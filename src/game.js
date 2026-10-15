@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or tap or flick up to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -25,7 +25,7 @@ const STR = {
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲, тап или свайп вверх — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
-    bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
+    tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
@@ -965,20 +965,20 @@ const ui = {
       button(t('giveUp'), 'chip wide', () => game.giveUp()), button(t('revive'), 'big thumb', () => game.revive()));   // the main button last, under the thumb
   },
   result(r) {
-    const p = this.panel('result');
-    p.append(el('div', 'head', r.won ? t('won') : t('dead')));
+    const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons
+    box.append(el('div', 'head', r.won ? t('won') : t('dead')));
     const rows = [[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]];
     const tb = el('div', 'rows');
     for (const [k, v] of rows) { const row = el('div', 'row'); row.append(el('span', null, k), el('b', null, String(v))); tb.append(row); }
-    p.append(tb);
+    box.append(tb);
     if (r.fresh.length || r.firstWin) {
       const u = el('div', 'fresh');
       u.append(el('div', 'label', t('unlocked')));
       for (const f of r.fresh) { const c = el('span', 'chip swatch on'); c.style.background = rgb(colorById(f.id).base); u.append(c); }
       if (r.firstWin) u.append(el('div', null, t('hardOpen')));
-      p.append(u);
+      box.append(u);
     }
-    p.append(button(t('menu'), 'chip wide', () => game.toMenu()), button(t('again'), 'big thumb', () => game.startRun()));   // Again at the bottom, the width of the screen
+    p.append(box, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('again'), 'big thumb', () => game.startRun()));   // Again at the bottom, Menu as big over it
   },
   toastTimer: 0,
   toast(text, ms = 1500) {
@@ -1016,6 +1016,13 @@ const ui = {
     $('hud').classList.toggle('on', playing);
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
+    const fh = $('floorHint'), lv = g.lv, fy = lv.floor - lv.cam;   // how to jump, written on the first level's floor, in the band over the keys
+    const onFloor = g.state === 'play' && lv.kind === 'well' && g.world === 0 && g.stage === 0 && !g.bonus && fy < view.h - view.keep;
+    fh.classList.toggle('on', onFloor);
+    if (onFloor) {
+      if (!fh.firstChild) fh.append(px(t(coarse ? 'tapJump' : 'keyJump')));
+      fh.style.transform = 'translate(' + Math.round(view.w / 2) + 'px,' + Math.round(fy + (view.h - view.keep - fy) / 2) + 'px) translate(-50%, -50%)';
+    }
     if (g.hp !== this.hp || g.maxHp !== this.max) {
       this.hp = g.hp; this.max = g.maxHp;
       const h = $('hearts');

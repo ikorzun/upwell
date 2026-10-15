@@ -950,6 +950,8 @@ function padPart(part, onTouch) {
     onTouch(e);
   });
   part.addEventListener('pointermove', (e) => { if (e.pointerId === id) onTouch(e); });
+  for (const type of ['touchstart', 'touchmove']) part.addEventListener(type, (e) => e.preventDefault(), { passive: false });   // no selection, loupe or callout in Safari
+  part.addEventListener('contextmenu', (e) => e.preventDefault());
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) part.addEventListener(type, (e) => { if (e.pointerId === id) { id = -1; onTouch(null); } });
 }
 const dpad = $('dpad');

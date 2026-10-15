@@ -78,7 +78,7 @@ const BOSS = { size: 2.3, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // and scaled up with hard edges), the camera moves in whole game pixels, and everything is
 // drawn in the nine inks of the palette sheet (research/refs), flat or as 1-bit patterns
 // of one ink over another.
-const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1 : 2 };   // a phone's screen is small and sharp: twice the density there
+const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2 };   // a phone's screen is small and sharp: finer there (1 was too fine)
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'), red: hex('#e73228'), blue: hex('#48acf8'), yellow: hex('#fbe741'), green: hex('#36803a'),
   purple: hex('#bc83f8'), orange: hex('#ee9530'), gray: hex('#c0c0c0'), white: hex('#ebebeb') };

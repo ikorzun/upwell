@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, ▼ to let go.\nLand on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    news: 'New: {n}', dark: 'darkness',
+    starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -25,7 +25,7 @@ const STR = {
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, ▼ — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
-    news: 'Новое: {n}', dark: 'темнота',
+    starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
@@ -466,9 +466,9 @@ class Game {
     this.drop(b.cx, b.cy, Math.round(e.def.coins * this.mods.coinMul));
     if (e.type === 'splitter' && byHero) for (const d of [-1, 1]) {   // in two, thrown apart
       const m = new Foe({ type: 'mini', x: b.cx + d * 0.5 * b.R, y: b.cy, ledge: e.ledge, dir: d }, lv);
-      setVel(m.body, d * 3 * this.R, -4 * this.R); lv.enemies.push(m);
+      setVel(m.body, d * 3 * this.R, -4 * this.R); lv.enemies.push(m); lv.foeTotal++;
     }
-    if (byHero) { this.kills++; this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo); }
+    if (byHero) { lv.foeKilled++; this.kills++; this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo); }
   }
   hitBoss() {
     const bs = this.lv.boss, b = bs.body;
@@ -607,7 +607,7 @@ class Game {
       const dx = H.cx - c.x, dy = H.cy - c.y, d = Math.hypot(dx, dy) || 1;
       if (d < mR && (!c.drop || c.t > 0.25)) { c.moving = true; c.vx += (dx / d) * COIN.pull * dt; c.vy += (dy / d) * COIN.pull * dt; }
       if (c.moving) { c.vx *= k; c.vy *= k; c.x += c.vx * dt; c.y += c.vy * dt; }
-      if (d < H.R * 0.85 + (c.v > 1 ? 1.4 : 1) * cr) { cs.splice(i, 1); this.coins += c.v; fx.ring(c.x, c.y, cr * 1.6, INK.coin); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
+      if (d < H.R * 0.85 + (c.v > 1 ? 1.4 : 1) * cr) { cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
     }
   }
   payCombo() {
@@ -678,6 +678,9 @@ class Game {
     const H = this.hero;
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
     if (this.combo > 0) this.payCombo();
+    const lv = this.lv, allCoins = lv.coinsTaken >= lv.coinTotal, allFoes = lv.foeKilled >= lv.foeTotal;   // the stars, paid at once
+    this.stars = { n: 1 + allCoins + allFoes, coins: [lv.coinsTaken, lv.coinTotal], foes: [lv.foeKilled, lv.foeTotal] };
+    this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
     this.climbed += this.levelM; this.levelM = 0;
     haptics.buzz(20); sound.play('portal');   // no toast: it would hide the hole
   }
@@ -885,7 +888,13 @@ const ui = {
   },
   soundChip(again) { return button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'chip wide', () => { sound.toggle(); again(); }); },
   cards(list) {
-    const p = this.panel('cards');
+    const p = this.panel('cards'), st = game.stars;
+    if (st) {   // the level's stars, what they paid and what they were for
+      const row = el('div', 'stars');
+      for (let k = 0; k < 3; k++) row.append(iconEl(k < st.n ? 'star' : 'starOff'));
+      row.append(px('+' + st.pay));
+      p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/'), f: st.foes.join('/') })));
+    }
     p.append(el('div', 'head', t('pick')));
     for (const u of list) {
       const [name, desc] = L2(u.name), c = button('', 'card', () => game.pick(u)), d = el('span');

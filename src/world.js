@@ -52,6 +52,8 @@ const REVIVE = { price: 50, grow: 2, hp: 2, invuln: 2.5 };
 const STOMP = { bounce: 1.0, keepVx: 0.45, hitstop: 0.045, blast: 3.4 };
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
+// A level's stars: one for getting out, one for all its coins, one for all its enemies; `coins` pays for 1, 2, 3.
+const STARS = { coins: [1, 2, 5] };
 // Coins: radius and magnet reach in R; dropped ones fade after `life` s.
 const COIN = { r: 0.54, magnet: 2.6, pull: 1400, drag: 2.4, life: 8, blink: 1.6, burst: 260 };
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
@@ -200,6 +202,8 @@ const ICONS = {
   upgrade: '............/.pppppppppp./.ppppwwwppp./.pppwpppwpp./.pppppppwpp./.ppppppwppp./.pppppwpppp./.pppppwpppp./.pppppppppp./.pppppwpppp./.pppppppppp./............',
   gift: '...yy..yy.../....yyyy..../.rrrryyrrrr./.rrrryyrrrr./.yyyyyyyyyy./.rrrryyrrrr./.rrrryyrrrr./.rrrryyrrrr./.rrrryyrrrr./.rrrryyrrrr./............/............',
 };
+ICONS.star = '.....yy...../.....yy...../....yyyy..../yyyyyyyyyyoo/.yyyyyyyyoo./..yyyyyyoo../...yyyyoo.../..yyyyyyoo../..yyy..yoo../.yyy....ooo./.yy......oo./............';
+ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
 ICONS.maxhp = ICONS.heart;
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
@@ -574,6 +578,7 @@ class Level {
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
+    this.coinTotal = 0; this.coinsTaken = 0; this.foeTotal = 0; this.foeKilled = 0;   // for the level's stars
     this.cam = this.floor + CAM.floorShow - o.h;
     if (o.kind === 'well') {
       const rnd = this.rng, H = o.height;
@@ -658,6 +663,7 @@ class Level {
       if (lift >= 3 || !this.cramped(lens[0])) break;
       keep.forEach((a, i) => { a.length = lens[i]; }); lift++;
     }
+    this.coinTotal += this.coins.length - lens[3]; this.foeTotal += this.spawns.length - lens[4];   // as laid at last
     const h = (lift + c.rows.length) * this.tile;
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;

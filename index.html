@@ -58,6 +58,10 @@
   #hearts .full { color: var(--red); }
   #hearts .empty { color: var(--gray); }
   #hearts.hit { animation: shake 0.3s steps(4); }
+  #gun { position: absolute; left: 12px; top: calc(env(safe-area-inset-top, 0px) + 34px); width: 84px; height: 6px; display: none; background: var(--dim2); box-shadow: 0 0 0 2px var(--ink); }   /* the fizz left */
+  #gun.on { display: block; }
+  #gun i { display: block; height: 100%; background: var(--yellow); }
+  #gun.low i { background: var(--white); }
   #mid { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; }
   #height { --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); }
   #stage { color: var(--gray); filter: drop-shadow(0 2px 0 var(--ink)); }
@@ -96,6 +100,7 @@
   }
   #pad.on { display: flex; }
   #dpad, #act { display: flex; gap: 8px; align-items: flex-end; pointer-events: auto; touch-action: none; }
+  #dpad, #act { padding-top: 40px; }   /* a finger a little over a key still presses it */
   #dpad { flex: 1; }
   #dpad .key { flex: 1; width: auto; }   /* left and right fill all the room up to down and jump */
   .key {   /* all four the same size */
@@ -167,6 +172,7 @@
 <div id="ui">
   <div id="hud">
     <div id="hearts" aria-label="Hearts"></div>
+    <div id="gun" aria-hidden="true"><i></i></div>
     <div id="mid"><div id="height"></div><div id="stage"></div></div>
     <div id="purse"><span id="coins"></span><svg class="coin" viewBox="0 0 5 5" aria-hidden="true" shape-rendering="crispEdges"><path fill="#ee9530" d="M1 0h3v1h1v3h-1v1h-3v-1h-1v-3h1z"/><path fill="#fbe741" d="M1 1h3v3h-3z"/><path fill="#ebebeb" d="M1 1h1v1h-1z"/></svg></div>
     <button id="pauseBtn" aria-label="Pause"></button>

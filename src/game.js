@@ -15,7 +15,7 @@ const STR = {
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
-    seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
+    seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall', seen_fizz: 'Fizz: while it lasts, you shoot by yourself',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
@@ -29,7 +29,7 @@ const STR = {
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
-    seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене',
+    seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене', seen_fizz: 'Шипучка: пока шипит, выстрелы летят сами',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
@@ -188,7 +188,7 @@ class Boss {
 }
 
 // ── Game ─────────────────────────────────────────────────────
-const MODS = () => ({ bounce: 1, slide: 1, hold: 0, magnet: 1, invuln: 0, airJumps: 1, blast: false, coinMul: 1, comboShift: 0, jump: 1, discount: 1, iron: false, fire: 1 });
+const MODS = () => ({ bounce: 1, slide: 1, hold: 0, magnet: 1, invuln: 0, airJumps: 1, blast: false, coinMul: 1, comboShift: 0, jump: 1, discount: 1, iron: false, fire: 1, gun: 0 });
 const SPIKE_PUSH = [[0, -1], [0, 1], [1, -0.35], [-1, -0.35]];
 let nextSeed = null;
 class Game {
@@ -261,7 +261,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.combo = 0;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0;
     this.touch = 0; this.queued = null; this.rising = false;
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
@@ -399,7 +399,7 @@ class Game {
     for (const e of lv.enemies) if (STR.en['seen_' + e.type] && e.body.cy > lv.cam && e.body.cy < lv.cam + view.h) this.hint(e.type);   // a new kind of enemy, told once
     if (lv.boss && !lv.boss.dead && lv.boss.body.touchHero) this.meet(lv.boss);
     if (this.state !== 'play') return;
-    this.spikes(); this.fireStep(dt); this.fireTouch(); this.shots(dt); this.collect(dt);
+    this.spikes(); this.fireStep(dt); this.fireTouch(); this.shots(dt); this.collect(dt); this.gun(dt);
     if (this.combo > 0 && (H.wallMask & 8) && !H.springHit) this.payCombo();   // only a floor ends a combo
     const near = (o, r) => Math.hypot(H.cx - o.x, H.cy - o.y) < r;
     if (lv.portal && near(lv.portal, lv.portal.r + 0.5 * H.R)) { this.levelClear(); return; }
@@ -500,7 +500,7 @@ class Game {
     if (this.hp <= 0) this.die();
     return true;
   }
-  room() { return Math.max(CAM.floorShow, view.keep + 0.6 * this.R); }   // what the camera shows under a ledge the hero stands on
+  room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
   // The last few ledges the hero stood on (null: the floor), with where on them. Crumbling
   // ones and springs do not count, nor a spot beside spikes; a ledge kept here is never
   // pruned, so a fall after a long wall climb still finds it.
@@ -587,6 +587,34 @@ class Game {
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;
     splatFx(H.cx, f.y, this.R * 0.7, INK.flame, 6);
     f.y = Math.max(f.y, H.maxY + FIRE.back * view.h); f.warn = null;   // and sinks back: a throw into a ceiling must not land in it again
+  }
+  // A fizz candy taken, the hero shoots by itself for a while: at the nearest enemy or blob in range.
+  gun(dt) {
+    const lv = this.lv, H = this.hero, R = this.R;
+    for (const p of lv.fizz || []) if (!p.taken && Math.hypot(H.cx - p.x, H.cy - p.y) < p.r + 0.8 * H.R) {
+      p.taken = true; this.gunMax = this.gunT = GUN.time + this.mods.gun; this.gunCD = 0;
+      fx.ring(p.x, p.y, 1.4 * R, INK.coin); sound.play('buy'); haptics.buzz(14); this.hint('fizz');
+    }
+    if (this.gunT > 0 && (this.gunT -= dt) > 0 && (this.gunCD -= dt) <= 0) {
+      let best = null, bd = GUN.range * R;
+      for (const e of lv.enemies) { const d = Math.hypot(e.body.cx - H.cx, e.body.cy - H.cy); if (d < bd) { bd = d; best = [e.body.cx, e.body.cy]; } }
+      for (const s of lv.shots) { const d = Math.hypot(s.x - H.cx, s.y - H.cy); if (d < bd) { bd = d; best = [s.x, s.y]; } }
+      if (best) {
+        const dx = (best[0] - H.cx) / bd, dy = (best[1] - H.cy) / bd;
+        lv.bullets.push({ x: H.cx + dx * H.R, y: H.cy + dy * H.R, vx: dx * GUN.speed * R, vy: dy * GUN.speed * R, t: 0 });
+        this.gunCD = GUN.every; sound.play('shot', 0.35, 0.9 + Math.random() * 0.2);
+      }
+    }
+    for (let i = lv.bullets.length - 1; i >= 0; i--) {   // a bullet: through the air until it meets an enemy, a blob or a block
+      const b = lv.bullets[i];
+      b.x += b.vx * dt; b.y += b.vy * dt; b.t += dt;
+      let gone = b.t > 1 || b.y < lv.cam - R || b.y > lv.cam + view.h + R;
+      for (const r of lv.near(b.y, b.y)) if (!r.plank && b.x > r.x0 && b.x < r.x1) { gone = true; if (r.crumble) r.hit = true; }
+      if (b.x < lv.l || b.x > lv.r) gone = true;
+      for (const e of lv.enemies.slice()) { const q = e.body; if (!gone && b.x > q.minX && b.x < q.maxX && b.y > q.minY && b.y < q.maxY) { this.kill(e, true); gone = true; } }
+      for (let k = lv.shots.length - 1; k >= 0 && !gone; k--) { const s = lv.shots[k]; if (Math.hypot(s.x - b.x, s.y - b.y) < s.r + GUN.r * R) { splatFx(s.x, s.y, s.r * 2, INK.spike, 4); lv.shots.splice(k, 1); gone = true; } }
+      if (gone) lv.bullets.splice(i, 1);
+    }
   }
   shots(dt) {
     const lv = this.lv, H = this.hero, sh = lv.shots;
@@ -757,8 +785,8 @@ class Game {
       cy /= b.n;
       const target = cy - CAM.anchor * view.h;
       if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * dt));
-      const down = b.maxY + this.room() - view.h;   // and down, so the hero never sinks under the touch keys: as far as the newest safe ledge
-      if (down > lv.cam) lv.cam = Math.min(down, this.safeSpot().y + 1.1 * this.R + this.room() - view.h, lv.floor + this.room() - view.h);
+      const down = b.maxY + this.room() - view.h;   // and down with a fall, so the hero stays well over the touch keys, as far as the floor
+      if (down > lv.cam) lv.cam = Math.min(down, lv.floor + this.room() - view.h);
       lv.cam = Math.max(lv.cam, lv.capY - CAM.top);
     }
     lv.ensure(lv.cam - view.h * LEVEL.ahead);
@@ -971,6 +999,9 @@ const ui = {
       for (let i = 0; i < g.maxHp; i++) { const k = i < g.hp ? 'full' : 'empty', s = el('i', k); s.innerHTML = pxSvg(7, 6, `<path fill="currentColor" d="${inkPath(HEART[k], 0, 0)}"/>`); h.append(s); }
     }
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
+    const gun = $('gun'), left = g.gunT > 0 && g.state === 'play' ? Math.ceil((g.gunT / g.gunMax) * 10) : 0;   // the fizz left, in tenths, blinking near the end
+    gun.classList.toggle('on', left > 0);
+    if (left) { gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
     const m = Math.floor(g.climbed + g.levelM);
     if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
     const st = g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.world >= WORLDS.length ? L2(SUMMIT.name) : (g.world + 1) + '-' + (g.stage + 1);
@@ -1029,10 +1060,12 @@ padPart(dpad, (e) => {
   input.set('left', !!e && !right); input.set('right', right);
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
-for (const [id, what] of [['jumpBtn', 'jump'], ['downBtn', 'down']]) {
-  const btn = $(id);
-  padPart(btn, (e) => { input.set(what, !!e); btn.classList.toggle('on', !!e); });
-}
+const act = $('act'), jumpBtn = $('jumpBtn'), downBtn = $('downBtn');
+padPart(act, (e) => {   // down and jump as one part too, split where jump begins: a finger may slide from one to the other
+  const jump = !!e && e.clientX > jumpBtn.getBoundingClientRect().left - 4;
+  input.set('jump', jump); input.set('down', !!e && !jump);
+  jumpBtn.classList.toggle('on', jump); downBtn.classList.toggle('on', !!e && !jump);
+});
 
 // ── Sound ────────────────────────────────────────────────────
 // Effects and music made with ElevenLabs (tools/audio.py). One Web Audio context, made on the first key press or
@@ -1040,7 +1073,7 @@ for (const [id, what] of [['jumpBtn', 'jump'], ['downBtn', 'down']]) {
 // calm in the menu and the rooms, climb in the shaft, boss at the summit, quieter while paused or over. It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
-  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit'];
+  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot'];
 const MUSIC_VOL = 0.4, FX_VOL = 0.7;
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1,

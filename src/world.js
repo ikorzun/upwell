@@ -39,10 +39,12 @@ const DOOR = { w: 2.4, h: 2.8 };   // in R: a way into a shop or a stash, and th
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
 // ledges (at a crawler on them, say) passes under it, a full one up from the top ledge gets in.
 const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
-// The hero is kept at `anchor` of the view height; the ceiling over an exit stops the
-// camera `top` px under the screen's top; dropping `deathPad` below the bottom costs a
-// heart and puts the hero back on the last ledge it stood on.
-const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40 };
+// The hero is kept at `anchor` of the view height going up, and going down at least `keep`
+// hero heights over the touch keys (or the screen's bottom): a fall is followed, down to the
+// floor, and caught by a ledge or the fire. The ceiling over an exit stops the camera `top` px
+// under the screen's top; were the hero ever to drop `deathPad` below the bottom anyway, that
+// costs a heart and puts it back on the last ledge it stood on.
+const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40, keep: 3 };
 const R_PER_M = 2.2;   // a metre of climb is 2.2 hero radii (64 px when the well was 12 tiles), so a level is as many jumps on any screen
 const HEALTH = { start: 4, invuln: 1.0, knock: 640, hitstop: 0.08, blink: 0.09 };
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
@@ -50,6 +52,10 @@ const HEALTH = { start: 4, invuln: 1.0, knock: 640, hitstop: 0.08, blink: 0.09 }
 const REVIVE = { price: 50, grow: 2, hp: 2, invuln: 2.5 };
 // A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach.
 const STOMP = { bounce: 1.0, keepVx: 0.45, hitstop: 0.045, blast: 3.4 };
+// A fizz candy, found once or twice a level (at `at` of its height, from..to), makes the hero shoot by
+// itself for `time` s (+`plus` a Long fizz): a bullet every `every` s at the nearest enemy or blob within
+// `range` R, flying `speed` R/s; it stops at a block and breaks a crumbling one.
+const GUN = { time: 5, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at: [[0.22, 0.4], [0.58, 0.78]] };
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, one for all its coins, one for all its enemies; `coins` pays for 1, 2, 3.
@@ -170,6 +176,7 @@ const UPGRADES = [
   { id: 'legs', stack: true, name: { ru: ['Сильные ноги', 'Прыжок выше'], en: ['Strong legs', 'Jump higher'] }, apply: (g) => { g.mods.jump *= 1.08; } },
   { id: 'member', name: { ru: ['Клубная карта', 'Скидка 25% в лавках'], en: ['Member card', '25% off in shops'] }, apply: (g) => { g.mods.discount *= 0.75; } },
   { id: 'iron', name: { ru: ['Железные подошвы', 'Шипы снизу не ранят'], en: ['Iron soles', 'Floor spikes do not hurt'] }, apply: (g) => { g.mods.iron = true; } },
+  { id: 'long', stack: true, name: { ru: ['Долгий заряд', 'Шипучка действует на 2 с дольше'], en: ['Long fizz', 'A fizz candy lasts 2 s longer'] }, apply: (g) => { g.mods.gun += GUN.plus; } },
   { id: 'cool', name: { ru: ['Огнеупорность', 'Огонь растёт медленнее и реже плюётся'], en: ['Fireproof', 'The fire rises slower and spits less'] }, apply: (g) => { g.mods.fire *= 0.6; } },
 ];
 // A shop shows three of these; prices grow by half a price a world.
@@ -204,6 +211,8 @@ const ICONS = {
 };
 ICONS.star = '.....yy...../.....yy...../....yyyy..../yyyyyyyyyyoo/.yyyyyyyyoo./..yyyyyyoo../...yyyyoo.../..yyyyyyoo../..yyy..yoo../.yyy....ooo./.yy......oo./............';
 ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
+ICONS.fizz = '............/............/...yyyyyy.../o.ywwyyyyy.o/ooywyyyyyyoo/oooyyyyyyooo/oooyyyyyyooo/ooyyyyyyyyoo/o.yyyyyyyy.o/...yyyyyy.../............/............';
+ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.maxhp = ICONS.heart;
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
@@ -576,6 +585,8 @@ class Level {
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
+    this.fizz = []; this.bullets = [];
+    this.fizzAt = o.kind === 'well' && o.height ? GUN.at.map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
     this.coinTotal = 0; this.coinsTaken = 0; this.foeTotal = 0; this.foeKilled = 0;   // for the level's stars
@@ -664,6 +675,10 @@ class Level {
       keep.forEach((a, i) => { a.length = lens[i]; }); lift++;
     }
     this.coinTotal += this.coins.length - lens[3]; this.foeTotal += this.spawns.length - lens[4];   // as laid at last
+    if (this.fizzAt.length && this.top - (lift + c.rows.length) * this.tile < this.fizzAt[0] && c !== CHUNKS.pocket) {   // a candy due: over a steady ledge of this chunk
+      const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile);
+      if (ok.length) { const r = ok[(this.rng() * ok.length) | 0]; this.fizz.push({ x: (r.x0 + r.x1) / 2, y: r.y0 - 1.3 * this.R, r: 0.5 * this.R, taken: false }); this.fizzAt.shift(); }
+    }
     const h = (lift + c.rows.length) * this.tile;
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
@@ -1208,6 +1223,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1);
     icon(p.item.id, p.x, y, a, 2);
   }
+  for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // fizz candies, bobbing in a glow
+    const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
+    F(p.x, y, p.r * 2, 0, 0, p.r * 2, INK.coin, 0.3, 1); icon('fizz', p.x, y, 1, Math.max(1, Math.round(2.4 / PIX.size)));   // about 24-36 px across
+  }
+  for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
     if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
@@ -1311,6 +1331,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (lv.portal) light(lv.portal.x, lv.portal.y, 2, 4);
     for (const s of lv.shots) light(s.x, s.y, 0.5, 1.4);   // blobs, the fire's and the spitters'
     for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);
+    for (const p of lv.fizz) if (!p.taken) light(p.x, p.y, 0.8, 2);
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);
     const pd = this.pDark;

@@ -337,6 +337,11 @@ class Game {
     unstick(H, JUMP.dropAfter);
     addVel(H, side === 1 ? 2 * this.R : side === 2 ? -2 * this.R : 0, side === 4 ? 3 * this.R : 0);
   }
+  // A swipe to a side: up to a run's speed that way at once (the keys ease in; a swipe is too short to).
+  nudge(dir) {
+    const H = this.hero, want = dir * MOVE.speed * this.R;
+    if (this.state === 'play' && !(H.stuck && glueSide(H) !== 4) && dir * H.rigVx < dir * want) addVel(H, want - H.rigVx, 0);
+  }
   // Left and right run along a floor and steer in the air; while down is held nothing sticks.
   move(dt) {
     const H = this.hero, d = input.dir, floor = this.onFloor(), top = H.stuck > 0 && glueSide(H) === 4;
@@ -1115,11 +1120,12 @@ padPart(act, (e) => { input.set('jump', !!e); jumpBtn.classList.toggle('on', !!e
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick); a quick
 // flick up jumps (held, it goes higher), a quick flick down lets go; a tap jumps, a second finger's too.
-const GEST = { dead: 18, flick: 30, quick: 320, tap: 230, still: 12 };
-let gest = null, tap2 = null;
+const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, glide: 400 };
+let gest = null, tap2 = null, glide = 0;
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel')) return;
   if (gest) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
+  if (glide) { clearTimeout(glide); glide = 0; input.set('left', false); input.set('right', false); }   // a swipe's glide ends with a new touch
   gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false };
 });
 document.addEventListener('pointermove', (e) => {
@@ -1132,7 +1138,7 @@ document.addEventListener('pointermove', (e) => {
   const dx = e.clientX - g.ax;
   if (Math.abs(dx) > 3 * GEST.dead) g.ax = e.clientX - Math.sign(dx) * 3 * GEST.dead;
   const dir = Math.abs(dx) < GEST.dead ? 0 : Math.sign(dx);
-  if (dir !== g.dir) { g.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); }
+  if (dir !== g.dir) { g.dir = dir; clearTimeout(glide); input.set('left', dir < 0); input.set('right', dir > 0); if (dir) game.nudge(dir); }   // a swipe moves at once, on the ground or in the air
 });
 const gestEnd = (e) => {
   if (tap2 && e.pointerId === tap2.id) {   // a second finger's tap
@@ -1141,10 +1147,14 @@ const gestEnd = (e) => {
   }
   const g = gest;
   if (!g || e.pointerId !== g.id) return;
-  if (g.dir) { input.set('left', false); input.set('right', false); }
+  gest = null;
+  if (g.dir) {   // let go: a quick swipe goes on that way a moment more, a held drag stops
+    const swiped = e.timeStamp - g.t0 < GEST.quick + 100 && Math.abs(e.clientX - g.x0) > GEST.swipe;
+    const stop = () => { if (!gest) { input.set('left', false); input.set('right', false); } };
+    if (swiped) glide = setTimeout(() => { glide = 0; stop(); }, GEST.glide); else stop();
+  }
   if (g.flick === 'up') input.set('jump', false);
   else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)
-  gest = null;
 };
 for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, gestEnd);
 

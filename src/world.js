@@ -11,7 +11,7 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // ── Tuning ───────────────────────────────────────────────────
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
 // as wide as the view; the hero and everything in the well are sized from it.
-const HERO = { sizeFrac: 1 / 12, sizeMin: 24, sizeMax: 44 };   // a tile: the well is 12 tiles wide
+const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
 // floor and `air`/s in the air; `slip` is a floor's friction while running. A wall takes
 // the hero when it comes in at `cling` px/s or more, or is pressed toward it. Stuck under a
@@ -43,7 +43,7 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // camera `top` px under the screen's top; dropping `deathPad` below the bottom costs a
 // heart and puts the hero back on the last ledge it stood on.
 const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40 };
-const PX_PER_M = 64;
+const R_PER_M = 2.2;   // a metre of climb is 2.2 hero radii (64 px when the well was 12 tiles), so a level is as many jumps on any screen
 const HEALTH = { start: 4, invuln: 1.0, knock: 640, hitstop: 0.08, blink: 0.09 };
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
@@ -78,7 +78,7 @@ const BOSS = { size: 2.3, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // and scaled up with hard edges), the camera moves in whole game pixels, and everything is
 // drawn in the nine inks of the palette sheet (research/refs), flat or as 1-bit patterns
 // of one ink over another.
-const PIX = { size: 2 };
+const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1 : 2 };   // a phone's screen is small and sharp: twice the density there
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'), red: hex('#e73228'), blue: hex('#48acf8'), yellow: hex('#fbe741'), green: hex('#36803a'),
   purple: hex('#bc83f8'), orange: hex('#ee9530'), gray: hex('#c0c0c0'), white: hex('#ebebeb') };
@@ -101,7 +101,7 @@ const THEMES = {
   room: theme(PAL.orange, PAL.yellow, PAL.blue, PAL.blue, PAL.yellow),
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
-PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'yellow', 'blue', 'green', 'purple', 'gray'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
+PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'blue', 'green', 'purple'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
 Object.assign(THEME, { ink: PAL.black, blush: PAL.red, rim: PAL.white });
 
 // ── Content ──────────────────────────────────────────────────
@@ -195,23 +195,18 @@ const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 
 // standing on a floor.
 DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 2.0, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
   face: { eye: [0.3, 0.02], eyeR: [0.075, 0.095], mouth: [0, 0.2], mouthW: 0.13, blush: [0.52, 0.17] } });
-// Shapes open as a run first gets to a level (`lv`: world × 3 + stage, 3 being 2-1), and each
-// starts a run with an upgrade that suits it (`perk`); colours open with the coins of all runs
-// together (not spent), like Downwell's palettes, and are only looks.
+// The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs
+// together (not spent), like Downwell's palettes, and each starting a run with an upgrade (`perk`).
 const UNLOCKS = [
-  { kind: 'form', id: 'round', lv: 0, perk: 'bouncy', name: { ru: 'Шарик', en: 'Ball' } },
-  { kind: 'form', id: 'mochi', lv: 3, perk: 'sticky', name: { ru: 'Моти', en: 'Mochi' } },
-  { kind: 'form', id: 'cat', lv: 6, perk: 'legs', name: { ru: 'Кот', en: 'Cat' } },
-  { kind: 'form', id: 'heart', lv: 9, perk: 'heart', name: { ru: 'Сердце', en: 'Heart' } },
-  { kind: 'form', id: 'star', lv: 11, perk: 'blast', name: { ru: 'Звезда', en: 'Star' } },
-  { kind: 'color', id: 'white', at: 0 }, { kind: 'color', id: 'orange', at: 80 }, { kind: 'color', id: 'yellow', at: 200 },
-  { kind: 'color', id: 'blue', at: 350 }, { kind: 'color', id: 'green', at: 550 }, { kind: 'color', id: 'purple', at: 800 },
-  { kind: 'color', id: 'gray', at: 1200 },
+  { kind: 'color', id: 'white', at: 0, perk: 'bouncy' }, { kind: 'color', id: 'orange', at: 80, perk: 'legs' },
+  { kind: 'color', id: 'blue', at: 200, perk: 'sticky' }, { kind: 'color', id: 'green', at: 400, perk: 'heart' },
+  { kind: 'color', id: 'purple', at: 700, perk: 'blast' },
 ];
 
 // ── Chunks ───────────────────────────────────────────────────
-// A shaft is stacked from these, like Downwell's and Spelunky's hand-made rooms: 12 tiles
-// wide (a tile is a twelfth of the well, the hero's radius; the hero is 2 tiles across),
+// A shaft is stacked from these, like Downwell's and Spelunky's hand-made rooms: drawn 12
+// tiles wide and widened to the well's 16 as they load (see COLS; a tile is the hero's radius,
+// the hero is 2 tiles across),
 // rows top to bottom, mirrored at random. Each is a little climb of its own, with its
 // first foothold at most 3 tiles over its bottom and its last at most 2 under its top, so
 // any one can follow any other within a jump (the bottom rises about 6.3 tiles). `d`: difficulty 1–3. Which way
@@ -458,6 +453,17 @@ const CHUNKS = {
     '............'] },
 };
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
+// The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
+// even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
+// spring or door in a doubled column is not copied.
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B']);
+for (const id in CHUNKS) {
+  CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
+    if (!WIDEN.includes(k)) return ch;
+    const copy = ONCE.has(ch) ? '.' : ch;
+    return k < 6 ? ch + copy : copy + ch;   // the copy on the inner side
+  }).join(''));
+}
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
 const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S']);
@@ -465,7 +471,7 @@ for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
     const row = c.rows[H - 1 - r], up = c.rows[H - 2 - r] || '', ok = (k) => STAND.has(row[k]) && up[k] !== '^', out = [];
-    for (let k = 0; k < 12; k++) if (ok(k) && !ok(k - 1)) { let k1 = k; while (k1 < 11 && ok(k1 + 1)) k1++; out.push([k, k1, row[k]]); }
+    for (let k = 0; k < COLS; k++) if (ok(k) && !ok(k - 1)) { let k1 = k; while (k1 < COLS - 1 && ok(k1 + 1)) k1++; out.push([k, k1, row[k]]); }
     return out;
   };
   let lo = 0, hi = H - 1;
@@ -473,7 +479,7 @@ for (const id in CHUNKS) {
   while (hi > 0 && !runs(hi).length) hi--;
   c.first = runs(lo); c.last = runs(hi);
 }
-const flipRuns = (runs) => runs.map(([a, b, t]) => [11 - b, 11 - a, t]);
+const flipRuns = (runs) => runs.map(([a, b, t]) => [COLS - 1 - b, COLS - 1 - a, t]);
 // How hard a step it is from a foothold up onto the next: one right overhead has to be
 // gone around (unless it is a plank to jump through, or moves), and the gap between them
 // should be 1–3 tiles. The easiest pair counts.
@@ -539,7 +545,7 @@ class Level {
     this.dark = o.kind === 'well' && !!(o.world.dark && o.world.dark.includes(this.stage));
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null;
-    this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / 12; this.last = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
+    this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.top = this.floor; this.endY = o.height ? this.floor - o.height : -Infinity;
@@ -629,14 +635,14 @@ class Level {
   place(c, base, mirror) {
     const t = this.tile, R = this.R, l = this.l, rows = c.rows, H = rows.length, d = LEVEL.spike * R;
     const at = (r, k) => {   // the tile at row r (from the bottom), column k
-      if (r < 0 || r >= H || k < 0 || k > 11) return '.';
-      const ch = rows[H - 1 - r][mirror ? 11 - k : k];
+      if (r < 0 || r >= H || k < 0 || k >= COLS) return '.';
+      const ch = rows[H - 1 - r][mirror ? COLS - 1 - k : k];
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
     const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
-    for (let r = 0; r < H; r++) for (let k = 0; k < 12; k++) {
+    for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
       if (SOLID[ch] && !used.has(key(r, k))) {
         const k1 = runEnd(r, k, ch);
@@ -659,11 +665,11 @@ class Level {
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, side, cd: 0, room: null });
       }
     }
-    // the walls: runs down column 0 or 11 of spikes ('>' left, '<' right) or a coat of ice, moss or rubber
+    // the walls: runs down the first or last column of spikes ('>' left, '<' right) or a coat of ice, moss or rubber
     const wall = (ch, k, add) => { for (let r = 0; r < H; r++) if (at(r, k) === ch && at(r - 1, k) !== ch) { let r1 = r; while (at(r1 + 1, k) === ch) r1++; add(Y(r1 + 1), Y(r)); } };
     wall('>', 0, (y0, y1) => this.spikes.push({ x0: l, x1: l + d, y0, y1, dir: 2 }));
-    wall('<', 11, (y0, y1) => this.spikes.push({ x0: this.r - d, x1: this.r, y0, y1, dir: 3 }));
-    for (const [ch, k, side, kind] of [['[', 0, 1, 'ice'], [']', 11, 2, 'ice'], ['{', 0, 1, 'moss'], ['}', 11, 2, 'moss'], ['(', 0, 1, 'rubber'], [')', 11, 2, 'rubber']])
+    wall('<', COLS - 1, (y0, y1) => this.spikes.push({ x0: this.r - d, x1: this.r, y0, y1, dir: 3 }));
+    for (const [ch, k, side, kind] of [['[', 0, 1, 'ice'], [']', COLS - 1, 2, 'ice'], ['{', 0, 1, 'moss'], ['}', COLS - 1, 2, 'moss'], ['(', 0, 1, 'rubber'], [')', COLS - 1, 2, 'rubber']])
       wall(ch, k, (y0, y1) => this.coats.push({ side, y0, y1, kind }));
     if (c !== CHUNKS.pocket) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at
   }
@@ -924,8 +930,9 @@ void main() {
   ivec2 g = cell();
   float wx = (float(g.x) + 0.5) * uPix;   // CSS px in the world
   vec3 c = uTop;
-  int py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb
-  if ((py & 7) == 3 && ((g.x + ((py >> 3) & 1) * 8) & 15) == 3) c = uDots;
+  int s = uPix < 1.5 ? 2 : 1, py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-CSS-px cells, a dot one game pixel
+  ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / float(s)));
+  if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = uDots;
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
     c = ((g.x + g.y) & 3) == 0 ? uWallD : uWall;

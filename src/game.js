@@ -9,8 +9,8 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, ▼ to let go.\nLand on enemies from above!', play: 'Play', best: 'Best climb', bank: 'Coins, all runs', form: 'Shape', color: 'Colour',
-    hard: 'Hard mode', from: 'at {n}', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
+    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, ▼ to let go.\nLand on enemies from above!', play: 'Play',
+    hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
     news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
@@ -21,8 +21,8 @@ const STR = {
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off',
   },
   ru: {
-    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, ▼ — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть', best: 'Лучший подъём', bank: 'Монет за все забеги', form: 'Форма', color: 'Цвет',
-    hard: 'Сложный режим', from: 'с {n}', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
+    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, ▼ — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть',
+    hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
     news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
@@ -40,22 +40,20 @@ const L2 = (o) => o[lang] || o.en;
 const detectLang = () => { const l = (navigator.language || 'en').slice(0, 2).toLowerCase(); return STR[l] ? l : 'en'; };
 
 // ── Save ─────────────────────────────────────────────────────
-// What outlives a run: best climb, coins of all runs (they unlock shapes and colours),
+// What outlives a run: best climb, coins of all runs (they unlock colours),
 // wins (the first one opens hard mode) and the chosen look.
 const SAVE_KEY = 'upwell.save';
 const save = (() => {
-  const d = { best: 0, bank: 0, wins: 0, runs: 0, reach: 0, form: 'round', color: PALETTE[0].id, hard: false, seen: {} };   // seen: hints shown once
+  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {} };   // seen: hints shown once
   try {
     const s = Object.assign(d, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'));
-    if (!s.ball) { s.ball = true; if (s.form === 'mochi') s.form = 'round'; }   // the hero became a ball: an old save's default look goes with it
-    if (!PALETTE.some((c) => c.id === s.color)) s.color = PALETTE[0].id;   // and a colour from before the palette inks
+    if (!PALETTE.some((c) => c.id === s.color)) s.color = PALETTE[0].id;   // a colour from before the palette inks
     return s;
   } catch (e) { return d; }
 })();
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* private mode: this visit only */ } }
-const opened = (u) => (u.kind === 'form' ? save.reach >= u.lv : save.bank >= u.at);
-const levelName = (lv) => Math.floor(lv / 3) + 1 + '-' + ((lv % 3) + 1);
-if (!UNLOCKS.some((u) => u.kind === 'form' && u.id === save.form && opened(u))) save.form = 'round';   // a look that is gone or not open yet
+const opened = (u) => save.bank >= u.at;
+if (!UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone or not open yet
 
 // ── Bodies ───────────────────────────────────────────────────
 // The rigid part of a body's motion becomes (vx, vy); the wobble on top of it stays.
@@ -173,11 +171,11 @@ class Game {
     this.newRun();
   }
   newRun() {
-    this.world = 0; this.stage = 0; this.reach0 = save.reach; this.hard = !!save.hard && save.wins > 0; this.mods = MODS(); this.taken = [];
+    this.world = 0; this.stage = 0; this.hard = !!save.hard && save.wins > 0; this.mods = MODS(); this.taken = [];
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0;
     this.climbed = 0; this.levelM = 0; this.revives = 0;
-    const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.kind === 'form' && u.id === save.form) || {}).perk);
-    if (perk) this.takeUpgrade(perk);   // each shape starts with its own upgrade
+    const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
+    if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
   }
   applyMods() {
     STICK.slide = BASE_STICK.slide * this.mods.slide; STICK.hold = BASE_STICK.hold + this.mods.hold;
@@ -195,7 +193,7 @@ class Game {
   }
   makeHero() {
     const x = view.w / 2, y = this.lv.floor - 1.1 * this.R;
-    this.hero = new Body(designById(save.form), colorById(save.color), x, y, this.R, 0.6);
+    this.hero = new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6);
     this.hero.isHero = true;
     this.startY = this.hero.cy;
   }
@@ -207,7 +205,7 @@ class Game {
   // The menu's backdrop is the first level of a fresh run with the hero standing in it.
   toMenu() {
     this.newRun(); this.state = 'menu'; this.buildLevel(true);
-    this.lv.cam = this.hero.cy - 0.36 * view.h;   // the hero in the gap between the title and the pickers, so a new look shows
+    this.lv.cam = this.hero.cy - 0.46 * view.h;   // the hero in the gap between the title and the colours, so a new look shows
     ui.hideAll(); ui.menu();
   }
   startRun() {
@@ -224,7 +222,7 @@ class Game {
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard,
-      height: boss ? 0 : wd.heights[this.stage] * PX_PER_M, theme: wd.theme });
+      height: boss ? 0 : wd.heights[this.stage] * R_PER_M * this.R, theme: wd.theme });
     if (boss) this.lv.boss = new Boss(this.lv);
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
@@ -380,7 +378,7 @@ class Game {
       if (lv.exit.armed && inDoor(lv.exit, -0.3 * H.R)) { this.leaveRoom(); return; }
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
-    if (lv.kind === 'well') { const m = (this.startY - H.cy) / PX_PER_M; if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else this.idleT += dt; }   // no new height: the fire speeds up
+    if (lv.kind === 'well') { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else this.idleT += dt; }   // no new height: the fire speeds up
     if (H.minY > lv.cam + view.h + CAM.deathPad) this.fall();
   }
   // From above it is a stomp; anything else is a hit.
@@ -636,7 +634,6 @@ class Game {
   pick(u) {
     this.takeUpgrade(u);
     if (++this.stage >= 3) { this.stage = 0; this.world++; }
-    if (this.world * 3 + this.stage > save.reach) { save.reach = this.world * 3 + this.stage; persist(); }   // shapes open as the climb gets there
     this.state = 'play'; this.stateT = 0;
     this.buildLevel(false);
     ui.hideAll(); ui.banner();
@@ -666,7 +663,7 @@ class Game {
     save.bank += this.coins; save.best = Math.max(save.best, total);
     if (won) save.wins++;
     persist();
-    const fresh = UNLOCKS.filter((u) => (u.kind === 'form' ? u.lv > this.reach0 && u.lv <= save.reach : u.at > bank0 && u.at <= save.bank));
+    const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
     this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin };
   }
   where() { return this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + (this.world + 1) + '-' + (this.stage + 1); }
@@ -805,29 +802,24 @@ const ui = {
   menu() {
     const p = this.panel('menu');
     p.append(el('h1', 'title', 'UPWELL'));
-    const stats = el('div', 'stats');
-    stats.append(el('div', null, t('best') + ': ' + save.best + ' ' + t('m')), el('div', null, t('bank') + ': ' + save.bank));
-    p.append(stats, button(t('play'), 'big', () => game.startRun()));
-    const forms = el('div', 'pickers'), colors = el('div', 'pickers');
+    const colors = el('div', 'pickers');   // the hero shows through above; under it its five colours, what the chosen one starts with, and Play
     for (const u of UNLOCKS) {
-      const open = opened(u), on = u.kind === 'form' ? save.form === u.id : save.color === u.id;
-      const b = button(u.kind === 'form' ? L2(u.name) : '', 'chip' + (on ? ' on' : '') + (open ? '' : ' locked') + (u.kind === 'color' ? ' swatch' : ''), () => {
+      const open = opened(u), b = button('', 'chip swatch' + (save.color === u.id ? ' on' : '') + (open ? '' : ' locked'), () => {
         if (!open) return;
-        if (u.kind === 'form') save.form = u.id; else save.color = u.id;
-        persist(); game.makeHero(); this.menu();
+        save.color = u.id; persist(); game.makeHero(); this.menu();
       });
-      if (u.kind === 'color') b.style.background = rgb(colorById(u.id).base);
-      if (!open) b.append(el('small', null, u.kind === 'color' ? u.at : tf('from', { n: levelName(u.lv) })));   // a swatch only has room for the number
-      (u.kind === 'form' ? forms : colors).append(b);
+      b.style.background = rgb(colorById(u.id).base);
+      if (!open) b.append(el('small', null, u.at));   // what it costs, in coins of all runs
+      colors.append(b);
     }
-    p.append(el('div', 'label', t('form')), forms);
-    const form = UNLOCKS.find((u) => u.kind === 'form' && u.id === save.form), perk = form && UPGRADES.find((u) => u.id === form.perk);
-    if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }   // what the shape starts with
-    p.append(el('div', 'label', t('color')), colors);
+    p.append(colors);
+    const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
+    if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }
     if (save.wins > 0) {
       const h = button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); });
       p.append(h);
     }
+    p.append(button(t('play'), 'big', () => game.startRun()));
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
@@ -863,7 +855,7 @@ const ui = {
     if (r.fresh.length || r.firstWin) {
       const u = el('div', 'fresh');
       u.append(el('div', 'label', t('unlocked')));
-      for (const f of r.fresh) u.append(el('span', 'chip on', f.kind === 'form' ? L2(f.name) : '●'));
+      for (const f of r.fresh) { const c = el('span', 'chip swatch on'); c.style.background = rgb(colorById(f.id).base); u.append(c); }
       if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       p.append(u);
     }
@@ -1095,7 +1087,7 @@ let paused = document.hidden, started = false, firstFrame = false, layoutQueued 
 function layout() {
   const vw = window.innerWidth, vh = window.innerHeight;
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
-  const W = Math.min(vw, Math.round(vh * 0.5625)), H = vh, left = Math.round((vw - W) / 2);
+  const W = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
   view.w = W; view.h = H; view.left = left;
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
   renderer.resize(W, H, window.devicePixelRatio || 1);   // the canvas a device pixel per pixel: the game pixels are copied up onto it

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0e0d13">
+<title>Upwell</title>
+<!--
+  Upwell — a squishy climbs a well (Downwell, upside down). Portrait first.
+  src/gum.js   the soft body and the renderer, copied from Gum (see its header)
+  src/world.js tuning, content tables, the level and how it is drawn
+  src/game.js  the run, the rules, the UI, input and the loop
+-->
+<style>
+  /* The canvas is pixel art in nine inks; the DOM over it is drawn in the same terms: the
+     same inks, boxes with their corners cut by a game pixel (2 CSS px), 2-px borders, see-
+     through things as half their pixels black, and all text in the pixel font (px() in
+     game.js, sized by --p: CSS px per font pixel, 2 being a game pixel). */
+  :root {
+    --ink: #141414; --red: #e73228; --blue: #48acf8; --yellow: #fbe741; --green: #36803a; --purple: #bc83f8; --orange: #ee9530; --gray: #c0c0c0; --white: #ebebeb;
+    --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+    --dim: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' d='M0 0h2v2H0zM2 2h2v2H2z'/%3E%3C/svg%3E") 0 0 / 4px 4px;
+    --p: 2;
+  }
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #0e0d13;
+    overscroll-behavior: none;
+    touch-action: none;                 /* no scroll, no pinch, no double-tap zoom */
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    font-family: ui-monospace, monospace;
+    color: var(--white);
+  }
+  body { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
+  #gl { position: absolute; top: 0; left: 0; display: block; touch-action: none; }
+  #gl.wait { visibility: hidden; }
+  /* everything over the canvas column; layout() gives it the canvas's box */
+  #ui { position: absolute; top: 0; left: 0; pointer-events: none; overflow: hidden; }
+  button { font: inherit; color: inherit; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+  .px { display: inline-block; vertical-align: middle; line-height: 0; }
+  .px svg, #hearts svg { display: block; width: calc(var(--w) * var(--p) * 1px); height: calc(var(--h) * var(--p) * 1px); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  #hud {
+    position: absolute; left: 0; right: 0; top: 0;
+    display: none; align-items: center; gap: 8px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 0;
+  }
+  #hud.on { display: flex; }
+  #hearts { display: flex; gap: 3px; flex: 1; --p: 3; }
+  #hearts i { display: block; filter: drop-shadow(0 3px 0 var(--ink)); }
+  #hearts .full { color: var(--red); }
+  #hearts .empty { color: var(--gray); }
+  #hearts.hit { animation: shake 0.3s steps(4); }
+  #mid { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  #height { --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); }
+  #stage { color: var(--gray); filter: drop-shadow(0 2px 0 var(--ink)); }
+  #purse { display: flex; align-items: center; gap: 6px; --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); }
+  #purse.bump { animation: bump 0.2s steps(2); }
+  .coin { display: block; width: 15px; height: 15px; }
+  #pauseBtn {
+    width: 32px; height: 32px; border: 0; padding: 0; position: relative; flex: none;
+    background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
+  }
+  #pauseBtn::before, #pauseBtn::after { content: ""; position: absolute; top: 10px; width: 4px; height: 12px; background: var(--white); }
+  #pauseBtn::before { left: 10px; }
+  #pauseBtn::after { right: 10px; }
+
+  #combo { position: absolute; left: 0; top: 0; display: none; --p: 4; color: var(--yellow); filter: drop-shadow(0 4px 0 var(--ink)); }
+  #combo.show { display: block; }
+  #combo.pop .px { animation: pop 0.24s steps(3); }
+  #toast {
+    position: absolute; left: 50%; top: 22%;
+    transform: translate(-50%, -6px);
+    width: max-content; max-width: calc(100% - 32px); box-sizing: border-box;
+    padding: 12px 14px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
+    opacity: 0; transition: opacity 0.2s steps(2), transform 0.2s steps(2);
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #labels .tag { position: absolute; left: 0; top: 0; padding: 4px 6px; background: var(--ink); clip-path: var(--notch); }
+  #labels .tag.dim { color: var(--gray); }
+  #fade { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
+  #fade.go { animation: fade 0.35s steps(4); }
+
+  /* the touch pad: left and right under the left thumb, down and jump under the right */
+  #pad {
+    position: absolute; left: 0; right: 0; bottom: 0; display: none;
+    justify-content: space-between; align-items: flex-end;
+    padding: 0 12px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  }
+  #pad.on { display: flex; }
+  #dpad, #act { display: flex; gap: 8px; align-items: flex-end; pointer-events: auto; touch-action: none; }
+  .key {
+    display: flex; align-items: center; justify-content: center; width: 68px; height: 68px; padding: 0; box-sizing: border-box; border: 0;
+    background: var(--dim); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch); --p: 5; color: var(--white);
+  }
+  .key.on { box-shadow: inset 0 0 0 2px var(--yellow); color: var(--yellow); }
+  #downBtn { width: 56px; height: 56px; --p: 4; }
+  #jumpBtn { width: 84px; height: 84px; --p: 6; }
+
+  .panel {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    padding: calc(env(safe-area-inset-top, 0px) + 24px) 22px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    box-sizing: border-box; background: var(--dim); pointer-events: auto; text-align: center;
+  }
+  .panel.on { display: flex; }
+  #menu { background: linear-gradient(transparent 46%, var(--gray) 46%, var(--gray) calc(46% + 2px), var(--ink) calc(46% + 2px)); justify-content: flex-end; }   /* the hero shows through the top */
+  .title { margin: 0 0 auto; padding-top: 12%; --p: 6; filter: drop-shadow(0 6px 0 var(--ink)); }
+  .stats { display: flex; flex-direction: column; gap: 6px; color: var(--gray); }
+  .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
+  .label { color: var(--gray); margin-top: 6px; }
+  .big {
+    min-width: 200px; padding: 14px 28px 20px; border: 0; --p: 4;
+    background: var(--yellow); color: var(--ink); clip-path: var(--notch); box-shadow: inset 0 -6px 0 var(--orange);
+  }
+  .big:active { transform: translateY(4px); box-shadow: inset 0 -2px 0 var(--orange); }
+  .pickers { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 340px; }
+  .chip {
+    min-height: 34px; padding: 8px 10px; border: 0; box-sizing: border-box;
+    background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  }
+  .chip.on { box-shadow: inset 0 0 0 2px var(--yellow); color: var(--yellow); }
+  .chip.locked { background: var(--dim); box-shadow: none; color: var(--gray); }
+  .chip small { color: var(--gray); }
+  .chip.swatch { width: 44px; height: 36px; padding: 0; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+  .chip.swatch.on { box-shadow: inset 0 0 0 2px var(--white), inset 0 0 0 4px var(--ink); }
+  .chip.swatch small { color: var(--ink); }
+  .chip.wide { min-width: 160px; }
+  .perk { display: flex; align-items: center; gap: 8px; text-align: left; }
+  .perk .ico { --p: 2; }
+  .iconBtn {
+    position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; width: 32px; height: 32px; border: 0; padding: 0;
+    display: flex; align-items: center; justify-content: center; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
+  }
+  .card {
+    width: 100%; max-width: 320px; padding: 14px 16px; border: 0; box-sizing: border-box;
+    background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
+    display: grid; grid-template-columns: auto 1fr; align-items: center; justify-items: start; gap: 8px 12px; text-align: left;
+  }
+  .card .ico { grid-row: span 2; --p: 3; }   /* its picture on the left, name over description */
+  .card b { color: var(--yellow); }
+  .card:active { box-shadow: inset 0 0 0 2px var(--yellow); }
+  .rows { width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+  .row { display: flex; justify-content: space-between; align-items: center; }
+  .row span { color: var(--gray); }
+  .fresh { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; max-width: 300px; }
+  .fresh .label { width: 100%; }
+
+  @keyframes shake { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+  @keyframes bump { 50% { transform: translateY(-4px); } }
+  @keyframes pop { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
+  @keyframes fade { from { opacity: 1; } to { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go { animation: none; } }
+</style>
+</head>
+<body>
+<canvas id="gl" class="wait" aria-label="Climbing squishy"></canvas>
+<div id="ui">
+  <div id="hud">
+    <div id="hearts" aria-label="Hearts"></div>
+    <div id="mid"><div id="height"></div><div id="stage"></div></div>
+    <div id="purse"><span id="coins"></span><svg class="coin" viewBox="0 0 5 5" aria-hidden="true" shape-rendering="crispEdges"><path fill="#ee9530" d="M1 0h3v1h1v3h-1v1h-3v-1h-1v-3h1z"/><path fill="#fbe741" d="M1 1h3v3h-3z"/><path fill="#ebebeb" d="M1 1h1v1h-1z"/></svg></div>
+    <button id="pauseBtn" aria-label="Pause"></button>
+  </div>
+  <div id="combo" aria-hidden="true"></div>
+  <div id="labels"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="fade"></div>
+  <div id="pad">
+    <div id="dpad"><i class="key left"></i><i class="key right"></i></div>
+    <div id="act"><button id="downBtn" class="key down" aria-label="Let go"></button><button id="jumpBtn" class="key jump" aria-label="Jump"></button></div>
+  </div>
+  <div id="menu" class="panel"></div>
+  <div id="cards" class="panel"></div>
+  <div id="pause" class="panel"></div>
+  <div id="result" class="panel"></div>
+</div>
+<script src="src/gum.js"></script>
+<script src="src/world.js"></script>
+<script src="src/game.js"></script>
+</body>
+</html>

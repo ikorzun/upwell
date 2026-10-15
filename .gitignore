@@ -1,0 +1,6 @@
+.DS_Store
+.claude/
+# raw ElevenLabs takes: not for shipping
+assets/_raw/
+# research notes with third-party screenshots
+research/

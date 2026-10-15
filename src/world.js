@@ -50,8 +50,11 @@ const HEALTH = { start: 4, invuln: 1.0, knock: 640, hitstop: 0.08, blink: 0.09 }
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
 const REVIVE = { price: 50, grow: 2, hp: 2, invuln: 2.5 };
-// A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach.
-const STOMP = { bounce: 1.0, keepVx: 0.45, hitstop: 0.045, blast: 3.4 };
+// A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. It counts
+// when the hero meets an enemy from over it: its middle `above` of their radii over the enemy's and at least
+// `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
+// testers found stomps too exact).
+const STOMP = { bounce: 1.0, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
 // A fizz candy, found once or twice a level (at `at` of its height, from..to), makes the hero shoot by
 // itself for `time` s (+`plus` a Long fizz): a bullet every `every` s at the nearest enemy or blob within
 // `range` R, flying `speed` R/s; it stops at a block and breaks a crumbling one.

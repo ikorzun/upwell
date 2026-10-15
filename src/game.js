@@ -435,7 +435,7 @@ class Game {
   meet(e) {
     if (e.state === 'shell' || (e.type === 'mini' && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter: harmless
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = H.rigVy - b.rigVy;
-    const above = dy > 0.42 * (H.R + b.R) && dy > dx * 0.5 && rel > -280;
+    const above = (dy > STOMP.above * (H.R + b.R) && dy > dx * STOMP.slope && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * (H.R + b.R));   // from over it, or falling onto it
     const can = e === this.lv.boss ? e.angry <= 0 : e.def.stomp;
     if (above && can) this.stomp(e); else this.hurt(H.cx - b.cx, H.cy - b.cy);
   }

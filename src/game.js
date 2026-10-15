@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, swipe down to let go.\nLand on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
+    bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -25,7 +25,7 @@ const STR = {
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, свайп вниз — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
-    starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
+    bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
@@ -202,7 +202,7 @@ class Game {
   newRun() {
     this.world = 0; this.stage = 0; this.hard = !!save.hard && save.wins > 0; this.mods = MODS(); this.taken = [];
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0;
-    this.climbed = 0; this.levelM = 0; this.revives = 0;
+    this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0;
     const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
   }
@@ -244,7 +244,7 @@ class Game {
     if (save.runs <= 2) ui.toast(t(coarse ? 'hintTouch' : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 5200);
   }
   buildLevel(newHero) {
-    const W = view.w, H = view.h, boss = this.world >= WORLDS.length, wd = this.wd;
+    const W = view.w, H = view.h, boss = this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
     const seed = nextSeed != null ? nextSeed : (Math.random() * 4294967296) >>> 0;
@@ -399,7 +399,10 @@ class Game {
     for (const e of lv.enemies) if (STR.en['seen_' + e.type] && e.body.cy > lv.cam && e.body.cy < lv.cam + view.h) this.hint(e.type);   // a new kind of enemy, told once
     if (lv.boss && !lv.boss.dead && lv.boss.body.touchHero) this.meet(lv.boss);
     if (this.state !== 'play') return;
-    this.spikes(); this.fireStep(dt); this.fireTouch(); this.shots(dt); this.collect(dt); this.gun(dt);
+    if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
+    this.spikes(); this.fireStep(dt); this.fireTouch();
+    if (this.lv !== lv) return;   // the fire ended a bonus level
+    this.shots(dt); this.collect(dt); this.gun(dt);
     if (this.combo > 0 && (H.wallMask & 8) && !H.springHit) this.payCombo();   // only a floor ends a combo
     const near = (o, r) => Math.hypot(H.cx - o.x, H.cy - o.y) < r;
     if (lv.portal && near(lv.portal, lv.portal.r + 0.5 * H.R)) { this.levelClear(); return; }
@@ -492,7 +495,8 @@ class Game {
     if (this.invuln > 0 || this.state !== 'play') return false;
     const H = this.hero, d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
-    this.hp--; this.invuln = HEALTH.invuln + this.mods.invuln;
+    if (!this.bonus) this.hp--;   // a bonus level costs no hearts
+    this.invuln = HEALTH.invuln + this.mods.invuln;
     setVel(H, dx * HEALTH.knock, Math.min(dy * HEALTH.knock, 0) - HEALTH.knock * 0.45);
     unstick(H, 0.3); H.face.surprise = 1; H.kickSquash(dx, dy, 2); this.rising = false;
     this.hitstop = HEALTH.hitstop; shake.add(7); haptics.buzz(40); ui.hurt();
@@ -581,6 +585,7 @@ class Game {
   fireTouch() {
     const f = this.lv.fire, H = this.hero;
     if (!f || H.maxY < f.y) return;
+    if (this.bonus) { this.endBonus('caught'); return; }   // the fire race: caught is the end of it
     this.hurt(0, -1);
     sound.play('burn');
     if (this.state !== 'play') return;
@@ -644,9 +649,10 @@ class Game {
     let rw = null;
     for (const c of COMBO) if (n >= c.at - s) rw = c;
     if (!rw) return;
-    this.coins += rw.coins;
+    const pay = rw.coins * ((this.bonus && this.bonus.comboMul) || 1);
+    this.coins += pay;
     if (rw.hp) this.heal(rw.hp);
-    ui.toast(tf('comboPay', { n, c: rw.coins }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);
+    ui.toast(tf('comboPay', { n, c: pay }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);
     haptics.buzz(18); sound.play('combo');
   }
   // The first touch of each kind of surface, and the first sight of the fire, told once ever.
@@ -706,9 +712,11 @@ class Game {
     const H = this.hero;
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
     if (this.combo > 0) this.payCombo();
-    const lv = this.lv, allCoins = lv.coinsTaken >= lv.coinTotal, allFoes = lv.foeKilled >= lv.foeTotal;   // the stars, paid at once
-    this.stars = { n: 1 + allCoins + allFoes, coins: [lv.coinsTaken, lv.coinTotal], foes: [lv.foeKilled, lv.foeTotal] };
-    this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
+    const lv = this.lv, allCoins = lv.coinsTaken >= lv.coinTotal, allFoes = lv.foeKilled >= lv.foeTotal;   // the stars, paid at once (not for a bonus level)
+    if (!this.bonus) {
+      this.stars = { n: 1 + allCoins + allFoes, coins: [lv.coinsTaken, lv.coinTotal], foes: [lv.foeKilled, lv.foeTotal] };
+      this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
+    }
     this.climbed += this.levelM; this.levelM = 0;
     haptics.buzz(20); sound.play('portal');   // no toast: it would hide the hole
   }
@@ -721,10 +729,25 @@ class Game {
   }
   pick(u) {
     this.takeUpgrade(u);
-    if (++this.stage >= 3) { this.stage = 0; this.world++; }
     this.state = 'play'; this.stateT = 0;
+    if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
+    if (++this.stage >= 3) { this.stage = 0; this.world++; }
     this.buildLevel(false);
     ui.hideAll(); ui.banner();
+  }
+  // A bonus level: against the clock, no hearts lost; then on to the next world.
+  startBonus(b) {
+    this.bonus = b; this.bonusT = b.time; this.bonusCoins = this.coins;
+    this.buildLevel(false);
+    ui.hideAll(); ui.toast(L2(b.name) + '\n' + L2(b.goal) + ' · ' + b.time + ' ' + t('sec'), 2600);
+  }
+  endBonus(why) {
+    if (!this.bonus) return;
+    this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
+    const got = this.coins - this.bonusCoins;
+    this.buildLevel(false);
+    ui.hideAll(); ui.banner();
+    ui.toast((why ? t(why) + '  ' : '') + tf('bonusGot', { n: got }), 2200);
   }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;
@@ -775,7 +798,7 @@ class Game {
   frame(dt, alpha, now) {
     const lv = this.lv, b = this.hero;
     this.stateT += dt;
-    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) ui.cards(this.offer());
+    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else ui.cards(this.offer()); }
     if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
     if (this.state === 'won' && this.stateT > 0.4 && !ui.open) ui.result(this.result);
     if (this.winT > 0 && this.state === 'play' && (this.winT -= dt) <= 0) this.win();
@@ -1004,7 +1027,7 @@ const ui = {
     if (left) { gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
     const m = Math.floor(g.climbed + g.levelM);
     if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
-    const st = g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.world >= WORLDS.length ? L2(SUMMIT.name) : (g.world + 1) + '-' + (g.stage + 1);
+    const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.world >= WORLDS.length ? L2(SUMMIT.name) : (g.world + 1) + '-' + (g.stage + 1);   // a bonus level counts its seconds down
     if (st !== this.stage) { this.stage = st; $('stage').replaceChildren(px(st)); }
     const c = $('combo');
     if (g.combo > 0 && g.hero) c.style.transform = 'translate(' + Math.round(g.hero.cx) + 'px,' + Math.round(g.hero.minY - g.lv.cam - 30) + 'px) translateX(-50%)';
@@ -1303,6 +1326,7 @@ window.__up = {
   get view() { return { w: view.w, h: view.h, left: view.left, canvasW: canvas.width, canvasH: canvas.height }; },
   play(seed) { nextSeed = seed == null ? null : seed; game.startRun(); return game.seed; },
   // jump straight to world w (0-based; 4 is the boss), level s
+  bonus(w, seed) { this.go(w, 2, seed); game.startBonus(BONUS[w]); return this.state; },   // straight into world w's bonus level
   go(w, s = 0, seed) { if (game.state === 'menu') game.startRun(); game.world = w; game.stage = s; nextSeed = seed == null ? null : seed; game.state = 'play'; game.buildLevel(false); ui.hideAll(); return this.state; },
   god(on = true) { game.invuln = on ? 1e9 : 0; return game.invuln; },
   give(n) { game.coins += n; return game.coins; },

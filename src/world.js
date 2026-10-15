@@ -160,6 +160,24 @@ const WORLDS = [
 // The hardest chunk allowed, by world and level (hard mode allows all).
 const MAX_D = [[1, 2, 2], [2, 2, 3], [2, 3, 3], [3, 3, 3]];
 const SUMMIT = { id: 'summit', name: { ru: 'Вершина', en: 'Summit' }, theme: THEMES.summit, enemies: {}, chunks: {} };
+// A bonus level after each world's last: a short shaft against the clock (`time` s) where no heart is
+// lost; out by the hole on top, or out of time, it goes on to the next world. Made like a world, with
+// its own: `rain` sprinkles coins over every chunk, `coat` lines both walls, `pack` sets enemies to a
+// chunk, `comboMul` multiplies combo rewards; in the fire race the fire ends it.
+const BONUS = [
+  { id: 'rain', bonus: true, name: { ru: 'Бонус: монетный дождь', en: 'Bonus: coin rain' }, goal: { ru: 'Собери сколько успеешь', en: 'Grab all you can' },
+    theme: THEMES.cave, heights: [18, 18, 18], time: 20, maxD: 1, foes: 0, enemies: {}, rain: true,
+    chunks: { mosswall: 3, stairs: 2, planks: 2, pillars: 1 } },
+  { id: 'rubber', bonus: true, name: { ru: 'Бонус: резиновый колодец', en: 'Bonus: rubber well' }, goal: { ru: 'Вверх рикошетом от стен', en: 'Bounce your way up the walls' },
+    theme: THEMES.ice, heights: [18, 18, 18], time: 20, maxD: 2, foes: 0, enemies: {}, rain: true, coat: 'rubber',
+    chunks: { planks: 3, stairs: 2, pillars: 1, rest: 1 } },
+  { id: 'combo', bonus: true, name: { ru: 'Бонус: комбо-лестница', en: 'Bonus: combo ladder' }, goal: { ru: 'Топчи подряд: комбо вдвое дороже', en: 'Stomp in a row: combos pay double' },
+    theme: THEMES.mine, heights: [18, 18, 18], time: 20, maxD: 2, foes: 1, pack: 3, enemies: { crawler: 1 }, comboMul: 2,
+    chunks: { stairs: 3, planks: 3, pillars: 2 } },
+  { id: 'race', bonus: true, name: { ru: 'Бонус: гонка с огнём', en: 'Bonus: race the fire' }, goal: { ru: 'Огонь быстрый: беги вверх', en: 'The fire is fast: run up' },
+    theme: THEMES.void, heights: [18, 18, 18], time: 20, maxD: 2, foes: 0, enemies: {}, rain: true, fire: 2.2,
+    chunks: { stairs: 2, planks: 2, pillars: 2, lift: 1 } },
+];
 
 // One of three is offered after every level. `stack`: can be taken again.
 const UPGRADES = [
@@ -593,8 +611,8 @@ class Level {
     this.cam = this.floor + CAM.floorShow - o.h;
     if (o.kind === 'well') {
       const rnd = this.rng, H = o.height;
-      if (rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (0.3 + rnd() * 0.4), kind: 'shop', done: false });
-      if (rnd() < 0.8) this.plan.push({ y: this.floor - H * (0.15 + rnd() * 0.55), kind: 'treasure', done: false });
+      if (!o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (0.3 + rnd() * 0.4), kind: 'shop', done: false });
+      if (!o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       const v = (o.world.fire || 0) * this.R * (this.hard ? 1.4 : 1);
       if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null };
     } else this.build(o);
@@ -655,7 +673,7 @@ class Level {
     if (plan) { plan.done = true; if (this.top - this.endY > LEVEL.pocketEnd * this.tile) { id = 'pocket'; this.pocketKind = plan.kind; } }
     if (!id && this.intro.length && this.placed.length) id = this.intro.shift();   // after a first easy one, what the level is to show
     if (!id) {
-      const maxD = this.hard ? 3 : MAX_D[Math.min(wd === SUMMIT ? 3 : WORLDS.indexOf(wd), 3)][Math.min(this.stage, 2)], w = {};
+      const maxD = this.hard ? 3 : wd.maxD || MAX_D[Math.min(wd === SUMMIT ? 3 : WORLDS.indexOf(wd), 3)][Math.min(this.stage, 2)], w = {};
       for (const k in wd.chunks) if (CHUNKS[k].d <= maxD && k !== this.last) w[k] = wd.chunks[k];
       id = pick(rnd, w);
     }
@@ -741,6 +759,12 @@ class Level {
     wall('<', COLS - 1, (y0, y1) => this.spikes.push({ x0: this.r - d, x1: this.r, y0, y1, dir: 3 }));
     for (const [ch, k, side, kind] of [['[', 0, 1, 'ice'], [']', COLS - 1, 2, 'ice'], ['{', 0, 1, 'moss'], ['}', COLS - 1, 2, 'moss'], ['(', 0, 1, 'rubber'], [')', COLS - 1, 2, 'rubber']])
       wall(ch, k, (y0, y1) => this.coats.push({ side, y0, y1, kind }));
+    const wd = this.world;
+    if (wd.coat) for (const side of [1, 2]) this.coats.push({ side, y0: base - H * t, y1: base, kind: wd.coat });   // a bonus well's walls, lined
+    if (wd.rain) for (let r = 1; r < H; r += 2) {   // and a rain of coins in the open
+      const k = 1 + ((this.rng() * (COLS - 2)) | 0);
+      if (at(r, k) === '.' && at(r - 1, k) === '.') this.coin(X(k) + t / 2, Y(r) - t / 2, this.rng() < 0.12 ? 5 : 1);
+    }
     if (c !== CHUNKS.pocket) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at
   }
   // Enemies for a chunk just laid, on what it is made of: a crawler along a clear ledge, a
@@ -749,7 +773,7 @@ class Level {
   populate(rects, top, bottom) {
     const wd = this.world, rnd = this.rng, t = this.tile;
     if (!wd.enemies || bottom > this.floor - 6 * t || !(rnd() < wd.foes * (this.hard ? 1.4 : 1) * (1 + 0.15 * this.stage))) return;
-    const n = rnd() < 0.25 * this.stage ? 2 : 1;
+    const n = wd.pack || (rnd() < 0.25 * this.stage ? 2 : 1);
     for (let i = 0; i < n; i++) {
       const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.filter((k) => wd.enemies[k]).map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
       const taken = (r) => this.spawns.some((q) => q.ledge === r || q.rect === r);   // one enemy to a ledge or block

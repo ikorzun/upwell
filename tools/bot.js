@@ -38,7 +38,7 @@ const random = () => {
 
 // ── saving and restoring everything a step can change ──
 const GAME_KEYS = ['hp', 'maxHp', 'invuln', 'sinceContact', 'queueT', 'air', 'hitstop', 'touch', 'queued', 'rising', 'combo', 'coins',
-  'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunCD', 'gunMax', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY'];
+  'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunCD', 'gunMax', 'dashT', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY'];
 const copyItem = (e) => (e && typeof e === 'object' && !('x0' in e) ? Object.assign({}, e) : e);   // boxes stay shared
 function snapBody(b) {
   const o = {};

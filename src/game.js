@@ -296,15 +296,19 @@ class Game {
     else if (this.air > 0) { this.air--; this.jump(true, aimed); }
     else { this.queueT = JUMP.buffer; this.queued = aimed; }
   }
-  // Off a floor: up, keeping the run. Off a wall: up and away. Off a ceiling: pushed down
-  // and toward the pressed side. In the air: up again, with a puff under it. A slingshot
+  // Off a floor: up, keeping the run. Off a wall: up and away. Off a ceiling: pushed down,
+  // or with a side pressed a dash that way. In the air: up again, with a puff under it. A slingshot
   // launch goes where it was aimed, and letting go of a button cannot cut it.
   jump(inAir, aimed) {
     const H = this.hero, v = this.vjump, side = inAir ? 0 : this.touch;
     let vx = H.rigVx, vy = -v, rise = !aimed;
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
-    else if (side === 4) { vx = input.dir * MOVE.speed * this.R; vy = JUMP.ceil * v; rise = false; }
+    else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
+      if (input.dir) { vx = input.dir * JUMP.dash * this.R; vy = JUMP.dashDown * v; this.dashT = 0.15; fx.dust(H.cx - input.dir * H.R, H.minY, IMPACT.puffSpeed + 600); }   // the ceiling's friction off for a moment, or it drags the dash
+      else { vx = 0; vy = JUMP.ceil * v; }
+      rise = false;
+    }
     if (inAir) { fx.dust(H.cx, H.maxY, IMPACT.puffSpeed + 900); fx.ring(H.cx, H.maxY, 0.8 * this.R, H.color.base); }
     sound.play(inAir ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8);
     setVel(H, vx, vy);
@@ -333,7 +337,8 @@ class Game {
     const H = this.hero, d = input.dir, floor = this.onFloor(), top = H.stuck > 0 && glueSide(H) === 4;
     H.pressX = d; H.crawl = top && d !== 0;   // only a body hanging from a ceiling alone creeps along it
     if (input.down) H.stickCD = Math.max(H.stickCD || 0, 0.05);
-    H.fric = floor && d ? MOVE.slip : undefined;
+    if (this.dashT > 0) this.dashT -= dt;
+    H.fric = this.dashT > 0 ? 0 : floor && d ? MOVE.slip : undefined;
     if (!d || (H.stuck && !top)) return;   // stuck to a wall it slides; under a ceiling it creeps along
     const dv = (d * (top ? MOVE.ceil : MOVE.speed) * this.R - H.rigVx) * Math.min(1, (floor || top ? MOVE.accel : MOVE.air) * dt);
     if (dv * d > 0) addVel(H, dv, 0);   // toward the pressed side only: a faster leap is not braked

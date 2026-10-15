@@ -11,6 +11,9 @@ const STR = {
   en: {
     hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, ▼ to let go.\nLand on enemies from above!', play: 'Play', best: 'Best climb', bank: 'Coins, all runs', form: 'Shape', color: 'Colour',
     hard: 'Hard mode', from: 'at {n}', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
+    news: 'New: {n}', dark: 'darkness',
+    seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
+    seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
@@ -20,6 +23,9 @@ const STR = {
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, ▼ — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть', best: 'Лучший подъём', bank: 'Монет за все забеги', form: 'Форма', color: 'Цвет',
     hard: 'Сложный режим', from: 'с {n}', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
+    news: 'Новое: {n}', dark: 'темнота',
+    seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
+    seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
@@ -38,7 +44,7 @@ const detectLang = () => { const l = (navigator.language || 'en').slice(0, 2).to
 // wins (the first one opens hard mode) and the chosen look.
 const SAVE_KEY = 'upwell.save';
 const save = (() => {
-  const d = { best: 0, bank: 0, wins: 0, runs: 0, reach: 0, form: 'round', color: PALETTE[0].id, hard: false };
+  const d = { best: 0, bank: 0, wins: 0, runs: 0, reach: 0, form: 'round', color: PALETTE[0].id, hard: false, seen: {} };   // seen: hints shown once
   try {
     const s = Object.assign(d, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'));
     if (!s.ball) { s.ball = true; if (s.form === 'mochi') s.form = 'round'; }   // the hero became a ball: an old save's default look goes with it
@@ -218,7 +224,7 @@ class Game {
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard,
-      height: boss ? 0 : (wd.height + 5 * this.stage) * PX_PER_M, theme: wd.theme });
+      height: boss ? 0 : wd.heights[this.stage] * PX_PER_M, theme: wd.theme });
     if (boss) this.lv.boss = new Boss(this.lv);
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
@@ -344,6 +350,7 @@ class Game {
     if (hero.springHit && hero.rigVy > -0.5 * SPRING.v * this.vjump) this.spring(hero.springHit);
     if (playing && hero.rubber && !(hero.wallMask & 8)) this.rubberHit(hero.rubber);   // standing, rubber is just a wall
     if (playing && lv.kind === 'well' && this.onFloor() && !hero.springHit) this.markSafe(hero.floorRect);
+    if (playing && lv.kind === 'well') this.notice();
     if (playing) this.interact(dt);
   }
   // Enemies come alive a little above the screen and are forgotten far below it.
@@ -559,8 +566,17 @@ class Game {
     ui.toast(tf('comboPay', { n, c: rw.coins }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);
     haptics.buzz(18); sound.play('combo');
   }
+  // The first touch of each kind of surface, and the first sight of the fire, told once ever.
+  notice() {
+    const H = this.hero, lv = this.lv, m = H.wallMask, fr = H.floorRect;
+    const coat = m & 1 ? lv.coatAt(1, H.cy) : m & 2 ? lv.coatAt(2, H.cy) : null;
+    if (coat) this.hint(coat);
+    if (fr && (m & 8)) { if (fr.crumble) this.hint('crumble'); else if (fr.slick) this.hint('ice'); }
+    if (lv.fire && lv.fire.y < lv.cam + view.h) this.hint('fire');
+  }
+  hint(kind) { if (save.seen[kind] || this.stateT < 3) return; save.seen[kind] = 1; persist(); ui.toast(t('seen_' + kind), 2400); }   // not over the level's banner
   spring(r) {
-    const H = this.hero;
+    const H = this.hero; this.hint('spring');
     setVel(H, H.rigVx, -SPRING.v * this.vjump); unstick(H, 0.15); H.kickSquash(0, 1, -2.4); this.rising = false;
     r.t = SPRING.anim; this.sinceContact = JUMP.coyote + 1; sound.play('spring', 0.8);
     fx.ring((r.x0 + r.x1) / 2, r.y0, this.R, INK.spring); haptics.buzz(12);
@@ -862,7 +878,8 @@ const ui = {
   },
   banner() {
     if (game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
-    this.toast(tf('world', { n: game.world + 1 }) + ' · ' + L2(game.wd.name) + '  ' + (game.world + 1) + '-' + (game.stage + 1), 1800);
+    const intro = (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');
+    this.toast(tf('world', { n: game.world + 1 }) + ' · ' + L2(game.wd.name) + '  ' + (game.world + 1) + '-' + (game.stage + 1) + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
   comboPop(n) { const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
   comboEnd() { $('combo').classList.remove('show'); },

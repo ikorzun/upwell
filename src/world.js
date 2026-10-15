@@ -114,23 +114,28 @@ const ENEMY = {
   climber: { design: 'mochi', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7 },
   circler: { design: 'cat', color: 'red', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8 },
 };
-// Four worlds of three levels, then the boss. `height` is the first level's in metres
-// (+5 m a level); `chunks` weighs the chunks a shaft is built from (see CHUNKS), `foes` is
+// Four worlds of three levels, then the boss. `heights` are its levels' lengths in metres (a
+// saw: a world starts a little shorter than the last one ended); `chunks` weighs the chunks a shaft is built from (see CHUNKS), `foes` is
 // the chance of an enemy in a chunk and `enemies` weighs which, `fire` how fast the fire under it rises, in R/s;
-// `dark` lists the levels (0-based) lit only by the hero and what glows (see DARK_FS).
+// `dark` lists the levels (0-based) lit only by the hero and what glows (see DARK_FS); `intro`,
+// level by level, the chunks it must have (laid first, so the first minutes show the surfaces),
+// the enemies allowed (all if not given) and what is new, for the level's banner.
 const WORLDS = [
-  { id: 'cave', name: { ru: 'Пещера', en: 'Cave' }, theme: THEMES.cave, height: 40, fire: 0.4,
+  { id: 'cave', name: { ru: 'Пещера', en: 'Cave' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
     chunks: { stairs: 4, planks: 3, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2 },
-    foes: 0.55, enemies: { crawler: 3, climber: 1, circler: 1 } },
-  { id: 'ice', name: { ru: 'Ледник', en: 'Glacier' }, theme: THEMES.ice, height: 45, fire: 0.55, dark: [1],
+    foes: 0.55, enemies: { crawler: 3, climber: 1, circler: 1 },
+    intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], news: { ru: 'мох и пружины', en: 'moss and springs' } },
+      { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], news: { ru: 'осыпь, резина и лазуны', en: 'crumbling blocks, rubber and climbers' } },
+      { chunks: ['icewall', 'lift'], news: { ru: 'лёд, ездящие планки и обходчики', en: 'ice, moving planks and circlers' } }] },
+  { id: 'ice', name: { ru: 'Ледник', en: 'Glacier' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1 },
-    foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2 } },
-  { id: 'mine', name: { ru: 'Шахта', en: 'Mine' }, theme: THEMES.mine, height: 50, fire: 0.7, dark: [1],
+    foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2 }, intro: [{ news: { ru: 'ледяные блоки', en: 'ice blocks' } }] },
+  { id: 'mine', name: { ru: 'Шахта', en: 'Mine' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1],
     chunks: { crumble: 3, bridge: 3, lift: 3, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
-    foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 3 } },
-  { id: 'void', name: { ru: 'Пустота', en: 'Void' }, theme: THEMES.void, height: 55, fire: 0.85, dark: [1],
+    foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 3 }, intro: [{ news: { ru: 'мосты и лифты', en: 'bridges and lifts' } }, {}, { news: { ru: 'шипы', en: 'spikes' } }] },
+  { id: 'void', name: { ru: 'Пустота', en: 'Void' }, theme: THEMES.void, heights: [66, 74, 82], fire: 0.85, dark: [1],
     chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2 },
-    foes: 0.9, enemies: { crawler: 1, climber: 3, circler: 3 } },
+    foes: 0.9, enemies: { crawler: 1, climber: 3, circler: 3 }, intro: [{ news: { ru: 'шипы на стенах и ездящие планки', en: 'spiked walls and moving planks' } }] },
 ];
 // The hardest chunk allowed, by world and level (hard mode allows all).
 const MAX_D = [[1, 2, 2], [2, 2, 3], [2, 3, 3], [3, 3, 3]];
@@ -525,7 +530,7 @@ class Level {
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
-    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false;
+    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null;
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme }
   reset(o) {
@@ -535,6 +540,8 @@ class Level {
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null;
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / 12; this.last = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
+    const intro = (o.world.intro && o.world.intro[this.stage]) || {};
+    this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.top = this.floor; this.endY = o.height ? this.floor - o.height : -Infinity;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
     this.cam = this.floor + CAM.floorShow - o.h;
@@ -600,6 +607,7 @@ class Level {
     const wd = this.world, rnd = this.rng, plan = this.last !== 'pocket' && this.plan.find((p) => !p.done && this.top < p.y);
     let id;
     if (plan) { plan.done = true; if (this.top - this.endY > LEVEL.pocketEnd * this.tile) { id = 'pocket'; this.pocketKind = plan.kind; } }
+    if (!id && this.intro.length && this.placed.length) id = this.intro.shift();   // after a first easy one, what the level is to show
     if (!id) {
       const maxD = this.hard ? 3 : MAX_D[Math.min(wd === SUMMIT ? 3 : WORLDS.indexOf(wd), 3)][Math.min(this.stage, 2)], w = {};
       for (const k in wd.chunks) if (CHUNKS[k].d <= maxD && k !== this.last) w[k] = wd.chunks[k];
@@ -667,7 +675,7 @@ class Level {
     if (!wd.enemies || bottom > this.floor - 6 * t || !(rnd() < wd.foes * (this.hard ? 1.4 : 1) * (1 + 0.15 * this.stage))) return;
     const n = rnd() < 0.25 * this.stage ? 2 : 1;
     for (let i = 0; i < n; i++) {
-      const type = pick(rnd, wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
+      const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
       const taken = (r) => this.spawns.some((q) => q.ledge === r || q.rect === r);   // one enemy to a ledge or block
       if (type === 'crawler') {
         const ok = rects.filter((r) => !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 3 * t && !taken(r) &&

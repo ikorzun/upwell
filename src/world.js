@@ -1226,15 +1226,36 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
-  // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is inside.
+  // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is
+  // inside. A shop's (gold) and a stash's (violet) are magic: a breathing glow round them, white studs and a gem
+  // on the frame, lights turning in the dark of the opening, sparks rising up past it.
   const door = (d, kind) => {
-    const c = th.lip, f = 2 * PIX.size, x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2;
+    const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P;
+    const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
+    if (magic) { F(x, y, r * 2.1, 0, 0, hh * 1.8, c, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, y, r * 1.4, 0, 0, hh * 1.25, INK.white, 0.22, 1); }
     box(d.x0, d.y0, d.x1, d.y1, INK.dark, 1, 0);
-    box(d.x0, d.y0 - f, d.x1, d.y0, c, 1, 0);   // the lintel
+    if (magic) for (let k = 0; k < 8; k++) {   // a ring of lights turning inside, breathing in and out
+      const a = T * 1.5 + (k * TAU) / 8, q = 0.62 + 0.14 * Math.sin(T * 2.2 + k * 1.3);
+      box(x + Math.cos(a) * r * q - P, y + Math.sin(a) * hh * q * 0.85 - P, x + Math.cos(a) * r * q + P, y + Math.sin(a) * hh * q * 0.85 + P, k & 1 ? INK.white : c, 0.9, 0, 10, 0);
+    }
+    box(d.x0, d.y0 - f, d.x1, d.y0, c, 1, 0, 10, 0);   // the lintel
     if (d.side !== 1) box(d.x0 - f, d.y0 - f, d.x0, d.y1, c, 1, 0, 10, 0);   // the posts, where there is no wall
     if (d.side !== 2) box(d.x1, d.y0 - f, d.x1 + f, d.y1, c, 1, 0, 10, 0);
-    const bob = Math.round(Math.sin(T * 3 + x) * 1.5) * PIX.size;
-    if (kind === 'shop') { disc(x, y + bob, r * 0.4, INK.coinD, 1); disc(x, y + bob, r * 0.3, INK.coin, 1); }
+    if (magic) {
+      for (const sx of [d.x0, d.x1]) box(sx - P, d.y0 - f - P * 0.5, sx + P, d.y0 - f + P * 1.5, INK.white, 1, 0, 10, 0);   // studs on its corners
+      const open = d.side === 1 ? d.x1 : d.x0, run = (d.x1 - d.x0) + (d.y1 - d.y0), u = ((T * 0.9 + x * 0.01) % 1) * run, hl = 3 * P;   // a white glint running along the lintel and down the free post
+      if (u < d.x1 - d.x0) { const gx = d.side === 1 ? d.x0 + u : d.x1 - u; box(gx - hl, d.y0 - f, gx + hl, d.y0, INK.white, 1, 0, 10, 0); }
+      else { const gy2 = d.y0 + (u - (d.x1 - d.x0)), px0 = d.side === 1 ? open : open - f; box(px0, gy2 - hl, px0 + f, gy2 + hl, INK.white, 1, 0, 10, 0); }
+      const gy = d.y0 - f - 2 * P, gl = 1 + 0.5 * Math.sin(T * 4 + x);   // a gem over the middle, glinting
+      F(x, gy, 3.5 * P * gl, 0, 0, 3.5 * P * gl, INK.white, 0.6, 1); box(x - 2 * P, gy - 2 * P, x + 2 * P, gy + 2 * P, c, 1, 0, 10, 0); box(x - P, gy - P, x, gy, INK.white, 1, 0, 10, 0);
+      for (let k = 0; k < 6; k++) {   // sparks rising past it, twinkling as small crosses
+        const u = (T * 0.45 + k / 6) % 1, q = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, sx = d.x0 - r * 0.2 + q * r * 2.4, sy = d.y1 - u * (d.y1 - d.y0 + 2.5 * R);
+        const k2 = Math.sin(u * Math.PI), a2 = k2 > 0.25 ? 1 : 0, l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;
+        if (a2) { box(sx - l, sy - P * 0.5, sx + l, sy + P * 0.5, ink, 1, 0, 10, 0); box(sx - P * 0.5, sy - l, sx + P * 0.5, sy + l, ink, 1, 0, 10, 0); }
+      }
+    }
+    const bob = Math.round(Math.sin(T * 3 + x) * 1.5) * P;
+    if (kind === 'shop') { disc(x, y + bob, r * 0.4, INK.coinD, 1); disc(x, y + bob, r * 0.3, INK.coin, 1); disc(x - r * 0.1, y + bob - r * 0.1, r * 0.08, INK.white, 1); }
     else if (kind === 'treasure') for (let k = 0; k < 3; k++) disc(x + (k - 1) * r * 0.42, y + r * 0.3 - (k === 1 ? r * 0.35 : 0) + bob, r * 0.22, INK.coin, 1);
     else F(x, y - r * 0.1 + bob, r * 0.45, 0, 0, r * 0.45, c, 1, 3, 1.1, 0.75, 0.2);   // ^: the way out
   };

@@ -9,7 +9,7 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, ▼ to let go.\nLand on enemies from above!', play: 'Play',
+    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, swipe down to let go.\nLand on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
     starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
@@ -23,7 +23,7 @@ const STR = {
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off',
   },
   ru: {
-    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, ▼ — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть',
+    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, свайп вниз — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
     starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
@@ -1054,18 +1054,23 @@ function padPart(part, onTouch) {
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) part.addEventListener(type, (e) => { if (e.pointerId === id) { id = -1; onTouch(null); } });
 }
 const dpad = $('dpad');
-dpad.children[0].append(px('◀')); dpad.children[1].append(px('▶')); $('downBtn').append(px('▼')); $('jumpBtn').append(px('▲'));
+dpad.children[0].append(px('◀')); dpad.children[1].append(px('▶')); $('jumpBtn').append(px('▲'));
 padPart(dpad, (e) => {
   const r = dpad.getBoundingClientRect(), right = !!e && e.clientX > r.left + r.width / 2;
   input.set('left', !!e && !right); input.set('right', right);
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
-const act = $('act'), jumpBtn = $('jumpBtn'), downBtn = $('downBtn');
-padPart(act, (e) => {   // down and jump as one part too, split where jump begins: a finger may slide from one to the other
-  const jump = !!e && e.clientX > jumpBtn.getBoundingClientRect().left - 4;
-  input.set('jump', jump); input.set('down', !!e && !jump);
-  jumpBtn.classList.toggle('on', jump); downBtn.classList.toggle('on', !!e && !jump);
+const act = $('act'), jumpBtn = $('jumpBtn');
+padPart(act, (e) => { input.set('jump', !!e); jumpBtn.classList.toggle('on', !!e); });
+// Down is a swipe: a finger drawn quickly down over the game (not on the keys) lets go of a wall or a ceiling.
+let swipe = null;
+document.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch' && !e.target.closest('#pad, button, .panel')) swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; });
+document.addEventListener('pointermove', (e) => {
+  if (!swipe || e.pointerId !== swipe.id) return;
+  const dy = e.clientY - swipe.y, dx = Math.abs(e.clientX - swipe.x);
+  if (dy > 32 && dy > 1.5 * dx && e.timeStamp - swipe.t < 450) { game.pressDown(); swipe = null; }
 });
+for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, (e) => { if (swipe && e.pointerId === swipe.id) swipe = null; });
 
 // ── Sound ────────────────────────────────────────────────────
 // Effects and music made with ElevenLabs (tools/audio.py). One Web Audio context, made on the first key press or

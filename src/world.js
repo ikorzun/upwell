@@ -16,7 +16,7 @@ const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the we
 // floor and `air`/s in the air; `slip` is a floor's friction while running. A wall takes
 // the hero when it comes in at `cling` px/s or more, or is pressed toward it. Stuck under a
 // ceiling it creeps along it at `ceil` R/s, for as long as it holds on (STICK.hold).
-const MOVE = { speed: 8.4, accel: 20, air: 16, slip: 0.06, cling: 40, ceil: 5 };
+const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0.06, cling: 40, ceil: 5 };   // accel/air halved and speed a little lower: testers found it twitchy
 // A jump rises `height` R (the soft body's bottom, stretching off, about 1 R less); letting
 // go on the way up keeps `cut` of the speed. Off a wall it goes `wallX` R/s outwards and
 // `wallUp` of a jump up, every time. Off a ceiling it pushes down at `ceil` of a jump and
@@ -728,7 +728,7 @@ class Level {
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
-    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length;
+    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
@@ -751,6 +751,28 @@ class Level {
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, side, cd: 0, room: null });
+      }
+    }
+    // A ledge that stops short of a wall by less than the hero is wide leaves a slot nothing fits
+    // through: widen it to `pass` by cutting the ledge back, or close it if the ledge is short; spikes
+    // on the ledge go with it.
+    const pass = 2.3 * R;
+    for (let i = from; i < this.rects.length; i++) {
+      const r = this.rects[i];
+      if (r.plank || r.spring) continue;
+      const x0 = r.x0, x1 = r.x1;
+      for (const side of [1, 2]) {
+        const gap = side === 1 ? r.x0 - l : this.r - r.x1;
+        if (gap <= 1 || gap >= pass) continue;
+        const cut = pass - gap, keep = r.x1 - r.x0 - cut >= 1.5 * R;
+        if (side === 1) r.x0 = keep ? r.x0 + cut : l; else r.x1 = keep ? r.x1 - cut : this.r;
+      }
+      if (r.x0 === x0 && r.x1 === x1) continue;
+      for (let j = this.spikes.length - 1; j >= spikesFrom; j--) {
+        const q = this.spikes[j];
+        if (q.dir > 1 || q.x1 <= x0 || q.x0 >= x1 || (q.dir === 0 ? Math.abs(q.y1 - r.y0) : Math.abs(q.y0 - r.y1)) > 1) continue;
+        q.x0 = Math.max(q.x0, r.x0); q.x1 = Math.min(q.x1, r.x1);
+        if (q.x1 - q.x0 < 0.5 * R) this.spikes.splice(j, 1);
       }
     }
     // the walls: runs down the first or last column of spikes ('>' left, '<' right) or a coat of ice, moss or rubber

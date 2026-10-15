@@ -9,7 +9,7 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ to move, ▲ to jump, swipe down to let go.\nLand on enemies from above!', play: 'Play',
+    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or tap or flick up to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
     bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
@@ -23,7 +23,7 @@ const STR = {
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off',
   },
   ru: {
-    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ — бег, ▲ — прыжок, свайп вниз — отлипнуть.\nПрыгай на врагов сверху!', play: 'Играть',
+    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲, тап или свайп вверх — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
     bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
@@ -238,7 +238,7 @@ class Game {
     ui.hideAll(); ui.menu();
   }
   startRun() {
-    this.newRun(); save.runs++; persist();
+    this.newRun(); save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true);
     ui.hideAll(); ui.banner();
     if (save.runs <= 2) ui.toast(t(coarse ? 'hintTouch' : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 5200);
@@ -808,8 +808,9 @@ class Game {
       cy /= b.n;
       const target = cy - CAM.anchor * view.h;
       if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * dt));
-      const down = b.maxY + this.room() - view.h;   // and down with a fall, so the hero stays well over the touch keys, as far as the floor
-      if (down > lv.cam) lv.cam = Math.min(down, lv.floor + this.room() - view.h);
+      const down = Math.min(b.maxY + this.room() - view.h, lv.floor + this.room() - view.h);   // and down with a fall, keeping the hero well over the touch keys, as far as the floor:
+      if (down > lv.cam) lv.cam += (down - lv.cam) * (1 - Math.exp(-10 * dt));   // smoothly (a hard follow jerked with every bounce),
+      lv.cam = Math.max(lv.cam, Math.min(b.maxY + view.keep + this.R - view.h, lv.floor + this.room() - view.h));   // but never letting it near the keys
       lv.cam = Math.max(lv.cam, lv.capY - CAM.top);
     }
     lv.ensure(lv.cam - view.h * LEVEL.ahead);
@@ -932,12 +933,11 @@ const ui = {
       const h = button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); });
       p.append(h);
     }
-    p.append(button(t('play'), 'big', () => game.startRun()));
+    p.append(button(t('play'), 'big thumb', () => game.startRun()));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
   },
-  soundChip(again) { return button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'chip wide', () => { sound.toggle(); again(); }); },
   cards(list) {
     const p = this.panel('cards'), st = game.stars;
     if (st) {   // the level's stars, what they paid and what they were for
@@ -956,13 +956,13 @@ const ui = {
   },
   pause() {
     const p = this.panel('pause');
-    p.append(el('div', 'head', t('paused')), button(t('resume'), 'big', () => game.togglePause(false)), button(t('menu'), 'chip wide', () => game.toMenu()),
-      this.soundChip(() => this.pause()));
+    const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); this.pause(); });
+    p.append(el('div', 'head', t('paused')), snd, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
   },
   revive(price, coins) {   // before the result: go on for coins, or end the run
     const p = this.panel('result');
-    p.append(el('div', 'head', t('reviveQ')), button(t('revive'), 'big', () => game.revive()), el('div', 'label', tf('reviveCost', { n: price, c: coins })),
-      button(t('giveUp'), 'chip wide', () => game.giveUp()));
+    p.append(el('div', 'head', t('reviveQ')), el('div', 'label', tf('reviveCost', { n: price, c: coins })),
+      button(t('giveUp'), 'chip wide', () => game.giveUp()), button(t('revive'), 'big thumb', () => game.revive()));   // the main button last, under the thumb
   },
   result(r) {
     const p = this.panel('result');
@@ -978,7 +978,7 @@ const ui = {
       if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       p.append(u);
     }
-    p.append(button(t('again'), 'big', () => game.startRun()), button(t('menu'), 'chip wide', () => game.toMenu()));
+    p.append(button(t('menu'), 'chip wide', () => game.toMenu()), button(t('again'), 'big thumb', () => game.startRun()));   // Again at the bottom, the width of the screen
   },
   toastTimer: 0,
   toast(text, ms = 1500) {
@@ -1015,6 +1015,7 @@ const ui = {
     const playing = g.state !== 'menu' && g.state !== 'boot';
     $('hud').classList.toggle('on', playing);
     $('pad').classList.toggle('on', coarse && g.state === 'play');
+    $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
     if (g.hp !== this.hp || g.maxHp !== this.max) {
       this.hp = g.hp; this.max = g.maxHp;
       const h = $('hearts');
@@ -1063,15 +1064,17 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => { const k = KEYS[e.code]; if (k) input.set(k, false); });
 // A part of the pad follows the finger that pressed it until that finger lets go.
+let padUsed = 0;   // when a touch key was last pressed: unused for a while, the keys fade (see ui.frame)
 function padPart(part, onTouch) {
   let id = -1;
   part.addEventListener('pointerdown', (e) => {
+    padUsed = performance.now();
     if (id !== -1) return;
     id = e.pointerId; e.preventDefault();
     try { part.setPointerCapture(id); } catch (err) { /* fine */ }
     onTouch(e);
   });
-  part.addEventListener('pointermove', (e) => { if (e.pointerId === id) onTouch(e); });
+  part.addEventListener('pointermove', (e) => { if (e.pointerId === id) { padUsed = performance.now(); onTouch(e); } });
   for (const type of ['touchstart', 'touchmove']) part.addEventListener(type, (e) => e.preventDefault(), { passive: false });   // no selection, loupe or callout in Safari
   part.addEventListener('contextmenu', (e) => e.preventDefault());
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) part.addEventListener(type, (e) => { if (e.pointerId === id) { id = -1; onTouch(null); } });
@@ -1085,15 +1088,41 @@ padPart(dpad, (e) => {
 });
 const act = $('act'), jumpBtn = $('jumpBtn');
 padPart(act, (e) => { input.set('jump', !!e); jumpBtn.classList.toggle('on', !!e); });
-// Down is a swipe: a finger drawn quickly down over the game (not on the keys) lets go of a wall or a ceiling.
-let swipe = null;
-document.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch' && !e.target.closest('#pad, button, .panel')) swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; });
-document.addEventListener('pointermove', (e) => {
-  if (!swipe || e.pointerId !== swipe.id) return;
-  const dy = e.clientY - swipe.y, dx = Math.abs(e.clientX - swipe.x);
-  if (dy > 32 && dy > 1.5 * dx && e.timeStamp - swipe.t < 450) { game.pressDown(); swipe = null; }
+// Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
+// where it came down runs that way (the centre follows a long drag, so turning back is quick); a quick
+// flick up jumps (held, it goes higher), a quick flick down lets go; a tap jumps, a second finger's too.
+const GEST = { dead: 18, flick: 30, quick: 320, tap: 230, still: 12 };
+let gest = null, tap2 = null;
+document.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel')) return;
+  if (gest) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
+  gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false };
 });
-for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, (e) => { if (swipe && e.pointerId === swipe.id) swipe = null; });
+document.addEventListener('pointermove', (e) => {
+  const g = gest;
+  if (!g || e.pointerId !== g.id) return;
+  const ox = e.clientX - g.x0, dy = e.clientY - g.y0, quick = e.timeStamp - g.t0 < GEST.quick, upright = Math.abs(dy) > 1.5 * Math.abs(ox);
+  if (Math.abs(ox) > GEST.still || Math.abs(dy) > GEST.still) g.moved = true;
+  if (!g.flick && quick && upright && -dy > GEST.flick) { g.flick = 'up'; input.set('jump', true); }
+  else if (!g.flick && quick && upright && dy > GEST.flick) { g.flick = 'down'; game.pressDown(); }
+  const dx = e.clientX - g.ax;
+  if (Math.abs(dx) > 3 * GEST.dead) g.ax = e.clientX - Math.sign(dx) * 3 * GEST.dead;
+  const dir = Math.abs(dx) < GEST.dead ? 0 : Math.sign(dx);
+  if (dir !== g.dir) { g.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); }
+});
+const gestEnd = (e) => {
+  if (tap2 && e.pointerId === tap2.id) {   // a second finger's tap
+    if (e.type === 'pointerup' && e.timeStamp - tap2.t < GEST.tap && Math.hypot(e.clientX - tap2.x, e.clientY - tap2.y) < GEST.still) game.requestJump();
+    tap2 = null; return;
+  }
+  const g = gest;
+  if (!g || e.pointerId !== g.id) return;
+  if (g.dir) { input.set('left', false); input.set('right', false); }
+  if (g.flick === 'up') input.set('jump', false);
+  else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)
+  gest = null;
+};
+for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, gestEnd);
 
 // ── Sound ────────────────────────────────────────────────────
 // Effects and music made with ElevenLabs (tools/audio.py). One Web Audio context, made on the first key press or

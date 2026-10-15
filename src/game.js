@@ -14,6 +14,8 @@ const STR = {
     news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
+    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
+    seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
@@ -26,6 +28,8 @@ const STR = {
     news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
+    seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
+    seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
@@ -88,6 +92,7 @@ class Foe {
     this.body.gScale = def.grav; this.body.sticky = false; this.body.face.frown = true;
     this.body.fric = 0;   // no drag from what it crawls on (a wall's friction all but holds it still): its steering sets the pace
     this.dir = s.dir || (Math.random() < 0.5 ? -1 : 1); this.t = 0; this.stall = 0; this.ph = Math.random(); this.lastPh = this.ph;
+    this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
     this.s = this.rect ? (this.rect.x1 - this.rect.x0) / 2 + 1.05 * this.body.R : 0;   // a circler starts on top, in the middle
   }
   // Soft bodies moving as the hero does, by pushes and their own give rather than gliding on rails: each one inches
@@ -96,13 +101,14 @@ class Foe {
   think(dt, g) {
     const b = this.body, def = this.def, lv = g.lv;
     const steer = (tvx, tvy, k, xOnly) => { const q = Math.min(1, k * dt); addVel(b, (tvx - b.rigVx) * q, xOnly ? 0 : (tvy - b.rigVy) * q); };
-    this.t += dt;
+    this.t += dt; b.ghost = this.state === 'shell';   // kept in step with the state (a bot's restored branch included)
     turnUp(b, 6, dt);
     this.ph = (this.ph + dt / def.step) % 1;
     const pulse = 0.25 + 1.5 * Math.pow(Math.max(0, Math.sin(this.ph * TAU)), 2);   // averages about one
     const push = this.ph < this.lastPh;   // a new pulse begins
     this.lastPh = this.ph;
-    if (this.type === 'crawler') {   // back and forth along its ledge (or the floor, between the walls)
+    if (def.move === 'crawl') {   // back and forth along its ledge (or the floor, between the walls)
+      if (this.state === 'shell') { this.roll(dt, g); return; }
       if (!(b.wallMask & 8)) return;
       const l = this.ledge;
       if (l && !l.gone) {   // turn before its edge passes the ledge's: a part hanging over sags and catches on the corner
@@ -115,10 +121,12 @@ class Foe {
         this.lastX = b.cx;
         b.kickSquash(1, 0, -0.9);
       }
-      steer(this.dir * def.speed * pulse, 0, 6, true);
-    } else if (this.type === 'climber') {   // up and down its stretch of wall, pressed to it
+      const hold = this.type === 'spitter' && this.spit(dt, g);   // stands still to lob
+      steer(hold ? 0 : this.dir * def.speed * pulse, 0, 6, true);
+    } else if (def.move === 'wall') {   // up and down its stretch of wall, pressed to it (a chaser toward the hero's height)
       const w = this.wall, tx = w.side === 1 ? lv.l + b.R : lv.r - b.R;
-      if (b.cy < w.y0) this.dir = 1; else if (b.cy > w.y1) this.dir = -1;
+      if (def.chase) { const ty = clamp(g.hero.cy, w.y0, w.y1); this.dir = Math.abs(ty - b.cy) < 0.3 * b.R ? 0 : Math.sign(ty - b.cy); }
+      else if (b.cy < w.y0) this.dir = 1; else if (b.cy > w.y1) this.dir = -1;
       if (push) b.kickSquash(0, 1, -0.9);
       steer((tx - b.cx) * 6, this.dir * def.speed * pulse, 6);
     } else {   // round its block: along the top, down a side, along the bottom, up the other side
@@ -129,6 +137,27 @@ class Foe {
       const p = s < w ? [x0 + s, y0] : s < w + h ? [x0 + w, y0 + s - w] : s < 2 * w + h ? [x0 + w - (s - w - h), y0 + h] : [x0, y0 + h - (s - 2 * w - h)];
       steer((p[0] - b.cx) * 8, (p[1] - b.cy) * 8, 10);
     }
+  }
+  // A spitter, now and then while the hero is near and on screen, swells up for SPIT.wind s and
+  // lobs a blob that comes down where the hero was. True while it stands to do it.
+  spit(dt, g) {
+    const b = this.body, H = g.hero, lv = g.lv;
+    if (this.wind > 0) {
+      if ((this.wind -= dt) > 0) { b.kickSquash(0, 1, 0.04); return true; }
+      const x = b.cx, y = b.minY - SPIT.r * lv.R, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1);
+      lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * lv.R });
+      b.kickSquash(0, 1, -1.6); sound.play('spit', 0.5, 1.3);
+      this.spitT = rand(SPIT.every[0], SPIT.every[1]);
+      return true;
+    }
+    if ((this.spitT -= dt) <= 0 && Math.abs(H.cy - b.cy) < SPIT.range * view.h && b.cy > lv.cam && b.cy < lv.cam + view.h) { this.wind = SPIT.wind; return true; }
+    return false;
+  }
+  // A stomped shell rolls along at SHELL.speed, back off walls and over edges (Game.rolling has it hit the others).
+  roll(dt, g) {
+    const b = this.body;
+    if (b.wallMask & 1) this.dir = 1; else if (b.wallMask & 2) this.dir = -1;
+    addVel(b, (this.dir * SHELL.speed * g.R - b.rigVx) * Math.min(1, 10 * dt), 0);
   }
 }
 
@@ -223,6 +252,7 @@ class Game {
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard,
       height: boss ? 0 : wd.heights[this.stage] * R_PER_M * this.R, theme: wd.theme });
+    this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
     if (boss) this.lv.boss = new Boss(this.lv);
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
@@ -333,7 +363,7 @@ class Game {
         const A = bs[i], B = bs[j];
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
-        if (withHero && (this.invuln > 0 || !playing)) continue;   // a hit hero passes through for a moment
+        if (withHero && (this.invuln > 0 || !playing || A.ghost || B.ghost)) continue;   // a hit hero passes through for a moment, and a rolling shell through the hero
         if (collidePair(A, B) && withHero) (A === hero ? B : A).touchHero = true;
       }
       for (const b of bs) { b.collideLevel(lv, h); b.finishSubstep(h); b.updateBounds(); }
@@ -365,6 +395,8 @@ class Game {
   interact(dt) {
     const lv = this.lv, H = this.hero;
     for (const e of lv.enemies.slice()) if (e.body.touchHero) this.meet(e);
+    this.rolling(dt);
+    for (const e of lv.enemies) if (STR.en['seen_' + e.type] && e.body.cy > lv.cam && e.body.cy < lv.cam + view.h) this.hint(e.type);   // a new kind of enemy, told once
     if (lv.boss && !lv.boss.dead && lv.boss.body.touchHero) this.meet(lv.boss);
     if (this.state !== 'play') return;
     this.spikes(); this.fireStep(dt); this.fireTouch(); this.shots(dt); this.collect(dt);
@@ -379,10 +411,11 @@ class Game {
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
     if (lv.kind === 'well') { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else this.idleT += dt; }   // no new height: the fire speeds up
-    if (H.minY > lv.cam + view.h + CAM.deathPad) this.fall();
+    if (H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {
+    if (e.state === 'shell' || (e.type === 'mini' && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter: harmless
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = H.rigVy - b.rigVy;
     const above = dy > 0.42 * (H.R + b.R) && dy > dx * 0.5 && rel > -280;
     const can = e === this.lv.boss ? e.angry <= 0 : e.def.stomp;
@@ -391,6 +424,7 @@ class Game {
   stomp(e) {
     const H = this.hero, lv = this.lv, boss = e === lv.boss;
     if (boss) this.hitBoss();
+    else if (e.type === 'shell') this.shellUp(e);
     else {
       this.kill(e, true);
       if (this.mods.blast) {
@@ -405,6 +439,24 @@ class Game {
     this.hitstop = STOMP.hitstop; shake.add(2.5); haptics.buzz(14);
     if (!boss) sound.play('stomp', 1, 1 + 0.06 * Math.min(this.combo, 10));   // higher with each stomp of a combo, as in Downwell
   }
+  // A shell stomped: it rolls off away from the hero, into the others, and pops in a while.
+  shellUp(e) {
+    const b = e.body;
+    e.state = 'shell'; e.shellT = SHELL.life; e.dir = b.cx >= this.hero.cx ? 1 : -1; b.kickSquash(0, 1, 2);
+    this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo);
+  }
+  rolling(dt) {   // rolling shells knock out whatever they meet, and pop when their time is up
+    const lv = this.lv;
+    for (const e of lv.enemies.slice()) {
+      if (e.state !== 'shell' || !lv.enemies.includes(e)) continue;
+      const b = e.body;
+      for (const o of lv.enemies.slice()) {   // bodies touching: their boxes meet (they push apart, so a pixel or two of slack)
+        const q = o.body;
+        if (o !== e && q.maxX > b.minX - 3 && q.minX < b.maxX + 3 && q.maxY > b.minY - 3 && q.minY < b.maxY + 3) { this.kill(o, true); shake.add(2); }
+      }
+      if ((e.shellT -= dt) <= 0) this.kill(e, true);
+    }
+  }
   kill(e, byHero) {
     const lv = this.lv, i = lv.enemies.indexOf(e);
     if (i < 0) return;
@@ -412,6 +464,10 @@ class Game {
     const b = e.body;
     splatFx(b.cx, b.cy, b.R, b.color.base);
     this.drop(b.cx, b.cy, Math.round(e.def.coins * this.mods.coinMul));
+    if (e.type === 'splitter' && byHero) for (const d of [-1, 1]) {   // in two, thrown apart
+      const m = new Foe({ type: 'mini', x: b.cx + d * 0.5 * b.R, y: b.cy, ledge: e.ledge, dir: d }, lv);
+      setVel(m.body, d * 3 * this.R, -4 * this.R); lv.enemies.push(m);
+    }
     if (byHero) { this.kills++; this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo); }
   }
   hitBoss() {
@@ -444,6 +500,7 @@ class Game {
     if (this.hp <= 0) this.die();
     return true;
   }
+  room() { return Math.max(CAM.floorShow, view.keep + 0.6 * this.R); }   // what the camera shows under a ledge the hero stands on
   // The last few ledges the hero stood on (null: the floor), with where on them. Crumbling
   // ones and springs do not count, nor a spot beside spikes; a ledge kept here is never
   // pruned, so a fall after a long wall climb still finds it.
@@ -482,7 +539,7 @@ class Game {
     this.combo = 0; ui.comboEnd(); this.rising = false;
     this.placeHero(sp.x, sp.y);
     this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1;
-    lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + CAM.floorShow - view.h), lv.capY - CAM.top);
+    lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
     if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; }
     this.idleT = 0;
     ui.flash();
@@ -536,7 +593,7 @@ class Game {
     for (let i = sh.length - 1; i >= 0; i--) {
       const s = sh[i];
       s.vy += SHOT_G * dt; s.x += s.vx * dt; s.y += s.vy * dt;
-      let gone = s.y > lv.floor || s.y > lv.cam + view.h + 100 || (s.fire && s.vy > 0 && lv.fire && s.y > lv.fire.y);   // a fire's blob falls back into it
+      let gone = s.y > lv.floor || s.y > lv.cam + view.h + 100 || (s.vy > 0 && lv.fire && s.y > lv.fire.y);   // a blob falls into the fire
       for (const r of lv.near(s.y, s.y)) if (!r.plank && s.x > r.x0 && s.x < r.x1) gone = true;
       if (Math.hypot(H.cx - s.x, H.cy - s.y) < H.R * 0.8 + s.r) { this.hurt(H.cx - s.x, H.cy - s.y); gone = true; }
       if (gone) { splatFx(s.x, s.y, s.r * 2, s.fire ? INK.flame : INK.spike, 4); sh.splice(i, 1); }
@@ -577,7 +634,7 @@ class Game {
     const H = this.hero; this.hint('spring');
     setVel(H, H.rigVx, -SPRING.v * this.vjump); unstick(H, 0.15); H.kickSquash(0, 1, -2.4); this.rising = false;
     r.t = SPRING.anim; this.sinceContact = JUMP.coyote + 1; sound.play('spring', 0.8);
-    fx.ring((r.x0 + r.x1) / 2, r.y0, this.R, INK.spring); haptics.buzz(12);
+    fx.ring((r.x0 + r.x1) / 2, r.y0, this.R, this.lv.theme.spring); haptics.buzz(12);
   }
   // Off a rubber wall: thrown back the way it came and a little up, a wall jump nobody pressed.
   rubberHit(side) {
@@ -585,7 +642,7 @@ class Game {
     if (v < RUBBER.min * this.R) return;
     setVel(H, away * Math.max(RUBBER.x * this.R, 0.8 * v), Math.min(H.rigVy, -RUBBER.up * this.vjump));
     unstick(H, 0.15); H.kickSquash(away, 0, 0.8); this.rising = false;
-    sound.play('spring', 0.6, 1.3); fx.ring(side === 1 ? this.lv.l : this.lv.r, H.cy, 0.8 * this.R, INK.white); haptics.buzz(10);
+    sound.play('spring', 0.6, 1.3); fx.ring(side === 1 ? this.lv.l : this.lv.r, H.cy, 0.8 * this.R, this.lv.theme.rubber); haptics.buzz(10);
   }
 
   // ── Rooms behind bubbles (time stands still in the shaft meanwhile) ──
@@ -697,6 +754,8 @@ class Game {
       cy /= b.n;
       const target = cy - CAM.anchor * view.h;
       if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * dt));
+      const down = b.maxY + this.room() - view.h;   // and down, so the hero never sinks under the touch keys: as far as the newest safe ledge
+      if (down > lv.cam) lv.cam = Math.min(down, this.safeSpot().y + 1.1 * this.R + this.room() - view.h, lv.floor + this.room() - view.h);
       lv.cam = Math.max(lv.cam, lv.capY - CAM.top);
     }
     lv.ensure(lv.cam - view.h * LEVEL.ahead);
@@ -1076,7 +1135,7 @@ function aimPreview() {
 // ── Setup ────────────────────────────────────────────────────
 const canvas = $('gl');
 const uiEl = $('ui');
-const view = { w: 1, h: 1, left: 0 };
+const view = { w: 1, h: 1, left: 0, keep: 0 };   // keep: px at the bottom under the touch keys
 const perf = { ctxLoss: 0 };   // the renderer counts lost contexts here (Gum sends them as telemetry)
 const fx = new FX();
 const game = new Game();
@@ -1091,6 +1150,8 @@ function layout() {
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   const W = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
   view.w = W; view.h = H; view.left = left;
+  const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
+  view.keep = coarse ? parseFloat(getComputedStyle(pad.querySelector('.key')).height) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
   renderer.resize(W, H, window.devicePixelRatio || 1);   // the canvas a device pixel per pixel: the game pixels are copied up onto it
   game.applyMods();

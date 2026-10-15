@@ -109,6 +109,7 @@ SFX = {
     'click': (0.5, 'A tiny soft click of a game menu button, short and clean.' + NO),
     'bosshit': (0.8, 'A heavy wet squelch hitting a big jelly monster, with a low rubbery wobble.' + NO),
     'burn': (0.6, 'A short hot sizzle and crackling hiss with a soft squishy pop: a small jelly blob touching fire. Cartoon.' + NO),
+    'shot': (0.5, 'A tiny soft fizzy pop: a cute jelly blob shooting a small sparkling bubble. Very short, light, retro game.' + NO),
     'spit': (0.6, 'A quick fiery whoosh and a soft pop: flames spitting a blob of burning lava up into the air. Cartoon, short.' + NO),
 }
 SR = 44100

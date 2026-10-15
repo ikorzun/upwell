@@ -32,8 +32,8 @@ const MOVE = { speed: 8.4, accel: 20, air: 16, slip: 0.06, cling: 40, ceil: 5 };
 const JUMP = { height: 7.4, cut: 0.45, wallX: 10, wallUp: 0.95, ceil: 0.6, dropAfter: 0.3, stretch: 2.2,
   coyote: 0.1, buffer: 0.14, stickAfter: 0.16, dragFrac: 0.36, minPower: 0.22, deadZone: 14, minUp: 0.2, squeeze: 0.8, preview: 0.8, dots: 16, mouse: false };
 // Thicknesses in R; a shaft is made `ahead` views above the camera and dropped `behind`
-// views below it.
-const LEVEL = { wall: 12, thick: 0.75, plank: 0.32, spike: 0.42, ahead: 1.5, behind: 1.2, pocketEnd: 24 };
+// views below it; `room` (R) is the least space under a solid ledge over another one.
+const LEVEL = { wall: 12, thick: 0.75, plank: 0.32, spike: 0.42, ahead: 1.5, behind: 1.2, pocketEnd: 24, room: 4.5 };
 const DOOR = { w: 2.4, h: 2.8 };   // in R: a way into a shop or a stash, and the way back out
 // The way out pulls at `pull` R/s into the hole, `spin` R/s round it at first, and shrinks the
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
@@ -82,35 +82,48 @@ const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2 };   // a 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'), red: hex('#e73228'), blue: hex('#48acf8'), yellow: hex('#fbe741'), green: hex('#36803a'),
   purple: hex('#bc83f8'), orange: hex('#ee9530'), gray: hex('#c0c0c0'), white: hex('#ebebeb') };
-// 80/20: the world in its one ink, told apart by pattern; the bright inks mean something:
-// yellow is what can be taken (coins, items), red is danger (enemies, spikes, fire), white the
-// hero and the edges.
-const INK = { spike: PAL.red, coin: PAL.yellow, coinD: PAL.orange, spring: PAL.white, fire: PAL.red, flame: PAL.orange, white: PAL.white, dark: PAL.black };
+// 80/20: the world in its one ink, and the bright inks mean something: yellow is what can be
+// taken (coins, items), red is danger (enemies, spikes, fire), white the hero and the edges; a
+// surface that behaves differently (ice, moss, rubber, crumbling, moving, springs) has a colour of its own.
+const INK = { spike: PAL.red, coin: PAL.yellow, coinD: PAL.orange, fire: PAL.red, flame: PAL.orange, white: PAL.white, dark: PAL.black };
 const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
   boss: { id: 'boss', base: PAL.purple, deep: PAL.black },
 };
-// A world in one ink over black: walls, ledges, movers, ice, crumbling blocks and far dots all
-// in it (patterns tell them apart), with white for the edge you stand on.
-const theme = (ink) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white,
-  block: ink, plank: ink, mover: ink, slick: ink, crumble: ink });
+// A world in one ink over black for its walls, ledges and far dots, with white for the edge you
+// stand on; the surfaces that behave differently in colours of their own (`o` picks others where
+// the usual one is the world's ink): ice, moss, rubber, crumbling blocks, movers, springs.
+const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
+  slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: theme(PAL.gray), ice: theme(PAL.blue), mine: theme(PAL.orange), void: theme(PAL.purple), summit: theme(PAL.gray), room: theme(PAL.orange),
+  cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: theme(PAL.orange, { crumble: PAL.gray }),
+  void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
 PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'blue', 'green', 'purple'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
 Object.assign(THEME, { ink: PAL.black, blush: PAL.red, rim: PAL.white });
 
 // ── Content ──────────────────────────────────────────────────
-// Enemies are red squishies that crawl: along a ledge, up and down a wall, round and round
-// a block (none of them flies or jumps). `size` is in hero radii, `speed` in px/s on average,
-// pushed in pulses every `step` s; `grav` 0 holds on without falling. Any of them may be stomped from above; touching one any other
-// way hurts.
+// Enemies are red squishies that crawl (none of them flies or jumps), each by its `move`: along
+// a ledge (crawl), up and down a stretch of wall (wall), round and round a block (round).
+// `size` is in hero radii, `speed` in px/s on average, pushed in pulses every `step` s; `grav` 0
+// holds on without falling. Those with `stomp` may be stomped from above; touching one any other
+// way hurts, and a hedgehog hurts from above too. Their own ways: a shell stomped rolls off along
+// its ledge into the others (SHELL); a spitter stops to lob a blob at the hero (SPIT); a splitter
+// stomped breaks into two minis; a chaser keeps to the hero's height on its wall.
 const ENEMY = {
-  crawler: { design: 'loaf', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 3, speed: 60, step: 0.6 },
-  climber: { design: 'mochi', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7 },
-  circler: { design: 'cat', color: 'red', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8 },
+  crawler: { design: 'loaf', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 3, speed: 60, step: 0.6, move: 'crawl' },
+  climber: { design: 'mochi', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall' },
+  circler: { design: 'cat', color: 'red', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },
+  hedgehog: { design: 'star', color: 'red', size: 0.8, grav: 1, stomp: false, coins: 6, speed: 46, step: 0.7, move: 'crawl' },
+  shell: { design: 'dome', color: 'red', size: 0.82, grav: 1, stomp: true, coins: 4, speed: 44, step: 0.8, move: 'crawl' },
+  spitter: { design: 'drop', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 5, speed: 38, step: 0.7, move: 'crawl' },
+  splitter: { design: 'peanut', color: 'red', size: 1.0, grav: 1, stomp: true, coins: 2, speed: 34, step: 0.9, move: 'crawl' },
+  mini: { design: 'mochi', color: 'red', size: 0.5, grav: 1, stomp: true, coins: 2, speed: 80, step: 0.4, move: 'crawl' },
+  chaser: { design: 'slug', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 5, speed: 70, step: 0.5, move: 'wall', chase: true },
 };
+const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
+const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
 // Four worlds of three levels, then the boss. `heights` are its levels' lengths in metres (a
 // saw: a world starts a little shorter than the last one ended); `chunks` weighs the chunks a shaft is built from (see CHUNKS), `foes` is
 // the chance of an enemy in a chunk and `enemies` weighs which, `fire` how fast the fire under it rises, in R/s;
@@ -120,19 +133,21 @@ const ENEMY = {
 const WORLDS = [
   { id: 'cave', name: { ru: 'Пещера', en: 'Cave' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
     chunks: { stairs: 4, planks: 3, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2 },
-    foes: 0.55, enemies: { crawler: 3, climber: 1, circler: 1 },
+    foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], news: { ru: 'мох и пружины', en: 'moss and springs' } },
       { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], news: { ru: 'осыпь, резина и лазуны', en: 'crumbling blocks, rubber and climbers' } },
-      { chunks: ['icewall', 'lift'], news: { ru: 'лёд, ездящие планки и обходчики', en: 'ice, moving planks and circlers' } }] },
+      { chunks: ['icewall', 'lift'], news: { ru: 'лёд, ездящие планки и ежи', en: 'ice, moving planks and hedgehogs' } }] },
   { id: 'ice', name: { ru: 'Ледник', en: 'Glacier' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1 },
-    foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2 }, intro: [{ news: { ru: 'ледяные блоки', en: 'ice blocks' } }] },
+    foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { ru: 'ледяные блоки, обходчики и панцири', en: 'ice blocks, circlers and shells' } }] },
   { id: 'mine', name: { ru: 'Шахта', en: 'Mine' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1],
     chunks: { crumble: 3, bridge: 3, lift: 3, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
-    foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 3 }, intro: [{ news: { ru: 'мосты и лифты', en: 'bridges and lifts' } }, {}, { news: { ru: 'шипы', en: 'spikes' } }] },
+    foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2 },
+    intro: [{ news: { ru: 'мосты, лифты, плеваки и делилки', en: 'bridges, lifts, spitters and splitters' } }, {}, { news: { ru: 'шипы', en: 'spikes' } }] },
   { id: 'void', name: { ru: 'Пустота', en: 'Void' }, theme: THEMES.void, heights: [66, 74, 82], fire: 0.85, dark: [1],
     chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2 },
-    foes: 0.9, enemies: { crawler: 1, climber: 3, circler: 3 }, intro: [{ news: { ru: 'шипы на стенах и ездящие планки', en: 'spiked walls and moving planks' } }] },
+    foes: 0.9, enemies: { crawler: 1, climber: 2, circler: 2, hedgehog: 2, shell: 1, spitter: 2, splitter: 1, chaser: 2 },
+    intro: [{ news: { ru: 'шипы на стенах, ездящие планки и догонялы', en: 'spiked walls, moving planks and chasers' } }] },
 ];
 // The hardest chunk allowed, by world and level (hard mode allows all).
 const MAX_D = [[1, 2, 2], [2, 2, 3], [2, 3, 3], [3, 3, 3]];
@@ -192,6 +207,18 @@ const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 
 // standing on a floor.
 DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 2.0, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
   face: { eye: [0.3, 0.02], eyeR: [0.075, 0.095], mouth: [0, 0.2], mouthW: 0.13, blush: [0.52, 0.17] } });
+// The new enemies' shapes (y down): a shell's dome, a spitter's drop narrowing to its spout, a
+// splitter's bean of two lobes, a chaser's tall slug.
+DESIGNS.push(
+  { id: 'dome', n: 34, size: 1.0, firm: 1.6, kernel: [0, 0.12], sdf: (x, y) => Math.max(sdEll(x, y - 0.18, 1.1, 0.95), y - 0.5),
+    face: { eye: [0.3, 0.12], eyeR: [0.072, 0.09], mouth: [0, 0.3], mouthW: 0.11, blush: [0.5, 0.28] } },
+  { id: 'drop', n: 34, size: 1.0, firm: 1.3, kernel: [0, 0.15], sdf: (x, y) => Math.pow(x / (0.95 * (0.45 + 0.55 * Math.min(1, (y + 1) / 1.4))), 2) + y * y - 1,
+    face: { eye: [0.26, 0.18], eyeR: [0.07, 0.09], mouth: [0, 0.4], mouthW: 0.1, blush: [0.46, 0.34] } },
+  { id: 'peanut', n: 40, size: 1.0, firm: 1.1, kernel: [0, 0], sdf: (x, y) => smin(sdEll(x - 0.32, y, 0.7, 0.68), sdEll(x + 0.32, y, 0.7, 0.68), 0.4),   // a shallow waist: a deep one lets a body sink in before it touches
+    face: { eye: [0.22, 0.0], eyeR: [0.07, 0.09], mouth: [0, 0.22], mouthW: 0.12, blush: [0.5, 0.15] } },
+  { id: 'slug', n: 34, size: 1.0, firm: 1.2, kernel: [0, 0], sdf: (x, y) => sdRoundBox(x, y, 0.62, 1.0, 0.55),
+    face: { eye: [0.22, -0.3], eyeR: [0.07, 0.09], mouth: [0, -0.08], mouthW: 0.1, blush: [0.4, -0.15] } },
+);
 // The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs
 // together (not spent), like Downwell's palettes, and each starting a run with an upgrade (`perk`).
 const UNLOCKS = [
@@ -545,7 +572,7 @@ class Level {
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
-    this.top = this.floor; this.endY = o.height ? this.floor - o.height : -Infinity;
+    this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
     this.cam = this.floor + CAM.floorShow - o.h;
     if (o.kind === 'well') {
@@ -622,10 +649,35 @@ class Level {
     const cost = (m) => (this.lastFeet ? stepCost(this.lastFeet, m ? flipRuns(c.first) : c.first) : 0), a = cost(false), b = cost(true);
     const mirror = a === b ? rnd() < 0.5 : b < a;
     this.lastFeet = mirror ? flipRuns(c.last) : c.last;
-    this.place(c, this.top, mirror);
-    this.placed.push({ id, y1: this.top, y0: this.top - c.rows.length * this.tile });   // which chunk is where (for checks)
+    // Laid right on the last one, a chunk may hang a solid ledge just over a ledge under it, with
+    // no room to stand there and jump: then it goes a tile higher, up to three.
+    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles], lens = keep.map((a) => a.length);
+    let lift = 0;
+    for (;;) {
+      this.place(c, this.top - lift * this.tile, mirror);
+      if (lift >= 3 || !this.cramped(lens[0])) break;
+      keep.forEach((a, i) => { a.length = lens[i]; }); lift++;
+    }
+    const h = (lift + c.rows.length) * this.tile;
+    this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
-    this.top -= c.rows.length * this.tile;
+    this.top -= h;
+  }
+  // Whether a solid ledge just laid (from index `from` on) hangs over an older one, or over the
+  // floor (where the hero starts), with less than LEVEL.room under it.
+  cramped(from) {
+    const rs = this.rects, t = this.tile, min = LEVEL.room * this.R;
+    for (let i = from; i < rs.length; i++) {
+      const b = rs[i];
+      if (b.plank || b.spring) continue;   // a plank is jumped through from below
+      if (this.floor - b.y1 < min) return true;
+      for (let j = 0; j < from; j++) {
+        const a = rs[j];
+        if (a.cap || a.y0 < b.y1 || a.y0 - b.y1 >= min) continue;
+        if (Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0) >= t) return true;
+      }
+    }
+    return false;
   }
   // Lays a chunk with its bottom edge at y = base: runs of a block tile become one box (as
   // tall as the same run repeats above), planks and movers one per run, and so on.
@@ -678,13 +730,13 @@ class Level {
     if (!wd.enemies || bottom > this.floor - 6 * t || !(rnd() < wd.foes * (this.hard ? 1.4 : 1) * (1 + 0.15 * this.stage))) return;
     const n = rnd() < 0.25 * this.stage ? 2 : 1;
     for (let i = 0; i < n; i++) {
-      const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
+      const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.filter((k) => wd.enemies[k]).map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
       const taken = (r) => this.spawns.some((q) => q.ledge === r || q.rect === r);   // one enemy to a ledge or block
-      if (type === 'crawler') {
+      if (ENEMY[type].move === 'crawl') {
         const ok = rects.filter((r) => !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 3 * t && !taken(r) &&
           !this.spikes.some((q) => q.dir === 0 && Math.abs(q.y1 - r.y0) < 1 && q.x1 > r.x0 && q.x0 < r.x1));
         if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y0 - 1.2 * eR, ledge: r }); }
-      } else if (type === 'circler') {
+      } else if (ENEMY[type].move === 'round') {
         const ok = rects.filter((r) => !r.plank && !r.crumble && !r.spring && r.x0 > this.l + t && r.x1 < this.r - t && !taken(r) &&
           !rects.some((s) => s.spring && Math.abs(s.y1 - r.y0) < 1 && s.x1 > r.x0 && s.x0 < r.x1));   // not one with a spring on top, in its way round
         if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y0 - 1.1 * eR, rect: r, dir: rnd() < 0.5 ? 1 : -1 }); }
@@ -1084,14 +1136,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (kind === 'treasure') for (let k = 0; k < 3; k++) disc(x + (k - 1) * r * 0.42, y + r * 0.3 - (k === 1 ? r * 0.35 : 0) + bob, r * 0.22, INK.coin, 1);
     else F(x, y - r * 0.1 + bob, r * 0.45, 0, 0, r * 0.45, c, 1, 3, 1.1, 0.75, 0.2);   // ^: the way out
   };
-  for (const s of lv.coats) {   // in the wall's ink: ice striped white, rubber ribbed black, moss solid with a fringe of tufts over its edge
+  for (const s of lv.coats) {   // in their own colours: ice striped white, rubber ribbed black, moss solid with a fringe of tufts over its edge
     if (!seen(s.y0, s.y1)) continue;
     const x0 = s.side === 1 ? 0 : lv.r, x1 = s.side === 1 ? lv.l : W;
     if (s.kind === 'ice') box(x0, s.y0, x1, s.y1, th.slick, 0.9, 0, 7, 9);
-    else if (s.kind === 'rubber') box(x0, s.y0, x1, s.y1, th.wall, 1, 0, 8, 8);
+    else if (s.kind === 'rubber') box(x0, s.y0, x1, s.y1, th.rubber, 1, 0, 8, 8);
     else {
-      box(x0, s.y0, x1, s.y1, th.wall, 1, 0, 10, 0);
-      for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.wall, 1);
+      box(x0, s.y0, x1, s.y1, th.moss, 1, 0, 10, 0);
+      for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
     }
   }
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);
@@ -1111,7 +1163,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.spring) {
       const k = r.t / SPRING.anim, hh = (r.y1 - r.y0) * (1 - 0.5 * k), w = r.x1 - r.x0;
       box(r.x0 + w * 0.3, r.y1 - hh, r.x1 - w * 0.3, r.y1, th.block, 1, 2);
-      box(r.x0, r.y1 - hh - 0.2 * R, r.x1, r.y1 - hh, INK.spring, 1, 0.1 * R);
+      box(r.x0, r.y1 - hh - 0.2 * R, r.x1, r.y1 - hh, th.spring, 1, 0.1 * R);
       continue;
     }
     const c = r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);
@@ -1166,14 +1218,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const P = PIX.size, s = Math.max(1, Math.round(b.s * Math.min(1, (b.life - b.t) / (0.4 * b.life)))) * P, x0 = Math.round(b.x / P) * P, y0 = Math.round(b.y / P) * P;
     box(x0, y0, x0 + s, y0 + s, b.c, 1, 0, 10, 0);
   }
-  if (lv.fire && lv.fire.y - 1.6 * R < bot) {   // the fire: a red body under rows of tongues, red, orange, yellow, each flickering and drifting its own way
-    const fy = lv.fire.y, cx = (lv.l + lv.r) / 2, hw = (lv.r - lv.l) / 2 + 2;
-    box(lv.l - 2, fy, lv.r + 2, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
-    box(lv.l - 2, fy + 0.9 * R, lv.r + 2, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
-    box(lv.l - 2, fy + 2.2 * R, lv.r + 2, fy + H + 200, INK.fire, 1, 0, 10, 5);
-    for (const [c, h, w, v, ph] of [[INK.fire, 1.3, 0.9, 0.7, 0], [INK.flame, 0.95, 0.7, -1.1, 1.7], [INK.flame, 0.55, 0.5, 1.6, 3.1]]) {   // red and orange only: yellow is for what can be taken
-      const tw = w * R, hd = (h * R * (1 + 0.18 * Math.sin(T * 9 + ph)) + 0.12 * R * Math.sin(T * 23 + ph * 2)) / 2, sh = (((T * v * R) % tw) + tw) % tw;
-      F(cx - sh, fy + R * 0.35 - hd, hw + tw, 0, 0, hd, c, 1, 6, hw + tw, hd, tw);
+  if (lv.fire && lv.fire.y - 2.4 * R < bot) {   // the fire, between the walls: a red body under two layers of tongues, red behind and orange in front
+    const fy = lv.fire.y, W = lv.r - lv.l;
+    box(lv.l, fy, lv.r, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
+    box(lv.l, fy + 0.9 * R, lv.r, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
+    box(lv.l, fy + 2.2 * R, lv.r, fy + H + 200, INK.fire, 1, 0, 10, 5);
+    const steady = (i, k) => { const q = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return q - Math.floor(q); };   // a tongue's own numbers, the same every frame
+    for (const [c, gap, h0, h1, w0, w1, drift, k] of [[INK.fire, 0.8, 1.0, 2.0, 0.5, 0.85, 0.5, 1], [INK.flame, 0.6, 0.5, 1.25, 0.32, 0.6, -0.8, 2]]) {
+      const n = Math.ceil(W / (gap * R));
+      for (let i = 0; i < n; i++) {   // each its own width, height and flicker, now and then leaping; drifting along and wrapping round,
+        const a = steady(i, k), b = steady(i, k + 7), f = 5 + 6 * steady(i, k + 3), x = lv.l + ((((i + 0.5) / n) * W + T * drift * R * (0.7 + 0.6 * b)) % W + W) % W;
+        const leap = Math.pow(Math.max(0, Math.sin(T * f * 0.23 + a * 9)), 12), hw = Math.min((w0 + (w1 - w0) * b) * R, x - lv.l, lv.r - x);   // and narrower by a wall
+        if (hw < 0.5) continue;
+        const hd = ((h0 + (h1 - h0) * a) * R * (0.78 + 0.22 * Math.sin(T * f + a * 6.3)) * (1 + 0.6 * leap)) / 2;
+        F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
+      }
     }
     const w = lv.fire.warn;
     if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
@@ -1244,7 +1303,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const breath = 1 + 0.03 * Math.sin(T * 2.2);
     light(hero.cx, hero.cy, 4.5 * breath, 7.5 * breath);
     if (lv.portal) light(lv.portal.x, lv.portal.y, 2, 4);
-    for (const s of lv.shots) if (s.fire) light(s.x, s.y, 0.5, 1.4);
+    for (const s of lv.shots) light(s.x, s.y, 0.5, 1.4);   // blobs, the fire's and the spitters'
     for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);

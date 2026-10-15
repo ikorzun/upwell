@@ -82,23 +82,20 @@ const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2 };   // a 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'), red: hex('#e73228'), blue: hex('#48acf8'), yellow: hex('#fbe741'), green: hex('#36803a'),
   purple: hex('#bc83f8'), orange: hex('#ee9530'), gray: hex('#c0c0c0'), white: hex('#ebebeb') };
-const INK = { spike: PAL.red, coin: PAL.yellow, coinD: PAL.orange, spring: PAL.yellow, moss: PAL.green, rubber: PAL.yellow,
-  fire: PAL.red, flame: PAL.orange, flare: PAL.yellow, white: PAL.white, dark: PAL.black };
+// 80/20: the world in its one ink, told apart by pattern; the bright inks mean something:
+// yellow is what can be taken (coins, items), red is danger (enemies, spikes, fire), white the
+// hero and the edges.
+const INK = { spike: PAL.red, coin: PAL.yellow, coinD: PAL.orange, spring: PAL.white, fire: PAL.red, flame: PAL.orange, white: PAL.white, dark: PAL.black };
 const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
   boss: { id: 'boss', base: PAL.purple, deep: PAL.black },
 };
-// A world in two inks over black: `ink` for its walls, ledges and far dots, `lip` for the
-// edge you stand on; then movers, ice and crumbling blocks.
-const theme = (ink, lip, mover, slick, crumble) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip,
-  block: ink, plank: ink, mover, slick, crumble });
+// A world in one ink over black: walls, ledges, movers, ice, crumbling blocks and far dots all
+// in it (patterns tell them apart), with white for the edge you stand on.
+const theme = (ink) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white,
+  block: ink, plank: ink, mover: ink, slick: ink, crumble: ink });
 const THEMES = {
-  cave: theme(PAL.gray, PAL.white, PAL.blue, PAL.blue, PAL.orange),
-  ice: theme(PAL.blue, PAL.white, PAL.purple, PAL.blue, PAL.gray),
-  mine: theme(PAL.orange, PAL.yellow, PAL.blue, PAL.blue, PAL.yellow),
-  void: theme(PAL.purple, PAL.white, PAL.blue, PAL.blue, PAL.gray),
-  summit: theme(PAL.gray, PAL.white, PAL.blue, PAL.blue, PAL.orange),
-  room: theme(PAL.orange, PAL.yellow, PAL.blue, PAL.blue, PAL.yellow),
+  cave: theme(PAL.gray), ice: theme(PAL.blue), mine: theme(PAL.orange), void: theme(PAL.purple), summit: theme(PAL.gray), room: theme(PAL.orange),
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
 PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'blue', 'green', 'purple'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
@@ -871,7 +868,7 @@ function collidePair(A, B) {
 const bits = [];
 function burstFx(x, y, R, c) {
   for (let i = 0; i < 80; i++) {
-    const a = rand(0, TAU), sp = rand(250, 1100), ink = i % 7 === 0 ? INK.flare : i % 5 === 0 ? INK.white : c;
+    const a = rand(0, TAU), sp = rand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
     bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: rand(1.5, 4.5), c: ink, t: 0, life: rand(0.8, 1.6) });
   }
   fx.add(x, y, 0, 0, R * 1.3, 0.4, INK.white, 0.9, 2); fx.add(x, y, 0, 0, R * 0.8, 0.35, c, 1, 2, 0.08);
@@ -1077,7 +1074,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const seen = (y0, y1) => y1 > top && y0 < bot;
   // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is inside.
   const door = (d, kind) => {
-    const c = kind === 'exit' ? PAL.purple : PAL.yellow, f = 2 * PIX.size, x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2;
+    const c = th.lip, f = 2 * PIX.size, x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2;
     box(d.x0, d.y0, d.x1, d.y1, INK.dark, 1, 0);
     box(d.x0, d.y0 - f, d.x1, d.y0, c, 1, 0);   // the lintel
     if (d.side !== 1) box(d.x0 - f, d.y0 - f, d.x0, d.y1, c, 1, 0, 10, 0);   // the posts, where there is no wall
@@ -1087,14 +1084,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (kind === 'treasure') for (let k = 0; k < 3; k++) disc(x + (k - 1) * r * 0.42, y + r * 0.3 - (k === 1 ? r * 0.35 : 0) + bob, r * 0.22, INK.coin, 1);
     else F(x, y - r * 0.1 + bob, r * 0.45, 0, 0, r * 0.45, c, 1, 3, 1.1, 0.75, 0.2);   // ^: the way out
   };
-  for (const s of lv.coats) {   // ice striped white, rubber ribbed, moss speckled with tufts over its edge
+  for (const s of lv.coats) {   // in the wall's ink: ice striped white, rubber ribbed black, moss solid with a fringe of tufts over its edge
     if (!seen(s.y0, s.y1)) continue;
     const x0 = s.side === 1 ? 0 : lv.r, x1 = s.side === 1 ? lv.l : W;
     if (s.kind === 'ice') box(x0, s.y0, x1, s.y1, th.slick, 0.9, 0, 7, 9);
-    else if (s.kind === 'rubber') box(x0, s.y0, x1, s.y1, INK.rubber, 1, 0, 8, 4 * PIX.size);
+    else if (s.kind === 'rubber') box(x0, s.y0, x1, s.y1, th.wall, 1, 0, 8, 8);
     else {
-      box(x0, s.y0, x1, s.y1, INK.moss, 1, 0, 10, 1);
-      for (let y = s.y0 + 5, k = 0; y < s.y1 - 3; y += 7, k++) disc(s.side === 1 ? lv.l : lv.r, y, k & 1 ? 2.2 : 3.2, INK.moss, 1);
+      box(x0, s.y0, x1, s.y1, th.wall, 1, 0, 10, 0);
+      for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.wall, 1);
     }
   }
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);
@@ -1120,7 +1117,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9); else box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, rad);
+    if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
+    else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
+    else if (r.crumble) box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, 0, 10, 4);
+    else box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, rad);
     box(r.x0 + ox + rad * 0.5, r.y0, r.x1 + ox - rad * 0.5, r.y0 + 2.5, th.lip, a, 1.25);
     if (r.crumble) for (let x = r.x0 + 9; x < r.x1 - 6; x += 16) disc(x + ox, (r.y0 + r.y1) / 2 + 1, 1.6, th.wallD, a);
     if (r.move) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
@@ -1151,8 +1151,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     icon(p.item.id, p.x, y, a, 2);
   }
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart
-    F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, s.fire ? INK.flame : INK.spike, 1);
-    if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flare, 1);
+    F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
+    if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
   }
   const back = this.nf;
   const list = g.bodyList(), hero = g.hero, heroOff = g.state === 'dead' || (g.invuln > 0 && Math.floor(g.invuln / HEALTH.blink) % 2 === 1);   // blinking, or burst
@@ -1171,12 +1171,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(lv.l - 2, fy, lv.r + 2, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
     box(lv.l - 2, fy + 0.9 * R, lv.r + 2, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
     box(lv.l - 2, fy + 2.2 * R, lv.r + 2, fy + H + 200, INK.fire, 1, 0, 10, 5);
-    for (const [c, h, w, v, ph] of [[INK.fire, 1.3, 0.9, 0.7, 0], [INK.flame, 0.95, 0.7, -1.1, 1.7], [INK.flare, 0.55, 0.5, 1.6, 3.1]]) {
+    for (const [c, h, w, v, ph] of [[INK.fire, 1.3, 0.9, 0.7, 0], [INK.flame, 0.95, 0.7, -1.1, 1.7], [INK.flame, 0.55, 0.5, 1.6, 3.1]]) {   // red and orange only: yellow is for what can be taken
       const tw = w * R, hd = (h * R * (1 + 0.18 * Math.sin(T * 9 + ph)) + 0.12 * R * Math.sin(T * 23 + ph * 2)) / 2, sh = (((T * v * R) % tw) + tw) % tw;
       F(cx - sh, fy + R * 0.35 - hd, hw + tw, 0, 0, hd, c, 1, 6, hw + tw, hd, tw);
     }
     const w = lv.fire.warn;
-    if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flare, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
+    if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
   }
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
     disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, 0.15 * R, INK.white, 1);

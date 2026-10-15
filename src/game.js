@@ -514,7 +514,7 @@ class Game {
       f.warn = { x: clamp(H.cx + rand(-2.5, 2.5) * R, lv.l + R, lv.r - R), t: FIRE.warn };
       f.spitT = rand(FIRE.spit[0], FIRE.spit[1]);
     }
-    if (f.y < lv.cam + view.h + R && Math.random() < dt * 14) fx.add(rand(lv.l, lv.r), f.y + rand(0, 6), rand(-25, 25), rand(-150, -50), rand(2, 3.5), rand(0.5, 0.9), Math.random() < 0.5 ? INK.flare : INK.flame, 1, 0);
+    if (f.y < lv.cam + view.h + R && Math.random() < dt * 14) fx.add(rand(lv.l, lv.r), f.y + rand(0, 6), rand(-25, 25), rand(-150, -50), rand(2, 3.5), rand(0.5, 0.9), Math.random() < 0.5 ? INK.fire : INK.flame, 1, 0);
     for (let i = lv.enemies.length - 1; i >= 0; i--) {
       const b = lv.enemies[i].body;
       if (b.cy > f.y) { splatFx(b.cx, f.y, b.R, INK.flame, 8); lv.enemies.splice(i, 1); }   // marmalade burns: no coins for it
@@ -585,7 +585,7 @@ class Game {
     if (v < RUBBER.min * this.R) return;
     setVel(H, away * Math.max(RUBBER.x * this.R, 0.8 * v), Math.min(H.rigVy, -RUBBER.up * this.vjump));
     unstick(H, 0.15); H.kickSquash(away, 0, 0.8); this.rising = false;
-    sound.play('spring', 0.6, 1.3); fx.ring(side === 1 ? this.lv.l : this.lv.r, H.cy, 0.8 * this.R, INK.rubber); haptics.buzz(10);
+    sound.play('spring', 0.6, 1.3); fx.ring(side === 1 ? this.lv.l : this.lv.r, H.cy, 0.8 * this.R, INK.white); haptics.buzz(10);
   }
 
   // ── Rooms behind bubbles (time stands still in the shaft meanwhile) ──

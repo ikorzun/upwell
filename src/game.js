@@ -360,7 +360,7 @@ class Game {
     for (const r of lv.near(H.minY, H.maxY + R)) {
       if (r.plank || r.spring || r.gone) continue;
       const side = d > 0 ? r.x0 - H.maxX : H.minX - r.x1;   // the gap to its near side
-      if (side < -0.3 * R || side > 0.35 * R || r.y0 < H.minY + 0.25 * R || r.y0 > H.maxY + 0.2 * R) continue;
+      if (side < -0.55 * R || side > 0.35 * R || r.y0 < H.minY + 0.25 * R || r.y0 > H.maxY - 0.1 * R) continue;   // up to draped over its corner, not stood on it
       const lift = H.maxY - r.y0 + 0.55 * R, vy = -Math.sqrt(2 * WORLD.gravity * Math.max(lift, 0.3 * R));
       if (H.stuck) unstick(H, 0.12);
       setVel(H, d * MOVE.speed * R * 0.75, Math.min(H.rigVy, vy));
@@ -386,7 +386,7 @@ class Game {
     H.fric = this.dashT > 0 ? 0 : floor && d ? MOVE.slip : undefined;
     if (!d || (H.stuck && !top)) return;   // stuck to a wall it slides; under a ceiling it creeps along
     const dv = (d * (top ? MOVE.ceil : MOVE.speed) * this.R - H.rigVx) * Math.min(1, (floor || top ? MOVE.accel : MOVE.air) * dt);
-    if (dv * d > 0) addVel(H, dv, 0);   // toward the pressed side only: a faster leap is not braked
+    if (dv * d > 0 || (floor && !(this.dashT > 0))) addVel(H, dv, 0);   // toward the pressed side only, so a faster leap is not braked, bar along a floor
   }
 
   // ── The fixed step ──
@@ -1160,14 +1160,14 @@ const act = $('act'), jumpBtn = $('jumpBtn');
 padPart(act, (e) => { input.set('jump', !!e); jumpBtn.classList.toggle('on', !!e); });
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick), a quick
-// swipe to a side dashes; a quick flick up jumps (held, it goes higher), a quick flick down lets go; a
+// swipe to a side dashes (as soon as it is fast enough, or on letting go of a quick one); a quick flick up jumps (held, it goes higher), a quick flick down lets go; a
 // tap jumps, a second finger's too.
-const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28 };
+const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, fast: 500 };
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel')) return;
   if (gest) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
-  gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false };
+  gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false, dashed: false };
 });
 document.addEventListener('pointermove', (e) => {
   const g = gest;
@@ -1177,9 +1177,11 @@ document.addEventListener('pointermove', (e) => {
   if (!g.flick && quick && upright && -dy > GEST.flick) { g.flick = 'up'; input.set('jump', true); }
   else if (!g.flick && quick && upright && dy > GEST.flick) { g.flick = 'down'; game.pressDown(); }
   const dx = e.clientX - g.ax;
-  if (Math.abs(dx) > 3 * GEST.dead) g.ax = e.clientX - Math.sign(dx) * 3 * GEST.dead;
+  if (Math.abs(dx) > 2 * GEST.dead) g.ax = e.clientX - Math.sign(dx) * 2 * GEST.dead;
   const dir = Math.abs(dx) < GEST.dead ? 0 : Math.sign(dx);
   if (dir !== g.dir) { g.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); if (dir) game.nudge(dir); }   // a drag moves at once, on the ground or in the air
+  const t = e.timeStamp - g.t0;
+  if (!g.dashed && t < GEST.quick && Math.abs(ox) > GEST.swipe && Math.abs(ox) > Math.abs(dy) && Math.abs(ox) > (GEST.fast * t) / 1000) { g.dashed = true; game.dash(Math.sign(ox)); }   // a fast swipe: a dash now, not on letting go
 });
 const gestEnd = (e) => {
   if (tap2 && e.pointerId === tap2.id) {   // a second finger's tap
@@ -1191,7 +1193,7 @@ const gestEnd = (e) => {
   gest = null;
   if (g.dir) {   // let go: a quick swipe was a dash that way, a held drag just stops
     input.set('left', false); input.set('right', false);
-    if (e.timeStamp - g.t0 < GEST.quick + 100 && Math.abs(e.clientX - g.x0) > GEST.swipe) game.dash(g.dir);
+    if (!g.dashed && e.timeStamp - g.t0 < GEST.quick + 100 && Math.abs(e.clientX - g.x0) > GEST.swipe) game.dash(g.dir);
   }
   if (g.flick === 'up') input.set('jump', false);
   else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)

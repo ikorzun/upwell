@@ -383,10 +383,10 @@ class Game {
     if (this.dashCD > 0) this.dashCD -= dt;
     if (this.mantleCD > 0) this.mantleCD -= dt;
     if (d && this.state === 'play') this.mantle(d);
-    H.fric = this.dashT > 0 ? 0 : floor && d ? MOVE.slip : undefined;
+    H.fric = this.dashT > 0 ? 0 : floor && d ? (input.swipe ? 0 : MOVE.slip) : undefined;
     if (!d || (H.stuck && !top)) return;   // stuck to a wall it slides; under a ceiling it creeps along
     const dv = (d * (top ? MOVE.ceil : MOVE.speed) * this.R - H.rigVx) * Math.min(1, (floor || top ? MOVE.accel : MOVE.air) * dt);
-    if (dv * d > 0 || (floor && !(this.dashT > 0))) addVel(H, dv, 0);   // toward the pressed side only, so a faster leap is not braked, bar along a floor
+    if (dv * d > 0 || (input.swipe && floor && !(this.dashT > 0))) addVel(H, dv, 0);   // toward the pressed side only, so a faster leap is not braked, bar a swipe's along a floor
   }
 
   // ── The fixed step ──
@@ -1105,7 +1105,7 @@ const ui = {
 // Keyboard: the arrows and space. Touch: a pad along the bottom, left and right under the
 // left thumb (it can slide from one to the other), down and jump under the right one.
 const input = {
-  left: false, right: false, down: false, jump: false,
+  left: false, right: false, down: false, jump: false, swipe: false,   // swipe: the side is a drag over the game, not a key
   get dir() { return (this.right ? 1 : 0) - (this.left ? 1 : 0); },
   set(what, on) {
     if (this[what] === on) return;
@@ -1116,6 +1116,7 @@ const input = {
   clear() {
     aimCancel();
     for (const k of ['left', 'right', 'down', 'jump']) this.set(k, false);
+    this.swipe = false;
     for (const e of document.querySelectorAll('#pad .on')) e.classList.remove('on');
   },
 };
@@ -1179,7 +1180,7 @@ document.addEventListener('pointermove', (e) => {
   const dx = e.clientX - g.ax;
   if (Math.abs(dx) > 2 * GEST.dead) g.ax = e.clientX - Math.sign(dx) * 2 * GEST.dead;
   const dir = Math.abs(dx) < GEST.dead ? 0 : Math.sign(dx);
-  if (dir !== g.dir) { g.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); if (dir) game.nudge(dir); }   // a drag moves at once, on the ground or in the air
+  if (dir !== g.dir) { g.dir = dir; input.swipe = dir !== 0; input.set('left', dir < 0); input.set('right', dir > 0); if (dir) game.nudge(dir); }   // a drag moves at once, on the ground or in the air
   const t = e.timeStamp - g.t0;
   if (!g.dashed && t < GEST.quick && Math.abs(ox) > GEST.swipe && Math.abs(ox) > Math.abs(dy) && Math.abs(ox) > (GEST.fast * t) / 1000) { g.dashed = true; game.dash(Math.sign(ox)); }   // a fast swipe: a dash now, not on letting go
 });
@@ -1192,7 +1193,7 @@ const gestEnd = (e) => {
   if (!g || e.pointerId !== g.id) return;
   gest = null;
   if (g.dir) {   // let go: a quick swipe was a dash that way, a held drag just stops
-    input.set('left', false); input.set('right', false);
+    input.swipe = false; input.set('left', false); input.set('right', false);
     if (!g.dashed && e.timeStamp - g.t0 < GEST.quick + 100 && Math.abs(e.clientX - g.x0) > GEST.swipe) game.dash(g.dir);
   }
   if (g.flick === 'up') input.set('jump', false);

@@ -13,12 +13,12 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
-// floor and `air`/s in the air; `slip` is a floor's friction while running (0: any friction
-// at all held the run to 4.7 R/s, well under `speed`; along a floor `accel` also brakes a
-// faster run, as after a dash). A wall takes
+// floor and `air`/s in the air; `slip` is a floor's friction while running on the keys (it holds
+// the run to about 4.7 R/s: smooth, as testers wanted); a swipe runs with none, at the full
+// `speed`, and along a floor is braked back to it after a dash. A wall takes
 // the hero when it comes in at `cling` px/s or more, or is pressed toward it. Stuck under a
 // ceiling it creeps along it at `ceil` R/s, for as long as it holds on (STICK.hold).
-const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0, cling: 40, ceil: 5 };   // accel/air halved and speed a little lower: testers found it twitchy
+const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0.06, cling: 40, ceil: 5 };   // accel/air halved and speed a little lower: testers found it twitchy
 // A jump rises `height` R (the soft body's bottom, stretching off, about 1 R less); letting
 // go on the way up keeps `cut` of the speed. Off a wall it goes `wallX` R/s outwards and
 // `wallUp` of a jump up, every time. Off a ceiling it pushes down at `ceil` of a jump, or,

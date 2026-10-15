@@ -988,15 +988,23 @@ const bits = [];
 function burstFx(x, y, R, c) {
   for (let i = 0; i < 80; i++) {
     const a = rand(0, TAU), sp = rand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
-    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: rand(1.5, 4.5), c: ink, t: 0, life: rand(0.8, 1.6) });
+    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: rand(1.5, 4.5), c: ink, t: 0, life: rand(0.8, 1.6), g: 0.9, drag: 2.2 });
   }
   fx.add(x, y, 0, 0, R * 1.3, 0.4, INK.white, 0.9, 2); fx.add(x, y, 0, 0, R * 0.8, 0.35, c, 1, 2, 0.08);
 }
+// A spray of the same solid bits: `n` of them from (x, y) at angles `a`±`spread` (rad, 0 to the right,
+// y down), `sp` px/s (from, to), `size` game px (from, to), `life` s (from, to), in `inks`, pulled down at
+// `g` of a blob's fall. The juice of a jump, a coin, a stomp.
+function sparkFx(x, y, n, a, spread, sp, size, life, inks, g) {
+  for (let i = 0; i < n; i++) {
+    const t = a + rand(-spread, spread), v = rand(sp[0], sp[1]);
+    bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: rand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: rand(life[0], life[1]), g, drag: 4 });
+  }
+}
 function updateBits(dt) {
-  const d = Math.exp(-2.2 * dt);
   for (let i = bits.length - 1; i >= 0; i--) {
-    const b = bits[i];
-    b.vx *= d; b.vy = b.vy * d + SHOT_G * 0.9 * dt; b.x += b.vx * dt; b.y += b.vy * dt;
+    const b = bits[i], d = Math.exp(-b.drag * dt);
+    b.vx *= d; b.vy = b.vy * d + SHOT_G * b.g * dt; b.x += b.vx * dt; b.y += b.vy * dt;
     if ((b.t += dt) > b.life) bits.splice(i, 1);
   }
 }
@@ -1149,6 +1157,33 @@ void main() { if (vSA * vSA * uShadowA <= bayer(cell())) discard; o = vec4(PAL[0
 // scene is drawn into a small target, a game pixel per pixel, then copied up onto the
 // full-size canvas with nearest filtering (CSS image-rendering is not honoured for WebGL
 // canvases everywhere), so the pixels stay hard in every browser.
+// Faces in a little more detail than Gum's: eyes and mouths bigger (room for it in pixels), enemies with brows drawn in
+// over their eyes (sloping down to the middle) and two fangs under their frown, the hero with a second,
+// small glint low in each eye and a tongue in its smile.
+for (const d of DESIGNS) { d.face.eyeR = d.face.eyeR.map((v) => v * 1.45); d.face.mouthW *= 1.3; }
+const gumWriteFace = Renderer.prototype.writeFace;
+Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
+  gumWriteFace.call(this, b, X, Y, cx, cy);
+  const s = b.s, f = s.face, fc = b.face, ink = THEME.ink, P0 = this.p0, P1 = this.p1, P2 = this.p2;
+  const frame = (ux, uy, ax, ay, bx, by) => { mapPoint(s, X, Y, cx, cy, ux, uy, P0); mapPoint(s, X, Y, cx, cy, ux + ax, uy + ay, P1); mapPoint(s, X, Y, cx, cy, ux + bx, uy + by, P2); };
+  const put = (r, g, bl, type, p1, p2, p3) => this.feat(P0.x, P0.y, P1.x - P0.x, P1.y - P0.y, P2.x - P0.x, P2.y - P0.y, r, g, bl, 1, type, p1 || 0, p2 || 0, p3 || 0);
+  const closed = fc.squint > 0.45, lx = fc.lx * 0.05, ly = fc.ly * 0.035, [ex, ey] = f.eye, [rx, ry] = f.eyeR, m = f.mouthW;
+  if (fc.frown) {
+    for (let side = -1; side <= 1; side += 2) {
+      const k = -0.5 * side, w = rx * 1.45, h = ry * 0.5;
+      frame(ex * side + lx - rx * 0.15 * side, ey + ly - ry * 1.9, w, w * k, -h * k, h);
+      put(ink[0], ink[1], ink[2], 0);
+    }
+    if (!closed && fc.surprise <= 0.35) {   // tips down (the spikes' tips point to −B)
+      frame(f.mouth[0], f.mouth[1] + m * 0.3, m * 0.8, 0, 0, -m * 0.6);
+      const la = Math.hypot(P1.x - P0.x, P1.y - P0.y), lb = Math.hypot(P2.x - P0.x, P2.y - P0.y);
+      put(1, 1, 1, 6, la, lb, la);
+    }
+  } else if (!closed) {
+    if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
+    if (fc.surprise <= 0.35) { frame(f.mouth[0], f.mouth[1] + m * 0.42, m * 0.5, 0, 0, m * 0.36); put(THEME.blush[0], THEME.blush[1], THEME.blush[2], 0); }
+  }
+};
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {
   if (!gumInit.call(this)) return false;

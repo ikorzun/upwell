@@ -309,7 +309,12 @@ class Game {
       else { vx = 0; vy = JUMP.ceil * v; }
       rise = false;
     }
-    if (inAir) { fx.dust(H.cx, H.maxY, IMPACT.puffSpeed + 900); fx.ring(H.cx, H.maxY, 0.8 * this.R, H.color.base); }
+    const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
+    if (inAir) {
+      fx.dust(H.cx, foot, IMPACT.puffSpeed + 900); fx.ring(H.cx, foot, 0.8 * R, hc); fx.ring(H.cx, foot, 1.3 * R, INK.white);
+      sparkFx(H.cx, foot, 16, Math.PI / 2, 1.0, [220, 560], [1.5, 3.2], [0.3, 0.6], [INK.white, hc, INK.white], 0.25);
+    } else if (side === 1 || side === 2) sparkFx(side === 1 ? H.minX : H.maxX, H.cy, 9, side === 1 ? Math.PI : 0, 0.8, [120, 340], [1.2, 2.6], [0.25, 0.45], [INK.white, hc], 0.3);
+    else if (side !== 4) sparkFx(H.cx, foot, 8, Math.PI / 2, 1.45, [90, 260], [1.2, 2.4], [0.2, 0.4], [INK.white, PAL.gray], 0.15);
     sound.play(inAir ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8);
     setVel(H, vx, vy);
     unstick(H, JUMP.stickAfter);
@@ -444,7 +449,10 @@ class Game {
     unstick(H, 0.08); H.kickSquash(0, 1, 1.4);
     this.air = Math.max(this.air, 1); this.sinceContact = JUMP.coyote + 1; this.rising = false;
     if (this.queueT > 0) { this.queueT = 0; this.air--; this.jump(true, this.queued); }   // pressed just before landing on it
-    this.hitstop = STOMP.hitstop; shake.add(2.5); haptics.buzz(14);
+    this.hitstop = STOMP.hitstop; shake.add(3.5); haptics.buzz(14);
+    const bx = e.body.cx, by = e.body.minY;   // squashed flat: a spray of its colour and white, and a ring
+    sparkFx(bx, by, 18, -Math.PI / 2, 1.4, [200, 650], [1.6, 3.6], [0.35, 0.75], [e.body.color.base, INK.white, e.body.color.base], 0.85);
+    fx.ring(bx, by, 1.4 * this.R, INK.white); fx.ring(bx, by, 0.9 * this.R, e.body.color.base);
     if (!boss) sound.play('stomp', 1, 1 + 0.06 * Math.min(this.combo, 10));   // higher with each stomp of a combo, as in Downwell
   }
   // A shell stomped: it rolls off away from the hero, into the others, and pops in a while.
@@ -645,7 +653,7 @@ class Game {
       const dx = H.cx - c.x, dy = H.cy - c.y, d = Math.hypot(dx, dy) || 1;
       if (d < mR && (!c.drop || c.t > 0.25)) { c.moving = true; c.vx += (dx / d) * COIN.pull * dt; c.vy += (dy / d) * COIN.pull * dt; }
       if (c.moving) { c.vx *= k; c.vy *= k; c.x += c.vx * dt; c.y += c.vy * dt; }
-      if (d < H.R * 0.85 + (c.v > 1 ? 1.4 : 1) * cr) { cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
+      if (d < H.R * 0.85 + (c.v > 1 ? 1.4 : 1) * cr) { cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
     }
   }
   payCombo() {
@@ -697,10 +705,14 @@ class Game {
     aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble');
   }
   leaveRoom() {
-    const bub = this.door;
+    const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
     this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R);   // beside the door, on its ledge
     bub.cd = 1.2; aimCancel(); ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
+    if (bub.kind === 'treasure' && !room.coins.length) {   // a stash with all its coins taken: its way in closes behind the hero
+      this.lv.bubbles.splice(this.lv.bubbles.indexOf(bub), 1);
+      sparkFx(bub.x, bub.y, 14, -Math.PI / 2, Math.PI, [80, 240], [1.5, 3], [0.3, 0.6], [this.lv.theme.wall, INK.white], 0.6); fx.dust(bub.x, bub.y1, IMPACT.puffSpeed + 500);
+    }
   }
   buy(p) {
     const price = this.priceOf(p);

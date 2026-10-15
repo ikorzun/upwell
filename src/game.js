@@ -20,7 +20,8 @@ const STR = {
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
+    hintStick: 'Touch anywhere and lean: a stick to run, ▲ or a tap to jump,\npull down to let go. Land on enemies from above!',
   },
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲, тап или свайп вверх — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
@@ -34,7 +35,8 @@ const STR = {
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
-    nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл',
+    nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
+    hintStick: 'Коснись где угодно и веди — стик для бега, ▲ или тап — прыжок,\nвниз — отлипнуть. Прыгай на врагов сверху!',
   },
 };
 let lang = 'en';
@@ -48,7 +50,7 @@ const detectLang = () => { const l = (navigator.language || 'en').slice(0, 2).to
 // wins (the first one opens hard mode) and the chosen look.
 const SAVE_KEY = 'upwell.save';
 const save = (() => {
-  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {} };   // seen: hints shown once
+  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false };   // seen: hints shown once; stick: touch by a stick, not the keys
   try {
     const s = Object.assign(d, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'));
     if (!PALETTE.some((c) => c.id === s.color)) s.color = PALETTE[0].id;   // a colour from before the palette inks
@@ -241,7 +243,7 @@ class Game {
     this.newRun(); save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true);
     ui.hideAll(); ui.banner();
-    if (save.runs <= 2) ui.toast(t(coarse ? 'hintTouch' : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 5200);
+    if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 5200);
   }
   buildLevel(newHero) {
     const W = view.w, H = view.h, boss = this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
@@ -767,6 +769,7 @@ class Game {
 
   // ── The run's turns ──
   levelClear() {
+    joyEnd();   // a stick held into the hole lets go
     this.state = 'clear'; this.stateT = 0;
     const H = this.hero;
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
@@ -974,6 +977,14 @@ function iconEl(id) {
   return e;
 }
 const HEART = { full: '.##.##./#######/#######/.#####./..###../...#...'.split('/'), empty: '.##.##./#..#..#/#.....#/.#...#./..#.#../...#...'.split('/') };
+// A disc of radius `r` px in 2-px pixels: a gray rim a pixel wide round an inside of ink (or, for the knob, white) at `fill`.
+function pixelDisc(r, fill) {
+  const q = r / 2, rows = (k) => { let d = ''; for (let y = 0; y < 2 * k; y++) { const h = Math.round(Math.sqrt(Math.max(0, k * k - (y + 0.5 - k) ** 2))); if (h) d += 'M' + (q - h) + ' ' + (q - k + y) + 'h' + 2 * h + 'v1h-' + 2 * h + 'z'; } return d; };
+  const t = document.createElement('template');
+  t.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="' + 2 * r + '" height="' + 2 * r + '" viewBox="0 0 ' + r + ' ' + r + '" shape-rendering="crispEdges">'
+    + '<path class="rim" fill-rule="evenodd" d="' + rows(q) + rows(q - 1) + '"/><path class="in" fill-opacity="' + fill + '" d="' + rows(q - 1) + '"/></svg>';
+  return t.content.firstChild;
+}
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 function button(text, cls, fn) { const b = el('button', cls, text); b.addEventListener('click', (e) => { e.stopPropagation(); sound.unlock(); sound.play('click', 0.6); fn(); }); return b; }
 const ui = {
@@ -1024,7 +1035,8 @@ const ui = {
   pause() {
     const p = this.panel('pause');
     const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); this.pause(); });
-    p.append(el('div', 'head', t('paused')), snd, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
+    const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); this.pause(); });
+    p.append(el('div', 'head', t('paused')), ...(coarse ? [ctl] : []), snd, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
   },
   revive(price, coins) {   // before the result: go on for coins, or end the run
     const p = this.panel('result');
@@ -1082,6 +1094,7 @@ const ui = {
     const playing = g.state !== 'menu' && g.state !== 'boot';
     $('hud').classList.toggle('on', playing);
     $('pad').classList.toggle('on', coarse && g.state === 'play');
+    $('pad').classList.toggle('stick', !!save.stick);   // with the stick, the jump key alone
     $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
     const fh = $('floorHint'), lv = g.lv, fy = lv.floor - lv.cam;   // how to jump, written on the first level's floor, in the band over the keys
     const onFloor = g.state === 'play' && lv.kind === 'well' && g.world === 0 && g.stage === 0 && !g.bonus && fy < view.h - view.keep;
@@ -1126,7 +1139,7 @@ const input = {
   clear() {
     aimCancel();
     for (const k of ['left', 'right', 'down', 'jump']) this.set(k, false);
-    this.swipe = false;
+    this.swipe = false; joyEnd();
     for (const e of document.querySelectorAll('#pad .on')) e.classList.remove('on');
   },
 };
@@ -1172,15 +1185,17 @@ padPart(act, (e) => { input.set('jump', !!e); jumpBtn.classList.toggle('on', !!e
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick), a quick
 // swipe to a side dashes (as soon as it is fast enough, or on letting go of a quick one); a quick flick up jumps (held, it goes higher), a quick flick down lets go; a
-// tap jumps, a second finger's too.
+// tap jumps, a second finger's too. With the stick on (see JOY), a first finger is the stick instead.
 const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, fast: 500 };
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel')) return;
-  if (gest) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
+  if (gest || joy) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
+  if (save.stick) { joyStart(e); return; }
   gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false, dashed: false };
 });
 document.addEventListener('pointermove', (e) => {
+  if (joy && e.pointerId === joy.id) { joyMove(e); return; }
   const g = gest;
   if (!g || e.pointerId !== g.id) return;
   const ox = e.clientX - g.x0, dy = e.clientY - g.y0, quick = e.timeStamp - g.t0 < GEST.quick, upright = Math.abs(dy) > 1.5 * Math.abs(ox);
@@ -1199,6 +1214,8 @@ const gestEnd = (e) => {
     if (e.type === 'pointerup' && e.timeStamp - tap2.t < GEST.tap && Math.hypot(e.clientX - tap2.x, e.clientY - tap2.y) < GEST.still) game.requestJump();
     tap2 = null; return;
   }
+  const j = joy;
+  if (j && e.pointerId === j.id) { joyEnd(); if (!j.moved && e.type === 'pointerup' && e.timeStamp - j.t0 < GEST.tap) game.requestJump(); return; }   // a tap: a jump
   const g = gest;
   if (!g || e.pointerId !== g.id) return;
   gest = null;
@@ -1210,6 +1227,50 @@ const gestEnd = (e) => {
   else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)
 };
 for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, gestEnd);
+// The stick: it comes up where a finger comes down, anywhere but on the jump key, and runs left or
+// right as the finger leans that way: past `on` of its `reach` (px), and on till it is back under
+// `off` (so it doesn't flicker at the edge); at the keys' pace, all or nothing, as on a d-pad. Dragged
+// past its rim it follows the finger, so turning back is never more than a reach away. Pulled down past
+// `down` (more down than to the side) it lets go of a wall. Jumps are the ▲ key, a tap, a second finger's tap.
+const JOY = { reach: 56, on: 0.25, off: 0.12, down: 0.6 };
+let joy = null;
+const joyEl = $('stick'), joyKnob = joyEl.firstElementChild;
+joyEl.prepend(pixelDisc(56, 0.6)); joyKnob.append(pixelDisc(26, 0.9));   // the base under the knob
+function joyShow() {
+  joyEl.style.transform = 'translate(' + joy.bx + 'px,' + joy.by + 'px)';
+  joyKnob.style.transform = 'translate(' + (joy.x - joy.bx) + 'px,' + (joy.y - joy.by) + 'px)';
+  joyKnob.classList.toggle('on', joy.dir !== 0);
+}
+function joyStart(e) {
+  if (game.state !== 'play') return;
+  const x = e.clientX, y = e.clientY;
+  padUsed = performance.now();   // the ▲ key stays bright while the stick is in use
+  joy = { id: e.pointerId, bx: x, by: y, x, y, dir: 0, low: false, moved: false, t0: e.timeStamp };
+  joyShow(); joyEl.classList.add('on');
+}
+function joyMove(e) {
+  const j = joy, R = JOY.reach, x = e.clientX, y = e.clientY;
+  padUsed = performance.now();
+  let dx = x - j.bx, dy = y - j.by;
+  const d = Math.hypot(dx, dy);
+  if (d > GEST.still) j.moved = true;
+  if (d > R) { j.bx = x - (dx * R) / d; j.by = y - (dy * R) / d; dx = x - j.bx; dy = y - j.by; }   // past the rim: the base comes along
+  const dir = Math.abs(dx) > (Math.sign(dx) === j.dir ? JOY.off : JOY.on) * R ? Math.sign(dx) : 0;
+  if (dir !== j.dir) { j.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); }
+  const low = dy > JOY.down * R && dy > Math.abs(dx);
+  if (low && !j.low) game.pressDown();
+  j.low = low; j.x = x; j.y = y; joyShow();
+}
+function joyEnd() {
+  if (!joy) return;
+  joy = null; input.set('left', false); input.set('right', false); joyEl.classList.remove('on');
+}
+for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, (e) => {   // iOS can lose a finger's pointerup (off the top of the screen, say): no finger on the glass, nothing held
+  if (e.touches.length) return;
+  joyEnd();
+  if (gest) { if (gest.dir) { input.swipe = false; input.set('left', false); input.set('right', false); } if (gest.flick === 'up') input.set('jump', false); }
+  gest = null; tap2 = null;
+}, { passive: true });
 
 // ── Sound ────────────────────────────────────────────────────
 // Effects and music made with ElevenLabs (tools/audio.py). One Web Audio context, made on the first key press or

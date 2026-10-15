@@ -37,8 +37,9 @@ const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0.06, cling: 40, ceil: 5 }; 
 const JUMP = { height: 7.4, cut: 0.45, wallX: 10, wallUp: 0.95, ceil: 0.6, dash: 16, dashDown: 0.12, dashCD: 0.35, mantleCD: 0.35, dropAfter: 0.3, stretch: 2.2,
   coyote: 0.1, buffer: 0.14, stickAfter: 0.16, dragFrac: 0.36, minPower: 0.22, deadZone: 14, minUp: 0.2, squeeze: 0.8, preview: 0.8, dots: 16, mouse: false };
 // Thicknesses in R; a shaft is made `ahead` views above the camera and dropped `behind`
-// views below it; `room` (R) is the least space under a solid ledge over another one.
-const LEVEL = { wall: 12, thick: 0.75, plank: 0.32, spike: 0.42, ahead: 1.5, behind: 1.2, pocketEnd: 24, room: 4.5 };
+// views below it; `room` (R) is the least space under a solid ledge over another one;
+// `toPlank` of the plain one-tile ledges are laid as planks, to jump up through.
+const LEVEL = { wall: 12, thick: 0.75, plank: 0.32, spike: 0.42, ahead: 1.5, behind: 1.2, pocketEnd: 24, room: 4.5, toPlank: 0.35 };
 const DOOR = { w: 2.4, h: 2.8 };   // in R: a way into a shop or a stash, and the way back out
 // The way out pulls at `pull` R/s into the hole, `spin` R/s round it at first, and shrinks the
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
@@ -68,8 +69,10 @@ const GUN = { time: 5, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at:
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, one for all its coins, one for all its enemies; `coins` pays for 1, 2, 3.
 const STARS = { coins: [1, 2, 5] };
-// Coins: radius and magnet reach in R; dropped ones fade after `life` s.
-const COIN = { r: 0.54, magnet: 2.6, pull: 1400, drag: 2.4, life: 8, blink: 1.6, burst: 260 };
+// Coins: radius and magnet reach in R. An enemy's burst out at `burst` px/s and after `home` s
+// home in on the hero from anywhere, at `seek` px/s more than its own pace (three times that a
+// second on), turning at `steer`/s: they always get to it.
+const COIN = { r: 0.54, magnet: 2.6, pull: 1400, drag: 2.4, burst: 260, home: 0.25, seek: 600, steer: 10 };
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
 const CRUMBLE = { time: 0.55, back: 3 };   // gives way `time` s after a touch, is back `back` s later
 const SLICK = { fr: 0.03 };
@@ -148,20 +151,20 @@ const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between 
 // the enemies allowed (all if not given) and what is new, for the level's banner.
 const WORLDS = [
   { id: 'cave', name: { ru: 'Пещера', en: 'Cave' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
-    chunks: { stairs: 4, planks: 3, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2 },
+    chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2 },
     foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], news: { ru: 'мох и пружины', en: 'moss and springs' } },
       { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], news: { ru: 'осыпь, резина и лазуны', en: 'crumbling blocks, rubber and climbers' } },
       { chunks: ['icewall', 'lift'], news: { ru: 'лёд, ездящие планки и ежи', en: 'ice, moving planks and hedgehogs' } }] },
   { id: 'ice', name: { ru: 'Ледник', en: 'Glacier' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
-    chunks: { icewall: 3, iceblocks: 3, stairs: 2, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1 },
+    chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1 },
     foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { ru: 'ледяные блоки, обходчики и панцири', en: 'ice blocks, circlers and shells' } }] },
   { id: 'mine', name: { ru: 'Шахта', en: 'Mine' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1],
-    chunks: { crumble: 3, bridge: 3, lift: 3, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
+    chunks: { crumble: 3, bridge: 3, lift: 3, planks: 2, shelves: 2, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
     foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2 },
     intro: [{ news: { ru: 'мосты, лифты, плеваки и делилки', en: 'bridges, lifts, spitters and splitters' } }, {}, { news: { ru: 'шипы', en: 'spikes' } }] },
   { id: 'void', name: { ru: 'Пустота', en: 'Void' }, theme: THEMES.void, heights: [66, 74, 82], fire: 0.85, dark: [1],
-    chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2 },
+    chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, shelves: 1, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2 },
     foes: 0.9, enemies: { crawler: 1, climber: 2, circler: 2, hedgehog: 2, shell: 1, spitter: 2, splitter: 1, chaser: 2 },
     intro: [{ news: { ru: 'шипы на стенах, ездящие планки и догонялы', en: 'spiked walls, moving planks and chasers' } }] },
 ];
@@ -301,6 +304,17 @@ const CHUNKS = {
     '............',
     '.........o..',
     '.......====.',
+    '............'] },
+  shelves: { d: 1, rows: [
+    '............',
+    '............',
+    '.....=======',
+    '............',
+    '..o.........',
+    '..======....',
+    '............',
+    '.........o..',
+    '====....====',
     '............'] },
   pillars: { d: 1, rows: [
     '............',
@@ -669,7 +683,7 @@ class Level {
     this.rects = this.rects.filter((r) => r.cap || r.safe || keep(r));   // a ledge a fall may come back to stays
     this.spikes = this.spikes.filter(keep);
     this.coats = this.coats.filter(keep);
-    this.coins = this.coins.filter(keep);
+    this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
   }
   // The next chunk on top: a pocket with a bubble once the shaft passes a planned height
   // (never two pockets running, and none in the last `pocketEnd` tiles: a bubble right
@@ -760,6 +774,15 @@ class Level {
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, side, cd: 0, room: null });
       }
+    }
+    // Some plain one-tile ledges are laid as planks to jump up through (not one with spikes on or
+    // under it, or a spring on it; none in a pocket, by its door).
+    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket; i++) {
+      const r = this.rects[i], over = (a) => a.x1 > r.x0 && a.x0 < r.x1;
+      if (r.plank || r.spring || r.slick || r.crumble || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
+      if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;
+      if (this.rects.slice(from).some((q) => q.spring && over(q) && Math.abs(q.y1 - r.y0) < 1) || !(this.rng() < LEVEL.toPlank)) continue;
+      r.plank = true; r.y1 = r.y0 + LEVEL.plank * R;
     }
     // A ledge that stops short of a wall by less than the hero is wide leaves a slot nothing fits
     // through: widen it to `pass` by cutting the ledge back, or close it if the ledge is short; spikes
@@ -1320,7 +1343,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const cr = COIN.r * R;
   for (const c of lv.coins) {
     if (c.y < top || c.y > bot) continue;
-    if (c.drop && c.t > COIN.life - COIN.blink && Math.floor(c.t * 10) % 2) continue;
     // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded
     const r = c.v > 1 ? cr * 1.4 : cr, a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
     F(c.x + edge, c.y, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, 1, 9, 0);

@@ -689,10 +689,12 @@ class Game {
     const H = this.hero, cs = this.lv.coins, mR = COIN.magnet * this.R * this.mods.magnet, cr = COIN.r * this.R, k = Math.exp(-COIN.drag * dt);
     for (let i = cs.length - 1; i >= 0; i--) {
       const c = cs[i];
-      if (c.drop && (c.t += dt) > COIN.life) { cs.splice(i, 1); continue; }
-      const dx = H.cx - c.x, dy = H.cy - c.y, d = Math.hypot(dx, dy) || 1;
-      if (d < mR && (!c.drop || c.t > 0.25)) { c.moving = true; c.vx += (dx / d) * COIN.pull * dt; c.vy += (dy / d) * COIN.pull * dt; }
-      if (c.moving) { c.vx *= k; c.vy *= k; c.x += c.vx * dt; c.y += c.vy * dt; }
+      const dx = H.cx - c.x, dy = H.cy - c.y, d = Math.hypot(dx, dy) || 1, home = c.drop && (c.t += dt) > COIN.home;
+      if (home) {   // an enemy's, its burst over: on to the hero wherever it is, ever faster
+        const sp = COIN.seek * (1 + 3 * (c.t - COIN.home)) + Math.hypot(H.rigVx, H.rigVy), f = 1 - Math.exp(-COIN.steer * dt);
+        c.vx += ((dx / d) * sp - c.vx) * f; c.vy += ((dy / d) * sp - c.vy) * f;
+      } else if (d < mR && !c.drop) { c.moving = true; c.vx += (dx / d) * COIN.pull * dt; c.vy += (dy / d) * COIN.pull * dt; }
+      if (c.moving) { if (!home) { c.vx *= k; c.vy *= k; } c.x += c.vx * dt; c.y += c.vy * dt; }
       if (d < H.R * 0.85 + (c.v > 1 ? 1.4 : 1) * cr) { cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
     }
   }
@@ -769,6 +771,7 @@ class Game {
     const H = this.hero;
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
     if (this.combo > 0) this.payCombo();
+    this.bankDrops();
     const lv = this.lv, allCoins = lv.coinsTaken >= lv.coinTotal, allFoes = lv.foeKilled >= lv.foeTotal;   // the stars, paid at once (not for a bonus level)
     if (!this.bonus) {
       this.stars = { n: 1 + allCoins + allFoes, coins: [lv.coinsTaken, lv.coinTotal], foes: [lv.foeKilled, lv.foeTotal] };
@@ -798,8 +801,14 @@ class Game {
     this.buildLevel(false);
     ui.hideAll(); ui.toast(L2(b.name) + '\n' + L2(b.goal) + ' · ' + b.time + ' ' + t('sec'), 2600);
   }
+  // An enemy's coins still on their way to the hero as a level or the run ends get there all the same.
+  bankDrops() {
+    for (const c of this.lv.coins) if (c.drop) this.coins += c.v;
+    this.lv.coins = this.lv.coins.filter((c) => !c.drop);
+  }
   endBonus(why) {
     if (!this.bonus) return;
+    this.bankDrops();
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
     const got = this.coins - this.bonusCoins;
     this.buildLevel(false);
@@ -808,6 +817,7 @@ class Game {
   }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;
+    this.bankDrops();
     this.hp = Math.max(0, this.hp); this.state = 'dead'; this.stateT = 0; this.result = null;
     const H = this.hero, lv = this.lv;   // it bursts where it can be seen (a fall ends below the screen)
     burstFx(H.cx, clamp(H.cy, lv.cam + this.R, lv.cam + view.h - this.R), this.R, H.color.base); shake.add(12);

@@ -20,7 +20,10 @@ const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0.06, cling: 40, ceil: 5 }; 
 // A jump rises `height` R (the soft body's bottom, stretching off, about 1 R less); letting
 // go on the way up keeps `cut` of the speed. Off a wall it goes `wallX` R/s outwards and
 // `wallUp` of a jump up, every time. Off a ceiling it pushes down at `ceil` of a jump, or,
-// with a side pressed, dashes that way at `dash` R/s, dipping at `dashDown` of a jump. One more jump in the air comes free (MODS.airJumps). Down lets
+// with a side pressed, dashes that way at `dash` R/s, dipping at `dashDown` of a jump. A dash
+// is also a double tap of a side or a quick swipe (`dashCD` s apart, once in the air until a
+// landing). Pressed against the side of a ledge whose top is level with its body, the hero
+// hops up onto it (`mantleCD` s apart). One more jump in the air comes free (MODS.airJumps). Down lets
 // go of anything, for `dropAfter` s and for as long as it is held. `coyote`: a jump still
 // counts this long after leaving a surface; `buffer`: a press in the air waits this long for
 // one; `stickAfter`: no sticking right after a jump, or a leap along a wall would glue
@@ -29,7 +32,7 @@ const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0.06, cling: 40, ceil: 5 }; 
 // `deadZone` px nothing; off a surface it never goes into it (at least `minUp` away from it);
 // while it is held the body is squeezed by `squeeze` and `dots` show `preview` s of the arc.
 // `mouse` turns the slingshot on (off for now: keys and the touch pad only).
-const JUMP = { height: 7.4, cut: 0.45, wallX: 10, wallUp: 0.95, ceil: 0.6, dash: 16, dashDown: 0.12, dropAfter: 0.3, stretch: 2.2,
+const JUMP = { height: 7.4, cut: 0.45, wallX: 10, wallUp: 0.95, ceil: 0.6, dash: 16, dashDown: 0.12, dashCD: 0.35, mantleCD: 0.35, dropAfter: 0.3, stretch: 2.2,
   coyote: 0.1, buffer: 0.14, stickAfter: 0.16, dragFrac: 0.36, minPower: 0.22, deadZone: 14, minUp: 0.2, squeeze: 0.8, preview: 0.8, dots: 16, mouse: false };
 // Thicknesses in R; a shaft is made `ahead` views above the camera and dropped `behind`
 // views below it; `room` (R) is the least space under a solid ledge over another one.

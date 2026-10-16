@@ -181,12 +181,6 @@ const WORLDS = [
     foes: 0.9, enemies: { crawler: 1, climber: 2, circler: 2, hedgehog: 2, shell: 1, spitter: 2, splitter: 1, chaser: 2 },
     intro: [{ news: { ru: 'шипы на стенах, ездящие планки и догонялы', en: 'spiked walls, moving planks and chasers' } }] },
 ];
-// The worlds' details: drawn behind the bodies, touching nothing, laid by a generator of their own (so a shaft
-// is laid as it was). Per world (by id) the chance of each, along a solid ledge's top (`pebble`, `grass`,
-// `mushroom`, one a stretch of 0.9 R), under it (`root`, `drip`: a drop forming and falling to what is below,
-// one a stretch of 0.8 R, not under moss), in the walls (`stone`, one every 1.5–3.5 R), and `dust` motes
-// in the air. In the world's ink and white, dithered back: never yellow (to take) nor red (danger).
-const DECOR = { cave: { pebble: 0.45, grass: 0.4, mushroom: 0.18, root: 0.4, drip: 0.18, stone: 0.6, dust: 10 } };
 // The hardest chunk allowed, by world and level (hard mode allows all).
 const MAX_D = [[1, 2, 2], [2, 2, 3], [2, 3, 3], [3, 3, 3]];
 const SUMMIT = { id: 'summit', name: { ru: 'Вершина', en: 'Summit' }, theme: THEMES.summit, enemies: {}, chunks: {} };
@@ -647,7 +641,7 @@ class Level {
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
-    this.fizz = []; this.bullets = []; this.decor = []; this.drng = mulberry32((o.seed ^ 0x7f4a7c15) >>> 0);   // details, by their own generator
+    this.fizz = []; this.bullets = [];
     this.fizzAt = o.kind === 'well' && o.height ? GUN.at.map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies
     this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY));   // and which kinds, by a generator of their own: the shaft is laid as before
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
@@ -700,32 +694,6 @@ class Level {
     }
   }
   ensure(y) { while (this.top > y) this.addChunk(); }
-  // The world's details for a chunk just laid (its rects from `from` on, between y0 and y1): see DECOR.
-  dress(from, y0, y1) {
-    const d = DECOR[this.world.id], rnd = this.drng, R = this.R;
-    if (!d || this.kind !== 'well') return;
-    for (let i = from; i < this.rects.length; i++) {
-      const r = this.rects[i];
-      if (r.plank || r.spring || r.cap || r.move || r.crumble || r.slick) continue;
-      for (let x = r.x0 + 0.4 * R; x < r.x1 - 0.4 * R; x += 0.9 * R) {   // on its top
-        const u = rnd(), s = 0.5 + rnd() * 0.5, at = x + (rnd() - 0.5) * 0.4 * R;
-        if (u < d.pebble) this.decor.push({ k: 'pebble', x: at, y: r.y0, s });
-        else if (u < d.pebble + d.grass) this.decor.push({ k: 'grass', x: at, y: r.y0, s, ph: rnd() * TAU });
-        else if (u < d.pebble + d.grass + d.mushroom) this.decor.push({ k: 'mushroom', x: at, y: r.y0, s });
-      }
-      if (!r.moss) for (let x = r.x0 + 0.5 * R; x < r.x1 - 0.5 * R; x += 0.8 * R) {   // under it
-        const u = rnd(), s = 0.4 + rnd() * 0.8;
-        if (u < d.root) this.decor.push({ k: 'root', x, y: r.y1, s, ph: rnd() * TAU });
-        else if (u < d.root + d.drip) this.decor.push({ k: 'drip', x, y: r.y1, y2: this.below(x, r.y1), ph: rnd() * 6, per: 2.5 + rnd() * 3 });
-      }
-    }
-    for (const side of [1, 2]) for (let y = y0 + rnd() * R; y < y1; y += (1.5 + rnd() * 2) * R) if (rnd() < d.stone) this.decor.push({ k: 'stone', side, y, s: 0.6 + rnd() * 0.4 });
-  }
-  below(x, y) {   // the top of what is first under (x, y): a ledge or the floor
-    let best = this.floor;
-    for (const r of this.rects) if (!r.cap && x > r.x0 && x < r.x1 && r.y0 > y + 1 && r.y0 < best) best = r.y0;
-    return best;
-  }
   // Drop what has fallen far below the camera (a crumbled block stays: it comes back).
   prune(y) {
     const keep = (o) => o.y0 === undefined ? o.y <= y : o.y0 <= y;
@@ -733,7 +701,6 @@ class Level {
     this.spikes = this.spikes.filter(keep);
     this.coats = this.coats.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
-    this.decor = this.decor.filter(keep);
   }
   // The next chunk on top: a pocket with a bubble once the shaft passes a planned height
   // (never two pockets running, and none in the last `pocketEnd` tiles: a bubble right
@@ -771,7 +738,6 @@ class Level {
     }
     const h = (lift + c.rows.length) * this.tile;
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
-    this.dress(lens[0], this.top - h, this.top);
     this.last = id;
     this.top -= h;
   }
@@ -1421,29 +1387,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (s.dir === 1) F(cx, cy, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, tw);
     else if (s.dir === 2) F(cx, cy, 0, hl, -hd, 0, INK.spike, 1, 6, hl, hd, tw);
     else F(cx, cy, 0, hl, hd, 0, INK.spike, 1, 6, hl, hd, tw);
-  }
-  const dp = PIX.size, dk = DECOR[lv.world.id], dim = th.block;   // the world's details (see DECOR): its ink, dithered back, and a little white
-  const seg = (x0, y0, x1, y1, w, c, a) => { const l = Math.hypot(x1 - x0, y1 - y0) || 1, ux = (x1 - x0) / l, uy = (y1 - y0) / l; F((x0 + x1) / 2, (y0 + y1) / 2, ux * l / 2, uy * l / 2, -uy * w / 2, ux * w / 2, c, a, 10, l / 2, w / 2, 0); };
-  for (const o of lv.decor || []) {
-    if (!seen(o.y - R, o.y + R) && !(o.k === 'drip' && seen(o.y, o.y2))) continue;
-    if (o.k === 'pebble') F(o.x, o.y - 0.1 * R * o.s, 0.2 * R * o.s, 0, 0, 0.12 * R * o.s, dim, 1, 9, 0);   // a stone, shaded
-    else if (o.k === 'grass') for (let k = -1; k <= 1; k++) { const l = (0.2 + 0.18 * o.s * (k ? 0.7 : 1)) * R, sw = Math.sin(T * 1.6 + o.ph + k) * 0.06 * R; seg(o.x + k * 2 * dp, o.y, o.x + k * 3 * dp + sw, o.y - l, dp, dim, 0.8); }   // a tuft, swaying
-    else if (o.k === 'mushroom') { const h = 0.42 * R * o.s, w = 0.26 * R * o.s; box(o.x - dp / 2, o.y - h, o.x + dp / 2, o.y, dim, 0.7, 0, 10, 0); F(o.x, o.y - h, w, 0, 0, w * 0.55, dim, 1, 9, 0); box(o.x - w * 0.4, o.y - h - w * 0.25, o.x - w * 0.4 + dp, o.y - h - w * 0.25 + dp, INK.white, 1, 0, 10, 0); }   // a stem, a shaded cap, a white spot
-    else if (o.k === 'root') { const l = 0.55 * R * o.s, b = Math.sin(T * 0.9 + o.ph) * 0.08 * R + 0.1 * R * Math.sin(o.ph * 3); seg(o.x, o.y, o.x + b, o.y + l * 0.55, dp, dim, 1); seg(o.x + b, o.y + l * 0.55, o.x + b * 0.3, o.y + l, dp, dim, 1); disc(o.x + b * 0.3, o.y + l, dp, dim, 1); }   // a root hanging, a little sway
-    else if (o.k === 'drip') {   // a drop swells under the ledge, falls, and splashes on what is below
-      const t = (T + o.ph) % o.per, g = 1200, fall = Math.sqrt(2 * (o.y2 - o.y) / g);
-      if (t < 0.7) disc(o.x, o.y + dp, dp * (0.5 + t), INK.white, 0.9);
-      else if (t < 0.7 + fall) disc(o.x, o.y + dp + 0.5 * g * (t - 0.7) ** 2, dp, INK.white, 0.9);
-      else if (t < 0.85 + fall) { const u = (t - 0.7 - fall) / 0.15; for (const s2 of [-1, 1]) box(o.x + s2 * (1 + 3 * u) * dp - dp / 2, o.y2 - (2 - u) * dp - dp / 2, o.x + s2 * (1 + 3 * u) * dp + dp / 2, o.y2 - (2 - u) * dp + dp / 2, INK.white, 1, 0, 10, 0); }
-    } else if (o.k === 'stone') {   // one set in the wall: dark, with a glint of the ink
-      const cx = o.side === 1 ? lv.l / 2 : (lv.r + W) / 2, rw = Math.min(0.36 * (W - lv.r), 0.24 * R) * o.s, rh = 0.18 * R * o.s;
-      F(cx, o.y, rw, 0, 0, rh, INK.dark, 1, 0); box(cx - rw * 0.5, o.y - rh * 0.5, cx - rw * 0.5 + dp, o.y - rh * 0.5 + dp, dim, 1, 0, 10, 0);
-    }
-  }
-  if (dk) for (let k = 0; k < dk.dust; k++) {   // dust motes drifting down the shaft
-    const h1 = ((Math.sin(k * 12.9898) * 43758.5453) % 1 + 1) % 1, h2 = ((Math.sin(k * 78.233) * 12345.678) % 1 + 1) % 1;
-    const y = cam + ((h2 + T * (0.01 + 0.02 * h1)) % 1) * H, x = lv.l + h1 * (lv.r - lv.l) + Math.sin(T * 0.6 + k * 2.1) * 0.4 * R;
-    box(x - dp / 2, y - dp / 2, x + dp / 2, y + dp / 2, dim, 0.6, 0, 10, 0);
   }
   const cr = COIN.r * R;
   for (const c of lv.coins) {

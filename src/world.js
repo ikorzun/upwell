@@ -58,7 +58,7 @@ const R_PER_M = 2.2;   // a metre of climb is 2.2 hero radii (64 px when the wel
 const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09 };
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
-const REVIVE = { price: 50, grow: 2, hp: 2, invuln: 2.5 };
+const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the hearts back (user)
 // A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. It counts
 // when the hero meets an enemy from over it: its middle `above` of their radii over the enemy's and at least
 // `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
@@ -76,7 +76,11 @@ const SMASH = { time: 11, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 3.5, 
 // `cycle` s (`slow` in its last second), a tail of up to `n` points `gap` R apart trails it in bands `band` R wide, shorter over the
 // last `fade` s; then `grace` s of the usual safety.
 const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, fade: 1.5, grace: 0.8 };
-const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
+// The grow candy: the hero `size` times as big breaks any block it runs or jumps into (reach R ahead, more at speed; not the one
+// under it, whose top is within `feet` R of its bottom), spikes and all, at `jolt` of a smash's hitstop and shake; enemies it
+// touches go. Spikes, blobs and fire still hurt. After it, `grace` s of a hit's safety (user).
+const GROW = { time: 9, size: 2, reach: 0.25, feet: 0.3, jolt: 0.5, grace: 2 };
+const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, the second for `half` its coins, the third for all of them (enemies do not
@@ -262,6 +266,7 @@ ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.
 ICONS.maxhp = ICONS.heart;
 ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
+ICONS.grow = 'ggg......ggg/gg........gg/g...wwww...g/...wwwwww.../..wwwwwwww../..wwkwwkww../..wwkwwkww../..wwwwwwww../...wwwwww.../g...wwww...g/gg........gg/ggg......ggg';   // the hero with arrows out of its corners: it grows
 ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
@@ -912,9 +917,13 @@ class Level {
         r.hit = false;
         if (r.crumbling && (r.t += dt) > CRUMBLE.time) { r.gone = true; r.t = 0; crumbleFx(r, this.theme.crumble); }
       } else if (r.crumble || r.broke) {   // back again once the hero is out of its way: a crumbled block in a while, a smashed one sooner, or at once under a hero coming down onto it
-        const h = g.hero, over = r.broke && r.t > SMASH.soon && h.maxY < r.y0 && h.rigVy > 0;
+        const h = g.hero, over = r.broke && !r.spikes && r.t > SMASH.soon && h.maxY < r.y0 && h.rigVy > 0;
         const free = (q) => q.maxX < r.x0 || q.minX > r.x1 || q.maxY < r.y0 || q.minY > r.y1;   // a smashed one round an enemy neither
-        if (((r.t += dt) > (r.broke ? SMASH.back : CRUMBLE.back) || over) && free(h) && (!r.broke || this.enemies.every((e) => free(e.body)))) { r.gone = r.crumbling = r.broke = false; r.t = 0; r.flash = 0.12; }
+        const bare = !r.spikes || r.spikes.every((s) => h.maxX < s.x0 || h.minX > s.x1 || h.maxY < s.y0 - this.R || h.minY > s.y1 + this.R);   // nor its spikes into the hero
+        if (((r.t += dt) > (r.broke ? SMASH.back : CRUMBLE.back) || over) && free(h) && bare && (!r.broke || this.enemies.every((e) => free(e.body)))) {
+          r.gone = r.crumbling = r.broke = false; r.t = 0; r.flash = 0.12;
+          if (r.spikes) { this.spikes.push(...r.spikes); r.spikes = null; }
+        }
       }
       if (r.flash > 0) r.flash -= dt;
       if (r.spring && r.t > 0) r.t = Math.max(0, r.t - dt);
@@ -1452,6 +1461,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     const w = lv.fire.warn;
     if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
+  }
+  if (g.state === 'play' && g.power('smash') && !(g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0)) {   // the smash's time left, over the hero's head: a pip a fifth, blinking in its last second (user)
+    const n = Math.ceil((5 * g.gunT) / g.gunMax);
+    for (let k = 0; k < n; k++) disc(hero.cx + (k - 2) * 0.42 * R, hero.minY - 0.45 * R, 0.14 * R, INK.flame, 1);
   }
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
     disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, (g.power('smash') ? 0.22 : 0.15) * R, g.power('smash') ? INK.flame : INK.white, 1);   // orange: the next one rams

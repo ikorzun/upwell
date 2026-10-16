@@ -36,6 +36,9 @@ const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0.06, cling: 40, ceil: 5 }; 
 // `mouse` turns the slingshot on (off for now: keys and the touch pad only).
 const JUMP = { height: 7.4, cut: 0.45, wallX: 10, wallUp: 0.95, ceil: 0.6, dash: 16, dashDown: 0.12, dashCD: 0.35, mantleCD: 0.35, dropAfter: 0.3, stretch: 2.2,
   coyote: 0.1, buffer: 0.14, stickAfter: 0.16, dragFrac: 0.36, minPower: 0.22, deadZone: 14, minUp: 0.2, squeeze: 0.8, preview: 0.8, dots: 16, mouse: false };
+// Down held on a floor (↓, or the stick pulled down): the hero squashes; a jump from there goes `height` times as high, and
+// the air jump is still there after it (user).
+const CROUCH = { squeeze: 1, height: 2 };
 // Thicknesses in R; a shaft is made `ahead` views above the camera and dropped `behind`
 // views below it; `room` (R) is the least space under a solid ledge over another one;
 // `toPlank` of the plain one-tile ledges are laid as planks, to jump up through.

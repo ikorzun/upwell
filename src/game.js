@@ -9,7 +9,7 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or a tap to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
+    hintKeys: '← → to move, space to jump, ↓ to let go;\n↓ then space: a high jump. Land on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or a tap to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
     tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
@@ -22,10 +22,10 @@ const STR = {
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
-    hintStick: 'Touch anywhere and lean: a stick to run; ▲ or a tap to jump,\ntwo quick leans to dash. Land on enemies from above!',
+    hintStick: 'Touch anywhere and lean: a stick to run; ▲ or a tap to jump,\ntwo quick leans to dash, pull down and jump to jump high.\nLand on enemies from above!',
   },
   ru: {
-    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
+    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть;\n↓ и пробел — высокий прыжок. Прыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
     tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
@@ -38,7 +38,7 @@ const STR = {
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
     nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
-    hintStick: 'Коснись где угодно и веди — бег; ▲ или тап — прыжок,\nдва быстрых наклона — рывок. Прыгай на врагов сверху!',
+    hintStick: 'Коснись где угодно и веди — бег; ▲ или тап — прыжок,\nдва быстрых наклона — рывок, вниз и прыжок — высокий прыжок.\nПрыгай на врагов сверху!',
   },
 };
 let lang = 'en';
@@ -268,7 +268,7 @@ class Game {
     }
     this.applyMods();
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false;
-    this.touch = 0; this.queued = null; this.rising = false;
+    this.touch = 0; this.queued = null; this.rising = false; this.crouch = false;
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
     this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
@@ -307,7 +307,8 @@ class Game {
   // launch goes where it was aimed, and letting go of a button cannot cut it.
   jump(inAir, aimed) {
     const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || (!aimed && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
-    let vx = H.rigVx, vy = -v, rise = !aimed;
+    const sup = !inAir && !aimed && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it
+    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : 1), rise = !aimed && !sup;
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
@@ -316,12 +317,12 @@ class Game {
       rise = false;
     }
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
-    if (inAir || ram) {
+    if (inAir || ram || sup) {
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 900); fx.ring(H.cx, foot, 0.8 * R, hc); fx.ring(H.cx, foot, 1.3 * R, INK.white);
       sparkFx(H.cx, foot, 16, Math.PI / 2, 1.0, [220, 560], [1.5, 3.2], [0.3, 0.6], [INK.white, hc, INK.white], 0.25);
     } else if (side === 1 || side === 2) sparkFx(side === 1 ? H.minX : H.maxX, H.cy, 9, side === 1 ? Math.PI : 0, 0.8, [120, 340], [1.2, 2.6], [0.25, 0.45], [INK.white, hc], 0.3);
     else if (side !== 4) sparkFx(H.cx, foot, 8, Math.PI / 2, 1.45, [90, 260], [1.2, 2.4], [0.2, 0.4], [INK.white, PAL.gray], 0.15);
-    sound.play(inAir || ram ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8, ram ? 0.8 : 1);
+    sound.play(inAir || ram || sup ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8, ram ? 0.8 : sup ? 0.85 : 1);
     setVel(H, vx, vy);
     unstick(H, JUMP.stickAfter);
     const sp = Math.hypot(vx, vy) || 1;
@@ -416,6 +417,8 @@ class Game {
   move(dt) {
     const H = this.hero, d = input.dir, floor = this.onFloor(), top = H.stuck > 0 && glueSide(H) === 4;
     H.pressX = d; H.crawl = top && d !== 0;   // only a body hanging from a ceiling alone creeps along it
+    const crouch = input.down && floor;   // down on a floor: squashed flat, ready for a high jump (see jump)
+    if (crouch !== this.crouch) { this.crouch = crouch; H.sqAx = 0; H.sqAy = 1; H.squeezeIn = crouch ? CROUCH.squeeze : 0; }
     if (input.down) H.stickCD = Math.max(H.stickCD || 0, 0.05);
     if (this.dashT > 0) this.dashT -= dt;
     if (this.dashCD > 0) this.dashCD -= dt;
@@ -1381,12 +1384,12 @@ function joyMove(e) {
   if (dir && dir !== j.dir) { if (lastTap.d === dir && e.timeStamp - lastTap.t < 280) game.dash(dir); lastTap = { d: dir, t: e.timeStamp }; }   // a fresh lean: a second one quick is a dash
   if (dir !== j.dir) { j.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); }
   const low = dy > JOY.down * R && dy > Math.abs(dx);
-  if (low && !j.low) game.pressDown();
+  if (low !== j.low) input.set('down', low);   // pulled down: lets go of a wall, on a floor a crouch while held
   j.low = low; j.x = x; j.y = y; joyShow();
 }
 function joyEnd() {
   if (!joy) return;
-  joy = null; input.joy = false; input.set('left', false); input.set('right', false); joyEl.classList.remove('on');
+  joy = null; input.joy = false; input.set('left', false); input.set('right', false); input.set('down', false); joyEl.classList.remove('on');
 }
 for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, (e) => {   // iOS can lose a finger's pointerup (off the top of the screen, say): no finger on the glass, nothing held
   if (e.touches.length) return;

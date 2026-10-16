@@ -65,11 +65,12 @@ function snap() {
   return {
     g: GAME_KEYS.map((k) => g[k]), safes: g.safes.map((s) => Object.assign({}, s)), seed,
     input: [input.left, input.right, input.down, input.jump], hero: snapBody(g.hero),
-    cam: lv.cam, t: lv.t, rects: lv.rects.slice(), rs: lv.rects.map((r) => [r.x0, r.x1, r.dx, r.gone, r.t, r.hit, r.crumbling, r.safe, r.move ? r.move.v : 0, r.broke, r.paid]),
+    cam: lv.cam, t: lv.t, rects: lv.rects.slice(), rs: lv.rects.map((r) => [r.x0, r.x1, r.dx, r.gone, r.t, r.hit, r.crumbling, r.safe, r.move ? r.move.v : 0, r.broke, r.paid, r.crack]),
     coins: lv.coins.map((c) => Object.assign({}, c)), spawns: lv.spawns.slice(), shots: lv.shots.map((q) => Object.assign({}, q)),
     counts: [lv.coinsTaken, lv.foeKilled, lv.foeTotal], bullets: lv.bullets.map((q) => Object.assign({}, q)), fizz: lv.fizz.map((p) => p.taken), fire: lv.fire && { y: lv.fire.y, spitT: lv.fire.spitT, warn: lv.fire.warn && Object.assign({}, lv.fire.warn) }, bubbles: lv.bubbles.map((b) => b.cd),
     enemies: lv.enemies.map((e) => ({ e, f: Object.fromEntries(Object.entries(e).filter(([, v]) => typeof v !== 'object')), b: snapBody(e.body) })),
     folk: lv.folk.map((f) => ({ f, o: Object.assign({}, f), b: f.body && snapBody(f.body) })), pickups: lv.pickups.slice(), sold: lv.pickups.map((p) => p.sold),
+    icicles: lv.icicles.map((c) => Object.assign({}, c)), arenas: lv.arenas.map((a) => ({ a, o: Object.assign({}, a, { foes: a.foes.slice() }) })),
   };
 }
 function restore(S) {
@@ -79,7 +80,7 @@ function restore(S) {
   restoreBody(g.hero, S.hero);
   const lv = g.lv;
   lv.cam = S.cam; lv.t = S.t; lv.rects = S.rects.slice();
-  S.rects.forEach((r, i) => { const v = S.rs[i]; r.x0 = v[0]; r.x1 = v[1]; r.dx = v[2]; r.gone = v[3]; r.t = v[4]; r.hit = v[5]; r.crumbling = v[6]; r.safe = v[7]; if (r.move) r.move.v = v[8]; r.broke = v[9]; r.paid = v[10]; });
+  S.rects.forEach((r, i) => { const v = S.rs[i]; r.x0 = v[0]; r.x1 = v[1]; r.dx = v[2]; r.gone = v[3]; r.t = v[4]; r.hit = v[5]; r.crumbling = v[6]; r.safe = v[7]; if (r.move) r.move.v = v[8]; r.broke = v[9]; r.paid = v[10]; r.crack = v[11]; });
   lv.coins = S.coins.map((c) => Object.assign({}, c)); lv.spawns = S.spawns.slice(); lv.shots = S.shots.map((q) => Object.assign({}, q));
   [lv.coinsTaken, lv.foeKilled, lv.foeTotal] = S.counts; lv.bullets = S.bullets.map((q) => Object.assign({}, q)); lv.fizz.forEach((p, i) => { p.taken = S.fizz[i]; });
   if (lv.fire) { lv.fire.y = S.fire.y; lv.fire.spitT = S.fire.spitT; lv.fire.warn = S.fire.warn && Object.assign({}, S.fire.warn); }
@@ -87,6 +88,7 @@ function restore(S) {
   lv.enemies = S.enemies.map((o) => { Object.assign(o.e, o.f); restoreBody(o.e.body, o.b); return o.e; });
   lv.folk = S.folk.map(({ f, o, b }) => { for (const k of Object.keys(f)) if (!(k in o)) delete f[k]; Object.assign(f, o); if (b) restoreBody(f.body, b); return f; });   // a body made in a look ahead goes again
   lv.pickups = S.pickups.slice(); lv.pickups.forEach((p, i) => { p.sold = S.sold[i]; });
+  lv.icicles = S.icicles.map((c) => Object.assign({}, c)); lv.arenas = S.arenas.map(({ a, o }) => Object.assign(a, o, { foes: o.foes.slice() }));
 }
 
 // ── playing ──

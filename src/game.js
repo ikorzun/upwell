@@ -14,7 +14,7 @@ const STR = {
     tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
-    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_cage: 'Someone is locked in! Touch the cage', seen_trader: 'A trader: touch the thing to buy it', freedCoins: 'Thank you! +{n} coins', freedHeart: 'Thank you! +1 heart', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
+    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: 'Thank you! +{n} coins', freedHeart: 'Thank you! +1 heart', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
     got_fizz: 'Fizz! You shoot by yourself · {s} s', got_smash: 'Rock candy! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
@@ -30,7 +30,7 @@ const STR = {
     tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', bonusDone: 'Бонус пройден!', double: '×2 за рекламу', next: 'Дальше', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
-    seen_hedgehog: 'Ежа не топчи: колется!', seen_cage: 'Кто-то заперт! Коснись клетки', seen_trader: 'Торговец: коснись товара, чтобы купить', freedCoins: 'Спасибо! +{n} монет', freedHeart: 'Спасибо! +1 сердце', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
+    seen_hedgehog: 'Ежа не топчи: колется!', seen_cage: 'Кто-то заперт! Коснись клетки', seen_crack: 'Треснутый блок: ударь его снизу!', arena: 'Арена! Победи всех', arenaWave: 'Волна {n}!', arenaWon: 'Арена пройдена! +{n}', seen_trader: 'Торговец: коснись товара, чтобы купить', freedCoins: 'Спасибо! +{n} монет', freedHeart: 'Спасибо! +1 сердце', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
     seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене',
     got_fizz: 'Шипучка! Стреляешь сам · {s} с', got_smash: 'Крушилка! Прыжок ломает блоки · {s} с', got_rainbow: 'Радуга! Ничто не ранит, враги лопаются · {s} с', got_grow: 'Великан! Ломаешь блоки, враги лопаются · {s} с',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
@@ -383,6 +383,7 @@ class Game {
     this.rising = false;   // as after a stomp: letting go of a tapped jump must not cut the kick
   }
   smash(r, jolt = 1) {
+    if (r.crack) { this.crack(r); return; }   // a stash's way in: gone for good
     const lv = this.lv, R = this.R, cx = (r.x0 + r.x1) / 2, on = (s) => s.x1 > r.x0 && s.x0 < r.x1 && (s.dir === 0 ? Math.abs(s.y1 - r.y0) < 1 : s.dir === 1 && Math.abs(s.y0 - r.y1) < 1);
     r.gone = r.broke = true; r.crumbling = false; r.t = 0;
     if (lv.spikes.some(on)) { r.spikes = lv.spikes.filter(on); lv.spikes = lv.spikes.filter((s) => !on(s)); }   // a giant's: its spikes go with it, and come back with it
@@ -403,6 +404,16 @@ class Game {
       if (r.cap || r.spring || r.plank || r.y0 > H.maxY - GROW.feet * R || r.x1 < H.minX - m || r.x0 > H.maxX + m) continue;
       if (!lv.rects.some((q) => q.spring && on(r, q)) && !lv.bubbles.some((b) => on(r, b))) this.smash(r, GROW.jolt);
     }
+  }
+  // A cracked block (a stash's way in, see 'X') gives at a head-butt from below, for good: broken just before it is met, so the jump goes on in.
+  cracks() {
+    const H = this.hero, R = this.R, up = 0.3 * R - H.rigVy * STEP;
+    for (const r of this.lv.near(H.minY - up, H.minY).slice()) if (r.crack && r.y1 <= H.minY + 2 && r.x1 > H.minX + 0.3 * R && r.x0 < H.maxX - 0.3 * R) this.crack(r);
+  }
+  crack(r) {
+    r.gone = true; r.crack = false;
+    crumbleFx(r, this.lv.theme.block, true); fx.ring((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1.4 * this.R, INK.coin);
+    sound.play('crumble', 1, 0.9); sound.play('coin', 0.6, 1.3); shake.add(3); haptics.buzz(20);
   }
   bonk() { const H = this.hero; this.ram = false; sound.play('land', 0.8, 0.6); shake.add(2); sparkFx(H.cx, H.minY, 6, -Math.PI / 2, 1, [80, 220], [1.2, 2.4], [0.2, 0.35], [INK.white], 0.5); }
   // Letting go of the button on the way up makes a lower jump.
@@ -490,7 +501,7 @@ class Game {
     const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
     if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
     if (hang) setVel(hero, 0, 0);
-    if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); }
+    if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); if (hero.rigVy < -40) this.cracks(); }
     const bs = this.bodyList();
     this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
     for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.touchHero = false; b.beginStep(dt); }
@@ -560,6 +571,32 @@ class Game {
       }
     }
   }
+  // Set pieces at work: a stalactite over the hero shakes and falls (a blob of lv.shots, so it hurts and breaks on what it
+  // meets); an arena starts as the hero comes to its middle, sends its waves down, pays in big coins once they are all gone.
+  setStep(dt) {
+    const lv = this.lv, H = this.hero, R = this.R;
+    for (let i = lv.icicles.length - 1; i >= 0; i--) {
+      const c = lv.icicles[i];
+      if (c.state === 'hang' && Math.abs(H.cx - c.x) < ICICLE.reach * R && H.minY > c.y && H.minY - c.y < ICICLE.below * R) { c.state = 'shake'; c.t = ICICLE.shake; sound.play('crumble', 0.4, 1.6); }
+      else if (c.state === 'shake' && (c.t -= dt) <= 0) { lv.icicles.splice(i, 1); lv.shots.push({ x: c.x, y: c.y + 0.3 * R, vx: 0, vy: 0, r: ICICLE.r * R, icicle: true }); }
+    }
+    for (const a of lv.arenas) {
+      if (a.done) continue;
+      if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }
+      if (a.foes.some((e) => lv.enemies.includes(e))) continue;
+      if (a.wave < ARENA.waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
+      a.done = true; this.drop(a.x, a.y - R, ARENA.coins, 5); ui.toast(tf('arenaWon', { n: 5 * ARENA.coins }), 2000); sound.play('combo', 1, 1.1); shake.add(4);
+    }
+  }
+  arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped
+    const lv = this.lv, R = this.R, n = ARENA.waves[a.wave++], wd = this.wd, kinds = Object.keys(wd.enemies || {}).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini');
+    const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
+    a.foes = [];
+    for (let k = 0; k < n; k++) {
+      const type = kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', f = new Foe({ type, x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor }, lv);
+      lv.enemies.push(f); lv.foeTotal++; a.foes.push(f); fx.ring(f.body.cx, f.body.cy, 1.2 * R, INK.spike);
+    }
+  }
   free(f) {
     const b = f.body, R = this.R;
     f.open = true; f.hop = 0.25; b.face.frown = false; b.face.surprise = 1;
@@ -578,8 +615,9 @@ class Game {
     if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
     this.spikes(); this.fireStep(dt); this.fireTouch();
     if (this.state !== 'play') return;   // the fire ended a bonus level
-    this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt);
+    this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt); this.setStep(dt);
     for (const f of lv.folk) if (f.body && !f.open && f.y > lv.cam && f.y < lv.cam + view.h) this.hint(f.kind);   // a cage or a trader, told once
+    if (!save.seen.crack) for (const r of lv.near(lv.cam + view.h * 0.2, lv.cam + view.h * 0.8)) if (r.crack) { this.hint('crack'); break; }
     if (this.combo > 0 && (H.wallMask & 8) && !H.springHit && !this.power('rainbow')) this.payCombo();   // only a floor ends a combo; a rainbow's runs on till it is over
     const near = (o, r) => Math.hypot(H.cx - o.x, H.cy - o.y) < r;
     if (lv.portal && near(lv.portal, lv.portal.r + 0.5 * H.R)) { this.levelClear(); return; }

@@ -186,20 +186,20 @@ const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between 
 // the enemies allowed (all if not given) and what is new, for the level's banner.
 const WORLDS = [
   { id: 'cave', name: { ru: 'Пещера', en: 'Cave' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
-    chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2 },
+    chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2, fork: 1, vault: 2 },
     foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { ru: 'мох и пружины', en: 'moss and springs' } },
       { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'fizz'], news: { ru: 'осыпь, резина и лазуны', en: 'crumbling blocks, rubber and climbers' } },
       { chunks: ['icewall', 'lift'], news: { ru: 'лёд, ездящие планки и ежи', en: 'ice, moving planks and hedgehogs' } }] },
   { id: 'ice', name: { ru: 'Ледник', en: 'Glacier' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
-    chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1 },
+    chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1, fork: 1, fork2: 1, vault: 1 },
     foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { ru: 'ледяные блоки, обходчики и панцири', en: 'ice blocks, circlers and shells' } }] },
   { id: 'mine', name: { ru: 'Шахта', en: 'Mine' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1],
-    chunks: { crumble: 3, bridge: 3, lift: 3, planks: 2, shelves: 2, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
+    chunks: { crumble: 3, bridge: 3, lift: 3, planks: 2, shelves: 2, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1, fork2: 2, vault: 1 },
     foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2 },
     intro: [{ news: { ru: 'мосты, лифты, плеваки и делилки', en: 'bridges, lifts, spitters and splitters' } }, {}, { news: { ru: 'шипы', en: 'spikes' } }] },
   { id: 'void', name: { ru: 'Пустота', en: 'Void' }, theme: THEMES.void, heights: [66, 74, 82], fire: 0.85, dark: [1],
-    chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, shelves: 1, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2 },
+    chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, shelves: 1, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2, fork: 1, fork2: 1, vault: 1 },
     foes: 0.9, enemies: { crawler: 1, climber: 2, circler: 2, hedgehog: 2, shell: 1, spitter: 2, splitter: 1, chaser: 2 },
     intro: [{ news: { ru: 'шипы на стенах, ездящие планки и догонялы', en: 'spiked walls, moving planks and chasers' } }] },
 ];
@@ -325,6 +325,8 @@ const UNLOCKS = [
 //   {  moss on the left wall (holds)   }  on the right    (  rubber on the left wall (throws back)   )  on the right
 //   ~  moss under the block above (the only ceiling the hero hangs from, see CEIL)
 //   o  coin   O  big coin   B  bubble in the wall (a shop or a stash)
+//   X  cracked block: a head-butt from below (or a smash) breaks it for good — the way into a stash in the wall
+//   Y  a stalactite under the block above: it falls on a hero passing under it   A  an arena's middle (waves of enemies)
 const CHUNKS = {
   stairs: { d: 1, rows: [
     '............',
@@ -558,6 +560,109 @@ const CHUNKS = {
     '>..........<',
     '>.....====.<',
     '>..........<'] },
+  fork: { d: 2, rows: [   // two ways up (user): moss to hang on and a coin, or spiked wall and two big ones
+    '............',
+    '............',
+    '###..##..###',
+    '{....##....<',
+    '{....##..O.<',
+    '{.o..##....<',
+    '{....##.##.<',
+    '{##..##....<',
+    '{....##..O.<',
+    '{....##....<',
+    '{....##.##.<',
+    '{##..##....<',
+    '{....##....<',
+    '............'] },
+  fork2: { d: 2, rows: [   // planks all the way, or crumbling blocks under big coins
+    '............',
+    '............',
+    '###..##..###',
+    '.....##.....',
+    '.....##..O..',
+    '.==..##.....',
+    '.....##.CC..',
+    '..==.##.....',
+    '.....##..O..',
+    '.==..##.....',
+    '.....##.CC..',
+    '.....##.....',
+    '..==.##.....',
+    '............'] },
+  vault: { d: 1, rows: [   // a stash in the wall (user): coins boxed in over a cracked floor; the way up passes by it, a jump up
+    '............',        // from under it breaks in, and a gap in its roof lets the hero on up through it (no dead end)
+    '............',
+    '##.....##..#',
+    '.......#oOo#',
+    '.......#ooo#',
+    '.......#XXX#',
+    '............',
+    '...o........',
+    '..###.......',
+    '............',
+    '............',
+    '.....######.',
+    '............'] },
+  // Set pieces, one a level about halfway up (see SETS; user's picks): a moss garden, a treasury over spikes, an arena of
+  // enemy waves, a hall of stalactites.
+  garden: { d: 1, rows: [
+    '{..........}',
+    '{..........}',
+    '{.####.....}',
+    '{.~~~~...o.}',
+    '{......###.}',
+    '{.o....~~~.}',
+    '{..........}',
+    '{...o......}',
+    '{.###....o.}',
+    '{.~~~......}',
+    '{......###.}',
+    '{..o...~~~.}',
+    '{..........}',
+    '{.###......}',
+    '{..........}'] },
+  treasury: { d: 2, rows: [
+    '............',
+    '............',
+    '###......###',
+    '............',
+    '...oOOOOo...',
+    '...oooooo...',
+    '..########..',
+    '..vvvvvvvv..',
+    '............',
+    '............',
+    '............',
+    '####....####',
+    '............'] },
+  arena: { d: 2, rows: [
+    '............',
+    '............',
+    '###......###',
+    '............',
+    '............',
+    '............',
+    '.....A......',
+    '............',
+    '..========..',
+    '............',
+    '............'] },
+  icicles: { d: 2, rows: [
+    '............',
+    '............',
+    '####...#####',
+    '.Y.Y....Y.Y.',
+    '............',
+    '...o..o..o..',
+    '............',
+    '########....',
+    '.Y..Y..Y....',
+    '............',
+    '............',
+    '............',
+    '......######',
+    '............'] },
   sparse: { d: 3, rows: [
     '............',
     '............',
@@ -571,11 +676,19 @@ const CHUNKS = {
     '........~~~.',
     '............'] },
 };
+// What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
+for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney'], moving: ['movers', 'lift'], crumbling: ['crumble', 'bridge'],
+  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'] })) for (const id of ids) CHUNKS[id].kind = kind;
+// Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
+const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
+const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from
+const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y']);
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -585,7 +698,7 @@ for (const id in CHUNKS) {
 }
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
-const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S']);
+const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
@@ -651,7 +764,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -662,12 +775,16 @@ class Level {
     this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.R = o.R; this.t = 0;
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
     this.dark = o.kind === 'well' && !!(o.world.dark && o.world.dark.includes(this.stage));
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null;
-    this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
+    this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.fizz = []; this.bullets = [];
+    if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows)
+      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
+      if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
+    }
     this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0);   // folk (see FOLK), by their own generator
     if (o.kind === 'well' && o.height && !o.world.bonus) {
       const fr = this.folkRng, at = ([a, b]) => this.floor - o.height * (a + fr() * (b - a));
@@ -753,7 +870,7 @@ class Level {
     this.spikes = this.spikes.filter(keep);
     this.coats = this.coats.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
-    this.folk = this.folk.filter(keep);
+    this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep);
   }
   // The next chunk on top: a pocket with a bubble once the shaft passes a planned height
   // (never two pockets running, and none in the last `pocketEnd` tiles: a bubble right
@@ -764,9 +881,18 @@ class Level {
     let id;
     if (plan) { plan.done = true; if (this.top - this.endY > LEVEL.pocketEnd * this.tile) { id = 'pocket'; this.pocketKind = plan.kind; } }
     if (!id && this.intro.length && this.placed.length) id = this.intro.shift();   // after a first easy one, what the level is to show
+    if (!id && this.setAt != null && this.top < this.setAt) { id = this.setId; this.setAt = null; }   // its set piece
+    // The level's rhythm (user): an easy fifth at the start, harder ones likelier in the middle, a rest just under the way out,
+    // and never two of a kind running.
+    const left = this.top - this.endY, p = Number.isFinite(this.endY) ? 1 - left / Math.max(1, this.floor - this.endY) : 0.5;
+    if (!id && !this.rested && left > 4 * this.tile && left < 14 * this.tile && !wd.bonus) { id = 'rest'; this.rested = true; }
     if (!id) {
-      const maxD = this.hard ? 3 : wd.maxD || MAX_D[Math.min(wd === SUMMIT ? 3 : WORLDS.indexOf(wd), 3)][Math.min(this.stage, 2)], w = {};
-      for (const k in wd.chunks) if (CHUNKS[k].d <= maxD && k !== this.last) w[k] = wd.chunks[k];
+      let maxD = this.hard ? 3 : wd.maxD || MAX_D[Math.min(wd === SUMMIT ? 3 : WORLDS.indexOf(wd), 3)][Math.min(this.stage, 2)], w = {};
+      if (p < 0.2) maxD = Math.min(maxD, 1);
+      const lastKind = this.last && CHUNKS[this.last].kind, mid = p > 0.35 && p < 0.75;
+      const once = (k) => k === 'rest' || (k === 'vault' && this.placed.some((q) => q.id === k));   // the rest only under the way out; one stash in the wall a level
+      for (const k in wd.chunks) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k)) w[k] = wd.chunks[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
+      if (!Object.keys(w).length) for (const k in wd.chunks) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k)) w[k] = wd.chunks[k];   // a small pool: kinds may run
       id = pick(rnd, w);
     }
     const c = CHUNKS[id];
@@ -777,7 +903,7 @@ class Level {
     this.lastFeet = mirror ? flipRuns(c.last) : c.last;
     // Laid right on the last one, a chunk may hang a solid ledge just over a ledge under it, with
     // no room to stand there and jump: then it goes a tile higher, up to three.
-    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles], lens = keep.map((a) => a.length);
+    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles, this.arenas, this.icicles], lens = keep.map((a) => a.length);
     let lift = 0;
     for (;;) {
       this.place(c, this.top - lift * this.tile, mirror);
@@ -844,7 +970,7 @@ class Level {
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
-    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
+    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
@@ -864,6 +990,8 @@ class Level {
         this.spikes.push(ch === '^' ? { x0: X(k), x1: X(k1 + 1), y0: Y(r) - d, y1: Y(r), dir: 0 } : { x0: X(k), x1: X(k1 + 1), y0: Y(r + 1), y1: Y(r + 1) + d, dir: 1 });
       } else if (ch === 'S') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - 0.7 * R, Y(r) - 0.36 * R, cx + 0.7 * R, Y(r), { spring: true })); }
       else if (ch === 'o' || ch === 'O') this.coin(X(k) + t / 2, Y(r) - t / 2, ch === 'O' ? 5 : 1);
+      else if (ch === 'Y') this.icicles.push({ x: X(k) + t / 2, y: Y(r + 1), state: 'hang', t: 0 });
+      else if (ch === 'A') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [] });
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, side, cd: 0, room: null });
@@ -874,10 +1002,10 @@ class Level {
       for (let i = from; i < this.rects.length; i++) { const q = this.rects[i]; if (!q.plank && Math.abs(q.y1 - y) < 1 && x > q.x0 && x < q.x1) q.moss = true; }
     }
     // Some plain one-tile ledges are laid as planks to jump up through (not one with spikes on or
-    // under it, or a spring on it; none in a pocket, by its door).
-    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket; i++) {
+    // under it, or a spring on it; none in a pocket, by its door; none in a stash in the wall, a set piece or the last rest).
+    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set'; i++) {
       const r = this.rects[i], over = (a) => a.x1 > r.x0 && a.x0 < r.x1;
-      if (r.plank || r.spring || r.slick || r.crumble || r.moss || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
+      if (r.plank || r.spring || r.slick || r.crumble || r.crack || r.moss || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
       if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;
       if (this.rects.slice(from).some((q) => q.spring && over(q) && Math.abs(q.y1 - r.y0) < 1) || !(this.rng() < LEVEL.toPlank)) continue;
       r.plank = true; r.y1 = r.y0 + LEVEL.plank * R;
@@ -1449,6 +1577,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, rad);
     box(r.x0 + ox + rad * 0.5, r.y0, r.x1 + ox - rad * 0.5, r.y0 + 2.5, th.lip, a, 1.25);
     if (r.crumble) for (let x = r.x0 + 9; x < r.x1 - 6; x += 16) disc(x + ox, (r.y0 + r.y1) / 2 + 1, 1.6, th.wallD, a);
+    if (r.crack) {   // cracked: a dark zigzag across it, and now and then a glint of gold through it (what is behind)
+      const P = PIX.size, w = r.x1 - r.x0, hgt = r.y1 - r.y0;
+      for (let k = 0; k < 6; k++) { const x = r.x0 + w * (0.15 + 0.14 * k), y = r.y0 + hgt * (k & 1 ? 0.35 : 0.65); box(x - P, y - P, x + P, y + P, th.wallD, 1, 0, 10, 0); }
+      if ((T * 1.3 + r.x0 * 0.01) % 2 < 0.25) box(r.x0 + w * 0.5 - P, r.y0 + hgt * 0.5 - P, r.x0 + w * 0.5 + P, r.y0 + hgt * 0.5 + P, INK.coin, 1, 0, 10, 0);
+    }
     if (r.move) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
     if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
@@ -1494,7 +1627,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); icon(p.kind || 'fizz', p.x, y, 1, k);
   }
   for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
-  for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart
+  const icicle = (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
+  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);
+  for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart; a falling stalactite
+    if (s.icicle) { icicle(s.x, s.y - 0.3 * R); continue; }
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
     if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
   }

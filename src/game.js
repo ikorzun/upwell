@@ -582,6 +582,7 @@ class Game {
     }
     for (const a of lv.arenas) {
       if (a.done) continue;
+      if (a.on && H.cy < a.y - view.h) { a.done = true; continue; }   // left behind (its waves pruned below): over, and nothing paid
       if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }
       if (a.foes.some((e) => lv.enemies.includes(e))) continue;
       if (a.wave < ARENA.waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }

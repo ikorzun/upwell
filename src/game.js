@@ -16,6 +16,7 @@ const STR = {
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall', seen_fizz: 'Fizz: while it lasts, you shoot by yourself',
+    seen_smash: 'Rock candy: a double jump smashes the block overhead', seen_rainbow: 'Rainbow: nothing hurts, enemies pop at a touch',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
@@ -31,6 +32,7 @@ const STR = {
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
     seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене', seen_fizz: 'Шипучка: пока шипит, выстрелы летят сами',
+    seen_smash: 'Крушилка: двойной прыжок пробивает блок над головой', seen_rainbow: 'Радуга: ничто не ранит, враги лопаются от касания',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
@@ -190,6 +192,7 @@ class Boss {
 }
 
 // ── Game ─────────────────────────────────────────────────────
+const RAINBOW_BODY = RAINBOW_INK.map((c) => ({ id: 'rainbow', base: c, deep: PAL.black }));   // the hero's colours under a rainbow
 const MODS = () => ({ bounce: 1, slide: 1, hold: 0, magnet: 1, invuln: 0, airJumps: 1, blast: false, coinMul: 1, comboShift: 0, jump: 1, discount: 1, iron: false, fire: 1, gun: 0 });
 const SPIKE_PUSH = [[0, -1], [0, 1], [1, -0.35], [-1, -0.35]];
 let nextSeed = null;
@@ -199,6 +202,7 @@ class Game {
     this.R = 30; this.vjump = 1; this.builtW = 0; this.list = []; this.look = { x: 0, y: 0, t: 0 }; this.heroLook = { x: 0, y: 0, t: -1e9 };
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.queued = null; this.rising = false;
     this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = [];
+    this.pow = null; this.ram = false; this.tail = [];   // the candy at work, a ram on its way up, a rainbow's tail
     this.newRun();
   }
   newRun() {
@@ -263,7 +267,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false;
     this.touch = 0; this.queued = null; this.rising = false;
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
@@ -302,7 +306,7 @@ class Game {
   // or with a side pressed a dash that way. In the air: up again, with a puff under it. A slingshot
   // launch goes where it was aimed, and letting go of a button cannot cut it.
   jump(inAir, aimed) {
-    const H = this.hero, v = this.vjump, side = inAir ? 0 : this.touch;
+    const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || (!aimed && this.touch === 4 && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || ram ? 0 : this.touch;   // a ram off a ceiling goes up through it
     let vx = H.rigVx, vy = -v, rise = !aimed;
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
@@ -312,19 +316,50 @@ class Game {
       rise = false;
     }
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
-    if (inAir) {
+    if (inAir || ram) {
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 900); fx.ring(H.cx, foot, 0.8 * R, hc); fx.ring(H.cx, foot, 1.3 * R, INK.white);
       sparkFx(H.cx, foot, 16, Math.PI / 2, 1.0, [220, 560], [1.5, 3.2], [0.3, 0.6], [INK.white, hc, INK.white], 0.25);
     } else if (side === 1 || side === 2) sparkFx(side === 1 ? H.minX : H.maxX, H.cy, 9, side === 1 ? Math.PI : 0, 0.8, [120, 340], [1.2, 2.6], [0.25, 0.45], [INK.white, hc], 0.3);
     else if (side !== 4) sparkFx(H.cx, foot, 8, Math.PI / 2, 1.45, [90, 260], [1.2, 2.4], [0.2, 0.4], [INK.white, PAL.gray], 0.15);
-    sound.play(inAir ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8);
+    sound.play(inAir || ram ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8, ram ? 0.8 : 1);
     setVel(H, vx, vy);
     unstick(H, JUMP.stickAfter);
     const sp = Math.hypot(vx, vy) || 1;
     H.kickSquash(vx / sp, vy / sp, -JUMP.stretch * Math.min(1, sp / v));   // stretch along the leap
     haptics.buzz(8);
-    this.rising = rise; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.queued = null;
+    this.rising = rise && !ram; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.queued = null; this.ram = ram;   // a ram goes all the way up: a quick tap must not cut it short of the block
   }
+  // The solid ledges just over the hero (planks are jumped through anyway), and which of them a ram breaks: a shaft ledge one tile
+  // thick, not the exit's ceiling or a spring, with nothing on it or under it that would be left hanging in the air.
+  over(look) { const H = this.hero, R = this.R; return this.lv.near(H.minY - look, H.cy).filter((r) => !r.plank && r.y1 <= H.cy && r.x1 > H.minX + 0.25 * R && r.x0 < H.maxX - 0.25 * R); }
+  smashable(r) {
+    const lv = this.lv, on = (q) => q.x1 > r.x0 && q.x0 < r.x1;
+    return lv.kind === 'well' && !r.cap && !r.spring && r.y1 - r.y0 <= SMASH.maxH * lv.tile &&
+      !lv.spikes.some((s) => s.dir < 2 && on(s) && Math.abs(s.dir ? s.y0 - r.y1 : s.y1 - r.y0) < 1) &&   // red stays danger
+      !lv.rects.some((q) => q.spring && on(q) && Math.abs(q.y1 - r.y0) < 1) && !lv.bubbles.some((b) => on(b) && Math.abs(b.y1 - r.y0) < 1);
+  }
+  ramUp() {   // each step of a ram on its way up: what is just overhead goes before the hero meets it, or the ram stops on what does not break
+    const H = this.hero, vy = H.vy.reduce((s, v) => s + v, 0) / H.n;   // the rigid part, as setVel set it (rigVy lags a jump by a step)
+    if (vy >= 0) { this.ram = false; return; }
+    const rs = this.over(SMASH.reach * this.R - vy * STEP);
+    if (!rs.length) return;
+    if (!rs.every((r) => this.smashable(r))) { this.bonk(); return; }
+    for (const r of rs.slice()) this.smash(r);
+    if (vy > -SMASH.kick * this.vjump) addVel(H, 0, -SMASH.kick * this.vjump - vy);   // on up through it and over, whatever was left of the jump
+    this.rising = false;   // as after a stomp: letting go of a tapped jump must not cut the kick
+  }
+  smash(r) {
+    const lv = this.lv, R = this.R, cx = (r.x0 + r.x1) / 2;
+    r.gone = r.broke = true; r.crumbling = false; r.t = 0;
+    const was = new Set(lv.enemies);
+    for (const e of lv.enemies.slice()) { const q = e.body; if (e.rect === r || (q.maxX > r.x0 && q.minX < r.x1 && q.maxY > r.y0 - 0.5 * R && q.minY < r.y1 + 0.3 * R)) this.kill(e, true); }   // knocked off from below, a hedgehog too
+    for (const e of lv.enemies.slice()) if (!was.has(e)) this.kill(e, true);   // a splitter's minis too: they would land in the hole, in the hero's way
+    if (!r.paid) { r.paid = true; this.drop(cx, r.y0, SMASH.coins); }
+    crumbleFx(r, r.slick ? lv.theme.slick : r.crumble ? lv.theme.crumble : lv.theme.block, true); fx.ring(cx, (r.y0 + r.y1) / 2, 1.6 * R, INK.white);
+    this.hitstop = Math.max(this.hitstop, SMASH.hitstop); shake.add(SMASH.shake); haptics.buzz(25);
+    sound.play('crumble', 1, 0.75); sound.play('stomp', 0.6, 0.55);
+  }
+  bonk() { const H = this.hero; this.ram = false; sound.play('land', 0.8, 0.6); shake.add(2); sparkFx(H.cx, H.minY, 6, -Math.PI / 2, 1, [80, 220], [1.2, 2.4], [0.2, 0.35], [INK.white], 0.5); }
   // Letting go of the button on the way up makes a lower jump.
   releaseJump() {
     const H = this.hero;
@@ -405,7 +440,7 @@ class Game {
       if (lv.boss && !lv.boss.dead) lv.boss.think(dt, this);
     }
     if (this.invuln > 0) this.invuln -= dt;
-    if (playing) this.move(dt);
+    if (playing) { this.move(dt); if (this.ram) this.ramUp(); }
     const bs = this.bodyList();
     for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.touchHero = false; b.beginStep(dt); }
     hero.springHit = null; hero.rubber = 0;
@@ -455,7 +490,7 @@ class Game {
     this.spikes(); this.fireStep(dt); this.fireTouch();
     if (this.lv !== lv) return;   // the fire ended a bonus level
     this.shots(dt); this.collect(dt); this.gun(dt);
-    if (this.combo > 0 && (H.wallMask & 8) && !H.springHit) this.payCombo();   // only a floor ends a combo
+    if (this.combo > 0 && (H.wallMask & 8) && !H.springHit && !this.power('rainbow')) this.payCombo();   // only a floor ends a combo; a rainbow's runs on till it is over
     const near = (o, r) => Math.hypot(H.cx - o.x, H.cy - o.y) < r;
     if (lv.portal && near(lv.portal, lv.portal.r + 0.5 * H.R)) { this.levelClear(); return; }
     const inDoor = (d, m) => H.cx > d.x0 - m && H.cx < d.x1 + m && H.cy > d.y0 - m && H.cy < d.y1 + m;
@@ -474,7 +509,15 @@ class Game {
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = H.rigVy - b.rigVy;
     const above = (dy > STOMP.above * (H.R + b.R) && dy > dx * STOMP.slope && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * (H.R + b.R));   // from over it, or falling onto it
     const can = e === this.lv.boss ? e.angry <= 0 : e.def.stomp;
-    if (above && can) this.stomp(e); else this.hurt(H.cx - b.cx, H.cy - b.cy);
+    if (above && can) this.stomp(e); else if (this.power('rainbow') && e !== this.lv.boss) this.zap(e);
+    else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
+    else this.hurt(H.cx - b.cx, H.cy - b.cy);
+  }
+  zap(e) {   // a rainbow hero's touch: the enemy pops, in all the inks
+    const b = e.body;
+    this.kill(e, true);
+    sparkFx(b.cx, b.cy, 18, -Math.PI / 2, Math.PI, [200, 600], [1.6, 3.6], [0.35, 0.7], RAINBOW_INK, 0.8); fx.ring(b.cx, b.cy, 1.4 * this.R, INK.white);
+    this.hitstop = Math.max(this.hitstop, 0.03); shake.add(3); sound.play('stomp', 0.9, 1.15 + 0.06 * Math.min(this.combo, 10));
   }
   stomp(e) {
     const H = this.hero, lv = this.lv, boss = e === lv.boss;
@@ -527,6 +570,8 @@ class Game {
       setVel(m.body, d * 3 * this.R, -4 * this.R); lv.enemies.push(m); lv.foeTotal++;
     }
     if (byHero) { lv.foeKilled++; this.kills++; this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo); }
+    sparkFx(b.cx, b.cy, 10 + 2 * Math.min(this.combo, 8), -Math.PI / 2, Math.PI, [150, 480], [1.5, 3.5], [0.3, 0.6], [b.color.base, INK.white], 0.8);   // every kill bursts, the more the longer the combo
+    if (byHero) shake.add(1.5 + 0.5 * Math.min(this.combo, 8));
   }
   hitBoss() {
     const bs = this.lv.boss, b = bs.body;
@@ -540,14 +585,14 @@ class Game {
     this.lv.shots.length = 0;
     this.invuln = BOSS.winDelay + 1; this.winT = BOSS.winDelay;
   }
-  drop(x, y, n) {
+  drop(x, y, n, v = 1) {
     for (let k = 0; k < n; k++) {
       const a = -Math.PI / 2 + rand(-1.2, 1.2), sp = COIN.burst * rand(0.6, 1.25);
-      this.lv.coins.push({ x, y, v: 1, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: rand(0, TAU) });
+      this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: rand(0, TAU) });
     }
   }
   hurt(dx, dy) {
-    if (this.invuln > 0 || this.state !== 'play') return false;
+    if (this.invuln > 0 || this.power('rainbow') || this.state !== 'play') return false;
     const H = this.hero, d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
     if (!this.bonus) this.hp--;   // a bonus level costs no hearts
@@ -649,13 +694,25 @@ class Game {
     f.y = Math.max(f.y, H.maxY + FIRE.back * view.h); f.warn = null;   // and sinks back: a throw into a ceiling must not land in it again
   }
   // A fizz candy taken, the hero shoots by itself for a while: at the nearest enemy or blob in range.
+  power(k) { return this.gunT > 0 && this.pow === k; }   // a candy at work
+  take(kind) {   // one candy at a time: a new one takes over, the same one starts again
+    if (this.power('rainbow') && kind !== 'rainbow') this.powerEnd();   // a rainbow cut short still ends safely
+    this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.gunCD = 0; this.ram = false;
+    if (kind === 'rainbow') this.invuln = 0;   // a hit's blink would let enemies through untouched
+    this.hint(kind);
+  }
+  powerEnd() {   // run out; after the rainbow a moment of the usual safety, so the crowd it was ploughing through does not hit at once
+    if (this.pow === 'rainbow') { this.invuln = Math.max(this.invuln, RAINBOW.grace); fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.6, 0.8); }
+    this.pow = null; this.ram = false;
+  }
   gun(dt) {
     const lv = this.lv, H = this.hero, R = this.R;
     for (const p of lv.fizz || []) if (!p.taken && Math.hypot(H.cx - p.x, H.cy - p.y) < p.r + 0.8 * H.R) {
-      p.taken = true; this.gunMax = this.gunT = GUN.time + this.mods.gun; this.gunCD = 0;
-      fx.ring(p.x, p.y, 1.4 * R, INK.coin); sound.play('buy'); haptics.buzz(14); this.hint('fizz');
+      p.taken = true; this.take(p.kind || 'fizz');
+      fx.ring(p.x, p.y, 1.4 * R, INK.coin); sound.play('buy'); haptics.buzz(14);
     }
-    if (this.gunT > 0 && (this.gunT -= dt) > 0 && (this.gunCD -= dt) <= 0) {
+    if (this.gunT > 0 && (this.gunT -= dt) <= 0) this.powerEnd();
+    if (this.power('fizz') && (this.gunCD -= dt) <= 0) {
       let best = null, bd = GUN.range * R;
       for (const e of lv.enemies) { const d = Math.hypot(e.body.cx - H.cx, e.body.cy - H.cy); if (d < bd) { bd = d; best = [e.body.cx, e.body.cy]; } }
       for (const s of lv.shots) { const d = Math.hypot(s.x - H.cx, s.y - H.cy); if (d < bd) { bd = d; best = [s.x, s.y]; } }
@@ -697,7 +754,8 @@ class Game {
         c.vx += ((dx / d) * sp - c.vx) * f; c.vy += ((dy / d) * sp - c.vy) * f;
       } else if (d < mR && !c.drop) { c.moving = true; c.vx += (dx / d) * COIN.pull * dt; c.vy += (dy / d) * COIN.pull * dt; }
       if (c.moving) { if (!home) { c.vx *= k; c.vy *= k; } c.x += c.vx * dt; c.y += c.vy * dt; }
-      if (d < H.R * 0.85 + (c.v > 1 ? 1.4 : 1) * cr) { cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
+      if (d < H.R * 0.85 + (c.v > 1 ? 1.4 : 1) * cr && !(c.drop && c.t < COIN.home)) {   // a dropped one only once its burst is over: a combo's fountain is seen
+        cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
     }
   }
   payCombo() {
@@ -706,8 +764,9 @@ class Game {
     let rw = null;
     for (const c of COMBO) if (n >= c.at - s) rw = c;
     if (!rw) return;
-    const pay = rw.coins * ((this.bonus && this.bonus.comboMul) || 1);
-    this.coins += pay;
+    const pay = rw.coins * ((this.bonus && this.bonus.comboMul) || 1), H = this.hero;
+    this.drop(H.cx, H.minY, pay / 5, 5);   // out of the hero as big coins that fly back in: the reward seen (every reward is a multiple of 5)
+    sparkFx(H.cx, H.minY, Math.min(36, 6 + 3 * n), -Math.PI / 2, 0.9, [250, 650], [1.5, 3.5], [0.4, 0.8], [INK.coin, INK.coinD, INK.white], 1); shake.add(rw.hp ? 6 : 3);
     if (rw.hp) this.heal(rw.hp);
     ui.toast(tf('comboPay', { n, c: pay }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);
     haptics.buzz(18); sound.play('combo');
@@ -744,6 +803,7 @@ class Game {
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
+    this.bankDrops();   // in the purse at once: they are for the shop in there
     this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false;
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R);
     aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble');
@@ -811,6 +871,7 @@ class Game {
   }
   endBonus(why) {
     if (!this.bonus) return;
+    if (this.combo > 0) this.payCombo();   // a combo running (a rainbow holds one) is paid
     this.bankDrops();
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
     const got = this.coins - this.bonusCoins;
@@ -867,6 +928,11 @@ class Game {
   }
   frame(dt, alpha, now) {
     const lv = this.lv, b = this.hero;
+    const rb = this.power('rainbow') && this.state !== 'dead', tl = this.tail, last = tl[tl.length - 1];   // frame runs on under the revive dialog, gun() does not
+    b.color = rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
+    if (last && Math.hypot(b.cx - last[0], b.cy - last[1]) > 4 * this.R) tl.length = 0;   // a respawn or a door: no streak across the screen
+    else if (rb && (!last || Math.hypot(b.cx - last[0], b.cy - last[1]) > RAINBOW.gap * this.R)) tl.push([b.cx, b.cy]);
+    while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after
     this.stateT += dt;
     if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else ui.cards(this.offer()); }
     if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
@@ -1112,7 +1178,7 @@ const ui = {
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
     const gun = $('gun'), left = g.gunT > 0 && g.state === 'play' ? Math.ceil((g.gunT / g.gunMax) * 10) : 0;   // the fizz left, in tenths, blinking near the end
     gun.classList.toggle('on', left > 0);
-    if (left) { gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
+    if (left) { gun.dataset.k = g.pow; gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
     const m = Math.floor(g.climbed + g.levelM);
     if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
     const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.world >= WORLDS.length ? L2(SUMMIT.name) : (g.world + 1) + '-' + (g.stage + 1);   // a bonus level counts its seconds down
@@ -1490,6 +1556,7 @@ window.__up = {
   version: VERSION,
   tuning: { HERO, MOVE, JUMP, LEVEL, CAM, HEALTH, STOMP, COMBO, COIN, STICK, WORLD, ENEMY, WORLDS, BOSS },
   get game() { return game; },
+  candy(kind) { game.take(kind); return { pow: game.pow, t: game.gunT }; },   // a candy's power at once, for checks
   get state() {
     const g = game, lv = g.lv;
     return { state: g.state, kind: lv.kind, world: g.world, stage: g.stage, seed: g.seed, cam: Math.round(lv.cam), hp: g.hp, maxHp: g.maxHp, coins: g.coins,

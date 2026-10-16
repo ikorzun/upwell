@@ -62,9 +62,18 @@ const REVIVE = { price: 50, grow: 2, hp: 2, invuln: 2.5 };
 // testers found stomps too exact).
 const STOMP = { bounce: 1.0, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
 // A fizz candy, found once or twice a level (at `at` of its height, from..to), makes the hero shoot by
-// itself for `time` s (+`plus` a Long fizz): a bullet every `every` s at the nearest enemy or blob within
+// itself for `time` s (+`plus` a Long charge): a bullet every `every` s at the nearest enemy or blob within
 // `range` R, flying `speed` R/s; it stops at a block and breaks a crumbling one.
 const GUN = { time: 5, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at: [[0.22, 0.4], [0.58, 0.78]] };
+// Rock candy: for `time` s a double jump (an air jump, or a jump off the underside of a ledge) rams up: a solid ledge no taller than
+// `maxH` tiles found `reach` R over the hero (`look` R off a ceiling) breaks before it is met, its enemies with it, `coins` once ever,
+// the hero kicked on up at `kick` of a jump; it is back `back` s later, or at once under a hero coming down onto it.
+const SMASH = { time: 8, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 2.5, coins: 2, hitstop: 0.05, shake: 5 };
+// Rainbow: for `time` s nothing hurts and an enemy touched pops (from above it is still a stomp); the hero cycles the six inks every
+// `cycle` s (`slow` in its last second), a tail of up to `n` points `gap` R apart trails it in bands `band` R wide, shorter over the
+// last `fade` s; then `grace` s of the usual safety.
+const RAINBOW = { time: 6, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, fade: 1.5, grace: 0.8 };
+const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, one for all its coins, one for all its enemies; `coins` pays for 1, 2, 3.
@@ -105,6 +114,7 @@ const PAL = { black: hex('#141414'), red: hex('#e73228'), blue: hex('#48acf8'), 
 // taken (coins, items), red is danger (enemies, spikes, fire), white the hero and the edges; a
 // surface that behaves differently (ice, moss, rubber, crumbling, moving, springs) has a colour of its own.
 const INK = { spike: PAL.red, coin: PAL.yellow, coinD: PAL.orange, fire: PAL.red, flame: PAL.orange, white: PAL.white, dark: PAL.black };
+const RAINBOW_INK = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'].map((id) => PAL[id]);   // the one thing in all the inks at once
 const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
   boss: { id: 'boss', base: PAL.purple, deep: PAL.black },
@@ -153,8 +163,8 @@ const WORLDS = [
   { id: 'cave', name: { ru: 'Пещера', en: 'Cave' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
     chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2 },
     foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
-    intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], news: { ru: 'мох и пружины', en: 'moss and springs' } },
-      { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], news: { ru: 'осыпь, резина и лазуны', en: 'crumbling blocks, rubber and climbers' } },
+    intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { ru: 'мох и пружины', en: 'moss and springs' } },
+      { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'fizz'], news: { ru: 'осыпь, резина и лазуны', en: 'crumbling blocks, rubber and climbers' } },
       { chunks: ['icewall', 'lift'], news: { ru: 'лёд, ездящие планки и ежи', en: 'ice, moving planks and hedgehogs' } }] },
   { id: 'ice', name: { ru: 'Ледник', en: 'Glacier' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1 },
@@ -205,7 +215,7 @@ const UPGRADES = [
   { id: 'legs', stack: true, name: { ru: ['Сильные ноги', 'Прыжок выше'], en: ['Strong legs', 'Jump higher'] }, apply: (g) => { g.mods.jump *= 1.08; } },
   { id: 'member', name: { ru: ['Клубная карта', 'Скидка 25% в лавках'], en: ['Member card', '25% off in shops'] }, apply: (g) => { g.mods.discount *= 0.75; } },
   { id: 'iron', name: { ru: ['Железные подошвы', 'Шипы снизу не ранят'], en: ['Iron soles', 'Floor spikes do not hurt'] }, apply: (g) => { g.mods.iron = true; } },
-  { id: 'long', stack: true, name: { ru: ['Долгий заряд', 'Шипучка действует на 2 с дольше'], en: ['Long fizz', 'A fizz candy lasts 2 s longer'] }, apply: (g) => { g.mods.gun += GUN.plus; } },
+  { id: 'long', stack: true, name: { ru: ['Долгий заряд', 'Конфеты действуют на 2 с дольше'], en: ['Long charge', 'Candies last 2 s longer'] }, apply: (g) => { g.mods.gun += GUN.plus; } },
   { id: 'cool', name: { ru: ['Огнеупорность', 'Огонь растёт медленнее и реже плюётся'], en: ['Fireproof', 'The fire rises slower and spits less'] }, apply: (g) => { g.mods.fire *= 0.6; } },
 ];
 // A shop shows three of these; prices grow by half a price a world.
@@ -243,6 +253,8 @@ ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
 ICONS.fizz = '............/............/...yyyyyy.../o.ywwyyyyy.o/ooywyyyyyyoo/oooyyyyyyooo/oooyyyyyyooo/ooyyyyyyyyoo/o.yyyyyyyy.o/...yyyyyy.../............/............';
 ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.maxhp = ICONS.heart;
+ICONS.smash = '.s........s./..s......s../...yyyyyy.../o.ywwkyyyy.o/ooywyykyyyoo/oooyykyyyooo/oooyyykyyooo/ooyyykyyyyoo/o.yyyykyyy.o/...yyyyyy.../............/............';   // a cracked candy
+ICONS.rainbow = '............/............/...rrrrrr.../w.rwrrrrrr.w/wwooooooooww/wwwyyyyyywww/wwwggggggwww/wwbbbbbbbbww/w.pppppppp.w/...pppppp.../............/............';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
@@ -627,6 +639,7 @@ class Level {
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.fizz = []; this.bullets = [];
     this.fizzAt = o.kind === 'well' && o.height ? GUN.at.map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies
+    this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY));   // and which kinds, by a generator of their own: the shaft is laid as before
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
     this.coinTotal = 0; this.coinsTaken = 0; this.foeTotal = 0; this.foeKilled = 0;   // for the level's stars
@@ -717,7 +730,7 @@ class Level {
     this.coinTotal += this.coins.length - lens[3]; this.foeTotal += this.spawns.length - lens[4];   // as laid at last
     if (this.fizzAt.length && this.top - (lift + c.rows.length) * this.tile < this.fizzAt[0] && c !== CHUNKS.pocket) {   // a candy due: over a steady ledge of this chunk
       const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile);
-      if (ok.length) { const r = ok[(this.rng() * ok.length) | 0]; this.fizz.push({ x: (r.x0 + r.x1) / 2, y: r.y0 - 1.3 * this.R, r: 0.5 * this.R, taken: false }); this.fizzAt.shift(); }
+      if (ok.length) { const r = ok[(this.rng() * ok.length) | 0]; this.fizz.push({ x: (r.x0 + r.x1) / 2, y: r.y0 - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
     }
     const h = (lift + c.rows.length) * this.tile;
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
@@ -886,10 +899,12 @@ class Level {
         if (r.hit && !r.crumbling) { r.crumbling = true; sound.play('crumble', 0.6); }
         r.hit = false;
         if (r.crumbling && (r.t += dt) > CRUMBLE.time) { r.gone = true; r.t = 0; crumbleFx(r, this.theme.crumble); }
-      } else if (r.crumble && (r.t += dt) > CRUMBLE.back) {   // back again, once the hero is out of its way
-        const h = g.hero;
-        if (h.maxX < r.x0 || h.minX > r.x1 || h.maxY < r.y0 || h.minY > r.y1) { r.gone = false; r.crumbling = false; r.t = 0; }
+      } else if (r.crumble || r.broke) {   // back again once the hero is out of its way: a crumbled block in a while, a smashed one sooner, or at once under a hero coming down onto it
+        const h = g.hero, over = r.broke && h.maxY < r.y0 && h.rigVy > 0;
+        const free = (q) => q.maxX < r.x0 || q.minX > r.x1 || q.maxY < r.y0 || q.minY > r.y1;   // a smashed one round an enemy neither
+        if (((r.t += dt) > (r.broke ? SMASH.back : CRUMBLE.back) || over) && free(h) && (!r.broke || this.enemies.every((e) => free(e.body)))) { r.gone = r.crumbling = r.broke = false; r.t = 0; r.flash = 0.12; }
       }
+      if (r.flash > 0) r.flash -= dt;
       if (r.spring && r.t > 0) r.t = Math.max(0, r.t - dt);
     }
     const f = this.fire;
@@ -1027,6 +1042,7 @@ function burstFx(x, y, R, c) {
 // y down), `sp` px/s (from, to), `size` game px (from, to), `life` s (from, to), in `inks`, pulled down at
 // `g` of a blob's fall. The juice of a jump, a coin, a stomp.
 function sparkFx(x, y, n, a, spread, sp, size, life, inks, g) {
+  if (bits.length > 400) return;   // a phone's budget
   for (let i = 0; i < n; i++) {
     const t = a + rand(-spread, spread), v = rand(sp[0], sp[1]);
     bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: rand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: rand(life[0], life[1]), g, drag: 4 });
@@ -1044,8 +1060,12 @@ function splatFx(x, y, R, c, n = 9) {
   for (let i = 0; i < n; i++) { const a = rand(0, TAU), sp = rand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, rand(0.18, 0.32) * R, rand(0.35, 0.6), k, 0.95, 0); }
   fx.add(x, y, 0, 0, R * 0.9, 0.35, lighten(c, 0.3), 0.7, 2);
 }
-function crumbleFx(r, c) {
-  for (let x = r.x0 + 6; x < r.x1; x += 12) fx.add(x, (r.y0 + r.y1) / 2, rand(-40, 40), rand(30, 120), rand(4, 8), rand(0.4, 0.7), c, 0.9, 0);
+function crumbleFx(r, c, up) {   // a block breaking up: puffs and solid chunks of it in its ink and white, dropping away (flung up when smashed from below)
+  const y = (r.y0 + r.y1) / 2;
+  for (let x = r.x0 + 6; x < r.x1; x += 12) {
+    fx.add(x, y, rand(-40, 40), rand(30, 120), rand(4, 8), rand(0.4, 0.7), c, 0.9, 0);
+    sparkFx(x, y, up ? 3 : 2, up ? -Math.PI / 2 : Math.PI / 2, up ? 1.3 : 0.8, up ? [150, 560] : [20, 140], [1.5, 4], [0.5, 1], [c, c, INK.white], 1);
+  }
 }
 
 // ── Drawing ──────────────────────────────────────────────────
@@ -1320,7 +1340,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(r.x0, r.y1 - hh - 0.2 * R, r.x1, r.y1 - hh, th.spring, 1, 0.1 * R);
       continue;
     }
-    const c = r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);
+    const c = r.flash > 0 ? INK.white : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
     if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
@@ -1355,14 +1375,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1);
     icon(p.item.id, p.x, y, a, 2);
   }
-  for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // fizz candies, bobbing in a glow
+  for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
     const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
-    F(p.x, y, p.r * 2, 0, 0, p.r * 2, INK.coin, 0.3, 1); icon('fizz', p.x, y, 1, Math.max(1, Math.round(2.4 / PIX.size)));   // about 24-36 px across
+    F(p.x, y, p.r * 2, 0, 0, p.r * 2, INK.coin, 0.3, 1); icon(p.kind || 'fizz', p.x, y, 1, Math.max(1, Math.round(2.4 / PIX.size)));   // about 24-36 px across
   }
   for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
     if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
+  }
+  const tl = g.tail, hb = g.hero, bw = RAINBOW.band * R;   // a rainbow's tail: six bands along the hero's way, fading to its end
+  for (let i = 0; i < tl.length; i++) {
+    const [x0, y0] = tl[i], [x1, y1] = i + 1 < tl.length ? tl[i + 1] : [hb.cx, hb.cy], l = Math.hypot(x1 - x0, y1 - y0) || 1, ux = (x1 - x0) / l, uy = (y1 - y0) / l, hl = l / 2 + PIX.size;
+    for (let k = 0; k < 6; k++) { const o = (k - 2.5) * bw; F((x0 + x1) / 2 - uy * o, (y0 + y1) / 2 + ux * o, ux * hl, uy * hl, -uy * bw / 2, ux * bw / 2, RAINBOW_INK[k], (i + 1) / tl.length, 10, hl, bw / 2, 0); }
   }
   const back = this.nf;
   const list = g.bodyList(), hero = g.hero, heroOff = g.state === 'dead' || (g.invuln > 0 && Math.floor(g.invuln / HEALTH.blink) % 2 === 1);   // blinking, or burst
@@ -1396,7 +1421,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
   }
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
-    disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, 0.15 * R, INK.white, 1);
+    disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, (g.power('smash') ? 0.22 : 0.15) * R, g.power('smash') ? INK.flame : INK.white, 1);   // orange: the next one rams
   for (let k = 0; k < nDots; k++) { const u = k / Math.max(1, JUMP.dots - 1); disc(dots[2 * k], dots[2 * k + 1], (2.4 - 1.2 * u) * PIX.size, INK.white, 1); }   // the slingshot's arc: solid dots that shrink (tiny see-through ones would dither to crumbs)
   const nFront = this.nf - front;
   gl.bindVertexArray(null);

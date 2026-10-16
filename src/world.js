@@ -253,11 +253,11 @@ const ICONS = {
 };
 ICONS.star = '.....yy...../.....yy...../....yyyy..../yyyyyyyyyyoo/.yyyyyyyyoo./..yyyyyyoo../...yyyyoo.../..yyyyyyoo../..yyy..yoo../.yyy....ooo./.yy......oo./............';
 ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
-ICONS.fizz = '............/............/...yyyyyy.../o.ywwyyyyy.o/ooywyyyyyyoo/oooyyyyyyooo/oooyyyyyyooo/ooyyyyyyyyoo/o.yyyyyyyy.o/...yyyyyy.../............/............';
+ICONS.fizz = '............/............/..........w./.yyyyyyyyy../.ywwyyyyyyw./.yyyyyyyyy../.yyyoo....../.yyyo.o...../.yyyooo...../.yyy......../.ooo......../............';   // what it does: a gun, shots flying
 ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.maxhp = ICONS.heart;
-ICONS.smash = '.s........s./..s......s../...yyyyyy.../o.ywwkyyyy.o/ooywyykyyyoo/oooyykyyyooo/oooyyykyyooo/ooyyykyyyyoo/o.yyyykyyy.o/...yyyyyy.../............/............';   // a cracked candy
-ICONS.rainbow = '............/............/...rrrrrr.../w.rwrrrrrr.w/wwooooooooww/wwwyyyyyywww/wwwggggggwww/wwbbbbbbbbww/w.pppppppp.w/...pppppp.../............/............';
+ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
+ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round

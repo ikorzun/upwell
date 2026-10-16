@@ -89,6 +89,7 @@
     opacity: 0; transition: opacity 0.2s steps(2), transform 0.2s steps(2);
   }
   #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #toast .ico { --p: 3; margin-right: 10px; }   /* a candy's picture before its note */
   #labels .tag { position: absolute; left: 0; top: 0; padding: 4px 6px; background: var(--ink); clip-path: var(--notch); }
   #labels .tag.dim { color: var(--gray); }
   #floorHint { position: absolute; left: 0; top: 0; display: none; --p: 3; color: var(--ink); padding: 8px 12px; background: var(--gray); clip-path: var(--notch); }   /* written on the first floor, on a plain plate over its stripes */

@@ -15,8 +15,8 @@ const STR = {
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
-    seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall', seen_fizz: 'Fizz: while it lasts, you shoot by yourself',
-    seen_smash: 'Rock candy: a jump smashes the block overhead', seen_rainbow: 'Rainbow: nothing hurts, enemies pop at a touch',
+    seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
+    got_fizz: 'Fizz! You shoot by yourself · {s} s', got_smash: 'Rock candy! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
@@ -31,8 +31,8 @@ const STR = {
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
-    seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене', seen_fizz: 'Шипучка: пока шипит, выстрелы летят сами',
-    seen_smash: 'Крушилка: прыжок пробивает блок над головой', seen_rainbow: 'Радуга: ничто не ранит, враги лопаются от касания',
+    seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене',
+    got_fizz: 'Шипучка! Стреляешь сам · {s} с', got_smash: 'Крушилка! Прыжок ломает блоки · {s} с', got_rainbow: 'Радуга! Ничто не ранит, враги лопаются · {s} с',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
@@ -703,7 +703,7 @@ class Game {
     if (this.power('rainbow') && kind !== 'rainbow') this.powerEnd();   // a rainbow cut short still ends safely
     this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.gunCD = 0; this.ram = false;
     if (kind === 'rainbow') this.invuln = 0;   // a hit's blink would let enemies through untouched
-    this.hint(kind);
+    ui.toast(tf('got_' + kind, { s: Math.round(this.gunT) }), 2200, kind);   // each time: its picture, what it does, for how long
   }
   powerEnd() {   // run out; after the rainbow a moment of the usual safety, so the crowd it was ploughing through does not hit at once
     if (this.pow === 'rainbow') { this.invuln = Math.max(this.invuln, RAINBOW.grace); fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.6, 0.8); }
@@ -1130,9 +1130,9 @@ const ui = {
     p.append(box, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('again'), 'big thumb', () => game.startRun()));   // Again at the bottom, Menu as big over it
   },
   toastTimer: 0,
-  toast(text, ms = 1500) {
+  toast(text, ms = 1500, icon) {   // `icon`: an ICONS picture before the words
     const e = $('toast');
-    e.replaceChildren(px(text, Math.floor((view.w - 64) / 2))); e.classList.add('show');
+    e.replaceChildren(...(icon ? [iconEl(icon)] : []), px(text, Math.floor((view.w - (icon ? 110 : 64)) / 2))); e.classList.add('show');
     clearTimeout(this.toastTimer);
     if (ms) this.toastTimer = setTimeout(() => e.classList.remove('show'), ms);   // 0 keeps it up
   },

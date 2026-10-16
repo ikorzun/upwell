@@ -692,13 +692,34 @@ class Level {
       shuffled(rnd, SHOP_ITEMS).slice(0, 3).forEach((item, k) => {
         this.pickups.push({ x: cx + (k - 1) * 0.3 * W, y: at(0.45), r: 0.6 * R, item, sold: false, near: false });   // centred, a third of the width apart, as the user's sketch has them
       });
-    } else {
-      const y = at(0.42);
-      this.rects.push(this.box(cx - W * 0.24, y, cx + W * 0.24, y + LEVEL.thick * R, {}));
-      for (let row = 0; row < 4; row++) for (let k = 0, n = 4 - row; k < n; k++) {   // a heap of coins on it
-        this.coin(cx + (k - (n - 1) / 2) * 1.1 * R, y - 0.75 * R - row * 1.0 * R, row === 3 || rnd() < 0.15 ? 5 : 1);
+    } else {   // a stash: one of five, each with its own lot of coins (user: one was dull)
+      const ledge = (x0, x1, y, f = {}) => this.rects.push(this.box(x0, y, x1, y + (f.plank ? LEVEL.plank : LEVEL.thick) * R, f));
+      const row = (y, n, gap, v = 1) => { for (let k = 0; k < n; k++) this.coin(cx + (k - (n - 1) / 2) * gap * R, y, v); };
+      const side = (f0, n) => { for (let k = 0; k < n; k++) { this.coin(this.l + 1.3 * R, at(f0 + 0.12 * k), 1); this.coin(this.r - 1.3 * R, at(f0 + 0.12 * k), 1); } };
+      this.stash = (rnd() * 5) | 0;
+      if (this.stash === 0) {   // the heap: a pyramid on a ledge, the top a big one, and two columns up the walls (~27)
+        const y = at(0.42);
+        ledge(cx - W * 0.24, cx + W * 0.24, y);
+        for (let r = 0; r < 4; r++) for (let k = 0, n = 4 - r; k < n; k++) this.coin(cx + (k - (n - 1) / 2) * 1.1 * R, y - 0.75 * R - r * 1.0 * R, r === 3 || rnd() < 0.15 ? 5 : 1);
+        side(0.3, 4);
+      } else if (this.stash === 1) {   // the stairs: three ledges up from side to side, a row on each, a big one at the top (~17)
+        [[0.22, -1], [0.44, 1], [0.66, -1]].forEach(([f, d], i) => {
+          const x = cx + d * W * 0.2, y = at(f); ledge(x - W * 0.2, x + W * 0.2, y);
+          for (let k = 0; k < 4; k++) this.coin(x + (k - 1.5) * 1.1 * R, y - 0.75 * R, i === 2 && k === (d < 0 ? 0 : 3) ? 5 : 1);
+        });
+      } else if (this.stash === 2) {   // the ring: a circle of coins round a big one, in the air over a plank to jump from (~17)
+        const y = at(0.5);
+        ledge(cx - W * 0.16, cx + W * 0.16, at(0.22), { plank: true });
+        for (let k = 0; k < 12; k++) { const a = (k / 12) * TAU; this.coin(cx + Math.cos(a) * 2.6 * R, y + Math.sin(a) * 2.6 * R, 1); }
+        this.coin(cx, y, 5);
+      } else if (this.stash === 3) {   // the hoard: few, all big: three on the floor, three on a ledge high in the middle (30)
+        row(this.floor - 0.75 * R, 3, 2.2, 5);
+        ledge(cx - W * 0.18, cx + W * 0.18, at(0.5)); row(at(0.5) - 0.75 * R, 3, 1.6, 5);
+      } else {   // the rain: many small ones hanging in rows, two planks to climb them by (~24)
+        ledge(this.l, this.l + W * 0.28, at(0.3), { plank: true }); ledge(this.r - W * 0.28, this.r, at(0.52), { plank: true });   // clear of the rows
+        for (let r = 0; r < 4; r++) row(at(0.38 + 0.11 * r), r & 1 ? 5 : 6, 1.2);
+        side(0.22, 1);
       }
-      for (let k = 0; k < 4; k++) { this.coin(this.l + 1.3 * R, at(0.3 + 0.12 * k), 1); this.coin(this.r - 1.3 * R, at(0.3 + 0.12 * k), 1); }
       if (rnd() < 0.45) this.pickups.push({ x: cx, y: at(0.8), r: 0.6 * R, item: GIFT, sold: false, near: false });
     }
   }

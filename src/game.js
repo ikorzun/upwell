@@ -443,6 +443,9 @@ class Game {
       if (lv.boss && !lv.boss.dead) lv.boss.think(dt, this);
     }
     if (this.invuln > 0) this.invuln -= dt;
+    const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
+    if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
+    if (hang) setVel(hero, 0, 0);
     if (playing) { this.move(dt); if (this.ram) this.ramUp(); }
     const bs = this.bodyList();
     for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.touchHero = false; b.beginStep(dt); }
@@ -1252,16 +1255,17 @@ padPart(dpad, (e) => {
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
 const act = $('act'), jumpBtn = $('jumpBtn');
-// The hybrid (Controls: hybrid, the keys otherwise): pressed in the air with a jump left, ▲ aims it: pulled
-// back like a slingshot the dots show where it goes (the further, the stronger: `min` of a jump to all of it at
-// `full` of the width), held still past `hold` s they show the plain jump; let go and it goes. A quick tap is
-// the plain jump, no dots. On the ground ▲ is the usual jump.
+// The hybrid (Controls: hybrid, the keys otherwise): pressed in the air with a jump left, or on a wall, ▲ aims
+// it: pulled back like a slingshot the dots show where it goes (the further, the stronger: `min` of a jump to all
+// of it at `full` of the width), held still past `hold` s they show the plain jump; while they show the hero hangs
+// where it is; let go and it goes. A quick tap is the plain jump, no dots. On the ground ▲ is the usual jump.
 const HYB = { hold: 0.18, full: 0.18, min: 0.6 };
 padPart(act, (e) => {
   jumpBtn.classList.toggle('on', !!e);
   const g = game, x = e ? e.clientX - view.left : 0;
   if (e && aim.on && aim.hyb) { aim.x = x; aim.y = e.clientY; return; }   // pulling
-  if (e && save.aim && !input.jump && g.state === 'play' && g.sinceContact > JUMP.coyote && g.air > 0) {   // pressed in the air: aim
+  const wall = g.sinceContact <= JUMP.coyote && (g.touch === 1 || g.touch === 2);
+  if (e && save.aim && !input.jump && g.state === 'play' && ((g.sinceContact > JUMP.coyote && g.air > 0) || wall)) {   // pressed in the air or on a wall: aim
     Object.assign(aim, { on: true, hyb: true, id: e.pointerId, sx: x, x, sy: e.clientY, y: e.clientY, p: 0, t0: performance.now() });
     return;
   }
@@ -1434,7 +1438,10 @@ function aimUpdate() {
   const dx = aim.sx - aim.x, dy = aim.sy - aim.y, len = Math.hypot(dx, dy);
   if (len < JUMP.deadZone) {   // not pulled: no dots, but in the hybrid after a moment the plain jump's
     aim.p = 0;
-    if (aim.hyb && performance.now() - aim.t0 > HYB.hold * 1000) { aim.p = 1; aim.ux = 0; aim.uy = -1; aim.vx = game.hero.rigVx; aim.vy = -game.vjump; }
+    if (aim.hyb && performance.now() - aim.t0 > HYB.hold * 1000) {   // off a wall up and away from it, in the air straight up
+      const t = game.touch, wall = game.sinceContact <= JUMP.coyote && (t === 1 || t === 2);
+      aim.p = 1; aim.ux = 0; aim.uy = -1; aim.vx = wall ? (t === 1 ? 1 : -1) * JUMP.wallX * game.R : game.hero.rigVx; aim.vy = -game.vjump * (wall ? JUMP.wallUp : 1);
+    }
     return;
   }
   let ux = dx / len, uy = dy / len;
@@ -1522,6 +1529,10 @@ canvas.addEventListener('lostpointercapture', (e) => aimRelease(e, false));
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.togglePause(true); });
 document.addEventListener('gesturestart', (e) => e.preventDefault());
+// Safari (user: it got in the way): a finger anywhere over the game, the stick and swipes included, must never start a
+// selection, the loupe or a callout. Only buttons keep their default: their click needs it. Pointer events still come.
+for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button'))) e.preventDefault(); }, { passive: false });
+for (const type of ['selectstart', 'contextmenu']) document.addEventListener(type, (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
   paused = document.hidden; loop.last = performance.now(); sound.sleep(document.hidden);

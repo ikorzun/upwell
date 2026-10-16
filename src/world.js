@@ -52,15 +52,15 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // costs a heart and puts it back on the last ledge it stood on.
 const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40, keep: 3 };
 const R_PER_M = 2.2;   // a metre of climb is 2.2 hero radii (64 px when the well was 12 tiles), so a level is as many jumps on any screen
-const HEALTH = { start: 4, invuln: 1.0, knock: 640, hitstop: 0.08, blink: 0.09 };
+const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09 };
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
 const REVIVE = { price: 50, grow: 2, hp: 2, invuln: 2.5 };
 // A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. It counts
 // when the hero meets an enemy from over it: its middle `above` of their radii over the enemy's and at least
 // `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
-// testers found stomps too exact). `bounce` was 1.0: the user found the hop off a kill too high.
-const STOMP = { bounce: 0.8, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
+// testers found stomps too exact). `bounce` was 1.0, then 0.8: the user found the hop off a kill too high.
+const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
 // A fizz candy, found once or twice a level (at `at` of its height, from..to), makes the hero shoot by
 // itself for `time` s (+`plus` a Long charge): a bullet every `every` s at the nearest enemy or blob within
 // `range` R, flying `speed` R/s; it stops at a block and breaks a crumbling one.
@@ -261,8 +261,8 @@ ICONS.rainbow = '............/............/...rrrrrr.../w.rwrrrrrr.w/wwoooooooow
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
-// standing on a floor.
-DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 2.0, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
+// standing on a floor, and runnier than at first (firm 2.0; user: it rattled about at speed).
+DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 1.4, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
   face: { eye: [0.3, 0.02], eyeR: [0.075, 0.095], mouth: [0, 0.2], mouthW: 0.13, blush: [0.52, 0.17] } });
 // The new enemies' shapes (y down): a shell's dome, a spitter's drop narrowing to its spout, a
 // splitter's bean of two lobes, a chaser's tall slug.
@@ -304,7 +304,7 @@ const CHUNKS = {
     '............',
     '............',
     '.......#####',
-    '......o.....',
+    '......o~~~~~',
     '.....o......',
     '............',
     '#####.......',
@@ -339,7 +339,7 @@ const CHUNKS = {
     '............',
     '......o.....',
     '.....###....',
-    '............',
+    '.....~~~....',
     '...o........',
     '.###........',
     '............'] },
@@ -360,7 +360,7 @@ const CHUNKS = {
     '............',
     '............',
     '####........',
-    '............',
+    '~~~~........',
     '.....o......',
     '........####',
     '............',
@@ -379,7 +379,7 @@ const CHUNKS = {
     '......######',
     '...o..######',
     '......######',
-    '............',
+    '......~~~~~~',
     '............'] },
   overhang: { d: 2, rows: [
     '............',
@@ -395,7 +395,7 @@ const CHUNKS = {
     '............',
     '............',
     '.......#####',
-    '............',
+    '.......~~~~~',
     '....o.......',
     '............',
     '....o.......',
@@ -410,7 +410,7 @@ const CHUNKS = {
     '............',
     '............',
     '####........',
-    '............',
+    '~~~~........',
     '......o.....',
     '.....CCC....',
     '............',
@@ -431,7 +431,7 @@ const CHUNKS = {
     '............',
     '............',
     '###.........',
-    '............',
+    '~~~.........',
     '............',
     '....MMMM....',
     '............',
@@ -442,7 +442,7 @@ const CHUNKS = {
     '[..........]',
     '[..........]',
     '[.....###..]',
-    '[..........]',
+    '[.....~~~..]',
     '[..........]',
     '[.###......]',
     '[.....o....]',
@@ -542,7 +542,7 @@ const CHUNKS = {
     '...vvv......',
     '............',
     '........###.',
-    '............',
+    '........~~~.',
     '............'] },
 };
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
@@ -923,6 +923,22 @@ class Level {
     for (const b of this.bubbles) if (b.cd > 0) b.cd -= dt;
   }
 }
+
+// The hero is gooier than Gum's other bodies: after each substep its wobble (all but the rigid move and spin) dies
+// away a further `wobble`/s, so a landing, a wall or a knock squashes it without springing it back off (a 10 R drop
+// came back up at 258 px/s and hopped four times; now about 125 and once). The rigid move is untouched: jumps and runs
+// are as they were.
+const GOO = { wobble: 40 };
+const gumFinish = Body.prototype.finishSubstep;
+Body.prototype.finishSubstep = function (h) {
+  gumFinish.call(this, h);
+  if (!this.isHero) return;
+  const n = this.n, x = this.x, y = this.y, vx = this.vx, vy = this.vy, k = Math.exp(-GOO.wobble * h), mx = this.rigVx, my = this.rigVy, w = this.omega;
+  let cx = 0, cy = 0;
+  for (let i = 0; i < n; i++) { cx += x[i]; cy += y[i]; }
+  cx /= n; cy /= n;
+  for (let i = 0; i < n; i++) { const ux = mx - w * (y[i] - cy), uy = my + w * (x[i] - cx); vx[i] = ux + (vx[i] - ux) * k; vy[i] = uy + (vy[i] - uy) * k; }
+};
 
 // ── Contact with the level ───────────────────────────────────
 // Gum's walls(), with the toy's box turned into the well. Surfaces as in Gum: 1 faces +x

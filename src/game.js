@@ -9,7 +9,7 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, tap ▲ to jump; hold ▲ to aim the jump,\na finger beside it leans it like a stick. Land on enemies from above!', play: 'Play',
+    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or a tap to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
     tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
@@ -22,10 +22,10 @@ const STR = {
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
-    hintStick: 'Touch anywhere and lean: a stick to run; tap ▲, lean up or tap to jump;\nhold ▲ to aim the jump with the stick. Land on enemies from above!',
+    hintStick: 'Touch anywhere and lean: a stick to run; ▲, up or a tap to jump,\ntwo quick leans to dash. Land on enemies from above!',
   },
   ru: {
-    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, тап по ▲ — прыжок; зажми ▲ — прицел\nпрыжка, другой палец ведёт его, как стик. Прыгай на врагов сверху!', play: 'Играть',
+    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
     tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
@@ -38,7 +38,7 @@ const STR = {
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
     nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
-    hintStick: 'Коснись где угодно и веди — бег; тап по ▲, вверх или тап — прыжок;\nзажми ▲ — прицел прыжка стиком. Прыгай на врагов сверху!',
+    hintStick: 'Коснись где угодно и веди — бег; ▲, вверх или тап — прыжок,\nдва быстрых наклона — рывок. Прыгай на врагов сверху!',
   },
 };
 let lang = 'en';
@@ -1261,11 +1261,13 @@ const act = $('act'), jumpBtn = $('jumpBtn');
 // (or moved past `slop` px: a pull), that very jump is aimed: the hero hangs where it is (or stands) and the dots show
 // the arc, the plain jump's to begin with; a second finger anywhere leans it like a stick (see aimStick), or ▲ pulled
 // back like a slingshot (the further, the stronger: `min` of a jump to all of it at `full` of the width); let go of ▲
-// and it goes. `hold` is half UIKit's 0.5 s: a jump must not wait long to be told apart.
-const HYB = { hold: 0.25, slop: 10, full: 0.18, min: 0.6 };
+// and it goes. `hold` is half UIKit's 0.5 s: a jump must not wait long to be told apart. `on`: the aim is put away
+// for now (user); off, ▲ is the plain key: a jump as it goes down, higher the longer it is held.
+const HYB = { on: false, hold: 0.25, slop: 10, full: 0.18, min: 0.6 };
 let hyb = null;   // ▲ down, not yet told apart: since when, where
 padPart(act, (e) => {
   jumpBtn.classList.toggle('on', !!e);
+  if (!HYB.on) { input.set('jump', !!e); return; }
   const g = game, x = e ? e.clientX - view.left : 0;
   if (e && aim.on && aim.hyb) { aim.x = x; aim.y = e.clientY; return; }   // pulling
   if (!e) {   // let go: an aimed jump goes where aimed; a tap is the plain jump
@@ -1277,7 +1279,7 @@ padPart(act, (e) => {
   hyb.x = x; hyb.y = e.clientY;
   if (Math.hypot(x - hyb.x0, e.clientY - hyb.y0) > HYB.slop) hybAim(performance.now());   // pulled at once: a slingshot
 });
-function hybCheck(now) { if (hyb && !aim.on && now - hyb.t0 >= HYB.hold * 1000) hybAim(now); }   // held: a long press
+function hybCheck(now) { if (HYB.on && hyb && !aim.on && now - hyb.t0 >= HYB.hold * 1000) hybAim(now); }   // held: a long press
 function hybAim(now) {   // ▲ held or pulled: aim the jump it is (off what the hero touches, or one left in the air)
   const g = game;
   if (aim.on || g.state !== 'play' || (g.sinceContact > JUMP.coyote && g.air <= 0)) return;

@@ -256,6 +256,7 @@ ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
 ICONS.fizz = '............/............/..........w./.yyyyyyyyy../.ywwyyyyyyw./.yyyyyyyyy../.yyyoo....../.yyyo.o...../.yyyooo...../.yyy......../.ooo......../............';   // what it does: a gun, shots flying
 ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.maxhp = ICONS.heart;
+ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
 ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
@@ -675,13 +676,12 @@ class Level {
       this.rects.push(this.box(cx - W * 0.16, at(0.68), cx + W * 0.16, at(0.68) + p, { plank: true }));
       return;
     }
-    // a room: the way back out is the bubble in the middle of the floor
-    this.exit = { x0: cx - DOOR.w * R / 2, x1: cx + DOOR.w * R / 2, y0: this.floor - DOOR.h * R, y1: this.floor, x: cx, y: this.floor - 1.2 * R, armed: false };
-    if (o.kind === 'shop') {   // a plank to jump up through, with room to drop past it at both ends
-      const y = at(0.42);
-      this.rects.push(this.box(this.l + W * 0.25, y, this.r - W * 0.25, y + LEVEL.plank * R, { plank: true }));
+    // a room: the way back out is a hole in the left wall, on the floor, as the doors in the shaft are
+    const dw = DOOR.w * R;
+    this.exit = { x0: this.l - LEVEL.wall, x1: this.l + dw, y0: this.floor - DOOR.h * R, y1: this.floor, x: this.l + dw / 2, y: this.floor - 1.2 * R, side: 1, armed: false };
+    if (o.kind === 'shop') {   // its things in a row a jump up off the floor (walking under them buys nothing), well apart, clear of the way out
       shuffled(rnd, SHOP_ITEMS).slice(0, 3).forEach((item, k) => {
-        this.pickups.push({ x: this.l + W * (0.33 + 0.17 * k), y: y - 1.25 * R, r: 0.5 * R, item, sold: false, near: false });
+        this.pickups.push({ x: this.l + W * (0.4 + 0.24 * k), y: this.floor - 3.3 * R, r: 0.6 * R, item, sold: false, near: false });
       });
     } else {
       const y = at(0.42);
@@ -690,7 +690,7 @@ class Level {
         this.coin(cx + (k - (n - 1) / 2) * 1.1 * R, y - 0.75 * R - row * 1.0 * R, row === 3 || rnd() < 0.15 ? 5 : 1);
       }
       for (let k = 0; k < 4; k++) { this.coin(this.l + 1.3 * R, at(0.3 + 0.12 * k), 1); this.coin(this.r - 1.3 * R, at(0.3 + 0.12 * k), 1); }
-      if (rnd() < 0.45) this.pickups.push({ x: cx, y: at(0.8), r: 0.5 * R, item: GIFT, sold: false, near: false });
+      if (rnd() < 0.45) this.pickups.push({ x: cx, y: at(0.8), r: 0.6 * R, item: GIFT, sold: false, near: false });
     }
   }
   ensure(y) { while (this.top > y) this.addChunk(); }
@@ -1401,7 +1401,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;
     F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1);
-    icon(p.item.id, p.x, y, a, 2);
+    icon(p.item.id, p.x, y, a, 2.4);   // a fifth bigger than at first (user)
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
     const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
@@ -1435,13 +1435,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(lv.l, fy + 0.9 * R, lv.r, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
     box(lv.l, fy + 2.2 * R, lv.r, fy + H + 200, INK.fire, 1, 0, 10, 5);
     const steady = (i, k) => { const q = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return q - Math.floor(q); };   // a tongue's own numbers, the same every frame
-    for (const [c, gap, h0, h1, w0, w1, drift, k] of [[INK.fire, 0.8, 1.0, 2.0, 0.5, 0.85, 0.5, 1], [INK.flame, 0.6, 0.5, 1.25, 0.32, 0.6, -0.8, 2]]) {
+    for (const [c, gap, h0, h1, w0, w1, drift, k, off] of [[INK.fire, 0.7, 1.3, 1.45, 0.5, 0.5, 0.3, 1, 0], [INK.flame, 0.7, 0.8, 0.9, 0.36, 0.36, 0.3, 2, 0.5]]) {   // evener than at first (user)
       const n = Math.ceil(W / (gap * R));
-      for (let i = 0; i < n; i++) {   // each its own width, height and flicker, now and then leaping; drifting along and wrapping round,
-        const a = steady(i, k), b = steady(i, k + 7), f = 5 + 6 * steady(i, k + 3), x = lv.l + ((((i + 0.5) / n) * W + T * drift * R * (0.7 + 0.6 * b)) % W + W) % W;
-        const leap = Math.pow(Math.max(0, Math.sin(T * f * 0.23 + a * 9)), 12), hw = Math.min((w0 + (w1 - w0) * b) * R, x - lv.l, lv.r - x);   // and narrower by a wall
+      for (let i = 0; i < n; i++) {   // alike and evenly set, the front row between the back one's, a gentle flicker, drifting along and wrapping round,
+        const a = steady(i, k), f = 5 + 2 * steady(i, k + 3), x = lv.l + ((((i + 0.5 + off) / n) * W + T * drift * R) % W + W) % W;
+        const hw = Math.min((w0 + (w1 - w0) * a) * R, x - lv.l, lv.r - x);   // and narrower by a wall
         if (hw < 0.5) continue;
-        const hd = ((h0 + (h1 - h0) * a) * R * (0.78 + 0.22 * Math.sin(T * f + a * 6.3)) * (1 + 0.6 * leap)) / 2;
+        const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3))) / 2;
         F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
       }
     }

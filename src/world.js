@@ -76,8 +76,9 @@ const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, f
 const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
-// A level's stars: one for getting out, one for all its coins, one for all its enemies; `coins` pays for 1, 2, 3.
-const STARS = { coins: [1, 2, 5] };
+// A level's stars: one for getting out, the second for `half` its coins, the third for all of them (enemies do not
+// count, user); `coins` pays for 1, 2, 3.
+const STARS = { coins: [1, 2, 5], half: 0.5 };
 // Coins: radius and magnet reach in R. An enemy's burst out at `burst` px/s and after `home` s
 // home in on the hero from anywhere, at `seek` px/s more than its own pace (three times that a
 // second on), turning at `steer`/s: they always get to it.

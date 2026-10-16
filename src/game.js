@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or a tap to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -27,7 +27,7 @@ const STR = {
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
-    tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
+    tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
@@ -839,9 +839,9 @@ class Game {
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
     if (this.combo > 0) this.payCombo();
     this.bankDrops();
-    const lv = this.lv, allCoins = lv.coinsTaken >= lv.coinTotal, allFoes = lv.foeKilled >= lv.foeTotal;   // the stars, paid at once (not for a bonus level)
+    const lv = this.lv, allCoins = lv.coinsTaken >= lv.coinTotal, half = lv.coinsTaken >= STARS.half * lv.coinTotal;   // the stars, paid at once (not for a bonus level)
     if (!this.bonus) {
-      this.stars = { n: 1 + allCoins + allFoes, coins: [lv.coinsTaken, lv.coinTotal], foes: [lv.foeKilled, lv.foeTotal] };
+      this.stars = { n: 1 + half + allCoins, coins: [lv.coinsTaken, lv.coinTotal] };
       this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
     }
     this.climbed += this.levelM; this.levelM = 0;
@@ -1090,9 +1090,14 @@ const ui = {
     const p = this.panel('cards'), st = game.stars;
     if (st) {   // the level's stars, what they paid and what they were for
       const row = el('div', 'stars');
-      for (let k = 0; k < 3; k++) row.append(iconEl(k < st.n ? 'star' : 'starOff'));
-      row.append(px('+' + st.pay));
-      p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/'), f: st.foes.join('/') })));
+      for (let k = 0; k < 3; k++) {   // one after another, popping in; each earned one rings higher, then twinkles
+        const s = iconEl(k < st.n ? 'star' : 'starOff');
+        s.classList.add(k < st.n ? 'won' : 'lost'); s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : '');
+        row.append(s);
+        if (k < st.n) setTimeout(() => sound.play('coin', 0.8, 1 + 0.18 * k), 300 + 300 * k);
+      }
+      const pay = px('+' + st.pay); pay.classList.add('pay'); row.append(pay);
+      p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
     }
     p.append(el('div', 'head', t('pick')));
     for (const u of list) {

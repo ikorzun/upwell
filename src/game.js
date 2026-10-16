@@ -769,11 +769,13 @@ class Game {
     const H = this.hero, cs = this.lv.coins, mR = COIN.magnet * this.R * this.mods.magnet, cr = COIN.r * this.R, k = Math.exp(-COIN.drag * dt);
     for (let i = cs.length - 1; i >= 0; i--) {
       const c = cs[i];
-      const dx = H.cx - c.x, dy = H.cy - c.y, d = Math.hypot(dx, dy) || 1, home = c.drop && (c.t += dt) > COIN.home;
-      if (home) {   // an enemy's, its burst over: on to the hero wherever it is, ever faster
+      const dx = H.cx - c.x, dy = H.cy - c.y, d = Math.hypot(dx, dy) || 1;
+      if (!c.drop && !c.moving && d < mR) { c.moving = true; c.t = COIN.home; }   // in the magnet's reach: on its way in for good
+      const home = c.drop ? (c.t += dt) > COIN.home : c.moving && (c.t += dt);
+      if (home) {   // an enemy's, its burst over, or one the magnet caught: on to the hero wherever it is, ever faster
         const sp = COIN.seek * (1 + 3 * (c.t - COIN.home)) + Math.hypot(H.rigVx, H.rigVy), f = 1 - Math.exp(-COIN.steer * dt);
         c.vx += ((dx / d) * sp - c.vx) * f; c.vy += ((dy / d) * sp - c.vy) * f;
-      } else if (d < mR && !c.drop) { c.moving = true; c.vx += (dx / d) * COIN.pull * dt; c.vy += (dy / d) * COIN.pull * dt; }
+      }
       if (c.moving) { if (!home) { c.vx *= k; c.vy *= k; } c.x += c.vx * dt; c.y += c.vy * dt; }
       if (d < H.R * H.growth * 0.85 + (c.v > 1 ? 1.4 : 1) * cr && !(c.drop && c.t < COIN.home)) {   // a dropped one only once its burst is over: a combo's fountain is seen
         cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
@@ -808,8 +810,12 @@ class Game {
     fx.ring((r.x0 + r.x1) / 2, r.y0, this.R, this.lv.theme.spring); haptics.buzz(12);
   }
   // Off a rubber wall: thrown back the way it came and a little up, a wall jump nobody pressed.
+  // Rubber sings (user): a note as the hero meets it and one every bit of the way it rolls along it, up a scale while it goes on.
+  chime() { const t = this.lv.t; this.noteK = t - (this.noteT || -9) < 1.5 ? Math.min((this.noteK || 0) + 1, 9) : 0; this.noteT = t; sound.note(this.noteK); }
   rubberHit(side) {
     const H = this.hero, away = side === 1 ? 1 : -1, v = H.hitR[side - 1];
+    if (this.lv.t - (this.rubT || -9) > 0.1 || Math.abs(H.cy - this.rubY) > 0.8 * this.R) { this.rubY = H.cy; this.chime(); }
+    this.rubT = this.lv.t;
     if (v < RUBBER.min * this.R) return;
     setVel(H, away * Math.max(RUBBER.x * this.R, 0.8 * v), Math.min(H.rigVy, -RUBBER.up * this.vjump));
     unstick(H, 0.15); H.kickSquash(away, 0, 0.8); this.rising = false;
@@ -820,7 +826,7 @@ class Game {
   enterRoom(bub) {
     if (!bub.room) {
       const room = new Level();
-      room.reset({ kind: bub.kind, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: THEMES.room, hard: this.hard });
+      room.reset({ kind: bub.kind, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' ? THEMES.stash : THEMES.room, hard: this.hard });
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
@@ -1429,13 +1435,14 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // ── Sound ────────────────────────────────────────────────────
 // Effects and music made with ElevenLabs (tools/audio.py). One Web Audio context, made on the first key press or
 // touch (browsers keep sound off until then). Effects play with a little random pitch; music loops and cross-fades:
-// calm in the menu and the rooms, climb in the shaft, boss at the summit, quieter while paused or over. It sleeps
+// calm in the menu and the shop, a climb of each world's own in the shaft, the bonus levels', the stash's, boss at the
+// summit, quieter while paused or over (each fetched when first wanted, the last four kept: all of them decoded are ~170 MB). It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot'];
-const MUSIC_VOL = 0.4, FX_VOL = 0.7;
+const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
 const sound = {
-  ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1,
+  ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {
     if (this.ctx) { if (this.ctx.state !== 'running' && this.ctx.state !== 'closed' && !document.hidden && !ads.quiet) this.ctx.resume(); return; }   // suspended, or 'interrupted' (iOS: a call, a notification, another app's sound)
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -1444,9 +1451,30 @@ const sound = {
     this.out = c.createGain(); this.out.gain.value = save.sound === false ? 0 : 1; this.out.connect(c.destination);
     this.fx = c.createGain(); this.fx.gain.value = FX_VOL; this.fx.connect(this.out);
     this.mus = c.createGain(); this.mus.gain.value = MUSIC_VOL; this.mus.connect(this.out);
-    const load = (name, path) => fetch(path).then((r) => r.arrayBuffer()).then((a) => c.decodeAudioData(a)).then((b) => { this.bufs[name] = b; }).catch(() => {});
-    for (const n of SOUNDS) load(n, 'assets/sfx/' + n + '.mp3');
-    for (const n of ['climb', 'calm', 'boss']) load('m:' + n, 'assets/music/' + n + '.mp3');
+    for (const n of SOUNDS) this.load(n, 'assets/sfx/' + n + '.mp3');
+    for (const n of ['calm', 'climb']) this.fetchMusic(n);
+  },
+  load(name, path) { return fetch(path).then((r) => r.arrayBuffer()).then((a) => this.ctx.decodeAudioData(a)).then((b) => { this.bufs[name] = b; }).catch(() => {}); },
+  fetchMusic(name) {
+    if (this.asked[name]) return;
+    this.asked[name] = true;
+    this.load('m:' + name, 'assets/music/' + name + '.mp3').then(() => {   // over four kept: the longest unplayed one goes (fetched again if wanted)
+      const kept = Object.keys(this.bufs).filter((k) => k.startsWith('m:')).map((k) => k.slice(2));
+      if (kept.length <= 4) return;
+      const old = kept.filter((n) => n !== this.track && n !== name).sort((a, b) => this.used.indexOf(a) - this.used.indexOf(b))[0];
+      if (old) { delete this.bufs['m:' + old]; this.asked[old] = false; }
+    });
+  },
+  note(k, vol = 0.35) {   // a soft bell, the k-th step of a major pentatonic up from C5
+    if (!this.ctx || save.sound === false || this.ctx.state !== 'running') return;
+    const c = this.ctx, t = c.currentTime, f = 523.25 * Math.pow(2, PENTA[k % 5] / 12 + Math.floor(k / 5)), g = c.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+    for (const [m, type, a] of [[1, 'triangle', 1], [2, 'sine', 0.35], [3.01, 'sine', 0.12]]) {   // a triangle and two overtones: a marimba-ish ping
+      const o = c.createOscillator(), og = c.createGain();
+      o.type = type; o.frequency.value = f * m; og.gain.value = a;
+      o.connect(og); og.connect(g); o.start(t); o.stop(t + 0.75);
+    }
+    g.connect(this.fx);
   },
   play(name, vol = 1, rate = 1) {
     const b = this.bufs[name];
@@ -1458,7 +1486,9 @@ const sound = {
   // A loop starts and ends where its sound does (an MP3 has a little silence padded at both ends).
   music(name) {
     const b = this.bufs['m:' + name];
-    if (this.track === name || !b) return;
+    if (this.track === name) return;
+    if (!b) { this.fetchMusic(name); return; }   // the one playing goes on till it is here
+    this.used = this.used.filter((n) => n !== name).concat(name);
     const c = this.ctx, t = c.currentTime, d = b.getChannelData(0);
     if (this.src) { this.gain.gain.setTargetAtTime(0, t, 0.25); this.src.stop(t + 1.5); }
     let a = 0, z = d.length - 1;
@@ -1474,7 +1504,7 @@ const sound = {
   frame(g) {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const kind = g.lv.kind;
-    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' || kind === 'treasure' ? 'calm' : kind === 'boss' ? 'boss' : 'climb');
+    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : CLIMBS[g.world] || 'climb');
     const duck = g.state === 'play' || g.state === 'menu' ? 1 : 0.35;
     if (duck !== this.duck) { this.duck = duck; this.mus.gain.setTargetAtTime(MUSIC_VOL * duck, this.ctx.currentTime, 0.2); }
   },

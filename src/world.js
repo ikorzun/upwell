@@ -89,7 +89,7 @@ const STARS = { coins: [1, 2, 5], half: 0.5 };
 // Coins: radius and magnet reach in R. An enemy's burst out at `burst` px/s and after `home` s
 // home in on the hero from anywhere, at `seek` px/s more than its own pace (three times that a
 // second on), turning at `steer`/s: they always get to it.
-const COIN = { r: 0.54, magnet: 2.6, pull: 1400, drag: 2.4, burst: 260, home: 0.25, seek: 600, steer: 10 };
+const COIN = { r: 0.54, magnet: 2.6, drag: 2.4, burst: 260, home: 0.25, seek: 600, steer: 10 };   // a coin the magnet reaches homes in as an enemy's does (user: faster)
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
 const CRUMBLE = { time: 0.55, back: 3 };   // gives way `time` s after a touch, is back `back` s later
 const SLICK = { fr: 0.03 };
@@ -138,6 +138,7 @@ const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wal
 const THEMES = {
   cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: theme(PAL.orange, { crumble: PAL.gray }),
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
+  stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
 PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'blue', 'green', 'purple'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
@@ -691,7 +692,7 @@ class Level {
     this.exit = { x0: this.l - LEVEL.wall, x1: this.l + dw, y0: this.floor - DOOR.h * R, y1: this.floor, x: this.l + dw / 2, y: this.floor - 1.2 * R, side: 1, armed: false };
     if (o.kind === 'shop') {   // its things in a row halfway up the room (a double jump; walking under them buys nothing), well apart, clear of the way out
       shuffled(rnd, SHOP_ITEMS).slice(0, 3).forEach((item, k) => {
-        this.pickups.push({ x: cx + (k - 1) * 0.3 * W, y: at(0.45), r: 0.6 * R, item, sold: false, near: false });   // centred, a third of the width apart, as the user's sketch has them
+        this.pickups.push({ x: cx + (k - 1) * 0.3 * W, y: at(0.38), r: 0.6 * R, item, sold: false, near: false });   // centred, a third of the width apart, as the user's sketch has them; a full jump reaches (was 0.45, user: hard to reach)
       });
     } else {   // a stash: one of five, each with its own lot of coins (user: one was dull)
       const ledge = (x0, x1, y, f = {}) => this.rects.push(this.box(x0, y, x1, y + (f.plank ? LEVEL.plank : LEVEL.thick) * R, f));
@@ -1340,20 +1341,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // inside. A shop's (gold) and a stash's (violet) are magic: a breathing glow round them, white studs and a gem
   // on the frame, lights turning in the dark of the opening, sparks rising up past it.
   const door = (d, kind) => {
-    const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P;
+    const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
-    if (magic) { F(x, y, r * 2.1, 0, 0, hh * 1.8, c, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, c, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1); F(x, y, r * 1.4, 0, 0, hh * 1.25, INK.white, 0.22, 1); }   // a glow breathing round it, brightest round the arch
-    const ay = d.y0 + r;   // a magic door is an arch (user): a half disc over a box, its rim in its glow colour
-    if (magic) { F(x, ay, r + f, 0, 0, r + f, c, 1, 0); box(d.x0 - f, ay, d.x1 + f, d.y1, c, 1, 0, 10, 0); F(x, ay, r, 0, 0, r, INK.dark, 1, 0); box(d.x0, ay, d.x1, d.y1, INK.dark, 1, 0, 10, 0); }
-    else box(d.x0, d.y0, d.x1, d.y1, INK.dark, 1, 0);
+    F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
+    if (magic) F(x, y, r * 1.4, 0, 0, hh * 1.25, INK.white, 0.22, 1);
+    const ay = d.y0 + r;   // every door is an arch (user; a room's way out too): a half disc over a box, its rim in its colour
+    F(x, ay, r + f, 0, 0, r + f, c, 1, 0); box(d.x0 - f, ay, d.x1 + f, d.y1, c, 1, 0, 10, 0); F(x, ay, r, 0, 0, r, INK.dark, 1, 0); box(d.x0, ay, d.x1, d.y1, INK.dark, 1, 0, 10, 0);
     if (magic) for (let k = 0; k < 8; k++) {   // a ring of lights turning inside, breathing in and out
       const a = T * 1.5 + (k * TAU) / 8, q = 0.62 + 0.14 * Math.sin(T * 2.2 + k * 1.3);
       box(x + Math.cos(a) * r * q - P, y + Math.sin(a) * hh * q * 0.85 - P, x + Math.cos(a) * r * q + P, y + Math.sin(a) * hh * q * 0.85 + P, k & 1 ? INK.white : c, 0.9, 0, 10, 0);
-    }
-    if (!magic) {
-      box(d.x0, d.y0 - f, d.x1, d.y0, c, 1, 0, 10, 0);   // the lintel
-      if (d.side !== 1) box(d.x0 - f, d.y0 - f, d.x0, d.y1, c, 1, 0, 10, 0);   // the posts, where there is no wall
-      if (d.side !== 2) box(d.x1, d.y0 - f, d.x1 + f, d.y1, c, 1, 0, 10, 0);
     }
     if (magic) {
       const ga = Math.PI * (1 + ((T * 0.7 + x * 0.01) % 1)), gr = r + f / 2;   // a white glint running round the arch's rim (the glow round it is drawn first, behind)

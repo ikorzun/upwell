@@ -186,6 +186,22 @@ MUSIC = {
               'steady 84 BPM', 'no drums']),
     'boss': (60, 'intense, urgent, driving, steady, no ending',
              ['chiptune', 'driving pulsing bass', 'fast arpeggios', 'tense and urgent', 'video game boss battle', 'steady 150 BPM']),
+    # owner 2026-10-16: more variety — a climb of its own for each world after the cave, the bonus levels, the stash
+    'ice': (75, 'airy, sparkling, light, gently bouncy, steady, no ending',
+            ['lo-fi chiptune', 'glassy bell arpeggios', 'soft shimmering synth pads', 'light steady beat with soft hi-hats',
+             'crisp and wintry, full of wonder', 'cute video game platformer, icy cavern', 'steady 104 BPM']),
+    'mine': (75, 'busy, plucky, chugging, steady, no ending',
+             ['lo-fi chiptune', 'plucky square-wave bass', 'woodblock and shaker percussion', 'mechanical rhythmic groove',
+              'determined and playful', 'cute video game platformer, old mine with carts', 'steady 112 BPM']),
+    'void': (75, 'mysterious, floating, spacey, steady, no ending',
+             ['chiptune', 'deep soft synth bass', 'dreamy detuned arpeggios', 'spacey reverb pads', 'mysterious and curious',
+              'cute video game platformer, outer space', 'steady 96 BPM']),
+    'bonus': (60, 'upbeat, exciting, fast, sparkling, steady, no ending',
+              ['chiptune', 'bright catchy lead melody', 'fast arpeggios', 'punchy drums', 'joyful rush',
+               'video game bonus stage, collecting coins', 'steady 140 BPM']),
+    'stash': (60, 'magical, twinkling, wondrous, steady, no ending',
+              ['lo-fi chiptune', 'twinkling celesta arpeggios', 'soft warm synth pads', 'secret treasure room', 'magical and secret',
+               'steady 90 BPM', 'no drums']),
 }
 NOT_MUSIC = ['vocals', 'lyrics', 'singing', 'choir', 'intro', 'outro', 'ending', 'fade out', 'orchestra', 'guitar solo',
              'dubstep', 'heavy distortion', 'tape warble', 'lo-fi noise']

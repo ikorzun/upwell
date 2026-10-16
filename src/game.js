@@ -22,7 +22,7 @@ const STR = {
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick', ctrlHybrid: 'hybrid',
-    hintHybrid: '◀ ▶ to move, ▲ to jump. In the air hold ▲ and pull:\nthe dots show the jump, let go to make it. Land on enemies from above!',
+    hintHybrid: '◀ ▶ to move, ▲ to jump. In the air hold ▲ and aim with another finger\nlike a stick (or pull ▲ back), let go to jump. Land on enemies from above!',
     hintStick: 'Touch anywhere and lean: a stick to run, up or a tap to jump,\ntwo quick leans to dash, down to let go. Land on enemies from above!',
   },
   ru: {
@@ -39,7 +39,7 @@ const STR = {
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
     nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик', ctrlHybrid: 'гибрид',
-    hintHybrid: '◀ ▶ — бег, ▲ — прыжок. В воздухе зажми ▲ и тяни палец:\nпунктир покажет прыжок, отпусти — прыгнешь. Прыгай на врагов сверху!',
+    hintHybrid: '◀ ▶ — бег, ▲ — прыжок. В воздухе зажми ▲ и целься другим пальцем,\nкак стиком (или оттяни ▲), отпусти — прыгнешь. Прыгай на врагов сверху!',
     hintStick: 'Коснись где угодно и веди: бег, вверх или тап — прыжок,\nдва быстрых наклона — рывок, вниз — отлипнуть. Прыгай на врагов сверху!',
   },
 };
@@ -54,10 +54,11 @@ const detectLang = () => { const l = (navigator.language || 'en').slice(0, 2).to
 // wins (the first one opens hard mode) and the chosen look.
 const SAVE_KEY = 'upwell.save';
 const save = (() => {
-  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false, aim: false };   // seen: hints shown once; stick: touch by a stick, not the keys; aim: the keys with an aimed air jump (hybrid)
+  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false, aim: true };   // seen: hints shown once; stick: touch by a stick, not the keys; aim: the keys with an aimed air jump (hybrid, the default)
   try {
     const s = Object.assign(d, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'));
     if (!PALETTE.some((c) => c.id === s.color)) s.color = PALETTE[0].id;   // a colour from before the palette inks
+    if (s.ctrlV !== 2) { s.aim = true; s.stick = false; s.ctrlV = 2; }   // the hybrid became the default: once, everyone starts on it
     return s;
   } catch (e) { return d; }
 })();
@@ -1248,6 +1249,11 @@ const dpad = $('dpad');
 dpad.children[0].append(px('◀')); dpad.children[1].append(px('▶')); $('jumpBtn').append(px('▲'));
 let lastTap = { d: 0, t: -1e9 }, padDir = 0;   // the last press of a side, for a double tap (keys and pad alike)
 padPart(dpad, (e) => {
+  if (aim.on && aim.hyb) {   // ▲ aiming: the finger on ◀ ▶ is the aim's stick, from where it is now
+    if (e) aimStick('pad', e.clientX, e.clientY); else if (aim.stk && aim.stk.id === 'pad') aim.stk.id = -1;
+    padDir = 0; input.set('left', false); input.set('right', false); dpad.children[0].classList.remove('on'); dpad.children[1].classList.remove('on');
+    return;
+  }
   const r = dpad.getBoundingClientRect(), right = !!e && e.clientX > r.left + r.width / 2, d = e ? (right ? 1 : -1) : 0;
   if (d && !padDir) { if (lastTap.d === d && e.timeStamp - lastTap.t < 280) game.dash(d); lastTap = { d, t: e.timeStamp }; }   // a fresh press: a second one quick is a dash
   padDir = d;
@@ -1280,11 +1286,16 @@ const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, 
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel')) return;
+  if (aim.on && aim.hyb) { aimStick(e.pointerId, e.clientX, e.clientY, true); return; }   // ▲ aiming: a finger anywhere is the aim's stick
   if (gest || joy) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
   if (save.stick) { joyStart(e); return; }
   gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false, dashed: false };
 });
 document.addEventListener('pointermove', (e) => {
+  if (aim.on && aim.hyb && ((aim.stk && aim.stk.id === e.pointerId) || (gest && gest.id === e.pointerId))) {   // the aim's stick (the running finger turns into it)
+    if (gest && gest.id === e.pointerId) { gest = null; input.swipe = false; input.set('left', false); input.set('right', false); }
+    aimStick(e.pointerId, e.clientX, e.clientY); return;
+  }
   if (joy && e.pointerId === joy.id) { joyMove(e); return; }
   const g = gest;
   if (!g || e.pointerId !== g.id) return;
@@ -1300,6 +1311,7 @@ document.addEventListener('pointermove', (e) => {
   if (!g.dashed && t < GEST.quick && Math.abs(ox) > GEST.swipe && Math.abs(ox) > Math.abs(dy) && Math.abs(ox) > (GEST.fast * t) / 1000) { g.dashed = true; game.dash(Math.sign(ox)); }   // a fast swipe: a dash now, not on letting go
 });
 const gestEnd = (e) => {
+  if (aim.stk && aim.stk.id === e.pointerId) { aim.stk.id = -1; return; }   // the aim's stick let go: it keeps its aim
   if (tap2 && e.pointerId === tap2.id) {   // a second finger's tap
     if (e.type === 'pointerup' && e.timeStamp - tap2.t < GEST.tap && Math.hypot(e.clientX - tap2.x, e.clientY - tap2.y) < GEST.still) game.requestJump();
     tap2 = null; return;
@@ -1435,7 +1447,8 @@ const aim = { on: false, id: -1, sx: 0, sy: 0, x: 0, y: 0, p: 0, ux: 0, uy: -1, 
 const dots = new Float32Array(JUMP.dots * 2);
 let nDots = 0;
 function aimUpdate() {
-  const dx = aim.sx - aim.x, dy = aim.sy - aim.y, len = Math.hypot(dx, dy);
+  const k = aim.stk, byStk = !!k && Math.hypot(k.x - k.sx, k.y - k.sy) >= JUMP.deadZone;   // a stick points where to go; ▲ pulled back points the other way
+  const dx = byStk ? k.x - k.sx : aim.sx - aim.x, dy = byStk ? k.y - k.sy : aim.sy - aim.y, len = Math.hypot(dx, dy);
   if (len < JUMP.deadZone) {   // not pulled: no dots, but in the hybrid after a moment the plain jump's
     aim.p = 0;
     if (aim.hyb && performance.now() - aim.t0 > HYB.hold * 1000) {   // off a wall up and away from it, in the air straight up
@@ -1451,11 +1464,24 @@ function aimUpdate() {
     if (out < JUMP.minUp) { const s = (along < 0 ? -1 : 1) * Math.sqrt(1 - JUMP.minUp * JUMP.minUp); ux = JUMP.minUp * n[0] + s * tx; uy = JUMP.minUp * n[1] + s * ty; }
   }
   aim.ux = ux; aim.uy = uy;
-  aim.p = Math.min(1, (len - JUMP.deadZone) / ((aim.hyb ? HYB.full : JUMP.dragFrac) * view.w));
+  aim.p = Math.min(1, (len - JUMP.deadZone) / (byStk ? JOY.reach - JUMP.deadZone : (aim.hyb ? HYB.full : JUMP.dragFrac) * view.w));
   const lo = aim.hyb ? HYB.min : JUMP.minPower, v = game.vjump * (lo + (1 - lo) * aim.p);
   aim.vx = ux * v; aim.vy = uy * v;
 }
-function aimCancel() { aim.on = false; aim.hyb = false; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; }
+function aimCancel() { aim.on = false; aim.hyb = false; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; if (aim.stk) { aim.stk = null; stkShow(); } }
+// The hybrid's other finger while ▲ aims: a stick from where it came down (or where it was), drawn as the stick
+// is, all of the jump at its reach; let go, it keeps its aim till ▲ is let go.
+function aimStick(id, x, y, fresh) {
+  if (fresh || !aim.stk || aim.stk.id !== id) aim.stk = { id, sx: x, sy: y, x, y }; else { aim.stk.x = x; aim.stk.y = y; }
+  stkShow();
+}
+function stkShow() {
+  const k = aim.stk;
+  if (!k) { if (!joy) joyEl.classList.remove('on'); return; }
+  const dx = k.x - k.sx, dy = k.y - k.sy, d = Math.hypot(dx, dy), s = d > JOY.reach ? JOY.reach / d : 1;
+  joyEl.style.transform = 'translate(' + k.sx + 'px,' + k.sy + 'px)'; joyKnob.style.transform = 'translate(' + dx * s + 'px,' + dy * s + 'px)';
+  joyKnob.classList.toggle('on', d >= JUMP.deadZone); joyEl.classList.add('on');
+}
 function aimFrame(now) {
   if (!aim.on) return;
   if (game.state !== 'play') { aimCancel(); return; }

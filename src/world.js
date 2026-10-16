@@ -1406,7 +1406,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
     const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
-    F(p.x, y, p.r * 2, 0, 0, p.r * 2, INK.coin, 0.3, 1); icon(p.kind || 'fizz', p.x, y, 1, Math.max(1, Math.round(2.4 / PIX.size)));   // about 24-36 px across
+    const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
+    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); icon(p.kind || 'fizz', p.x, y, 1, k);
   }
   for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart

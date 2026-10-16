@@ -9,7 +9,7 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or a tap to jump; hold ▲ to aim the next jump,\na finger beside it leans it like a stick. Land on enemies from above!', play: 'Play',
+    hintKeys: '← → to move, space to jump, ↓ to let go.\nLand on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, tap ▲ to jump; hold ▲ to aim the jump,\na finger beside it leans it like a stick. Land on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
     tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c} · Enemies {f}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
@@ -22,10 +22,10 @@ const STR = {
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
-    hintStick: 'Touch anywhere and lean: a stick to run; ▲, up or a tap to jump; hold ▲\nto aim the next jump with the stick. Land on enemies from above!',
+    hintStick: 'Touch anywhere and lean: a stick to run; tap ▲, lean up or tap to jump;\nhold ▲ to aim the jump with the stick. Land on enemies from above!',
   },
   ru: {
-    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок; зажми ▲ — прицел\nследующего прыжка, другой палец ведёт его, как стик. Прыгай на врагов сверху!', play: 'Играть',
+    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, тап по ▲ — прыжок; зажми ▲ — прицел\nпрыжка, другой палец ведёт его, как стик. Прыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
     tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c} · Враги {f}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
@@ -38,7 +38,7 @@ const STR = {
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
     nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
-    hintStick: 'Коснись где угодно и веди — бег; ▲, вверх или тап — прыжок; зажми ▲ —\nприцел следующего прыжка стиком. Прыгай на врагов сверху!',
+    hintStick: 'Коснись где угодно и веди — бег; тап по ▲, вверх или тап — прыжок;\nзажми ▲ — прицел прыжка стиком. Прыгай на врагов сверху!',
   },
 };
 let lang = 'en';
@@ -1256,29 +1256,32 @@ padPart(dpad, (e) => {
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
 const act = $('act'), jumpBtn = $('jumpBtn');
-// ▲ (either scheme) jumps at once, a tap or a quick second one alike (let go quick, a lower jump); held on, a long
-// press as Apple's (`hold` s, not moved past `slop` px: UILongPressGestureRecognizer's 0.5 s and 10 pt), with a jump
-// still to come (off a floor or a wall, or one left in the air), the next one is aimed: the hero
-// hangs where it is and the dots show the arc, the plain jump's to begin with; a second finger anywhere leans it like
-// a stick (see aimStick), or ▲ pulled back like a slingshot (the further, the stronger: `min` of a jump to all of it
-// at `full` of the width); let go of ▲ and it goes.
-const HYB = { hold: 0.5, slop: 10, full: 0.18, min: 0.6 };
-let hyb = null;   // ▲ held in the hybrid: since when, where
+// ▲ (either scheme) tells a tap from a long press on the first press, as UIKit does (a tap counts as the finger
+// lifts, a long press once held `hold` s): let go before that, the plain jump, a quick second tap another; held on
+// (or moved past `slop` px: a pull), that very jump is aimed: the hero hangs where it is (or stands) and the dots show
+// the arc, the plain jump's to begin with; a second finger anywhere leans it like a stick (see aimStick), or ▲ pulled
+// back like a slingshot (the further, the stronger: `min` of a jump to all of it at `full` of the width); let go of ▲
+// and it goes. `hold` is half UIKit's 0.5 s: a jump must not wait long to be told apart.
+const HYB = { hold: 0.25, slop: 10, full: 0.18, min: 0.6 };
+let hyb = null;   // ▲ down, not yet told apart: since when, where
 padPart(act, (e) => {
   jumpBtn.classList.toggle('on', !!e);
   const g = game, x = e ? e.clientX - view.left : 0;
   if (e && aim.on && aim.hyb) { aim.x = x; aim.y = e.clientY; return; }   // pulling
-  if (!e && aim.on && aim.hyb) { const p = aim.p, vx = aim.vx, vy = aim.vy; aimCancel(); input.jump = false; g.requestJump(p > 0 ? { vx, vy } : null); return; }   // let go: the aimed jump (no cut: the button is let go of quietly)
-  if (e && !hyb) hyb = { t0: performance.now(), x0: x, y0: e.clientY, x, y: e.clientY, slid: false };
-  if (e && hyb) { hyb.x = x; hyb.y = e.clientY; if (Math.hypot(x - hyb.x0, e.clientY - hyb.y0) > HYB.slop) hyb.slid = true; }   // moved off: no long press
-  if (!e) hyb = null;
-  input.set('jump', !!e);
+  if (!e) {   // let go: an aimed jump goes where aimed; a tap is the plain jump
+    if (aim.on && aim.hyb) { const p = aim.p, vx = aim.vx, vy = aim.vy; aimCancel(); g.requestJump(p > 0 ? { vx, vy } : null); }
+    else if (hyb) { hyb = null; g.requestJump(); }
+    return;
+  }
+  if (!hyb) hyb = { t0: performance.now(), x0: x, y0: e.clientY, x, y: e.clientY };
+  hyb.x = x; hyb.y = e.clientY;
+  if (Math.hypot(x - hyb.x0, e.clientY - hyb.y0) > HYB.slop) hybAim(performance.now());   // pulled at once: a slingshot
 });
-function hybCheck(now) {   // ▲ held on past `hold` with a jump still to come: aim that one
+function hybCheck(now) { if (hyb && !aim.on && now - hyb.t0 >= HYB.hold * 1000) hybAim(now); }   // held: a long press
+function hybAim(now) {   // ▲ held or pulled: aim the jump it is (off what the hero touches, or one left in the air)
   const g = game;
-  if (!hyb || hyb.slid || aim.on || g.state !== 'play' || now - hyb.t0 < HYB.hold * 1000) return;
-  if (g.sinceContact > JUMP.coyote && g.air <= 0) return;   // a jump still to come: off what it touches (a floor, a wall), or one left in the air
-  Object.assign(aim, { on: true, hyb: true, sx: hyb.x, x: hyb.x, sy: hyb.y, y: hyb.y, p: 0, t0: now - HYB.hold * 1000 });   // the plain arc shows at once
+  if (aim.on || g.state !== 'play' || (g.sinceContact > JUMP.coyote && g.air <= 0)) return;
+  Object.assign(aim, { on: true, hyb: true, sx: hyb.x0, x: hyb.x, sy: hyb.y0, y: hyb.y, p: 0, t0: now - HYB.hold * 1000 });   // the plain arc shows at once
 }
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick), a quick

@@ -80,7 +80,15 @@ const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, f
 // under it, whose top is within `feet` R of its bottom), spikes and all, at `jolt` of a smash's hitstop and shake; enemies it
 // touches go. Spikes, blobs and fire still hurt. After it, `grace` s of a hit's safety (user).
 const GROW = { time: 9, size: 2, reach: 0.25, feet: 0.3, jolt: 0.5, grace: 2 };
-const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
+const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW };
+// Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
+// sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
+// now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless.
+// Laid by a generator of their own, so the shaft is laid as before; none in a bonus level.
+const FOLK = { cage: [0.3, 0.55], cageP: 0.75, trader: [0.6, 0.85], traderP: 0.5, critterP: 0.3, coins: 8, flee: 3 };
+const CRITTER = {   // '#' the world's ink, 'w' white; a bat hangs and flaps, a bug walks
+  bat: ['#...#', '.###.', '#w#w#', '.###.', '..#..'], batUp: ['#.....#', '##.#.##', '.#w#w#.', '..###..'], batDown: ['..###..', '.#w#w#.', '##.#.##', '#.....#'],
+  bug: ['..##.', '.#w##', '#.#.#'], bug2: ['..##.', '.#w##', '.#.#.'] };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, the second for `half` its coins, the third for all of them (enemies do not
@@ -660,6 +668,13 @@ class Level {
     const intro = (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.fizz = []; this.bullets = [];
+    this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0);   // folk (see FOLK), by their own generator
+    if (o.kind === 'well' && o.height && !o.world.bonus) {
+      const fr = this.folkRng, at = ([a, b]) => this.floor - o.height * (a + fr() * (b - a));
+      if (fr() < FOLK.cageP) this.folkAt.push({ kind: 'cage', y: at(FOLK.cage) });
+      if (fr() < FOLK.traderP) this.folkAt.push({ kind: 'trader', y: at(FOLK.trader) });
+      this.folkAt.sort((p, q) => q.y - p.y);   // the lower first
+    }
     this.fizzAt = o.kind === 'well' && o.height ? GUN.at.map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies
     this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY));   // and which kinds, by a generator of their own: the shaft is laid as before
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
@@ -738,6 +753,7 @@ class Level {
     this.spikes = this.spikes.filter(keep);
     this.coats = this.coats.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
+    this.folk = this.folk.filter(keep);
   }
   // The next chunk on top: a pocket with a bubble once the shaft passes a planned height
   // (never two pockets running, and none in the last `pocketEnd` tiles: a bubble right
@@ -774,9 +790,33 @@ class Level {
       if (ok.length) { const r = ok[(this.rng() * ok.length) | 0]; this.fizz.push({ x: (r.x0 + r.x1) / 2, y: r.y0 - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
     }
     const h = (lift + c.rows.length) * this.tile;
+    if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
     this.top -= h;
+  }
+  // Folk for the chunk just laid (its rects from `from` on, its top at `top`): a cage or a trader when its height has come,
+  // on a steady bare ledge with room over it and no enemy on it; maybe a critter. All by folkRng.
+  addFolk(from, top) {
+    if (this.world.bonus) return;
+    const fr = this.folkRng, R = this.R, t = this.tile, rs = this.rects.slice(from);
+    const steady = (r) => !r.plank && !r.crumble && !r.move && !r.spring && !r.cap && !r.slick;
+    const over = (r, h) => !this.rects.some((q) => q !== r && q.x1 > r.x0 && q.x0 < r.x1 && q.y1 <= r.y0 + 1 && q.y1 > r.y0 - h);   // nothing within h over it
+    const bare = (r) => !this.spikes.some((s) => s.x1 > r.x0 && s.x0 < r.x1 && Math.abs(s.y1 - r.y0) < 1) && !this.spawns.some((s) => s.ledge === r || Math.abs(s.y - r.y0) < 2 * R && s.x > r.x0 && s.x < r.x1)
+      && !this.fizz.some((p) => p.x > r.x0 - R && p.x < r.x1 + R && Math.abs(p.y - r.y0) < 2 * R) && !this.folk.some((f) => f.rect === r);
+    const due = this.folkAt[0];
+    if (due && top < due.y) {
+      const ok = rs.filter((r) => steady(r) && r.x1 - r.x0 >= 3 * t && bare(r) && over(r, (due.kind === 'trader' ? 4.6 : 3) * R));
+      if (ok.length) { const r = ok[(fr() * ok.length) | 0]; this.folk.push({ kind: due.kind, x: r.x0 + (r.x1 - r.x0) * (0.3 + 0.4 * fr()), y: r.y0, rect: r }); this.folkAt.shift(); }
+    }
+    if (fr() < FOLK.critterP) {
+      const bat = fr() < 0.5, under = (r) => !this.rects.some((q) => q !== r && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 2.5 * R);
+      const ok = rs.filter((r) => steady(r) && r.x1 - r.x0 >= 2 * t && (bat ? under(r) : bare(r) && over(r, 1.5 * R)));
+      if (ok.length) {
+        const r = ok[(fr() * ok.length) | 0], x = r.x0 + (r.x1 - r.x0) * (0.2 + 0.6 * fr());
+        this.folk.push(bat ? { kind: 'bat', x, y: r.y1, fly: false, t: 0 } : { kind: 'bug', x, y: r.y0, rect: r, dir: fr() < 0.5 ? -1 : 1, run: false, t: 0 });
+      }
+    }
   }
   // Whether a solid ledge just laid (from index `from` on) hangs over an older one, or over the
   // floor (where the hero starts), with less than LEVEL.room under it.
@@ -1434,6 +1474,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6);
     F(c.x - r * s * 0.3, c.y - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0);
   }
+  const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
+    const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
+    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : ink, 1, 0, 10, 0); });
+  };
+  const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
+  for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
+    if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
+    else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
+  }
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;
     F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1);
@@ -1484,6 +1533,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     const w = lv.fire.warn;
     if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
+  }
+  for (const f of lv.folk) if (f.kind === 'cage' && !f.open && f.body && seen(f.body.minY - R, f.body.maxY)) {   // a cage: white bars, a yellow lock (yellow: touch it)
+    const b = f.body, P = PIX.size, x0 = b.cx - 0.95 * R, x1 = b.cx + 0.95 * R, y1 = b.maxY + 1, y0 = y1 - 1.9 * R;
+    box(x0, y0 - P, x1, y0 + P, INK.white, 1, 0, 10, 0); box(x0, y1 - P, x1, y1 + P, INK.white, 1, 0, 10, 0);
+    for (let k = 0; k <= 4; k++) { const x = x0 + ((x1 - x0) * k) / 4; box(x - P, y0, x + P, y1, INK.white, 1, 0, 10, 0); }
+    box(b.cx - 0.2 * R, y0 + 0.75 * R, b.cx + 0.2 * R, y0 + 1.15 * R, INK.coin, 1, 0, 10, 0); box(b.cx - 0.1 * R, y0 + 0.55 * R, b.cx + 0.1 * R, y0 + 0.75 * R, INK.coinD, 1, 0, 10, 0);
   }
   const bs = lv.boss;
   if (bs && !bs.dead && bs.state === 'dazed' && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top

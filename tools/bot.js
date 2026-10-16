@@ -38,7 +38,7 @@ const random = () => {
 
 // ── saving and restoring everything a step can change ──
 const GAME_KEYS = ['hp', 'maxHp', 'invuln', 'sinceContact', 'queueT', 'air', 'hitstop', 'touch', 'queued', 'rising', 'combo', 'coins',
-  'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunCD', 'gunMax', 'dashT', 'dashCD', 'mantleCD', 'airDash', 'pow', 'ram', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY'];
+  'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunCD', 'gunMax', 'dashT', 'dashCD', 'mantleCD', 'airDash', 'pow', 'ram', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY', 'freed', 'crouch', 'noteK', 'noteT'];
 const copyItem = (e) => (e && typeof e === 'object' && !('x0' in e) ? Object.assign({}, e) : e);   // boxes stay shared
 function snapBody(b) {
   const o = {};
@@ -69,6 +69,7 @@ function snap() {
     coins: lv.coins.map((c) => Object.assign({}, c)), spawns: lv.spawns.slice(), shots: lv.shots.map((q) => Object.assign({}, q)),
     counts: [lv.coinsTaken, lv.foeKilled, lv.foeTotal], bullets: lv.bullets.map((q) => Object.assign({}, q)), fizz: lv.fizz.map((p) => p.taken), fire: lv.fire && { y: lv.fire.y, spitT: lv.fire.spitT, warn: lv.fire.warn && Object.assign({}, lv.fire.warn) }, bubbles: lv.bubbles.map((b) => b.cd),
     enemies: lv.enemies.map((e) => ({ e, f: Object.fromEntries(Object.entries(e).filter(([, v]) => typeof v !== 'object')), b: snapBody(e.body) })),
+    folk: lv.folk.map((f) => ({ f, o: Object.assign({}, f), b: f.body && snapBody(f.body) })), pickups: lv.pickups.slice(), sold: lv.pickups.map((p) => p.sold),
   };
 }
 function restore(S) {
@@ -84,6 +85,8 @@ function restore(S) {
   if (lv.fire) { lv.fire.y = S.fire.y; lv.fire.spitT = S.fire.spitT; lv.fire.warn = S.fire.warn && Object.assign({}, S.fire.warn); }
   lv.bubbles.forEach((b, i) => { b.cd = S.bubbles[i]; });
   lv.enemies = S.enemies.map((o) => { Object.assign(o.e, o.f); restoreBody(o.e.body, o.b); return o.e; });
+  lv.folk = S.folk.map(({ f, o, b }) => { for (const k of Object.keys(f)) if (!(k in o)) delete f[k]; Object.assign(f, o); if (b) restoreBody(f.body, b); return f; });   // a body made in a look ahead goes again
+  lv.pickups = S.pickups.slice(); lv.pickups.forEach((p, i) => { p.sold = S.sold[i]; });
 }
 
 // ── playing ──

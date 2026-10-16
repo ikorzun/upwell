@@ -14,7 +14,7 @@ const STR = {
     tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
-    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
+    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_cage: 'Someone is locked in! Touch the cage', seen_trader: 'A trader: touch the thing to buy it', freedCoins: 'Thank you! +{n} coins', freedHeart: 'Thank you! +1 heart', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
     got_fizz: 'Fizz! You shoot by yourself · {s} s', got_smash: 'Rock candy! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
@@ -30,7 +30,7 @@ const STR = {
     tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', bonusDone: 'Бонус пройден!', double: '×2 за рекламу', next: 'Дальше', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
-    seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
+    seen_hedgehog: 'Ежа не топчи: колется!', seen_cage: 'Кто-то заперт! Коснись клетки', seen_trader: 'Торговец: коснись товара, чтобы купить', freedCoins: 'Спасибо! +{n} монет', freedHeart: 'Спасибо! +1 сердце', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
     seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене',
     got_fizz: 'Шипучка! Стреляешь сам · {s} с', got_smash: 'Крушилка! Прыжок ломает блоки · {s} с', got_rainbow: 'Радуга! Ничто не ранит, враги лопаются · {s} с', got_grow: 'Великан! Ломаешь блоки, враги лопаются · {s} с',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
@@ -239,7 +239,7 @@ class Game {
   newRun() {
     this.world = 0; this.stage = 0; this.hard = !!save.hard && save.wins > 0; this.mods = MODS(); this.taken = [];
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0;
-    this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0;
+    this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0;
     const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
   }
@@ -254,6 +254,7 @@ class Game {
     a.length = 0;
     for (const e of lv.enemies) a.push(e.body);
     if (lv.boss && !lv.boss.dead) a.push(lv.boss.body);
+    for (const f of lv.folk || []) if (f.body) a.push(f.body);
     if (this.hero) a.push(this.hero);
     return a;
   }
@@ -529,6 +530,43 @@ class Game {
       if (s.y < lv.cam + view.h) lv.enemies.push(new Foe(s, lv));
     }
     for (let i = lv.enemies.length - 1; i >= 0; i--) if (lv.enemies[i].body.cy > far) lv.enemies.splice(i, 1);
+    for (const f of lv.folk) if (!f.body && (f.kind === 'cage' || f.kind === 'trader') && f.y > lim && f.y < lv.cam + view.h + this.R) this.folkUp(f);
+  }
+  folkUp(f) {   // a cage's blob (a hero's colour, not this one's) or the trader (purple), standing on its ledge; the hero passes through them
+    const lv = this.lv, R = this.R, cage = f.kind === 'cage', cols = PALETTE.filter((c) => c.id !== save.color), r = (cage ? 0.7 : 0.95) * R;
+    const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(Math.random() * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
+    b.gScale = 1; b.sticky = false; b.ghost = true; b.face.frown = cage;   // locked in: glum
+    if (!cage) { f.p = { x: f.x, y: f.y - 3 * R, r: 0.6 * R, item: SHOP_ITEMS[(Math.random() * SHOP_ITEMS.length) | 0], sold: false, near: false, trader: f }; lv.pickups.push(f.p); }
+  }
+  // Folk (see FOLK): a cage opens at a touch and its blob hops for joy, paying coins or a heart by turns; the trader's thing
+  // keeps over its head; critters keep clear of the hero.
+  folkStep(dt) {
+    const lv = this.lv, H = this.hero, R = this.R, near = (x, y, d) => Math.hypot(H.cx - x, H.cy - y) < d;
+    for (let i = lv.folk.length - 1; i >= 0; i--) {
+      const f = lv.folk[i], b = f.body;
+      if (f.kind === 'cage' && b) {
+        if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
+        else if (f.open && (b.wallMask & 8) && (f.hop -= dt) <= 0) { setVel(b, 0, -0.55 * this.vjump); b.kickSquash(0, 1, -1); f.hop = rand(0.5, 1.2); }
+      } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
+      else if (f.kind === 'bat') {
+        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); }
+        if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
+      } else if (f.kind === 'bug') {
+        const r = f.rect;
+        if (r.gone) { lv.folk.splice(i, 1); continue; }
+        if (!f.run && near(f.x, f.y, FOLK.flee * R)) { f.run = true; f.dir = f.x < H.cx ? -1 : 1; }
+        f.x += f.dir * (f.run ? 3.5 : 0.5) * R * dt; f.t += dt;
+        if (f.x < r.x0 + 0.2 * R || f.x > r.x1 - 0.2 * R) { if (f.run) { fx.dust(f.x, f.y, IMPACT.puffSpeed); lv.folk.splice(i, 1); continue; } f.dir = -f.dir; }   // at the end: turns round, or, running, is gone over it
+      }
+    }
+  }
+  free(f) {
+    const b = f.body, R = this.R;
+    f.open = true; f.hop = 0.25; b.face.frown = false; b.face.surprise = 1;
+    sparkFx(b.cx, b.maxY - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, INK.coin], 0.6); fx.ring(b.cx, b.cy, 1.6 * R, INK.white);
+    sound.play('crumble', 0.7, 1.3); sound.play('bubble', 0.9, 1.2); haptics.buzz(16);
+    if (++this.freed % 2 === 0 && this.hp < this.maxHp) { this.heal(1); ui.hurt(); ui.toast(t('freedHeart'), 1800); sound.play('buy'); }   // every second one a heart, if one is missing
+    else { this.drop(b.cx, b.minY, FOLK.coins); ui.toast(tf('freedCoins', { n: FOLK.coins }), 1800); }
   }
   interact(dt) {
     const lv = this.lv, H = this.hero;
@@ -540,7 +578,8 @@ class Game {
     if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
     this.spikes(); this.fireStep(dt); this.fireTouch();
     if (this.state !== 'play') return;   // the fire ended a bonus level
-    this.shots(dt); this.collect(dt); this.gun(dt);
+    this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt);
+    for (const f of lv.folk) if (f.body && !f.open && f.y > lv.cam && f.y < lv.cam + view.h) this.hint(f.kind);   // a cage or a trader, told once
     if (this.combo > 0 && (H.wallMask & 8) && !H.springHit && !this.power('rainbow')) this.payCombo();   // only a floor ends a combo; a rainbow's runs on till it is over
     const near = (o, r) => Math.hypot(H.cx - o.x, H.cy - o.y) < r;
     if (lv.portal && near(lv.portal, lv.portal.r + 0.5 * H.R)) { this.levelClear(); return; }
@@ -884,6 +923,7 @@ class Game {
     if (p.item.can && !p.item.can(this)) { ui.toast(t('noNeed'), 1200); sound.play('deny', 0.7); return; }
     if (this.coins < price) { ui.toast(tf('poor', { n: price - this.coins }), 1200); haptics.buzz(8); sound.play('deny', 0.7); return; }
     this.coins -= price; p.sold = true; p.item.apply(this); sound.play('buy');
+    if (p.trader && p.trader.body) { const b = p.trader.body; b.face.surprise = 1; setVel(b, 0, -0.5 * this.vjump); }   // the trader hops: a sale
     splatFx(p.x, p.y, p.r * 2, p.item.color, 8); haptics.buzz(16);
     if (p.item.id !== 'upgrade') ui.toast(L2(p.item.name), 1200);
   }
@@ -1026,6 +1066,7 @@ class Game {
     b.face.update(dt, b, this.heroLook, now);
     this.look.x = b.cx; this.look.y = b.cy; this.look.t = now;
     for (const e of lv.enemies) e.body.face.update(dt, e.body, this.look, now);
+    for (const f of lv.folk || []) if (f.body) f.body.face.update(dt, f.body, this.look, now);
     if (lv.boss && !lv.boss.dead) lv.boss.body.face.update(dt, lv.boss.body, this.look, now);
     ui.frame(this);
   }
@@ -1266,7 +1307,7 @@ const ui = {
     if (st !== this.stage) { this.stage = st; $('stage').replaceChildren(px(st)); }
     const c = $('combo');
     if (g.combo > 0 && g.hero) c.style.transform = 'translate(' + Math.round(g.hero.cx) + 'px,' + Math.round(g.hero.minY - g.lv.cam - 30) + 'px) translateX(-50%)';
-    this.labels(g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? g.lv : null);
+    this.labels(g.lv.pickups.length ? g.lv : null);   // a room's things, or a trader's in the shaft
   },
 };
 

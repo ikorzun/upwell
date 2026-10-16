@@ -1161,7 +1161,7 @@ const ui = {
       const e = this.labelEls[i], price = game.priceOf(p), text = L2(p.item.name) + '\n' + (p.sold ? t('sold') : price ? price : t('free'));
       if (e.dataset.text !== text) { e.dataset.text = text; e.replaceChildren(px(text, 34)); e.h = 0; }
       if (!e.h) e.h = e.offsetHeight;
-      e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round(p.y - p.r - 8 - e.h * (i === 1 ? 2.1 : 1) - lv.cam) + 'px) translateX(-50%)';
+      e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round(p.y - p.r - 8 - e.h - lv.cam) + 'px) translateX(-50%)';
       e.classList.toggle('dim', p.sold || price > game.coins);
     });
   },
@@ -1409,7 +1409,7 @@ const MUSIC_VOL = 0.4, FX_VOL = 0.7;
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1,
   unlock() {
-    if (this.ctx) { if (this.ctx.state === 'suspended' && !document.hidden) this.ctx.resume(); return; }
+    if (this.ctx) { if (this.ctx.state !== 'running' && this.ctx.state !== 'closed' && !document.hidden) this.ctx.resume(); return; }   // suspended, or 'interrupted' (iOS: a call, a notification, another app's sound)
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     const c = (this.ctx = new AC());
@@ -1441,6 +1441,7 @@ const sound = {
     gain.gain.value = 0; gain.gain.setTargetAtTime(1, t, 0.4);
     src.connect(gain); gain.connect(this.mus); src.start(t, src.loopStart);
     this.track = name; this.src = src; this.gain = gain;
+    src.onended = () => { if (this.src === src) { this.src = null; this.track = null; } };   // stopped by the system (iOS can): the next frame starts it again
   },
   frame(g) {
     if (!this.ctx || this.ctx.state !== 'running') return;

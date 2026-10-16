@@ -680,9 +680,9 @@ class Level {
     // a room: the way back out is a hole in the left wall, on the floor, as the doors in the shaft are
     const dw = DOOR.w * R;
     this.exit = { x0: this.l - LEVEL.wall, x1: this.l + dw, y0: this.floor - DOOR.h * R, y1: this.floor, x: this.l + dw / 2, y: this.floor - 1.2 * R, side: 1, armed: false };
-    if (o.kind === 'shop') {   // its things in a row a jump up off the floor (walking under them buys nothing), well apart, clear of the way out
+    if (o.kind === 'shop') {   // its things in a row halfway up the room (a double jump; walking under them buys nothing), well apart, clear of the way out
       shuffled(rnd, SHOP_ITEMS).slice(0, 3).forEach((item, k) => {
-        this.pickups.push({ x: cx + (k - 1) * 0.3 * W, y: this.floor - 3.3 * R, r: 0.6 * R, item, sold: false, near: false });   // centred, a third of the width apart (user: hard to buy)
+        this.pickups.push({ x: cx + (k - 1) * 0.3 * W, y: at(0.45), r: 0.6 * R, item, sold: false, near: false });   // centred, a third of the width apart, as the user's sketch has them
       });
     } else {
       const y = at(0.42);

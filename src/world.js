@@ -108,8 +108,13 @@ const RUBBER = { x: 9, up: 0.55, min: 2 };
 // flaring `warn` s where the blob will come out.
 const FIRE = { lag: 0.5, idle: 3, boost: 3, ramp: 2, launch: 1.7, back: 0.3, spit: [3, 6], warn: 0.5, blob: 0.34 };
 const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
-// A stomp on the boss bounces at `bounce` of a jump's speed.
-const BOSS = { size: 2.3, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, maxMinions: 3, coins: 40, winDelay: 2.2, bounce: 1.9 };
+// The boss fight goes round (user: there was no way onto it under the ceiling): it hovers (`hover` s, `fast` of that when
+// angry or half beaten) `high` R over the floor (in sight under the HUD; clear of a hero standing on a ledge), swaying
+// `sway` of the width, dropping goo and calling crawlers; shakes over the hero `warn` s; dives at `dive` R/s into
+// the middle of the arena (no planks there); lies there `dazed` s, flat, a yellow arrow over it — then a stomp hurts it and
+// its side does not; then it rises again. A stomp bounces at `bounce` of a jump's speed.
+const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9,
+  hover: 3.6, fast: 0.65, high: 12, sway: 0.15, warn: 0.8, dive: 40, dazed: 2.8 };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -269,6 +274,7 @@ ICONS.maxhp = ICONS.heart;
 ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
 ICONS.grow = 'ggg......ggg/gg........gg/g...wwww...g/...wwwwww.../..wwwwwwww../..wwkwwkww../..wwkwwkww../..wwwwwwww../...wwwwww.../g...wwww...g/gg........gg/ggg......ggg';   // the hero with arrows out of its corners: it grows
+ICONS.mark = '....yyyy..../....yyyy..../....yyyy..../....yyyy..../....yyyy..../yyyyyyyyyyyy/.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../....yyyy..../.....yy...../............';   // over a dazed boss: land here
 ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
@@ -681,10 +687,9 @@ class Level {
     this.rects.push(this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true }));
     const at = (f) => this.floor + (this.capY - this.floor) * f;
     if (o.kind === 'boss') {
-      const p = LEVEL.plank * R;
-      this.rects.push(this.box(this.l, at(0.4), this.l + W * 0.3, at(0.4) + p, { plank: true }));
-      this.rects.push(this.box(this.r - W * 0.3, at(0.4), this.r, at(0.4) + p, { plank: true }));
-      this.rects.push(this.box(cx - W * 0.16, at(0.68), cx + W * 0.16, at(0.68) + p, { plank: true }));
+      const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
+      this.rects.push(this.box(this.l, at(0.32), this.l + W * 0.3, at(0.32) + p, { plank: true }));
+      this.rects.push(this.box(this.r - W * 0.3, at(0.32), this.r, at(0.32) + p, { plank: true }));
       return;
     }
     // a room: the way back out is a hole in the left wall, on the floor, as the doors in the shaft are
@@ -1480,6 +1485,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const w = lv.fire.warn;
     if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
   }
+  const bs = lv.boss;
+  if (bs && !bs.dead && bs.state === 'dazed' && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
   if (g.state === 'play' && g.power('smash') && !(g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0)) {   // the smash's time left, over the hero's head: a pip a fifth, blinking in its last second (user)
     const n = Math.ceil((5 * g.gunT) / g.gunMax);
     for (let k = 0; k < n; k++) disc(hero.cx + (k - 2) * 0.42 * R, hero.minY - 0.45 * R, 0.14 * R, INK.flame, 1);

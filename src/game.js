@@ -20,7 +20,7 @@ const STR = {
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
-    noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
+    noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Touch anywhere and lean: a stick to run; ▲ or a tap to jump,\ntwo quick leans to dash, pull down and jump to jump high.\nLand on enemies from above!',
   },
@@ -36,7 +36,7 @@ const STR = {
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
-    noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
+    noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', bossHint: 'Оглушён! Прыгай на макушку!', m: 'м',
     nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
     hintStick: 'Коснись где угодно и веди — бег; ▲ или тап — прыжок,\nдва быстрых наклона — рывок, вниз и прыжок — высокий прыжок.\nПрыгай на врагов сверху!',
   },
@@ -165,21 +165,51 @@ class Foe {
   }
 }
 
-// The boss at the summit: a big squishy that hovers under the ceiling, drops goo and calls
-// helpers. A stomp hurts it and makes it red for a moment: then it hurts to touch.
+// The boss at the summit: a big squishy that goes round (see BOSS): hovers dropping goo and calling helpers, shakes over
+// the hero, dives into the middle, lies there dazed (the time to stomp it), rises again. A stomp hurts it and makes it red
+// for a moment: then it hurts to touch.
 class Boss {
   constructor(lv) {
     const R = lv.R * BOSS.size;
-    this.body = new Body(designById('cat'), FOE_COLOR.boss, (lv.l + lv.r) / 2, lv.capY + R * 1.7, R, 0.4);
+    this.body = new Body(designById('cat'), FOE_COLOR.boss, (lv.l + lv.r) / 2, lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = 0; this.body.sticky = false; this.body.face.frown = true;
     this.hp = BOSS.hp + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
+    this.state = 'hover'; this.st = 0; this.dazes = 0;
   }
+  open() { return this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0); }   // a stomp hurts it
+  to(s) { this.state = s; this.st = 0; }
   think(dt, g) {
-    const b = this.body, lv = g.lv, W = lv.r - lv.l, k = this.angry > 0 ? 1.8 : 1;
-    this.t += dt * k;
+    const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
+    this.t += dt * k; this.st += dt; b.wake();   // never asleep: lying dazed it would doze off, and then not get up
+    if (this.state !== 'dazed') turnUp(b, 6, dt);   // upright in the air, as the crawlers on their walls
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = FOE_COLOR.boss;
-    const tx = (lv.l + lv.r) / 2 + Math.sin(this.t * 0.55) * W * 0.27, ty = lv.capY + b.R * 1.65 + Math.sin(this.t * 1.2) * b.R * 0.35, q = Math.min(1, 2.4 * dt);
+    if (this.state === 'warn' || this.state === 'dive' || this.state === 'dazed') {
+      if (this.state === 'warn') {   // over the hero (kept to the middle, clear of the ledges), shaking, flashing
+        const tx = clamp(g.hero.cx, cx - 0.2 * W + b.R, cx + 0.2 * W - b.R), q = Math.min(1, 6 * dt);
+        addVel(b, ((tx - b.cx) * 4 - b.rigVx) * q, -b.rigVy * q);
+        if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.12);
+        b.color = Math.floor(this.st * 10) % 2 ? FOE_COLOR.red : FOE_COLOR.boss;
+        if (this.st > BOSS.warn) { this.to('dive'); b.color = FOE_COLOR.boss; sound.play('airjump', 0.9, 0.5); }
+      } else if (this.state === 'dive') {
+        setVel(b, 0, BOSS.dive * R);
+        for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > b.minX && q.minX < b.maxX && q.minY < b.maxY + 4 && q.maxY > b.minY) g.kill(e, false); }   // its own helpers squashed under it
+        if ((b.wallMask & 8) || this.st > 1.5) {   // down: the floor shakes
+          this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2.2); b.sqAx = 0; b.sqAy = 1; b.squeezeIn = 0.7;
+          shake.add(9); haptics.buzz(40); sound.play('stomp', 1, 0.45); sound.play('crumble', 0.8, 0.6);
+          fx.dust(b.cx - b.R, lv.floor, IMPACT.puffSpeed + 900); fx.dust(b.cx + b.R, lv.floor, IMPACT.puffSpeed + 900); fx.ring(b.cx, lv.floor, 2 * b.R, INK.white);
+          if (!this.dazes++) ui.toast(t('bossHint'), 2600);   // the first time: what to do now
+        }
+      } else {
+        addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+        if (this.st > BOSS.dazed) this.rise();
+      }
+      return;
+    }
+    if (this.state === 'hover' && this.st > BOSS.hover * (this.angry > 0 || this.hp < this.max / 2 ? BOSS.fast : 1)) { this.to('warn'); return; }
+    const tx = cx + Math.sin(this.t * 0.55) * W * BOSS.sway, ty = lv.floor - R * BOSS.high + Math.sin(this.t * 1.2) * R * 0.5, q = Math.min(1, 2.4 * dt);
     addVel(b, ((tx - b.cx) * 2 - b.rigVx) * q, ((ty - b.cy) * 2 - b.rigVy) * q);
+    if (this.state === 'rise' && Math.abs(ty - b.cy) < b.R) this.to('hover');
+    if (this.state !== 'hover') return;
     if ((this.drop -= dt * k) <= 0) {
       this.drop = BOSS.dropEvery;
       for (let i = -1; i <= 1; i++) lv.shots.push({ x: b.cx + i * b.R * 0.5, y: b.maxY, vx: i * 120, vy: 60, r: 0.32 * lv.R });
@@ -189,6 +219,7 @@ class Boss {
       if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: 'crawler', x: b.cx, y: b.cy + b.R * 0.6 }, lv));   // it drops onto a plank or the floor
     }
   }
+  rise() { const b = this.body; this.to('rise'); b.gScale = 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); }
 }
 
 // ── Game ─────────────────────────────────────────────────────
@@ -469,7 +500,8 @@ class Game {
         const A = bs[i], B = bs[j];
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
-        if (withHero && (this.invuln > 0 || !playing || A.ghost || B.ghost)) continue;   // a hit hero passes through for a moment, and a rolling shell through the hero
+        const solid = lv.boss && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck
+        if (withHero && ((this.invuln > 0 && !solid) || !playing || A.ghost || B.ghost)) continue;   // a hit hero passes through for a moment, and a rolling shell through the hero
         if (collidePair(A, B) && withHero) (A === hero ? B : A).touchHero = true;
       }
       for (const b of bs) { b.collideLevel(lv, h); b.finishSubstep(h); b.updateBounds(); }
@@ -527,9 +559,11 @@ class Game {
     if (e.state === 'shell' || (e.type === 'mini' && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter: harmless
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
     const above = (dy > STOMP.above * (H.R + b.R) && dy > dx * STOMP.slope && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * (H.R + b.R));   // from over it, or falling onto it
-    const can = e === this.lv.boss ? e.angry <= 0 : e.def.stomp;
+    const boss = e === this.lv.boss, can = boss ? e.open() : e.def.stomp;
+    if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
     if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
+    else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0);   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy);
   }
   zap(e, inks) {   // a rainbow hero's touch: the enemy pops, in all the inks (a giant's: in its own)
@@ -596,7 +630,7 @@ class Game {
     const bs = this.lv.boss, b = bs.body;
     bs.hp--; this.drop(b.cx, b.cy, 5); shake.add(5); sound.play('bosshit', 1, bs.hp > 0 ? 1 : 0.7); splatFx(b.cx, b.maxY - b.R * 0.3, b.R * 0.5, b.color.base, 6);
     this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo);
-    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = 1 - 0.06 * (bs.max - bs.hp); ui.toast(tf('bossLeft', { n: bs.hp })); return; }
+    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = 1 - 0.06 * (bs.max - bs.hp); ui.toast(tf('bossLeft', { n: bs.hp })); if (bs.state === 'dazed') bs.rise(); return; }
     bs.dead = true; this.kills++;
     splatFx(b.cx, b.cy, b.R * 1.4, FOE_COLOR.boss.base, 24); shake.add(9); haptics.buzz(60);
     this.drop(b.cx, b.cy, BOSS.coins);

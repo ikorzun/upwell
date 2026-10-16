@@ -67,8 +67,8 @@ const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.
 const GUN = { time: 8, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at: [[0.22, 0.4], [0.58, 0.78]] };
 // Rock candy: for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
 // `maxH` tiles found `reach` R over the hero (`look` R off a ceiling) breaks before it is met, its enemies with it, `coins` once ever,
-// the hero kicked on up at `kick` of a jump; it is back `back` s later, or at once under a hero coming down onto it.
-const SMASH = { time: 11, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 2.5, coins: 2, hitstop: 0.05, shake: 5 };
+// the hero kicked on up at `kick` of a jump; it is back `back` s later, or under a hero coming down onto it once `soon` s are out.
+const SMASH = { time: 11, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 3.5, soon: 1, coins: 2, hitstop: 0.05, shake: 5 };   // back 1 s later than at first (user)
 // Rainbow: for `time` s nothing hurts and an enemy touched pops (from above it is still a stomp); the hero cycles the six inks every
 // `cycle` s (`slow` in its last second), a tail of up to `n` points `gap` R apart trails it in bands `band` R wide, shorter over the
 // last `fade` s; then `grace` s of the usual safety.
@@ -262,8 +262,8 @@ ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
-// standing on a floor, and runnier than at first (firm 2.0; user: it rattled about at speed).
-DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 1.4, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
+// standing on a floor, and runnier than at first (firm 2.0, then 1.4; user: it rattled about at speed, then: softer still).
+DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 1.2, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
   face: { eye: [0.3, 0.02], eyeR: [0.075, 0.095], mouth: [0, 0.2], mouthW: 0.13, blush: [0.52, 0.17] } });
 // The new enemies' shapes (y down): a shell's dome, a spitter's drop narrowing to its spout, a
 // splitter's bean of two lobes, a chaser's tall slug.
@@ -908,7 +908,7 @@ class Level {
         r.hit = false;
         if (r.crumbling && (r.t += dt) > CRUMBLE.time) { r.gone = true; r.t = 0; crumbleFx(r, this.theme.crumble); }
       } else if (r.crumble || r.broke) {   // back again once the hero is out of its way: a crumbled block in a while, a smashed one sooner, or at once under a hero coming down onto it
-        const h = g.hero, over = r.broke && h.maxY < r.y0 && h.rigVy > 0;
+        const h = g.hero, over = r.broke && r.t > SMASH.soon && h.maxY < r.y0 && h.rigVy > 0;
         const free = (q) => q.maxX < r.x0 || q.minX > r.x1 || q.maxY < r.y0 || q.minY > r.y1;   // a smashed one round an enemy neither
         if (((r.t += dt) > (r.broke ? SMASH.back : CRUMBLE.back) || over) && free(h) && (!r.broke || this.enemies.every((e) => free(e.body)))) { r.gone = r.crumbling = r.broke = false; r.t = 0; r.flash = 0.12; }
       }
@@ -1307,22 +1307,22 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const door = (d, kind) => {
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
-    if (magic) { F(x, y, r * 2.1, 0, 0, hh * 1.8, c, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, y, r * 1.4, 0, 0, hh * 1.25, INK.white, 0.22, 1); }
-    box(d.x0, d.y0, d.x1, d.y1, INK.dark, 1, 0);
+    if (magic) { F(x, y, r * 2.1, 0, 0, hh * 1.8, c, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, c, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1); F(x, y, r * 1.4, 0, 0, hh * 1.25, INK.white, 0.22, 1); }   // a glow breathing round it, brightest round the arch
+    const ay = d.y0 + r;   // a magic door is an arch (user): a half disc over a box, its rim in its glow colour
+    if (magic) { F(x, ay, r + f, 0, 0, r + f, c, 1, 0); box(d.x0 - f, ay, d.x1 + f, d.y1, c, 1, 0, 10, 0); F(x, ay, r, 0, 0, r, INK.dark, 1, 0); box(d.x0, ay, d.x1, d.y1, INK.dark, 1, 0, 10, 0); }
+    else box(d.x0, d.y0, d.x1, d.y1, INK.dark, 1, 0);
     if (magic) for (let k = 0; k < 8; k++) {   // a ring of lights turning inside, breathing in and out
       const a = T * 1.5 + (k * TAU) / 8, q = 0.62 + 0.14 * Math.sin(T * 2.2 + k * 1.3);
       box(x + Math.cos(a) * r * q - P, y + Math.sin(a) * hh * q * 0.85 - P, x + Math.cos(a) * r * q + P, y + Math.sin(a) * hh * q * 0.85 + P, k & 1 ? INK.white : c, 0.9, 0, 10, 0);
     }
-    box(d.x0, d.y0 - f, d.x1, d.y0, c, 1, 0, 10, 0);   // the lintel
-    if (d.side !== 1) box(d.x0 - f, d.y0 - f, d.x0, d.y1, c, 1, 0, 10, 0);   // the posts, where there is no wall
-    if (d.side !== 2) box(d.x1, d.y0 - f, d.x1 + f, d.y1, c, 1, 0, 10, 0);
+    if (!magic) {
+      box(d.x0, d.y0 - f, d.x1, d.y0, c, 1, 0, 10, 0);   // the lintel
+      if (d.side !== 1) box(d.x0 - f, d.y0 - f, d.x0, d.y1, c, 1, 0, 10, 0);   // the posts, where there is no wall
+      if (d.side !== 2) box(d.x1, d.y0 - f, d.x1 + f, d.y1, c, 1, 0, 10, 0);
+    }
     if (magic) {
-      for (const sx of [d.x0, d.x1]) box(sx - P, d.y0 - f - P * 0.5, sx + P, d.y0 - f + P * 1.5, INK.white, 1, 0, 10, 0);   // studs on its corners
-      const open = d.side === 1 ? d.x1 : d.x0, run = (d.x1 - d.x0) + (d.y1 - d.y0), u = ((T * 0.9 + x * 0.01) % 1) * run, hl = 3 * P;   // a white glint running along the lintel and down the free post
-      if (u < d.x1 - d.x0) { const gx = d.side === 1 ? d.x0 + u : d.x1 - u; box(gx - hl, d.y0 - f, gx + hl, d.y0, INK.white, 1, 0, 10, 0); }
-      else { const gy2 = d.y0 + (u - (d.x1 - d.x0)), px0 = d.side === 1 ? open : open - f; box(px0, gy2 - hl, px0 + f, gy2 + hl, INK.white, 1, 0, 10, 0); }
-      const gy = d.y0 - f - 2 * P, gl = 1 + 0.5 * Math.sin(T * 4 + x);   // a gem over the middle, glinting
-      F(x, gy, 3.5 * P * gl, 0, 0, 3.5 * P * gl, INK.white, 0.6, 1); box(x - 2 * P, gy - 2 * P, x + 2 * P, gy + 2 * P, c, 1, 0, 10, 0); box(x - P, gy - P, x, gy, INK.white, 1, 0, 10, 0);
+      const ga = Math.PI * (1 + ((T * 0.7 + x * 0.01) % 1)), gr = r + f / 2;   // a white glint running round the arch's rim (the glow round it is drawn first, behind)
+      for (let k = -1; k <= 1; k++) { const a = ga + k * 0.09; box(x + Math.cos(a) * gr - P, ay + Math.sin(a) * gr - P, x + Math.cos(a) * gr + P, ay + Math.sin(a) * gr + P, INK.white, 1, 0, 10, 0); }
       for (let k = 0; k < 6; k++) {   // sparks rising past it, twinkling as small crosses
         const u = (T * 0.45 + k / 6) % 1, q = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, sx = d.x0 - r * 0.2 + q * r * 2.4, sy = d.y1 - u * (d.y1 - d.y0 + 2.5 * R);
         const k2 = Math.sin(u * Math.PI), a2 = k2 > 0.25 ? 1 : 0, l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;

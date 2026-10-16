@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → to move, space to jump, ↓ to let go;\n↓ then space: a high jump. Land on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or a tap to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -27,7 +27,7 @@ const STR = {
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть;\n↓ и пробел — высокий прыжок. Прыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
-    tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
+    tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', bonusDone: 'Бонус пройден!', double: '×2 за рекламу', next: 'Дальше', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
@@ -507,7 +507,7 @@ class Game {
     if (this.state !== 'play') return;
     if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
     this.spikes(); this.fireStep(dt); this.fireTouch();
-    if (this.lv !== lv) return;   // the fire ended a bonus level
+    if (this.state !== 'play') return;   // the fire ended a bonus level
     this.shots(dt); this.collect(dt); this.gun(dt);
     if (this.combo > 0 && (H.wallMask & 8) && !H.springHit && !this.power('rainbow')) this.payCombo();   // only a floor ends a combo; a rainbow's runs on till it is over
     const near = (o, r) => Math.hypot(H.cx - o.x, H.cy - o.y) < r;
@@ -890,15 +890,24 @@ class Game {
     for (const c of this.lv.coins) if (c.drop) this.coins += c.v;
     this.lv.coins = this.lv.coins.filter((c) => !c.drop);
   }
+  // Out by the hole, out of time or caught: the level stands still under what it paid and an offer to double that for an ad.
   endBonus(why) {
-    if (!this.bonus) return;
+    if (!this.bonus || this.state === 'reward') return;
     if (this.combo > 0) this.payCombo();   // a combo running (a rainbow holds one) is paid
-    this.bankDrops();
+    this.bankDrops(); input.clear();
+    this.state = 'reward'; this.stateT = 0; this.bonusWhy = why || 'bonusDone'; this.bonusGot = this.coins - this.bonusCoins; this.adBusy = false;
+    ui.bonusEnd(this.bonusWhy, this.bonusGot, false);
+  }
+  doubleBonus() {   // only once the ad was watched to its end
+    if (this.adBusy || this.state !== 'reward') return;
+    this.adBusy = true;
+    ads.reward((ok) => { this.adBusy = false; if (!ok || this.state !== 'reward') return; this.coins += this.bonusGot; sound.play('buy'); haptics.buzz(16); ui.bonusEnd(this.bonusWhy, this.bonusGot, true); });
+  }
+  nextWorld() {
+    if (this.state !== 'reward') return;
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
-    const got = this.coins - this.bonusCoins;
     this.buildLevel(false);
     ui.hideAll(); ui.banner();
-    ui.toast((why ? t(why) + '  ' : '') + tf('bonusGot', { n: got }), 2200);
   }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;
@@ -1129,6 +1138,12 @@ const ui = {
     const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); this.pause(); });
     const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); queueLayout(); this.pause(); });
     p.append(el('div', 'head', t('paused')), ...(coarse ? [ctl] : []), snd, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
+  },
+  bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
+    const p = this.panel('result');
+    p.append(el('div', 'head', t(why)), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
+    if (!doubled && n > 0 && ads.canReward) p.append(button(t('next'), 'chip wide', () => game.nextWorld()), button(t('double'), 'big thumb', () => game.doubleBonus()));   // the ad's button under the thumb
+    else p.append(button(t('next'), 'big thumb', () => game.nextWorld()));
   },
   revive(price, coins) {   // before the result: go on for coins, or end the run
     const p = this.panel('result');
@@ -1422,7 +1437,7 @@ const MUSIC_VOL = 0.4, FX_VOL = 0.7;
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1,
   unlock() {
-    if (this.ctx) { if (this.ctx.state !== 'running' && this.ctx.state !== 'closed' && !document.hidden) this.ctx.resume(); return; }   // suspended, or 'interrupted' (iOS: a call, a notification, another app's sound)
+    if (this.ctx) { if (this.ctx.state !== 'running' && this.ctx.state !== 'closed' && !document.hidden && !ads.quiet) this.ctx.resume(); return; }   // suspended, or 'interrupted' (iOS: a call, a notification, another app's sound)
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     const c = (this.ctx = new AC());
@@ -1470,6 +1485,38 @@ const sound = {
   sleep(hidden) { if (this.ctx) { if (hidden) this.ctx.suspend(); else this.ctx.resume(); } },
 };
 for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.addEventListener(type, () => sound.unlock(), { capture: true, passive: true });
+
+// ── Ads (Playgama Bridge) ─────────────────────────────────────
+// For now a rewarded ad only: a bonus level's coins doubled. The platform's pause and sound requests are kept (an ad
+// open, a tab switched). Off a platform (GitHub Pages, here) Bridge is a mock with no ads: there the button doubles at
+// once, so the way it goes can be tried. No Bridge at all (it did not load): no button.
+const ads = {
+  ok: false, quiet: false, off: false, held: false,   // quiet: the platform's sound off, or its pause on
+  init() {
+    if (!window.bridge) return;
+    bridge.initialize().then(() => {
+      this.ok = true;
+      bridge.platform.on(bridge.EVENT_NAME.AUDIO_STATE_CHANGED, (on) => { this.off = !on; this.hush(); });
+      bridge.platform.on(bridge.EVENT_NAME.PAUSE_STATE_CHANGED, (p) => { this.held = p; this.hush(); if (p) game.togglePause(true); });
+      this.off = !bridge.platform.isAudioEnabled; this.hush();
+      bridge.platform.sendMessage('game_ready');
+    }).catch(() => {});
+  },
+  hush() { this.quiet = this.off || this.held; sound.sleep(this.quiet || document.hidden); },
+  get mock() { return this.ok && bridge.platform.id === 'mock'; },
+  get canReward() { return this.ok && (this.mock || bridge.advertisement.isRewardedSupported); },
+  reward(done) {   // done(true) once it was watched to its end; done(false) if it was closed early or failed
+    if (this.mock) { done(true); return; }
+    let got = false;
+    const on = (s) => {
+      if (s === 'rewarded') got = true;
+      if (s === 'closed' || s === 'failed') { bridge.advertisement.off(bridge.EVENT_NAME.REWARDED_STATE_CHANGED, on); done(got); }
+    };
+    bridge.advertisement.on(bridge.EVENT_NAME.REWARDED_STATE_CHANGED, on);
+    bridge.advertisement.showRewarded();
+  },
+};
+window.addEventListener('load', () => ads.init());
 
 // ── Slingshot ────────────────────────────────────────────────
 // With a mouse, as well as the keys: press anywhere, pull back, let go, and the squishy
@@ -1596,7 +1643,7 @@ for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, 
 for (const type of ['selectstart', 'contextmenu']) document.addEventListener(type, (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
-  paused = document.hidden; loop.last = performance.now(); sound.sleep(document.hidden);
+  paused = document.hidden; loop.last = performance.now(); sound.sleep(document.hidden || ads.quiet);
   if (paused) { input.clear(); game.togglePause(true); }
 });
 window.addEventListener('blur', () => input.clear());

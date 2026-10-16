@@ -192,22 +192,23 @@ const WORLDS = [
 // The hardest chunk allowed, by world and level (hard mode allows all).
 const MAX_D = [[1, 2, 2], [2, 2, 3], [2, 3, 3], [3, 3, 3]];
 const SUMMIT = { id: 'summit', name: { ru: 'Вершина', en: 'Summit' }, theme: THEMES.summit, enemies: {}, chunks: {} };
-// A bonus level after each world's last: a short shaft against the clock (`time` s) where no heart is
-// lost; out by the hole on top, or out of time, it goes on to the next world. Made like a world, with
+// A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about
+// 1.1 s a metre) where no heart is lost; out by the hole on top, out of time or caught by the fire, what it paid is shown
+// with an offer to double it for an ad, then on to the next world (user). Made like a world, with
 // its own: `rain` sprinkles coins over every chunk, `coat` lines both walls, `pack` sets enemies to a
 // chunk, `comboMul` multiplies combo rewards; in the fire race the fire ends it.
 const BONUS = [
   { id: 'rain', bonus: true, name: { ru: 'Бонус: монетный дождь', en: 'Bonus: coin rain' }, goal: { ru: 'Собери сколько успеешь', en: 'Grab all you can' },
-    theme: THEMES.cave, heights: [18, 18, 18], time: 20, maxD: 1, foes: 0, enemies: {}, rain: true,
+    theme: THEMES.cave, heights: [38, 38, 38], time: 42, maxD: 1, foes: 0, enemies: {}, rain: true,
     chunks: { mosswall: 3, stairs: 2, planks: 2, pillars: 1 } },
   { id: 'rubber', bonus: true, name: { ru: 'Бонус: резиновый колодец', en: 'Bonus: rubber well' }, goal: { ru: 'Вверх рикошетом от стен', en: 'Bounce your way up the walls' },
-    theme: THEMES.ice, heights: [18, 18, 18], time: 20, maxD: 2, foes: 0, enemies: {}, rain: true, coat: 'rubber',
+    theme: THEMES.ice, heights: [50, 50, 50], time: 55, maxD: 2, foes: 0, enemies: {}, rain: true, coat: 'rubber',
     chunks: { planks: 3, stairs: 2, pillars: 1, rest: 1 } },
   { id: 'combo', bonus: true, name: { ru: 'Бонус: комбо-лестница', en: 'Bonus: combo ladder' }, goal: { ru: 'Топчи подряд: комбо вдвое дороже', en: 'Stomp in a row: combos pay double' },
-    theme: THEMES.mine, heights: [18, 18, 18], time: 20, maxD: 2, foes: 1, pack: 3, enemies: { crawler: 1 }, comboMul: 2,
+    theme: THEMES.mine, heights: [62, 62, 62], time: 68, maxD: 2, foes: 1, pack: 3, enemies: { crawler: 1 }, comboMul: 2,
     chunks: { stairs: 3, planks: 3, pillars: 2 } },
   { id: 'race', bonus: true, name: { ru: 'Бонус: гонка с огнём', en: 'Bonus: race the fire' }, goal: { ru: 'Огонь быстрый: беги вверх', en: 'The fire is fast: run up' },
-    theme: THEMES.void, heights: [18, 18, 18], time: 20, maxD: 2, foes: 0, enemies: {}, rain: true, fire: 2.2,
+    theme: THEMES.void, heights: [74, 74, 74], time: 81, maxD: 2, foes: 0, enemies: {}, rain: true, fire: 2.2,
     chunks: { stairs: 2, planks: 2, pillars: 2, lift: 1 } },
 ];
 

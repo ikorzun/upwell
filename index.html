@@ -17,7 +17,7 @@
      through things as half their pixels black, and all text in the pixel font (px() in
      game.js, sized by --p: CSS px per font pixel, 2 being a game pixel). */
   :root {
-    --ink: #141414; --red: #e73228; --blue: #48acf8; --yellow: #fbe741; --green: #36803a; --purple: #bc83f8; --orange: #ee9530; --gray: #c0c0c0; --white: #ebebeb;
+    --ink: #141414; --red: #f43e34; --blue: #5bb8ff; --yellow: #ffed57; --green: #339c39; --purple: #c996ff; --orange: #faa23e; --gray: #c8c8c8; --white: #f3f3f3;
     --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
     --dim: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' d='M0 0h2v2H0zM2 2h2v2H2z'/%3E%3C/svg%3E") 0 0 / 4px 4px;
     --dim2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' fill-rule='evenodd' d='M0 0h4v4H0zM1 1h1v1H1zM3 3h1v1H3z'/%3E%3C/svg%3E") 0 0 / 4px 4px;   /* seven eighths ink: the game shows through a pixel in eight */
@@ -115,7 +115,6 @@
     background: rgba(20, 20, 20, 0.8); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch); --p: 4; color: var(--white);   /* ink at 80% */
   }
   .key.on { box-shadow: inset 0 0 0 2px var(--yellow); color: var(--yellow); }
-  #pad.stick #dpad { visibility: hidden; }   /* the stick runs: the jump key stays where it was */
   /* the stick: under the finger while it is held, gone a moment after (see JOY in game.js) */
   #stick { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; opacity: 0; transition: opacity 0.25s; }
   #stick.on { opacity: 1; transition-duration: 0s; }
@@ -198,7 +197,7 @@
     <div id="hearts" aria-label="Hearts"></div>
     <div id="gun" aria-hidden="true"><i></i></div>
     <div id="mid"><div id="height"></div><div id="stage"></div></div>
-    <div id="purse"><span id="coins"></span><svg class="coin" viewBox="0 0 5 5" aria-hidden="true" shape-rendering="crispEdges"><path fill="#ee9530" d="M1 0h3v1h1v3h-1v1h-3v-1h-1v-3h1z"/><path fill="#fbe741" d="M1 1h3v3h-3z"/><path fill="#ebebeb" d="M1 1h1v1h-1z"/></svg></div>
+    <div id="purse"><span id="coins"></span><svg class="coin" viewBox="0 0 5 5" aria-hidden="true" shape-rendering="crispEdges"><path fill="#faa23e" d="M1 0h3v1h1v3h-1v1h-3v-1h-1v-3h1z"/><path fill="#ffed57" d="M1 1h3v3h-3z"/><path fill="#f3f3f3" d="M1 1h1v1h-1z"/></svg></div>
     <button id="pauseBtn" aria-label="Pause"></button>
   </div>
   <div id="combo" aria-hidden="true"></div>

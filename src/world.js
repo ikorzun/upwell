@@ -59,21 +59,21 @@ const REVIVE = { price: 50, grow: 2, hp: 2, invuln: 2.5 };
 // A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. It counts
 // when the hero meets an enemy from over it: its middle `above` of their radii over the enemy's and at least
 // `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
-// testers found stomps too exact).
-const STOMP = { bounce: 1.0, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
+// testers found stomps too exact). `bounce` was 1.0: the user found the hop off a kill too high.
+const STOMP = { bounce: 0.8, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
 // A fizz candy, found once or twice a level (at `at` of its height, from..to), makes the hero shoot by
 // itself for `time` s (+`plus` a Long charge): a bullet every `every` s at the nearest enemy or blob within
 // `range` R, flying `speed` R/s; it stops at a block and breaks a crumbling one.
-const GUN = { time: 5, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at: [[0.22, 0.4], [0.58, 0.78]] };
-// Rock candy: for `time` s a double jump (an air jump, or a jump off the underside of a ledge) rams up: a solid ledge no taller than
+const GUN = { time: 8, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at: [[0.22, 0.4], [0.58, 0.78]] };
+// Rock candy: for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
 // `maxH` tiles found `reach` R over the hero (`look` R off a ceiling) breaks before it is met, its enemies with it, `coins` once ever,
 // the hero kicked on up at `kick` of a jump; it is back `back` s later, or at once under a hero coming down onto it.
-const SMASH = { time: 8, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 2.5, coins: 2, hitstop: 0.05, shake: 5 };
+const SMASH = { time: 11, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 2.5, coins: 2, hitstop: 0.05, shake: 5 };
 // Rainbow: for `time` s nothing hurts and an enemy touched pops (from above it is still a stomp); the hero cycles the six inks every
 // `cycle` s (`slow` in its last second), a tail of up to `n` points `gap` R apart trails it in bands `band` R wide, shorter over the
 // last `fade` s; then `grace` s of the usual safety.
-const RAINBOW = { time: 6, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, fade: 1.5, grace: 0.8 };
-const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge)
+const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, fade: 1.5, grace: 0.8 };
+const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, one for all its coins, one for all its enemies; `coins` pays for 1, 2, 3.
@@ -89,6 +89,8 @@ const SLICK = { fr: 0.03 };
 // usual speed; rubber takes nothing and throws it back off at `x` R/s and `up` of a jump's
 // speed, when it comes in faster than `min` R/s.
 const MOSS = { slide: 0.15 };
+// Ceilings: for now (user) only a block with moss under it ('~' in a chunk) holds the hero hanging; any: true, every ceiling, as before.
+const CEIL = { any: false };
 const RUBBER = { x: 9, up: 0.55, min: 2 };
 // Fire rises under the shaft and burns marmalade. It climbs at its world's `fire` R/s and never
 // stays more than `lag` of the view below the screen; once the hero has gained no height for
@@ -108,8 +110,9 @@ const BOSS = { size: 2.3, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // of one ink over another.
 const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2 };   // a phone's screen is small and sharp: finer there (1 was too fine)
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
-const PAL = { black: hex('#141414'), red: hex('#e73228'), blue: hex('#48acf8'), yellow: hex('#fbe741'), green: hex('#36803a'),
-  purple: hex('#bc83f8'), orange: hex('#ee9530'), gray: hex('#c0c0c0'), white: hex('#ebebeb') };
+const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at first (user)
+  red: hex('#f43e34'), blue: hex('#5bb8ff'), yellow: hex('#ffed57'), green: hex('#339c39'),
+  purple: hex('#c996ff'), orange: hex('#faa23e'), gray: hex('#c8c8c8'), white: hex('#f3f3f3') };
 // 80/20: the world in its one ink, and the bright inks mean something: yellow is what can be
 // taken (coins, items), red is danger (enemies, spikes, fire), white the hero and the edges; a
 // surface that behaves differently (ice, moss, rubber, crumbling, moving, springs) has a colour of its own.
@@ -294,6 +297,7 @@ const UNLOCKS = [
 //   S  spring on the block below    ^  spikes on the block below   v  spikes under the block above
 //   >  spikes on the left wall      <  on the right    [  ice on the left wall   ]  on the right
 //   {  moss on the left wall (holds)   }  on the right    (  rubber on the left wall (throws back)   )  on the right
+//   ~  moss under the block above (the only ceiling the hero hangs from, see CEIL)
 //   o  coin   O  big coin   B  bubble in the wall (a shop or a stash)
 const CHUNKS = {
   stairs: { d: 1, rows: [
@@ -381,7 +385,7 @@ const CHUNKS = {
     '............',
     '............',
     '####....####',
-    '............',
+    '~~~~....~~~~',
     '.....o......',
     '............',
     '............',
@@ -449,19 +453,19 @@ const CHUNKS = {
     '{..........}',
     '{..........}',
     '{......###.}',
-    '{..........}',
+    '{......~~~.}',
     '{..........}',
     '{.o........}',
     '{..........}',
     '{..........}',
     '{.###......}',
-    '{..........}',
+    '{.~~~......}',
     '{..........}'] },
   rubberwall: { d: 2, rows: [
     '(...........',
     '(...........',
     '(......#####',
-    '(...........',
+    '(......~~~~~',
     '(...........',
     '(..o........',
     '(...........',
@@ -788,11 +792,15 @@ class Level {
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, side, cd: 0, room: null });
       }
     }
+    for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) if (at(r, k) === '~') {   // moss under a block: that block's underside holds
+      const x = X(k) + t / 2, y = Y(r + 1);
+      for (let i = from; i < this.rects.length; i++) { const q = this.rects[i]; if (!q.plank && Math.abs(q.y1 - y) < 1 && x > q.x0 && x < q.x1) q.moss = true; }
+    }
     // Some plain one-tile ledges are laid as planks to jump up through (not one with spikes on or
     // under it, or a spring on it; none in a pocket, by its door).
     for (let i = from; i < this.rects.length && c !== CHUNKS.pocket; i++) {
       const r = this.rects[i], over = (a) => a.x1 > r.x0 && a.x0 < r.x1;
-      if (r.plank || r.spring || r.slick || r.crumble || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
+      if (r.plank || r.spring || r.slick || r.crumble || r.moss || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
       if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;
       if (this.rects.slice(from).some((q) => q.spring && over(q) && Math.abs(q.y1 - r.y0) < 1) || !(this.rng() < LEVEL.toPlank)) continue;
       r.plank = true; r.y1 = r.y0 + LEVEL.plank * R;
@@ -989,7 +997,7 @@ Body.prototype.collideLevel = function (lv, h) {
         if (v > hitW[3]) hitW[3] = v;
         y[i] = y0; x[i] -= (x[i] - px[i] - r.dx * carry) * rf; mask |= 8; this.floorX += x[i]; this.floorN++; this.floorY = r.y0; this.floorRect = r;   // friction against the ledge's own motion: a mover carries what rides it
         if (r.spring && hero) this.springHit = r;
-      } else if (face === 4) { const v = (py[i] - y[i]) / h; if (v > hitW[2]) hitW[2] = v; y[i] = y1; x[i] -= (x[i] - px[i]) * rf; mask |= 4; if (canTop && st) stick(i, 4, y1, x0, x1, r); }
+      } else if (face === 4) { const v = (py[i] - y[i]) / h; if (v > hitW[2]) hitW[2] = v; y[i] = y1; x[i] -= (x[i] - px[i]) * rf; mask |= 4; if (canTop && st && (CEIL.any || r.moss)) stick(i, 4, y1, x0, x1, r); }
       else if (face === 2) { const v = (x[i] - px[i]) / h; if (v > hitW[1]) hitW[1] = v; x[i] = x0; y[i] -= (y[i] - py[i]) * rf; mask |= 2; if (canStick && st && (v > MOVE.cling || this.pressX > 0)) stick(i, 2, x0, y0, y1, r); }
       else { const v = (px[i] - x[i]) / h; if (v > hitW[0]) hitW[0] = v; x[i] = x1; y[i] -= (y[i] - py[i]) * rf; mask |= 1; if (canStick && st && (v > MOVE.cling || this.pressX < 0)) stick(i, 1, x1, y0, y1, r); }
     }
@@ -1325,7 +1333,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pt = lv.portal;
   if (pt && seen(pt.y - 3 * pt.r, pt.y + 3 * pt.r)) {
     const p = 1 + 0.08 * Math.sin(T * 4);
-    F(pt.x, pt.y, pt.r * 2.2 * p, 0, 0, pt.r * 2.2 * p, [0.85, 0.75, 1.0], 0.3, 1);
+    F(pt.x, pt.y, pt.r * 2.2 * p, 0, 0, pt.r * 2.2 * p, INK.white, 0.3, 1);
     disc(pt.x, pt.y, pt.r, INK.dark, 1);   // a hole: the hero shows going into it
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
@@ -1350,6 +1358,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(r.x0 + ox + rad * 0.5, r.y0, r.x1 + ox - rad * 0.5, r.y0 + 2.5, th.lip, a, 1.25);
     if (r.crumble) for (let x = r.x0 + 9; x < r.x1 - 6; x += 16) disc(x + ox, (r.y0 + r.y1) / 2 + 1, 1.6, th.wallD, a);
     if (r.move) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
+    if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
+      box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
+      for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);
+    }
   }
   for (const s of lv.spikes) {
     if (!seen(s.y0, s.y1)) continue;

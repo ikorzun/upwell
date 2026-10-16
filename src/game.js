@@ -16,13 +16,14 @@ const STR = {
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall', seen_fizz: 'Fizz: while it lasts, you shoot by yourself',
-    seen_smash: 'Rock candy: a double jump smashes the block overhead', seen_rainbow: 'Rainbow: nothing hurts, enemies pop at a touch',
+    seen_smash: 'Rock candy: a jump smashes the block overhead', seen_rainbow: 'Rainbow: nothing hurts, enemies pop at a touch',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
-    hintStick: 'Touch anywhere and lean: a stick to run, ▲ or a tap to jump,\npull down to let go. Land on enemies from above!',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick', ctrlHybrid: 'hybrid',
+    hintHybrid: '◀ ▶ to move, ▲ to jump. In the air hold ▲ and pull:\nthe dots show the jump, let go to make it. Land on enemies from above!',
+    hintStick: 'Touch anywhere and lean: a stick to run, up or a tap to jump,\ntwo quick leans to dash, down to let go. Land on enemies from above!',
   },
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲, тап или свайп вверх — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
@@ -32,13 +33,14 @@ const STR = {
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
     seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене', seen_fizz: 'Шипучка: пока шипит, выстрелы летят сами',
-    seen_smash: 'Крушилка: двойной прыжок пробивает блок над головой', seen_rainbow: 'Радуга: ничто не ранит, враги лопаются от касания',
+    seen_smash: 'Крушилка: прыжок пробивает блок над головой', seen_rainbow: 'Радуга: ничто не ранит, враги лопаются от касания',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
-    nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
-    hintStick: 'Коснись где угодно и веди — стик для бега, ▲ или тап — прыжок,\nвниз — отлипнуть. Прыгай на врагов сверху!',
+    nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик', ctrlHybrid: 'гибрид',
+    hintHybrid: '◀ ▶ — бег, ▲ — прыжок. В воздухе зажми ▲ и тяни палец:\nпунктир покажет прыжок, отпусти — прыгнешь. Прыгай на врагов сверху!',
+    hintStick: 'Коснись где угодно и веди: бег, вверх или тап — прыжок,\nдва быстрых наклона — рывок, вниз — отлипнуть. Прыгай на врагов сверху!',
   },
 };
 let lang = 'en';
@@ -52,7 +54,7 @@ const detectLang = () => { const l = (navigator.language || 'en').slice(0, 2).to
 // wins (the first one opens hard mode) and the chosen look.
 const SAVE_KEY = 'upwell.save';
 const save = (() => {
-  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false };   // seen: hints shown once; stick: touch by a stick, not the keys
+  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false, aim: false };   // seen: hints shown once; stick: touch by a stick, not the keys; aim: the keys with an aimed air jump (hybrid)
   try {
     const s = Object.assign(d, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'));
     if (!PALETTE.some((c) => c.id === s.color)) s.color = PALETTE[0].id;   // a colour from before the palette inks
@@ -247,7 +249,7 @@ class Game {
     this.newRun(); save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true);
     ui.hideAll(); ui.banner();
-    if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 5200);
+    if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : save.aim ? 'hintHybrid' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 5200);
   }
   buildLevel(newHero) {
     const W = view.w, H = view.h, boss = this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
@@ -306,7 +308,7 @@ class Game {
   // or with a side pressed a dash that way. In the air: up again, with a puff under it. A slingshot
   // launch goes where it was aimed, and letting go of a button cannot cut it.
   jump(inAir, aimed) {
-    const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || (!aimed && this.touch === 4 && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || ram ? 0 : this.touch;   // a ram off a ceiling goes up through it
+    const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || (!aimed && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
     let vx = H.rigVx, vy = -v, rise = !aimed;
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
@@ -327,7 +329,8 @@ class Game {
     const sp = Math.hypot(vx, vy) || 1;
     H.kickSquash(vx / sp, vy / sp, -JUMP.stretch * Math.min(1, sp / v));   // stretch along the leap
     haptics.buzz(8);
-    this.rising = rise && !ram; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.queued = null; this.ram = ram;   // a ram goes all the way up: a quick tap must not cut it short of the block
+    const thru = ram && this.over(JUMP.height * this.R).some((r) => this.smashable(r));   // a block to break within a jump: no tap may cut it short of it
+    this.rising = rise && !thru; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.queued = null; this.ram = ram;
   }
   // The solid ledges just over the hero (planks are jumped through anyway), and which of them a ram breaks: a shaft ledge one tile
   // thick, not the exit's ceiling or a spring, with nothing on it or under it that would be left hanging in the air.
@@ -422,7 +425,7 @@ class Game {
     if (d && this.state === 'play') this.mantle(d);
     H.fric = this.dashT > 0 ? 0 : floor && d ? (input.swipe ? 0 : MOVE.slip) : undefined;
     if (!d || (H.stuck && !top)) return;   // stuck to a wall it slides; under a ceiling it creeps along
-    const dv = (d * (top ? MOVE.ceil : MOVE.speed) * this.R - H.rigVx) * Math.min(1, (floor || top ? MOVE.accel : MOVE.air) * dt);
+    const dv = (d * (top ? MOVE.ceil : MOVE.speed) * this.R - H.rigVx) * Math.min(1, (floor || top ? MOVE.accel : MOVE.air) * (input.joy ? JOY.accel : 1) * dt);   // the stick eases in faster than the keys
     if (dv * d > 0 || (input.swipe && floor && !(this.dashT > 0))) addVel(H, dv, 0);   // toward the pressed side only, so a faster leap is not braked, bar a swipe's along a floor
   }
 
@@ -1101,7 +1104,10 @@ const ui = {
   pause() {
     const p = this.panel('pause');
     const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); this.pause(); });
-    const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); this.pause(); });
+    const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : save.aim ? 'ctrlHybrid' : 'ctrlKeys'), 'big thumb alt', () => {   // buttons, the stick, the hybrid, round again
+      if (save.stick) { save.stick = false; save.aim = true; } else if (save.aim) save.aim = false; else save.stick = true;
+      persist(); this.pause();
+    });
     p.append(el('div', 'head', t('paused')), ...(coarse ? [ctl] : []), snd, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
   },
   revive(price, coins) {   // before the result: go on for coins, or end the run
@@ -1159,8 +1165,7 @@ const ui = {
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot';
     $('hud').classList.toggle('on', playing);
-    $('pad').classList.toggle('on', coarse && g.state === 'play');
-    $('pad').classList.toggle('stick', !!save.stick);   // with the stick, the jump key alone
+    $('pad').classList.toggle('on', coarse && g.state === 'play' && !save.stick);   // the stick needs no keys at all
     $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
     const fh = $('floorHint'), lv = g.lv, fy = lv.floor - lv.cam;   // how to jump, written on the first level's floor, in the band over the keys
     const onFloor = g.state === 'play' && lv.kind === 'well' && g.world === 0 && g.stage === 0 && !g.bonus && fy < view.h - view.keep;
@@ -1194,7 +1199,7 @@ const ui = {
 // Keyboard: the arrows and space. Touch: a pad along the bottom, left and right under the
 // left thumb (it can slide from one to the other), down and jump under the right one.
 const input = {
-  left: false, right: false, down: false, jump: false, swipe: false,   // swipe: the side is a drag over the game, not a key
+  left: false, right: false, down: false, jump: false, swipe: false, joy: false,   // swipe: the side is a drag over the game, not a key; joy: the stick's
   get dir() { return (this.right ? 1 : 0) - (this.left ? 1 : 0); },
   set(what, on) {
     if (this[what] === on) return;
@@ -1247,7 +1252,22 @@ padPart(dpad, (e) => {
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
 const act = $('act'), jumpBtn = $('jumpBtn');
-padPart(act, (e) => { input.set('jump', !!e); jumpBtn.classList.toggle('on', !!e); });
+// The hybrid (Controls: hybrid, the keys otherwise): pressed in the air with a jump left, ▲ aims it: pulled
+// back like a slingshot the dots show where it goes (the further, the stronger: `min` of a jump to all of it at
+// `full` of the width), held still past `hold` s they show the plain jump; let go and it goes. A quick tap is
+// the plain jump, no dots. On the ground ▲ is the usual jump.
+const HYB = { hold: 0.18, full: 0.18, min: 0.6 };
+padPart(act, (e) => {
+  jumpBtn.classList.toggle('on', !!e);
+  const g = game, x = e ? e.clientX - view.left : 0;
+  if (e && aim.on && aim.hyb) { aim.x = x; aim.y = e.clientY; return; }   // pulling
+  if (e && save.aim && !input.jump && g.state === 'play' && g.sinceContact > JUMP.coyote && g.air > 0) {   // pressed in the air: aim
+    Object.assign(aim, { on: true, hyb: true, id: e.pointerId, sx: x, x, sy: e.clientY, y: e.clientY, p: 0, t0: performance.now() });
+    return;
+  }
+  if (!e && aim.on && aim.hyb) { const p = aim.p, vx = aim.vx, vy = aim.vy; aimCancel(); g.requestJump(p > 0 ? { vx, vy } : null); return; }   // let go: the aimed jump, or the plain one
+  input.set('jump', !!e);
+});
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick), a quick
 // swipe to a side dashes (as soon as it is fast enough, or on letting go of a quick one); a quick flick up jumps (held, it goes higher), a quick flick down lets go; a
@@ -1293,12 +1313,14 @@ const gestEnd = (e) => {
   else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)
 };
 for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, gestEnd);
-// The stick: it comes up where a finger comes down, anywhere but on the jump key, and runs left or
-// right as the finger leans that way: past `on` of its `reach` (px), and on till it is back under
-// `off` (so it doesn't flicker at the edge); at the keys' pace, all or nothing, as on a d-pad. Dragged
-// past its rim it follows the finger, so turning back is never more than a reach away. Pulled down past
-// `down` (more down than to the side) it lets go of a wall. Jumps are the ▲ key, a tap, a second finger's tap.
-const JOY = { reach: 56, on: 0.25, off: 0.12, down: 0.6 };
+// The stick (no keys with it): it comes up where a finger comes down, anywhere, and runs left or right as
+// the finger leans that way: past `on` of its `reach` (px), and on till it is back under `off` (so it
+// doesn't flicker at the edge); all or nothing, as on a d-pad, easing in `accel` times as fast as the keys.
+// Two quick leans the same way dash. Leaning up past `up` (and not much more to the side) is the jump
+// button, held till back under `upOff`; pulled down past `down` (more down than to the side) it lets go of
+// a wall. Dragged past its rim it follows the finger, so turning back is never more than a reach away.
+// A tap jumps too, as does a second finger's.
+const JOY = { reach: 56, on: 0.125, off: 0.06, up: 0.3, upOff: 0.15, down: 0.45, accel: 2 };   // twice as sensitive as at first (user: it felt sticky)
 let joy = null;
 const joyEl = $('stick'), joyKnob = joyEl.firstElementChild;
 joyEl.prepend(pixelDisc(56, 0.6)); joyKnob.append(pixelDisc(26, 0.9));   // the base under the knob
@@ -1310,26 +1332,28 @@ function joyShow() {
 function joyStart(e) {
   if (game.state !== 'play') return;
   const x = e.clientX, y = e.clientY;
-  padUsed = performance.now();   // the ▲ key stays bright while the stick is in use
-  joy = { id: e.pointerId, bx: x, by: y, x, y, dir: 0, low: false, moved: false, t0: e.timeStamp };
+  joy = { id: e.pointerId, bx: x, by: y, x, y, dir: 0, up: false, low: false, moved: false, t0: e.timeStamp }; input.joy = true;
   joyShow(); joyEl.classList.add('on');
 }
 function joyMove(e) {
   const j = joy, R = JOY.reach, x = e.clientX, y = e.clientY;
-  padUsed = performance.now();
   let dx = x - j.bx, dy = y - j.by;
   const d = Math.hypot(dx, dy);
   if (d > GEST.still) j.moved = true;
   if (d > R) { j.bx = x - (dx * R) / d; j.by = y - (dy * R) / d; dx = x - j.bx; dy = y - j.by; }   // past the rim: the base comes along
   const dir = Math.abs(dx) > (Math.sign(dx) === j.dir ? JOY.off : JOY.on) * R ? Math.sign(dx) : 0;
+  if (dir) j.moved = true;   // a lean, however short, is not a tap
+  if (dir && dir !== j.dir) { if (lastTap.d === dir && e.timeStamp - lastTap.t < 280) game.dash(dir); lastTap = { d: dir, t: e.timeStamp }; }   // a fresh lean: a second one quick is a dash
   if (dir !== j.dir) { j.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); }
+  const up = j.up ? -dy > JOY.upOff * R : -dy > JOY.up * R && -dy > 0.5 * Math.abs(dx);   // steering on to the side while up does not let go of it
+  if (up !== j.up) { j.up = up; input.set('jump', up); }   // held up, a higher jump
   const low = dy > JOY.down * R && dy > Math.abs(dx);
   if (low && !j.low) game.pressDown();
   j.low = low; j.x = x; j.y = y; joyShow();
 }
 function joyEnd() {
   if (!joy) return;
-  joy = null; input.set('left', false); input.set('right', false); joyEl.classList.remove('on');
+  joy = null; input.joy = false; input.set('left', false); input.set('right', false); input.set('jump', false); joyEl.classList.remove('on');
 }
 for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, (e) => {   // iOS can lose a finger's pointerup (off the top of the screen, say): no finger on the glass, nothing held
   if (e.touches.length) return;
@@ -1408,7 +1432,11 @@ const dots = new Float32Array(JUMP.dots * 2);
 let nDots = 0;
 function aimUpdate() {
   const dx = aim.sx - aim.x, dy = aim.sy - aim.y, len = Math.hypot(dx, dy);
-  if (len < JUMP.deadZone) { aim.p = 0; return; }
+  if (len < JUMP.deadZone) {   // not pulled: no dots, but in the hybrid after a moment the plain jump's
+    aim.p = 0;
+    if (aim.hyb && performance.now() - aim.t0 > HYB.hold * 1000) { aim.p = 1; aim.ux = 0; aim.uy = -1; aim.vx = game.hero.rigVx; aim.vy = -game.vjump; }
+    return;
+  }
   let ux = dx / len, uy = dy / len;
   const n = game.surfaceNormal();
   if (n) {   // at least `minUp` out of the surface, still to the side it was aimed
@@ -1416,11 +1444,11 @@ function aimUpdate() {
     if (out < JUMP.minUp) { const s = (along < 0 ? -1 : 1) * Math.sqrt(1 - JUMP.minUp * JUMP.minUp); ux = JUMP.minUp * n[0] + s * tx; uy = JUMP.minUp * n[1] + s * ty; }
   }
   aim.ux = ux; aim.uy = uy;
-  aim.p = Math.min(1, (len - JUMP.deadZone) / (JUMP.dragFrac * view.w));
-  const v = game.vjump * (JUMP.minPower + (1 - JUMP.minPower) * aim.p);
+  aim.p = Math.min(1, (len - JUMP.deadZone) / ((aim.hyb ? HYB.full : JUMP.dragFrac) * view.w));
+  const lo = aim.hyb ? HYB.min : JUMP.minPower, v = game.vjump * (lo + (1 - lo) * aim.p);
   aim.vx = ux * v; aim.vy = uy * v;
 }
-function aimCancel() { aim.on = false; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; }
+function aimCancel() { aim.on = false; aim.hyb = false; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; }
 function aimFrame(now) {
   if (!aim.on) return;
   if (game.state !== 'play') { aimCancel(); return; }

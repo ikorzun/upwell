@@ -22,7 +22,7 @@ const STR = {
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
-    hintStick: 'Touch anywhere and lean: a stick to run; ▲, up or a tap to jump,\ntwo quick leans to dash. Land on enemies from above!',
+    hintStick: 'Touch anywhere and lean: a stick to run; ▲ or a tap to jump,\ntwo quick leans to dash. Land on enemies from above!',
   },
   ru: {
     hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть.\nПрыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
@@ -38,7 +38,7 @@ const STR = {
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', m: 'м',
     nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
-    hintStick: 'Коснись где угодно и веди — бег; ▲, вверх или тап — прыжок,\nдва быстрых наклона — рывок. Прыгай на врагов сверху!',
+    hintStick: 'Коснись где угодно и веди — бег; ▲ или тап — прыжок,\nдва быстрых наклона — рывок. Прыгай на врагов сверху!',
   },
 };
 let lang = 'en';
@@ -1341,14 +1341,13 @@ const gestEnd = (e) => {
   else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)
 };
 for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, gestEnd);
-// The stick (no keys with it): it comes up where a finger comes down, anywhere, and runs left or right as
+// The stick (the round ▲ key beside it): it comes up where a finger comes down, anywhere, and runs left or right as
 // the finger leans that way: past `on` of its `reach` (px), and on till it is back under `off` (so it
 // doesn't flicker at the edge); all or nothing, as on a d-pad, easing in `accel` times as fast as the keys.
-// Two quick leans the same way dash. Leaning up past `up` (and not much more to the side) is the jump
-// button, held till back under `upOff`; pulled down past `down` (more down than to the side) it lets go of
-// a wall. Dragged past its rim it follows the finger, so turning back is never more than a reach away.
-// A tap jumps too, as does a second finger's.
-const JOY = { reach: 56, on: 0.125, off: 0.06, up: 0.3, upOff: 0.15, down: 0.45, accel: 2 };   // twice as sensitive as at first (user: it felt sticky)
+// Two quick leans the same way dash; pulled down past `down` (more down than to the side) it lets go of a
+// wall; leaning up does nothing (user: no jump on the stick). Dragged past its rim it follows the finger, so
+// turning back is never more than a reach away. Jumps are the ▲ key, a tap, a second finger's tap.
+const JOY = { reach: 56, on: 0.125, off: 0.06, down: 0.45, accel: 2 };   // twice as sensitive as at first (user: it felt sticky)
 let joy = null;
 const joyEl = $('stick'), joyKnob = joyEl.firstElementChild;
 joyEl.prepend(pixelDisc(56, 0.6)); joyKnob.append(pixelDisc(26, 0.9));   // the base under the knob
@@ -1361,7 +1360,7 @@ function joyStart(e) {
   if (game.state !== 'play') return;
   const x = e.clientX, y = e.clientY;
   padUsed = performance.now();
-  joy = { id: e.pointerId, bx: x, by: y, x, y, dir: 0, up: false, low: false, moved: false, t0: e.timeStamp }; input.joy = true;
+  joy = { id: e.pointerId, bx: x, by: y, x, y, dir: 0, low: false, moved: false, t0: e.timeStamp }; input.joy = true;
   joyShow(); joyEl.classList.add('on');
 }
 function joyMove(e) {
@@ -1380,16 +1379,13 @@ function joyMove(e) {
   if (dir) j.moved = true;   // a lean, however short, is not a tap
   if (dir && dir !== j.dir) { if (lastTap.d === dir && e.timeStamp - lastTap.t < 280) game.dash(dir); lastTap = { d: dir, t: e.timeStamp }; }   // a fresh lean: a second one quick is a dash
   if (dir !== j.dir) { j.dir = dir; input.set('left', dir < 0); input.set('right', dir > 0); }
-  const up = j.up ? -dy > JOY.upOff * R : -dy > JOY.up * R && -dy > 0.5 * Math.abs(dx);   // steering on to the side while up does not let go of it
-  if (up !== j.up) { j.up = up; if (!hyb) input.set('jump', up); }   // held up, a higher jump (not while ▲ has it)
   const low = dy > JOY.down * R && dy > Math.abs(dx);
   if (low && !j.low) game.pressDown();
   j.low = low; j.x = x; j.y = y; joyShow();
 }
 function joyEnd() {
   if (!joy) return;
-  const j = joy;
-  joy = null; input.joy = false; input.set('left', false); input.set('right', false); if (j.up && !hyb) input.set('jump', false); joyEl.classList.remove('on');
+  joy = null; input.joy = false; input.set('left', false); input.set('right', false); joyEl.classList.remove('on');
 }
 for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, (e) => {   // iOS can lose a finger's pointerup (off the top of the screen, say): no finger on the glass, nothing held
   if (e.touches.length) return;

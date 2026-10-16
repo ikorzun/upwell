@@ -1261,23 +1261,30 @@ padPart(dpad, (e) => {
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
 const act = $('act'), jumpBtn = $('jumpBtn');
-// The hybrid (Controls: hybrid, the keys otherwise): pressed in the air with a jump left, or on a wall, ▲ aims
-// it: pulled back like a slingshot the dots show where it goes (the further, the stronger: `min` of a jump to all
-// of it at `full` of the width), held still past `hold` s they show the plain jump; while they show the hero hangs
-// where it is; let go and it goes. A quick tap is the plain jump, no dots. On the ground ▲ is the usual jump.
+// The hybrid (Controls: hybrid, the default): ▲ jumps at once, as the keys do (let go quick, a lower jump); held on
+// past `hold` s with a jump still to come (in the air with one left, or on a wall), the next one is aimed: the hero
+// hangs where it is and the dots show the arc, the plain jump's to begin with; a second finger anywhere leans it like
+// a stick (see aimStick), or ▲ pulled back like a slingshot (the further, the stronger: `min` of a jump to all of it
+// at `full` of the width); let go of ▲ and it goes.
 const HYB = { hold: 0.18, full: 0.18, min: 0.6 };
+let hyb = null;   // ▲ held in the hybrid: since when, where
 padPart(act, (e) => {
   jumpBtn.classList.toggle('on', !!e);
   const g = game, x = e ? e.clientX - view.left : 0;
   if (e && aim.on && aim.hyb) { aim.x = x; aim.y = e.clientY; return; }   // pulling
-  const wall = g.sinceContact <= JUMP.coyote && (g.touch === 1 || g.touch === 2);
-  if (e && save.aim && !input.jump && g.state === 'play' && ((g.sinceContact > JUMP.coyote && g.air > 0) || wall)) {   // pressed in the air or on a wall: aim
-    Object.assign(aim, { on: true, hyb: true, id: e.pointerId, sx: x, x, sy: e.clientY, y: e.clientY, p: 0, t0: performance.now() });
-    return;
-  }
-  if (!e && aim.on && aim.hyb) { const p = aim.p, vx = aim.vx, vy = aim.vy; aimCancel(); g.requestJump(p > 0 ? { vx, vy } : null); return; }   // let go: the aimed jump, or the plain one
+  if (!e && aim.on && aim.hyb) { const p = aim.p, vx = aim.vx, vy = aim.vy; aimCancel(); input.jump = false; g.requestJump(p > 0 ? { vx, vy } : null); return; }   // let go: the aimed jump (no cut: the button is let go of quietly)
+  if (e && save.aim && !hyb) hyb = { t0: performance.now(), x, y: e.clientY };
+  if (e && hyb) { hyb.x = x; hyb.y = e.clientY; }
+  if (!e) hyb = null;
   input.set('jump', !!e);
 });
+function hybCheck(now) {   // ▲ held on past `hold` with a jump still to come: aim that one
+  const g = game;
+  if (!hyb || aim.on || g.state !== 'play' || now - hyb.t0 < HYB.hold * 1000) return;
+  const wall = g.sinceContact <= JUMP.coyote && (g.touch === 1 || g.touch === 2);
+  if (!wall && !(g.sinceContact > JUMP.coyote && g.air > 0)) return;
+  Object.assign(aim, { on: true, hyb: true, sx: hyb.x, x: hyb.x, sy: hyb.y, y: hyb.y, p: 0, t0: now - HYB.hold * 1000 });   // the plain arc shows at once
+}
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick), a quick
 // swipe to a side dashes (as soon as it is fast enough, or on letting go of a quick one); a quick flick up jumps (held, it goes higher), a quick flick down lets go; a
@@ -1468,7 +1475,7 @@ function aimUpdate() {
   const lo = aim.hyb ? HYB.min : JUMP.minPower, v = game.vjump * (lo + (1 - lo) * aim.p);
   aim.vx = ux * v; aim.vy = uy * v;
 }
-function aimCancel() { aim.on = false; aim.hyb = false; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; if (aim.stk) { aim.stk = null; stkShow(); } }
+function aimCancel() { aim.on = false; aim.hyb = false; hyb = null; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; if (aim.stk) { aim.stk = null; stkShow(); } }
 // The hybrid's other finger while ▲ aims: a stick from where it came down (or where it was), drawn as the stick
 // is, all of the jump at its reach; let go, it keeps its aim till ▲ is let go.
 function aimStick(id, x, y, fresh) {
@@ -1483,6 +1490,7 @@ function stkShow() {
   joyKnob.classList.toggle('on', d >= JUMP.deadZone); joyEl.classList.add('on');
 }
 function aimFrame(now) {
+  hybCheck(now);
   if (!aim.on) return;
   if (game.state !== 'play') { aimCancel(); return; }
   aimUpdate();

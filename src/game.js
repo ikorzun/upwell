@@ -446,6 +446,7 @@ class Game {
     if (hang) setVel(hero, 0, 0);
     if (playing) { this.move(dt); if (this.ram) this.ramUp(); }
     const bs = this.bodyList();
+    this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
     for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.touchHero = false; b.beginStep(dt); }
     hero.springHit = null; hero.rubber = 0;
     for (let s = 0; s < PHYS.substeps; s++) {
@@ -510,7 +511,7 @@ class Game {
   // From above it is a stomp; anything else is a hit.
   meet(e) {
     if (e.state === 'shell' || (e.type === 'mini' && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter: harmless
-    const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = H.rigVy - b.rigVy;
+    const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
     const above = (dy > STOMP.above * (H.R + b.R) && dy > dx * STOMP.slope && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * (H.R + b.R));   // from over it, or falling onto it
     const can = e === this.lv.boss ? e.angry <= 0 : e.def.stomp;
     if (above && can) this.stomp(e); else if (this.power('rainbow') && e !== this.lv.boss) this.zap(e);

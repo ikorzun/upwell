@@ -186,73 +186,73 @@ const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between 
 // level by level, the chunks it must have (laid first, so the first minutes show the surfaces),
 // the enemies allowed (all if not given) and what is new, for the level's banner.
 const WORLDS = [
-  { id: 'cave', name: { ru: 'Пещера', en: 'Cave' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
+  { id: 'cave', name: { en: 'Cave', es: 'Cueva', pt: 'Caverna', ja: 'どうくつ' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
     chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2, fork: 1, vault: 2 },
     foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
-    intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { ru: 'мох и пружины', en: 'moss and springs' } },
-      { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'fizz'], news: { ru: 'осыпь, резина и лазуны', en: 'crumbling blocks, rubber and climbers' } },
-      { chunks: ['icewall', 'lift'], news: { ru: 'лёд, ездящие планки и ежи', en: 'ice, moving planks and hedgehogs' } }] },
-  { id: 'ice', name: { ru: 'Ледник', en: 'Glacier' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
+    intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { en: 'moss and springs', es: 'musgo y resortes', pt: 'musgo e molas', ja: 'コケと バネ' } },
+      { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'fizz'], news: { en: 'crumbling blocks, rubber and climbers', es: 'bloques que se caen, goma y trepadores', pt: 'blocos que desmoronam, borracha e escaladores', ja: 'くずれる ブロック、ゴム、カベノボリ' } },
+      { chunks: ['icewall', 'lift'], news: { en: 'ice, moving planks and hedgehogs', es: 'hielo, tablas móviles y erizos', pt: 'gelo, tábuas móveis e ouriços', ja: 'こおり、うごく いた、ハリネズミ' } }] },
+  { id: 'ice', name: { en: 'Glacier', es: 'Glaciar', pt: 'Geleira', ja: 'ひょうが' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1, fork: 1, fork2: 1, vault: 1 },
-    foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { ru: 'ледяные блоки, обходчики и панцири', en: 'ice blocks, circlers and shells' } }] },
-  { id: 'mine', name: { ru: 'Шахта', en: 'Mine' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1],
+    foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { en: 'ice blocks, circlers and shells', es: 'bloques de hielo, rondadores y caparazones', pt: 'blocos de gelo, rondadores e cascos', ja: 'こおり ブロック、グルグル、こうら' } }] },
+  { id: 'mine', name: { en: 'Mine', es: 'Mina', pt: 'Mina', ja: 'こうざん' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1],
     chunks: { crumble: 3, bridge: 3, lift: 3, planks: 2, shelves: 2, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1, fork2: 2, vault: 1 },
     foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2 },
-    intro: [{ news: { ru: 'мосты, лифты, плеваки и делилки', en: 'bridges, lifts, spitters and splitters' } }, {}, { news: { ru: 'шипы', en: 'spikes' } }] },
-  { id: 'void', name: { ru: 'Пустота', en: 'Void' }, theme: THEMES.void, heights: [66, 74, 82], fire: 0.85, dark: [1],
+    intro: [{ news: { en: 'bridges, lifts, spitters and splitters', es: 'puentes, elevadores, escupidores y divisores', pt: 'pontes, elevadores, cuspidores e divisores', ja: 'はし、リフト、ペッペ、ブンレツ' } }, {}, { news: { en: 'spikes', es: 'pinchos', pt: 'espinhos', ja: 'トゲ' } }] },
+  { id: 'void', name: { en: 'Void', es: 'Vacío', pt: 'Vazio', ja: 'こくう' }, theme: THEMES.void, heights: [66, 74, 82], fire: 0.85, dark: [1],
     chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, shelves: 1, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2, fork: 1, fork2: 1, vault: 1 },
     foes: 0.9, enemies: { crawler: 1, climber: 2, circler: 2, hedgehog: 2, shell: 1, spitter: 2, splitter: 1, chaser: 2 },
-    intro: [{ news: { ru: 'шипы на стенах, ездящие планки и догонялы', en: 'spiked walls, moving planks and chasers' } }] },
+    intro: [{ news: { en: 'spiked walls, moving planks and chasers', es: 'paredes con pinchos, tablas móviles y perseguidores', pt: 'paredes com espinhos, tábuas móveis e perseguidores', ja: 'トゲの かべ、うごく いた、オイカケ' } }] },
 ];
 // The hardest chunk allowed, by world and level (hard mode allows all).
 const MAX_D = [[1, 2, 2], [2, 2, 3], [2, 3, 3], [3, 3, 3]];
-const SUMMIT = { id: 'summit', name: { ru: 'Вершина', en: 'Summit' }, theme: THEMES.summit, enemies: {}, chunks: {} };
+const SUMMIT = { id: 'summit', name: { en: 'Summit', es: 'Cumbre', pt: 'Cume', ja: 'ちょうじょう' }, theme: THEMES.summit, enemies: {}, chunks: {} };
 // A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about
 // 1.1 s a metre) where no heart is lost; out by the hole on top, out of time or caught by the fire, what it paid is shown
 // with an offer to double it for an ad, then on to the next world (user). Made like a world, with
 // its own: `rain` sprinkles coins over every chunk, `coat` lines both walls, `pack` sets enemies to a
 // chunk, `comboMul` multiplies combo rewards; in the fire race the fire ends it.
 const BONUS = [
-  { id: 'rain', bonus: true, name: { ru: 'Бонус: монетный дождь', en: 'Bonus: coin rain' }, goal: { ru: 'Собери сколько успеешь', en: 'Grab all you can' },
+  { id: 'rain', bonus: true, name: { en: 'Bonus: coin rain', es: 'Bonus: lluvia de monedas', pt: 'Bônus: chuva de moedas', ja: 'ボーナス: コインの あめ' }, goal: { en: 'Grab all you can', es: 'Atrapa todo lo que puedas', pt: 'Pegue tudo o que puder', ja: 'できるだけ あつめよう' },
     theme: THEMES.cave, heights: [38, 38, 38], time: 42, maxD: 1, foes: 0, enemies: {}, rain: true,
     chunks: { mosswall: 3, stairs: 2, planks: 2, pillars: 1 } },
-  { id: 'rubber', bonus: true, name: { ru: 'Бонус: резиновый колодец', en: 'Bonus: rubber well' }, goal: { ru: 'Вверх рикошетом от стен', en: 'Bounce your way up the walls' },
+  { id: 'rubber', bonus: true, name: { en: 'Bonus: rubber well', es: 'Bonus: pozo de goma', pt: 'Bônus: poço de borracha', ja: 'ボーナス: ゴムの いど' }, goal: { en: 'Bounce your way up the walls', es: 'Sube rebotando en las paredes', pt: 'Suba quicando nas paredes', ja: 'かべで はねて のぼろう' },
     theme: THEMES.ice, heights: [50, 50, 50], time: 55, maxD: 2, foes: 0, enemies: {}, rain: true, coat: 'rubber',
     chunks: { planks: 3, stairs: 2, pillars: 1, rest: 1 } },
-  { id: 'combo', bonus: true, name: { ru: 'Бонус: комбо-лестница', en: 'Bonus: combo ladder' }, goal: { ru: 'Топчи подряд: комбо вдвое дороже', en: 'Stomp in a row: combos pay double' },
+  { id: 'combo', bonus: true, name: { en: 'Bonus: combo ladder', es: 'Bonus: escalera de combos', pt: 'Bônus: escada de combos', ja: 'ボーナス: コンボ はしご' }, goal: { en: 'Stomp in a row: combos pay double', es: 'Pisa seguido: los combos pagan el doble', pt: 'Pise sem parar: combos valem o dobro', ja: 'つづけて ふめ: コンボ 2ばい' },
     theme: THEMES.mine, heights: [62, 62, 62], time: 68, maxD: 2, foes: 1, pack: 3, enemies: { crawler: 1 }, comboMul: 2,
     chunks: { stairs: 3, planks: 3, pillars: 2 } },
-  { id: 'race', bonus: true, name: { ru: 'Бонус: гонка с огнём', en: 'Bonus: race the fire' }, goal: { ru: 'Огонь быстрый: беги вверх', en: 'The fire is fast: run up' },
+  { id: 'race', bonus: true, name: { en: 'Bonus: race the fire', es: 'Bonus: carrera contra el fuego', pt: 'Bônus: corrida contra o fogo', ja: 'ボーナス: ほのおと きょうそう' }, goal: { en: 'The fire is fast: run up', es: 'El fuego es rápido: ¡sube!', pt: 'O fogo é rápido: suba!', ja: 'ほのおが はやい: いそげ' },
     theme: THEMES.void, heights: [74, 74, 74], time: 81, maxD: 2, foes: 0, enemies: {}, rain: true, fire: 2.2,
     chunks: { stairs: 2, planks: 2, pillars: 2, lift: 1 } },
 ];
 
 // One of three is offered after every level. `stack`: can be taken again.
 const UPGRADES = [
-  { id: 'bouncy', stack: true, name: { ru: ['Пружинка', 'Отскок от врагов выше'], en: ['Springy', 'Bounce higher off enemies'] }, apply: (g) => { g.mods.bounce *= 1.2; } },
-  { id: 'sticky', stack: true, name: { ru: ['Липучка', 'Медленнее сползаешь, дольше висишь на потолке'], en: ['Sticky', 'Slide slower, hang longer'] }, apply: (g) => { g.mods.slide *= 0.55; g.mods.hold += 0.6; } },
-  { id: 'magnet', stack: true, name: { ru: ['Магнит', 'Монеты притягиваются издалека'], en: ['Magnet', 'Coins come from further away'] }, apply: (g) => { g.mods.magnet *= 2; } },
-  { id: 'heart', stack: true, name: { ru: ['Толстая кожа', '+1 сердце к запасу'], en: ['Thick skin', '+1 max heart'] }, apply: (g) => { g.maxHp++; g.hp++; } },
-  { id: 'apple', stack: true, name: { ru: ['Яблоко', 'Вылечить 2 сердца'], en: ['Apple', 'Heal 2 hearts'] }, apply: (g) => g.heal(2) },
-  { id: 'candle', stack: true, name: { ru: ['Свеча', 'Дольше неуязвим после удара'], en: ['Candle', 'Longer safety after a hit'] }, apply: (g) => { g.mods.invuln += 0.8; } },
-  { id: 'air', stack: true, name: { ru: ['Воздушный прыжок', '+1 прыжок в воздухе'], en: ['Air jump', '+1 jump in mid-air'] }, apply: (g) => { g.mods.airJumps++; } },
-  { id: 'blast', name: { ru: ['Взрывной прыжок', 'Прыжок на врага сбивает соседей'], en: ['Blast stomp', 'A stomp takes out its neighbours'] }, apply: (g) => { g.mods.blast = true; } },
-  { id: 'greed', stack: true, name: { ru: ['Жадность', 'Враги роняют больше монет'], en: ['Greed', 'Enemies drop more coins'] }, apply: (g) => { g.mods.coinMul *= 1.5; } },
-  { id: 'combo', stack: true, name: { ru: ['Мастер комбо', 'Награды за комбо раньше'], en: ['Combo master', 'Combo rewards come sooner'] }, apply: (g) => { g.mods.comboShift++; } },
-  { id: 'legs', stack: true, name: { ru: ['Сильные ноги', 'Прыжок выше'], en: ['Strong legs', 'Jump higher'] }, apply: (g) => { g.mods.jump *= 1.08; } },
-  { id: 'member', name: { ru: ['Клубная карта', 'Скидка 25% в лавках'], en: ['Member card', '25% off in shops'] }, apply: (g) => { g.mods.discount *= 0.75; } },
-  { id: 'iron', name: { ru: ['Железные подошвы', 'Шипы снизу не ранят'], en: ['Iron soles', 'Floor spikes do not hurt'] }, apply: (g) => { g.mods.iron = true; } },
-  { id: 'long', stack: true, name: { ru: ['Долгий заряд', 'Конфеты действуют на 2 с дольше'], en: ['Long charge', 'Candies last 2 s longer'] }, apply: (g) => { g.mods.gun += GUN.plus; } },
-  { id: 'cool', name: { ru: ['Огнеупорность', 'Огонь растёт медленнее и реже плюётся'], en: ['Fireproof', 'The fire rises slower and spits less'] }, apply: (g) => { g.mods.fire *= 0.6; } },
+  { id: 'bouncy', stack: true, name: { en: ['Springy', 'Bounce higher off enemies'], es: ['Saltarín', 'Rebotas más alto en los enemigos'], pt: ['Saltitante', 'Quica mais alto nos inimigos'], ja: ['ピョンピョン', 'てきを ふむと たかく はねる'] }, apply: (g) => { g.mods.bounce *= 1.2; } },
+  { id: 'sticky', stack: true, name: { en: ['Sticky', 'Slide slower, hang longer'], es: ['Pegajoso', 'Resbalas más lento y aguantas más'], pt: ['Grudento', 'Escorrega devagar, segura mais'], ja: ['ネバネバ', 'ゆっくり すべり、ながく つかまる'] }, apply: (g) => { g.mods.slide *= 0.55; g.mods.hold += 0.6; } },
+  { id: 'magnet', stack: true, name: { en: ['Magnet', 'Coins come from further away'], es: ['Imán', 'Las monedas llegan desde más lejos'], pt: ['Ímã', 'As moedas vêm de mais longe'], ja: ['マグネット', 'コインが とおくから あつまる'] }, apply: (g) => { g.mods.magnet *= 2; } },
+  { id: 'heart', stack: true, name: { en: ['Thick skin', '+1 max heart'], es: ['Piel dura', '+1 corazón máximo'], pt: ['Pele grossa', '+1 coração máximo'], ja: ['かたい かわ', 'さいだい ハート +1'] }, apply: (g) => { g.maxHp++; g.hp++; } },
+  { id: 'apple', stack: true, name: { en: ['Apple', 'Heal 2 hearts'], es: ['Manzana', 'Cura 2 corazones'], pt: ['Maçã', 'Cura 2 corações'], ja: ['リンゴ', 'ハートを 2 かいふく'] }, apply: (g) => g.heal(2) },
+  { id: 'candle', stack: true, name: { en: ['Candle', 'Longer safety after a hit'], es: ['Vela', 'Más tiempo a salvo tras un golpe'], pt: ['Vela', 'Mais tempo protegido após um golpe'], ja: ['ろうそく', 'やられた あとの むてきが ながい'] }, apply: (g) => { g.mods.invuln += 0.8; } },
+  { id: 'air', stack: true, name: { en: ['Air jump', '+1 jump in mid-air'], es: ['Salto aéreo', '+1 salto en el aire'], pt: ['Pulo aéreo', '+1 pulo no ar'], ja: ['くうちゅう ジャンプ', 'くうちゅうで ジャンプ +1'] }, apply: (g) => { g.mods.airJumps++; } },
+  { id: 'blast', name: { en: ['Blast stomp', 'A stomp takes out its neighbours'], es: ['Pisotón explosivo', 'Un pisotón tumba a los vecinos'], pt: ['Pisão explosivo', 'Um pisão derruba os vizinhos'], ja: ['ばくはつ ふみつけ', 'ふむと まわりの てきも たおす'] }, apply: (g) => { g.mods.blast = true; } },
+  { id: 'greed', stack: true, name: { en: ['Greed', 'Enemies drop more coins'], es: ['Codicia', 'Los enemigos sueltan más monedas'], pt: ['Ganância', 'Inimigos soltam mais moedas'], ja: ['よくばり', 'てきが コインを おおく おとす'] }, apply: (g) => { g.mods.coinMul *= 1.5; } },
+  { id: 'combo', stack: true, name: { en: ['Combo master', 'Combo rewards come sooner'], es: ['Maestro del combo', 'Los premios de combo llegan antes'], pt: ['Mestre do combo', 'Prêmios de combo chegam mais cedo'], ja: ['コンボ マスター', 'コンボの ごほうびが はやい'] }, apply: (g) => { g.mods.comboShift++; } },
+  { id: 'legs', stack: true, name: { en: ['Strong legs', 'Jump higher'], es: ['Piernas fuertes', 'Saltas más alto'], pt: ['Pernas fortes', 'Pula mais alto'], ja: ['つよい あし', 'もっと たかく とべる'] }, apply: (g) => { g.mods.jump *= 1.08; } },
+  { id: 'member', name: { en: ['Member card', '25% off in shops'], es: ['Tarjeta de socio', '25% menos en las tiendas'], pt: ['Cartão de sócio', '25% de desconto nas lojas'], ja: ['かいいんしょう', 'ショップで 25% びき'] }, apply: (g) => { g.mods.discount *= 0.75; } },
+  { id: 'iron', name: { en: ['Iron soles', 'Floor spikes do not hurt'], es: ['Suelas de hierro', 'Los pinchos del suelo no dañan'], pt: ['Solas de ferro', 'Espinhos no chão não machucam'], ja: ['てつの くつぞこ', 'ゆかの トゲが いたくない'] }, apply: (g) => { g.mods.iron = true; } },
+  { id: 'long', stack: true, name: { en: ['Long charge', 'Candies last 2 s longer'], es: ['Carga larga', 'Los caramelos duran 2 s más'], pt: ['Carga longa', 'Doces duram 2 s a mais'], ja: ['ロング チャージ', 'キャンディが 2 びょう ながもち'] }, apply: (g) => { g.mods.gun += GUN.plus; } },
+  { id: 'cool', name: { en: ['Fireproof', 'The fire rises slower and spits less'], es: ['Ignífugo', 'El fuego sube más lento y escupe menos'], pt: ['À prova de fogo', 'O fogo sobe devagar e cospe menos'], ja: ['たいか', 'ほのおが ゆっくり、あまり とばさない'] }, apply: (g) => { g.mods.fire *= 0.6; } },
 ];
 // A shop shows three of these; prices grow by half a price a world.
 const SHOP_ITEMS = [
-  { id: 'heal1', price: 25, color: PAL.red, name: { ru: '+1 сердце', en: '+1 heart' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(1) },
-  { id: 'heal2', price: 40, color: PAL.red, name: { ru: '+2 сердца', en: '+2 hearts' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(2) },
-  { id: 'maxhp', price: 80, color: PAL.red, name: { ru: '+1 к запасу', en: '+1 max heart' }, apply: (g) => { g.maxHp++; g.hp++; } },
-  { id: 'upgrade', price: 110, color: PAL.purple, name: { ru: 'Улучшение', en: 'Upgrade' }, apply: (g) => g.randomUpgrade() },
+  { id: 'heal1', price: 25, color: PAL.red, name: { en: '+1 heart', es: '+1 corazón', pt: '+1 coração', ja: 'ハート +1' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(1) },
+  { id: 'heal2', price: 40, color: PAL.red, name: { en: '+2 hearts', es: '+2 corazones', pt: '+2 corações', ja: 'ハート +2' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(2) },
+  { id: 'maxhp', price: 80, color: PAL.red, name: { en: '+1 max heart', es: '+1 corazón máx.', pt: '+1 coração máx.', ja: 'さいだい ハート +1' }, apply: (g) => { g.maxHp++; g.hp++; } },
+  { id: 'upgrade', price: 110, color: PAL.purple, name: { en: 'Upgrade', es: 'Mejora', pt: 'Melhoria', ja: 'パワーアップ' }, apply: (g) => g.randomUpgrade() },
 ];
-const GIFT = { id: 'gift', price: 0, free: true, color: PAL.red, name: { ru: '+1 сердце', en: '+1 heart' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(1) };
+const GIFT = { id: 'gift', price: 0, free: true, color: PAL.red, name: { en: '+1 heart', es: '+1 corazón', pt: '+1 coração', ja: 'ハート +1' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(1) };
 // A 12×12 pixel picture for every upgrade and shop item, rows top to bottom in the letters
 // of ICON_INK ('.' is nothing); drawn on its card and as the item in a shop.
 const ICONS = {

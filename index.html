@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0e0d13">
 <title>Upwell</title>
+<link rel="preload" href="assets/fonts/vt323.woff2" as="font" type="font/woff2" crossorigin>   <!-- the type, before the first screen (see .tx) -->
 <script async src="https://bridge.playgama.com/v2/stable/playgama-bridge.js"></script>   <!-- Playgama Bridge: ads (see `ads` in game.js); the game runs without it -->
 <!--
   Upwell — a squishy climbs a well (Downwell, upside down). Portrait first.
@@ -15,8 +16,10 @@
 <style>
   /* The canvas is pixel art in nine inks; the DOM over it is drawn in the same terms: the
      same inks, boxes with their corners cut by a game pixel (2 CSS px), 2-px borders, see-
-     through things as half their pixels black, and all text in the pixel font (px() in
-     game.js, sized by --p: CSS px per font pixel, 2 being a game pixel). */
+     through things as half their pixels black. Text is VT323, and DotGothic16 for Japanese (px()
+     in game.js), sized by --p: CSS px per pixel of the old pixel font, 2 being a game pixel. */
+  @font-face { font-family: 'VT323'; src: url('assets/fonts/vt323.woff2') format('woff2'); font-display: block; }   /* both built by tools/fonts.py (SIL OFL) */
+  @font-face { font-family: 'DotGothic16'; src: url('assets/fonts/dotgothic16.woff2') format('woff2'); font-display: block; }
   :root {
     --ink: #141414; --red: #f43e34; --blue: #5bb8ff; --yellow: #ffed57; --green: #339c39; --purple: #c996ff; --orange: #faa23e; --gray: #c8c8c8; --white: #f3f3f3;
     --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
@@ -34,7 +37,7 @@
     -webkit-user-select: none; user-select: none;
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
-    font-family: ui-monospace, monospace;
+    font-family: 'VT323', ui-monospace, monospace;
     color: var(--white);
   }
   body { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
@@ -45,6 +48,24 @@
   button { font: inherit; color: inherit; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
   .px { display: inline-block; vertical-align: middle; line-height: 0; }
   .px svg, #hearts svg { display: block; width: calc(var(--w) * var(--p) * 1px); height: calc(var(--h) * var(--p) * 1px); }
+  /* Text: its capitals as tall as the old pixel font's 7 pixels (VT323's are 0.56 em) and its box cut to them, as that
+     font's was, so nothing round it moved; a line every 10 pixels, as before. Japanese: DotGothic16, its kana about as
+     tall (0.94 em at 8 pixels an em: its own 16-px grid at --p 2), the box cut the same way. */
+  .tx { font-family: 'VT323', monospace; font-size: calc(var(--p) * 12.5px); line-height: 0.8; margin: -0.14em 0 -0.1em; white-space: pre-line; text-align: center; min-width: min-content; }   /* never narrower than its longest word: a price tag's "corazones" */
+  .tx:lang(ja) { font-family: 'DotGothic16', 'VT323', sans-serif; font-size: calc(var(--p) * 8px); line-height: 1.25; margin: -0.21em 0 -0.16em; word-break: keep-all; }   /* broken only at its spaces, never inside a word */
+  .big .tx { white-space: nowrap; }   /* a big button's words on one line (see fitBig) */
+  .tx.left { text-align: left; }
+  .tx .px { vertical-align: baseline; }   /* a drawn glyph (an arrow, a triangle) stands on the line, as tall as the capitals */
+  /* A heading's or a button's words in the other script, small under it: Japanese, or English in the Japanese game */
+  .cap { display: block; margin-top: 4px; padding-left: 0.2em; font-family: 'DotGothic16', sans-serif; font-size: max(12px, calc(var(--p) * 4px)); line-height: 1; letter-spacing: 0.2em; }
+  .cap:lang(en) { font-family: 'VT323', monospace; font-size: max(14px, calc(var(--p) * 5px)); letter-spacing: 0.1em; padding-left: 0.1em; }
+  .title .cap, .head .cap { color: var(--purple); }
+  .title .cap { margin-top: 10px; letter-spacing: 0.5em; padding-left: 0.5em; }
+  .chip .cap { margin-top: 0; }
+  .big.capped { padding-top: 10px; padding-bottom: 14px; }   /* as tall as before, near enough, with the words under */
+  .big, .chip, .head, .title, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
+  .langs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; max-width: 340px; }   /* two by two: four in a row would not fit a small phone */
+  .langs .chip { text-transform: none; }   /* each language's name as it is written */
   * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }   /* Safari: a held finger selects nothing */
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -143,7 +164,7 @@
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
   #pause { justify-content: flex-end; }
   .summary { flex: 1; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-  .big.alt { background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as big, not the main one */
+  .big.alt { --p: 3; background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as wide, a size smaller: not the main one (and "Controls: buttons" in one line) */
   .big.alt:active { transform: translateY(4px); }
   .big.thumb { align-self: stretch; margin-top: 8px; }   /* the main button: the width of the screen, at its bottom */
   #menu { background: linear-gradient(transparent 58%, var(--gray) 58%, var(--gray) calc(58% + 2px), var(--ink) calc(58% + 2px)); justify-content: flex-end; }   /* the hero shows through the top */

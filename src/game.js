@@ -22,29 +22,62 @@ const STR = {
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
-    hintStick: 'Lean to run · tap to jump',
+    hintStick: 'Lean to run · tap to jump', lang: 'Language',
   },
-  ru: {
-    hintKeys: '← → бег · пробел прыжок', hintMouse: '← → бег · пробел прыжок', hintTouch: 'Веди пальцем — бег, тап — прыжок', play: 'Играть',
-    hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
-    tapJump: 'Тап — прыжок', continue: 'Продолжить', newRun: 'Новый забег', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', bonusDone: 'Бонус пройден!', double: '×2 за рекламу', next: 'Дальше', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
-    seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
-    seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
-    seen_hedgehog: 'Ежа не топчи: колется!', seen_crawler: 'Прыгай на врагов сверху!', seen_wallK: '↓ — отлипнуть от стены', seen_wallT: 'Свайп вниз — отлипнуть', seen_wallS: 'Стик вниз — отлипнуть', seen_crouchK: '↓ и пробел — высокий прыжок', seen_crouchS: 'Стик вниз и тап — высокий прыжок', seen_cage: 'Кто-то заперт! Коснись клетки', seen_crack: 'Треснутый блок: ударь его снизу!', arena: 'Арена! Победи всех', arenaWave: 'Волна {n}!', arenaWon: 'Арена пройдена! +{n}', seen_trader: 'Торговец: коснись товара, чтобы купить', freedCoins: 'Спасибо! +{n} монет', freedHeart: 'Спасибо! +1 сердце', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
-    seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене',
-    got_fizz: 'Шипучка! Стреляешь сам · {s} с', got_smash: 'Крушилка! Прыжок ломает блоки · {s} с', got_rainbow: 'Радуга! Ничто не ранит, враги лопаются · {s} с', got_grow: 'Великан! Ломаешь блоки, враги лопаются · {s} с',
-    reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
-    height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
-    again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
-    noNeed: 'Сейчас не нужно', rotate: 'Поверни телефон вертикально', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', bossHint: 'Оглушён! Прыгай на макушку!', m: 'м',
-    nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', shake: 'Тряска', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
-    hintStick: 'Наклон — бег, тап — прыжок',
+  es: {
+    hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
+    hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', news: 'Nuevo: {n}', dark: 'oscuridad',
+    seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
+    seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
+    seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '¡Gracias! +{n} monedas', freedHeart: '¡Gracias! +1 corazón', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
+    seen_splitter: 'El divisor se parte en dos', seen_chaser: 'El perseguidor te sigue por su pared',
+    got_fizz: '¡Burbujas! Disparas solo · {s} s', got_smash: '¡Caramelo roca! Tus saltos rompen bloques · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
+    reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
+    height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
+    again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
+    noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
+    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
+    hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
+  },
+  pt: {
+    hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
+    hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', news: 'Novo: {n}', dark: 'escuridão',
+    seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
+    seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
+    seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: 'Obrigado! +{n} moedas', freedHeart: 'Obrigado! +1 coração', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
+    seen_splitter: 'O divisor se parte em dois', seen_chaser: 'O perseguidor segue você pela parede',
+    got_fizz: 'Gasosa! Você atira sozinho · {s} s', got_smash: 'Bala de pedra! Pulos quebram blocos · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
+    reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
+    height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
+    again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
+    noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
+    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
+    hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
+  },
+  ja: {
+    hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
+    hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', news: 'NEW: {n}', dark: 'くらやみ',
+    seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
+    seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
+    seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: 'ありがとう！ +{n} コイン', freedHeart: 'ありがとう！ ハート +1', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
+    seen_splitter: 'ブンレツは ふたつに わかれる', seen_chaser: 'オイカケは かべを つたって おってくる',
+    got_fizz: 'シュワシュワ！ じどうで うつ · {s} びょう', got_smash: 'ロックキャンディ！ ジャンプで ブロックを こわす · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
+    reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
+    height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
+    again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
+    noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
+    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
+    hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
   },
 };
 let lang = 'en';
 const t = (k) => (STR[lang] && STR[lang][k]) || STR.en[k];
 const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (_, n) => o[n]);
 const L2 = (o) => o[lang] || o.en;
+const LANGS = [['en', 'English'], ['es', 'Español'], ['pt', 'Português'], ['ja', '日本語']];   // each by its own name
 const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || navigator.language || 'en').slice(0, 2).toLowerCase(); return STR[l] ? l : 'en'; };   // the platform's (Playgama checklist), else the browser's; English by default
 
 // ── Save ─────────────────────────────────────────────────────
@@ -1201,47 +1234,27 @@ class Game {
 // the canvas column, and so is the touch pad.
 const $ = (id) => document.getElementById(id);
 const rgb = (c) => 'rgb(' + c.map((v) => Math.round(v * 255)).join(',') + ')';
-// ── Pixel type ──
-// A 7-pixel-tall capitals font, Latin and Cyrillic (the letters drawn alike share a glyph),
-// drawn by hand: rows top to bottom, '#' ink. Text is set as one crisp SVG path; CSS sizes
-// it (--p: CSS px per font pixel, 2 = a game pixel) and colours it (currentColor), and a
-// visually hidden copy keeps it readable for screen readers.
+// ── Type ──
+// Text is set in VT323 (Latin, es and pt included) and DotGothic16 (Japanese), both shipped in assets/fonts (see
+// index.html and tools/fonts.py). What VT323 has not got, the arrows, triangles and the speaker, stays drawn by hand:
+// 7 pixels tall, rows top to bottom, '#' ink, each an SVG path sized by CSS --p (CSS px per pixel) and coloured by
+// currentColor, as all the text was before.
 const FONT = {
-  A: '.##./#..#/#..#/####/#..#/#..#/#..#', B: '###./#..#/#..#/###./#..#/#..#/###.', C: '.##./#..#/#.../#.../#.../#..#/.##.',
-  D: '###./#..#/#..#/#..#/#..#/#..#/###.', E: '####/#.../#.../###./#.../#.../####', F: '####/#.../#.../###./#.../#.../#...',
-  G: '.##./#..#/#.../#.##/#..#/#..#/.###', H: '#..#/#..#/#..#/####/#..#/#..#/#..#', I: '###/.#./.#./.#./.#./.#./###',
-  J: '...#/...#/...#/...#/#..#/#..#/.##.', K: '#..#/#..#/#.#./##../#.#./#..#/#..#', L: '#.../#.../#.../#.../#.../#.../####',
-  M: '#...#/##.##/#.#.#/#.#.#/#...#/#...#/#...#', N: '#..#/##.#/##.#/#.##/#.##/#..#/#..#', O: '.##./#..#/#..#/#..#/#..#/#..#/.##.',
-  P: '###./#..#/#..#/###./#.../#.../#...', Q: '.##./#..#/#..#/#..#/#..#/#.#./.#.#', R: '###./#..#/#..#/###./#.#./#..#/#..#',
-  S: '.###/#.../#.../.##./...#/...#/###.', T: '#####/..#../..#../..#../..#../..#../..#..', U: '#..#/#..#/#..#/#..#/#..#/#..#/.##.',
-  V: '#...#/#...#/#...#/#...#/.#.#./.#.#./..#..', W: '#...#/#...#/#...#/#.#.#/#.#.#/##.##/#...#', X: '#...#/#...#/.#.#./..#../.#.#./#...#/#...#',
-  Y: '#...#/#...#/.#.#./..#../..#../..#../..#..', Z: '####/...#/..#./.#../#.../#.../####',
-  0: '.##./#..#/#..#/#..#/#..#/#..#/.##.', 1: '.#./##./.#./.#./.#./.#./###', 2: '.##./#..#/...#/..#./.#../#.../####',
-  3: '###./...#/...#/.##./...#/...#/###.', 4: '..#./.##./#.#./#.#./####/..#./..#.', 5: '####/#.../###./...#/...#/#..#/.##.',
-  6: '.##./#.../#.../###./#..#/#..#/.##.', 7: '####/...#/..#./..#./.#../.#../.#..', 8: '.##./#..#/#..#/.##./#..#/#..#/.##.',
-  9: '.##./#..#/#..#/.###/...#/...#/.##.',
-  Б: '####/#.../#.../###./#..#/#..#/###.', Г: '####/#.../#.../#.../#.../#.../#...', Д: '.###./.#.#./.#.#./.#.#./.#.#./#####/#...#',
-  Ж: '#.#.#/#.#.#/.###./..#../.###./#.#.#/#.#.#', З: '.##./#..#/...#/.##./...#/#..#/.##.', И: '#..#/#.##/#.##/##.#/##.#/#..#/#..#',
-  Й: '.##./..../#..#/#.##/##.#/#..#/#..#', Л: '.###/.#.#/.#.#/.#.#/.#.#/.#.#/##.#', П: '####/#..#/#..#/#..#/#..#/#..#/#..#',
-  У: '#..#/#..#/#..#/.###/...#/...#/###.', Ф: '..#../.###./#.#.#/#.#.#/#.#.#/.###./..#..', Ц: '#..#./#..#./#..#./#..#./#..#./#####/....#',
-  Ч: '#..#/#..#/#..#/.###/...#/...#/...#', Ш: '#.#.#/#.#.#/#.#.#/#.#.#/#.#.#/#.#.#/#####', Щ: '#.#.#/#.#.#/#.#.#/#.#.#/#.#.#/#####/....#',
-  Ъ: '##.../.#.../.#.../.###./.#..#/.#..#/.###.', Ы: '#...#/#...#/#...#/###.#/#.#.#/#.#.#/###.#', Ь: '#.../#.../#.../###./#..#/#..#/###.',
-  Э: '###./...#/...#/.###/...#/...#/###.', Ю: '#..#./#.#.#/#.#.#/###.#/#.#.#/#.#.#/#..#.', Я: '.###/#..#/#..#/.###/.#.#/#..#/#..#',
-  Ё: '#.#./..../####/#.../###./#.../####',
-  ' ': '../../../../../../..', '.': '././././././#', ',': '../../../../../.#/#.', ':': '././#/././#/.', ';': '../../.#/../../.#/#.',
-  '!': '#/#/#/#/#/./#', '?': '.##./#..#/...#/..#./.#../..../.#..', "'": '#/#/././././.', '"': '#.#/#.#/.../.../.../.../...',
-  '-': '.../.../.../###/.../.../...', '—': '...../...../...../#####/...../...../.....', '+': '.../.../.#./###/.#./.../...',
-  '×': '.../.../#.#/.#./#.#/.../...', '/': '..#/..#/.#./.#./.#./#../#..', '(': '.#/#./#./#./#./#./.#', ')': '#./.#/.#/.#/.#/.#/#.',
-  '%': '##..#/##..#/...#./..#../.#.../#..##/#..##', '#': '.#.#./.#.#./#####/.#.#./#####/.#.#./.#.#.', '·': './././#/././.',
-  '●': '...../.###./#####/#####/#####/.###./.....', '✓': '...../....#/...##/#.##./###../.#.../.....',
-  '←': '...../..#../.#.../#####/.#.../..#../.....', '→': '...../..#../...#./#####/...#./..#../.....',
-  '↑': '..#../.###./#.#.#/..#../..#../..#../..#..', '↓': '..#../..#../..#../..#../#.#.#/.###./..#..',
-  '▲': '...../..#../..#../.###./.###./#####/.....', '▼': '...../#####/.###./.###./..#../..#../.....',
-  '◀': '...#/..##/.###/####/.###/..##/...#', '▶': '#.../##../###./####/###./##../#...',
-  '\u{E000}': '...#.../..##.#./####..#/####..#/####..#/..##.#./...#...', '\u{E001}': '...#.../..##.../####.#./#####.#/####.#./..##.../...#...',   // sound on / off
+  '●': '...../.###./#####/#####/#####/.###./.....',
+  '✓': '...../....#/...##/#.##./###../.#.../.....',
+  '←': '...../..#../.#.../#####/.#.../..#../.....',
+  '→': '...../..#../...#./#####/...#./..#../.....',
+  '↑': '..#../.###./#.#.#/..#../..#../..#../..#..',
+  '↓': '..#../..#../..#../..#../#.#.#/.###./..#..',
+  '▲': '...../..#../..#../.###./.###./#####/.....',
+  '▼': '...../#####/.###./.###./..#../..#../.....',
+  '◀': '...#/..##/.###/####/.###/..##/...#',
+  '▶': '#.../##../###./####/###./##../#...',
+  '\u{E000}': '...#.../..##.#./####..#/####..#/####..#/..##.#./...#...',
+  '\u{E001}': '...#.../..##.../####.#./#####.#/####.#./..##.../...#...',   // the last two: sound on / off
 };
-for (const [c, l] of Object.entries({ А: 'A', В: 'B', Е: 'E', К: 'K', М: 'M', Н: 'H', О: 'O', Р: 'P', С: 'C', Т: 'T', Х: 'X' })) FONT[c] = FONT[l];
 for (const c in FONT) FONT[c] = FONT[c].split('/');
+const GLYPHS = new RegExp('([' + Object.keys(FONT).join('') + '])', 'u');
 // Rows of '#' as an SVG path, at (x, y) in font pixels.
 function inkPath(rows, x, y) {
   let d = '';
@@ -1249,21 +1262,26 @@ function inkPath(rows, x, y) {
   return d;
 }
 const pxSvg = (W, H, paths) => `<svg aria-hidden="true" viewBox="0 0 ${W} ${H}" style="--w:${W};--h:${H}" shape-rendering="crispEdges">${paths}</svg>`;
-// Text in the pixel font, centred line under line (or `left`); `max` (font pixels) wraps at spaces.
+// Text, centred line under line (or `left`); `max` (--p CSS px each, the old pixel font's measure) wraps it at spaces, as
+// a '\n' does. Sized by --p too: its capitals as tall as that font's 7 pixels (see .tx in index.html).
 function px(text, max = Infinity, left = false) {
-  const glyph = (c) => FONT[c] || FONT['?'], width = (s) => [...s].reduce((w, c, i) => w + glyph(c)[0].length + (i ? 1 : 0), 0), lines = [];
-  for (const raw of String(text).toUpperCase().split('\n')) {
-    let cur = '';
-    for (const word of raw.split(' ')) { const next = cur ? cur + ' ' + word : word; if (cur && width(next) > max) { lines.push(cur); cur = word; } else cur = next; }
-    lines.push(cur);
-  }
-  const W = Math.max(1, ...lines.map(width)), H = lines.length * 10 - 3;
-  let d = '';
-  lines.forEach((ln, i) => { let x = left ? 0 : Math.floor((W - width(ln)) / 2); for (const c of ln) { d += inkPath(glyph(c), x, i * 10); x += glyph(c)[0].length + 1; } });
   const e = document.createElement('span');
-  e.className = 'px';
-  e.innerHTML = pxSvg(W, H, `<path fill="currentColor" d="${d}"/>`) + '<span class="sr"></span>';
-  e.lastChild.textContent = text;
+  e.className = 'px tx' + (left ? ' left' : '');
+  if (max < Infinity) e.style.maxWidth = 'calc(var(--p) * ' + max + 'px)';
+  for (const part of String(text).split(GLYPHS)) {
+    if (!FONT[part]) { if (part) e.append(part); continue; }
+    const g = document.createElement('i'), rows = FONT[part];
+    g.className = 'px'; g.innerHTML = pxSvg(rows[0].length, rows.length, `<path fill="currentColor" d="${inkPath(rows, 0, 0)}"/>`);
+    e.append(g);
+  }
+  return e;
+}
+// A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
+// English by the Japanese). `k` is the STR key it says.
+function cap(e, k) {
+  const c = document.createElement('small'), ja = lang !== 'ja' || k === 'title';
+  c.className = 'cap'; c.lang = ja ? 'ja' : 'en'; c.textContent = k === 'title' ? 'アップウェル' : STR[ja ? 'ja' : 'en'][k];
+  e.classList.add('capped'); e.append(c);
   return e;
 }
 // An ICONS picture as pixel SVG, a path per ink in the page's palette colours.
@@ -1287,14 +1305,25 @@ function pixelDisc(r, fill) {
   return t.content.firstChild;
 }
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
-function button(text, cls, fn) { const b = el('button', cls, text); b.addEventListener('click', (e) => { e.stopPropagation(); sound.unlock(); sound.play('click', 0.6); fn(); }); return b; }
+function button(text, cls, fn) {
+  const b = el('button', cls, text);
+  b.addEventListener('click', (e) => { e.stopPropagation(); sound.unlock(); sound.play('click', 0.6); fn(); });
+  if (/\bbig\b/.test(cls)) queueMicrotask(() => fitBig(b));   // once it is in its panel
+  return b;
+}
+// A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
+// ("×2 con un anuncio", a world's name after Continue on a small phone).
+function fitBig(b) {
+  const tx = b.querySelector('.tx');
+  for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > 2;) { p -= 0.5; b.style.setProperty('--p', p); }
+}
 const ui = {
   open: null, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; return p; },
   hideAll() { for (const id of ['menu', 'cards', 'pause', 'result']) $(id).classList.remove('on'); this.open = null; },
   menu() {
     const p = this.panel('menu');
-    p.append(el('h1', 'title', 'UPWELL'));
+    const title = cap(el('h1', 'title', 'UPWELL'), 'title'); title.lang = 'en'; p.append(title);   // the name in VT323 whatever the language
     const colors = el('div', 'pickers');   // the hero shows through above; under it its five colours, what the chosen one starts with, and Play
     for (const u of UNLOCKS) {
       const open = opened(u), b = button('', 'chip swatch' + (save.color === u.id ? ' on' : '') + (open ? '' : ' locked'), () => {
@@ -1309,12 +1338,12 @@ const ui = {
     const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }
     if (save.wins > 0) {
-      const h = button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); });
+      const h = cap(button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); }), 'hard');
       p.append(h);
     }
     const r = save.run;   // a run kept from before: Continue at the bottom (one tap), a new one over it
-    if (r) p.append(button(t('newRun'), 'chip wide', () => game.startRun()), button(t('continue') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'big thumb', () => game.continueRun()));
-    else p.append(button(t('play'), 'big thumb', () => game.startRun()));   // the width of the screen, 12 px in from its edges
+    if (r) p.append(cap(button(t('newRun'), 'chip wide', () => game.startRun()), 'newRun'), cap(button(t('continue') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'big thumb', () => game.continueRun()), 'continue'));
+    else p.append(cap(button(t('play'), 'big thumb', () => game.startRun()), 'play'));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
@@ -1332,7 +1361,7 @@ const ui = {
       const pay = px('+' + st.pay); pay.classList.add('pay'); row.append(pay);
       p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
     }
-    p.append(el('div', 'head', t('pick')));
+    p.append(cap(el('div', 'head', t('pick')), 'pick'));
     for (const u of list) {
       const [name, desc] = L2(u.name), c = button('', 'card', () => game.pick(u)), d = el('span');
       d.append(px(desc, 118, true));
@@ -1342,25 +1371,28 @@ const ui = {
   },
   pause() {
     const p = this.panel('pause');
-    const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); });
-    const shk = button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); });
-    const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); queueLayout(); track('settings_changed', { setting: 'controls', value: save.stick ? 'stick' : 'buttons' }); this.pause(); });
-    p.append(el('div', 'head', t('paused')), ...(coarse ? [ctl] : []), snd, shk, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
+    const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); }), 'sound');
+    const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); }), 'shake');
+    const ctl = cap(button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); queueLayout(); track('settings_changed', { setting: 'controls', value: save.stick ? 'stick' : 'buttons' }); this.pause(); }), 'ctrl');
+    const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
+    langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
+    for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); this.pause(); }); b.lang = k; langs.append(b); }
+    p.append(cap(el('div', 'head', t('paused')), 'paused'), langs, ...(coarse ? [ctl] : []), snd, shk, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
-    p.append(el('div', 'head', t(why)), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
-    if (!doubled && n > 0 && ads.canReward) p.append(button(t('next'), 'chip wide', () => game.nextWorld()), button(t('double'), 'big thumb', () => game.doubleBonus()));   // the ad's button under the thumb
-    else p.append(button(t('next'), 'big thumb', () => game.nextWorld()));
+    p.append(cap(el('div', 'head', t(why)), why), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
+    if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'chip wide', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
+    else p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'));
   },
   revive(price, coins) {   // before the result: go on for coins, or end the run
     const p = this.panel('result');
-    p.append(el('div', 'head', t('reviveQ')), el('div', 'label', tf('reviveCost', { n: price, c: coins })),
-      button(t('giveUp'), 'chip wide', () => game.giveUp()), button(t('revive'), 'big thumb', () => game.revive()));   // the main button last, under the thumb
+    p.append(cap(el('div', 'head', t('reviveQ')), 'reviveQ'), el('div', 'label', tf('reviveCost', { n: price, c: coins })),
+      cap(button(t('giveUp'), 'chip wide', () => game.giveUp()), 'giveUp'), cap(button(t('revive'), 'big thumb', () => game.revive()), 'revive'));   // the main button last, under the thumb
   },
   result(r) {
     const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons
-    box.append(el('div', 'head', r.won ? t('won') : t('dead')));
+    box.append(cap(el('div', 'head', r.won ? t('won') : t('dead')), r.won ? 'won' : 'dead'));
     const rows = [[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]];
     const tb = el('div', 'rows');
     for (const [k, v] of rows) { const row = el('div', 'row'); row.append(el('span', null, k), el('b', null, String(v))); tb.append(row); }
@@ -1373,7 +1405,7 @@ const ui = {
       box.append(u);
     }
     const then = (f) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); ads.between(f); };   // the run over: an ad may come first
-    p.append(box, button(t('menu'), 'big thumb alt', then(() => game.toMenu())), button(t('again'), 'big thumb', then(() => game.startRun())));   // Again at the bottom, Menu as big over it
+    p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu())), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun())), 'again'));   // Again at the bottom, Menu as big over it
   },
   toastTimer: 0,
   toast(text, ms = 1500, icon) {   // `icon`: an ICONS picture before the words
@@ -1972,15 +2004,20 @@ async function boot() {
   if (old) try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { s = null; }
   loadSave(s);
   ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
+  try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen
   start();
   if (br) { if (old && s) persist(); bridge.platform.sendMessage('game_ready'); }
 }
+// The words in another language: the page's (the type follows it, see .tx in index.html), and the HUD written again.
+function setLang(l) {
+  lang = l; document.documentElement.lang = l;
+  $('rotate').replaceChildren(px(t('rotate')));
+  $('floorHint').replaceChildren(); ui.m = -1; ui.stage = ''; ui.coins = -1;
+}
 function start() {
   if (started) return;
-  lang = detectLang();
-  document.documentElement.lang = lang;
+  setLang(STR[save.lang] ? save.lang : detectLang());
   if (!renderer.ok) { ui.toast(t('nogl'), 0); return; }
-  $('rotate').replaceChildren(px(t('rotate')));
   layout();
   started = true;
   game.toMenu();

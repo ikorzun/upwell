@@ -114,7 +114,8 @@ const RUBBER = { x: 9, up: 0.55, min: 2 };
 // throws the hero up at `launch` of a jump's speed and sinks it back `back` of the view. While
 // its top is on screen it spits a blob (`blob` R) at the hero every `spit` s (from, to), first
 // flaring `warn` s where the blob will come out.
-const FIRE = { lag: 0.5, idle: 3, boost: 3, ramp: 2, launch: 1.7, back: 0.3, spit: [3, 6], warn: 0.5, blob: 0.34 };
+// `calm`: in 1-1 the fire waits that many s before it rises, and an idle hero does not speed it up (the digest §6: no losing while learning).
+const FIRE = { calm: 15, lag: 0.5, idle: 3, boost: 3, ramp: 2, launch: 1.7, back: 0.3, spit: [3, 6], warn: 0.5, blob: 0.34 };
 const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
 // The boss fight goes round (user: there was no way onto it under the ceiling): it hovers (`hover` s, `fast` of that when
 // angry or half beaten) `high` R over the floor (in sight under the HUD; clear of a hero standing on a ledge), swaying
@@ -803,7 +804,7 @@ class Level {
       if (!o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (0.3 + rnd() * 0.4), kind: 'shop', done: false });
       if (!o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       const v = (o.world.fire || 0) * this.R * (this.hard ? 1.4 : 1);
-      if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null };
+      if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
     } else this.build(o);
   }
   box(x0, y0, x1, y1, f) {
@@ -1125,8 +1126,8 @@ class Level {
       if (r.spring && r.t > 0) r.t = Math.max(0, r.t - dt);
     }
     const f = this.fire;
-    if (f && g.state === 'play') {   // faster while the hero gains no height
-      const k = 1 + (FIRE.boost - 1) * clamp((g.idleT - FIRE.idle) / FIRE.ramp, 0, 1);
+    if (f && g.state === 'play' && !(f.calm > 0 && (f.calm -= dt) > 0)) {   // faster while the hero gains no height (not in a calm start)
+      const k = f.calm === 0 ? 1 + (FIRE.boost - 1) * clamp((g.idleT - FIRE.idle) / FIRE.ramp, 0, 1) : 1;
       f.y = Math.min(f.y - f.v * k * g.mods.fire * dt, this.cam + view.h * (1 + FIRE.lag));
     }
     for (const b of this.bubbles) if (b.cd > 0) b.cd -= dt;

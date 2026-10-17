@@ -9,36 +9,36 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → to move, space to jump, ↓ to let go;\n↓ then space: a high jump. Land on enemies from above!', hintMouse: '← → to move, space to jump, ↓ to let go,\nor pull back with the mouse and let go.\nLand on enemies from above!', hintTouch: '◀ ▶ or drag to move, ▲ or a tap to jump,\nflick down to let go. Land on enemies from above!', play: 'Play',
+    hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
     tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
-    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: 'Thank you! +{n} coins', freedHeart: 'Thank you! +1 heart', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
+    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: 'Thank you! +{n} coins', freedHeart: 'Thank you! +1 heart', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
     got_fizz: 'Fizz! You shoot by yourself · {s} s', got_smash: 'Rock candy! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
-    hintStick: 'Touch anywhere and lean: a stick to run; ▲ or a tap to jump,\ntwo quick leans to dash, pull down and jump to jump high.\nLand on enemies from above!',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
+    hintStick: 'Lean to run · tap to jump',
   },
   ru: {
-    hintKeys: '← → — бег, пробел — прыжок, ↓ — отлипнуть;\n↓ и пробел — высокий прыжок. Прыгай на врагов сверху!', hintMouse: '← → — бег, пробел — прыжок, ↓ — отлипнуть,\nили тяни мышью назад и отпускай.\nПрыгай на врагов сверху!', hintTouch: '◀ ▶ или веди пальцем — бег, ▲ или тап — прыжок,\nсвайп вниз — отлипнуть. Прыгай на врагов сверху!', play: 'Играть',
+    hintKeys: '← → бег · пробел прыжок', hintMouse: '← → бег · пробел прыжок', hintTouch: 'Веди пальцем — бег, тап — прыжок', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
     tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', bonusDone: 'Бонус пройден!', double: '×2 за рекламу', next: 'Дальше', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
-    seen_hedgehog: 'Ежа не топчи: колется!', seen_cage: 'Кто-то заперт! Коснись клетки', seen_crack: 'Треснутый блок: ударь его снизу!', arena: 'Арена! Победи всех', arenaWave: 'Волна {n}!', arenaWon: 'Арена пройдена! +{n}', seen_trader: 'Торговец: коснись товара, чтобы купить', freedCoins: 'Спасибо! +{n} монет', freedHeart: 'Спасибо! +1 сердце', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
+    seen_hedgehog: 'Ежа не топчи: колется!', seen_crawler: 'Прыгай на врагов сверху!', seen_wallK: '↓ — отлипнуть от стены', seen_wallT: 'Свайп вниз — отлипнуть', seen_wallS: 'Стик вниз — отлипнуть', seen_crouchK: '↓ и пробел — высокий прыжок', seen_crouchS: 'Стик вниз и тап — высокий прыжок', seen_cage: 'Кто-то заперт! Коснись клетки', seen_crack: 'Треснутый блок: ударь его снизу!', arena: 'Арена! Победи всех', arenaWave: 'Волна {n}!', arenaWon: 'Арена пройдена! +{n}', seen_trader: 'Торговец: коснись товара, чтобы купить', freedCoins: 'Спасибо! +{n} монет', freedHeart: 'Спасибо! +1 сердце', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
     seen_splitter: 'Делилка распадается надвое', seen_chaser: 'Догоняла ползёт за тобой по стене',
     got_fizz: 'Шипучка! Стреляешь сам · {s} с', got_smash: 'Крушилка! Прыжок ломает блоки · {s} с', got_rainbow: 'Радуга! Ничто не ранит, враги лопаются · {s} с', got_grow: 'Великан! Ломаешь блоки, враги лопаются · {s} с',
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
     noNeed: 'Сейчас не нужно', rotate: 'Поверни телефон вертикально', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', bossHint: 'Оглушён! Прыгай на макушку!', m: 'м',
-    nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
-    hintStick: 'Коснись где угодно и веди — бег; ▲ или тап — прыжок,\nдва быстрых наклона — рывок, вниз и прыжок — высокий прыжок.\nПрыгай на врагов сверху!',
+    nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', shake: 'Тряска', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
+    hintStick: 'Наклон — бег, тап — прыжок',
   },
 };
 let lang = 'en';
@@ -55,6 +55,10 @@ const SAVE_KEY = 'upwell.save';
 // one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
 const save = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false };   // seen: hints shown once; stick: touch by a stick, not the keys
 const opened = (u) => save.bank >= u.at;
+// The screen shake (Gum's) only when wanted: off by the player, or by the system's reduced motion until turned on (the digest §8).
+const shakeOn = () => (save.shake === undefined ? !matchMedia('(prefers-reduced-motion: reduce)').matches : save.shake);
+const shakeAdd = shake.add.bind(shake);
+shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
@@ -190,7 +194,7 @@ class Boss {
         const tx = clamp(g.hero.cx, cx - 0.2 * W + b.R, cx + 0.2 * W - b.R), q = Math.min(1, 6 * dt);
         addVel(b, ((tx - b.cx) * 4 - b.rigVx) * q, -b.rigVy * q);
         if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.12);
-        b.color = Math.floor(this.st * 10) % 2 ? FOE_COLOR.red : FOE_COLOR.boss;
+        b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : FOE_COLOR.boss;   // 2.5 flashes a second: under WCAG's 3
         if (this.st > BOSS.warn) { this.to('dive'); b.color = FOE_COLOR.boss; sound.play('airjump', 0.9, 0.5); }
       } else if (this.state === 'dive') {
         setVel(b, 0, BOSS.dive * R);
@@ -281,7 +285,7 @@ class Game {
     this.newRun(); save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true);
     ui.hideAll(); ui.banner();
-    if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 5200);
+    if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
   }
   buildLevel(newHero) {
     const W = view.w, H = view.h, boss = this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
@@ -779,8 +783,10 @@ class Game {
   }
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
+  learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
   fall() {
-    this.hp--; ui.hurt(); haptics.buzz(40); shake.add(5);
+    if (!this.learning()) { this.hp--; ui.hurt(); }
+    haptics.buzz(40); shake.add(5);
     if (this.hp <= 0) { this.die(); return; }
     sound.play('fall', 0.8);
     this.respawn();
@@ -833,7 +839,7 @@ class Game {
     const f = this.lv.fire, H = this.hero;
     if (!f || H.maxY < f.y) return;
     if (this.bonus) { this.endBonus('caught'); return; }   // the fire race: caught is the end of it
-    this.hurt(0, -1);
+    if (!this.learning()) this.hurt(0, -1);
     sound.play('burn');
     if (this.state !== 'play') return;
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;
@@ -929,8 +935,11 @@ class Game {
     if (coat) this.hint(coat);
     if (fr && (m & 8)) { if (fr.crumble) this.hint('crumble'); else if (fr.slick) this.hint('ice'); }
     if (lv.fire && lv.fire.y < lv.cam + view.h) this.hint('fire');
+    const how = coarse ? (save.stick ? 'S' : 'T') : 'K';   // the words for the controls in use
+    if (H.stuck && (glueSide(H) === 1 || glueSide(H) === 2)) this.hint('wall', 'seen_wall' + how);   // stuck to a wall the first time: how to let go
+    if (how !== 'T' && (m & 8) && this.idleT > 4 && !this.learning()) this.hint('crouch', 'seen_crouch' + how);   // standing about: there is a high jump (no down on the touch keys)
   }
-  hint(kind) { if (save.seen[kind] || this.stateT < 3) return; save.seen[kind] = 1; persist(); ui.toast(t('seen_' + kind), 2400); }   // not over the level's banner
+  hint(kind, key = 'seen_' + kind) { if (save.seen[kind] || this.stateT < 3) return; save.seen[kind] = 1; persist(); ui.toast(t(key), 2400); }   // not over the level's banner
   spring(r) {
     const H = this.hero; this.hint('spring');
     setVel(H, H.rigVx, -SPRING.v * this.vjump); unstick(H, 0.15); H.kickSquash(0, 1, -2.4); this.rising = false;
@@ -1280,8 +1289,9 @@ const ui = {
   pause() {
     const p = this.panel('pause');
     const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); this.pause(); });
+    const shk = button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); this.pause(); });
     const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); queueLayout(); this.pause(); });
-    p.append(el('div', 'head', t('paused')), ...(coarse ? [ctl] : []), snd, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
+    p.append(el('div', 'head', t('paused')), ...(coarse ? [ctl] : []), snd, shk, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
@@ -1661,9 +1671,9 @@ for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.add
 // minute at most. The platform's pause and sound requests are kept (an ad open, a tab switched). Off a platform (GitHub
 // Pages, here) the Bridge is a mock with no ads: there the rewarded button doubles at once, so the way it goes can be
 // tried. No Bridge at all: no rewarded button, no interstitials.
-const BRIDGE_WAIT = 4000, AD_GAP = 60000;
+const BRIDGE_WAIT = 4000, AD_GAP = 180000, AD_AFTER = 3;   // an interstitial three minutes apart at most, from the third pause on (CrazyGames; the digest §6)
 const ads = {
-  ok: false, quiet: false, off: false, held: false, lastAd: 0,   // quiet: the platform's sound off, or its pause on; lastAd: when one was last up
+  ok: false, quiet: false, off: false, held: false, lastAd: 0, pauses: 0,   // quiet: the platform's sound off, or its pause on; lastAd: when one was last up
   init() {   // resolves true once the Bridge is up, false if it never came (no script in time, or its initialize failed)
     return new Promise((done) => {
       const t0 = performance.now();
@@ -1683,7 +1693,7 @@ const ads = {
   },
   between(done) {   // an interstitial, if one is due and to be had; `done` once it is closed, or at once if none comes
     const now = performance.now();
-    if (!this.ok || !bridge.advertisement.isInterstitialSupported || now - this.lastAd < AD_GAP) { done(); return; }
+    if (!this.ok || !bridge.advertisement.isInterstitialSupported || ++this.pauses < AD_AFTER || now - this.lastAd < AD_GAP) { done(); return; }
     const EV = bridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
     let over = false, timer = 0;
     const end = () => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(); };

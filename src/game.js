@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: 'Thank you! +{n} coins', freedHeart: 'Thank you! +1 heart', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -27,7 +27,7 @@ const STR = {
   ru: {
     hintKeys: '← → бег · пробел прыжок', hintMouse: '← → бег · пробел прыжок', hintTouch: 'Веди пальцем — бег, тап — прыжок', play: 'Играть',
     hard: 'Сложный режим', world: 'Мир {n}', pick: 'Выбери улучшение', dead: 'Забег окончен', won: 'Ты выбрался!',
-    tapJump: 'Тап — прыжок', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', bonusDone: 'Бонус пройден!', double: '×2 за рекламу', next: 'Дальше', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
+    tapJump: 'Тап — прыжок', continue: 'Продолжить', newRun: 'Новый забег', keyJump: 'Пробел — прыжок', bonus: 'Бонус', sec: 'с', bonusGot: 'Бонус: +{n} монет', bonusDone: 'Бонус пройден!', double: '×2 за рекламу', next: 'Дальше', timeUp: 'Время!', caught: 'Догнал!', starLine: 'Монеты {c}', news: 'Новое: {n}', dark: 'темнота',
     seen_moss: 'Мох держит: можно передохнуть', seen_rubber: 'Резина отбрасывает', seen_ice: 'Лёд скользкий: не прилипнешь',
     seen_crumble: 'Блок осыпается: не стой', seen_spring: 'Пружина подбрасывает высоко', seen_fire: 'Огонь растёт, если стоишь на месте!',
     seen_hedgehog: 'Ежа не топчи: колется!', seen_crawler: 'Прыгай на врагов сверху!', seen_wallK: '↓ — отлипнуть от стены', seen_wallT: 'Свайп вниз — отлипнуть', seen_wallS: 'Стик вниз — отлипнуть', seen_crouchK: '↓ и пробел — высокий прыжок', seen_crouchS: 'Стик вниз и тап — высокий прыжок', seen_cage: 'Кто-то заперт! Коснись клетки', seen_crack: 'Треснутый блок: ударь его снизу!', arena: 'Арена! Победи всех', arenaWave: 'Волна {n}!', arenaWon: 'Арена пройдена! +{n}', seen_trader: 'Торговец: коснись товара, чтобы купить', freedCoins: 'Спасибо! +{n} монет', freedHeart: 'Спасибо! +1 сердце', seen_shell: 'Растопчи панцирь: он покатится по врагам', seen_spitter: 'Плевака кидается комками: увернись',
@@ -283,7 +283,7 @@ class Game {
   }
   startRun() {
     this.newRun(); save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
-    this.state = 'play'; this.stateT = 0; this.buildLevel(true);
+    this.state = 'play'; this.stateT = 0; this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
     if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
   }
@@ -1023,14 +1023,14 @@ class Game {
       this.state = 'play'; this.stateT = 0;
       if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
       if (++this.stage >= 3) { this.stage = 0; this.world++; }
-      this.buildLevel(false);
+      this.buildLevel(false); this.saveRun();
       ui.hideAll(); ui.banner();
     });
   }
   // A bonus level: against the clock, no hearts lost; then on to the next world.
   startBonus(b) {
     this.bonus = b; this.bonusT = b.time; this.bonusCoins = this.coins;
-    this.buildLevel(false);
+    this.buildLevel(false); this.saveRun();
     ui.hideAll(); ui.toast(L2(b.name) + '\n' + L2(b.goal) + ' · ' + b.time + ' ' + t('sec'), 2600);
   }
   // An enemy's coins still on their way to the hero as a level or the run ends get there all the same.
@@ -1058,7 +1058,25 @@ class Game {
   }
   goOn() {
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
-    this.buildLevel(false);
+    this.buildLevel(false); this.saveRun();
+    ui.hideAll(); ui.banner();
+  }
+  // The run kept at the start of every level (Playgama's checklist: progress outlives a reload; losing a long run is what
+  // players of the climbing games hate most), dropped once the run ends. Quitting to the menu keeps it, for Continue.
+  saveRun() {
+    save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
+      bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice() };
+    persist();
+  }
+  continueRun() {   // back where the kept run's level began: the same level (its seed), hearts, coins and upgrades
+    const r = save.run;
+    if (!r) return;
+    this.newRun(); padUsed = performance.now();
+    for (const k of ['world', 'stage', 'hp', 'maxHp', 'coins', 'kills', 'bestCombo', 'climbed', 'revives', 'freed', 'hard']) this[k] = r[k];
+    this.mods = Object.assign(MODS(), r.mods); this.taken = r.taken.slice();
+    this.state = 'play'; this.stateT = 0; nextSeed = r.seed;
+    if (r.bonus >= 0) { this.startBonus(BONUS[r.bonus]); return; }
+    this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
   }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
@@ -1086,6 +1104,7 @@ class Game {
     const bank0 = save.bank, total = Math.floor(this.climbed + this.levelM), firstWin = won && save.wins === 0;
     save.bank += this.coins; save.best = Math.max(save.best, total);
     if (won) save.wins++;
+    delete save.run;   // over: nothing to continue
     persist();
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
     this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin };
@@ -1260,7 +1279,9 @@ const ui = {
       const h = button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); });
       p.append(h);
     }
-    p.append(button(t('play'), 'big thumb', () => game.startRun()));   // the width of the screen, 12 px in from its edges
+    const r = save.run;   // a run kept from before: Continue at the bottom (one tap), a new one over it
+    if (r) p.append(button(t('newRun'), 'chip wide', () => game.startRun()), button(t('continue') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'big thumb', () => game.continueRun()));
+    else p.append(button(t('play'), 'big thumb', () => game.startRun()));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);

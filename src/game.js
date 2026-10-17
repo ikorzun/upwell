@@ -1146,7 +1146,6 @@ class Game {
     if (this.state !== 'play') return;
     this.bankDrops();
     this.hp = Math.max(0, this.hp); this.state = 'dead'; this.stateT = 0; this.result = null;
-    pmsg('level_failed', this.lvl());
     const H = this.hero, lv = this.lv;   // it bursts where it can be seen (a fall ends below the screen)
     burstFx(H.cx, clamp(H.cy, lv.cam + this.R, lv.cam + view.h - this.R), this.R, H.color.base); shake.add(12);
     input.clear(); haptics.buzz(30); sound.play('die');
@@ -1170,6 +1169,7 @@ class Game {
     save.bank += this.coins; save.best = Math.max(save.best, total);
     if (won) save.wins++;
     delete save.run;   // over: nothing to continue
+    if (!won) pmsg('level_failed', this.lvl());   // only now: a death with a revive after it is the same go at the level
     track('run_over', { won, level_id: this.levelId(), height: total, coins: this.coins, kills: this.kills, revives: this.revives });
     persist();
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);

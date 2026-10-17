@@ -1,0 +1,13 @@
+{
+  "advertisement": {
+    "minimumDelayBetweenInterstitial": 60,
+    "interstitial": {
+      "placementFallback": "level_completed",
+      "placements": [{ "id": "level_completed" }]
+    },
+    "rewarded": {
+      "placementFallback": "double_bonus",
+      "placements": [{ "id": "double_bonus" }]
+    }
+  }
+}

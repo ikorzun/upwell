@@ -41,7 +41,7 @@ const run = async (expression) => {
 };
 await page('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 2, mobile: true });
 await page('Page.navigate', { url: PAGE });
-for (let i = 0; !(await run(`document.readyState === 'complete' && typeof __up === 'object'`)); i++) {
+for (let i = 0; !(await run(`document.readyState === 'complete' && typeof __up === 'object' && __up.started`)); i++) {
   if (i > 300) throw new Error('the game did not load');
   await new Promise((ok) => setTimeout(ok, 100));
 }

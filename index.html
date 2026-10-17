@@ -55,6 +55,8 @@
   }
   #hud.on { display: flex; }
   #hearts { display: flex; gap: 3px; flex: 1; --p: 3; }
+  #rotate { display: none; position: fixed; inset: 0; z-index: 50; background: var(--ink); align-items: center; justify-content: center; --p: 3; color: var(--white); }
+  @media (pointer: coarse) and (orientation: landscape) { #rotate { display: flex; } }   /* Playgama's checklist: the layout holds in the orientation it supports */
   #hearts i { display: block; filter: drop-shadow(0 3px 0 var(--ink)); }
   #hearts .full { color: var(--red); }
   #hearts .empty { color: var(--gray); }
@@ -202,6 +204,7 @@
 </head>
 <body>
 <canvas id="gl" class="wait" aria-label="Climbing squishy"></canvas>
+<div id="rotate" role="alert"></div>   <!-- a phone held sideways: the game is for upright (see layout) -->
 <div id="stick" aria-hidden="true"><i></i></div>   <!-- over the canvas, under the UI; out of #ui so it shows by the column too (landscape) -->
 <div id="ui">
   <div id="hud">

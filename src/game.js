@@ -20,7 +20,7 @@ const STR = {
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
-    noNeed: 'Not needed now', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
+    noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Touch anywhere and lean: a stick to run; ▲ or a tap to jump,\ntwo quick leans to dash, pull down and jump to jump high.\nLand on enemies from above!',
   },
@@ -36,7 +36,7 @@ const STR = {
     reviveQ: 'Ещё попытка?', revive: 'Возродиться', reviveCost: 'Цена {n} · у тебя {c}', giveUp: 'Нет, закончить',
     height: 'Подъём', coins: 'Монеты', kills: 'Врагов', combo: 'Лучшее комбо', reached: 'Дошёл до', unlocked: 'Открыто', hardOpen: 'Открыт сложный режим!',
     again: 'Ещё раз', menu: 'В меню', resume: 'Продолжить', paused: 'Пауза', comboPay: 'Комбо ×{n}  +{c}', comboHp: '+1 сердце', poor: 'Не хватает {n} монет',
-    noNeed: 'Сейчас не нужно', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', bossHint: 'Оглушён! Прыгай на макушку!', m: 'м',
+    noNeed: 'Сейчас не нужно', rotate: 'Поверни телефон вертикально', sold: 'продано', free: 'даром', shop: 'Лавка', treasure: 'Тайник', bossLeft: 'Ещё {n}!', bossHint: 'Оглушён! Прыгай на макушку!', m: 'м',
     nogl: 'Нужен WebGL 2. Попробуй другой браузер.', sound: 'Звук', on: 'вкл', off: 'выкл', ctrl: 'Управление', ctrlKeys: 'кнопки', ctrlStick: 'стик',
     hintStick: 'Коснись где угодно и веди — бег; ▲ или тап — прыжок,\nдва быстрых наклона — рывок, вниз и прыжок — высокий прыжок.\nПрыгай на врагов сверху!',
   },
@@ -45,23 +45,25 @@ let lang = 'en';
 const t = (k) => (STR[lang] && STR[lang][k]) || STR.en[k];
 const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (_, n) => o[n]);
 const L2 = (o) => o[lang] || o.en;
-const detectLang = () => { const l = (navigator.language || 'en').slice(0, 2).toLowerCase(); return STR[l] ? l : 'en'; };
+const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || navigator.language || 'en').slice(0, 2).toLowerCase(); return STR[l] ? l : 'en'; };   // the platform's (Playgama checklist), else the browser's; English by default
 
 // ── Save ─────────────────────────────────────────────────────
 // What outlives a run: best climb, coins of all runs (they unlock colours),
 // wins (the first one opens hard mode) and the chosen look.
 const SAVE_KEY = 'upwell.save';
-const save = (() => {
-  const d = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false };   // seen: hints shown once; stick: touch by a stick, not the keys
-  try {
-    const s = Object.assign(d, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'));
-    if (!PALETTE.some((c) => c.id === s.color)) s.color = PALETTE[0].id;   // a colour from before the palette inks
-    return s;
-  } catch (e) { return d; }
-})();
-function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* private mode: this visit only */ } }
+// Kept through the Playgama Bridge's storage (its checklist: never localStorage itself), the whole of it under one key in
+// one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
+const save = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false };   // seen: hints shown once; stick: touch by a stick, not the keys
 const opened = (u) => save.bank >= u.at;
-if (!UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone or not open yet
+function loadSave(s) {
+  if (s && typeof s === 'object') Object.assign(save, s);
+  if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
+}
+function persist() {
+  const s = JSON.stringify(save);
+  if (ads.ok) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});
+  else try { localStorage.setItem(SAVE_KEY, s); } catch (e) { /* private mode: this visit only */ }
+}
 
 // ── Bodies ───────────────────────────────────────────────────
 // The rigid part of a body's motion becomes (vx, vy); the wobble on top of it stays.
@@ -306,7 +308,21 @@ class Game {
     this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
   }
   // A new width remakes the level under way (the well is the view's width); the run goes on.
-  resized() { if (this.state === 'menu' || this.state === 'boot') this.toMenu(); else this.buildLevel(true); }
+  // A new width remakes the level (the well is the view's width): the same one (its seed), the hero back about as high up it as it
+  // was, on the highest steady ledge under that (Playgama's checklist: a turn of the phone must not lose progress). In a room, the shaft.
+  resized() {
+    if (this.state === 'menu' || this.state === 'boot') { this.toMenu(); return; }
+    const shaft = this.well || this.lv, h = shaft.kind === 'well' && this.hero ? (shaft.floor - (this.well ? this.door.y1 : this.hero.cy)) / this.R : 0;
+    nextSeed = this.seed; this.buildLevel(true);
+    const lv = this.lv, R = this.R;
+    if (lv.kind !== 'well' || h < 3) return;
+    lv.ensure(lv.floor - (h + 2 * view.h / R) * R);
+    const r = lv.rects.filter((q) => !q.cap && !q.plank && !q.crumble && !q.move && !q.spring && !q.crack && q.x1 - q.x0 > 2 * R && (lv.floor - q.y0) / R <= h + 0.5).sort((a, b) => a.y0 - b.y0)[0];
+    if (!r) return;
+    this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }];
+    lv.cam = this.hero.cy - CAM.anchor * view.h; lv.ensure(lv.cam - view.h * LEVEL.ahead);
+    if (lv.fire) lv.fire.y = Math.max(lv.fire.y, lv.cam + view.h * 1.2);
+  }
   heal(n) { this.hp = Math.min(this.maxHp, this.hp + n); }
   offer(n = 3) {
     const pool = UPGRADES.filter((u) => u.stack || !this.taken.includes(u.id));
@@ -991,12 +1007,16 @@ class Game {
     H.growthTarget = Math.max(0.04, 1 - this.stateT / PORTAL.shrink);
   }
   pick(u) {
+    if (this.state !== 'clear') return;   // a second tap
     this.takeUpgrade(u);
-    this.state = 'play'; this.stateT = 0;
-    if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
-    if (++this.stage >= 3) { this.stage = 0; this.world++; }
-    this.buildLevel(false);
-    ui.hideAll(); ui.banner();
+    this.state = 'wait'; ui.hideAll();   // (an ad may come here: nothing goes on under it)
+    ads.between(() => {
+      this.state = 'play'; this.stateT = 0;
+      if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
+      if (++this.stage >= 3) { this.stage = 0; this.world++; }
+      this.buildLevel(false);
+      ui.hideAll(); ui.banner();
+    });
   }
   // A bonus level: against the clock, no hearts lost; then on to the next world.
   startBonus(b) {
@@ -1024,6 +1044,10 @@ class Game {
   }
   nextWorld() {
     if (this.state !== 'reward') return;
+    this.state = 'wait'; ui.hideAll();
+    ads.between(() => this.goOn());
+  }
+  goOn() {
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
     this.buildLevel(false);
     ui.hideAll(); ui.banner();
@@ -1284,7 +1308,8 @@ const ui = {
       if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       box.append(u);
     }
-    p.append(box, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('again'), 'big thumb', () => game.startRun()));   // Again at the bottom, Menu as big over it
+    const then = (f) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); ads.between(f); };   // the run over: an ad may come first
+    p.append(box, button(t('menu'), 'big thumb alt', then(() => game.toMenu())), button(t('again'), 'big thumb', then(() => game.startRun())));   // Again at the bottom, Menu as big over it
   },
   toastTimer: 0,
   toast(text, ms = 1500, icon) {   // `icon`: an ICONS picture before the words
@@ -1631,20 +1656,40 @@ const sound = {
 for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.addEventListener(type, () => sound.unlock(), { capture: true, passive: true });
 
 // ── Ads (Playgama Bridge) ─────────────────────────────────────
-// For now a rewarded ad only: a bonus level's coins doubled. The platform's pause and sound requests are kept (an ad
-// open, a tab switched). Off a platform (GitHub Pages, here) Bridge is a mock with no ads: there the button doubles at
-// once, so the way it goes can be tried. No Bridge at all (it did not load): no button.
+// Waited for at boot (see boot; given up on after BRIDGE_WAIT ms, and the game goes on without it). Ads: a rewarded one
+// doubles a bonus level's coins; an interstitial at a natural pause (a level done, a bonus done, a run over), one a
+// minute at most. The platform's pause and sound requests are kept (an ad open, a tab switched). Off a platform (GitHub
+// Pages, here) the Bridge is a mock with no ads: there the rewarded button doubles at once, so the way it goes can be
+// tried. No Bridge at all: no rewarded button, no interstitials.
+const BRIDGE_WAIT = 4000, AD_GAP = 60000;
 const ads = {
-  ok: false, quiet: false, off: false, held: false,   // quiet: the platform's sound off, or its pause on
-  init() {
-    if (!window.bridge) return;
-    bridge.initialize().then(() => {
-      this.ok = true;
-      bridge.platform.on(bridge.EVENT_NAME.AUDIO_STATE_CHANGED, (on) => { this.off = !on; this.hush(); });
-      bridge.platform.on(bridge.EVENT_NAME.PAUSE_STATE_CHANGED, (p) => { this.held = p; this.hush(); if (p) game.togglePause(true); });
-      this.off = !bridge.platform.isAudioEnabled; this.hush();
-      bridge.platform.sendMessage('game_ready');
-    }).catch(() => {});
+  ok: false, quiet: false, off: false, held: false, lastAd: 0,   // quiet: the platform's sound off, or its pause on; lastAd: when one was last up
+  init() {   // resolves true once the Bridge is up, false if it never came (no script in time, or its initialize failed)
+    return new Promise((done) => {
+      const t0 = performance.now();
+      const go = () => {
+        if (!window.bridge) { if (performance.now() - t0 < BRIDGE_WAIT) setTimeout(go, 50); else done(false); return; }
+        const late = setTimeout(() => done(false), BRIDGE_WAIT);
+        bridge.initialize().then(() => {
+          clearTimeout(late); this.ok = true;
+          bridge.platform.on(bridge.EVENT_NAME.AUDIO_STATE_CHANGED, (on) => { this.off = !on; this.hush(); });
+          bridge.platform.on(bridge.EVENT_NAME.PAUSE_STATE_CHANGED, (p) => { this.held = p; this.hush(); if (p) game.togglePause(true); });
+          this.off = !bridge.platform.isAudioEnabled; this.hush();
+          done(true);
+        }).catch(() => { clearTimeout(late); done(false); });
+      };
+      go();
+    });
+  },
+  between(done) {   // an interstitial, if one is due and to be had; `done` once it is closed, or at once if none comes
+    const now = performance.now();
+    if (!this.ok || !bridge.advertisement.isInterstitialSupported || now - this.lastAd < AD_GAP) { done(); return; }
+    const EV = bridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
+    let over = false, timer = 0;
+    const end = () => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(); };
+    const on = (s) => { if (s === 'opened') { clearTimeout(timer); this.lastAd = performance.now(); } else if (s === 'closed' || s === 'failed') end(); };
+    bridge.advertisement.on(EV, on); timer = setTimeout(end, 3000);   // none opened in time: on without it
+    bridge.advertisement.showInterstitial();
   },
   hush() { this.quiet = this.off || this.held; sound.sleep(this.quiet || document.hidden); },
   get mock() { return this.ok && bridge.platform.id === 'mock'; },
@@ -1660,7 +1705,6 @@ const ads = {
     bridge.advertisement.showRewarded();
   },
 };
-window.addEventListener('load', () => ads.init());
 
 // ── Slingshot ────────────────────────────────────────────────
 // With a mouse, as well as the keys: press anywhere, pull back, let go, and the squishy
@@ -1756,6 +1800,7 @@ function layout() {
   renderer.resize(W, H, window.devicePixelRatio || 1);   // the canvas a device pixel per pixel: the game pixels are copied up onto it
   game.applyMods();
   if (started && Math.abs(W - game.builtW) > 2) game.resized();
+  if (started && coarse && vw > vh) game.togglePause(true);   // held sideways: paused under the 'turn it upright' screen
 }
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
 // start of the next frame, right before drawing.
@@ -1831,11 +1876,25 @@ function runFrame(now, fixedDt) {
   if (!firstFrame) { firstFrame = true; canvas.classList.remove('wait'); }
 }
 
+// Boot (Playgama checklist): the Bridge up first, the save loaded from its storage in one call (a save from before it, kept by
+// the browser, is taken over once), then the menu, then game_ready — the game playable.
+async function boot() {
+  const br = await ads.init();
+  let s = null;
+  if (br) try { const [v] = await bridge.storage.get([SAVE_KEY]); s = v ? (typeof v === 'string' ? JSON.parse(v) : v) : null; } catch (e) { s = null; }
+  const old = !s;
+  if (old) try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { s = null; }
+  loadSave(s);
+  ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
+  start();
+  if (br) { if (old && s) persist(); bridge.platform.sendMessage('game_ready'); }
+}
 function start() {
   if (started) return;
   lang = detectLang();
   document.documentElement.lang = lang;
   if (!renderer.ok) { ui.toast(t('nogl'), 0); return; }
+  $('rotate').replaceChildren(px(t('rotate')));
   layout();
   started = true;
   game.toMenu();
@@ -1845,6 +1904,7 @@ function start() {
 // Debug handle for automated checks (read-only state and a few helpers).
 window.__up = {
   version: VERSION,
+  get started() { return started; },   // booted (the Bridge waited for, the save loaded)
   tuning: { HERO, MOVE, JUMP, LEVEL, CAM, HEALTH, STOMP, COMBO, COIN, STICK, WORLD, ENEMY, WORLDS, BOSS },
   get game() { return game; },
   candy(kind) { game.take(kind); return { pow: game.pow, t: game.gunT }; },   // a candy's power at once, for checks
@@ -1895,4 +1955,4 @@ window.__up = {
 };
 
 requestAnimationFrame(frame);
-start();
+boot();

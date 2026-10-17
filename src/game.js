@@ -240,6 +240,7 @@ class Game {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.queued = null; this.rising = false;
     this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = [];
     this.pow = null; this.ram = false; this.tail = [];   // the candy at work, a ram on its way up, a rainbow's tail
+    this.warns = [];   // where threats come down into view (see threats)
     this.newRun();
   }
   newRun() {
@@ -522,6 +523,7 @@ class Game {
     if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
     if (hang) setVel(hero, 0, 0);
     if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); if (hero.rigVy < -40) this.cracks(); }
+    this.warns = playing ? this.threats(dt) : [];
     const bs = this.bodyList();
     this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
     for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.touchHero = false; b.beginStep(dt); }
@@ -741,6 +743,26 @@ class Game {
       const a = -Math.PI / 2 + rand(-1.2, 1.2), sp = COIN.burst * rand(0.6, 1.25);
       this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: rand(0, TAU) });
     }
+  }
+  // What is about to come down into view over its top edge, by where (x) it comes in, for a sign there (the market review:
+  // a death by what could not be seen angers players most; the digest §2: the player must be the one to blame). A blob over
+  // the top always comes down; a stalactite over it shaking falls; an enemy only on its way down, in view within ~1 s and
+  // with its surface reaching into view (none leaves its own: one settling onto a ledge over the top is no threat yet, nor
+  // one standing there: the camera keeps most of the view over the hero, so it is seen in time; a rolling shell is harmless).
+  // A wall's crawler goes by its own way (its pulses would make the sign blink), a circler not at all (round its block it
+  // comes and goes), and a sign once up stays 0.4 s: no blink as the camera brings one in (the digest: flashes).
+  threats(dt) {
+    const lv = this.lv, cam = lv.cam, R = this.R, out = [];
+    for (const s of lv.shots) if (s.y + s.r < cam) out.push(s.x);
+    for (const c of lv.icicles) if (c.state === 'shake' && c.y < cam) out.push(c.x);
+    for (const e of lv.enemies) {
+      const b = e.body, l = e.ledge, wall = e.def.move === 'wall';
+      const low = wall ? e.wall.y1 + b.R : l && !l.gone ? l.y0 : Infinity;   // the lowest it can get to
+      const vy = wall ? e.dir * e.def.speed : b.rigVy;
+      const due = e.def.move !== 'round' && e.state !== 'shell' && b.maxY < cam && low > cam && vy > R && cam - b.maxY < 1.2 * vy;
+      if (due || (e.warnT > 0 && e.warnT < 0.4)) { e.warnT = (e.warnT || 0) + dt; out.push(b.cx); } else e.warnT = 0;
+    }
+    return out;
   }
   hurt(dx, dy, by = 'other') {
     if (this.invuln > 0 || this.power('rainbow') || this.state !== 'play') return false;
@@ -1387,6 +1409,7 @@ const ui = {
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot';
     $('hud').classList.toggle('on', playing);
+    if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner
     $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
@@ -1839,7 +1862,7 @@ function layout() {
   const vw = window.innerWidth, vh = window.innerHeight;
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   const W = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
-  view.w = W; view.h = H; view.left = left;
+  view.w = W; view.h = H; view.left = left; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }

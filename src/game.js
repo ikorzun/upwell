@@ -661,8 +661,8 @@ class Game {
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
     if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
-    else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0);   // landed on: thrown out to the side, not up into it
-    else this.hurt(H.cx - b.cx, H.cy - b.cy);
+    else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
+    else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
   }
   zap(e, inks) {   // a rainbow hero's touch: the enemy pops, in all the inks (a giant's: in its own)
     const b = e.body;
@@ -742,11 +742,12 @@ class Game {
       this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: rand(0, TAU) });
     }
   }
-  hurt(dx, dy) {
+  hurt(dx, dy, by = 'other') {
     if (this.invuln > 0 || this.power('rainbow') || this.state !== 'play') return false;
     const H = this.hero, d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
     if (!this.bonus) this.hp--;   // a bonus level costs no hearts
+    track('hero_hit', { by, fatal: this.hp <= 0, ...this.at() });
     this.invuln = HEALTH.invuln + this.mods.invuln;
     setVel(H, dx * HEALTH.knock, Math.min(dy * HEALTH.knock, 0) - HEALTH.knock * 0.45);
     unstick(H, 0.3); H.face.surprise = 1; H.kickSquash(dx, dy, 2); this.rising = false;
@@ -783,9 +784,12 @@ class Game {
   }
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
+  levelId() { return this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
+  at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
+  lvl() { return { world: this.wd.id, level: this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
   fall() {
-    if (!this.learning()) { this.hp--; ui.hurt(); }
+    if (!this.learning()) { this.hp--; ui.hurt(); track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
     if (this.hp <= 0) { this.die(); return; }
     sound.play('fall', 0.8);
@@ -809,7 +813,7 @@ class Game {
       for (let i = 0; i < H.n && !hit; i++) hit = H.x[i] > s.x0 && H.x[i] < s.x1 && H.y[i] > s.y0 - 1 && H.y[i] < s.y1 + 1;
       if (!hit || (s.dir === 0 && this.mods.iron)) continue;
       const p = SPIKE_PUSH[s.dir];
-      this.hurt(p[0], p[1]);
+      this.hurt(p[0], p[1], 'spikes');
       return;
     }
   }
@@ -839,7 +843,7 @@ class Game {
     const f = this.lv.fire, H = this.hero;
     if (!f || H.maxY < f.y) return;
     if (this.bonus) { this.endBonus('caught'); return; }   // the fire race: caught is the end of it
-    if (!this.learning()) this.hurt(0, -1);
+    if (!this.learning()) this.hurt(0, -1, 'fire');
     sound.play('burn');
     if (this.state !== 'play') return;
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;
@@ -895,7 +899,7 @@ class Game {
       s.vy += SHOT_G * dt; s.x += s.vx * dt; s.y += s.vy * dt;
       let gone = s.y > lv.floor || s.y > lv.cam + view.h + 100 || (s.vy > 0 && lv.fire && s.y > lv.fire.y);   // a blob falls into the fire
       for (const r of lv.near(s.y, s.y)) if (!r.plank && s.x > r.x0 && s.x < r.x1) gone = true;
-      if (Math.hypot(H.cx - s.x, H.cy - s.y) < H.R * H.growth * 0.8 + s.r) { this.hurt(H.cx - s.x, H.cy - s.y); gone = true; }
+      if (Math.hypot(H.cx - s.x, H.cy - s.y) < H.R * H.growth * 0.8 + s.r) { this.hurt(H.cx - s.x, H.cy - s.y, s.icicle ? 'icicle' : s.fire ? 'fire_blob' : 'shot'); gone = true; }
       if (gone) { splatFx(s.x, s.y, s.r * 2, s.fire ? INK.flame : INK.spike, 4); sh.splice(i, 1); }
     }
   }
@@ -987,6 +991,7 @@ class Game {
     if (p.item.can && !p.item.can(this)) { ui.toast(t('noNeed'), 1200); sound.play('deny', 0.7); return; }
     if (this.coins < price) { ui.toast(tf('poor', { n: price - this.coins }), 1200); haptics.buzz(8); sound.play('deny', 0.7); return; }
     this.coins -= price; p.sold = true; p.item.apply(this); sound.play('buy');
+    track('item_bought', { id: p.item.id, price, from: p.trader ? 'trader' : this.lv.kind, level_id: this.levelId() });
     if (p.trader && p.trader.body) { const b = p.trader.body; b.face.surprise = 1; setVel(b, 0, -0.5 * this.vjump); }   // the trader hops: a sale
     splatFx(p.x, p.y, p.r * 2, p.item.color, 8); haptics.buzz(16);
     if (p.item.id !== 'upgrade') ui.toast(L2(p.item.name), 1200);
@@ -995,6 +1000,7 @@ class Game {
   // ── The run's turns ──
   levelClear() {
     joyEnd();   // a stick held into the hole lets go
+    if (!this.bonus) { pmsg('level_completed', this.lvl()); track('level_stats', { level_id: this.levelId(), seconds: Math.round(this.lv.t), coins_taken: this.lv.coinsTaken, coins_total: this.lv.coinTotal, hp: this.hp }); }   // (a bonus level is done in endBonus, by its hole or not)
     this.state = 'clear'; this.stateT = 0;
     const H = this.hero;
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
@@ -1017,7 +1023,7 @@ class Game {
   }
   pick(u) {
     if (this.state !== 'clear') return;   // a second tap
-    this.takeUpgrade(u);
+    this.takeUpgrade(u); track('upgrade_picked', { id: u.id, level_id: this.levelId() });
     this.state = 'wait'; ui.hideAll();   // (an ad may come here: nothing goes on under it)
     ads.between(() => {
       this.state = 'play'; this.stateT = 0;
@@ -1043,6 +1049,7 @@ class Game {
     if (!this.bonus || this.state === 'reward') return;
     if (this.combo > 0) this.payCombo();   // a combo running (a rainbow holds one) is paid
     this.bankDrops(); input.clear();
+    pmsg('level_completed', this.lvl());
     this.state = 'reward'; this.stateT = 0; this.bonusWhy = why || 'bonusDone'; this.bonusGot = this.coins - this.bonusCoins; this.adBusy = false;
     ui.bonusEnd(this.bonusWhy, this.bonusGot, false);
   }
@@ -1067,11 +1074,12 @@ class Game {
     save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
       bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice() };
     persist();
+    pmsg('level_started', this.lvl());
   }
   continueRun() {   // back where the kept run's level began: the same level (its seed), hearts, coins and upgrades
     const r = save.run;
     if (!r) return;
-    this.newRun(); padUsed = performance.now();
+    this.newRun(); padUsed = performance.now(); track('run_continued', { level_id: r.bonus >= 0 ? 'B' + (r.world + 1) : r.world >= WORLDS.length ? 'boss' : (r.world + 1) + '-' + (r.stage + 1) });
     for (const k of ['world', 'stage', 'hp', 'maxHp', 'coins', 'kills', 'bestCombo', 'climbed', 'revives', 'freed', 'hard']) this[k] = r[k];
     this.mods = Object.assign(MODS(), r.mods); this.taken = r.taken.slice();
     this.state = 'play'; this.stateT = 0; nextSeed = r.seed;
@@ -1083,6 +1091,7 @@ class Game {
     if (this.state !== 'play') return;
     this.bankDrops();
     this.hp = Math.max(0, this.hp); this.state = 'dead'; this.stateT = 0; this.result = null;
+    pmsg('level_failed', this.lvl());
     const H = this.hero, lv = this.lv;   // it bursts where it can be seen (a fall ends below the screen)
     burstFx(H.cx, clamp(H.cy, lv.cam + this.R, lv.cam + view.h - this.R), this.R, H.color.base); shake.add(12);
     input.clear(); haptics.buzz(30); sound.play('die');
@@ -1094,17 +1103,19 @@ class Game {
     const price = this.revivePrice();
     if (this.state !== 'dead' || this.result || this.coins < price) return;
     this.coins -= price; this.revives++; this.hp = this.maxHp;   // all the hearts, however many were bought
+    track('revive', { price, revives: this.revives, ...this.at() });
     this.state = 'play'; this.stateT = 0; ui.hideAll();
     this.respawn(); this.invuln = REVIVE.invuln;
     sound.play('buy'); haptics.buzz(16);
   }
   giveUp() { this.finish(false); ui.result(this.result); }
-  win() { this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8); this.finish(true); }
+  win() { pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8); this.finish(true); }
   finish(won) {
     const bank0 = save.bank, total = Math.floor(this.climbed + this.levelM), firstWin = won && save.wins === 0;
     save.bank += this.coins; save.best = Math.max(save.best, total);
     if (won) save.wins++;
     delete save.run;   // over: nothing to continue
+    track('run_over', { won, level_id: this.levelId(), height: total, coins: this.coins, kills: this.kills, revives: this.revives });
     persist();
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
     this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin };
@@ -1309,9 +1320,9 @@ const ui = {
   },
   pause() {
     const p = this.panel('pause');
-    const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); this.pause(); });
-    const shk = button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); this.pause(); });
-    const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); queueLayout(); this.pause(); });
+    const snd = button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); });
+    const shk = button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); });
+    const ctl = button(t('ctrl') + ': ' + t(save.stick ? 'ctrlStick' : 'ctrlKeys'), 'big thumb alt', () => { save.stick = !save.stick; persist(); queueLayout(); track('settings_changed', { setting: 'controls', value: save.stick ? 'stick' : 'buttons' }); this.pause(); });
     p.append(el('div', 'head', t('paused')), ...(coarse ? [ctl] : []), snd, shk, button(t('menu'), 'big thumb alt', () => game.toMenu()), button(t('resume'), 'big thumb', () => game.togglePause(false)));   // Resume at the bottom, under the thumb
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
@@ -1692,6 +1703,10 @@ for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.add
 // minute at most. The platform's pause and sound requests are kept (an ad open, a tab switched). Off a platform (GitHub
 // Pages, here) the Bridge is a mock with no ads: there the rewarded button doubles at once, so the way it goes can be
 // tried. No Bridge at all: no rewarded button, no interstitials.
+// Analytics (the digest §9: telemetry says what, playtests why): the level's start, end and failure go as the platform's own
+// messages (Bridge records them); what only the game knows goes through analytics.send. Without the Bridge, nothing.
+const pmsg = (m, data) => { if (ads.ok) try { bridge.platform.sendMessage(m, data); } catch (e) { /* not on this platform */ } };
+const track = (name, data) => { if (ads.ok && bridge.analytics) try { bridge.analytics.send(name, data); } catch (e) { /* not on this platform */ } };
 const BRIDGE_WAIT = 4000, AD_GAP = 180000, AD_AFTER = 3;   // an interstitial three minutes apart at most, from the third pause on (CrazyGames; the digest §6)
 const ads = {
   ok: false, quiet: false, off: false, held: false, lastAd: 0, pauses: 0,   // quiet: the platform's sound off, or its pause on; lastAd: when one was last up
@@ -1811,7 +1826,7 @@ function aimPreview() {
 const canvas = $('gl');
 const uiEl = $('ui');
 const view = { w: 1, h: 1, left: 0, keep: 0 };   // keep: px at the bottom under the touch keys
-const perf = { ctxLoss: 0 };   // the renderer counts lost contexts here (Gum sends them as telemetry)
+const perf = { ctxLoss: 0, lost0: 0, t0: 0, last: 0, active: 0, ft: [] };   // the renderer counts lost contexts here (Gum sends them as telemetry); the rest: see perfFrame
 const fx = new FX();
 const game = new Game();
 const renderer = new Renderer(canvas);
@@ -1864,6 +1879,7 @@ for (const type of ['selectstart', 'contextmenu']) document.addEventListener(typ
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
   paused = document.hidden; loop.last = performance.now(); sound.sleep(document.hidden || ads.quiet);
+  if (paused) { if (perf.active >= 5000) perfSend(loop.last); perf.last = 0; }
   if (paused) { input.clear(); game.togglePause(true); }
 });
 window.addEventListener('blur', () => input.clear());
@@ -1879,9 +1895,25 @@ function frame(now) {
   const raw = now - (loop.prevRaw || now);
   loop.prevRaw = now;
   if (raw > 0 && raw < 100) loop.ema += (raw - loop.ema) * 0.1;
-  if (!started || paused || loop.frozen || renderer.lost || !renderer.ok) { loop.last = now; return; }
+  if (!started || paused || loop.frozen || renderer.lost || !renderer.ok) { loop.last = now; perf.last = 0; return; }
   if (coarse && loop.ema < 10 && (++loop.n & 1)) return;   // 120 Hz touch screens: draw at ~60
-  runFrame(now);
+  runFrame(now); perfFrame(now);
+}
+// performance_sample (Playgama's telemetry guide): the drawn frames of play only, menus, pauses and hidden time left out
+// (a gap there is no frame), sent as one sample about every 30 s.
+function perfFrame(now) {
+  if (!ads.ok || game.state !== 'play' || document.hidden) { perf.last = 0; return; }
+  if (!perf.t0) perf.t0 = now;
+  if (perf.last) { const d = now - perf.last; perf.ft.push(d); perf.active += d; }
+  perf.last = now;
+  if (now - perf.t0 >= 30000) perfSend(now);
+}
+function perfSend(now) {
+  const ft = perf.ft.sort((a, b) => a - b), n = ft.length, q = (p) => ft[Math.min(n - 1, Math.floor(p * n))], over = (ms) => ft.filter((d) => d > ms).length, r1 = (v) => Math.round(v * 10) / 10;
+  if (n) track('performance_sample', { target_fps: 60, window_ms: Math.round(now - perf.t0), active_ms: Math.round(perf.active), frame_count: n,
+    fps_avg: r1((n * 1000) / perf.active), fps_p10: r1(1000 / q(0.9)), frame_time_p50_ms: r1(q(0.5)), frame_time_p95_ms: r1(q(0.95)), frame_time_p99_ms: r1(q(0.99)), frame_time_max_ms: r1(ft[n - 1]),
+    frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION });
+  perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss;
 }
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.
 function runFrame(now, fixedDt) {

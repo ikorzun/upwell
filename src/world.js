@@ -5,7 +5,7 @@
    and how it is drawn. Loaded after src/gum.js, before src/game.js.
    ───────────────────────────────────────────────────────────── */
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; this is where it starts
 
 // ── Tuning ───────────────────────────────────────────────────

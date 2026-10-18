@@ -351,7 +351,9 @@ class Boss {
   // and dashes over to the far wall, which shakes icicles down from its second phase. Only a rolling shell turns it (flip).
   slide(dt, g) {
     const b = this.body, lv = g.lv, R = lv.R, ph = this.def.phase(this.hp), H = g.hero;
-    this.st += dt; b.wake();
+    b.wake();
+    if ((this.t += dt) < PUCK.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first
+    this.st += dt;
     if (this.state !== 'dazed') turnUp(b, 6, dt);   // the dome up (on its back, Gum's own righting is held off: flip)
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = FOE_COLOR.boss;
     if (this.state === 'dazed') { addVel(b, -b.rigVx * Math.min(1, 4 * dt), 0); if (this.st > PUCK.flip * this.help) this.rise(); return; }
@@ -439,7 +441,7 @@ class Game {
     return a;
   }
   makeHero() {
-    const x = view.w / 2, y = this.lv.floor - 1.1 * this.R;
+    const bs = this.lv.boss, x = bs && bs.def && bs.def.slide ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
     this.hero = new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6);
     this.hero.isHero = true;
     this.startY = this.hero.cy;

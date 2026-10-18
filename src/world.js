@@ -148,7 +148,8 @@ const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // The Puck (BOSSES.puck, world 2): it slides the ice at `slide` R/s, flicking a shell out every `every` s (as many as
 // `shells` by phase); rests `rest` s, winds up `wind` s (backing off, flat, flashing) and dashes wall to wall at `dash`
 // R/s, its wall shaking `icicles` down by phase. Its top is hard; a shell rolled into it turns it belly up for `flip` s.
-const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [15, 18, 22], icicles: [0, 1, 2], flip: 2.5 };
+// It keeps still its first `calm` s, while its name is up (the plan: an encounter starts safe).
+const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 1, 2], flip: 2.5, calm: 2.5 };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller

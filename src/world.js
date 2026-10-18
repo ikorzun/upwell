@@ -225,6 +225,19 @@ const UNDER = { len: 30, lift: 12, at: [0.25, 0.6], p: 0.55, r: 1.25 };
 // `at[0]` of the height, the second at `at[1]`. By a generator of their own.
 const RUNE = { p: 0.2, at: [[0.3, 0.42], [0.62, 0.75]] };
 // The book's enemies: their names, and a line on each (their hints say the rest).
+// What each does, for the book (a line, under eight words).
+const FOE_DESC = {
+  crawler: { en: 'Crawls its ledge. Land on it!', es: 'Repta por su saliente. ¡Cae encima!', pt: 'Rasteja na sua borda. Pule em cima!', ja: 'いたの うえを はう。うえから ふもう！' },
+  climber: { en: 'Crawls up and down the walls.', es: 'Sube y baja por las paredes.', pt: 'Sobe e desce pelas paredes.', ja: 'かべを のぼりおりする。' },
+  circler: { en: 'Circles round its block.', es: 'Da vueltas a su bloque.', pt: 'Gira em volta do seu bloco.', ja: 'ブロックの まわりを まわる。' },
+  hedgehog: { en: 'Red and prickly: never stomp it.', es: 'Rojo y con púas: no lo pises.', pt: 'Vermelho e espinhoso: não pise.', ja: 'トゲトゲ: ふんでは だめ。' },
+  shell: { en: 'Stomped, it rolls into the others.', es: 'Pisado, rueda contra los demás.', pt: 'Pisado, rola contra os outros.', ja: 'ふむと ころがって ぶつかる。' },
+  spitter: { en: 'Lobs blobs at you. Dodge, then stomp.', es: 'Te lanza bolas. Esquiva y pisa.', pt: 'Atira bolas em você. Desvie e pise.', ja: 'たまを なげる。よけて ふもう。' },
+  splitter: { en: 'Stomp it and it splits in two.', es: 'Písalo y se parte en dos.', pt: 'Pise e ele se divide em dois.', ja: 'ふむと ふたつに わかれる。' },
+  mini: { en: "A splitter's half: small and quick.", es: 'Medio divisor: pequeño y rápido.', pt: 'Metade de um divisor: pequeno e rápido.', ja: 'ブンレツの かたわれ。はやい。' },
+  chaser: { en: 'Crawls the walls up to your height.', es: 'Trepa las paredes hasta tu altura.', pt: 'Sobe as paredes até a sua altura.', ja: 'きみの たかさまで かべを のぼる。' },
+  worm: { en: 'Stomp the knot, not the tubes!', es: '¡Pisa el nudo, no los tubos!', pt: 'Pise no nó, não nos tubos!', ja: 'むすびめを ふめ、くだは さけろ！' },
+};
 const FOE_NAMES = {
   crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
   circler: { en: 'Circler', es: 'Rondador', pt: 'Rondador', ja: 'グルグル' }, hedgehog: { en: 'Hedgehog', es: 'Erizo', pt: 'Ouriço', ja: 'ハリネズミ' },
@@ -518,6 +531,27 @@ DESIGNS.push(
   { id: 'slug', n: 34, size: 1.0, firm: 1.2, kernel: [0, 0], sdf: (x, y) => sdRoundBox(x, y, 0.62, 1.0, 0.55),
     face: { eye: [0.22, -0.3], eyeR: [0.07, 0.09], mouth: [0, -0.08], mouthW: 0.1, blush: [0.4, -0.15] } },
 );
+// The book's pictures of each enemy and boss (the user: each its own, in detail): its own shape as Gum's design gives its
+// body, 16 pixels square in its ink, shaded as the bodies are (a white gloss up left, a dither of black low down), its
+// eyes black with a white glint (ICONS foe_<kind>, boss_<id>).
+function portrait(design, ink, n = 16) {
+  const d = designById(design), f = d.face, rows = [], at = (i) => (((i + 0.5) / n) * 2 - 1) * 1.2;
+  let top = n, bot = 0;
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (d.sdf(at(i), at(j)) < 0) { top = Math.min(top, j); bot = Math.max(bot, j); }
+  for (let j = 0; j < n; j++) {
+    let row = '';
+    for (let i = 0; i < n; i++) {
+      const x = at(i), y = at(j), ex = [-1, 1].map((sx) => [(x - sx * f.eye[0]) / (2.2 * f.eyeR[0]), (y - f.eye[1]) / (2.2 * f.eyeR[1])]);
+      const eye = ex.some(([u, v]) => u * u + v * v < 1), glint = ex.some(([u, v]) => (u + 0.35) ** 2 + (v + 0.35) ** 2 < 0.12);
+      const inside = d.sdf(x, y) < 0, rim = inside && d.sdf(x - 0.15, y - 0.15) > -0.08, low = j > top + (bot - top) * 0.72;
+      row += !inside ? '.' : eye ? (glint ? 'w' : 'k') : rim && x < 0 && y < 0 ? 'w' : low && (i + j) % 2 ? 'k' : ink;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+for (const k in ENEMY) ICONS['foe_' + k] = portrait(ENEMY[k].design, 'r');
+for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', 'p');
 // The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs
 // together (not spent), like Downwell's palettes, and each starting a run with an upgrade (`perk`).
 const UNLOCKS = [

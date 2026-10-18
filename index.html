@@ -77,6 +77,18 @@
   .rune { font-family: 'Yarndings 12'; font-size: 72px; line-height: 1; }   /* knitted on a 12-px grid: crisp at 6 px a stitch */
   .rune.r0 { color: var(--orange); } .rune.r1 { color: var(--white); } .rune.r2 { color: var(--yellow); }   /* the Heat, a drop, the Light */
   .lore { margin-bottom: auto; }
+  .feed { align-self: stretch; flex: 1; min-height: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }   /* the book: one feed down, scrolled by touch here only */
+  .feed .sect { position: sticky; top: 0; z-index: 1; background: var(--ink); color: var(--yellow); padding: 10px 2px 6px; text-align: left; }   /* a block's header, kept in sight over its cards */
+  .card2 { flex: none; display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch); text-align: left; }
+  .card2.locked { background: var(--dim); box-shadow: none; color: var(--gray); }
+  .card2 .pic { flex: none; width: 56px; height: 56px; display: grid; place-items: center; }
+  .card2 .pic .ico { --p: 4; }   /* the picture big: 48-56 px */
+  .card2 .pic .tx { --p: 4; }
+  .card2 .txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; text-align: left; }
+  .card2 .txt span { color: var(--gray); }
+  .card2 .txt .tx { text-align: left; }   /* its lines from the left, as a page reads */
+  .feed { scrollbar-width: thin; scrollbar-color: var(--gray) transparent; }   /* a thin bar in the game's grey */
+  .feed::-webkit-scrollbar { width: 4px; } .feed::-webkit-scrollbar-thumb { background: var(--gray); }
   .medals { display: flex; gap: 14px; justify-content: center; }   /* the daily well's three, each over its height */
   .medal { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--gray); --p: 2; }
   .medal .ico { --p: 3; }

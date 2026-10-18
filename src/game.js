@@ -1789,21 +1789,27 @@ const ui = {
     if (next) p.append(cap(button(t('map'), 'chip wide', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 10)), 'continue'));
     else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
   },
-  // The book of what has been met (the plan after the sandbox: an encyclopedia): upgrades and their pairs, candies, enemies,
-  // bosses, a page each; what is met shows its picture and name, the rest a '?'; a tap reads one out under them.
-  book(page = 'up') {
-    const p = this.panel('map'), bk = save.book || {}, has = (k, id) => !!(bk[k] && bk[k][id]), tabs = el('div', 'duo'), grid = el('div', 'levels'), line = el('div', 'label lore', t('bookTap'));
-    for (const [k, n] of [['up', 'bookUp'], ['candy', 'bookCandy'], ['foe', 'bookFoe'], ['boss', 'bookBoss']]) tabs.append(button(t(n), 'chip' + (k === page ? ' on' : ''), () => this.book(k)));
-    const items = page === 'up' ? UPGRADES.map((u) => [u.id, u.id, L2(u.name)[0], L2(u.name)[1]]).concat(SYNERGIES.map((sy) => [sy.id, sy.of[0], L2(sy.name)[0], L2(sy.name)[1]]))
-      : page === 'candy' ? Object.keys(CANDY).map((k) => [k, k, t('got_' + k).split('!')[0].replace('¡', ''), t('got_' + k).split('·')[0]])
-        : page === 'foe' ? Object.keys(ENEMY).map((k) => [k, 'foe', L2(FOE_NAMES[k]), STR.en['seen_' + k] ? t('seen_' + k) : L2(FOE_NAMES[k])])
-          : Object.keys(BOSSES).map((k) => [k, 'boss', L2(BOSSES[k].name), L2(BOSSES[k].intro[0])]);
-    for (const [id, icon, name, desc] of items) {
-      const known = has(page, id), b = button('', 'chip lvl' + (known ? '' : ' locked'), () => { line.replaceChildren(px(known ? name + ': ' + desc : t('unknown'), 150)); });
-      if (known) b.append(iconEl(icon)); else b.append(px('?'));
-      b.setAttribute('aria-label', known ? name : '?'); grid.append(b);
+  // The book of what has been met (the plan after the sandbox: an encyclopedia), one feed down under its headers (the user:
+  // no tabs, bigger blocks, each in detail): upgrades and their pairs, candies, enemies, bosses, a card each with its picture,
+  // its name and what it does or says; what is not met yet a dim '?'. The feed scrolls by touch (it alone: see the touch guard).
+  book() {
+    const p = this.panel('map'), bk = save.book || {}, has = (k, id) => !!(bk[k] && bk[k][id]), feed = el('div', 'feed');
+    const got = (k) => t('got_' + k).split(/[!！]/), sections = [
+      ['up', 'bookUp', UPGRADES.map((u) => [u.id, u.id, ...L2(u.name)]).concat(SYNERGIES.map((sy) => [sy.id, sy.of[0], ...L2(sy.name)]))],
+      ['candy', 'bookCandy', Object.keys(CANDY).map((k) => [k, k, got(k)[0].replace('¡', ''), (got(k)[1] || '').split('·')[0].trim()])],
+      ['foe', 'bookFoe', Object.keys(ENEMY).map((k) => [k, 'foe_' + k, L2(FOE_NAMES[k]), L2(FOE_DESC[k])])],
+      ['boss', 'bookBoss', Object.keys(BOSSES).map((k) => [k, 'boss_' + k, L2(BOSSES[k].name), L2(BOSSES[k].intro[0])])],
+    ];
+    for (const [k, head, items] of sections) {
+      feed.append(el('div', 'sect', t(head) + ' · ' + items.filter(([id]) => has(k, id)).length + '/' + items.length));   // how many found
+      for (const [id, icon, name, desc] of items) {
+        const known = has(k, id), card = el('div', 'card2' + (known ? '' : ' locked')), pic = el('div', 'pic'), txt = el('div', 'txt');
+        pic.append(known ? iconEl(icon) : px('?'));
+        txt.append(el('b', null, known ? name : '???'), el('span', null, known ? desc : t('unknown')));
+        card.append(pic, txt); feed.append(card);
+      }
     }
-    p.append(cap(el('div', 'head', t('book')), 'book'), tabs, grid, line, cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
+    p.append(cap(el('div', 'head', t('book')), 'book'), feed, cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
   },
   // The campaign's map: a world's ten levels, five by two, each its number (the bonus a coin, the boss its face) over its stars;
   // the open ones to tap, the next one yellow; on to that one under the thumb.
@@ -2411,7 +2417,7 @@ $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.toggl
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 // Safari (user: it got in the way): a finger anywhere over the game, the stick and swipes included, must never start a
 // selection, the loupe or a callout. Only buttons keep their default: their click needs it. Pointer events still come.
-for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button'))) e.preventDefault(); }, { passive: false });
+for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
 for (const type of ['selectstart', 'contextmenu']) document.addEventListener(type, (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {

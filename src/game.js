@@ -290,6 +290,7 @@ class Game {
     this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = [];
     this.pow = null; this.ram = false; this.tail = [];   // the candy at work, a ram on its way up, a rainbow's tail
     this.warns = [];   // where threats come down into view (see threats)
+    this.followers = []; this.trail = [];   // the freed, following the hero along its way (see followStep)
     this.newRun();
   }
   newRun() {
@@ -312,6 +313,7 @@ class Game {
     for (const e of lv.enemies) a.push(e.body);
     if (lv.boss && !lv.boss.dead) a.push(lv.boss.body);
     for (const f of lv.folk || []) if (f.body) a.push(f.body);
+    for (const f of this.followers) a.push(f.body);   // into rooms too
     if (this.hero) a.push(this.hero);
     return a;
   }
@@ -360,6 +362,7 @@ class Game {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
+    this.followers = []; this.trail = [];
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
     this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
@@ -566,7 +569,7 @@ class Game {
     if (this.hitstop > 0) { this.hitstop -= dt; return; }
     const lv = this.lv, hero = this.hero, playing = st === 'play', h = dt / PHYS.substeps, sk2 = 2 * WORLD.skin;
     lv.update(dt, this);
-    if (st === 'clear' && lv.portal) this.suck(dt);
+    if (st === 'clear' && lv.portal) { this.suck(dt); this.followStep(); }
     if (playing) {
       this.activate();
       for (const e of lv.enemies) e.think(dt, this);
@@ -586,13 +589,14 @@ class Game {
       for (const b of bs) { b.integrate(h, WORLD.maxSpeed); b.solve(h); b.updateBounds(); }
       for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
         const A = bs[i], B = bs[j];
+        if (A.thread || B.thread) continue;   // a follower touches nothing
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
         const solid = lv.boss && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck
         if (withHero && ((this.invuln > 0 && !solid) || !playing || A.ghost || B.ghost)) continue;   // a hit hero passes through for a moment, and a rolling shell through the hero
         if (collidePair(A, B) && withHero) (A === hero ? B : A).touchHero = true;
       }
-      for (const b of bs) { b.collideLevel(lv, h); b.finishSubstep(h); b.updateBounds(); }
+      for (const b of bs) { if (!b.thread) b.collideLevel(lv, h); b.finishSubstep(h); b.updateBounds(); }
     }
     for (const b of bs) b.endStep(dt, this);
     if (this.contact()) {   // what a jump would push off
@@ -633,7 +637,6 @@ class Game {
       const f = lv.folk[i], b = f.body;
       if (f.kind === 'cage' && b) {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
-        else if (f.open && (b.wallMask & 8) && (f.hop -= dt) <= 0) { setVel(b, 0, -0.55 * this.vjump); b.kickSquash(0, 1, -1); f.hop = rand(0.5, 1.2); }
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
       else if (f.kind === 'bat') {
         if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); }
@@ -646,6 +649,17 @@ class Game {
         if (f.x < r.x0 + 0.2 * R || f.x > r.x1 - 0.2 * R) { if (f.run) { fx.dust(f.x, f.y, IMPACT.puffSpeed); lv.folk.splice(i, 1); continue; } f.dir = -f.dir; }   // at the end: turns round, or, running, is gone over it
       }
     }
+  }
+  // The freed follow the hero to the level's end as if on a thread (user): each its own place back along the hero's way
+  // (a point every 0.4 R, four apart: 1.6 R), floating through everything, hurt by nothing; a stop stops them too.
+  followStep() {
+    const H = this.hero, R = this.R, tr = this.trail, last = tr[tr.length - 1];
+    if (!last || Math.hypot(H.cx - last[0], H.cy - last[1]) > 0.4 * R) { tr.push([H.cx, H.cy]); if (tr.length > 120) tr.shift(); }
+    this.followers.forEach((f, k) => { const b = f.body, [tx, ty] = tr[Math.max(0, tr.length - 1 - 4 * (k + 1))]; setVel(b, (tx - b.cx) * 8, (ty - b.cy) * 8); b.wake(); });
+  }
+  regroup() {   // the hero somewhere new (a door, a respawn): a way laid out beside it, toward the well's middle, for the freed to line up on
+    const H = this.hero, R = this.R, lv = this.lv, d = H.cx < (lv.l + lv.r) / 2 ? 1 : -1;
+    this.trail = Array.from({ length: 12 }, (_, k) => [H.cx + d * (12 - k) * 0.4 * R, H.cy]);
   }
   // Set pieces at work: a stalactite over the hero shakes and falls (a blob of lv.shots, so it hurts and breaks on what it
   // meets); an arena starts as the hero comes to its middle, sends its waves down, pays in big coins once they are all gone.
@@ -675,8 +689,10 @@ class Game {
     }
   }
   free(f) {
-    const b = f.body, R = this.R;
-    f.open = true; f.hop = 0.25; b.face.frown = false; b.face.surprise = 1;
+    const b = f.body, R = this.R, i = this.lv.folk.indexOf(f);
+    f.open = true; b.face.frown = false; b.face.surprise = 1;
+    if (i >= 0) this.lv.folk.splice(i, 1);
+    b.thread = true; b.gScale = 0; this.followers.push(f);   // and off it goes after the hero (followStep)
     sparkFx(b.cx, b.maxY - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, INK.coin], 0.6); fx.ring(b.cx, b.cy, 1.6 * R, INK.white);
     sound.play('crumble', 0.7, 1.3); sound.play('bubble', 0.9, 1.2); haptics.buzz(16);
     if (++this.freed % 2 === 0 && this.hp < this.maxHp) { this.heal(1); ui.hurt(); ui.toast(t('freedHeart'), 1800); sound.play('buy'); }   // every second one a heart, if one is missing
@@ -692,7 +708,7 @@ class Game {
     if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
     this.spikes(); this.fireStep(dt); this.fireTouch();
     if (this.state !== 'play') return;   // the fire ended a bonus level
-    this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt); this.setStep(dt);
+    this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt); this.followStep(); this.setStep(dt);
     for (const f of lv.folk) if (f.body && !f.open && f.y > lv.cam && f.y < lv.cam + view.h) this.hint(f.kind);   // a cage or a trader, told once
     if (!save.seen.crack) for (const r of lv.near(lv.cam + view.h * 0.2, lv.cam + view.h * 0.8)) if (r.crack) { this.hint('crack'); break; }
     if (this.combo > 0 && (H.wallMask & 8) && !H.springHit && !this.power('rainbow')) this.payCombo();   // only a floor ends a combo; a rainbow's runs on till it is over
@@ -884,7 +900,7 @@ class Game {
   respawn() {   // onto the last safe ledge, the camera with it
     const lv = this.lv, sp = this.safeSpot();
     this.combo = 0; ui.comboEnd(); this.rising = false;
-    this.placeHero(sp.x, sp.y);
+    this.placeHero(sp.x, sp.y); this.regroup();
     this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1;
     lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
     if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; }
@@ -1059,13 +1075,13 @@ class Game {
     if (this.combo > 0) this.payCombo();
     this.bankDrops();   // in the purse at once: they are for the shop in there
     this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false;
-    this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R);
+    this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble');
   }
   leaveRoom() {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
-    this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R);   // beside the door, on its ledge
+    this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R); this.regroup();   // beside the door, on its ledge
     bub.cd = 1.2; aimCancel(); ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
     if (bub.kind === 'treasure' && !room.coins.length) {   // a stash with all its coins taken: its way in closes behind the hero
       this.lv.bubbles.splice(this.lv.bubbles.indexOf(bub), 1);
@@ -1107,6 +1123,7 @@ class Game {
     const sp = Math.min(PORTAL.pull * this.R * k, d * 10), turn = PORTAL.spin * this.R * (1 - k * 0.6);
     setVel(H, (dx / d) * sp - (dy / d) * turn, (dy / d) * sp + (dx / d) * turn);
     H.growthTarget = Math.max(0.04, 1 - this.stateT / PORTAL.shrink);
+    for (const f of this.followers) f.body.growthTarget = H.growthTarget;   // the freed go in after it
   }
   pick(u) {
     if (this.state !== 'clear') return;   // a second tap
@@ -1289,6 +1306,7 @@ class Game {
     this.look.x = b.cx; this.look.y = b.cy; this.look.t = now;
     for (const e of lv.enemies) e.body.face.update(dt, e.body, this.look, now);
     for (const f of lv.folk || []) if (f.body) f.body.face.update(dt, f.body, this.look, now);
+    for (const f of this.followers) f.body.face.update(dt, f.body, this.look, now);
     if (lv.boss && !lv.boss.dead) lv.boss.body.face.update(dt, lv.boss.body, this.look, now);
     ui.frame(this);
   }

@@ -6,6 +6,7 @@
   assets/fonts/yarndings12.woff2  Yarndings 12, the runes on the worlds' tapestries (the `runes:` in world.js)
 
 Run it again whenever a Japanese text or a rune changes: it reads the characters from src/*.js and index.html.
+It also prints each rune as an ICONS picture (12 x 12 stitches) for world.js, where the runes hang on the shaft's walls.
 Both fonts are SIL OFL 1.1 (their licences are copied next to them). The full fonts are kept in assets/_raw/fonts
 (not in git), downloaded from the Google Fonts repository the first time.
 Needs fontTools and brotli (pip install fonttools brotli).
@@ -14,6 +15,7 @@ Usage: python3 tools/fonts.py
 import os, re, shutil, sys, urllib.request
 from fontTools import subset
 from fontTools.ttLib import TTFont
+from fontTools.pens.pointInsidePen import PointInsidePen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW, OUT = os.path.join(ROOT, 'assets/_raw/fonts'), os.path.join(ROOT, 'assets/fonts')
@@ -47,6 +49,15 @@ def cut(src, dst, unicodes):
     subset.save_font(font, dst, opts)
 
 
+def rune_icons(src, chars):   # Yarndings 12 knits on a grid of 65 units a stitch, 12 stitches up from the baseline, from x = 65
+    font = TTFont(src); gs, cmap = font.getGlyphSet(), font.getBestCmap()
+    def stitch(g, i, j):
+        pen = PointInsidePen(gs, (65 * (i + 1) + 32, 65 * (12 - j) - 32)); gs[g].draw(pen); return pen.getResult()
+    for ch in chars:
+        g = cmap[ord(ch)]
+        print(f"ICONS.rune{ch} = '" + '/'.join(''.join('w' if stitch(g, i, j) else '.' for i in range(12)) for j in range(12)) + "';")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     text = ''.join(open(os.path.join(ROOT, p), encoding='utf-8').read() for p in ('src/game.js', 'src/world.js', 'index.html'))
@@ -62,6 +73,7 @@ def main():
         cut(src, dst, [u for u in uni if u in have])
         shutil.copy(lic, os.path.join(OUT, name + '-OFL.txt'))
         print(f'{dst}: {os.path.getsize(dst)} bytes, {sum(1 for u in uni if u in have)} characters')
+        if name == 'yarndings12': rune_icons(src, [chr(u) for u in uni])
 
 
 if __name__ == '__main__':

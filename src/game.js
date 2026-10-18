@@ -14,7 +14,7 @@ const STR = {
     tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
-    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: 'Thank you! +{n} coins', freedHeart: 'Thank you! +1 heart', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
+    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
     got_fizz: 'Fizz! You shoot by yourself · {s} s', got_smash: 'Rock candy! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
@@ -31,7 +31,7 @@ const STR = {
     tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
-    seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '¡Gracias! +{n} monedas', freedHeart: '¡Gracias! +1 corazón', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
+    seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
     seen_splitter: 'El divisor se parte en dos', seen_chaser: 'El perseguidor te sigue por su pared',
     got_fizz: '¡Burbujas! Disparas solo · {s} s', got_smash: '¡Caramelo roca! Tus saltos rompen bloques · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
@@ -48,7 +48,7 @@ const STR = {
     tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
-    seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: 'Obrigado! +{n} moedas', freedHeart: 'Obrigado! +1 coração', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
+    seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
     seen_splitter: 'O divisor se parte em dois', seen_chaser: 'O perseguidor segue você pela parede',
     got_fizz: 'Gasosa! Você atira sozinho · {s} s', got_smash: 'Bala de pedra! Pulos quebram blocos · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
@@ -65,7 +65,7 @@ const STR = {
     tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
-    seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: 'ありがとう！ +{n} コイン', freedHeart: 'ありがとう！ ハート +1', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
+    seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
     seen_splitter: 'ブンレツは ふたつに わかれる', seen_chaser: 'オイカケは かべを つたって おってくる',
     got_fizz: 'シュワシュワ！ じどうで うつ · {s} びょう', got_smash: 'ロックキャンディ！ ジャンプで ブロックを こわす · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
@@ -339,6 +339,7 @@ class Boss {
 }
 
 // ── Game ─────────────────────────────────────────────────────
+const said = { freed: (Math.random() * SAY.freed.length) | 0, moti: (Math.random() * SAY.moti.length) | 0 }, say = (k) => L2(SAY[k][said[k]++ % SAY[k].length]);   // the lore's lines in turn, from anywhere
 const RAINBOW_BODY = RAINBOW_INK.map((c) => ({ id: 'rainbow', base: c, deep: PAL.black }));   // the hero's colours under a rainbow
 // A death (the plan: funny deaths, each its own): the hero held a beat in the colour of what did it, hot, pricked,
 // bonked or soured, with the world still, then its burst (Game.pop). A fall ends below the screen: no beat there.
@@ -794,8 +795,8 @@ class Game {
     b.thread = true; b.gScale = 0; this.followers.push(f);   // and off it goes after the hero (followStep)
     sparkFx(b.cx, b.maxY - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, INK.coin], 0.6); fx.ring(b.cx, b.cy, 1.6 * R, INK.white);
     sound.play('crumble', 0.7, 1.3); sound.play('bubble', 0.9, 1.2); haptics.buzz(16);
-    if (++this.freed % 2 === 0 && this.hp < this.maxHp) { this.heal(1); ui.hurt(); ui.toast(t('freedHeart'), 1800); sound.play('buy'); }   // every second one a heart, if one is missing
-    else { this.drop(b.cx, b.minY, FOLK.coins); ui.toast(tf('freedCoins', { n: FOLK.coins }), 1800); }
+    if (++this.freed % 2 === 0 && this.hp < this.maxHp) { this.heal(1); ui.hurt(); ui.toast(say('freed') + '\n' + t('freedHeart'), 2400); sound.play('buy'); }   // every second one a heart, if one is missing; a word from it first
+    else { this.drop(b.cx, b.minY, FOLK.coins); ui.toast(say('freed') + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400); }
   }
   interact(dt) {
     const lv = this.lv, H = this.hero;
@@ -1240,7 +1241,7 @@ class Game {
     track('item_bought', { id: p.item.id, price, from: p.trader ? 'trader' : this.lv.kind, level_id: this.levelId() });
     if (p.trader && p.trader.body) { const b = p.trader.body; b.face.surprise = 1; setVel(b, 0, -0.5 * this.vjump); }   // the trader hops: a sale
     splatFx(p.x, p.y, p.r * 2, p.item.color, 8); haptics.buzz(16);
-    if (p.item.id !== 'upgrade') ui.toast(L2(p.item.name), 1200);
+    if (p.item.id !== 'upgrade') ui.toast(L2(p.item.name) + '\n' + tf('moti', { s: say('moti') }), 2200);   // and a word from Aunt Moti
   }
 
   // ── The run's turns ──

@@ -89,6 +89,24 @@ const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SW
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless.
 // Laid by a generator of their own, so the shaft is laid as before; none in a bonus level.
 const FOLK = { cage: [0.3, 0.55], cageP: 0.75, trader: [0.6, 0.85], traderP: 0.5, critterP: 0.3, coins: 8, flee: 3 };
+// The lore's lines (the plan: under eight words, in turn): what one set free says, balls of your kind the sour ones
+// caught on their way up; and Aunt Moti's word at each sale, in her shop or on a ledge.
+const SAY = {
+  freed: [
+    { en: "Thank you! I'm with you!", es: '¡Gracias! ¡Voy contigo!', pt: 'Obrigado! Vou com você!', ja: 'ありがとう！ いっしょに いく！' },
+    { en: 'Free! Up to the Light!', es: '¡Libre! ¡Hacia la Luz!', pt: 'Livre! Rumo à Luz!', ja: 'じゆうだ！ ひかりへ！' },
+    { en: 'The sour ones got me. Phew!', es: 'Me atraparon los ácidos. ¡Uf!', pt: 'Os azedos me pegaram. Ufa!', ja: 'すっぱい やつに つかまってた！' },
+    { en: 'I climbed this far long ago.', es: 'Subí hasta aquí hace mucho.', pt: 'Subi até aqui faz tempo.', ja: 'まえに ここまで きたんだ。' },
+    { en: "Lead the way, I'll follow!", es: '¡Tú delante, yo te sigo!', pt: 'Vai na frente, eu te sigo!', ja: 'さきに いって！ ついていく！' },
+  ],
+  moti: [
+    { en: "Take it while it's warm!", es: '¡Llévatelo, que está calentito!', pt: 'Leva, que está quentinho!', ja: 'あったかい うちに どうぞ！' },
+    { en: 'No change, dear.', es: 'No hay cambio, cielo.', pt: 'Não tem troco, querido.', ja: 'おつりは ないよ。' },
+    { en: 'Good pick. Climb well!', es: 'Buena elección. ¡Sube bien!', pt: 'Boa escolha. Suba bem!', ja: 'いい えらびだね。 がんばって！' },
+    { en: 'The runes spoke of you.', es: 'Las runas hablaban de ti.', pt: 'As runas falaram de você.', ja: 'ルーンに きみが いた。' },
+    { en: 'Mind the sour ones, sweetie.', es: 'Cuidado con los ácidos, cielo.', pt: 'Cuidado com os azedos, docinho.', ja: 'すっぱい やつに きをつけて。' },
+  ],
+};
 const CRITTER = {   // '#' the world's ink, 'w' white; a bat hangs and flaps, a bug walks
   bat: ['#...#', '.###.', '#w#w#', '.###.', '..#..'], batUp: ['#.....#', '##.#.##', '.#w#w#.', '..###..'], batDown: ['..###..', '.#w#w#.', '##.#.##', '#.....#'],
   bug: ['..##.', '.#w##', '#.#.#'], bug2: ['..##.', '.#w##', '.#.#.'] };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
@@ -192,6 +210,10 @@ const WORM = { len: 1.7, seg: 0.24, w: 0.27, tip: 0.24, wait: [2.4, 4], reach: 0
 // the hero back up the level `lift` m over where it went in (a shortcut). `len` its depth, m; a random run's level has a spot
 // with odds `p`, `at` a share of the way up; `r` a spot's size, R.
 const UNDER = { len: 30, lift: 12, at: [0.25, 0.6], p: 0.55, r: 1.25 };
+// A world's runes (its tapestry's, CAMPAIGN) hung on the shaft's back wall by a side wall, quiet, in the world's own ink:
+// as many as a recipe's `runes` (the plan: 1-9, before the boss), and in a run one in `p` of its levels; the first at
+// `at[0]` of the height, the second at `at[1]`. By a generator of their own.
+const RUNE = { p: 0.2, at: [[0.3, 0.42], [0.62, 0.75]] };
 // The book's enemies: their names, and a line on each (their hints say the rest).
 const FOE_NAMES = {
   crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
@@ -299,7 +321,7 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
   { role: 'twist', len: 28, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
   { role: 'peak', len: 28, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
-  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, seed: 3616,
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'probka', moss: true },   // moss on its arena's walls: a place to sit its dive out
 ] }];
@@ -391,6 +413,10 @@ ICONS.coin = '............/....oooo..../..ooyyyyoo../..oyywyyyo../.oyywyyyyyo./.
 ICONS.boss = '............/...pppppp.../..pppppppp../.pkkppppkkp./.pppkppkppp./.ppwkppwkpp./.ppwkppwkpp./.pppppppppp./.pppkkkkppp./..pppppppp../...pppppp.../............';   // and a boss's, its face
 ICONS.warn = '.....ww...../....wrrw..../....wrrw..../...wrrrrw.../...wrwwrw.../..wrrwwrrw../..wrrwwrrw../.wrrrrrrrrw./.wrrrwwrrrw./wrrrrrrrrrrw/wwwwwwwwwwww/............';   // a warning sign, at the top edge: something coming down into view here
 ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
+// The runes, as Yarndings 12 knits them (SIL OFL 1.1; printed by tools/fonts.py from its 12-stitch grid)
+ICONS.runeS = '.....ww...../..w.wwww.w../.www.ww.www./..wwwwwwww../.w.ww..ww.w./wwww.ww.wwww/wwww.ww.wwww/.w.ww..ww.w./..wwwwwwww../.www.ww.www./..w.wwww.w../.....ww.....';
+ICONS.runeV = '.....ww...../..w..ww..w../.www.ww.www./..wwwwwwww../...wwwwww.../wwwwwwwwwwww/wwwwwwwwwwww/...wwwwww.../..wwwwwwww../.www.ww.www./..w..ww..w../.....ww.....';
+ICONS.runeh = '.....w....../....www...../...wwwww..../..wwwwwww.../.wwww.wwww../www.w.w.www./wwww.w.wwww./ww.ww.ww.ww./www.w.w.www./.www.w.www../..www.www.../...ww.ww....';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
@@ -872,7 +898,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 class Level {
   constructor() {
     this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.under = false;
+    this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
     this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.rc = null;
@@ -888,6 +914,8 @@ class Level {
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.under = false;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
+    const ru = this.runeRng = mulberry32((o.seed ^ 0x6d2b79f5) >>> 0), cw = CAMPAIGN.find((c) => c.world === o.world), n = !cw || o.kind !== 'well' || !o.height ? 0 : rc ? rc.runes || 0 : ru() < RUNE.p ? 1 : 0;   // its runes (RUNE), by their own generator too
+    this.runes = []; this.runeAt = shuffled(ru, [...(cw ? cw.runes : '')]).slice(0, n).map((ch, k) => ({ ch, y: this.floor - o.height * (RUNE.at[k][0] + ru() * (RUNE.at[k][1] - RUNE.at[k][0])) }));
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
@@ -982,7 +1010,7 @@ class Level {
     this.spikes = this.spikes.filter(keep);
     this.coats = this.coats.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
-    this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep);
+    this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep); this.runes = this.runes.filter(keep);
   }
   // The next chunk on top: a pocket with a bubble once the shaft passes a planned height
   // (never two pockets running, and none in the last `pocketEnd` tiles: a bubble right
@@ -1031,6 +1059,7 @@ class Level {
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
     if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set') this.addSpot(this.top - h, this.top);
+    if (this.runeAt.length && this.top - h < this.runeAt[0].y && c !== CHUNKS.pocket) this.addRune(this.top - h, this.top);
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
     this.top -= h;
@@ -1046,6 +1075,17 @@ class Level {
     if (!ok.length) return;
     const [x, y] = ok[(this.spotRng() * ok.length) | 0];
     this.spots.push({ x, y, y1: y, r: UNDER.r, kind: 'in', used: false }); this.spotAt = null;
+  }
+  // A rune due (RUNE) in the chunk just laid (from y0 up to y1): by a side wall, where no ledge, spike or door stands in front of it.
+  addRune(y0, y1) {
+    const R = this.R, ok = [];
+    for (let y = y0 + 1.5 * R; y < y1 - 1.5 * R; y += 0.5 * R) for (const x of [this.l + 1.2 * R, this.r - 1.2 * R]) {
+      const near = (q, d) => q.x1 > x - d && q.x0 < x + d && q.y1 > y - d && q.y0 < y + d;
+      if (!this.rects.some((q) => near(q, 1.1 * R)) && !this.spikes.some((q) => near(q, 1.5 * R)) && !this.bubbles.some((q) => near(q, 1.5 * R))) ok.push([x, y]);
+    }
+    if (!ok.length) return;   // the next chunk, then
+    const [x, y] = ok[(this.runeRng() * ok.length) | 0];
+    this.runes.push({ x, y, ch: this.runeAt.shift().ch });
   }
   // Folk for the chunk just laid (its rects from `from` on, its top at `top`): a cage or a trader when its height has come,
   // on a steady bare ledge with room over it and no enemy on it; maybe a critter. All by folkRng.
@@ -1632,9 +1672,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
   const box = (x0, y0, x1, y1, c, a, rad, type, p3) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, c, a, type || 5, hw, hh, type >= 7 ? p3 : rad); };
-  const icon = (id, x, y, a, k) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink
+  const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
     const rows = ICONS[id], s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
+    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
   // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is
@@ -1674,6 +1714,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x0, s.y0, x1, s.y1, th.moss, 1, 0, 10, 0);
       for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
     }
+  }
+  for (const u of lv.runes) if (seen(u.y - R, u.y + R)) {   // a world's runes on the back wall (RUNE): a faint cloth, the rune knitted on it in the world's ink
+    const h = 8 * PIX.size; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, 1, th.wall);
   }
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);
   if (lv.exit) door(lv.exit, 'exit');

@@ -149,6 +149,11 @@ const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // `shells` by phase); rests `rest` s, winds up `wind` s (backing off, flat, flashing) and dashes wall to wall at `dash`
 // R/s, its wall shaking `icicles` down by phase. Its top is hard; a shell rolled into it turns it belly up for `flip` s.
 // It keeps still its first `calm` s, while its name is up (the plan: an encounter starts safe).
+// The Minecart (BOSSES.cart, world 3): `size` R, rides its rail end to end in `pass` s by phase, lobs blobs (two from its
+// second phase) every `spit` s after winding up `wind` s, creaks `creak` s at an end and tips three rocks (`rock` R) down.
+// From its second phase the bridges go in `crumble[0]` s and come back in `crumble[1]`; in its third the lifts run `lifts` times as fast.
+// In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it.
+const CART = { size: 2.2, pass: [4, 3.4, 2.6], spit: 2.5, wind: 0.6, creak: 0.8, rock: 0.35, crumble: [0.35, 4.5], lifts: 1.5, hold: 2 };
 const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 1, 2], flip: 2.5, calm: 2.5 };
 
 // ── Looks ────────────────────────────────────────────────────
@@ -229,6 +234,9 @@ const FOE_NAMES = {
 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
+// A mini-boss (the plan: a big one of a known enemy, on a variation level, its scene's last): `size` times as big, `hp`
+// stomps to beat; a spitter's lobs two blobs at once. 3-4's arena ends with one (a recipe's `mini`).
+const MINI = { size: 1.6, hp: 3 };
 // Four worlds of three levels, then the boss. `heights` are its levels' lengths in metres (a
 // saw: a world starts a little shorter than the last one ended); `chunks` weighs the chunks a shaft is built from (see CHUNKS), `foes` is
 // the chance of an enemy in a chunk and `enemies` weighs which, `fire` how fast the fire under it rises, in R/s;
@@ -311,6 +319,16 @@ const BOSSES = {
     top: { en: 'Hard on top. Roll a shell at it!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
     hint: { en: 'Flipped! Land on its belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
     how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
+  // World 3's: the Minecart (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
+  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, design: 'loaf', size: CART.size, rail: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+    intro: [{ en: 'No outsiders in the pit!', es: '¡Prohibido entrar a la mina!', pt: 'Proibido entrar na mina!', ja: 'ぶがいしゃは たちいり きんし！' },
+      { en: "Mind the rocks. Or don't.", es: 'Cuidado con las rocas. O no.', pt: 'Cuidado com as pedras. Ou não.', ja: 'いわに きをつけな。' },
+      { en: 'My rail, my rules.', es: 'Mi riel, mis reglas.', pt: 'Meu trilho, minhas regras.', ja: 'わたしの レール、わたしの ルール。' }],
+    quip: [{ en: 'The shift is not over yet.', es: 'El turno aún no acaba.', pt: 'O turno ainda não acabou.', ja: 'シフトは まだ おわらない。' },
+      { en: 'Out of my pit, small fry.', es: 'Fuera de mi mina, pequeño.', pt: 'Fora da minha mina, pequeno.', ja: 'でていきな、ちびすけ。' }],
+    defeat: { en: 'Shift is over… go on, then.', es: 'Se acabó el turno… sigue, pues.', pt: 'O turno acabou… vai, então.', ja: 'シフト おわり… いきな。' },
+    hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
+    how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
   // The random run's summit: the Lid (the plan's last boss, its first look): goo from the start, then helpers, then twice the goo.
   lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
     intro: [{ en: 'Nothing up there. I checked.', es: 'Arriba no hay nada. Lo comprobé.', pt: 'Lá em cima não tem nada. Eu vi.', ja: 'うえには なにも ないよ。' },
@@ -321,6 +339,7 @@ const BOSSES = {
     defeat: { en: '…Light. I had forgotten it.', es: '…Luz. La había olvidado.', pt: '…Luz. Eu tinha esquecido.', ja: '…ひかり。わすれてた。' } },
 };
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
+const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
 // A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12
 // (its knitted pictures: the Heat, a drop like the hero, the Light) and what Aunt Moti reads in them.
@@ -361,6 +380,27 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
   { role: 'rest', len: 22, fire: 0.33, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, icewall: 1 }, intro: [], enemies: ['shell'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 4104,
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
   { role: 'boss', boss: 'puck', ice: true },   // an ice floor, icicles over it
+] },
+// World 3, the Mine (the plan's levels 21-30): crumbling blocks and bridges, the Fizz, spitters, the pit's waves and a fat
+// spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Minecart. Its runes: crossed picks, a block of
+// ore, a turn (those tired of climbing began to dig sideways). The worm stays in the random run (user).
+{ world: WORLDS[2], runes: 'LnY', lore: { en: 'Those tired of climbing\nbegan to dig sideways.', es: 'Los cansados de subir\nempezaron a cavar de lado.', pt: 'Os cansados de subir\ncomeçaram a cavar de lado.', ja: 'のぼるのに つかれた ものは\nよこへ ほりはじめた。' }, levels: [
+  { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2, crumble: 3, bridge: 3, icewall: 1 }, intro: ['crumble', 'bridge'], enemies: ['climber'], foes: 0.35, candy: [], cage: true, safe: true, seed: 4102,
+    news: { en: "crumbling blocks: don't stand still", es: 'bloques que se caen: no te quedes quieto', pt: 'blocos que desmoronam: não fique parado', ja: 'くずれる ブロック: とまるな' } },
+  { role: 'apply', len: 42, fire: 0.46, maxD: 2, chunks: MINE, intro: [], enemies: ['crawler', 'shell'], foes: 0.5, pair: 0.1, candy: ['fizz', 'fizz'], cage: true, seed: 4105,
+    news: { en: 'fizz candy', es: 'caramelo efervescente', pt: 'bala efervescente', ja: 'シュワシュワ キャンディ' } },
+  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler'], foes: 0.55, candy: ['fizz'], seed: 4106,
+    news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
+  { role: 'apply', len: 46, fire: 0.46, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.15, candy: ['fizz', 'smash'], shop: 0.4, seed: 4101,
+    news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
+  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4108 },
+  { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
+  { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...MINE, lift: 3, rubberwall: 2 }, intro: ['lift'], enemies: ['spitter', 'crawler'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 4101,
+    news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
+  { role: 'peak', len: 37, fire: 0.5, maxD: 3, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4102 },
+  { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
+    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+  { role: 'boss', boss: 'cart', rail: true },   // its rail under the ceiling, moss over its ends
 ] }];
 
 // Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
@@ -457,6 +497,9 @@ ICONS.runeh = '.....w....../....www...../...wwwww..../..wwwwwww.../.wwww.wwww../
 ICONS.runeI = '.ww..ww..ww./www.wwww.www/www.wwww.www/.....ww...../.ww..ww..ww./wwwwwwwwwwww/wwwwwwwwwwww/.ww..ww..ww./.....ww...../www.wwww.www/www.wwww.www/.ww..ww..ww.';
 ICONS.runeg = '...w.w.w..../....www...../...ww.ww..../....www...../.ww..w..ww../.www.w.www../..ww.w.ww.../....www...../....www...../.....w....../...wwwww..../...wwwww....';
 ICONS.runey = '............/..www...www./.wwwww.wwwww/wwwwwwwwwwww/wwwwwwwwwwww/wwwwwwwwwwww/.wwwwwwwwwww/..wwwwwwwww./...wwwwwww../....wwwww.../.....www..../......w.....';
+ICONS.runeL = '............/.w.......w../www.....www./.www...www../..www.www.../...wwwww..../....www...../...wwwww..../..www.www.../.www...www../www.....www./.w.......w..';
+ICONS.runen = '............/.w.w.w.w.w../www.www.www./.www.w.www../w.wwwwwww.w./.w.wwwww.w../wwwwwwwwwww./.w.wwwww.w../w.wwwwwww.w./.www.w.www../www.www.www./.w.w.w.w.w..';
+ICONS.runeY = '............/...ww......./...www....../...www....../....ww.www../.www..wwww../wwww..www.../www.ww....../....www...../....www...../.....ww...../............';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
@@ -951,7 +994,7 @@ class Level {
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' && (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage)));
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.under = false;
+    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
     const ru = this.runeRng = mulberry32((o.seed ^ 0x6d2b79f5) >>> 0), cw = CAMPAIGN.find((c) => c.world === o.world), n = !cw || o.kind !== 'well' || !o.height ? 0 : rc ? rc.runes || 0 : ru() < RUNE.p ? 1 : 0;   // its runes (RUNE), by their own generator too
@@ -1000,6 +1043,16 @@ class Level {
     if (o.kind === 'boss') {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
+      if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
+        const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
+        for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));
+        this.rail = { x0: this.l + end, x1: this.r - end, y: top + 3.05 * R + 1.6 * cr };   // a hero hanging under the moss clears it
+        const A = this.floor - this.rail.y;
+        for (const [f0, f1] of [[0.06, 0.36], [0.64, 0.94]]) this.rects.push(this.box(this.l + W * f0, this.floor - 0.5 * A, this.l + W * f1, this.floor - 0.5 * A + p, { plank: true, crumble: true }));
+        this.rects.push(this.box(this.l, this.floor - 0.2 * A, this.l + 0.26 * W, this.floor - 0.2 * A + p, { plank: true, move: { a: this.l, b: this.r - 0.26 * W, v: 1.8 * R } }));
+        this.rects.push(this.box(this.r - 0.26 * W, this.floor - 0.34 * A, this.r, this.floor - 0.34 * A + p, { plank: true, move: { a: this.l, b: this.r - 0.26 * W, v: -2.2 * R } }));
+        return;
+      }
       if (this.rc && this.rc.ice) {   // the Puck's: the floor all ice, four icicles under the ceiling (it shakes them down)
         this.rects.push(this.box(this.l, this.floor - 0.3 * R, this.r, this.floor, { slick: true }));
         for (const f of [0.2, 0.4, 0.6, 0.8]) this.icicles.push({ x: this.l + W * f, y: this.capY, state: 'hang', t: 0 });
@@ -1322,12 +1375,12 @@ class Level {
       if (r.crumble && !r.gone) {
         if (r.hit && !r.crumbling) { r.crumbling = true; sound.play('crumble', 0.6); }
         r.hit = false;
-        if (r.crumbling && (r.t += dt) > CRUMBLE.time) { r.gone = true; r.t = 0; crumbleFx(r, this.theme.crumble); }
+        if (r.crumbling && (r.t += dt) > (this.crumbleTime || CRUMBLE.time)) { r.gone = true; r.t = 0; crumbleFx(r, this.theme.crumble); }
       } else if (r.crumble || r.broke) {   // back again once the hero is out of its way: a crumbled block in a while, a smashed one sooner, or at once under a hero coming down onto it
         const h = g.hero, over = r.broke && !r.spikes && r.t > SMASH.soon && h.maxY < r.y0 && h.rigVy > 0;
         const free = (q) => q.maxX < r.x0 || q.minX > r.x1 || q.maxY < r.y0 || q.minY > r.y1;   // a smashed one round an enemy neither
         const bare = !r.spikes || r.spikes.every((s) => h.maxX < s.x0 || h.minX > s.x1 || h.maxY < s.y0 - this.R || h.minY > s.y1 + this.R);   // nor its spikes into the hero
-        if (((r.t += dt) > (r.broke ? SMASH.back : CRUMBLE.back) || over) && free(h) && bare && (!r.broke || this.enemies.every((e) => free(e.body)))) {
+        if (((r.t += dt) > (r.broke ? SMASH.back : this.crumbleBack || CRUMBLE.back) || over) && free(h) && bare && (!r.broke || this.enemies.every((e) => free(e.body)))) {
           r.gone = r.crumbling = r.broke = false; r.t = 0; r.flash = 0.12;
           if (r.spikes) { this.spikes.push(...r.spikes); r.spikes = null; }
         }
@@ -1759,6 +1812,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
     }
   }
+  if (lv.rail && seen(lv.rail.y - R, lv.rail.y + R)) {   // the Minecart's rail: a white line from wall to wall, ties under it
+    box(lv.l, lv.rail.y, lv.r, lv.rail.y + 2.5, th.lip, 1, 0);
+    for (let x = lv.l + 0.6 * R; x < lv.r; x += 1.3 * R) box(x - 1.5, lv.rail.y + 2.5, x + 1.5, lv.rail.y + 0.35 * R, th.wall, 1, 0);
+  }
   for (const u of lv.runes) if (seen(u.y - R, u.y + R)) {   // a world's runes on the back wall (RUNE): a faint cloth, the rune knitted on it in the world's ink
     const h = 8 * PIX.size; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, 1, th.wall);
   }
@@ -1860,6 +1917,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     });
   }
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart; a falling stalactite
+    if (s.rock) { F(s.x, lv.floor + 1, s.r * 1.3, 0, 0, s.r * 0.35, INK.dark, 1, 0); disc(s.x, s.y, s.r, PAL.gray, 1); disc(s.x - 0.3 * s.r, s.y - 0.3 * s.r, 0.3 * s.r, PAL.white, 1); continue; }   // the Minecart's rocks, a shadow under each on the floor
     if (s.icicle) { icicle(s.x, s.y - 0.3 * R); continue; }
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
     if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
@@ -1907,7 +1965,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(b.cx - 0.2 * R, y0 + 0.75 * R, b.cx + 0.2 * R, y0 + 1.15 * R, INK.coin, 1, 0, 10, 0); box(b.cx - 0.1 * R, y0 + 0.55 * R, b.cx + 0.1 * R, y0 + 0.75 * R, INK.coinD, 1, 0, 10, 0);
   }
   const bs = lv.boss;
-  if (bs && !bs.dead && bs.state === 'dazed' && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
+  if (bs && !bs.dead && bs.def && bs.def.rail) {   // the Minecart's cart, in front of it: dark, a white rim, two wheels on the rail
+    const b = bs.body, hw = 0.55 * (b.maxX - b.minX), y0 = b.cy, y1 = lv.rail.y;
+    box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
+    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
+  }
+  if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
   if (g.state === 'play' && g.power('smash') && !(g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0)) {   // the smash's time left, over the hero's head: a pip a fifth, blinking in its last second (user)
     const n = Math.ceil((5 * g.gunT) / g.gunMax);
     for (let k = 0; k < n; k++) disc(hero.cx + (k - 2) * 0.42 * R, hero.minY - 0.45 * R, 0.14 * R, INK.flame, 1);

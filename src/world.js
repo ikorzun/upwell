@@ -192,6 +192,14 @@ const WORM = { len: 1.7, seg: 0.24, w: 0.27, tip: 0.24, wait: [2.4, 4], reach: 0
 // the hero back up the level `lift` m over where it went in (a shortcut). `len` its depth, m; a random run's level has a spot
 // with odds `p`, `at` a share of the way up; `r` a spot's size, R.
 const UNDER = { len: 30, lift: 12, at: [0.25, 0.6], p: 0.55, r: 1.25 };
+// The book's enemies: their names, and a line on each (their hints say the rest).
+const FOE_NAMES = {
+  crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
+  circler: { en: 'Circler', es: 'Rondador', pt: 'Rondador', ja: 'グルグル' }, hedgehog: { en: 'Hedgehog', es: 'Erizo', pt: 'Ouriço', ja: 'ハリネズミ' },
+  shell: { en: 'Shell', es: 'Caparazón', pt: 'Casco', ja: 'こうら' }, spitter: { en: 'Spitter', es: 'Escupidor', pt: 'Cuspidor', ja: 'ペッペ' },
+  splitter: { en: 'Splitter', es: 'Divisor', pt: 'Divisor', ja: 'ブンレツ' }, mini: { en: 'Mini', es: 'Mini', pt: 'Mini', ja: 'チビ' },
+  chaser: { en: 'Chaser', es: 'Perseguidor', pt: 'Perseguidor', ja: 'オイカケ' }, worm: { en: 'Worm', es: 'Gusano', pt: 'Minhoca', ja: 'ワーム' },
+};
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
 // Four worlds of three levels, then the boss. `heights` are its levels' lengths in metres (a
@@ -288,6 +296,14 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
   { role: 'boss', boss: 'probka', moss: true },   // moss on its arena's walls: a place to sit its dive out
 ] }];
 
+// Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
+// once, with a toast (Game.takeUpgrade); `apply` what it adds.
+const SYNERGIES = [
+  { id: 'moon', of: ['bouncy', 'legs'], name: { en: ['Moon boots', 'Stomps throw you far higher'], es: ['Botas lunares', 'Los pisotones te lanzan mucho más alto'], pt: ['Botas lunares', 'Pisões jogam você bem mais alto'], ja: ['ムーンブーツ', 'ふむと もっと たかく とぶ'] }, apply: (g) => { g.mods.bounce *= 1.25; } },
+  { id: 'rush', of: ['magnet', 'greed'], name: { en: ['Gold rush', 'Coins fly to you from anywhere'], es: ['Fiebre del oro', 'Las monedas vuelan hacia ti'], pt: ['Corrida do ouro', 'As moedas voam até você'], ja: ['ゴールドラッシュ', 'コインが どこからでも とんでくる'] }, apply: (g) => { g.mods.magnet *= 4; } },
+  { id: 'meteor', of: ['dive', 'blast'], name: { en: ['Meteor', 'A dive stomp blasts a wide ring'], es: ['Meteorito', 'Un pisotón en picado barre un gran anillo'], pt: ['Meteoro', 'Um pisão em mergulho varre um grande anel'], ja: ['メテオ', 'ダイブで ふむと ひろく ふきとばす'] }, apply: (g) => { g.mods.meteor = true; } },
+  { id: 'ember', of: ['cool', 'candle'], name: { en: ['Fire walker', "The fire's first touch a level is free"], es: ['Caminafuegos', 'El primer toque del fuego en cada nivel no cuenta'], pt: ['Anda-fogo', 'O primeiro toque do fogo na fase não conta'], ja: ['ひわたり', 'ほのおの さいしょの 1かいは ノーダメージ'] }, apply: (g) => { g.mods.fireFree++; } },
+];
 // In the campaign a card is offered only once what it is for has been met: after the level (its index) where that
 // came in: the shop at 1-9, the candies at 1-4, the spikes at 4-3 (the plan).
 const CARD_FROM = { member: 8, long: 3, iron: 32 };
@@ -311,6 +327,10 @@ const UPGRADES = [
   { id: 'iron', name: { en: ['Iron soles', 'Floor spikes do not hurt'], es: ['Suelas de hierro', 'Los pinchos del suelo no dañan'], pt: ['Solas de ferro', 'Espinhos no chão não machucam'], ja: ['てつの くつぞこ', 'ゆかの トゲが いたくない'] }, apply: (g) => { g.mods.iron = true; } },
   { id: 'long', stack: true, name: { en: ['Long charge', 'Candies last 2 s longer'], es: ['Carga larga', 'Los caramelos duran 2 s más'], pt: ['Carga longa', 'Doces duram 2 s a mais'], ja: ['ロング チャージ', 'キャンディが 2 びょう ながもち'] }, apply: (g) => { g.mods.gun += GUN.plus; } },
   { id: 'cool', name: { en: ['Fireproof', 'The fire rises slower and spits less'], es: ['Ignífugo', 'El fuego sube más lento y escupe menos'], pt: ['À prova de fogo', 'O fogo sobe devagar e cospe menos'], ja: ['たいか', 'ほのおが ゆっくり、あまり とばさない'] }, apply: (g) => { g.mods.fire *= 0.6; } },
+  // Upgrades that change what the hero does, not a number (the plan after the sandbox: "+5%" is dull)
+  { id: 'ceiling', name: { en: ['Sticky top', 'Any ceiling holds you'], es: ['Techo pegajoso', 'Cualquier techo te sujeta'], pt: ['Teto grudento', 'Qualquer teto segura você'], ja: ['ネバネバ てんじょう', 'どの てんじょうにも くっつく'] }, apply: (g) => { g.mods.ceil = true; } },
+  { id: 'dive', name: { en: ['Dive', '↓ in the air: down fast, bounce high'], es: ['Picado', '↓ en el aire: cae rápido, rebota alto'], pt: ['Mergulho', '↓ no ar: desce rápido, quica alto'], ja: ['ダイブ', 'くうちゅうで ↓: はやく おちて たかく はねる'] }, apply: (g) => { g.mods.dive = true; } },
+  { id: 'dash2', name: { en: ['Double dash', 'Two dashes in the air'], es: ['Doble impulso', 'Dos impulsos en el aire'], pt: ['Impulso duplo', 'Dois impulsos no ar'], ja: ['ダブル ダッシュ', 'くうちゅうで 2かい ダッシュ'] }, apply: (g) => { g.mods.dashes = 2; } },
 ];
 // A shop shows three of these; prices grow by half a price a world.
 const SHOP_ITEMS = [
@@ -351,6 +371,10 @@ ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
 ICONS.grow = 'ggg......ggg/gg........gg/g...wwww...g/...wwwwww.../..wwwwwwww../..wwkwwkww../..wwkwwkww../..wwwwwwww../...wwwwww.../g...wwww...g/gg........gg/ggg......ggg';   // the hero with arrows out of its corners: it grows
 ICONS.mark = '....yyyy..../....yyyy..../....yyyy..../....yyyy..../....yyyy..../yyyyyyyyyyyy/.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../....yyyy..../.....yy...../............';   // over a dazed boss: land here
+ICONS.ceiling = 'wwwwwwwwwwww/gggggggggggg/..g..g..g.../....wwww..../...wwwwww.../...wkwwkw.../...wwwwww.../....wwww..../............/............/............/............';
+ICONS.dive = '....wwww..../...wwwwww.../...wkwwkw.../...wwwwww.../....wwww..../.....yy...../.....yy...../.....yy...../...yyyyyy.../....yyyy..../.....yy...../............';
+ICONS.dash2 = '............/.......wwww./......wwwwww/oooo..wkwwkw/......wwwwww/.oooo..wwww./............/.......wwww./......wwwwww/oooo..wkwwkw/......wwwwww/.oooo..wwww.';
+ICONS.foe = '............/....rrrr..../..rrrrrrrr../.rrkkrrkkrr./.rrrkrrkrrr./.rrwkrrwkrr./rrrrrrrrrrrr/rrrrkkkkrrrr/rrrrrrrrrrrr/.rrrrrrrrrr./..rrrrrrrr../............';   // the book's enemies
 ICONS.medalG = '..rr....rr../...rr..rr.../....rrrr..../...yyyyyy.../..yyyyyyyy../.yyywyyyyyy./.yywyyyyyyy./.yyyyyyyyyy./.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../............';   // the daily well's medals: gold, silver, bronze, one not won
 ICONS.medalS = ICONS.medalG.replace(/y/g, 'w'); ICONS.medalB = ICONS.medalG.replace(/y/g, 'o'); ICONS.medalOff = ICONS.medalG.replace(/[yr]/g, 's');
 ICONS.swarm = '.ooo....bbb./ooooo..bbbbb/ooooo..bbbbb/ooooo..bbbbb/.ooo....bbb./....www...../....www...../.ggg....ppp./ggggg..ppppp/ggggg..ppppp/ggggg..ppppp/.ggg....ppp.';   // five of a kind, in their colours

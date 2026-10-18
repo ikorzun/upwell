@@ -80,7 +80,10 @@ const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, f
 // under it, whose top is within `feet` R of its bottom), spikes and all, at `jolt` of a smash's hitstop and shake; enemies it
 // touches go. Spikes, blobs and fire still hurt. After it, `grace` s of a hit's safety (user).
 const GROW = { time: 9, size: 2, reach: 0.25, feet: 0.3, jolt: 0.5, grace: 2 };
-const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW };
+// The swarm (user): for its time the hero is 5-7 of its kind in the other colours round it, each wrecking what it touches
+// (enemies, and blocks over its feet); `size` theirs, R; `orbit` their ring's, R; `spin` its turn, rad/s; `back` the last s, home.
+const SWARM = { time: 3, n: [5, 7], size: 0.75, orbit: 2.4, spin: 3.2, back: 0.3 };
+const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM };
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless.
@@ -336,6 +339,7 @@ ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
 ICONS.grow = 'ggg......ggg/gg........gg/g...wwww...g/...wwwwww.../..wwwwwwww../..wwkwwkww../..wwkwwkww../..wwwwwwww../...wwwwww.../g...wwww...g/gg........gg/ggg......ggg';   // the hero with arrows out of its corners: it grows
 ICONS.mark = '....yyyy..../....yyyy..../....yyyy..../....yyyy..../....yyyy..../yyyyyyyyyyyy/.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../....yyyy..../.....yy...../............';   // over a dazed boss: land here
+ICONS.swarm = '.ooo....bbb./ooooo..bbbbb/ooooo..bbbbb/ooooo..bbbbb/.ooo....bbb./....www...../....www...../.ggg....ppp./ggggg..ppppp/ggggg..ppppp/ggggg..ppppp/.ggg....ppp.';   // five of a kind, in their colours
 ICONS.plaster = '............/............/............/.wwwwwwwwww./wwswwoowwsww/wwwwwoowwwww/wwswwoowwsww/.wwwwwwwwww./............/............/............/............';   // the first hit a level is free
 ICONS.coin = '............/....oooo..../..ooyyyyoo../..oyywyyyo../.oyywyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./..oyyyyyyo../..ooyyyyoo../....oooo..../............';   // the campaign's map: a bonus level
 ICONS.boss = '............/...pppppp.../..pppppppp../.pkkppppkkp./.pppkppkppp./.ppwkppwkpp./.ppwkppwkpp./.pppppppppp./.pppkkkkppp./..pppppppp../...pppppp.../............';   // and a boss's, its face

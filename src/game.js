@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,7 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう',
   },
 };
 let lang = 'en';
@@ -291,6 +291,7 @@ class Game {
     this.pow = null; this.ram = false; this.tail = [];   // the candy at work, a ram on its way up, a rainbow's tail
     this.warns = [];   // where threats come down into view (see threats)
     this.followers = []; this.trail = [];   // the freed, following the hero along its way (see followStep)
+    this.swarm = [];   // the swarm candy's crowd (swarmUp)
     this.newRun();
   }
   newRun() {
@@ -314,6 +315,7 @@ class Game {
     if (lv.boss && !lv.boss.dead) a.push(lv.boss.body);
     for (const f of lv.folk || []) if (f.body) a.push(f.body);
     for (const f of this.followers) a.push(f.body);   // into rooms too
+    for (const b of this.swarm) a.push(b);
     if (this.hero) a.push(this.hero);
     return a;
   }
@@ -362,7 +364,7 @@ class Game {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
-    this.followers = []; this.trail = [];
+    this.followers = []; this.trail = []; this.swarm = [];
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
     this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
@@ -483,6 +485,26 @@ class Game {
       if (!lv.rects.some((q) => q.spring && on(r, q)) && !lv.bubbles.some((b) => on(r, b))) this.smash(r, GROW.jolt);
     }
   }
+  // The swarm (SWARM): the hero's kind in the other colours, round it on a turning ring, breathing; home in its last moment.
+  swarmUp() {
+    const H = this.hero, R = this.R, n = SWARM.n[0] + ((Math.random() * (SWARM.n[1] - SWARM.n[0] + 1)) | 0), cols = PALETTE.filter((c) => c.id !== save.color);
+    for (const b of this.swarm) sparkFx(b.cx, b.cy, 4, -Math.PI / 2, Math.PI, [60, 160], [1, 2], [0.2, 0.3], [b.color.base], 0.3);   // (taken again: a new crowd)
+    this.swarm = Array.from({ length: n }, (_, k) => { const b = new Body(designById('round'), cols[k % cols.length], H.cx, H.cy, SWARM.size * R, 0.6); b.thread = true; b.ghost = true; b.gScale = 0; b.sticky = false; return b; });
+    fx.ring(H.cx, H.cy, SWARM.orbit * R, INK.white); sound.play('spring', 0.8, 1.4); shake.add(4);
+  }
+  // Each pops the enemies it touches and smashes the blocks it meets over the hero's feet (not the ledge it stands on).
+  swarmStep() {
+    const H = this.hero, R = this.R, lv = this.lv, n = this.swarm.length, home = this.gunT < SWARM.back, on = (r, q) => q.x1 > r.x0 && q.x0 < r.x1 && Math.abs(q.y1 - r.y0) < 1;
+    this.swarm.forEach((b, k) => {
+      const a = lv.t * SWARM.spin + (k / n) * TAU, rr = SWARM.orbit * R * (home ? this.gunT / SWARM.back : 0.85 + 0.15 * Math.sin(lv.t * 5 + k));
+      setVel(b, (H.cx + Math.cos(a) * rr - b.cx) * 10, (H.cy + Math.sin(a) * rr - b.cy) * 10); b.wake();
+      for (const e of lv.enemies.slice()) if (Math.hypot(e.body.cx - b.cx, e.body.cy - b.cy) < e.body.R + b.R) this.zap(e, [b.color.base, INK.white]);
+      if (lv.kind === 'well') for (const r of lv.near(b.minY, b.maxY).slice()) {
+        if (r.cap || r.spring || r.plank || r.y0 >= H.maxY - 2 || r.x1 < b.minX || r.x0 > b.maxX || r.y1 < b.minY || r.y0 > b.maxY) continue;
+        if (!lv.rects.some((q) => q.spring && on(r, q)) && !lv.bubbles.some((q) => on(r, q))) this.smash(r, 0.4);
+      }
+    });
+  }
   // A cracked block (a stash's way in, see 'X') gives at a head-butt from below, for good: broken just before it is met, so the jump goes on in.
   cracks() {
     const H = this.hero, R = this.R, up = 0.3 * R - H.rigVy * STEP;
@@ -579,7 +601,7 @@ class Game {
     const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
     if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
     if (hang) setVel(hero, 0, 0);
-    if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); if (hero.rigVy < -40) this.cracks(); }
+    if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); if (this.power('swarm')) this.swarmStep(); if (hero.rigVy < -40) this.cracks(); }
     this.warns = playing ? this.threats(dt) : [];
     const bs = this.bodyList();
     this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
@@ -731,7 +753,7 @@ class Game {
     const above = (dy > STOMP.above * (H.R + b.R) && dy > dx * STOMP.slope && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * (H.R + b.R));   // from over it, or falling onto it
     const boss = e === this.lv.boss, can = boss ? e.open() : e.def.stomp;
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
-    if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
+    if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow') || this.power('swarm')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
     else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
@@ -836,7 +858,7 @@ class Game {
     return out;
   }
   hurt(dx, dy, by = 'other') {
-    if (this.invuln > 0 || this.power('rainbow') || this.state !== 'play') return false;
+    if (this.invuln > 0 || this.power('rainbow') || this.power('swarm') || this.state !== 'play') return false;
     const H = this.hero, d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
     const lost = this.loseHeart();
@@ -958,11 +980,13 @@ class Game {
     if (this.gunT > 0 && this.pow !== kind) this.powerEnd();   // a rainbow or a giant cut short still ends safely
     this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.gunCD = 0; this.ram = false;
     if (kind === 'grow') { this.hero.growthTarget = GROW.size; fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('spring', 0.8, 0.6); shake.add(4); }
-    if (kind === 'rainbow') this.invuln = 0;   // a hit's blink would let enemies through untouched
+    if (kind === 'rainbow' || kind === 'swarm') this.invuln = 0;   // a hit's blink would let enemies through untouched
+    if (kind === 'swarm') this.swarmUp();
     ui.toast(tf('got_' + kind, { s: Math.round(this.gunT) }), 2200, kind);   // each time: its picture, what it does, for how long
   }
   powerEnd() {   // run out; after the rainbow a moment of the usual safety, so the crowd it was ploughing through does not hit at once
     if (this.pow === 'rainbow') { this.invuln = Math.max(this.invuln, RAINBOW.grace); fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.6, 0.8); }
+    if (this.pow === 'swarm') { for (const b of this.swarm) sparkFx(b.cx, b.cy, 6, -Math.PI / 2, Math.PI, [80, 220], [1.2, 2.4], [0.2, 0.4], [b.color.base, INK.white], 0.4); this.swarm = []; this.invuln = Math.max(this.invuln, RAINBOW.grace); sound.play('bubble', 0.6, 1.1); }   // home, and a moment of safety
     if (this.pow === 'grow') { this.hero.growthTarget = 1; this.invuln = Math.max(this.invuln, GROW.grace); fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('bubble', 0.7, 0.7); }   // back to size, and a while blinking
     this.pow = null; this.ram = false;
   }

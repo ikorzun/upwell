@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', bookTap: 'Tap one to read it', unknown: 'Not met yet',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', bookTap: 'Tap one to read it', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', bookTap: 'Toca uno para leerlo', unknown: 'Aún sin descubrir',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', bookTap: 'Toca uno para leerlo', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', bookTap: 'Toque em um para ler', unknown: 'Ainda não encontrado',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', bookTap: 'Toque em um para ler', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,7 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', bookTap: 'さわって よもう', unknown: 'まだ みつけてない',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', bookTap: 'さわって よもう', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！',
   },
 };
 let lang = 'en';
@@ -357,7 +357,9 @@ class Game {
     this.newRun();
   }
   newRun() {
-    this.world = 0; this.stage = 0; this.hard = !!save.hard && save.wins > 0; this.mods = MODS(); this.taken = [];
+    this.world = 0; this.stage = 0; this.mods = MODS(); this.taken = [];
+    this.tier = save.wins > 0 ? Math.min(save.tier || (save.hard ? 1 : 0), save.tierMax || 1) : 0; this.hard = this.tier > 0;   // the hard mode's tier (an old save's hard mode: tier 1)
+    this.endless = false; this.loop = 0;
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0; this.syns = [];
     this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0;
     this.mode = 'run'; this.rc = null; this.ci = -1; this.lastBy = null; this.daily = null;   // the random run; playLevel makes it a campaign level
@@ -399,8 +401,8 @@ class Game {
     this.lv.cam = this.hero.cy - 0.46 * view.h;   // the hero in the gap between the title and the colours, so a new look shows
     ui.hideAll(); ui.menu();
   }
-  startRun(daily) {   // daily: the day's well
-    this.newRun(); if (daily) this.daily = today; save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
+  startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round
+    this.newRun(); if (daily) this.daily = today; this.endless = !!endless; save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
     if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
@@ -412,7 +414,7 @@ class Game {
     const seed = nextSeed != null ? nextSeed : this.daily != null ? daySeed(this.daily, this.world, this.stage, !!this.bonus) : (Math.random() * 4294967296) >>> 0;
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
-    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, recipe: this.bonus ? null : rc,
+    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
       height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: wd.theme });
     this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
     if (boss) { this.lv.boss = new Boss(this.lv, rc && BOSSES[rc.boss]); if (rc && (save.camp.fails[this.ci] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
@@ -1327,7 +1329,7 @@ class Game {
   // players of the climbing games hate most), dropped once the run ends. Quitting to the menu keeps it, for Continue.
   saveRun() {
     if (this.mode === 'run') save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
-      bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice(), daily: this.daily };
+      bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice(), daily: this.daily, tier: this.tier, endless: this.endless, loop: this.loop };
     persist();
     pmsg('level_started', this.lvl());
   }
@@ -1336,7 +1338,7 @@ class Game {
     if (!r) return;
     this.newRun(); padUsed = performance.now(); track('run_continued', { level_id: r.bonus >= 0 ? 'B' + (r.world + 1) : r.world >= WORLDS.length ? 'boss' : (r.world + 1) + '-' + (r.stage + 1) });
     for (const k of ['world', 'stage', 'hp', 'maxHp', 'coins', 'kills', 'bestCombo', 'climbed', 'revives', 'freed', 'hard']) this[k] = r[k];
-    this.daily = r.daily != null ? r.daily : null;
+    this.daily = r.daily != null ? r.daily : null; this.tier = r.tier || 0; this.endless = !!r.endless; this.loop = r.loop || 0;
     this.mods = Object.assign(MODS(), r.mods); this.taken = r.taken.slice();
     this.state = 'play'; this.stateT = 0; nextSeed = r.seed;
     if (r.bonus >= 0) { this.startBonus(BONUS[r.bonus]); return; }
@@ -1390,14 +1392,22 @@ class Game {
   }
   giveUp() { this.finish(false); ui.result(this.result); }
   win() {
+    if (this.mode === 'run' && this.endless) { pmsg('level_completed', this.lvl()); this.loopOn(); return; }   // the endless climb goes round again
     pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8);
     if (this.mode === 'camp') { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); this.result = null; return; }   // a boss's stars: by the hearts it cost
     this.finish(true);
+  }
+  loopOn() {   // past the summit: the worlds again from the first, a tier harder each time round
+    this.loop++; this.world = 0; this.stage = 0; this.hard = true; this.state = 'wait'; ui.hideAll();
+    ads.between(() => { this.state = 'play'; this.stateT = 0; this.buildLevel(false); this.saveRun(); ui.hideAll(); ui.toast(tf('loop', { n: this.loop + 1 }), 2200); });
   }
   finish(won) {
     const bank0 = save.bank, total = Math.floor(this.climbed + this.levelM), firstWin = won && save.wins === 0;
     save.bank += this.coins; save.best = Math.max(save.best, total);
     if (won) save.wins++;
+    let tierUp = 0;
+    if (won && this.tier >= (save.tierMax || 0) && (save.tierMax || 0) < 5) { save.tierMax = this.tier + 1; tierUp = save.tierMax; }   // a win at the top tier opens the next (up to 5)
+    if (this.endless) save.endlessBest = Math.max(save.endlessBest || 0, total);
     delete save.run;   // over: nothing to continue
     if (!won) pmsg('level_failed', this.lvl());   // only now: a death with a revive after it is the same go at the level
     track('run_over', { won, level_id: this.levelId(), height: total, coins: this.coins, kills: this.kills, revives: this.revives });
@@ -1409,7 +1419,7 @@ class Game {
       if (ads.ok && bridge.leaderboards && bridge.leaderboards.type !== 'not_available') bridge.leaderboards.setScore('daily_height', total).catch(() => {});
     }
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
-    this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily };
+    this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp };
   }
   where() { return this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + (this.world + 1) + '-' + (this.stage + 1); }
   togglePause(on) {
@@ -1579,8 +1589,11 @@ const ui = {
     const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }
     if (save.wins > 0) {
-      const h = cap(button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); }), 'hard');
-      p.append(h);
+      const top = Math.max(1, save.tierMax || 1), tier = Math.min(save.tier != null ? save.tier : save.hard ? 1 : 0, top);
+      const h = cap(button(t('hard') + ': ' + (tier ? tier : t('off')), 'chip' + (tier ? ' on' : ''), () => { save.tier = (tier + 1) % (top + 1); save.hard = save.tier > 0; persist(); this.menu(); }), 'hard');
+      const row = el('div', 'duo');   // and the endless climb by it
+      row.append(h, cap(button(t('endless') + (save.endlessBest ? ' · ' + save.endlessBest + ' ' + t('m') : ''), 'chip', () => game.startRun(false, true)), 'endless'));
+      p.append(row);
     }
     const r = save.run, c = save.camp, next = campAt(c.open), begun = c.open > 0 || c.stars[0] > 0, done = c.stars[CAMP_LEN - 1] > 0;
     const duo = el('div', 'duo');   // once the campaign is begun, over the main button: its map, and the random run (a kept one to go on with, or a new one)
@@ -1722,11 +1735,11 @@ const ui = {
         if (es.length) box.append(el('div', 'label', t('board')), b);
       }).catch(() => {});
     }
-    if (r.fresh.length || r.firstWin) {
+    if (r.fresh.length || r.firstWin || r.tierUp > 1) {
       const u = el('div', 'fresh');
       u.append(el('div', 'label', t('unlocked')));
       for (const f of r.fresh) { const c = el('span', 'chip swatch on'); c.style.background = rgb(colorById(f.id).base); u.append(c); }
-      if (r.firstWin) u.append(el('div', null, t('hardOpen')));
+      if (r.tierUp > 1) u.append(el('div', null, tf('tierOpen', { n: r.tierUp }))); else if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       box.append(u);
     }
     const then = (f) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); ads.between(f); };   // the run over: an ad may come first

@@ -873,6 +873,7 @@ class Level {
   reset(o) {
     this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.R = o.R; this.t = 0;
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
+    this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' && (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage)));
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
@@ -904,7 +905,7 @@ class Level {
       const rnd = this.rng, H = o.height;
       if (rc ? rc.shop : !o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (rc ? rc.shop : 0.3 + rnd() * 0.4), kind: 'shop', done: false });
       if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
-      const v = (rc ? rc.fire : o.world.fire || 0) * this.R * (this.hard ? 1.4 : 1);
+      const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
       if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
     } else this.build(o);
   }
@@ -1169,7 +1170,7 @@ class Level {
   populate(rects, top, bottom) {
     const wd = this.world, rnd = this.rng, t = this.tile;
     const rc = this.rc, odds = rc ? rc.foes : wd.foes * (1 + 0.15 * this.stage);   // a recipe's own odds of one, and of two
-    if (!wd.enemies || (this.foeTypes && !this.foeTypes.length) || bottom > this.floor - 6 * t || !(rnd() < odds * (this.hard ? 1.4 : 1))) return;
+    if (!wd.enemies || (this.foeTypes && !this.foeTypes.length) || bottom > this.floor - 6 * t || !(rnd() < odds * this.k)) return;
     const n = wd.pack || (rnd() < (rc ? rc.pair || 0 : 0.25 * this.stage) ? 2 : 1);
     for (let i = 0; i < n; i++) {
       const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.filter((k) => wd.enemies[k]).map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];

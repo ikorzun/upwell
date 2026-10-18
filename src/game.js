@@ -671,6 +671,7 @@ class Game {
     this.swarm.forEach((b, k) => {
       const a = lv.t * SWARM.spin + (k / n) * TAU, rr = SWARM.orbit * R * (home ? this.gunT / SWARM.back : 0.85 + 0.15 * Math.sin(lv.t * 5 + k));
       setVel(b, (H.cx + Math.cos(a) * rr - b.cx) * 10, (H.cy + Math.sin(a) * rr - b.cy) * 10); b.wake();
+      if (!(lv.t - (b.tk || -1) < 0.03)) { b.tk = lv.t; (b.trail = b.trail || []).push([b.cx, b.cy]); if (b.trail.length > SWARM.trail) b.trail.shift(); }   // its trail (user)
       for (const e of lv.enemies.slice()) if (Math.hypot(e.body.cx - b.cx, e.body.cy - b.cy) < e.body.R + b.R) this.zap(e, [b.color.base, INK.white]);
       if (lv.kind === 'well') for (const r of lv.near(b.minY, b.maxY).slice()) {
         if (r.cap || r.spring || r.plank || r.y0 >= H.maxY - 2 || r.x1 < b.minX || r.x0 > b.maxX || r.y1 < b.minY || r.y0 > b.maxY) continue;

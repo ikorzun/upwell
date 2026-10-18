@@ -82,7 +82,7 @@ const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, f
 const GROW = { time: 9, size: 2, reach: 0.25, feet: 0.3, jolt: 0.5, grace: 2 };
 // The swarm (user): for its time the hero is 5-7 of its kind in the other colours round it, each wrecking what it touches
 // (enemies, and blocks over its feet); `size` theirs, R; `orbit` their ring's, R; `spin` its turn, rad/s; `back` the last s, home.
-const SWARM = { time: 3, n: [5, 7], size: 0.75, orbit: 2.4, spin: 3.2, back: 0.3 };
+const SWARM = { time: 7, n: [5, 7], size: 0.9, orbit: 2.9, spin: 3.2, back: 0.3, trail: 6 };   // 7 s, clones and their ring a fifth bigger (user), `trail` dots of each clone's colour behind it
 const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM };
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
@@ -2071,6 +2071,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
     if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
   }
+  if (g.swarm && g.power('swarm')) for (const b of g.swarm) (b.trail || []).forEach(([x, y], i, tr) => { const f = (i + 1) / tr.length; disc(x, y, b.R * (0.3 + 0.55 * f), b.color.base, 0.3 + 0.55 * f); });   // each clone's trail, in its colour (user)
   const tl = g.tail, hb = g.hero, bw = RAINBOW.band * R;   // a rainbow's tail: six bands along the hero's way, fading to its end
   for (let i = 0; i < tl.length; i++) {
     const [x0, y0] = tl[i], [x1, y1] = i + 1 < tl.length ? tl[i + 1] : [hb.cx, hb.cy], l = Math.hypot(x1 - x0, y1 - y0) || 1, ux = (x1 - x0) / l, uy = (y1 - y0) / l, hl = l / 2 + PIX.size;

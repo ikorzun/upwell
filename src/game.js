@@ -276,7 +276,8 @@ class Boss {
 
 // ── Game ─────────────────────────────────────────────────────
 const RAINBOW_BODY = RAINBOW_INK.map((c) => ({ id: 'rainbow', base: c, deep: PAL.black }));   // the hero's colours under a rainbow
-const MODS = () => ({ bounce: 1, slide: 1, hold: 0, magnet: 1, invuln: 0, airJumps: 1, blast: false, coinMul: 1, comboShift: 0, jump: 1, discount: 1, iron: false, fire: 1, gun: 0 });
+const MODS = () => ({ bounce: 1, slide: 1, hold: 0, magnet: 1, invuln: 0, airJumps: 1, blast: false, coinMul: 1, comboShift: 0, jump: 1, discount: 1, iron: false, fire: 1, gun: 0, plaster: 0 });
+let lastOffer = [];   // the cards offered last time: not again in the next three (a bag, the digest §7: fair-feeling chance)
 const SPIKE_PUSH = [[0, -1], [0, 1], [1, -0.35], [-1, -0.35]];
 let nextSeed = null;
 class Game {
@@ -355,7 +356,7 @@ class Game {
     }
     this.applyMods();
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false;
-    this.touch = 0; this.queued = null; this.rising = false; this.crouch = false;
+    this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
     this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
@@ -378,8 +379,10 @@ class Game {
   }
   heal(n) { this.hp = Math.min(this.maxHp, this.hp + n); }
   offer(n = 3) {
-    const pool = UPGRADES.filter((u) => u.stack || !this.taken.includes(u.id));
-    return shuffled(Math.random, pool).slice(0, n);
+    const camp = this.mode === 'camp', pool = UPGRADES.filter((u) => (u.stack || !this.taken.includes(u.id)) && (camp ? !u.run && (CARD_FROM[u.id] || 0) <= this.ci : !u.camp));
+    const fresh = pool.filter((u) => !lastOffer.includes(u.id)), out = shuffled(Math.random, fresh.length >= n ? fresh : pool).slice(0, n);
+    if (n > 1) lastOffer = out.map((u) => u.id);
+    return out;
   }
   takeUpgrade(u) { u.apply(this); this.taken.push(u.id); this.applyMods(); }
   randomUpgrade() { const u = this.offer(1)[0]; if (u) { this.takeUpgrade(u); ui.toast(L2(u.name)[0]); } }
@@ -816,16 +819,24 @@ class Game {
     if (this.invuln > 0 || this.power('rainbow') || this.state !== 'play') return false;
     const H = this.hero, d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
-    if (!this.bonus) this.hp--;   // a bonus level costs no hearts
+    const lost = this.loseHeart();
     this.lastBy = by;
     track('hero_hit', { by, fatal: this.hp <= 0, ...this.at() });
     this.invuln = HEALTH.invuln + this.mods.invuln;
     setVel(H, dx * HEALTH.knock, Math.min(dy * HEALTH.knock, 0) - HEALTH.knock * 0.45);
     unstick(H, 0.3); H.face.surprise = 1; H.kickSquash(dx, dy, 2); this.rising = false;
-    this.hitstop = HEALTH.hitstop; shake.add(7); haptics.buzz(40); ui.hurt();
+    this.hitstop = HEALTH.hitstop; shake.add(7); haptics.buzz(40); if (lost) ui.hurt();
     if (this.hp > 0) sound.play('hurt');
     if (this.hp <= 0) this.die();
     return true;
+  }
+  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; a learning level never
+  // takes the last (the digest §3: no losing while learning). False: none was lost.
+  loseHeart() {
+    if (this.bonus) return false;
+    if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
+    if (this.rc && this.rc.safe && this.hp <= 1) return false;
+    this.hp--; return true;
   }
   room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
   // The last few ledges the hero stood on (null: the floor), with where on them. Crumbling
@@ -860,7 +871,7 @@ class Game {
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
   fall() {
-    if (!this.learning()) { this.hp--; ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
+    if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
     if (this.hp <= 0) { this.die(); return; }
     sound.play('fall', 0.8);
@@ -1469,7 +1480,9 @@ const ui = {
     const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
     langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
     for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); this.pause(); }); b.lang = k; langs.append(b); }
-    p.append(cap(el('div', 'head', t('paused')), 'paused'), langs, ...(coarse ? [ctl] : []), snd, shk, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+    const build = el('div', 'build');   // the upgrades taken (the world's build, in the campaign), as their pictures
+    for (const id of game.taken) build.append(iconEl(id));
+    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, ...(coarse ? [ctl] : []), snd, shk, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');

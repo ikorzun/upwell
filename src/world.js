@@ -258,13 +258,19 @@ const CAMPAIGN = [{ world: WORLDS[0], levels: [
   { role: 'boss', boss: 'probka' },
 ] }];
 
-// One of three is offered after every level. `stack`: can be taken again.
+// In the campaign a card is offered only once what it is for has been met: after the level (its index) where that
+// came in: the shop at 1-9, the candies at 1-4, the spikes at 4-3 (the plan).
+const CARD_FROM = { member: 8, long: 3, iron: 32 };
+// One of three is offered after every level. `stack`: can be taken again. `run`: the random run's only (its hearts carry
+// over); `camp`: the campaign's only (it starts each level with all of them).
 const UPGRADES = [
   { id: 'bouncy', stack: true, name: { en: ['Springy', 'Bounce higher off enemies'], es: ['Saltarín', 'Rebotas más alto en los enemigos'], pt: ['Saltitante', 'Quica mais alto nos inimigos'], ja: ['ピョンピョン', 'てきを ふむと たかく はねる'] }, apply: (g) => { g.mods.bounce *= 1.2; } },
   { id: 'sticky', stack: true, name: { en: ['Sticky', 'Slide slower, hang longer'], es: ['Pegajoso', 'Resbalas más lento y aguantas más'], pt: ['Grudento', 'Escorrega devagar, segura mais'], ja: ['ネバネバ', 'ゆっくり すべり、ながく つかまる'] }, apply: (g) => { g.mods.slide *= 0.55; g.mods.hold += 0.6; } },
   { id: 'magnet', stack: true, name: { en: ['Magnet', 'Coins come from further away'], es: ['Imán', 'Las monedas llegan desde más lejos'], pt: ['Ímã', 'As moedas vêm de mais longe'], ja: ['マグネット', 'コインが とおくから あつまる'] }, apply: (g) => { g.mods.magnet *= 2; } },
   { id: 'heart', stack: true, name: { en: ['Thick skin', '+1 max heart'], es: ['Piel dura', '+1 corazón máximo'], pt: ['Pele grossa', '+1 coração máximo'], ja: ['かたい かわ', 'さいだい ハート +1'] }, apply: (g) => { g.maxHp++; g.hp++; } },
-  { id: 'apple', stack: true, name: { en: ['Apple', 'Heal 2 hearts'], es: ['Manzana', 'Cura 2 corazones'], pt: ['Maçã', 'Cura 2 corações'], ja: ['リンゴ', 'ハートを 2 かいふく'] }, apply: (g) => g.heal(2) },
+  { id: 'apple', stack: true, run: true, name: { en: ['Apple', 'Heal 2 hearts'], es: ['Manzana', 'Cura 2 corazones'], pt: ['Maçã', 'Cura 2 corações'], ja: ['リンゴ', 'ハートを 2 かいふく'] }, apply: (g) => g.heal(2) },
+  { id: 'plaster', stack: true, camp: true, name: { en: ['Plaster', 'The first hit in a level is free'], es: ['Tirita', 'El primer golpe de cada nivel no cuenta'], pt: ['Curativo', 'O primeiro golpe da fase não conta'], ja: ['ばんそうこう', 'さいしょの 1かいは ノーダメージ'] },
+    apply: (g) => { g.mods.plaster++; } },
   { id: 'candle', stack: true, name: { en: ['Candle', 'Longer safety after a hit'], es: ['Vela', 'Más tiempo a salvo tras un golpe'], pt: ['Vela', 'Mais tempo protegido após um golpe'], ja: ['ろうそく', 'やられた あとの むてきが ながい'] }, apply: (g) => { g.mods.invuln += 0.8; } },
   { id: 'air', stack: true, name: { en: ['Air jump', '+1 jump in mid-air'], es: ['Salto aéreo', '+1 salto en el aire'], pt: ['Pulo aéreo', '+1 pulo no ar'], ja: ['くうちゅう ジャンプ', 'くうちゅうで ジャンプ +1'] }, apply: (g) => { g.mods.airJumps++; } },
   { id: 'blast', name: { en: ['Blast stomp', 'A stomp takes out its neighbours'], es: ['Pisotón explosivo', 'Un pisotón tumba a los vecinos'], pt: ['Pisão explosivo', 'Um pisão derruba os vizinhos'], ja: ['ばくはつ ふみつけ', 'ふむと まわりの てきも たおす'] }, apply: (g) => { g.mods.blast = true; } },
@@ -315,6 +321,7 @@ ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
 ICONS.grow = 'ggg......ggg/gg........gg/g...wwww...g/...wwwwww.../..wwwwwwww../..wwkwwkww../..wwkwwkww../..wwwwwwww../...wwwwww.../g...wwww...g/gg........gg/ggg......ggg';   // the hero with arrows out of its corners: it grows
 ICONS.mark = '....yyyy..../....yyyy..../....yyyy..../....yyyy..../....yyyy..../yyyyyyyyyyyy/.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../....yyyy..../.....yy...../............';   // over a dazed boss: land here
+ICONS.plaster = '............/............/............/.wwwwwwwwww./wwswwoowwsww/wwwwwoowwwww/wwswwoowwsww/.wwwwwwwwww./............/............/............/............';   // the first hit a level is free
 ICONS.coin = '............/....oooo..../..ooyyyyoo../..oyywyyyo../.oyywyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./..oyyyyyyo../..ooyyyyoo../....oooo..../............';   // the campaign's map: a bonus level
 ICONS.boss = '............/...pppppp.../..pppppppp../.pkkppppkkp./.pppkppkppp./.ppwkppwkpp./.ppwkppwkpp./.pppppppppp./.pppkkkkppp./..pppppppp../...pppppp.../............';   // and a boss's, its face
 ICONS.warn = '.....ww...../....wrrw..../....wrrw..../...wrrrrw.../...wrwwrw.../..wrrwwrrw../..wrrwwrrw../.wrrrrrrrrw./.wrrrwwrrrw./wrrrrrrrrrrw/wwwwwwwwwwww/............';   // a warning sign, at the top edge: something coming down into view here

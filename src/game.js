@@ -320,15 +320,15 @@ class Boss {
       }
       return;
     }
-    if (this.state === 'hover' && this.st > BOSS.hover * (this.angry > 0 || this.hp < this.max / 2 ? BOSS.fast : 1)) { this.to('warn'); return; }
+    const ph = this.def ? this.def.phase(this.hp) : 2;   // a boss with a def adds things as it loses hearts (BOSSES)
+    if (this.state === 'hover' && this.st > BOSS.hover * (this.angry > 0 || this.hp < this.max / 2 || ph >= 3 ? BOSS.fast : 1)) { this.to('warn'); return; }
     const tx = cx + Math.sin(this.t * 0.55) * W * BOSS.sway, ty = lv.floor - R * BOSS.high + Math.sin(this.t * 1.2) * R * 0.5, q = Math.min(1, 2.4 * dt);
     addVel(b, ((tx - b.cx) * 2 - b.rigVx) * q, ((ty - b.cy) * 2 - b.rigVy) * q);
     if (this.state === 'rise' && Math.abs(ty - b.cy) < b.R) this.to('hover');
     if (this.state !== 'hover') return;
-    const ph = this.def ? this.def.phase(this.hp) : 2;   // a campaign boss adds its goo, then its helpers, as it loses hearts
-    if (ph >= 1 && (this.drop -= dt * k) <= 0) {
+    if (ph >= 1 && (this.drop -= dt * k) <= 0) {   // its goo, then its helpers; at phase 3 twice the goo
       this.drop = BOSS.dropEvery;
-      for (let i = -1; i <= 1; i++) lv.shots.push({ x: b.cx + i * b.R * 0.5, y: b.maxY, vx: i * 120, vy: 60, r: 0.32 * lv.R });
+      for (let i = -1; i <= 1; i += ph >= 3 ? 0.5 : 1) lv.shots.push({ x: b.cx + i * b.R * 0.5, y: b.maxY, vx: i * 120, vy: 60, r: 0.32 * lv.R });
     }
     if (ph >= 2 && (this.call -= dt) <= 0) {
       this.call = BOSS.spawnEvery;
@@ -417,7 +417,7 @@ class Game {
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
       height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: wd.theme });
     this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
-    if (boss) { this.lv.boss = new Boss(this.lv, rc && BOSSES[rc.boss]); if (rc && (save.camp.fails[this.ci] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
+    if (boss) { this.lv.boss = new Boss(this.lv, BOSSES[rc ? rc.boss : 'lid']); if ((save.camp.fails[this.failKey()] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
       const h = this.hero;
@@ -908,7 +908,7 @@ class Game {
     bs.hp--; this.drop(b.cx, b.cy, 5); shake.add(5); sound.play('bosshit', 1, bs.hp > 0 ? 1 : 0.7); splatFx(b.cx, b.maxY - b.R * 0.3, b.R * 0.5, b.color.base, 6);
     this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo);
     if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = 1 - 0.06 * (bs.max - bs.hp); ui.toast(tf('bossLeft', { n: bs.hp })); if (bs.state === 'dazed') bs.rise(); return; }
-    bs.dead = true; this.kills++; met('boss', bs.def ? this.rc.boss : 'summit');
+    bs.dead = true; this.kills++; met('boss', this.rc && this.rc.boss ? this.rc.boss : 'lid'); delete save.camp.fails[this.failKey()];
     if (bs.def) ui.toast(L2(bs.def.defeat), 2200);
     splatFx(b.cx, b.cy, b.R * 1.4, FOE_COLOR.boss.base, 24); shake.add(9); haptics.buzz(60);
     this.drop(b.cx, b.cy, BOSS.coins);
@@ -993,6 +993,7 @@ class Game {
   }
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
+  failKey() { return this.mode === 'camp' ? this.ci : 'lid'; }   // whose losses running (save.camp.fails): a campaign boss's by its level, the summit's as one
   levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
@@ -1376,7 +1377,8 @@ class Game {
     const H = this.hero, lv = this.lv;   // it bursts where it can be seen (a fall ends below the screen)
     burstFx(H.cx, clamp(H.cy, lv.cam + this.R, lv.cam + view.h - this.R), this.R, H.color.base); shake.add(12);
     input.clear(); haptics.buzz(30); sound.play('die');
-    if (this.mode === 'camp') { if (this.lv.boss) save.camp.fails[this.ci] = (save.camp.fails[this.ci] || 0) + 1; this.campKeep(); persist(); return; }   // the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
+    if (this.lv.boss) save.camp.fails[this.failKey()] = (save.camp.fails[this.failKey()] || 0) + 1;   // a loss at a boss, counted (help after three)
+    if (this.mode === 'camp') { this.campKeep(); persist(); return; }   // the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
     if (this.coins < this.revivePrice()) this.finish(false);
   }
   revivePrice() { return Math.round(REVIVE.price * (1 + 0.5 * Math.min(this.world, 4)) * Math.pow(REVIVE.grow, this.revives) * (this.hard ? 1.5 : 1)); }
@@ -1648,7 +1650,7 @@ const ui = {
     const p = this.panel('result'), g = game, price = g.revivePrice(), by = g.lastBy, boss = !!(g.rc && g.rc.boss);
     const why = by === 'fire' || by === 'fire_blob' ? 'fire' : by === 'spikes' || by === 'fall' || by === 'icicle' ? by : 'enemy';
     const def = g.lv.boss && g.lv.boss.def;
-    p.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.ci] || 0) % def.quip.length])) : cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));   // a boss has a word of its own
+    p.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));   // a boss has a word of its own
     if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'chip wide', () => g.revive()), 'revive'));
     p.append(cap(button(t('menu'), 'big thumb alt', () => { pmsg('level_failed', g.lvl()); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
   },
@@ -1670,7 +1672,7 @@ const ui = {
     const items = page === 'up' ? UPGRADES.map((u) => [u.id, u.id, L2(u.name)[0], L2(u.name)[1]]).concat(SYNERGIES.map((sy) => [sy.id, sy.of[0], L2(sy.name)[0], L2(sy.name)[1]]))
       : page === 'candy' ? Object.keys(CANDY).map((k) => [k, k, t('got_' + k).split('!')[0].replace('¡', ''), t('got_' + k).split('·')[0]])
         : page === 'foe' ? Object.keys(ENEMY).map((k) => [k, 'foe', L2(FOE_NAMES[k]), STR.en['seen_' + k] ? t('seen_' + k) : L2(FOE_NAMES[k])])
-          : Object.keys(BOSSES).map((k) => [k, 'boss', L2(BOSSES[k].name), L2(BOSSES[k].intro[0])]).concat([['summit', 'boss', L2(SUMMIT.name), L2(SUMMIT.name)]]);
+          : Object.keys(BOSSES).map((k) => [k, 'boss', L2(BOSSES[k].name), L2(BOSSES[k].intro[0])]);
     for (const [id, icon, name, desc] of items) {
       const known = has(page, id), b = button('', 'chip lvl' + (known ? '' : ' locked'), () => { line.replaceChildren(px(known ? name + ': ' + desc : t('unknown'), 150)); });
       if (known) b.append(iconEl(icon)); else b.append(px('?'));
@@ -1753,9 +1755,9 @@ const ui = {
     if (ms) this.toastTimer = setTimeout(() => e.classList.remove('show'), ms);   // 0 keeps it up
   },
   banner() {
-    if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
     const bs = game.lv.boss;
-    if (bs && bs.def) { const n = save.camp.fails[game.ci] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? t('bossHow') : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
+    if (bs && bs.def) { const n = save.camp.fails[game.failKey()] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? t('bossHow') : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
+    if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
     const intro = game.mode === 'camp' ? game.rc : (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');
     this.toast(tf('world', { n: game.world + 1 }) + ' · ' + L2(game.wd.name) + '  ' + (game.world + 1) + '-' + (game.stage + 1) + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },

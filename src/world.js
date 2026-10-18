@@ -273,6 +273,14 @@ const BOSSES = {
     quip: [{ en: 'Told you. Stay down here.', es: 'Te lo dije. Quédate abajo.', pt: 'Eu avisei. Fica aqui embaixo.', ja: 'ほらね。ここに いなよ。' },
       { en: 'Too slow, little drop.', es: 'Muy lento, gotita.', pt: 'Muito lento, gotinha.', ja: 'おそいよ、しずくちゃん。' }],
     defeat: { en: 'Fine, fine… go on up.', es: 'Vale, vale… sube ya.', pt: 'Tá bom, tá bom… pode subir.', ja: 'わかったよ… のぼりな。' } },
+  // The random run's summit: the Lid (the plan's last boss, its first look): goo from the start, then helpers, then twice the goo.
+  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
+    intro: [{ en: 'Nothing up there. I checked.', es: 'Arriba no hay nada. Lo comprobé.', pt: 'Lá em cima não tem nada. Eu vi.', ja: 'うえには なにも ないよ。' },
+      { en: 'The sky? Just a story.', es: '¿El cielo? Solo un cuento.', pt: 'O céu? Só uma história.', ja: 'そら？ ただの おはなし。' },
+      { en: 'Climb all you like. I stay shut.', es: 'Trepa cuanto quieras. Sigo cerrada.', pt: 'Suba o quanto quiser. Fico fechada.', ja: 'いくら のぼっても あかないよ。' }],
+    quip: [{ en: 'Shut. Like I said.', es: 'Cerrada. Como dije.', pt: 'Fechada. Como eu disse.', ja: 'ほらね、しまってる。' },
+      { en: 'Back down you go.', es: 'Abajo otra vez.', pt: 'Pra baixo de novo.', ja: 'また したへ どうぞ。' }],
+    defeat: { en: '…Light. I had forgotten it.', es: '…Luz. La había olvidado.', pt: '…Luz. Eu tinha esquecido.', ja: '…ひかり。わすれてた。' } },
 };
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 // A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12

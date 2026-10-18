@@ -1842,6 +1842,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const rows = ICONS[id], s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
     rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
   };
+  const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
+    // cosine (past a quarter turn its back, mirrored), and the thickness of its edge in grey beside it as it turns
+    const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c = Math.cos(th), sn = Math.sin(th), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
+    const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
+    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), y0 + j * s, Math.max(u, v), y0 + (j + 1) * s, PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    const rim = Math.round((Math.abs(sn) * 2 * k)) * P, ex = x0 + Math.sign(sn) * Math.round(((w / 2) * s * Math.abs(c)) / P) * P;
+    if (rim > 0) box(Math.min(ex, ex + Math.sign(sn) * rim), y0 + 0.2 * rows.length * s, Math.max(ex, ex + Math.sign(sn) * rim), y0 + 0.8 * rows.length * s, PAL.gray, a, 0, 10, 0);
+  };
   const seen = (y0, y1) => y1 > top && y0 < bot;
   // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is
   // inside. A shop's (gold) and a stash's (violet) are magic: a breathing glow round them, white studs and a gem
@@ -1932,6 +1940,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x - 0.09 * R, r.y1, x + 0.09 * R, r.y1 + len, INK.dark, a, 0, 10, 0); disc(x, r.y1 + len, 0.14 * R, INK.dark, a);
     }
   }
+  {   // the platforms' shadows (user: depth, not overdone): cast by a sun that goes from the right to the left through a world's levels,
+    // a dithered black band under each and down its far side, over the walls and whatever ledge lies there (the black back wall barely shows them)
+    const sun = (g.mode === 'camp' ? g.stage / 9 : g.stage / 2) * 2 - 1, dx = Math.round((-sun * 0.45 * R) / PIX.size) * PIX.size, dy = Math.round((0.32 * R) / PIX.size) * PIX.size;
+    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && seen(r.y0, r.y1 + dy)) {
+      box(r.x0 + dx, r.y1, r.x1 + dx, r.y1 + dy, INK.dark, 0.55, 0, 10, 0);
+      if (dx) box(dx > 0 ? r.x1 : r.x0 + dx, r.y0 + dy, dx > 0 ? r.x1 + dx : r.x0, r.y1, INK.dark, 0.55, 0, 10, 0);
+    }
+  }
   for (const s of lv.spikes) {
     if (!seen(s.y0, s.y1)) continue;
     const vert = s.dir < 2, len = vert ? s.x1 - s.x0 : s.y1 - s.y0, dep = vert ? s.y1 - s.y0 : s.x1 - s.x0;
@@ -1963,12 +1979,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;
     F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1);
-    icon(p.item.id, p.x, y, a, 2.4);   // a fifth bigger than at first (user)
+    iconSpin(p.item.id, p.x, y, a, 2.4, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
     const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
-    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); icon(p.kind || 'fizz', p.x, y, 1, k);
+    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); iconSpin(p.kind || 'fizz', p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
   for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
   const icicle = (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
@@ -2027,6 +2043,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3))) / 2;
         F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
       }
+    }
+    // its mouth (user: a big open mouth wall to wall, fire bursting out of it): a black gum line on its rim, white fangs along it and
+    // big ones at the walls, and now and then a tall jet of flame out between them (to look at: the fire's blobs are what hurt)
+    box(lv.l, fy + 0.3 * R, lv.r, fy + 0.55 * R, INK.dark, 1, 0, 10, 0);
+    for (let n = Math.max(4, Math.round(W / (1.1 * R))), i = 0; i <= n; i++) {
+      const x = lv.l + (i / n) * W, big = i === 0 || i === n, hw = (big ? 0.45 : 0.28) * R, hd = (big ? 0.75 : 0.42) * R * (0.96 + 0.04 * Math.sin(T * 4 + i));
+      F(clamp(x, lv.l + hw, lv.r - hw), fy + 0.32 * R - hd, hw, 0, 0, hd, INK.white, 1, 6, hw, hd, 2 * hw);
+    }
+    for (let k = 0; k < 3; k++) {   // three jets in turn, each a moment every two seconds or so
+      const u = (T * 0.45 + k / 3) % 1;
+      if (u > 0.16) continue;
+      const x = lv.l + (0.2 + 0.6 * steady(Math.floor(T * 0.45 + k / 3), k + 7)) * W, h = Math.sin((u / 0.16) * Math.PI) * 2.2 * R;
+      F(x, fy - h / 2, 0.42 * R, 0, 0, h / 2 + 0.3 * R, INK.fire, 1, 6, 0.42 * R, h / 2 + 0.3 * R, 0.84 * R); F(x, fy - h * 0.35, 0.24 * R, 0, 0, h * 0.35 + 0.2 * R, INK.flame, 1, 6, 0.24 * R, h * 0.35 + 0.2 * R, 0.48 * R);
     }
     const w = lv.fire.warn;
     if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming

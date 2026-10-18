@@ -101,6 +101,7 @@ const met = (kind, id) => { const b = save.book = save.book || {}; const k = b[k
 // the platform's clock when it has one: a device's may be set wrong). Each day's best is kept (save.days); three medals
 // stand at fixed heights, worlds 1-3 done, not at a rank among strangers (the digest §6).
 const MEDALS = [114, 264, 450];
+const BOARD = 10000;   // Playgama's boards keep no days: a score is its day × BOARD + the day's best height, so today's lead and the days before sink under them
 let today = Math.floor(Date.now() / 86400000);
 // The week's marks (the plan after the sandbox; the digest §6: a streak back to zero punishes whoever missed a day): a day
 // played (its first level cleared) is a mark; the week's card fills in any order, a missed day loses nothing, and it pays at 3,
@@ -1430,8 +1431,8 @@ class Game {
     let daily = null;
     if (this.daily != null) {   // the day's best kept, its score to the leaderboard where there is one
       const d = save.days = save.days || {};
-      d[this.daily] = Math.max(d[this.daily] || 0, total); daily = { best: d[this.daily] };
-      if (ads.ok && bridge.leaderboards && bridge.leaderboards.type !== 'not_available') bridge.leaderboards.setScore('daily_height', total).catch(() => {});
+      d[this.daily] = Math.max(d[this.daily] || 0, total); daily = { best: d[this.daily], day: this.daily };
+      if (ads.ok && bridge.leaderboards && bridge.leaderboards.type !== 'not_available') bridge.leaderboards.setScore('daily_height', this.daily * BOARD + d[this.daily]).catch(() => {});   // the day's best, whether the board keeps the best or the last
     }
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
     this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp, why: this.deathWhy() };
@@ -1737,21 +1738,27 @@ const ui = {
   },
   result(r) {
     const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons
+    const cuts = [], fit = () => { cuts.sort((a, b) => a[0] - b[0]); while (cuts.length && box.firstElementChild.getBoundingClientRect().top < p.getBoundingClientRect().top + 8) cuts.shift()[1].remove(); };   // a short screen: the least of it goes, till the top shows (touch scrolls nothing here)
     const def = !r.won && game.lv.boss && game.lv.boss.def;   // a loss: a word on what did it (a boss has its own, as in ui.campDead),
     box.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[game.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', r.won ? t('won') : t('dead_' + r.why)), r.won ? 'won' : 'dead_' + r.why));
-    if (!r.won) box.append(el('div', 'label', t('dead')));   // and that the run is over
+    if (!r.won) { const l = el('div', 'label', t('dead')); box.append(l); cuts.push([3, l]); }   // and that the run is over
     const rows = [[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]];
     const tb = el('div', 'rows');
-    for (const [k, v] of rows) { const row = el('div', 'row'); row.append(el('span', null, k), el('b', null, String(v))); tb.append(row); }
+    rows.forEach(([k, v], i) => { const row = el('div', 'row'); row.append(el('span', null, k), el('b', null, String(v))); tb.append(row); if (i > 1) cuts.push([3 - i / 10, row]); });   // the combo first, then the enemies, the coins
     box.append(tb);
     if (r.daily) {
       const row = el('div', 'medals');
       MEDALS.forEach((m, k) => { const c = el('div', 'medal'); c.append(iconEl(r.daily.best >= m ? ['medalB', 'medalS', 'medalG'][k] : 'medalOff'), px(m + ' ' + t('m'))); row.append(c); });
       box.append(el('div', 'label', tf('dailyBest', { n: r.daily.best })), row);
-      if (ads.ok && bridge.leaderboards && bridge.leaderboards.type === 'in_game') bridge.leaderboards.getEntries('daily_height').then((es) => {
+      if (ads.ok && bridge.leaderboards && bridge.leaderboards.type === 'in_game') bridge.leaderboards.getEntries('daily_height').then((all) => {
+        const day = (e) => Math.floor(Number(e.score) / BOARD), es = all.filter((e) => day(e) === r.daily.day), ahead = all.filter((e) => day(e) > r.daily.day).length;   // today's only (see BOARD), ranked among themselves (a clock set ahead sends days to come)
         const me = es.findIndex((e) => bridge.player && e.id === bridge.player.id), from = me < 0 ? 0 : Math.max(0, me - 2), b = el('div', 'rows');   // the neighbours, not the top hundred (the digest §6)
-        for (const e of es.slice(from, from + 5)) { const q = el('div', 'row' + (es.indexOf(e) === me ? ' me' : '')); q.append(el('span', null, '#' + e.rank + ' ' + (e.name || '').slice(0, 14)), el('b', null, e.score + ' ' + t('m'))); b.append(q); }
-        if (es.length) box.append(el('div', 'label', t('board')), b);
+        const n = Math.min(5, es.length - from), mid = Math.min(Math.max(me, from + 1), from + n - 2);   // the three that stay on a short screen: about the hero
+        for (const e of es.slice(from, from + 5)) {
+          const i = es.indexOf(e), q = el('div', 'row' + (i === me ? ' me' : '')); q.append(el('span', null, '#' + (e.rank - ahead) + ' ' + (e.name || '').slice(0, 14)), el('b', null, (Number(e.score) % BOARD) + ' ' + t('m'))); b.append(q);
+          if (Math.abs(i - mid) > 1) cuts.push([1 - Math.abs(i - mid) / 10, q]);   // the neighbours farthest away go first
+        }
+        if (es.length) { box.append(el('div', 'label', t('board')), b); fit(); }
       }).catch(() => {});
     }
     if (r.fresh.length || r.firstWin || r.tierUp > 1) {
@@ -1762,7 +1769,8 @@ const ui = {
       box.append(u);
     }
     const then = (f) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); ads.between(f); };   // the run over: an ad may come first
-    p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu())), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun())), 'again'));   // Again at the bottom, Menu as big over it
+    p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu())), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun(!!r.daily, game.endless))), 'again'));   // Again (the same kind of run) at the bottom, Menu as big over it
+    fit();
   },
   toastTimer: 0,
   toast(text, ms = 1500, icon) {   // `icon`: an ICONS picture before the words

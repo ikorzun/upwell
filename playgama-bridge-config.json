@@ -22,5 +22,14 @@
     {
       "id": "daily_height"
     }
-  ]
+  ],
+  "saas": {
+    "publicToken": "cmvc70cbn3t4ymz0h3wfwgyj0",
+    "leaderboards": {
+      "platforms": [
+        "playgama",
+        "qa_tool"
+      ]
+    }
+  }
 }

@@ -1690,9 +1690,9 @@ function button(text, cls, fn) {
 }
 // A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
 // ("×2 con un anuncio", a world's name after Continue on a small phone).
-function fitBig(b) {
+function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
   const tx = b.querySelector('.tx');
-  for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > 2;) { p -= 0.5; b.style.setProperty('--p', p); }
+  for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > min;) { p -= 0.5; b.style.setProperty('--p', p); }
 }
 const ui = {
   open: null, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
@@ -1714,25 +1714,23 @@ const ui = {
     p.append(colors);
     const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }
-    if (save.wins > 0) {
-      const top = Math.max(1, save.tierMax || 1), tier = Math.min(save.tier != null ? save.tier : save.hard ? 1 : 0, top);
-      const h = cap(button(t('hard') + ': ' + (tier ? tier : t('off')), 'chip' + (tier ? ' on' : ''), () => { save.tier = (tier + 1) % (top + 1); save.hard = save.tier > 0; persist(); this.menu(); }), 'hard');
-      const row = el('div', 'duo');   // and the endless climb by it
-      row.append(h, cap(button(t('endless') + (save.endlessBest ? ' · ' + save.endlessBest + ' ' + t('m') : ''), 'chip', () => game.startRun(false, true)), 'endless'));
-      p.append(row);
-    }
     const r = save.run, c = save.camp, next = campAt(c.open), begun = c.open > 0 || c.stars[0] > 0, done = c.stars[CAMP_LEN - 1] > 0;
-    const duo = el('div', 'duo');   // once the campaign is begun, over the main button: its map, and the random run (a kept one to go on with, or a new one)
-    if (begun && !done) duo.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
-    if (begun) duo.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
-    if (begun) duo.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => game.startRun(true)), 'daily'));   // the day's well, and its best
-    if (r) duo.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));
-    else if (begun) duo.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
+    const grid = el('div', 'grid2');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid)
+    if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
+    if (begun) grid.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
+    if (begun) grid.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => game.startRun(true)), 'daily'));   // the day's well, and its best
+    if (r) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one
+    else if (begun) grid.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
+    if (save.wins > 0) {   // a run won: its hard mode's tier, and the endless climb
+      const top = Math.max(1, save.tierMax || 1), tier = Math.min(save.tier != null ? save.tier : save.hard ? 1 : 0, top);
+      grid.append(cap(button(t('hard') + ': ' + (tier ? tier : t('off')), 'chip' + (tier ? ' on' : ''), () => { save.tier = (tier + 1) % (top + 1); save.hard = save.tier > 0; persist(); this.menu(); }), 'hard'),
+        cap(button(t('endless') + (save.endlessBest ? ' · ' + save.endlessBest + ' ' + t('m') : ''), 'chip', () => game.startRun(false, true)), 'endless'));
+    }
     const wk = weekCard(), week = el('div', 'week');   // the week's card: its seven marks and what the next one pays
     week.append(px(t('week')));
     for (let k = 0; k < 7; k++) week.append(el('i', k < wk.days.length ? 'on' : MARKS.at.includes(k + 1) ? 'pay' : null));
     if (begun) p.append(week);
-    if (duo.children.length) p.append(duo);
+    if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }   // a long one smaller, on one line
     if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
     else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(0)), 'play'));   // one tap to the first level (CrazyGames: one at most)
     else p.append(cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(c.open)), 'continue'));   // the width of the screen, 12 px in from its edges

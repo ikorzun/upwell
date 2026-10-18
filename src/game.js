@@ -1354,16 +1354,16 @@ class Game {
     this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
     aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
   }
-  // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in paper, with coins as rain and no
+  // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in the dark, with coins as rain and no
   // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).
   enterUnder(sp) {
-    const R = this.R, wd = Object.assign({}, this.bonus || this.wd, { bonus: true, rain: true, fire: 0, dark: null, intro: null, coat: null, maxD: 2, foes: 0.7 * (this.wd.foes || 0.5) });
+    const R = this.R, wd = Object.assign({}, this.bonus || this.wd, { bonus: true, rain: true, fire: 0, intro: null, coat: null, maxD: 2, foes: 0.7 * (this.wd.foes || 0.5) });
     sp.used = true;
     if (this.combo > 0) this.payCombo();
     this.bankDrops();
     const lv = new Level();
-    lv.reset({ kind: 'well', w: view.w, h: view.h, R, seed: (this.lv.rng() * 4294967296) >>> 0, world: wd, stage: Math.min(this.stage, 2), hard: this.hard, height: UNDER.len * R_PER_M * R, theme: THEMES.under });
-    lv.ensure(-1e9); lv.portal = null; lv.under = true;   // all of it now; its way out is down
+    lv.reset({ kind: 'well', w: view.w, h: view.h, R, seed: (this.lv.rng() * 4294967296) >>> 0, world: wd, stage: Math.min(this.stage, 2), hard: this.hard, height: UNDER.len * R_PER_M * R, theme: wd.theme });
+    lv.ensure(-1e9); lv.portal = null; lv.under = true; lv.dark = true;   // all of it now; its way out is down; dark, lit by the hero and what glows (user: not white)
     const pool = lv.floor - 3 * R;   // its bottom an open pool: nothing over the floor there to stand on short of it
     lv.rects = lv.rects.filter((r) => r.cap || r.y1 < pool); lv.spikes = lv.spikes.filter((q) => q.y1 < pool); lv.spawns = lv.spawns.filter((q) => q.y < pool - R);
     lv.spots = [{ x: (lv.l + lv.r) / 2, y: lv.floor - 0.3 * R, r: 1.6, kind: 'out', used: false }];
@@ -1973,7 +1973,6 @@ const ui = {
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot';
     $('hud').classList.toggle('on', playing);
-    uiEl.classList.toggle('paper', !!g.lv.under);   // the flip side's paper: the HUD in ink (see #ui.paper)
     if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner

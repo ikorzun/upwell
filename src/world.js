@@ -197,7 +197,6 @@ const THEMES = {
   cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: theme(PAL.orange, { crumble: PAL.gray }),
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
-  under: Object.assign(theme(PAL.blue, { crumble: PAL.gray }), { top: PAL.white, bot: PAL.gray, dots: PAL.gray, lip: PAL.black }),   // the flip side: paper, the user's picture's
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
@@ -2219,6 +2218,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const s of lv.shots) light(s.x, s.y, 0.5, 1.4);   // blobs, the fire's and the spitters'
     for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);
     for (const p of lv.fizz) if (!p.taken) light(p.x, p.y, 0.8, 2);
+    for (const sp of lv.spots) if (!sp.used) light(sp.x, sp.y, 1.4, 3.2);   // the flip side's pools glow (its way back out)
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);
     const pd = this.pDark;

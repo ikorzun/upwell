@@ -2,7 +2,8 @@
 // playtest needs no browser window and has no time limit. Needs the dev server running
 // (python3 tools/serve.py 8793). Prints one JSON line per level. NOFOES=1 plays the same
 // levels with the enemies taken out.
-// Usage: node tools/botrun.mjs [seed] [level…]     e.g. node tools/botrun.mjs 5 2-3 3-1 (a random run's), c1-4 (the campaign's)
+// Usage: node tools/botrun.mjs [seed] [level…]     e.g. node tools/botrun.mjs 5 2-3 3-1 (a random run's), c1-4 (the campaign's);
+// the seed r plays a campaign level on its recipe's own seed.
 import { spawn } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -50,7 +51,7 @@ await run('__up.freeze(true)');
 try {
   for (const name of levels) {
     const camp = name[0] === 'c', [w, s] = name.replace(/^c/, '').split('-').map(Number);
-    const a = await run(`__bot.level(${w - 1}, ${s - 1}, ${+seed}, { noFoes: ${process.env.NOFOES === '1'}, camp: ${camp} })`);
+    const a = await run(`__bot.level(${w - 1}, ${s - 1}, ${seed === 'r' ? 'null' : +seed}, { noFoes: ${process.env.NOFOES === '1'}, camp: ${camp} })`);
     console.log(JSON.stringify({ level: name, result: a.result, time: a.time, heartsLost: a.heartsLost, hits: a.hits.map((h) => `${h.by}@${h.chunk}`),
       foes: a.spawned, stomped: a.killed, coins: `${a.coins}/${a.coinsPlaced}`, combo: a.combo, stuck: a.stuck.map((q) => `${q.chunk}@${q.at}`), tight: a.tightness, chunks: a.chunks }));
   }

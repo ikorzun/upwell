@@ -2168,7 +2168,7 @@ window.__up = {
   // jump straight to world w (0-based; 4 is the boss), level s
   bonus(w, seed) { this.go(w, 2, seed); game.startBonus(BONUS[w]); return this.state; },   // straight into world w's bonus level
   camp(i, seed) { game.playLevel(i, seed); ui.hideAll(); return this.state; },   // straight into campaign level i (0-based)
-  go(w, s = 0, seed) { if (game.state === 'menu') game.startRun(); game.world = w; game.stage = s; nextSeed = seed == null ? null : seed; game.state = 'play'; game.buildLevel(false); ui.hideAll(); return this.state; },
+  go(w, s = 0, seed) { if (game.state === 'menu') game.startRun(); game.mode = 'run'; game.rc = null; game.world = w; game.stage = s; nextSeed = seed == null ? null : seed; game.state = 'play'; game.buildLevel(false); ui.hideAll(); return this.state; },
   god(on = true) { game.invuln = on ? 1e9 : 0; return game.invuln; },
   give(n) { game.coins += n; return game.coins; },
   // Press or let go of a control as a player would: 'left', 'right', 'down' or 'jump'.

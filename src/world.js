@@ -120,6 +120,9 @@ const STARS = { coins: [1, 2, 5], half: 0.5 };
 // second on), turning at `steer`/s: they always get to it.
 const COIN = { r: 0.54, magnet: 2.6, drag: 2.4, burst: 260, home: 0.25, seek: 600, steer: 10 };   // a coin the magnet reaches homes in as an enemy's does (user: faster)
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
+// Ledges by world (user: some bounce, some pull; the random run's): a Cave plank in `bouncy` of them throws the hero up at `v`
+// of a jump as it lands; a Mine block in `magnet` pulls it in within `range` R at `pull` R/s² (MAGNET), more the nearer.
+const BOUNCY = { v: 1.05 }, MAGNET = { range: 3.2, pull: 70 };
 const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
 const CRUMBLE = { time: 0.55, back: 3 };   // gives way `time` s after a touch, is back `back` s later
 const SLICK = { fr: 0.03 };
@@ -263,7 +266,7 @@ const MINI = { size: 1.6, hp: 3 };
 // level by level, the chunks it must have (laid first, so the first minutes show the surfaces),
 // the enemies allowed (all if not given) and what is new, for the level's banner.
 const WORLDS = [
-  { id: 'cave', name: { en: 'Cave', es: 'Cueva', pt: 'Caverna', ja: 'どうくつ' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4,
+  { id: 'cave', name: { en: 'Cave', es: 'Cueva', pt: 'Caverna', ja: 'どうくつ' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4, bouncy: 0.2,
     chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2, fork: 1, vault: 2 },
     foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { en: 'moss and springs', es: 'musgo y resortes', pt: 'musgo e molas', ja: 'コケと バネ' } },
@@ -272,7 +275,7 @@ const WORLDS = [
   { id: 'ice', name: { en: 'Glacier', es: 'Glaciar', pt: 'Geleira', ja: 'ひょうが' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1, fork: 1, fork2: 1, vault: 1 },
     foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { en: 'ice blocks, circlers and shells', es: 'bloques de hielo, rondadores y caparazones', pt: 'blocos de gelo, rondadores e cascos', ja: 'こおり ブロック、グルグル、こうら' } }] },
-  { id: 'mine', name: { en: 'Mine', es: 'Mina', pt: 'Mina', ja: 'こうざん' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1],
+  { id: 'mine', name: { en: 'Mine', es: 'Mina', pt: 'Mina', ja: 'こうざん' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1], magnet: 0.25,
     chunks: { crumble: 3, bridge: 3, lift: 3, planks: 2, shelves: 2, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1, fork2: 2, vault: 1 },
     foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2, worm: 1 },
     intro: [{ news: { en: 'bridges, lifts, spitters and splitters', es: 'puentes, elevadores, escupidores y divisores', pt: 'pontes, elevadores, cuspidores e divisores', ja: 'はし、リフト、ペッペ、ブンレツ' } }, {}, { news: { en: 'spikes', es: 'pinchos', pt: 'espinhos', ja: 'トゲ' } }] },
@@ -1048,6 +1051,7 @@ class Level {
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
     const ru = this.runeRng = mulberry32((o.seed ^ 0x6d2b79f5) >>> 0), cw = CAMPAIGN.find((c) => c.world === o.world), n = !cw || o.kind !== 'well' || !o.height ? 0 : rc ? rc.runes || 0 : ru() < RUNE.p ? 1 : 0;   // its runes (RUNE), by their own generator too
     this.runes = []; this.runeAt = shuffled(ru, [...(cw ? cw.runes : '')]).slice(0, n).map((ch, k) => ({ ch, y: this.floor - o.height * (RUNE.at[k][0] + ru() * (RUNE.at[k][1] - RUNE.at[k][0])) }));
+    this.flavRng = mulberry32((o.seed ^ 0x2c1b3c6d) >>> 0);   // which ledges bounce or pull (flavour), by their own generator
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
@@ -1204,6 +1208,7 @@ class Level {
     }
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
+    this.flavour(lens[0]);
     if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set') this.addSpot(this.top - h, this.top);
     if (this.runeAt.length && this.top - h < this.runeAt[0].y && c !== CHUNKS.pocket) this.addRune(this.top - h, this.top);
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
@@ -1221,6 +1226,16 @@ class Level {
     if (!ok.length) return;
     const [x, y] = ok[(this.spotRng() * ok.length) | 0];
     this.spots.push({ x, y, y1: y, r: UNDER.r, kind: 'in', used: false }); this.spotAt = null;
+  }
+  // Some of a run's ledges as their world has them (user): the Cave's planks bounce, the Mine's blocks pull (BOUNCY, MAGNET).
+  flavour(from) {
+    const w = this.world;
+    if (this.rc || !(w.bouncy || w.magnet)) return;
+    for (const r of this.rects.slice(from)) {
+      if (r.move || r.crumble || r.spring || r.slick || r.cap) continue;
+      if (w.bouncy && r.plank && this.flavRng() < w.bouncy) r.bouncy = true;
+      else if (w.magnet && !r.plank && r.y1 - r.y0 <= this.tile + 1 && this.flavRng() < w.magnet) r.magnet = true;
+    }
   }
   // A rune due (RUNE) in the chunk just laid (from y0 up to y1): by a side wall, where no ledge, spike or door stands in front of it.
   addRune(y0, y1) {
@@ -1534,7 +1549,7 @@ Body.prototype.collideLevel = function (lv, h) {
         const v = (y[i] - py[i]) / h;
         if (v > hitW[3]) hitW[3] = v;
         y[i] = y0; x[i] -= (x[i] - px[i] - r.dx * carry) * rf; mask |= 8; this.floorX += x[i]; this.floorN++; this.floorY = r.y0; this.floorRect = r;   // friction against the ledge's own motion: a mover carries what rides it
-        if (r.spring && hero) this.springHit = r;
+        if ((r.spring || r.bouncy) && hero) this.springHit = r;
       } else if (face === 4) { const v = (py[i] - y[i]) / h; if (v > hitW[2]) hitW[2] = v; y[i] = y1; x[i] -= (x[i] - px[i]) * rf; mask |= 4; if (canTop && st && (CEIL.any || r.moss)) stick(i, 4, y1, x0, x1, r); }
       else if (face === 2) { const v = (x[i] - px[i]) / h; if (v > hitW[1]) hitW[1] = v; x[i] = x0; y[i] -= (y[i] - py[i]) * rf; mask |= 2; if (canStick && st && (v > MOVE.cling || this.pressX > 0)) stick(i, 2, x0, y0, y1, r); }
       else { const v = (px[i] - x[i]) / h; if (v > hitW[0]) hitW[0] = v; x[i] = x1; y[i] -= (y[i] - py[i]) * rf; mask |= 1; if (canStick && st && (v > MOVE.cling || this.pressX < 0)) stick(i, 1, x1, y0, y1, r); }
@@ -1916,7 +1931,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(r.x0, r.y1 - hh - 0.2 * R, r.x1, r.y1 - hh, th.spring, 1, 0.1 * R);
       continue;
     }
-    const c = r.flash > 0 ? INK.white : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);
+    const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
     if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
@@ -1935,6 +1950,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);
     }
+    if (r.bouncy && r.t > 0) box(r.x0, r.y0, r.x1, r.y1 + 0.25 * R * (r.t / SPRING.anim), th.spring, 1, 0, 10, 0);   // a bouncy plank sags as it throws
+    if (r.magnet) for (let k = 0; k < 4; k++) { const u = (T * 1.1 + k / 4) % 1, x = r.x0 + ((k + 0.5) / 4) * (r.x1 - r.x0), d = (1 - u) * 1.8 * R; box(x - 1, r.y0 - d - 2, x + 1, r.y0 - d, PAL.white, 0.9, 0, 10, 0); }   // a magnet: dots drawn in onto it
     if (th.drips && !r.plank && !r.spring && !r.moss) for (let n = Math.max(1, Math.round((r.x1 - r.x0) / (2.2 * R))), k = 0; k < n; k++) {   // the Crypt's black goo, hanging off the stone and stretching slowly
       const x = r.x0 + ((k + 0.5) * (r.x1 - r.x0)) / n + ox, len = (0.25 + 0.4 * (0.5 + 0.5 * Math.sin(T * 0.9 + x * 0.07 + r.y0 * 0.013))) * R;
       box(x - 0.09 * R, r.y1, x + 0.09 * R, r.y1 + len, INK.dark, a, 0, 10, 0); disc(x, r.y1 + len, 0.14 * R, INK.dark, a);

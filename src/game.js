@@ -390,7 +390,9 @@ class Boss {
   // end as it comes under (a ▼ then). Its second phase hurries the bridges and lobs two; its third, faster lifts and a spitter.
   ride(dt, g) {
     const b = this.body, lv = g.lv, R = lv.R, ph = this.def.phase(this.hp), H = g.hero, rail = lv.rail, k = this.angry > 0 ? 1.5 : 1;   // angry (hit): faster
-    b.wake(); turnUp(b, 6, dt); this.st += dt;
+    b.wake(); turnUp(b, 6, dt);
+    if ((this.t += dt) < CART.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), ((rail.y - 0.75 * b.R - b.cy) * 6 - b.rigVy) * Math.min(1, 6 * dt)); return; }   // still at first, while its name is up
+    this.st += dt;
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = FOE_COLOR.boss;
     if (ph >= 1 && !lv.crumbleTime) { lv.crumbleTime = CART.crumble[0]; lv.crumbleBack = CART.crumble[1]; }
     if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
@@ -957,7 +959,6 @@ class Game {
     const H = this.hero, lv = this.lv, boss = e === lv.boss;
     if (boss) this.hitBoss();
     else if (e.type === 'shell') this.shellUp(e);
-    else if (e.hp > 1) { e.hp--; e.body.kickSquash(0, 1, 2.2); sound.play('bosshit', 0.8, 1.3); ui.toast(tf('bossLeft', { n: e.hp }), 900); this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo); }   // a mini-boss: a heart less
     else {
       this.kill(e, true);
       if (this.mods.blast) {
@@ -1000,6 +1001,10 @@ class Game {
   kill(e, byHero) {
     const lv = this.lv, i = lv.enemies.indexOf(e);
     if (i < 0) return;
+    if (byHero && e.hp > 1) {   // a mini-boss (MINI): a heart less, by whatever the hero hit it with
+      e.hp--; e.body.kickSquash(0, 1, 2.2); sound.play('bosshit', 0.8, 1.3); ui.toast(tf('bossLeft', { n: e.hp }), 900);
+      this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo); return;
+    }
     lv.enemies.splice(i, 1);
     const b = e.body;
     splatFx(b.cx, b.cy, b.R, b.color.base);

@@ -238,6 +238,18 @@ const BONUS = [
 //   shop     a shop behind a door; stash: a room of coins         safe   the last heart is not taken (it is learning)
 //   bonus    the BONUS level it is (time: its seconds)            boss   the boss it is
 //   news     what is new, for its banner                          seed   its layout (picked with the bot)
+// The campaign's bosses (the plan: ten, each beaten its own way; the first so far): `hp` its hearts and `phase(hp)` what it
+// adds as they go (0: dives only, 1: drops goo as it hovers too, 2: calls crawlers too: one thing more a phase, the digest
+// §5); what it says coming in (by turns), when the hero dies (a quip) and when it is beaten. The lines under eight words.
+const BOSSES = {
+  probka: { name: { en: 'Cork', es: 'Tapón', pt: 'Rolha', ja: 'コルク' }, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+    intro: [{ en: "It's warm here. Why climb?", es: 'Aquí se está calentito. ¿Para qué subir?', pt: 'Aqui é quentinho. Pra que subir?', ja: 'ここは あったかい。なんで のぼるの？' },
+      { en: 'Shoo. This spot is mine.', es: 'Fuera. Este sitio es mío.', pt: 'Xô. Esse lugar é meu.', ja: 'しっしっ。ここは わたしの ばしょ。' },
+      { en: 'Nobody gets past the Cork.', es: 'Nadie pasa del Tapón.', pt: 'Ninguém passa da Rolha.', ja: 'コルクの さきへは いかせない。' }],
+    quip: [{ en: 'Told you. Stay down here.', es: 'Te lo dije. Quédate abajo.', pt: 'Eu avisei. Fica aqui embaixo.', ja: 'ほらね。ここに いなよ。' },
+      { en: 'Too slow, little drop.', es: 'Muy lento, gotita.', pt: 'Muito lento, gotinha.', ja: 'おそいよ、しずくちゃん。' }],
+    defeat: { en: 'Fine, fine… go on up.', es: 'Vale, vale… sube ya.', pt: 'Tá bom, tá bom… pode subir.', ja: 'わかったよ… のぼりな。' } },
+};
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 const CAMPAIGN = [{ world: WORLDS[0], levels: [
   { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0, candy: [], safe: true, seed: 1101,
@@ -255,7 +267,7 @@ const CAMPAIGN = [{ world: WORLDS[0], levels: [
   { role: 'peak', len: 28, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 1108 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: true, seed: 1109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'probka' },
+  { role: 'boss', boss: 'probka', moss: true },   // moss on its arena's walls: a place to sit its dive out
 ] }];
 
 // In the campaign a card is offered only once what it is for has been met: after the level (its index) where that
@@ -863,6 +875,7 @@ class Level {
     const at = (f) => this.floor + (this.capY - this.floor) * f;
     if (o.kind === 'boss') {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
+      if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
       this.rects.push(this.box(this.l, at(0.32), this.l + W * 0.3, at(0.32) + p, { plank: true }));
       this.rects.push(this.box(this.r - W * 0.3, at(0.32), this.r, at(0.32) + p, { plank: true }));
       return;

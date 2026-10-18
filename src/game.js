@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,7 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう',
   },
 };
 let lang = 'en';
@@ -94,7 +94,7 @@ const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, h
 // The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
 // purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
 // run's progress stays in save.run, for the random run.
-const campFresh = () => ({ open: 0, stars: [], wallet: 0, builds: [] });
+const campFresh = () => ({ open: 0, stars: [], wallet: 0, builds: [], fails: {} });   // fails: the losses running at a boss, by its level
 const CAMP_LEN = CAMPAIGN.length * 10;   // ten levels a world
 const campAt = (i) => ({ w: Math.floor(i / 10), s: i % 10, rc: CAMPAIGN[Math.floor(i / 10)].levels[i % 10] });
 const opened = (u) => save.bank >= u.at;
@@ -105,7 +105,7 @@ shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
-  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; c.open = Math.min(Math.max(0, c.open | 0), CAMP_LEN - 1);
+  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; c.open = Math.min(Math.max(0, c.open | 0), CAMP_LEN - 1);
   save.v = 2;
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
@@ -221,11 +221,12 @@ class Foe {
 // the hero, dives into the middle, lies there dazed (the time to stomp it), rises again. A stomp hurts it and makes it red
 // for a moment: then it hurts to touch.
 class Boss {
-  constructor(lv) {
+  constructor(lv, def) {   // def: a campaign boss's (BOSSES); the random run's summit boss has none
     const R = lv.R * BOSS.size;
     this.body = new Body(designById('cat'), FOE_COLOR.boss, (lv.l + lv.r) / 2, lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = 0; this.body.sticky = false; this.body.face.frown = true;
-    this.hp = BOSS.hp + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
+    this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
+    this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
     this.state = 'hover'; this.st = 0; this.dazes = 0;
   }
   open() { return this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0); }   // a stomp hurts it
@@ -253,7 +254,7 @@ class Boss {
         }
       } else {
         addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
-        if (this.st > BOSS.dazed) this.rise();
+        if (this.st > BOSS.dazed * this.help) this.rise();
       }
       return;
     }
@@ -262,11 +263,12 @@ class Boss {
     addVel(b, ((tx - b.cx) * 2 - b.rigVx) * q, ((ty - b.cy) * 2 - b.rigVy) * q);
     if (this.state === 'rise' && Math.abs(ty - b.cy) < b.R) this.to('hover');
     if (this.state !== 'hover') return;
-    if ((this.drop -= dt * k) <= 0) {
+    const ph = this.def ? this.def.phase(this.hp) : 2;   // a campaign boss adds its goo, then its helpers, as it loses hearts
+    if (ph >= 1 && (this.drop -= dt * k) <= 0) {
       this.drop = BOSS.dropEvery;
       for (let i = -1; i <= 1; i++) lv.shots.push({ x: b.cx + i * b.R * 0.5, y: b.maxY, vx: i * 120, vy: 60, r: 0.32 * lv.R });
     }
-    if ((this.call -= dt) <= 0) {
+    if (ph >= 2 && (this.call -= dt) <= 0) {
       this.call = BOSS.spawnEvery;
       if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: 'crawler', x: b.cx, y: b.cy + b.R * 0.6 }, lv));   // it drops onto a plank or the floor
     }
@@ -347,7 +349,7 @@ class Game {
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, recipe: this.bonus ? null : rc,
       height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: wd.theme });
     this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
-    if (boss) this.lv.boss = new Boss(this.lv);
+    if (boss) { this.lv.boss = new Boss(this.lv, rc && BOSSES[rc.boss]); if (rc && (save.camp.fails[this.ci] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
       const h = this.hero;
@@ -357,6 +359,7 @@ class Game {
     this.applyMods();
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
+    this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
     this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
@@ -783,6 +786,7 @@ class Game {
     this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo);
     if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = 1 - 0.06 * (bs.max - bs.hp); ui.toast(tf('bossLeft', { n: bs.hp })); if (bs.state === 'dazed') bs.rise(); return; }
     bs.dead = true; this.kills++;
+    if (bs.def) ui.toast(L2(bs.def.defeat), 2200);
     splatFx(b.cx, b.cy, b.R * 1.4, FOE_COLOR.boss.base, 24); shake.add(9); haptics.buzz(60);
     this.drop(b.cx, b.cy, BOSS.coins);
     for (const o of this.lv.enemies.slice()) this.kill(o, false);
@@ -1205,7 +1209,7 @@ class Game {
     const H = this.hero, lv = this.lv;   // it bursts where it can be seen (a fall ends below the screen)
     burstFx(H.cx, clamp(H.cy, lv.cam + this.R, lv.cam + view.h - this.R), this.R, H.color.base); shake.add(12);
     input.clear(); haptics.buzz(30); sound.play('die');
-    if (this.mode === 'camp') { this.campKeep(); persist(); return; }   // the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
+    if (this.mode === 'camp') { if (this.lv.boss) save.camp.fails[this.ci] = (save.camp.fails[this.ci] || 0) + 1; this.campKeep(); persist(); return; }   // the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
     if (this.coins < this.revivePrice()) this.finish(false);
   }
   revivePrice() { return Math.round(REVIVE.price * (1 + 0.5 * Math.min(this.world, 4)) * Math.pow(REVIVE.grow, this.revives) * (this.hard ? 1.5 : 1)); }
@@ -1222,7 +1226,7 @@ class Game {
   giveUp() { this.finish(false); ui.result(this.result); }
   win() {
     pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8);
-    if (this.mode === 'camp') { const lost = this.maxHp - this.hp; this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); this.result = null; return; }   // a boss's stars: by the hearts it cost
+    if (this.mode === 'camp') { const lost = this.maxHp - this.hp; delete save.camp.fails[this.ci]; this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); this.result = null; return; }   // a boss's stars: by the hearts it cost
     this.finish(true);
   }
   finish(won) {
@@ -1448,7 +1452,8 @@ const ui = {
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
     const p = this.panel('result'), g = game, price = g.revivePrice(), by = g.lastBy, boss = !!(g.rc && g.rc.boss);
     const why = by === 'fire' || by === 'fire_blob' ? 'fire' : by === 'spikes' || by === 'fall' || by === 'icicle' ? by : 'enemy';
-    p.append(cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));
+    const def = g.lv.boss && g.lv.boss.def;
+    p.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.ci] || 0) % def.quip.length])) : cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));   // a boss has a word of its own
     if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'chip wide', () => g.revive()), 'revive'));
     p.append(cap(button(t('menu'), 'big thumb alt', () => { pmsg('level_failed', g.lvl()); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
   },
@@ -1521,6 +1526,8 @@ const ui = {
   },
   banner() {
     if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
+    const bs = game.lv.boss;
+    if (bs && bs.def) { const n = save.camp.fails[game.ci] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? t('bossHow') : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
     const intro = game.mode === 'camp' ? game.rc : (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');
     this.toast(tf('world', { n: game.world + 1 }) + ' · ' + L2(game.wd.name) + '  ' + (game.world + 1) + '-' + (game.stage + 1) + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
@@ -1564,6 +1571,10 @@ const ui = {
       for (let i = 0; i < g.maxHp; i++) { const k = i < g.hp ? 'full' : 'empty', s = el('i', k); s.innerHTML = pxSvg(7, 6, `<path fill="currentColor" d="${inkPath(HEART[k], 0, 0)}"/>`); h.append(s); }
     }
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
+    const bh = $('bossHp'), bs = g.lv.boss, bon = !!bs && !bs.dead && playing;   // a boss's hearts, under the HUD (Lucky Tower's players asked for them)
+    bh.classList.toggle('on', bon);
+    if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax)) { this.bhp = bs.hp; this.bmax = bs.max; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); }
+    if (bon) bh.style.top = Math.round(view.hudB + 6) + 'px';
     const gun = $('gun'), left = g.gunT > 0 && g.state === 'play' ? Math.ceil((g.gunT / g.gunMax) * 10) : 0;   // the fizz left, in tenths, blinking near the end
     gun.classList.toggle('on', left > 0);
     if (left) { gun.dataset.k = g.pow; gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }

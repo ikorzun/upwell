@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,7 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！',
   },
 };
 let lang = 'en';
@@ -684,14 +684,14 @@ class Game {
   }
   // Enemies come alive a little above the screen and are forgotten far below it.
   activate() {
-    const lv = this.lv, lim = lv.cam - 0.7 * view.h, far = lv.cam + 2 * view.h;
+    const lv = this.lv, lim = lv.cam - 0.7 * view.h, far = lv.cam + 2 * view.h, low = lv.under ? lv.cam + 1.7 * view.h : Infinity;   // (the flip side is fallen: what is under the view is ahead)
     for (let i = lv.spawns.length - 1; i >= 0; i--) {
       const s = lv.spawns[i];
-      if (s.y < lim) continue;
+      if (s.y < lim || s.y > low) continue;
       lv.spawns.splice(i, 1);
-      if (s.y < lv.cam + view.h) lv.enemies.push(new Foe(s, lv));
+      if (s.y < lv.cam + view.h || lv.under) lv.enemies.push(new Foe(s, lv));
     }
-    for (let i = lv.enemies.length - 1; i >= 0; i--) if (lv.enemies[i].body.cy > far) lv.enemies.splice(i, 1);
+    if (!lv.under) for (let i = lv.enemies.length - 1; i >= 0; i--) if (lv.enemies[i].body.cy > far) lv.enemies.splice(i, 1);
     for (const f of lv.folk) if (!f.body && (f.kind === 'cage' || f.kind === 'trader') && f.y > lim && f.y < lv.cam + view.h + this.R) this.folkUp(f);
   }
   folkUp(f) {   // a cage's blob (a hero's colour, not this one's) or the trader (purple), standing on its ledge; the hero passes through them
@@ -788,12 +788,15 @@ class Game {
     if (lv.portal && near(lv.portal, lv.portal.r + 0.5 * H.R)) { this.levelClear(); return; }
     const inDoor = (d, m) => H.cx > d.x0 - m && H.cx < d.x1 + m && H.cy > d.y0 - m && H.cy < d.y1 + m;
     for (const b of lv.bubbles) if (b.cd <= 0 && inDoor(b, 0)) { this.enterRoom(b); return; }
+    for (const sp of lv.spots) if (!sp.used && sp.kind === 'in' && near(sp, sp.r * this.R + 0.5 * H.R)) { this.enterUnder(sp); return; }
+    if (lv.under && H.maxY > lv.floor - 3 && this.onFloor()) { this.leaveUnder(); return; }
+    for (const sp of lv.spots) if (!sp.used && sp.kind === 'in' && sp.y > lv.cam && sp.y < lv.cam + view.h) this.hint('spot');   // told once
     if (lv.exit) {
       if (!lv.exit.armed && !inDoor(lv.exit, H.R)) lv.exit.armed = true;
       if (lv.exit.armed && inDoor(lv.exit, -0.3 * H.R)) { this.leaveRoom(); return; }
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
-    if (lv.kind === 'well') { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else this.idleT += dt; }   // no new height: the fire speeds up
+    if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else this.idleT += dt; }   // no new height: the fire speeds up
     if (H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys
   }
   // From above it is a stomp; anything else is a hit.
@@ -1158,6 +1161,34 @@ class Game {
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble');
   }
+  // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in paper, with coins as rain and no
+  // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).
+  enterUnder(sp) {
+    const R = this.R, wd = Object.assign({}, this.bonus || this.wd, { bonus: true, rain: true, fire: 0, dark: null, intro: null, coat: null, maxD: 2, foes: 0.7 * (this.wd.foes || 0.5) });
+    sp.used = true;
+    if (this.combo > 0) this.payCombo();
+    this.bankDrops();
+    const lv = new Level();
+    lv.reset({ kind: 'well', w: view.w, h: view.h, R, seed: (this.lv.rng() * 4294967296) >>> 0, world: wd, stage: Math.min(this.stage, 2), hard: this.hard, height: UNDER.len * R_PER_M * R, theme: THEMES.under });
+    lv.ensure(-1e9); lv.portal = null; lv.under = true;   // all of it now; its way out is down
+    const pool = lv.floor - 3 * R;   // its bottom an open pool: nothing over the floor there to stand on short of it
+    lv.rects = lv.rects.filter((r) => r.cap || r.y1 < pool); lv.spikes = lv.spikes.filter((q) => q.y1 < pool); lv.spawns = lv.spawns.filter((q) => q.y < pool - R);
+    lv.spots = [{ x: (lv.l + lv.r) / 2, y: lv.floor - 0.3 * R, r: 1.6, kind: 'out', used: false }];
+    this.well = this.lv; this.door = sp; this.lv = lv;
+    this.placeHero((lv.l + lv.r) / 2, lv.capY + 1.6 * R); this.regroup(); this.safes = [];
+    lv.cam = this.hero.cy - 0.35 * view.h;
+    aimCancel(); ui.flash(); ui.toast(t('under'), 1600); sound.play('bubble', 1, 0.6); haptics.buzz(20);
+  }
+  leaveUnder() {   // back up the level, UNDER.lift m over where it went in, on the highest steady ledge there
+    const sp = this.door, well = this.well, R = this.R, ys = Math.max(sp.y - UNDER.lift * R_PER_M * R, well.endY + 6 * R);
+    this.bankDrops();
+    this.lv = well; this.well = null; this.door = null;
+    well.ensure(ys - 2 * view.h);
+    const r = well.rects.filter((q) => !q.cap && !q.plank && !q.crumble && !q.move && !q.spring && !q.crack && !q.gone && q.x1 - q.x0 > 2 * R && q.y0 >= ys && q.y0 < sp.y).sort((a, b) => a.y0 - b.y0)[0];
+    if (r) { this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }]; } else this.placeHero(sp.x, sp.y);
+    well.cam = Math.max(this.hero.cy - CAM.anchor * view.h, well.capY - CAM.top); well.ensure(well.cam - view.h * LEVEL.ahead);
+    this.regroup(); aimCancel(); ui.flash(); ui.toast(t('back'), 1400); sound.play('portal', 0.8, 1.2); haptics.buzz(20);
+  }
   leaveRoom() {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
@@ -1367,7 +1398,11 @@ class Game {
     if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
     if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.runes(); else ui.result(this.result); }
     if (this.winT > 0 && this.state === 'play' && (this.winT -= dt) <= 0) this.win();
-    if (lv.kind === 'well' && this.state === 'play') {   // keep the drawn hero at the anchor; only ever climb
+    if (lv.under && this.state === 'play') {   // the flip side is fallen: the hero high in the view, to see what is under it
+      const target = clamp(b.cy - 0.35 * view.h, lv.capY - CAM.top, lv.floor + this.room() - view.h);
+      lv.cam += (target - lv.cam) * (1 - Math.exp(-8 * dt));
+      lv.cam = Math.max(lv.cam, Math.min(b.maxY + view.keep + this.R - view.h, lv.floor + this.room() - view.h));   // never near the keys
+    } else if (lv.kind === 'well' && this.state === 'play') {   // keep the drawn hero at the anchor; only ever climb
       let cy = 0;
       for (let i = 0; i < b.n; i++) cy += b.sy[i] + (b.y[i] - b.sy[i]) * alpha;
       cy /= b.n;
@@ -1379,7 +1414,7 @@ class Game {
       lv.cam = Math.max(lv.cam, lv.capY - CAM.top);
     }
     lv.ensure(lv.cam - view.h * LEVEL.ahead);
-    if ((this.pruneT += dt) > 0.5) { this.pruneT = 0; if (lv.kind === 'well') lv.prune(lv.cam + view.h * (1 + LEVEL.behind)); }
+    if ((this.pruneT += dt) > 0.5) { this.pruneT = 0; if (lv.kind === 'well' && !lv.under) lv.prune(lv.cam + view.h * (1 + LEVEL.behind)); }
     const d = input.dir;   // the hero looks where it runs
     if (d && this.state === 'play') { this.heroLook.x = b.cx + d * 240; this.heroLook.y = b.cy - 40; this.heroLook.t = now; }
     b.face.update(dt, b, this.heroLook, now);
@@ -1657,6 +1692,7 @@ const ui = {
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot';
     $('hud').classList.toggle('on', playing);
+    uiEl.classList.toggle('paper', !!g.lv.under);   // the flip side's paper: the HUD in ink (see #ui.paper)
     if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner

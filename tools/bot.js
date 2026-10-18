@@ -171,6 +171,7 @@ function start(world, stage = 0, s = 1, opts = {}) {
   const lv = g.lv;
   lv.ensure(-1e7);
   for (const b of lv.bubbles) b.cd = Infinity;
+  for (const sp of lv.spots) sp.used = true;   // nor the flip side: it plays the climb
   if (opts.noFoes) lv.spawns.length = 0;   // the same level with nobody in it
   killed = {};
   const spawned = {};

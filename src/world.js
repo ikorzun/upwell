@@ -156,6 +156,7 @@ const THEMES = {
   cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: theme(PAL.orange, { crumble: PAL.gray }),
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
+  under: Object.assign(theme(PAL.blue, { crumble: PAL.gray }), { top: PAL.white, bot: PAL.gray, dots: PAL.gray, lip: PAL.black }),   // the flip side: paper, the user's picture's
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
 PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'blue', 'green', 'purple'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
@@ -186,6 +187,11 @@ const ENEMY = {
 // half-wide, `tip` the balls at their ends. On a ledge it `wait`s, then, on screen, reaches a tube out (`reach` s, the warning)
 // to a ledge `near` (R across) and pours itself along it in `flow` s, all of it hurting meanwhile.
 const WORM = { len: 1.7, seg: 0.24, w: 0.27, tip: 0.24, wait: [2.4, 4], reach: 0.6, flow: 0.7, near: [2.5, 7], angles: [-0.15, -0.5, Math.PI + 0.15, Math.PI + 0.5], wave: 0.3 };
+// The flip side (user: liquid pixel spots as in their picture, blue round yellow round white, red and black in it): a spot in the
+// shaft leads under the level, down a short light shaft, fallen as in Downwell (stomp on the way, coins as rain); its floor brings
+// the hero back up the level `lift` m over where it went in (a shortcut). `len` its depth, m; a random run's level has a spot
+// with odds `p`, `at` a share of the way up; `r` a spot's size, R.
+const UNDER = { len: 30, lift: 12, at: [0.25, 0.6], p: 0.55, r: 1.25 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
 // Four worlds of three levels, then the boss. `heights` are its levels' lengths in metres (a
@@ -832,7 +838,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 class Level {
   constructor() {
     this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null;
+    this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
     this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.rc = null;
@@ -844,7 +850,9 @@ class Level {
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' && (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage)));
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null;
+    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.under = false;
+    const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
+    this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
@@ -939,7 +947,7 @@ class Level {
     this.spikes = this.spikes.filter(keep);
     this.coats = this.coats.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
-    this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep);
+    this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep);
   }
   // The next chunk on top: a pocket with a bubble once the shaft passes a planned height
   // (never two pockets running, and none in the last `pocketEnd` tiles: a bubble right
@@ -987,9 +995,22 @@ class Level {
     }
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
+    if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set') this.addSpot(this.top - h, this.top);
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
     this.top -= h;
+  }
+  // The flip side's spot in the chunk just laid (from y0 up to y1): a free place in the open, clear of ledges, spikes and enemies.
+  addSpot(y0, y1) {
+    const R = this.R, rr = UNDER.r * R + 0.6 * R, ok = [];
+    for (let y = y0 + 2 * R; y < y1 - 2 * R; y += 0.8 * R) for (let x = this.l + rr; x < this.r - rr; x += 0.8 * R) {
+      if (this.rects.some((q) => q.x1 > x - rr && q.x0 < x + rr && q.y1 > y - rr && q.y0 < y + rr)) continue;
+      if (this.spikes.some((q) => q.x1 > x - 2 * R && q.x0 < x + 2 * R && q.y1 > y - 2 * R && q.y0 < y + 2 * R) || this.spawns.some((q) => Math.hypot(q.x - x, q.y - y) < 2.5 * R)) continue;
+      ok.push([x, y]);
+    }
+    if (!ok.length) return;
+    const [x, y] = ok[(this.spotRng() * ok.length) | 0];
+    this.spots.push({ x, y, y1: y, r: UNDER.r, kind: 'in', used: false }); this.spotAt = null;
   }
   // Folk for the chunk just laid (its rects from `from` on, its top at `top`): a cage or a trader when its height has come,
   // on a steady bare ledge with room over it and no enemy on it; maybe a critter. All by folkRng.
@@ -1700,6 +1721,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
   const icicle = (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
   for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);
+  for (const sp of lv.spots) if (!sp.used && seen(sp.y - 2.5 * R, sp.y + 2.5 * R)) {   // the flip side's spots (a pool, at its floor)
+    const r = sp.r * R, flat = sp.kind === 'out' ? 0.45 : 1, w = (k, a) => Math.sin(T * 2.1 + k * 1.9 + a) * 0.12 * r;
+    for (const [c, f] of [[PAL.blue, 1], [PAL.yellow, 0.8], [PAL.white, 0.62]]) for (let k = 0; k < 5; k++) {
+      const a = (k / 5) * TAU + T * 0.6;
+      F(sp.x + Math.cos(a) * 0.28 * r * f + w(k, 0), sp.y + (Math.sin(a) * 0.28 * r * f + w(k, 1)) * flat, 0.78 * r * f, 0, 0, 0.78 * r * f * flat, c, 1, 0);
+    }
+    for (let k = 0; k < 4; k++) { const a = T * 1.3 + k * 1.57, x = sp.x + Math.cos(a) * 0.3 * r, y = sp.y + Math.sin(a) * 0.3 * r * flat; disc(x, y, 0.16 * r, k % 2 ? PAL.red : PAL.black, 1); disc(x, y, 0.07 * r, PAL.white, 1); }
+    for (let k = 0; k < 2; k++) { const a = T * 0.8 + k * Math.PI, x = sp.x + Math.cos(a) * 1.4 * r, y = sp.y + Math.sin(a) * 0.9 * r * flat; disc(x, y, 0.17 * r, PAL.blue, 1); disc(x, y, 0.09 * r, PAL.yellow, 1); }
+  }
   for (const e of lv.enemies) if (e.type === 'worm' && seen(e.body.minY - 3 * R, e.body.maxY + 3 * R)) {   // a worm's tubes, behind its knot
     e.tubes(R, T).forEach((tube, k) => {
       const n = tube.length;

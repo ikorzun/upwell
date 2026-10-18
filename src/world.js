@@ -174,6 +174,7 @@ const RAINBOW_INK = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'].map((
 const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
   boss: { id: 'boss', base: PAL.purple, deep: PAL.black },
+  goo: { id: 'goo', base: PAL.black, deep: PAL.gray },   // a skull's black goo (the user's picture)
 };
 // A world in one ink over black for its walls, ledges and far dots, with white for the edge you
 // stand on; the surfaces that behave differently in colours of their own (`o` picks others where
@@ -185,6 +186,7 @@ const THEMES = {
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
   under: Object.assign(theme(PAL.blue, { crumble: PAL.gray }), { top: PAL.white, bot: PAL.gray, dots: PAL.gray, lip: PAL.black }),   // the flip side: paper, the user's picture's
+  crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
 PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'blue', 'green', 'purple'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
@@ -209,6 +211,7 @@ const ENEMY = {
   mini: { design: 'mochi', color: 'red', size: 0.5, grav: 1, stomp: true, coins: 2, speed: 80, step: 0.4, move: 'crawl' },
   chaser: { design: 'slug', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 5, speed: 70, step: 0.5, move: 'wall', chase: true },
   worm: { design: 'round', color: 'red', size: 0.85, grav: 1, stomp: true, coins: 6, speed: 0, step: 0.9, move: 'flow' },   // a knot of tubes, flowing ledge to ledge (WORM)
+  skull: { design: 'dome', color: 'goo', size: 1.1, grav: 1, stomp: true, coins: 5, speed: 40, step: 0.8, move: 'crawl' },   // a skull in black goo, dripping (SKULL; the Crypt's)
 };
 // The worm (user's video: dithered tubes flowing over each other, ball tips): its knot is stomped, its tubes hurt. Four tubes,
 // two to a side, waving up and out (the knot's top is clear: the way to stomp it); `len` theirs, R, in discs `seg` apart, `w`
@@ -237,6 +240,7 @@ const FOE_DESC = {
   mini: { en: "A splitter's half: small and quick.", es: 'Medio divisor: pequeño y rápido.', pt: 'Metade de um divisor: pequeno e rápido.', ja: 'ブンレツの かたわれ。はやい。' },
   chaser: { en: 'Crawls the walls up to your height.', es: 'Trepa las paredes hasta tu altura.', pt: 'Sobe as paredes até a sua altura.', ja: 'きみの たかさまで かべを のぼる。' },
   worm: { en: 'Stomp the knot, not the tubes!', es: '¡Pisa el nudo, no los tubos!', pt: 'Pise no nó, não nos tubos!', ja: 'むすびめを ふめ、くだは さけろ！' },
+  skull: { en: 'Creeps in its goo, lunges up close.', es: 'Se arrastra en su baba; se lanza de cerca.', pt: 'Rasteja na gosma; ataca de perto.', ja: 'どろどろ はう。ちかいと とびかかる。' },
 };
 const FOE_NAMES = {
   crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
@@ -244,6 +248,7 @@ const FOE_NAMES = {
   shell: { en: 'Shell', es: 'Caparazón', pt: 'Casco', ja: 'こうら' }, spitter: { en: 'Spitter', es: 'Escupidor', pt: 'Cuspidor', ja: 'ペッペ' },
   splitter: { en: 'Splitter', es: 'Divisor', pt: 'Divisor', ja: 'ブンレツ' }, mini: { en: 'Mini', es: 'Mini', pt: 'Mini', ja: 'チビ' },
   chaser: { en: 'Chaser', es: 'Perseguidor', pt: 'Perseguidor', ja: 'オイカケ' }, worm: { en: 'Worm', es: 'Gusano', pt: 'Minhoca', ja: 'ワーム' },
+  skull: { en: 'Skull', es: 'Calavera', pt: 'Caveira', ja: 'ドクロ' },
 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
@@ -277,7 +282,14 @@ const WORLDS = [
 ];
 // The hardest chunk allowed, by world and level (hard mode allows all).
 const MAX_D = [[1, 2, 2], [2, 2, 3], [2, 3, 3], [3, 3, 3]];
+// The Crypt (user: a scary level whose enemies are skulls): the random run's second Mine level (`at`: world, stage) in a look
+// of its own, its enemies skulls in their black goo and a spitter now and then, to the Void's drone. It shows by itself at
+// ?play=crypt, to look at. A skull rushes at a hero within `reach` R on its level for `rush` s at `k` times its pace, then
+// rests `every` s (SKULL).
+const SKULL = { reach: 5, rush: 0.7, every: 2.2, k: 2.6 };
 const SUMMIT = { id: 'summit', name: { en: 'Summit', es: 'Cumbre', pt: 'Cume', ja: 'ちょうじょう' }, theme: THEMES.summit, enemies: {}, chunks: {} };
+const CRYPT = Object.assign({}, WORLDS[2], { id: 'crypt', name: { en: 'Crypt', es: 'Cripta', pt: 'Cripta', ja: 'ちかぼち' }, theme: THEMES.crypt, enemies: { skull: 4, spitter: 1 },
+  foes: 0.8, maxD: 2, dark: [], at: [2, 1], intro: [{}, { news: { en: 'skulls: they lunge up close', es: 'calaveras: se lanzan de cerca', pt: 'caveiras: atacam de perto', ja: 'ドクロ: ちかいと とびかかる' } }, {}] });
 // A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about
 // 1.1 s a metre) where no heart is lost; out by the hole on top, out of time or caught by the fire, what it paid is shown
 // with an offer to double it for an ad, then on to the next world (user). Made like a world, with
@@ -552,6 +564,8 @@ function portrait(design, ink, n = 16) {
 }
 for (const k in ENEMY) ICONS['foe_' + k] = portrait(ENEMY[k].design, 'r');
 for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', 'p');
+ICONS.foe_skull = ['................', '.....wwwwww.....', '...wwwwwwwwww...', '..wwwwwwwswwww..', '..wwswwwwwwwww..', '.wwkkkkwwkkkkww.', '.wkkkkkwwkkkkkw.', '.wkkrkkwwkkrkkw.',
+  '.wwkkkwwwwkkkww.', '..wwwwwkkwwwww..', '...wwwwwwwwww...', '...wkwkwkwkwk...', '..ssssssssssss..', '.ssssssssssssss.', '.ss.sss..sss.ss.', '..s..s....s..s..'];   // a skull over its goo (the user's picture)
 // The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs
 // together (not spent), like Downwell's palettes, and each starting a run with an upgrade (`perk`).
 const UNLOCKS = [
@@ -1631,11 +1645,13 @@ vec3 snapPal(vec3 c) {   // the nearest of the nine, for anything that came in a
 // fixed to the world, with a lip line along the well.
 const BG_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
 uniform vec2 uShake; uniform vec2 uWalls; uniform float uPix;
-uniform vec3 uTop, uDots, uWall, uWallD, uLip;
+uniform vec3 uTop, uBot, uDots, uWall, uWallD, uLip; uniform float uGrad, uH;
 void main() {
   ivec2 g = cell();
   float wx = (float(g.x) + 0.5) * uPix;   // CSS px in the world
   vec3 c = uTop;
+  float t = (uH - gl_FragCoord.y) / uH;   // 0 at the top of the screen, 1 at its foot
+  if (uGrad > 0.5 && t * t > bayer(g)) c = uBot;   // a theme's fall from its top ink to its bottom one, through the 4x4 dither (the Crypt's)
   int s = uPix < 1.5 ? 2 : 1, py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-CSS-px cells, a dot one game pixel
   ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / float(s)));
   if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = uDots;
@@ -1892,6 +1908,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);
     }
+    if (th.drips && !r.plank && !r.spring && !r.moss) for (let n = Math.max(1, Math.round((r.x1 - r.x0) / (2.2 * R))), k = 0; k < n; k++) {   // the Crypt's black goo, hanging off the stone and stretching slowly
+      const x = r.x0 + ((k + 0.5) * (r.x1 - r.x0)) / n + ox, len = (0.25 + 0.4 * (0.5 + 0.5 * Math.sin(T * 0.9 + x * 0.07 + r.y0 * 0.013))) * R;
+      box(x - 0.09 * R, r.y1, x + 0.09 * R, r.y1 + len, INK.dark, a, 0, 10, 0); disc(x, r.y1 + len, 0.14 * R, INK.dark, a);
+    }
   }
   for (const s of lv.spikes) {
     if (!seen(s.y0, s.y1)) continue;
@@ -1999,6 +2019,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(b.cx - 0.2 * R, y0 + 0.75 * R, b.cx + 0.2 * R, y0 + 1.15 * R, INK.coin, 1, 0, 10, 0); box(b.cx - 0.1 * R, y0 + 0.55 * R, b.cx + 0.1 * R, y0 + 0.75 * R, INK.coinD, 1, 0, 10, 0);
   }
   const bs = lv.boss;
+  for (const e of lv.enemies) if (e.type === 'skull' && seen(e.body.minY, e.body.maxY)) {   // a skull over its black goo (the user's picture): its eye glints on the hero
+    const b = e.body, r = 0.72 * b.R, x = b.cx, y = b.cy - 0.3 * b.R, lx = clamp((g.hero.cx - x) / (6 * R), -1, 1) * 0.1 * r, ly = clamp((g.hero.cy - y) / (6 * R), -1, 1) * 0.08 * r;
+    disc(x, y, r, PAL.white, 1); box(x - 0.55 * r, y + 0.45 * r, x + 0.55 * r, y + 0.95 * r, PAL.white, 1, 0, 10, 0);   // its crown and its jaw
+    for (const d of [-1, 1]) { disc(x + d * 0.42 * r, y + 0.08 * r, 0.3 * r, INK.dark, 1); disc(x + d * 0.42 * r + lx, y + 0.04 * r + ly, 0.09 * r, INK.spike, 1); }   // black sockets, a red glint in each
+    box(x - 0.07 * r, y + 0.42 * r, x + 0.07 * r, y + 0.58 * r, INK.dark, 1, 0, 10, 0);   // its nose
+    for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
+    box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
+  }
   if (bs && !bs.dead && bs.def && bs.def.rail) {   // the Minecart's cart, in front of it: dark, a white rim, two wheels on the rail
     const b = bs.body, hw = 0.55 * (b.maxX - b.minX), y0 = b.cy, y1 = lv.rail.y;
     box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
@@ -2030,7 +2058,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pg = this.pBg;
   gl.useProgram(pg.p);
   gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, lv.l, lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);
-  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots);
+  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh);
   gl.uniform3fv(pg.u.uWall, th.wall); gl.uniform3fv(pg.u.uWallD, th.wallD); gl.uniform3fv(pg.u.uLip, th.lip);
   gl.bindVertexArray(this.emptyVao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);

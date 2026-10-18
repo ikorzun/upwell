@@ -194,7 +194,7 @@
   .big.alt { --p: 3; background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as wide, a size smaller: not the main one (and "Controls: buttons" in one line) */
   .big.alt:active { transform: translateY(4px); }
   .big.thumb { align-self: stretch; margin-top: 8px; }   /* the main button: the width of the screen, at its bottom */
-  #menu { background: linear-gradient(transparent 58%, var(--gray) 58%, var(--gray) calc(58% + 2px), var(--ink) calc(58% + 2px)); justify-content: flex-end; }   /* the hero shows through the top */
+  #menu { background: linear-gradient(transparent var(--split, 58%), var(--gray) var(--split, 58%), var(--gray) calc(var(--split, 58%) + 2px), var(--ink) calc(var(--split, 58%) + 2px)); justify-content: flex-end; }   /* the hero shows through the top (--split: set by ui.menu) */
   .title { margin: 0 0 auto; padding-top: 12%; --p: 6; filter: drop-shadow(0 6px 0 var(--ink)); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }

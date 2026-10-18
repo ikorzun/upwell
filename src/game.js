@@ -403,8 +403,7 @@ class Game {
   toMenu() {
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
     this.newRun(); this.state = 'menu'; this.buildLevel(true);
-    this.lv.cam = this.hero.cy - 0.46 * view.h;   // the hero in the gap between the title and the colours, so a new look shows
-    ui.hideAll(); ui.menu();
+    ui.hideAll(); ui.menu();   // (which sets the camera on the hero)
   }
   startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round
     this.newRun(); if (daily) this.daily = today; this.endless = !!endless; save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
@@ -1630,6 +1629,8 @@ const ui = {
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
+    const y0 = p.getBoundingClientRect().top, split = Math.min(0.58 * view.h, colors.getBoundingClientRect().top - y0 - 8), head = title.getBoundingClientRect().bottom - y0, R = game.R;   // the backdrop's edge over the colours (they climb as rows come, once won),
+    p.style.setProperty('--split', split + 'px'); if (game.state === 'menu') game.lv.cam = game.lv.floor - Math.min(split, Math.max(split - 0.12 * view.h + R, head + 2 * R + 2));   // and the hero standing over it, under the title (a short screen: less floor), so a new look shows
   },
   cards(list) {
     const p = this.panel('cards');
@@ -2263,6 +2264,7 @@ function layout() {
   renderer.resize(W, H, window.devicePixelRatio || 1);   // the canvas a device pixel per pixel: the game pixels are copied up onto it
   game.applyMods();
   if (started && Math.abs(W - game.builtW) > 2) game.resized();
+  else if (started && ui.open === 'menu') ui.menu();   // only taller or shorter: the menu's rows, and the hero over them, placed again
   if (started && coarse && vw > vh) game.togglePause(true);   // held sideways: paused under the 'turn it upright' screen
 }
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the

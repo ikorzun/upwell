@@ -81,6 +81,11 @@
   .medal { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--gray); --p: 2; }
   .medal .ico { --p: 3; }
   .row.me b, .row.me span { color: var(--yellow); }   /* the player on the leaderboard */
+  .week { display: flex; align-items: center; gap: 4px; color: var(--gray); }   /* the week's card in the menu */
+  .week .tx { margin-right: 6px; }
+  .week i { width: 10px; height: 10px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch); }
+  .week i.pay { box-shadow: inset 0 0 0 2px var(--yellow); }   /* a mark that pays */
+  .week i.on { background: var(--yellow); box-shadow: none; }
   .duo { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }   /* two chips side by side */
   * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }   /* Safari: a held finger selects nothing */
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

@@ -23,6 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -39,6 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -55,6 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -71,6 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！',
   },
 };
 let lang = 'en';
@@ -86,7 +90,13 @@ const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || na
 const SAVE_KEY = 'upwell.save';
 // Kept through the Playgama Bridge's storage (its checklist: never localStorage itself), the whole of it under one key in
 // one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
-const save = { best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false };   // seen: hints shown once; stick: touch by a stick, not the keys
+const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: false, camp: null };   // seen: hints shown once; stick: touch by a stick, not the keys
+// The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
+// purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
+// run's progress stays in save.run, for the random run.
+const campFresh = () => ({ open: 0, stars: [], wallet: 0, builds: [] });
+const CAMP_LEN = CAMPAIGN.length * 10;   // ten levels a world
+const campAt = (i) => ({ w: Math.floor(i / 10), s: i % 10, rc: CAMPAIGN[Math.floor(i / 10)].levels[i % 10] });
 const opened = (u) => save.bank >= u.at;
 // The screen shake (Gum's) only when wanted: off by the player, or by the system's reduced motion until turned on (the digest §8).
 const shakeOn = () => (save.shake === undefined ? !matchMedia('(prefers-reduced-motion: reduce)').matches : save.shake);
@@ -94,6 +104,9 @@ const shakeAdd = shake.add.bind(shake);
 shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
+  const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
+  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; c.open = Math.min(Math.max(0, c.open | 0), CAMP_LEN - 1);
+  save.v = 2;
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
 function persist() {
@@ -280,6 +293,7 @@ class Game {
     this.world = 0; this.stage = 0; this.hard = !!save.hard && save.wins > 0; this.mods = MODS(); this.taken = [];
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0;
     this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0;
+    this.mode = 'run'; this.rc = null; this.ci = -1; this.lastBy = null;   // the random run; playLevel makes it a campaign level
     const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
   }
@@ -288,7 +302,7 @@ class Game {
     this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump;
   }
   get b() { return this.hero && Number.isFinite(this.hero.floorY) ? this.hero.floorY : this.lv.floor; }   // where Body.endStep puts landing dust
-  get wd() { return this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT; }
+  get wd() { return this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT; }
   bodyList() {
     const a = this.list, lv = this.lv;
     a.length = 0;
@@ -311,6 +325,7 @@ class Game {
   }
   // The menu's backdrop is the first level of a fresh run with the hero standing in it.
   toMenu() {
+    if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
     this.newRun(); this.state = 'menu'; this.buildLevel(true);
     this.lv.cam = this.hero.cy - 0.46 * view.h;   // the hero in the gap between the title and the colours, so a new look shows
     ui.hideAll(); ui.menu();
@@ -322,14 +337,14 @@ class Game {
     if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
   }
   buildLevel(newHero) {
-    const W = view.w, H = view.h, boss = this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
+    const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
     const seed = nextSeed != null ? nextSeed : (Math.random() * 4294967296) >>> 0;
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
-    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard,
-      height: boss ? 0 : wd.heights[this.stage] * R_PER_M * this.R, theme: wd.theme });
+    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, recipe: this.bonus ? null : rc,
+      height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: wd.theme });
     this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
     if (boss) this.lv.boss = new Boss(this.lv);
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
@@ -802,6 +817,7 @@ class Game {
     const H = this.hero, d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
     if (!this.bonus) this.hp--;   // a bonus level costs no hearts
+    this.lastBy = by;
     track('hero_hit', { by, fatal: this.hp <= 0, ...this.at() });
     this.invuln = HEALTH.invuln + this.mods.invuln;
     setVel(H, dx * HEALTH.knock, Math.min(dy * HEALTH.knock, 0) - HEALTH.knock * 0.45);
@@ -839,12 +855,12 @@ class Game {
   }
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
-  levelId() { return this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
+  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
-  lvl() { return { world: this.wd.id, level: this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
+  lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
   fall() {
-    if (!this.learning()) { this.hp--; ui.hurt(); track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
+    if (!this.learning()) { this.hp--; ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
     if (this.hp <= 0) { this.die(); return; }
     sound.play('fall', 0.8);
@@ -1067,6 +1083,7 @@ class Game {
       this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
     }
     this.climbed += this.levelM; this.levelM = 0;
+    if (this.mode === 'camp' && !this.bonus) this.campDone(this.stars.n);
     haptics.buzz(20); sound.play('portal');   // no toast: it would hide the hole
   }
   // The way out swallows the hero: pulled to the hole's middle on a tightening spiral, shrinking away.
@@ -1079,8 +1096,10 @@ class Game {
   pick(u) {
     if (this.state !== 'clear') return;   // a second tap
     this.takeUpgrade(u); track('upgrade_picked', { id: u.id, level_id: this.levelId() });
+    if (this.mode === 'camp') { const b = save.camp.builds; (b[this.world] = b[this.world] || []).push(u.id); persist(); }   // the world's build
     this.state = 'wait'; ui.hideAll();   // (an ad may come here: nothing goes on under it)
     ads.between(() => {
+      if (this.mode === 'camp') { this.playLevel(this.ci + 1); return; }
       this.state = 'play'; this.stateT = 0;
       if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
       if (++this.stage >= 3) { this.stage = 0; this.world++; }
@@ -1090,9 +1109,9 @@ class Game {
   }
   // A bonus level: against the clock, no hearts lost; then on to the next world.
   startBonus(b) {
-    this.bonus = b; this.bonusT = b.time; this.bonusCoins = this.coins;
+    this.bonus = b; this.bonusT = (this.rc && this.rc.time) || b.time; this.bonusCoins = this.coins;   // (a campaign's on its recipe's clock)
     this.buildLevel(false); this.saveRun();
-    ui.hideAll(); ui.toast(L2(b.name) + '\n' + L2(b.goal) + ' · ' + b.time + ' ' + t('sec'), 2600);
+    ui.hideAll(); ui.toast(L2(b.name) + '\n' + L2(b.goal) + ' · ' + this.bonusT + ' ' + t('sec'), 2600);
   }
   // An enemy's coins still on their way to the hero as a level or the run ends get there all the same.
   bankDrops() {
@@ -1105,6 +1124,7 @@ class Game {
     if (this.combo > 0) this.payCombo();   // a combo running (a rainbow holds one) is paid
     this.bankDrops(); input.clear();
     pmsg('level_completed', this.lvl());
+    if (this.mode === 'camp') { const lv = this.lv, f = lv.coinsTaken / Math.max(1, lv.coinTotal); this.campDone(1 + (f >= 0.4) + (f >= 0.8)); }   // its stars: by the share of its coins
     this.state = 'reward'; this.stateT = 0; this.bonusWhy = why || 'bonusDone'; this.bonusGot = this.coins - this.bonusCoins; this.adBusy = false;
     ui.bonusEnd(this.bonusWhy, this.bonusGot, false);
   }
@@ -1119,6 +1139,7 @@ class Game {
     ads.between(() => this.goOn());
   }
   goOn() {
+    if (this.mode === 'camp') { this.campKeep(); persist(); this.playLevel(this.ci + 1); return; }   // (the doubled coins in the purse)
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
     this.buildLevel(false); this.saveRun();
     ui.hideAll(); ui.banner();
@@ -1126,7 +1147,7 @@ class Game {
   // The run kept at the start of every level (Playgama's checklist: progress outlives a reload; losing a long run is what
   // players of the climbing games hate most), dropped once the run ends. Quitting to the menu keeps it, for Continue.
   saveRun() {
-    save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
+    if (this.mode === 'run') save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
       bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice() };
     persist();
     pmsg('level_started', this.lvl());
@@ -1142,6 +1163,30 @@ class Game {
     this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
   }
+  // ── The campaign ──
+  // A level of it (CAMPAIGN): from its recipe and seed (or `seed`: the bot's), with its world's upgrades so far (after the
+  // colour's own), all the hearts and the purse. Dying costs that level only: Again starts it over (ui.campDead).
+  playLevel(i, seed) {
+    const { w, s, rc } = campAt(i);
+    this.newRun(); this.mode = 'camp'; this.ci = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
+    for (const id of save.camp.builds[w] || []) { const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }
+    this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = !(save.camp.stars[i] > 0);
+    padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
+    if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
+    this.buildLevel(true); this.saveRun();
+    ui.hideAll(); ui.banner();
+    if (i === 0 && this.first) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);   // the very first level: how to play
+  }
+  // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
+  campKeep() { const d = this.coins - this.kept; if (d > 0) save.bank += d; this.kept = this.coins; save.camp.wallet = this.coins; }
+  // A level cleared: its best stars, the next one open, the purse; kept at once (a reload loses none of it).
+  campDone(n) {
+    const c = save.camp, i = this.ci;
+    c.stars[i] = Math.max(c.stars[i] || 0, n); c.open = Math.max(c.open, Math.min(i + 1, CAMP_LEN - 1));
+    this.campKeep(); persist();
+  }
+  campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci + 1)); }   // on from a level played again
+  campAgain() { if (this.state !== 'dead') return; pmsg('level_failed', this.lvl()); this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci)); }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;
     this.bankDrops();
@@ -1149,6 +1194,7 @@ class Game {
     const H = this.hero, lv = this.lv;   // it bursts where it can be seen (a fall ends below the screen)
     burstFx(H.cx, clamp(H.cy, lv.cam + this.R, lv.cam + view.h - this.R), this.R, H.color.base); shake.add(12);
     input.clear(); haptics.buzz(30); sound.play('die');
+    if (this.mode === 'camp') { this.campKeep(); persist(); return; }   // the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
     if (this.coins < this.revivePrice()) this.finish(false);
   }
   revivePrice() { return Math.round(REVIVE.price * (1 + 0.5 * Math.min(this.world, 4)) * Math.pow(REVIVE.grow, this.revives) * (this.hard ? 1.5 : 1)); }
@@ -1163,7 +1209,11 @@ class Game {
     sound.play('buy'); haptics.buzz(16);
   }
   giveUp() { this.finish(false); ui.result(this.result); }
-  win() { pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8); this.finish(true); }
+  win() {
+    pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8);
+    if (this.mode === 'camp') { const lost = this.maxHp - this.hp; this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); this.result = null; return; }   // a boss's stars: by the hearts it cost
+    this.finish(true);
+  }
   finish(won) {
     const bank0 = save.bank, total = Math.floor(this.climbed + this.levelM), firstWin = won && save.wins === 0;
     save.bank += this.coins; save.best = Math.max(save.best, total);
@@ -1201,9 +1251,9 @@ class Game {
     else if (rb && (!last || Math.hypot(b.cx - last[0], b.cy - last[1]) > RAINBOW.gap * this.R)) tl.push([b.cx, b.cy]);
     while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after
     this.stateT += dt;
-    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else ui.cards(this.offer()); }
-    if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
-    if (this.state === 'won' && this.stateT > 0.4 && !ui.open) ui.result(this.result);
+    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else ui.cards(this.offer()); }   // an upgrade the first time a campaign level is cleared
+    if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
+    if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.worldDone(); else ui.result(this.result); }
     if (this.winT > 0 && this.state === 'play' && (this.winT -= dt) <= 0) this.win();
     if (lv.kind === 'well' && this.state === 'play') {   // keep the drawn hero at the anchor; only ever climb
       let cy = 0;
@@ -1341,15 +1391,33 @@ const ui = {
       const h = cap(button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); }), 'hard');
       p.append(h);
     }
-    const r = save.run;   // a run kept from before: Continue at the bottom (one tap), a new one over it
-    if (r) p.append(cap(button(t('newRun'), 'chip wide', () => game.startRun()), 'newRun'), cap(button(t('continue') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'big thumb', () => game.continueRun()), 'continue'));
-    else p.append(cap(button(t('play'), 'big thumb', () => game.startRun()), 'play'));   // the width of the screen, 12 px in from its edges
+    const r = save.run, c = save.camp, next = campAt(c.open);   // the campaign at the bottom (one tap): Play, or Continue where it is open;
+    if (r) p.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip wide', () => game.continueRun()), 'random'));   // a random run kept from before over it,
+    else if (c.open > 0) p.append(cap(button(t('random'), 'chip wide', () => game.startRun()), 'random'));   // or a new one, once the campaign is begun
+    if (c.open === 0 && !(c.stars[0] > 0)) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(0)), 'play'));
+    else p.append(cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(c.open)), 'continue'));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
   },
   cards(list) {
-    const p = this.panel('cards'), st = game.stars;
+    const p = this.panel('cards');
+    this.starRow(p);
+    p.append(cap(el('div', 'head', t('pick')), 'pick'));
+    for (const u of list) {
+      const [name, desc] = L2(u.name), c = button('', 'card', () => game.pick(u)), d = el('span');
+      d.append(px(desc, 118, true));
+      c.append(iconEl(u.id), el('b', null, name), d);
+      p.append(c);
+    }
+  },
+  cleared() {   // a campaign level played again: its stars, then on (an upgrade is for the first time only)
+    const p = this.panel('cards');
+    this.starRow(p);
+    p.append(cap(el('div', 'head', t('cleared')), 'cleared'), cap(button(t('next'), 'big thumb', () => game.campNext()), 'next'));
+  },
+  starRow(p) {
+    const st = game.stars;
     if (st) {   // the level's stars, what they paid and what they were for
       const row = el('div', 'stars');
       for (let k = 0; k < 3; k++) {   // one after another, popping in; each earned one rings higher, then twinkles
@@ -1361,13 +1429,17 @@ const ui = {
       const pay = px('+' + st.pay); pay.classList.add('pay'); row.append(pay);
       p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
     }
-    p.append(cap(el('div', 'head', t('pick')), 'pick'));
-    for (const u of list) {
-      const [name, desc] = L2(u.name), c = button('', 'card', () => game.pick(u)), d = el('span');
-      d.append(px(desc, 118, true));
-      c.append(iconEl(u.id), el('b', null, name), d);
-      p.append(c);
-    }
+  },
+  campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
+    const p = this.panel('result'), g = game, price = g.revivePrice(), by = g.lastBy, boss = !!(g.rc && g.rc.boss);
+    const why = by === 'fire' || by === 'fire_blob' ? 'fire' : by === 'spikes' || by === 'fall' || by === 'icicle' ? by : 'enemy';
+    p.append(cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));
+    if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'chip wide', () => g.revive()), 'revive'));
+    p.append(cap(button(t('menu'), 'big thumb alt', () => { pmsg('level_failed', g.lvl()); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
+  },
+  worldDone() {   // its boss beaten (the runes come here: see the plan)
+    const p = this.panel('result');
+    p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', t('soon')), cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
   },
   pause() {
     const p = this.panel('pause');
@@ -1415,8 +1487,8 @@ const ui = {
     if (ms) this.toastTimer = setTimeout(() => e.classList.remove('show'), ms);   // 0 keeps it up
   },
   banner() {
-    if (game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
-    const intro = (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');
+    if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
+    const intro = game.mode === 'camp' ? game.rc : (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');
     this.toast(tf('world', { n: game.world + 1 }) + ' · ' + L2(game.wd.name) + '  ' + (game.world + 1) + '-' + (game.stage + 1) + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
   comboPop(n) { const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
@@ -2045,6 +2117,7 @@ window.__up = {
   play(seed) { nextSeed = seed == null ? null : seed; game.startRun(); return game.seed; },
   // jump straight to world w (0-based; 4 is the boss), level s
   bonus(w, seed) { this.go(w, 2, seed); game.startBonus(BONUS[w]); return this.state; },   // straight into world w's bonus level
+  camp(i, seed) { game.playLevel(i, seed); ui.hideAll(); return this.state; },   // straight into campaign level i (0-based)
   go(w, s = 0, seed) { if (game.state === 'menu') game.startRun(); game.world = w; game.stage = s; nextSeed = seed == null ? null : seed; game.state = 'play'; game.buildLevel(false); ui.hideAll(); return this.state; },
   god(on = true) { game.invuln = on ? 1e9 : 0; return game.invuln; },
   give(n) { game.coins += n; return game.coins; },

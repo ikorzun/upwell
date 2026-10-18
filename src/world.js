@@ -227,6 +227,37 @@ const BONUS = [
     chunks: { stairs: 2, planks: 2, pillars: 2, lift: 1 } },
 ];
 
+// The campaign (user, 2026-10-17: ten worlds of ten fixed levels, the first of them so far; the plan is
+// research/upwell-100-levels.md). A world teaches, applies, teaches, varies, peaks, pays (its bonus, the 6th),
+// turns (the 7th), peaks again, rests, and ends in its boss; one new thing a level at most, none at a peak. A recipe:
+//   role     teach, apply, peak, bonus, twist, rest or boss       len    its length, m (20-34 in the Cave: user)
+//   fire     the fire, R/s; calm: the s it waits first            maxD   the hardest chunks it may use
+//   chunks   the chunks to build it from, by weight               intro  the ones it must show, laid first
+//   enemies  their kinds (none: []); foes: the odds of one a chunk, pair: of two
+//   candy    the candies' kinds, one each (none: [])             set    its set piece, if any
+//   shop     a shop behind a door; stash: a room of coins         safe   the last heart is not taken (it is learning)
+//   bonus    the BONUS level it is (time: its seconds)            boss   the boss it is
+//   news     what is new, for its banner                          seed   its layout (picked with the bot)
+const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
+const CAMPAIGN = [{ world: WORLDS[0], levels: [
+  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0, candy: [], safe: true, seed: 1101,
+    news: { en: 'jumps and springs', es: 'saltos y resortes', pt: 'pulos e molas', ja: 'ジャンプと バネ' } },
+  { role: 'teach', len: 31, fire: 0.35, maxD: 2, chunks: CAVE, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 1102,
+    news: { en: 'crawlers: land on them', es: 'reptadores: cae sobre ellos', pt: 'rastejantes: pule neles', ja: 'ハイハイ: うえから ふもう' } },
+  { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 1103,
+    news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' } },
+  { role: 'apply', len: 34, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: true, seed: 1104,
+    news: { en: 'rock candy', es: 'caramelo roca', pt: 'bala de pedra', ja: 'ロックキャンディ' } },
+  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 1105 },
+  { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 1106 },
+  { role: 'twist', len: 28, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: true, seed: 1107,
+    news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
+  { role: 'peak', len: 28, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 1108 },
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: true, seed: 1109,
+    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+  { role: 'boss', boss: 'probka' },
+] }];
+
 // One of three is offered after every level. `stack`: can be taken again.
 const UPGRADES = [
   { id: 'bouncy', stack: true, name: { en: ['Springy', 'Bounce higher off enemies'], es: ['Saltarín', 'Rebotas más alto en los enemigos'], pt: ['Saltitante', 'Quica mais alto nos inimigos'], ja: ['ピョンピョン', 'てきを ふむと たかく はねる'] }, apply: (g) => { g.mods.bounce *= 1.2; } },
@@ -770,31 +801,32 @@ class Level {
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
-    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null;
+    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.rc = null;
   }
-  // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme }
+  // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
     this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.R = o.R; this.t = 0;
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
-    this.dark = o.kind === 'well' && !!(o.world.dark && o.world.dark.includes(this.stage));
+    const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
+    this.dark = o.kind === 'well' && (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage)));
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null;
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
-    const intro = (o.world.intro && o.world.intro[this.stage]) || {};
+    const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.fizz = []; this.bullets = [];
-    if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows)
-      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
+    if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows; a recipe's own)
+      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
       if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
     }
     this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0);   // folk (see FOLK), by their own generator
     if (o.kind === 'well' && o.height && !o.world.bonus) {
       const fr = this.folkRng, at = ([a, b]) => this.floor - o.height * (a + fr() * (b - a));
-      if (fr() < FOLK.cageP) this.folkAt.push({ kind: 'cage', y: at(FOLK.cage) });
-      if (fr() < FOLK.traderP) this.folkAt.push({ kind: 'trader', y: at(FOLK.trader) });
+      if (rc ? rc.cage : fr() < FOLK.cageP) this.folkAt.push({ kind: 'cage', y: at(FOLK.cage) });
+      if (rc ? rc.trader : fr() < FOLK.traderP) this.folkAt.push({ kind: 'trader', y: at(FOLK.trader) });
       this.folkAt.sort((p, q) => q.y - p.y);   // the lower first
     }
-    this.fizzAt = o.kind === 'well' && o.height ? GUN.at.map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies
+    this.fizzAt = o.kind === 'well' && o.height ? GUN.at.slice(0, rc ? rc.candy.length : GUN.at.length).map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies (a recipe's, as many)
     this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY));   // and which kinds, by a generator of their own: the shaft is laid as before
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
@@ -802,10 +834,10 @@ class Level {
     this.cam = this.floor + CAM.floorShow - o.h;
     if (o.kind === 'well') {
       const rnd = this.rng, H = o.height;
-      if (!o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (0.3 + rnd() * 0.4), kind: 'shop', done: false });
-      if (!o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (0.15 + rnd() * 0.55), kind: 'treasure', done: false });
-      const v = (o.world.fire || 0) * this.R * (this.hard ? 1.4 : 1);
-      if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
+      if (rc ? rc.shop : !o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (0.3 + rnd() * 0.4), kind: 'shop', done: false });
+      if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (0.15 + rnd() * 0.55), kind: 'treasure', done: false });
+      const v = (rc ? rc.fire : o.world.fire || 0) * this.R * (this.hard ? 1.4 : 1);
+      if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
     } else this.build(o);
   }
   box(x0, y0, x1, y1, f) {
@@ -889,12 +921,13 @@ class Level {
     const left = this.top - this.endY, p = Number.isFinite(this.endY) ? 1 - left / Math.max(1, this.floor - this.endY) : 0.5;
     if (!id && !this.rested && left > 4 * this.tile && left < 14 * this.tile && !wd.bonus) { id = 'rest'; this.rested = true; }
     if (!id) {
-      let maxD = this.hard ? 3 : wd.maxD || MAX_D[Math.min(wd === SUMMIT ? 3 : WORLDS.indexOf(wd), 3)][Math.min(this.stage, 2)], w = {};
+      let maxD = this.hard ? 3 : this.rc ? this.rc.maxD : wd.maxD || MAX_D[Math.min(wd === SUMMIT ? 3 : WORLDS.indexOf(wd), 3)][Math.min(this.stage, 2)], w = {};
       if (p < 0.2) maxD = Math.min(maxD, 1);
       const lastKind = this.last && CHUNKS[this.last].kind, mid = p > 0.35 && p < 0.75;
       const once = (k) => k === 'rest' || (k === 'vault' && this.placed.some((q) => q.id === k));   // the rest only under the way out; one stash in the wall a level
-      for (const k in wd.chunks) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k)) w[k] = wd.chunks[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
-      if (!Object.keys(w).length) for (const k in wd.chunks) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k)) w[k] = wd.chunks[k];   // a small pool: kinds may run
+      const pool = this.rc ? this.rc.chunks : wd.chunks;
+      for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k)) w[k] = pool[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
+      if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k)) w[k] = pool[k];   // a small pool: kinds may run
       id = pick(rnd, w);
     }
     const c = CHUNKS[id];
@@ -1053,8 +1086,9 @@ class Level {
   // None in the first few tiles over the floor; later levels now and then get two.
   populate(rects, top, bottom) {
     const wd = this.world, rnd = this.rng, t = this.tile;
-    if (!wd.enemies || bottom > this.floor - 6 * t || !(rnd() < wd.foes * (this.hard ? 1.4 : 1) * (1 + 0.15 * this.stage))) return;
-    const n = wd.pack || (rnd() < 0.25 * this.stage ? 2 : 1);
+    const rc = this.rc, odds = rc ? rc.foes : wd.foes * (1 + 0.15 * this.stage);   // a recipe's own odds of one, and of two
+    if (!wd.enemies || (this.foeTypes && !this.foeTypes.length) || bottom > this.floor - 6 * t || !(rnd() < odds * (this.hard ? 1.4 : 1))) return;
+    const n = wd.pack || (rnd() < (rc ? rc.pair || 0 : 0.25 * this.stage) ? 2 : 1);
     for (let i = 0; i < n; i++) {
       const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.filter((k) => wd.enemies[k]).map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
       const taken = (r) => this.spawns.some((q) => q.ledge === r || q.rect === r);   // one enemy to a ledge or block

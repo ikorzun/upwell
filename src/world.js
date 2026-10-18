@@ -123,6 +123,10 @@ const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
 // Ledges by world (user: some bounce, some pull; the random run's): a Cave plank in `bouncy` of them throws the hero up at `v`
 // of a jump as it lands; a Mine block in `magnet` pulls it in within `range` R at `pull` R/s² (MAGNET), more the nearer.
 const BOUNCY = { v: 1.05 }, MAGNET = { range: 3.2, pull: 70 };
+// A boost ring (user: a ring that rockets the hero up through a quarter of the level, smashing): in `p` of a run's levels, at `at`
+// of its height, `r` R round; through it the hero flies up at `v` of a jump through all (breaking what breaks, popping what it
+// meets), `lift` of the level's height, then on from the first clear place.
+const RING = { p: 0.6, at: [0.15, 0.4], r: 1.2, v: 2.6, lift: 0.25 };
 const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
 const CRUMBLE = { time: 0.55, back: 3 };   // gives way `time` s after a touch, is back `back` s later
 const SLICK = { fr: 0.03 };
@@ -1046,11 +1050,13 @@ class Level {
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' && (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage)));
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
+    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
     const ru = this.runeRng = mulberry32((o.seed ^ 0x6d2b79f5) >>> 0), cw = CAMPAIGN.find((c) => c.world === o.world), n = !cw || o.kind !== 'well' || !o.height ? 0 : rc ? rc.runes || 0 : ru() < RUNE.p ? 1 : 0;   // its runes (RUNE), by their own generator too
     this.runes = []; this.runeAt = shuffled(ru, [...(cw ? cw.runes : '')]).slice(0, n).map((ch, k) => ({ ch, y: this.floor - o.height * (RUNE.at[k][0] + ru() * (RUNE.at[k][1] - RUNE.at[k][0])) }));
+    const rr = this.ringRng = mulberry32((o.seed ^ 0x7f4a7c15) >>> 0);   // the boost ring's place, by its own generator
+    this.ringAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && rr() < RING.p ? this.floor - o.height * (RING.at[0] + rr() * (RING.at[1] - RING.at[0])) : null;
     this.flavRng = mulberry32((o.seed ^ 0x2c1b3c6d) >>> 0);   // which ledges bounce or pull (flavour), by their own generator
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
@@ -1160,7 +1166,7 @@ class Level {
     this.spikes = this.spikes.filter(keep);
     this.coats = this.coats.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
-    this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep); this.runes = this.runes.filter(keep);
+    this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep); this.runes = this.runes.filter(keep); this.rings = this.rings.filter(keep);
   }
   // The next chunk on top: a pocket with a bubble once the shaft passes a planned height
   // (never two pockets running, and none in the last `pocketEnd` tiles: a bubble right
@@ -1209,6 +1215,7 @@ class Level {
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
     this.flavour(lens[0]);
+    if (this.ringAt != null && this.top - h < this.ringAt && c !== CHUNKS.pocket && c.kind !== 'set') this.addRing(this.top - h, this.top);
     if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set') this.addSpot(this.top - h, this.top);
     if (this.runeAt.length && this.top - h < this.runeAt[0].y && c !== CHUNKS.pocket) this.addRune(this.top - h, this.top);
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
@@ -1226,6 +1233,16 @@ class Level {
     if (!ok.length) return;
     const [x, y] = ok[(this.spotRng() * ok.length) | 0];
     this.spots.push({ x, y, y1: y, r: UNDER.r, kind: 'in', used: false }); this.spotAt = null;
+  }
+  // The boost ring in the chunk just laid (from y0 up to y1): in the open, clear of ledges and spikes (as the flip side's spot).
+  addRing(y0, y1) {
+    const R = this.R, rr = (RING.r + 0.5) * R, ok = [];
+    for (let y = y0 + 2 * R; y < y1 - 2 * R; y += 0.8 * R) for (let x = this.l + rr; x < this.r - rr; x += 0.8 * R) {
+      if (!this.rects.some((q) => q.x1 > x - rr && q.x0 < x + rr && q.y1 > y - rr && q.y0 < y + rr) && !this.spikes.some((q) => q.x1 > x - rr && q.x0 < x + rr && q.y1 > y - rr && q.y0 < y + rr)) ok.push([x, y]);
+    }
+    if (!ok.length) return;
+    const [x, y] = ok[(this.ringRng() * ok.length) | 0];
+    this.rings.push({ x, y, used: false }); this.ringAt = null;
   }
   // Some of a run's ledges as their world has them (user): the Cave's planks bounce, the Mine's blocks pull (BOUNCY, MAGNET).
   flavour(from) {
@@ -2006,6 +2023,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
   const icicle = (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
   for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);
+  for (const rg of lv.rings) if (!rg.used && seen(rg.y - 2 * R, rg.y + 2 * R)) {   // a boost ring: gold, two rims, lights going round it, a glow
+    const r = RING.r * R * (1 + 0.04 * Math.sin(T * 5));
+    F(rg.x, rg.y, r * 1.5, 0, 0, r * 1.5, INK.coin, 0.25, 1); F(rg.x, rg.y, r, 0, 0, r, INK.coin, 1, 4); F(rg.x, rg.y, r * 0.78, 0, 0, r * 0.78, PAL.white, 1, 4);
+    for (let k = 0; k < 6; k++) { const a = T * 3 + (k * TAU) / 6; disc(rg.x + Math.cos(a) * r * 0.9, rg.y + Math.sin(a) * r * 0.9, 0.09 * R, k & 1 ? INK.white : INK.coinD, 1); }
+  }
   for (const sp of lv.spots) if (!sp.used && seen(sp.y - 2.5 * R, sp.y + 2.5 * R)) {   // the flip side's spots (a pool, at its floor)
     const r = sp.r * R, flat = sp.kind === 'out' ? 0.45 : 1, w = (k, a) => Math.sin(T * 2.1 + k * 1.9 + a) * 0.12 * r;
     for (const [c, f] of [[PAL.blue, 1], [PAL.yellow, 0.8], [PAL.white, 0.62]]) for (let k = 0; k < 5; k++) {

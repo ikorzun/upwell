@@ -452,7 +452,7 @@ class Game {
     this.R = 30; this.vjump = 1; this.builtW = 0; this.list = []; this.look = { x: 0, y: 0, t: 0 }; this.heroLook = { x: 0, y: 0, t: -1e9 };
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.queued = null; this.rising = false;
     this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = [];
-    this.pow = null; this.ram = false; this.tail = [];   // the candy at work, a ram on its way up, a rainbow's tail
+    this.pow = null; this.ram = false; this.tail = []; this.rocket = null;   // the candy at work, a ram on its way up, a rainbow's tail, a boost ring's flight
     this.warns = [];   // where threats come down into view (see threats)
     this.followers = []; this.trail = [];   // the freed, following the hero along its way (see followStep)
     this.swarm = [];   // the swarm candy's crowd (swarmUp)
@@ -527,7 +527,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -688,6 +688,24 @@ class Game {
     crumbleFx(r, this.lv.theme.block, true); fx.ring((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1.4 * this.R, INK.coin);
     sound.play('crumble', 1, 0.9); sound.play('coin', 0.6, 1.3); shake.add(3); haptics.buzz(20);
   }
+  // The boost ring (RING): through it the hero rockets up a quarter of the level through all, smashing what breaks and popping
+  // the enemies it meets, safe meanwhile; it ends once that high and clear of every ledge.
+  ringStep(dt) {
+    const H = this.hero, lv = this.lv, R = this.R;
+    if (!this.rocket) {
+      for (const rg of lv.rings) if (!rg.used && Math.hypot(H.cx - rg.x, H.cy - rg.y) < RING.r * R) {
+        rg.used = true; this.rocket = { to: H.cy - RING.lift * Math.max(lv.floor - lv.endY, 10 * R) };
+        fx.ring(rg.x, rg.y, 2.4 * R, INK.coin); fx.ring(rg.x, rg.y, 1.6 * R, INK.white); shake.add(6); haptics.buzz(30); sound.play('spring', 1, 0.6); sound.play('combo', 0.8, 1.4);
+      }
+      return;
+    }
+    H.thread = true; H.gScale = 0; setVel(H, H.rigVx * 0.9, -RING.v * this.vjump); this.invuln = Math.max(this.invuln, 0.3);
+    for (const r of lv.near(H.minY, H.maxY)) if (!r.gone && r.x1 > H.minX && r.x0 < H.maxX && this.smashable(r)) this.smash(r);   // what breaks, broken
+    for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > H.minX && q.minX < H.maxX && q.maxY > H.minY && q.minY < H.maxY) this.zap(e, [INK.coin, INK.white]); }
+    sparkFx(H.cx, H.maxY, 3, Math.PI / 2, 0.5, [80, 200], [1.5, 3], [0.2, 0.4], [INK.coin, INK.white], 0.1);   // its trail
+    const clear = !lv.near(H.minY - 2, H.maxY + 2).some((r) => !r.gone && r.x1 > H.minX - 2 && r.x0 < H.maxX + 2 && !r.plank);
+    if (H.cy <= this.rocket.to && clear) { this.rocket = null; H.thread = false; H.gScale = 1; setVel(H, H.rigVx, -0.7 * this.vjump); this.invuln = Math.max(this.invuln, 1); this.sinceContact = JUMP.coyote + 1; }
+  }
   bonk() { const H = this.hero; this.ram = false; sound.play('land', 0.8, 0.6); shake.add(2); sparkFx(H.cx, H.minY, 6, -Math.PI / 2, 1, [80, 220], [1.2, 2.4], [0.2, 0.35], [INK.white], 0.5); }
   // Letting go of the button on the way up makes a lower jump.
   releaseJump() {
@@ -782,6 +800,7 @@ class Game {
       const d = hero.cy < r.y0 ? r.y0 - hero.maxY : hero.minY - r.y1, k = 1 - clamp(d / (MAGNET.range * this.R), 0, 1);
       if (d > 1) addVel(hero, 0, (hero.cy < r.y0 ? 1 : -1) * MAGNET.pull * this.R * k * dt);
     }
+    if (playing) this.ringStep(dt);
     if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); if (this.power('swarm')) this.swarmStep(); if (hero.rigVy < -40) this.cracks(); }
     this.warns = playing ? this.threats(dt) : [];
     const bs = this.bodyList(), puck = lv.boss && !lv.boss.dead && lv.boss.def && lv.boss.def.slide ? lv.boss.body : null;

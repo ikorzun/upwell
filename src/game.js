@@ -340,6 +340,10 @@ class Boss {
 
 // ── Game ─────────────────────────────────────────────────────
 const RAINBOW_BODY = RAINBOW_INK.map((c) => ({ id: 'rainbow', base: c, deep: PAL.black }));   // the hero's colours under a rainbow
+// A death (the plan: funny deaths, each its own): the hero held a beat in the colour of what did it, hot, pricked,
+// bonked or soured, with the world still, then its burst (Game.pop). A fall ends below the screen: no beat there.
+const DIE = { beat: 0.3, body: { fire: { id: 'die', base: PAL.orange, deep: PAL.red }, spikes: { id: 'die', base: PAL.red, deep: PAL.black },
+  icicle: { id: 'die', base: PAL.blue, deep: PAL.black }, enemy: { id: 'die', base: PAL.green, deep: PAL.black } } };
 const MODS = () => ({ bounce: 1, slide: 1, hold: 0, magnet: 1, invuln: 0, airJumps: 1, blast: false, coinMul: 1, comboShift: 0, jump: 1, discount: 1, iron: false, fire: 1, gun: 0, plaster: 0, ceil: false, dive: false, dashes: 1, meteor: false, fireFree: 0 });
 let lastOffer = [];   // the cards offered last time: not again in the next three (a bag, the digest §7: fair-feeling chance)
 const SPIKE_PUSH = [[0, -1], [0, 1], [1, -0.35], [-1, -0.35]];
@@ -1374,13 +1378,22 @@ class Game {
     if (this.state !== 'play') return;
     this.bankDrops();
     this.hp = Math.max(0, this.hp); this.state = 'dead'; this.stateT = 0; this.result = null;
-    const H = this.hero, lv = this.lv;   // it bursts where it can be seen (a fall ends below the screen)
-    burstFx(H.cx, clamp(H.cy, lv.cam + this.R, lv.cam + view.h - this.R), this.R, H.color.base); shake.add(12);
-    input.clear(); haptics.buzz(30); sound.play('die');
+    this.dieT = this.deathWhy() === 'fall' ? 0 : DIE.beat; if (this.dieT) sound.play('hurt'); else this.pop();   // held a beat in what did it (the hit heard at once), then the pop (frame)
+    input.clear(); haptics.buzz(30);
     if (this.lv.boss) save.camp.fails[this.failKey()] = (save.camp.fails[this.failKey()] || 0) + 1;   // a loss at a boss, counted (help after three)
     if (this.mode === 'camp') { this.campKeep(); persist(); return; }   // the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
     if (this.coins < this.revivePrice()) this.finish(false);
   }
+  pop() {   // the burst, each death its own: where it can be seen (a fall ends below the screen), in the colour it was held in
+    const H = this.hero, lv = this.lv, R = this.R, x = H.cx, y = clamp(H.cy, lv.cam + R, lv.cam + view.h - R), why = this.deathWhy();
+    burstFx(x, y, R, why === 'fall' ? H.color.base : DIE.body[why].base); shake.add(12); sound.play('die');
+    if (why === 'fire') sparkFx(x, y - 0.3 * R, 24, -Math.PI / 2, 0.6, [60, 220], [2.5, 5], [0.9, 1.6], [PAL.gray, PAL.gray, INK.flame], -0.2);   // toasted: smoke and embers going up
+    else if (why === 'spikes') { fx.ring(x, y, 1.6 * R, INK.spike); sparkFx(x, y, 20, -Math.PI / 2, 1.2, [350, 800], [2, 3.5], [0.35, 0.7], [INK.spike, INK.spike, INK.white], 0.8); }   // popped like a balloon
+    else if (why === 'fall') { splatFx(x, y, R, H.color.base, 14); fx.ring(x, y, 2.6 * R, H.color.base); fx.ring(x, y, 1.6 * R, INK.white); shake.add(6); }   // splat
+    else if (why === 'icicle') { fx.ring(x, y, 1.8 * R, INK.white); sparkFx(x, y - R, 10, -Math.PI / 2, 1.4, [150, 380], [2.5, 4], [0.5, 0.9], [PAL.yellow, PAL.white], 0.2); }   // bonk: stars over the head
+    else sparkFx(x, y, 18, -Math.PI / 2, Math.PI, [200, 560], [2, 3.5], [0.4, 0.8], [PAL.green, PAL.yellow], 0.6);   // too sour
+  }
+  deathWhy() { const by = this.lastBy; return by === 'fire' || by === 'fire_blob' ? 'fire' : by === 'spikes' || by === 'fall' || by === 'icicle' ? by : 'enemy'; }   // what did it, in a word's kind
   revivePrice() { return Math.round(REVIVE.price * (1 + 0.5 * Math.min(this.world, 4)) * Math.pow(REVIVE.grow, this.revives) * (this.hard ? 1.5 : 1)); }
   // Back from the end for coins: on the last safe ledge, with all its hearts and a long moment of safety.
   revive() {
@@ -1421,7 +1434,7 @@ class Game {
       if (ads.ok && bridge.leaderboards && bridge.leaderboards.type !== 'not_available') bridge.leaderboards.setScore('daily_height', total).catch(() => {});
     }
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
-    this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp };
+    this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp, why: this.deathWhy() };
   }
   where() { return this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + (this.world + 1) + '-' + (this.stage + 1); }
   togglePause(on) {
@@ -1444,11 +1457,12 @@ class Game {
   frame(dt, alpha, now) {
     const lv = this.lv, b = this.hero;
     const rb = this.power('rainbow') && this.state !== 'dead', tl = this.tail, last = tl[tl.length - 1];   // frame runs on under the revive dialog, gun() does not
-    b.color = rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
+    b.color = this.state === 'dead' && this.dieT > 0 ? DIE.body[this.deathWhy()] : rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
     if (last && Math.hypot(b.cx - last[0], b.cy - last[1]) > 4 * this.R) tl.length = 0;   // a respawn or a door: no streak across the screen
     else if (rb && (!last || Math.hypot(b.cx - last[0], b.cy - last[1]) > RAINBOW.gap * this.R)) tl.push([b.cx, b.cy]);
     while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after
     this.stateT += dt;
+    if (this.dieT > 0 && (this.dieT -= dt) <= 0 && this.state === 'dead') this.pop();
     if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else ui.cards(this.offer()); }   // an upgrade the first time a campaign level is cleared
     if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
     if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.runes(); else ui.result(this.result); }
@@ -1647,8 +1661,7 @@ const ui = {
     }
   },
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
-    const p = this.panel('result'), g = game, price = g.revivePrice(), by = g.lastBy, boss = !!(g.rc && g.rc.boss);
-    const why = by === 'fire' || by === 'fire_blob' ? 'fire' : by === 'spikes' || by === 'fall' || by === 'icicle' ? by : 'enemy';
+    const p = this.panel('result'), g = game, price = g.revivePrice(), boss = !!(g.rc && g.rc.boss), why = g.deathWhy();
     const def = g.lv.boss && g.lv.boss.def;
     p.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));   // a boss has a word of its own
     if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'chip wide', () => g.revive()), 'revive'));
@@ -1722,7 +1735,8 @@ const ui = {
   },
   result(r) {
     const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons
-    box.append(cap(el('div', 'head', r.won ? t('won') : t('dead')), r.won ? 'won' : 'dead'));
+    box.append(cap(el('div', 'head', r.won ? t('won') : t('dead_' + r.why)), r.won ? 'won' : 'dead_' + r.why));   // a loss: a word on what did it,
+    if (!r.won) box.append(el('div', 'label', t('dead')));   // and that the run is over
     const rows = [[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]];
     const tb = el('div', 'rows');
     for (const [k, v] of rows) { const row = el('div', 'row'); row.append(el('span', null, k), el('b', null, String(v))); tb.append(row); }

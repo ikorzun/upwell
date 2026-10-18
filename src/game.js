@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,7 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ',
   },
 };
 let lang = 'en';
@@ -1328,9 +1328,9 @@ function px(text, max = Infinity, left = false) {
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
-function cap(e, k) {
-  const c = document.createElement('small'), ja = lang !== 'ja' || k === 'title';
-  c.className = 'cap'; c.lang = ja ? 'ja' : 'en'; c.textContent = k === 'title' ? 'アップウェル' : STR[ja ? 'ja' : 'en'][k];
+function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
+  const c = document.createElement('small'), ja = lang !== 'ja' || k === 'title', raw = k === 'title' ? 'アップウェル' : STR[ja ? 'ja' : 'en'][k];
+  c.className = 'cap'; c.lang = ja ? 'ja' : 'en'; c.textContent = o ? raw.replace(/\{(\w+)\}/g, (_, n) => o[n]) : raw;
   e.classList.add('capped'); e.append(c);
   return e;
 }
@@ -1370,7 +1370,7 @@ function fitBig(b) {
 const ui = {
   open: null, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; return p; },
-  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result']) $(id).classList.remove('on'); this.open = null; },
+  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map']) $(id).classList.remove('on'); this.open = null; },
   menu() {
     const p = this.panel('menu');
     const title = cap(el('h1', 'title', 'UPWELL'), 'title'); title.lang = 'en'; p.append(title);   // the name in VT323 whatever the language
@@ -1391,10 +1391,14 @@ const ui = {
       const h = cap(button(t('hard') + (save.hard ? ' ✓' : ''), 'chip wide' + (save.hard ? ' on' : ''), () => { save.hard = !save.hard; persist(); this.menu(); }), 'hard');
       p.append(h);
     }
-    const r = save.run, c = save.camp, next = campAt(c.open);   // the campaign at the bottom (one tap): Play, or Continue where it is open;
-    if (r) p.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip wide', () => game.continueRun()), 'random'));   // a random run kept from before over it,
-    else if (c.open > 0) p.append(cap(button(t('random'), 'chip wide', () => game.startRun()), 'random'));   // or a new one, once the campaign is begun
-    if (c.open === 0 && !(c.stars[0] > 0)) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(0)), 'play'));
+    const r = save.run, c = save.camp, next = campAt(c.open), begun = c.open > 0 || c.stars[0] > 0, done = c.stars[CAMP_LEN - 1] > 0;
+    const duo = el('div', 'duo');   // once the campaign is begun, over the main button: its map, and the random run (a kept one to go on with, or a new one)
+    if (begun && !done) duo.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
+    if (r) duo.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));
+    else if (begun) duo.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
+    if (duo.children.length) p.append(duo);
+    if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
+    else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(0)), 'play'));   // one tap to the first level (CrazyGames: one at most)
     else p.append(cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(c.open)), 'continue'));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
@@ -1439,7 +1443,23 @@ const ui = {
   },
   worldDone() {   // its boss beaten (the runes come here: see the plan)
     const p = this.panel('result');
-    p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', t('soon')), cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
+    p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', t('soon')), cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
+  },
+  // The campaign's map: a world's ten levels, five by two, each its number (the bonus a coin, the boss its face) over its stars;
+  // the open ones to tap, the next one yellow; on to that one under the thumb.
+  map(w = Math.floor(save.camp.open / 10)) {
+    const p = this.panel('map'), c = save.camp, grid = el('div', 'levels'), next = campAt(c.open), done = c.stars[w * 10 + 9] > 0;
+    p.append(cap(el('div', 'head', tf('world', { n: w + 1 }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: w + 1 }));
+    for (let i = w * 10; i < w * 10 + 10; i++) {
+      const { s, rc } = campAt(i), open = i <= c.open, n = c.stars[i] || 0, icon = rc.boss ? 'boss' : rc.bonus != null ? 'coin' : null;
+      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === c.open && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) game.playLevel(i); });
+      if (icon) b.append(iconEl(icon));
+      if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
+      b.setAttribute('aria-label', (w + 1) + '-' + (s + 1)); grid.append(b);
+    }
+    p.append(grid);
+    if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
+    else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(c.open)), 'continue'));
   },
   pause() {
     const p = this.panel('pause');

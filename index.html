@@ -66,6 +66,12 @@
   .big, .chip, .head, .title, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
   .langs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; max-width: 340px; }   /* two by two: four in a row would not fit a small phone */
   .langs .chip { text-transform: none; }   /* each language's name as it is written */
+  #map { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
+  .levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 340px; margin: auto 0; }   /* the campaign's ten, five by two, in the middle */
+  .chip.lvl { min-height: 64px; padding: 6px 2px; }
+  .chip.lvl > .ico { --p: 2; }   /* a bonus's coin, the boss's face (not its stars) */
+  .mini { display: flex; gap: 1px; --p: 1; }   /* a level's stars */
+  .duo { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }   /* two chips side by side */
   * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }   /* Safari: a held finger selects nothing */
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -248,6 +254,7 @@
   <div id="cards" class="panel"></div>
   <div id="pause" class="panel"></div>
   <div id="result" class="panel"></div>
+  <div id="map" class="panel"></div>
 </div>
 <script src="src/gum.js"></script>
 <script src="src/world.js"></script>

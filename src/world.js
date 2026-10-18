@@ -68,7 +68,7 @@ const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.
 // itself for `time` s (+`plus` a Long charge): a bullet every `every` s at the nearest enemy or blob within
 // `range` R, flying `speed` R/s; it stops at a block and breaks a crumbling one.
 const GUN = { time: 8, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at: [[0.22, 0.4], [0.58, 0.78]] };
-// Rock candy: for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
+// The helmet (once rock candy; user): for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
 // `maxH` tiles found `reach` R over the hero (`look` R off a ceiling) breaks before it is met, its enemies with it, `coins` once ever,
 // the hero kicked on up at `kick` of a jump; it is back `back` s later, or under a hero coming down onto it once `soon` s are out.
 const SMASH = { time: 11, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 3.5, soon: 1, coins: 2, hitstop: 0.05, shake: 5 };   // back 1 s later than at first (user)
@@ -387,7 +387,7 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
   { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
     news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' } },
   { role: 'apply', len: 34, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
-    news: { en: 'rock candy', es: 'caramelo roca', pt: 'bala de pedra', ja: 'ロックキャンディ' } },
+    news: { en: 'the helmet', es: 'el casco', pt: 'o capacete', ja: 'ヘルメット' } },
   { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
   { role: 'twist', len: 28, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
@@ -511,7 +511,11 @@ ICONS.fizz = '............/............/..........w./.yyyyyyyyy../.ywwyyyyyyw./.
 ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.maxhp = ICONS.heart;
 ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
-ICONS.smash = '.s.s....s.s./............/ssssss.sssss/sssssk.sssss/ssssk.ksssss/ssssk..sssss/............/.....ww...../....wwww..../...wwwwww.../.....ww...../.....ww.....';   // a block cracking over an arrow up: a jump smashes it
+// The smash's picture: its helmet (user: the rock candy's place), a moto one, red with a white stripe and blue-lensed goggles,
+// or (?helmet=astro, the user's other choice) an astronaut's, white with a blue visor in a black rim and a blue and orange neck ring.
+const HELMET = /[?&]helmet=astro\b/.test(location.search) ? 'astro' : 'moto';
+ICONS.smash = HELMET === 'astro' ? '...wwwwww.../..wwwwwwwss./.wwkkkkkkws./wwkbbbbbbkws/wwkbwbbbbkws/wwkbbbbbbkws/wwkbbbbbbkws/.wwkkkkkkws./.wwwwwwwwws./..bbbbbbbb../..oooooooo../............'
+  : '....rwsr..../..rrrwsrrr../.rwrrwsrrrr./.rrrrwsrrrr./rrrrrwsrrrrr/rrrrrwsrrrrr/rkkkkkkkkkkr/rkbbbkkbbbkr/rkkkkkkkkkkr/rr........rr/.rr......rr./..r......r..';
 ICONS.grow = 'ggg......ggg/gg........gg/g...wwww...g/...wwwwww.../..wwwwwwww../..wwkwwkww../..wwkwwkww../..wwwwwwww../...wwwwww.../g...wwww...g/gg........gg/ggg......ggg';   // the hero with arrows out of its corners: it grows
 ICONS.mark = '....yyyy..../....yyyy..../....yyyy..../....yyyy..../....yyyy..../yyyyyyyyyyyy/.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../....yyyy..../.....yy...../............';   // over a dazed boss: land here
 ICONS.ceiling = 'wwwwwwwwwwww/gggggggggggg/..g..g..g.../....wwww..../...wwwwww.../...wkwwkw.../...wwwwww.../....wwww..../............/............/............/............';
@@ -1809,10 +1813,14 @@ void main() { if (vSA * vSA * uShadowA <= bayer(cell())) discard; o = vec4(PAL[0
 for (const d of DESIGNS) { d.face.eyeR = d.face.eyeR.map((v) => v * 1.45); d.face.mouthW *= 1.3; }
 const gumWriteFace = Renderer.prototype.writeFace;
 Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
-  gumWriteFace.call(this, b, X, Y, cx, cy);
   const s = b.s, f = s.face, fc = b.face, ink = THEME.ink, P0 = this.p0, P1 = this.p1, P2 = this.p2;
   const frame = (ux, uy, ax, ay, bx, by) => { mapPoint(s, X, Y, cx, cy, ux, uy, P0); mapPoint(s, X, Y, cx, cy, ux + ax, uy + ay, P1); mapPoint(s, X, Y, cx, cy, ux + bx, uy + by, P2); };
   const put = (r, g, bl, type, p1, p2, p3) => this.feat(P0.x, P0.y, P1.x - P0.x, P1.y - P0.y, P2.x - P0.x, P2.y - P0.y, r, g, bl, 1, type, p1 || 0, p2 || 0, p3 || 0);
+  const dot = (ux, uy, ax, ay, c) => { frame(ux, uy, ax, 0, 0, ay); put(c[0], c[1], c[2], 0); };   // an upright oval in one ink
+  // The hero's helmet while the smash is on (b.helmet, see HELMET; user: in place of its pips). An astro one goes under the face, which
+  // shows in its window: a white dome, grey on its right, the window's black rim, and in it the hero's own colour.
+  if (b.helmet === 'astro') { dot(0.1, 0.05, 1.03, 1.02, PAL.gray); dot(-0.05, -0.04, 0.96, 0.97, PAL.white); dot(0.93, 0.1, 0.12, 0.22, PAL.gray); dot(0, 0.13, 0.68, 0.49, ink); dot(0, 0.13, 0.56, 0.38, b.color.base); }
+  gumWriteFace.call(this, b, X, Y, cx, cy);
   const closed = fc.squint > 0.45, lx = fc.lx * 0.05, ly = fc.ly * 0.035, [ex, ey] = f.eye, [rx, ry] = f.eyeR, m = f.mouthW;
   if (fc.frown) {
     for (let side = -1; side <= 1; side += 2) {
@@ -1829,14 +1837,15 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
     if (fc.surprise <= 0.35) { frame(f.mouth[0], f.mouth[1] + m * 0.42, m * 0.5, 0, 0, m * 0.36); put(THEME.blush[0], THEME.blush[1], THEME.blush[2], 0); }
   }
-  if (b.isHero) {   // the hero's moto helmet (user: in place of the dots of its face): a shell over its top two thirds, red on a white hero
-    // and white on any other, a stripe of the other down its crown, a dark visor across the eyes, looking where they look, with a glint
-    const shell = b.color.base === PAL.white ? PAL.red : PAL.white, stripe = shell === PAL.red ? PAL.white : PAL.red, vx = fc.lx * 0.08;
-    frame(0, -0.33, 1.08, 0, 0, 0.86); put(shell[0], shell[1], shell[2], 0);
-    frame(0, -0.92, 0.13, 0, 0, 0.3); put(stripe[0], stripe[1], stripe[2], 0);
-    frame(vx, -0.04, 0.7, 0, 0, 0.3); put(ink[0], ink[1], ink[2], 0);
-    frame(vx - 0.32, -0.15, 0.16, 0, 0, 0.06); put(1, 1, 1, 0);
-  }
+  if (b.helmet === 'moto') {   // a moto one over the face: a shell over the brow, red (white on a red hero), a stripe down its crown of
+    // the other with a grey side, goggles across the eyes with blue lenses that look where the eyes look, a glint; the mouth shows under it
+    const shell = b.color.base === PAL.red ? PAL.white : PAL.red, stripe = shell === PAL.red ? PAL.white : PAL.red;
+    for (let side = -1; side <= 1; side += 2) dot(0.8 * side, 0.2, 0.22, 0.34, shell);   // its sides down by the cheeks
+    dot(0, -0.42, 1.06, 0.57, shell); dot(0.05, -0.56, 0.14, 0.42, PAL.gray); dot(-0.03, -0.57, 0.09, 0.41, stripe);
+    dot(lx * 1.6, ey + ly, 0.8, 0.14, ink);
+    for (let side = -1; side <= 1; side += 2) dot(ex * side + lx, ey + ly, rx * 0.95, ry * 0.5, PAL.blue);
+    dot(-0.52, -0.6, 0.13, 0.07, PAL.white);
+  } else if (b.helmet === 'astro') { dot(-0.42, 0.02, 0.05, 0.13, PAL.blue); dot(0, 0.8, 0.56, 0.07, PAL.blue); dot(0, 0.9, 0.44, 0.06, PAL.orange); }   // a glint in its window, its neck ring
 };
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {
@@ -2141,10 +2150,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
   }
   if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
-  if (g.state === 'play' && g.power('smash') && !(g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0)) {   // the smash's time left, over the hero's head: a pip a fifth, blinking in its last second (user)
-    const n = Math.ceil((5 * g.gunT) / g.gunMax);
-    for (let k = 0; k < n; k++) disc(hero.cx + (k - 2) * 0.42 * R, hero.minY - 0.45 * R, 0.14 * R, INK.flame, 1);
-  }
   if (g.warns.length) {   // threats coming down into view (see Game.threats): a red sign under the HUD over where each comes in
     const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2) * PIX.size;
     for (const x of g.warns) icon('warn', clamp(x, lv.l + hw, lv.r - hw), wy, 1, wk);

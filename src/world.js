@@ -235,7 +235,8 @@ const BONUS = [
 //   chunks   the chunks to build it from, by weight               intro  the ones it must show, laid first
 //   enemies  their kinds (none: []); foes: the odds of one a chunk, pair: of two
 //   candy    the candies' kinds, one each (none: [])             set    its set piece, if any
-//   shop     a shop behind a door; stash: a room of coins         safe   the last heart is not taken (it is learning)
+//   shop     a shop behind a door, at that share of its length    safe   the last heart is not taken (it is learning)
+//   stash    a room of coins, the same (low enough: no door in its last LEVEL.pocketEnd tiles)
 //   bonus    the BONUS level it is (time: its seconds)            boss   the boss it is
 //   news     what is new, for its banner                          seed   its layout (picked with the bot)
 // The campaign's bosses (the plan: ten, each beaten its own way; the first so far): `hp` its hearts and `phase(hp)` what it
@@ -260,14 +261,14 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
     news: { en: 'crawlers: land on them', es: 'reptadores: cae sobre ellos', pt: 'rastejantes: pule neles', ja: 'ハイハイ: うえから ふもう' } },
   { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 1103,
     news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' } },
-  { role: 'apply', len: 34, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: true, seed: 1104,
+  { role: 'apply', len: 34, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 1104,
     news: { en: 'rock candy', es: 'caramelo roca', pt: 'bala de pedra', ja: 'ロックキャンディ' } },
   { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 1105 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 1106 },
-  { role: 'twist', len: 28, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: true, seed: 1107,
+  { role: 'twist', len: 28, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 1107,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
   { role: 'peak', len: 28, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 1108 },
-  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: true, seed: 1109,
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, seed: 1109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'probka', moss: true },   // moss on its arena's walls: a place to sit its dive out
 ] }];
@@ -857,8 +858,8 @@ class Level {
     this.cam = this.floor + CAM.floorShow - o.h;
     if (o.kind === 'well') {
       const rnd = this.rng, H = o.height;
-      if (rc ? rc.shop : !o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (0.3 + rnd() * 0.4), kind: 'shop', done: false });
-      if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (0.15 + rnd() * 0.55), kind: 'treasure', done: false });
+      if (rc ? rc.shop : !o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (rc ? rc.shop : 0.3 + rnd() * 0.4), kind: 'shop', done: false });
+      if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * (this.hard ? 1.4 : 1);
       if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
     } else this.build(o);

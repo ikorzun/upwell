@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,7 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！',
   },
 };
 let lang = 'en';
@@ -163,6 +163,7 @@ class Foe {
     const pulse = 0.25 + 1.5 * Math.pow(Math.max(0, Math.sin(this.ph * TAU)), 2);   // averages about one
     const push = this.ph < this.lastPh;   // a new pulse begins
     this.lastPh = this.ph;
+    if (def.move === 'flow') { this.flow(dt, g); return; }
     if (def.move === 'crawl') {   // back and forth along its ledge (or the floor, between the walls)
       if (this.state === 'shell') { this.roll(dt, g); return; }
       if (!(b.wallMask & 8)) return;
@@ -193,6 +194,54 @@ class Foe {
       const p = s < w ? [x0 + s, y0] : s < w + h ? [x0 + w, y0 + s - w] : s < 2 * w + h ? [x0 + w - (s - w - h), y0 + h] : [x0, y0 + h - (s - 2 * w - h)];
       steer((p[0] - b.cx) * 8, (p[1] - b.cy) * 8, 10);
     }
+  }
+  // A worm (WORM): sits on its ledge; now and then, on screen, reaches a tube out to a ledge near by (the warning), then
+  // pours itself along it, through anything, and lands there. Its state drives its body: flowing, it floats and touches nothing.
+  flow(dt, g) {
+    const b = this.body, lv = g.lv;
+    if (this.state === 'walk') { this.state = 'sit'; this.waitT = rand(WORM.wait[0], WORM.wait[1]); }   // (just come alive)
+    b.thread = this.state === 'flow'; b.gScale = b.thread ? 0 : 1;   // (kept to the state: a bot's restored branch too)
+    if (this.state === 'sit') {
+      if ((this.waitT -= dt) > 0 || !(b.wallMask & 8) || b.cy < lv.cam || b.cy > lv.cam + view.h) return;
+      this.to = this.pickLedge(lv);
+      if (this.to) { this.state = 'reach'; this.st = 0; this.from = [b.cx, b.cy]; } else this.waitT = 1;
+      return;
+    }
+    this.st += dt;
+    if (this.state === 'reach') { if (this.st > WORM.reach) { this.state = 'flow'; this.st = 0; this.from = [b.cx, b.cy]; } return; }
+    const u = Math.min(1, this.st / WORM.flow), [x, y] = this.arc(u);
+    setVel(b, (x - b.cx) * 14, (y - b.cy) * 14); b.wake();
+    if (u >= 1) { this.state = 'sit'; this.waitT = rand(WORM.wait[0], WORM.wait[1]); this.ledge = this.to.r; this.to = null; }
+  }
+  pickLedge(lv) {   // a steady ledge near by, well in view (under the HUD's quarter, over the keys), clear of spikes: the middle of its top
+    const b = this.body, R = lv.R, [n0, n1] = WORM.near, g_room = game.room();
+    const ok = lv.near(b.cy - 6 * R, b.cy + 8 * R).filter((r) => { const d = Math.abs((r.x0 + r.x1) / 2 - b.cx);   // (down as well: it drips toward the hero)
+      return r !== this.ledge && !r.cap && !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * lv.tile && d > n0 * R && d < n1 * R && r.y0 > lv.cam + 0.25 * view.h && r.y0 < lv.cam + view.h - g_room
+        && !lv.spikes.some((q) => q.dir === 0 && Math.abs(q.y1 - r.y0) < 1 && q.x1 > r.x0 && q.x0 < r.x1); });
+    if (!ok.length) return null;
+    const r = ok[(Math.random() * ok.length) | 0];
+    return { r, x: (r.x0 + r.x1) / 2, y: r.y0 - 1.1 * b.R };
+  }
+  arc(u) {   // its way over: from where it set off to its spot, bowed 2 R up
+    const [x0, y0] = this.from, { x: x1, y: y1 } = this.to, cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - 2 * this.body.R, v = 1 - u;
+    return [v * v * x0 + 2 * v * u * cx + u * u * x1, v * v * y0 + 2 * v * u * cy + u * u * y1];
+  }
+  // Its tubes as discs [x, y, half-width]: waving round the knot; reaching out, one of them is its way over so far.
+  tubes(R, T) {
+    const b = this.body, out = [], n = Math.round(WORM.len / WORM.seg), d0 = 0.55 * R, reaching = this.state === 'reach' || this.state === 'flow';
+    const lead = reaching ? (this.to.x > this.from[0] ? 0 : 2) : -1;   // the tube on its way's side
+    WORM.angles.forEach((a0, k) => {
+      const pts = [];
+      if (k === lead) {   // along the arc: growing out, then (flowing) what is left of it ahead of the knot
+        const u0 = this.state === 'flow' ? Math.min(1, this.st / WORM.flow) : 0, u1 = this.state === 'reach' ? Math.min(1, this.st / WORM.reach) : 1, m = Math.max(2, Math.round(n * 2.5));
+        for (let i = 1; i <= m; i++) { const [x, y] = this.arc(u0 + ((u1 - u0) * i) / m); pts.push([x, y, WORM.w * R]); }
+      } else for (let i = 1; i <= n; i++) {
+        const a = a0 + Math.sin(T * 2.2 + k * 1.7 + i * 0.5) * WORM.wave, d = d0 + (i / n) * (WORM.len * R - d0);
+        pts.push([b.cx + Math.cos(a) * d, b.cy + Math.sin(a) * d, WORM.w * R * (1 - (0.3 * i) / n)]);
+      }
+      out.push(pts);
+    });
+    return out;
   }
   // A spitter, now and then while the hero is near and on screen, swells up for SPIT.wind s and
   // lobs a blob that comes down where the hero was. True while it stands to do it.
@@ -723,6 +772,7 @@ class Game {
   interact(dt) {
     const lv = this.lv, H = this.hero;
     for (const e of lv.enemies.slice()) if (e.body.touchHero) this.meet(e);
+    for (const e of lv.enemies.slice()) if (e.type === 'worm') this.wormTouch(e);
     this.rolling(dt);
     for (const e of lv.enemies) if (STR.en['seen_' + e.type] && e.body.cy > lv.cam && e.body.cy < lv.cam + view.h) this.hint(e.type);   // a new kind of enemy, told once
     if (lv.boss && !lv.boss.dead && lv.boss.body.touchHero) this.meet(lv.boss);
@@ -757,6 +807,12 @@ class Game {
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
     else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
+  }
+  wormTouch(e) {   // a worm's tubes hurt (its knot is stomped, see meet); pouring itself over, the knot does too
+    const H = this.hero, b = e.body, hr = H.R * H.growth * 0.8, pow = this.power('rainbow') || this.power('grow') || this.power('swarm');
+    const hit = (x, y) => { if (pow) this.zap(e, [INK.flame, INK.spike, PAL.purple]); else this.hurt(H.cx - x, H.cy - y, 'worm'); };
+    for (const tube of e.tubes(this.R, this.lv.t)) for (const [x, y, w] of tube) if (Math.hypot(H.cx - x, H.cy - y) < hr + w) { hit(x, y); return; }
+    if (b.thread && Math.hypot(H.cx - b.cx, H.cy - b.cy) < hr + b.R) hit(b.cx, b.cy);
   }
   zap(e, inks) {   // a rainbow hero's touch: the enemy pops, in all the inks (a giant's: in its own)
     const b = e.body;

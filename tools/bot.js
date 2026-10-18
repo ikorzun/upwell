@@ -68,7 +68,7 @@ function snap() {
     cam: lv.cam, t: lv.t, rects: lv.rects.slice(), rs: lv.rects.map((r) => [r.x0, r.x1, r.dx, r.gone, r.t, r.hit, r.crumbling, r.safe, r.move ? r.move.v : 0, r.broke, r.paid, r.crack]),
     coins: lv.coins.map((c) => Object.assign({}, c)), spawns: lv.spawns.slice(), shots: lv.shots.map((q) => Object.assign({}, q)),
     counts: [lv.coinsTaken, lv.foeKilled, lv.foeTotal], bullets: lv.bullets.map((q) => Object.assign({}, q)), fizz: lv.fizz.map((p) => p.taken), fire: lv.fire && { y: lv.fire.y, spitT: lv.fire.spitT, warn: lv.fire.warn && Object.assign({}, lv.fire.warn) }, bubbles: lv.bubbles.map((b) => b.cd),
-    enemies: lv.enemies.map((e) => ({ e, f: Object.fromEntries(Object.entries(e).filter(([, v]) => typeof v !== 'object')), b: snapBody(e.body) })),
+    enemies: lv.enemies.map((e) => ({ e, f: Object.fromEntries(Object.entries(e).filter(([k, v]) => typeof v !== 'object' || k === 'to' || k === 'from')), b: snapBody(e.body) })),   // (a worm's way over too: replaced, never changed)
     folk: lv.folk.map((f) => ({ f, o: Object.assign({}, f), b: f.body && snapBody(f.body) })), pickups: lv.pickups.slice(), sold: lv.pickups.map((p) => p.sold),
     icicles: lv.icicles.map((c) => Object.assign({}, c)), arenas: lv.arenas.map((a) => ({ a, o: Object.assign({}, a, { foes: a.foes.slice() }) })),
   };

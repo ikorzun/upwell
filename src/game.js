@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World 2 is on its way', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo 2 está en camino', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo 2 está a caminho', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,7 +74,7 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド 2は じゅんびちゅう', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:',
   },
 };
 let lang = 'en';
@@ -94,7 +94,7 @@ const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, h
 // The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
 // purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
 // run's progress stays in save.run, for the random run.
-const campFresh = () => ({ open: 0, stars: [], wallet: 0, builds: [], fails: {} });   // fails: the losses running at a boss, by its level
+const campFresh = () => ({ open: 0, stars: [], wallet: 0, builds: [], fails: {}, runes: [] });   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level
 const CAMP_LEN = CAMPAIGN.length * 10;   // ten levels a world
 const campAt = (i) => ({ w: Math.floor(i / 10), s: i % 10, rc: CAMPAIGN[Math.floor(i / 10)].levels[i % 10] });
 const opened = (u) => save.bank >= u.at;
@@ -105,7 +105,7 @@ shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
-  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; c.open = Math.min(Math.max(0, c.open | 0), CAMP_LEN - 1);
+  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = []; c.open = Math.min(Math.max(0, c.open | 0), CAMP_LEN - 1);
   save.v = 2;
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
@@ -1226,7 +1226,7 @@ class Game {
   giveUp() { this.finish(false); ui.result(this.result); }
   win() {
     pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8);
-    if (this.mode === 'camp') { const lost = this.maxHp - this.hp; delete save.camp.fails[this.ci]; this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); this.result = null; return; }   // a boss's stars: by the hearts it cost
+    if (this.mode === 'camp') { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); this.result = null; return; }   // a boss's stars: by the hearts it cost
     this.finish(true);
   }
   finish(won) {
@@ -1268,7 +1268,7 @@ class Game {
     this.stateT += dt;
     if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else ui.cards(this.offer()); }   // an upgrade the first time a campaign level is cleared
     if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
-    if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.worldDone(); else ui.result(this.result); }
+    if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.runes(); else ui.result(this.result); }
     if (this.winT > 0 && this.state === 'play' && (this.winT -= dt) <= 0) this.win();
     if (lv.kind === 'well' && this.state === 'play') {   // keep the drawn hero at the anchor; only ever climb
       let cy = 0;
@@ -1457,7 +1457,13 @@ const ui = {
     if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'chip wide', () => g.revive()), 'revive'));
     p.append(cap(button(t('menu'), 'big thumb alt', () => { pmsg('level_failed', g.lvl()); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
   },
-  worldDone() {   // its boss beaten (the runes come here: see the plan)
+  runes() {   // a world's boss beaten: its tapestry, three runes and what Aunt Moti reads in them (each its own ink); on at a tap
+    const p = this.panel('result'), cw = CAMPAIGN[game.world], cloth = el('div', 'cloth');
+    for (const [k, ch] of [...cw.runes].entries()) { const r = document.createElement('span'); r.className = 'rune r' + k; r.textContent = ch; cloth.append(r); }
+    cloth.setAttribute('aria-hidden', 'true');
+    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => this.worldDone()), 'next'));
+  },
+  worldDone() {   // its boss beaten, after its tapestry
     const p = this.panel('result');
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', t('soon')), cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
   },

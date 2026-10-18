@@ -251,7 +251,9 @@ const BOSSES = {
     defeat: { en: 'Fine, fine… go on up.', es: 'Vale, vale… sube ya.', pt: 'Tá bom, tá bom… pode subir.', ja: 'わかったよ… のぼりな。' } },
 };
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
-const CAMPAIGN = [{ world: WORLDS[0], levels: [
+// A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12
+// (its knitted pictures: the Heat, a drop like the hero, the Light) and what Aunt Moti reads in them.
+const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
   { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0, candy: [], safe: true, seed: 1101,
     news: { en: 'jumps and springs', es: 'saltos y resortes', pt: 'pulos e molas', ja: 'ジャンプと バネ' } },
   { role: 'teach', len: 31, fire: 0.35, maxD: 2, chunks: CAVE, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 1102,

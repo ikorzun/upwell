@@ -3,8 +3,9 @@
 
   assets/fonts/vt323.woff2        VT323, the type for Latin text: ASCII, Latin-1 and Latin Extended-A (es, pt) and punctuation
   assets/fonts/dotgothic16.woff2  DotGothic16 for Japanese, cut down to the characters the game's texts use, and ASCII
+  assets/fonts/yarndings12.woff2  Yarndings 12, the runes on the worlds' tapestries (the `runes:` in world.js)
 
-Run it again whenever a Japanese text changes: it reads the characters from src/*.js and index.html.
+Run it again whenever a Japanese text or a rune changes: it reads the characters from src/*.js and index.html.
 Both fonts are SIL OFL 1.1 (their licences are copied next to them). The full fonts are kept in assets/_raw/fonts
 (not in git), downloaded from the Google Fonts repository the first time.
 Needs fontTools and brotli (pip install fonttools brotli).
@@ -20,6 +21,7 @@ REPO = 'https://github.com/google/fonts/raw/main/ofl/'
 FONTS = {   # name: (repo folder, file)
     'vt323': ('vt323', 'VT323-Regular.ttf'),
     'dotgothic16': ('dotgothic16', 'DotGothic16-Regular.ttf'),
+    'yarndings12': ('yarndings12', 'Yarndings12-Regular.ttf'),
 }
 JA = re.compile('[　-ヿ㐀-鿿＀-￯]')   # kana, CJK punctuation and ideographs, full-width forms
 
@@ -50,7 +52,8 @@ def main():
     text = ''.join(open(os.path.join(ROOT, p), encoding='utf-8').read() for p in ('src/game.js', 'src/world.js', 'index.html'))
     ja = sorted(set(JA.findall(text)) | set('・ー、。！？「」'))
     for name, uni in (('vt323', list(range(0x20, 0x7f)) + list(range(0xa0, 0x180)) + list(range(0x2010, 0x2060)) + [0x20ac]),
-                      ('dotgothic16', [ord(c) for c in ja] + list(range(0x20, 0x7f)) + [0xb7, 0xd7])):   # its Latin and digits too: in the Japanese game they stand by kana
+                      ('dotgothic16', [ord(c) for c in ja] + list(range(0x20, 0x7f)) + [0xb7, 0xd7]),   # its Latin and digits too: in the Japanese game they stand by kana
+                      ('yarndings12', sorted({ord(c) for r in re.findall(r"runes: '([^']*)'", text) for c in r}))):   # the runes the worlds' tapestries use
         src, lic = fetch(name)
         have = TTFont(src).getBestCmap()
         missing = [chr(u) for u in uni if u not in have and (name != 'vt323')]

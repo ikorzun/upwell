@@ -776,6 +776,8 @@ class Game {
     const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
     if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
     if (hang) setVel(hero, 0, 0);
+    if (this.thrown && (hero.wallMask & (this.thrown > 0 ? 2 : 1))) { this.thrown = 0; this.wallHold = ROOM_THROW.hold; hero.kickSquash(1, 0, 1.6); shake.add(5); haptics.buzz(20); sound.play('land', 0.9, 0.7); }   // splat on the far wall,
+    if (this.wallHold > 0) { this.wallHold -= dt; setVel(hero, 0, 0); }   // and held there a moment, no bounce back (then the wall as ever)
     if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); if (this.power('swarm')) this.swarmStep(); if (hero.rigVy < -40) this.cracks(); }
     this.warns = playing ? this.threats(dt) : [];
     const bs = this.bodyList(), puck = lv.boss && !lv.boss.dead && lv.boss.def && lv.boss.def.slide ? lv.boss.body : null;
@@ -1016,7 +1018,7 @@ class Game {
     }
     lv.enemies.splice(i, 1);
     const b = e.body;
-    splatFx(b.cx, b.cy, b.R, b.color.base);
+    juiceFx(b.cx, b.cy, b.R, b.color.base); splatFx(b.cx, b.cy, b.R, b.color.base);   // it bursts like ripe fruit (user)
     if (e.type === 'skull') sparkFx(b.cx, b.cy - 0.3 * b.R, 16, -Math.PI / 2, Math.PI, [150, 450], [1.5, 3.2], [0.4, 0.8], [PAL.white, PAL.white, PAL.gray], 0.9);   // its bone in bits, over the goo
     this.drop(b.cx, b.cy, Math.round(e.def.coins * this.mods.coinMul));
     if (e.type === 'splitter' && byHero) for (const d of [-1, 1]) {   // in two, thrown apart
@@ -1312,7 +1314,8 @@ class Game {
     this.bankDrops();   // in the purse at once: they are for the shop in there
     this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false;
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
-    aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble');
+    this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
+    aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
   }
   // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in paper, with coins as rain and no
   // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).

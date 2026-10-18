@@ -120,6 +120,7 @@ const STARS = { coins: [1, 2, 5], half: 0.5 };
 // second on), turning at `steer`/s: they always get to it.
 const COIN = { r: 0.54, magnet: 2.6, drag: 2.4, burst: 260, home: 0.25, seek: 600, steer: 10 };   // a coin the magnet reaches homes in as an enemy's does (user: faster)
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
+const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
 const CRUMBLE = { time: 0.55, back: 3 };   // gives way `time` s after a touch, is back `back` s later
 const SLICK = { fr: 0.03 };
 // Wall coats beside ice: moss takes the hero at a touch and lets it slide at `slide` of the
@@ -1600,6 +1601,16 @@ function updateBits(dt) {
     if ((b.t += dt) > b.life) bits.splice(i, 1);
   }
 }
+// An enemy bursting like a ripe fruit (user: juicier, flying apart under the pressure): pieces of its skin and paler flesh
+// thrown in arcs, a few seeds, and a spray of juice drops falling after, over a white pop; `c` its ink.
+function juiceFx(x, y, R, c) {
+  if (bits.length > 380) return;   // a phone's budget
+  const flesh = c === PAL.red ? INK.flame : PAL.white;
+  for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: rand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: rand(0.7, 1.1), g: 1, drag: 1.2 }); }
+  for (let i = 0; i < 5; i++) { const a = rand(0, TAU), v = rand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: rand(0.5, 0.9), g: 1, drag: 1.5 }); }
+  for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + rand(-1.7, 1.7), v = rand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: rand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: rand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
+  fx.add(x, y, 0, 0, R * 1.5, 0.22, PAL.white, 0.9, 2); fx.ring(x, y, 1.8 * R, c);
+}
 function splatFx(x, y, R, c, n = 9) {
   const k = lighten(c, 0.1);
   for (let i = 0; i < n; i++) { const a = rand(0, TAU), sp = rand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, rand(0.18, 0.32) * R, rand(0.35, 0.6), k, 0.95, 0); }
@@ -1780,6 +1791,14 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   } else if (!closed) {
     if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
     if (fc.surprise <= 0.35) { frame(f.mouth[0], f.mouth[1] + m * 0.42, m * 0.5, 0, 0, m * 0.36); put(THEME.blush[0], THEME.blush[1], THEME.blush[2], 0); }
+  }
+  if (b.isHero) {   // the hero's moto helmet (user: in place of the dots of its face): a shell over its top two thirds, red on a white hero
+    // and white on any other, a stripe of the other down its crown, a dark visor across the eyes, looking where they look, with a glint
+    const shell = b.color.base === PAL.white ? PAL.red : PAL.white, stripe = shell === PAL.red ? PAL.white : PAL.red, vx = fc.lx * 0.08;
+    frame(0, -0.33, 1.08, 0, 0, 0.86); put(shell[0], shell[1], shell[2], 0);
+    frame(0, -0.92, 0.13, 0, 0, 0.3); put(stripe[0], stripe[1], stripe[2], 0);
+    frame(vx, -0.04, 0.7, 0, 0, 0.3); put(ink[0], ink[1], ink[2], 0);
+    frame(vx - 0.32, -0.15, 0.16, 0, 0, 0.06); put(1, 1, 1, 0);
   }
 };
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;

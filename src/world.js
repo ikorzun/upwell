@@ -2213,6 +2213,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }
   const kitT = lv.tile, kitP = PIX.size, snap = (v) => Math.round(v / kitP) * kitP;
+  const brace = (wx, d, y0, h, s, c) => {   // a knee brace off the wall at wx out toward d, from y0 down h, a pixel clear of the wall: a leg down
+    // the wall, a bar along its top and a strut s wide between their ends (Tokyo's slabs, its air conditioners)
+    const P = kitP, xs = (a, b) => [snap(Math.min(wx + d * a, wx + d * b)), snap(Math.max(wx + d * a, wx + d * b))], [l0, l1] = xs(P, P + s), [b0, b1] = xs(P, P + h);
+    box(l0, y0, l1, y0 + h, c, 1, 0, 10, 0); box(b0, y0, b1, y0 + 2 * P, c, 1, 0, 10, 0);
+    for (let y = y0; y < y0 + h; y += P) { const u = y0 + h - y, [a0, a1] = xs(Math.max(P, u - s / 2), Math.min(P + h, u + s / 2)); box(a0, y, a1, y + P, c, 1, 0, 10, 0); }
+  };
   if (th.town && lv.kind === 'well') {   // Tokyo's kit (THEMES.tokyo; see the parts catalog): whatever hangs, hangs on something. A utility pole up
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
     // a wall; vending machines stand in a niche at a ledge's wall end. All on a fixed beat by height, not at random, so nothing is kept.
@@ -2222,6 +2228,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (y0 + sag < top || y0 > bot) continue;
       for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, 1, 0, 10, 0); }
     }
+    const AC = { beat: 12, at: [2.5, 8.5], w: 1.3, h: 0.85, brace: 0.6 }, acY = (side, k) => (k * AC.beat + AC.at[side < 0 ? 0 : 1]) * t;   // the air conditioners, in tiles
+    const acNear = (side, ya, yb) => { const k = Math.floor((yb / t - AC.at[side < 0 ? 0 : 1]) / AC.beat); return acY(side, k) + (AC.h + AC.brace) * t + P > ya; };   // one hangs over [ya, yb]
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.28 * t, 0.46 * t);
@@ -2232,11 +2240,16 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const d of [0.5, 0.9]) { const x = at(d * t); box(x - P, y - 2 * P, x + P, y, PAL.white, 1, 0, 10, 0); }
         if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, 1, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
-      for (let k = Math.floor(top / (12 * t)) - 1; k * 12 * t < bot; k++) {   // an air conditioner on its bracket every 12 tiles, the two walls out of step
-        const y = k * 12 * t + (side < 0 ? 2.5 : 8.5) * t, w = 1.15 * t, h = 0.8 * t, x0 = side < 0 ? lv.l : lv.r - w, fx = x0 + w * (side < 0 ? 0.6 : 0.4);
-        if (y + h + 0.4 * t < top || y > bot) continue;
-        box(x0, y, x0 + w, y + h, PAL.gray, 0.85, 0, 10, 0); disc(fx, y + h / 2, 0.28 * t, PAL.black, 1); disc(fx, y + h / 2, 0.07 * t, PAL.gray, 1);
-        const bx = x0 + (side < 0 ? 0.18 : 0.82) * w; box(bx - P, y + h, bx + P, y + h + 0.35 * t, PAL.gray, 1, 0, 10, 0);
+      for (let k = Math.floor(top / (AC.beat * t)) - 1; k * AC.beat * t < bot; k++) {   // an air conditioner every 12 tiles, the two walls out of step (the owner's
+        // pick, research/variants/tokyo-aircon-1.png D): a grey box, its fan behind a cross, a blue panel, vents at its free side, on a grey knee brace bolted white
+        const y = acY(side, k), w = AC.w * t, h = AC.h * t, x0 = side < 0 ? lv.l : lv.r - w, f = (u) => (side < 0 ? x0 + u * w : x0 + w - u * w), fx = f(0.36), fy = y + h / 2, wx = side < 0 ? lv.l : lv.r, by = snap(y + h) + P, bh = snap(AC.brace * t);
+        if (by + bh < top || y > bot) continue;
+        box(x0, y, x0 + w, y + h, PAL.gray, 1, 0, 10, 0);
+        disc(fx, fy, 0.3 * t, PAL.black, 1); box(fx - 0.24 * t, fy - P / 2, fx + 0.24 * t, fy + P / 2, PAL.gray, 1, 0, 10, 0); box(fx - P / 2, fy - 0.24 * t, fx + P / 2, fy + 0.24 * t, PAL.gray, 1, 0, 10, 0); disc(fx, fy, 0.06 * t, PAL.gray, 1);
+        box(snap(Math.min(f(0.66), f(0.84))), y + 0.15 * h, snap(Math.max(f(0.66), f(0.84))), y + 0.85 * h, PAL.blue, 1, 0, 10, 0);
+        for (let i = 0; i < 4; i++) { const vy = snap(y + (0.2 + 0.18 * i) * h), vx = side < 0 ? x0 + w - P : x0; box(vx, vy, vx + P, vy + P, PAL.black, 1, 0, 10, 0); }
+        brace(wx, -side, by, bh, 2 * P, PAL.gray);
+        for (const [u, v] of [[2 * P, 0], [bh - P, 0], [2 * P, bh - 2 * P]]) { const bx = snap(wx - side * u); box(Math.min(bx, bx - side * P), by + v, Math.max(bx, bx - side * P), by + v + P, PAL.white, 1, 0, 10, 0); }
       }
     }
     const SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'], 'neonFish'], [['カ', 'ラ', 'オ', 'ケ'], 'neonMic']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
@@ -2475,13 +2488,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
       if (!thin) for (let y = r.y0 + 0.6 * t; y < r.y1 - 0.8 * t; y += 1.2 * t) for (let x = r.x0 + 0.4 * t; x < r.x1 - 0.7 * t; x += 1.1 * t) {
         const lit = ((Math.round(x / t) * 7 + Math.round(y / t) * 3) % 5) === 0; box(snap(x), snap(y), snap(x + 0.45 * t), snap(y + 0.55 * t), lit ? PAL.gray : th.wallD, 1, 0, 10, 0);
-      } else for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {   // the brace, a pixel clear of the wall and the slab: a triangle of a leg down
-        // the wall, a bar under the slab and a strut between their ends (nothing in Tokyo's campaign levels, its boss's arena aside, stands within 1.5 tiles under a wall's slab)
-        const h = snap(1.3 * t), s = 3 * P, y0 = snap(r.y1) + P, xs = (a, b) => [snap(Math.min(wx + d * a, wx + d * b)), snap(Math.max(wx + d * a, wx + d * b))];
-        const [l0, l1] = xs(P, P + s), [b0, b1] = xs(P, P + h);
-        box(l0, y0, l1, y0 + h, th.block, 1, 0, 10, 0); box(b0, y0, b1, y0 + 2 * P, th.block, 1, 0, 10, 0);
-        for (let y = y0; y < y0 + h; y += P) { const u = y0 + h - y, [a0, a1] = xs(Math.max(P, u - s / 2), Math.min(P + h, u + s / 2)); box(a0, y, a1, y + P, th.block, 1, 0, 10, 0); }
-      }
+      } else for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) brace(wx, d, snap(r.y1) + P, snap(1.3 * t), 3 * P, th.block);   // a pixel clear of the slab
+      // (nothing in Tokyo's campaign levels, its boss's arena aside, stands within 1.5 tiles under a wall's slab)
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };

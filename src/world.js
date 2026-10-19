@@ -1073,10 +1073,10 @@ const CHUNKS = {
   vault: { d: 1, rows: [   // a stash in the wall (user): coins boxed in over a cracked floor; the way up passes by it, a jump up
     '............',        // from under it breaks in, and a gap in its roof lets the hero on up through it (no dead end)
     '............',
-    '##.....HH..H',        // H: its cage, solid as a block but drawn as bars (owner: a cage, not a heap of blocks)
+    '##.....HH..H',        // H: its cage (owner: a cage, not a heap of blocks), made thin by Level.place: posts and a roof bar
     '.......HoOoH',
     '.......HoooH',
-    '.......HZZZH',        // Z: its floor, a cage's bars too but cracked: a head-butt from below breaks in
+    '.......HZZZH',        // Z: its floor, the cage's too but cracked: a head-butt from below breaks in
     '............',
     '...o........',
     '..###.......',
@@ -1666,6 +1666,20 @@ class Level {
         q.x0 = Math.max(q.x0, r.x0); q.x1 = Math.min(q.x1, r.x1);
         if (q.x1 - q.x0 < 0.5 * R) this.spikes.splice(j, 1);
       }
+    }
+    // A vault's cage (H, Z) as thin as it is drawn (the owner's pick, research/variants/tokyo-vault-1-px.png F), so nothing solid is out of sight: its walls a post
+    // 0.4 tiles thick on its floor's side, reaching up to its roof, a bar 0.3 thick at the roof's top (where it is stood on), and its cracked floor a plate 0.35
+    // thick at its foot (where a head-butt from below breaks it); the vault only opens up inside
+    const cage = this.rects.slice(from).filter((r) => r.cage), floor = cage.find((r) => r.crack);
+    if (floor) {
+      const fx = (floor.x0 + floor.x1) / 2, roofs = cage.filter((r) => !r.crack && r.x1 - r.x0 >= r.y1 - r.y0), was = new Map(roofs.map((q) => [q, q.y1]));
+      for (const q of roofs) q.y1 = q.y0 + 0.3 * t;
+      for (const r of cage) if (!r.crack && !roofs.includes(r)) {
+        if (r.x0 + r.x1 < 2 * fx) r.x0 = r.x1 - 0.4 * t; else r.x1 = r.x0 + 0.4 * t;
+        const roof = roofs.find((q) => Math.abs(was.get(q) - r.y0) < 1 && q.x0 < r.x1 && q.x1 > r.x0);
+        if (roof) r.y0 = roof.y1;
+      }
+      floor.y0 = floor.y1 - 0.35 * t;
     }
     // the walls: runs down the first or last column of spikes ('>' left, '<' right) or a coat of ice, moss or rubber
     const wall = (ch, k, add) => { for (let r = 0; r < H; r++) if (at(r, k) === ch && at(r - 1, k) !== ch) { let r1 = r; while (at(r1 + 1, k) === ch) r1++; add(Y(r1 + 1), Y(r)); } };
@@ -2630,13 +2644,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
-    if (r.cage) {   // a vault's cage (owner: all of bars, a cage): bars in the world's ink a third of a tile apart, a rail over and under them, its top edge white;
-      // its cracked floor has a bar broken in the middle and, now and then, a glint of gold there (hit here)
-      const P = PIX.size, [x0, x1] = r.crack ? vaultSpan(r) : [r.x0, r.x1], n = Math.max(1, Math.round((x1 - x0) / (0.3 * R)));
-      box(x0, r.y0, x1, r.y0 + 2 * P, th.block, 1, 0, 10, 0); box(x0, r.y1 - 2 * P, x1, r.y1, th.block, 1, 0, 10, 0);
-      for (let k = 0; k <= n; k++) { const x = Math.round((x0 + ((x1 - x0 - 2 * P) * k) / n) / P) * P; if (!(r.crack && k === n >> 1)) box(x, r.y0, x + 2 * P, r.y1, th.block, 1, 0, 10, 0); }
-      if (r.crack && (T * 1.3 + r.x0 * 0.01) % 2 < 0.25) { const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2; box(cx - P, cy - P, cx + P, cy + P, INK.coin, 1, 0, 10, 0); }
-      box(x0, r.y0, x1, r.y0 + 2.5, th.lip, 1, 1.25);
+    if (r.cage) {   // a vault's cage (the owner's pick, research/variants/tokyo-vault-1-px.png F; Level.place makes it this thin): blue posts, a white roof bar dotted
+      // grey under it, and its floor: a plate dotted black, its top edge white, a notch in it where it is cracked (a glint of gold there now and then), rubble in
+      // its corners, and three thin bars from it up to the roof, behind the coins
+      const P = PIX.size, tl = lv.tile;
+      if (r.crack) {
+        const [x0, x1] = vaultSpan(r), cx = Math.round((x0 + x1) / 2 / P) * P, top = r.y1 - 2.7 * tl;
+        for (const f of [0.25, 0.5, 0.75]) { const x = Math.round((x0 + (x1 - x0) * f) / P) * P - P; box(x, top, x + 2 * P, r.y0, th.block, 1, 0, 10, 0); }
+        box(x0, r.y0, x1, r.y1, th.block, 1, 0, 10, 2); box(x0, r.y0, x1, r.y0 + 2.5, th.lip, 1, 1.25);
+        box(cx - 2 * P, r.y0, cx + 2 * P, r.y1, PAL.black, 1, 0, 10, 0); box(cx - 3 * P, r.y0, cx - 2 * P, r.y1, PAL.white, 1, 0, 10, 0); box(cx + 2 * P, r.y0, cx + 3 * P, r.y1, PAL.white, 1, 0, 10, 0);
+        if ((T * 1.3 + r.x0 * 0.01) % 2 < 0.25) box(cx - P, (r.y0 + r.y1) / 2 - P, cx + P, (r.y0 + r.y1) / 2 + P, INK.coin, 1, 0, 10, 0);
+        for (const [a, d] of [[x0 + 0.12 * tl, 1], [x1 - 0.12 * tl, -1]]) for (const [u, v, w, h] of [[0, 0, 0.42, 0.14], [0.06, 0.14, 0.26, 0.12], [0.3, 0, 0.14, 0.08]]) {   // rubble
+          const p0 = a + d * u * tl, p1 = a + d * (u + w) * tl; box(Math.round(Math.min(p0, p1) / P) * P, Math.round((r.y0 - (v + h) * tl) / P) * P, Math.round(Math.max(p0, p1) / P) * P, Math.round((r.y0 - v * tl) / P) * P, PAL.gray, 1, 0, 10, 0);
+        }
+      } else if (r.x1 - r.x0 < r.y1 - r.y0) { box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0); box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); }
+      else { box(r.x0, r.y0, r.x1, r.y1 - P, PAL.white, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, PAL.gray, 1, 0, 10, 4); }
       continue;
     }
     if (r.cap) { box(lv.l - 2, Math.max(r.y0, top), lv.r + 2, r.y1, th.wall, 1, 0); box(lv.l - 2, r.y1 - 2.5, lv.r + 2, r.y1, th.lip, 1, 0); continue; }
@@ -2714,10 +2736,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(c.x, c.y, r * s, 0, 0, r, INK.coinD, 1, 9, 0);
     F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6);
     F(c.x - r * s * 0.3, c.y - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0);
-  }
-  for (const r of lv.rects) if (r.cage && r.crack && seen(r.y0 - 2 * lv.tile, r.y1)) {   // a vault's cage in front of its coins (owner: they are in a cage): thin bars
-    const P = PIX.size, [x0, x1] = vaultSpan(r), n = Math.max(1, Math.round((x1 - x0) / (0.3 * R)));   // from its floor up to its roof, two rows of tiles, wall to wall;
-    for (let k = 1; k < n; k++) { const x = Math.round((x0 + ((x1 - x0) * k) / n) / P) * P; box(x, r.y0 - 2 * lv.tile, x + P, r.y0, th.block, 1, 0, 10, 0); }   // broken in, it is open: they go with the floor
   }
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);

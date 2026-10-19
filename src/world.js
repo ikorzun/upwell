@@ -199,7 +199,8 @@ const FOE_COLOR = {
 const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
   slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: theme(PAL.orange, { crumble: PAL.gray }),
+  cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { pit: true }),   // pit: the Mine's kit (see mineRect)
+ 
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
   tokyo: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { win: true, town: true }),   // Tokyo's town at night (see TOKYO)
@@ -2102,6 +2103,64 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x0 + 0.25 * w, r.y0 - 0.2 * h, x0 + 0.75 * w, r.y0 - 0.12 * h, PAL.black, 1, 0, 10, 0);
     }
   }
+  const MINE_CAP = 8 * kitT;   // the Mine's timber caps, a beat up its walls (and its lamps, every other cap; see the dark's lights)
+  const mineLamp = (side, k) => ((k % 2) + 2) % 2 === (side < 0 ? 0 : 1);
+  if (th.pit && lv.kind === 'well') {   // the Mine's kit (THEMES.mine; see the parts catalog): a timber prop up each wall, a cap beam off it every MINE_CAP on
+    // a knee brace, a mine lamp hanging off every other cap, sugar crystals in the rock between; ore carts parked at a ledge's wall end.
+    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
+    for (const side of [-1, 1]) {
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
+      const [p0, p1] = span(0.12 * t, 0.5 * t), mid = snap((p0 + p1) / 2);
+      box(p0, top, p1, bot, th.block, 0.75, 0, 10, 0); box(mid, top, mid + P, bot, PAL.black, 0.75, 0, 10, 0);   // the prop, a step back, its grain
+      for (let k = Math.floor(top / MINE_CAP) - 1; k * MINE_CAP < bot; k++) {
+        const y = k * MINE_CAP, [c0, c1] = span(0, 1.35 * t);
+        box(c0, y, c1, y + 0.3 * t, th.block, 1, 0, 10, 0); box(c0, y + 0.3 * t - P, c1, y + 0.3 * t, PAL.black, 1, 0, 10, 0);   // its cap, a dark underside
+        for (let i = 0; i <= 6; i++) { const u = i / 6, x = snap(at((0.5 + 0.7 * u) * t)), yy = snap(y + 0.3 * t + 0.8 * t * (1 - u)); box(x - P, yy - P, x + P, yy + P, th.block, 1, 0, 10, 0); }   // the knee brace
+        if (mineLamp(side, k)) {   // a lamp off the cap: a hook, a grey cage, white glass, a flame in it
+          const lx = snap(at(1.05 * t)), ly = y + 0.3 * t;
+          box(lx - P / 2, ly, lx + P / 2, ly + 0.3 * t, PAL.gray, 1, 0, 10, 0);
+          box(lx - 0.2 * t, ly + 0.3 * t, lx + 0.2 * t, ly + 0.85 * t, PAL.gray, 1, 0, 10, 0); box(lx - 0.12 * t, ly + 0.38 * t, lx + 0.12 * t, ly + 0.77 * t, PAL.white, 1, 0, 10, 0);
+          disc(lx, ly + 0.6 * t, 0.07 * t, INK.flame, 1);
+        }
+      }
+      for (let k = Math.floor(top / (10 * t)) - 1; k * 10 * t < bot; k++) {   // sugar crystals in the wall's rock, three to a cluster
+        const y = k * 10 * t + (side < 0 ? 4 : 9) * t;
+        if (y < top - t || y > bot + t) continue;
+        for (const [dx, dy, sz] of [[0.15, 0, 0.22], [0.4, -0.25, 0.16], [0.35, 0.22, 0.12]]) F(at(dx * t), y + dy * t, sz * t, sz * t, sz * t, -sz * t, mod(k, 2) ? PAL.white : PAL.gray, 1, 0);
+      }
+    }
+    for (const r of lv.rects) {   // an ore cart parked at the wall end of some wide steady ledges: grey, ore heaped in it, two wheels
+      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1) continue;
+      const w = 1.6 * t, x0 = wl ? lv.l + 0.25 * t : lv.r - 0.25 * t - w, y1 = r.y0 - 0.3 * t, y0 = y1 - 0.75 * t;
+      for (const [dx, rr, c] of [[0.3, 0.3, th.block], [0.55, 0.36, PAL.white], [0.75, 0.28, th.block]]) disc(x0 + dx * w, y0, rr * t, c, 1);   // the ore
+      box(x0, y0, x0 + w, y1, PAL.gray, 1, 0, 10, 0); box(x0, y0, x0 + w, y0 + P, PAL.black, 1, 0, 10, 0);
+      for (const dx of [0.25, 0.75]) { disc(x0 + dx * w, r.y0 - 0.2 * t, 0.2 * t, PAL.black, 1); disc(x0 + dx * w, r.y0 - 0.2 * t, 0.07 * t, PAL.gray, 1); }
+    }
+  }
+  // The Mine's ledges (see the parts catalog): rock is caramel ore cut by dark strata with sugar crystals in them and a timber brace
+  // under it at a wall; a plank is a nailed board; a moving plank is a cage lift on its cable. False for what keeps the common look.
+  const mineRect = (r) => {
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    if (r.plank && r.move) {   // a cage lift: its floor, a grey frame round it, a cable up from its top
+      box(r.x0, r.y0, r.x1, r.y1, th.mover, 1, 0, 10, 2);
+      for (const x of [r.x0, r.x1 - 2 * P]) box(x, r.y0 - 1.1 * t, x + 2 * P, r.y0, PAL.gray, 1, 0, 10, 0);
+      box(r.x0, r.y0 - 1.1 * t, r.x1, r.y0 - 1.1 * t + 2 * P, PAL.gray, 1, 0, 10, 0);
+      const cx = snap((r.x0 + r.x1) / 2); box(cx - P / 2, top, cx + P / 2, r.y0 - 1.1 * t, PAL.gray, 1, 0, 10, 0);
+    } else if (r.plank) {   // a board: its grain, nails at its joints
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); const gy = snap(r.y0 + 0.55 * hgt); box(r.x0 + P, gy, r.x1 - P, gy + P, PAL.black, 1, 0, 10, 0);
+      for (let x = r.x0; x < r.x1 + 1; x += 1.3 * t) { const nx = snap(Math.min(x, r.x1 - 2 * P)); box(nx, r.y0 + 2 * P, nx + P, r.y0 + 3 * P, PAL.gray, 1, 0, 10, 0); }
+    } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
+    else {   // ore rock
+      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 2);
+      const lines = hgt > 1.5 * t ? [0.38, 0.72] : [0.58];
+      for (const f of lines) { const y = snap(r.y0 + f * hgt); for (let x = r.x0 + ((Math.round(r.y0 / t + f * 3) % 2) ? 0.2 : 0.9) * t; x < r.x1 - 0.3 * t; x += 2 * t) {
+        box(snap(x), y, snap(Math.min(x + 1.5 * t, r.x1 - 0.2 * t)), y + P, PAL.black, 1, 0, 10, 0); F(snap(x + 0.75 * t), y - P, 1.5 * P, 1.5 * P, 1.5 * P, -1.5 * P, PAL.white, 1, 0);   // a stratum, a sugar crystal on it
+      } }
+      if (hgt <= t + 1) for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) for (let i = 0; i <= 5; i++) { const u = i / 5, x = snap(wx + d * 0.9 * t * u), y = snap(r.y1 + 0.9 * t * (1 - u)); box(x - P, y - P, x + P, y + P, th.block, 1, 0, 10, 0); }   // a timber brace up to its foot
+    }
+    box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+  };
   // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
   // beam, a block is a concrete slab cut square with its panels' seams, a steel bracket under it at a wall and windows in a thick one.
   // Returns false for what keeps the common look (ice, crumble, cracks, springs, magnets).
@@ -2151,7 +2210,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const kit = th.town && !r.slick && !r.crumble && !r.crack && !(r.flash > 0) && townRect(r);   // Tokyo's own look (townRect); the overlays below stay
+    const own = !r.slick && !r.crumble && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.pit && mineRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
@@ -2423,6 +2482,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);
     for (const p of lv.fizz) if (!p.taken) light(p.x, p.y, 0.8, 2);
     for (const sp of lv.spots) if (!sp.used) light(sp.x, sp.y, 1.4, 3.2);   // the flip side's pools glow (its way back out)
+    if (th.pit && lv.kind === 'well') for (let k = Math.floor(top / MINE_CAP) - 1; k * MINE_CAP < bot; k++) for (const side of [-1, 1]) if (mineLamp(side, k)) light(side < 0 ? lv.l + 1.05 * kitT : lv.r - 1.05 * kitT, k * MINE_CAP + 0.85 * kitT, 0.9, 2.8);   // the Mine's lamps
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);

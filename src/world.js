@@ -122,7 +122,7 @@ for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id]
 const WIRE = { arm: 9, drop: 0.08, inset: [0.5, 0.9], sag: [0.8, 1.15], a: 0.5 };   // a: how much of a wire's line is drawn (a dither), the beams' and gondolas' cables' too
 // Tokyo's air conditioners (owner: not so often, and a ledge to stand on that gives way): one a wall every `beat` tiles, the walls `at` out of step,
 // `w` x `h` tiles on a brace `brace` tall; a plank on its top which, stood on, rattles and falls `time` s later, for good (Level.addAircons, Level.update)
-const AC = { beat: 24, at: [5, 17], w: 2.2, h: 1.4, brace: 0.9, time: 3 };
+const AC = { beat: 24, at: [5, 17], w: 2.2, h: 1.4, brace: 0.9, time: 3, off: 0.25 };   // off: its gap from the wall, its pipes in it
 const wireY = (lv, k, w, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset[w] * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset[w] * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag[w] * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
@@ -1076,7 +1076,7 @@ const CHUNKS = {
     '##.....HH..H',        // H: its cage, solid as a block but drawn as bars (owner: a cage, not a heap of blocks)
     '.......HoOoH',
     '.......HoooH',
-    '.......HXXXH',
+    '.......HZZZH',        // Z: its floor, a cage's bars too but cracked: a head-butt from below breaks in
     '............',
     '...o........',
     '..###.......',
@@ -1228,7 +1228,7 @@ for (const id in CHUNKS) {
 }
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
-const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X', 'T', 'H']);
+const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X', 'T', 'H', 'Z']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
@@ -1572,7 +1572,7 @@ class Level {
     for (const side of [-1, 1]) {
       const at = AC.at[side < 0 ? 0 : 1];
       for (let k = Math.ceil((y0 / t - at) / AC.beat); (k * AC.beat + at) * t < y1; k++) {
-        const y = (k * AC.beat + at) * t, x0 = side < 0 ? this.l : this.r - w, x1 = x0 + w, ya = y - 2.4 * t, yb = y + (AC.h + AC.brace + 0.4) * t;
+        const y = (k * AC.beat + at) * t, x0 = side < 0 ? this.l + AC.off * t : this.r - AC.off * t - w, x1 = x0 + w, ya = y - 2.4 * t, yb = y + (AC.h + AC.brace + 0.4) * t;
         if (y > this.floor - 4 * t || (xg && yb > xg.y0 - 2 * t && ya < xg.y1 + t)) continue;
         const clear = (q) => q.x1 <= x0 - 0.5 * t || q.x0 >= x1 + 0.5 * t || q.y1 <= ya || q.y0 >= yb;
         if (this.rects.every(clear) && this.spikes.every(clear) && this.bubbles.every(clear) && !this.coats.some((c) => c.side === (side < 0 ? 1 : 2) && c.y1 > ya && c.y0 < yb)) this.rects.push(this.box(x0, y, x1, y + LEVEL.plank * this.R, { plank: true, ac: true }));
@@ -1605,7 +1605,7 @@ class Level {
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
-    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true }, H: { cage: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
+    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true }, H: { cage: true }, Z: { cage: true, crack: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
@@ -2263,17 +2263,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(l0, y0, l1, y0 + h, c, 1, 0, 10, 0); box(b0, y0, b1, y0 + 2 * P, c, 1, 0, 10, 0);
     for (let y = y0; y < y0 + h; y += P) { const u = y0 + h - y, [a0, a1] = xs(Math.max(P, u - s / 2), Math.min(P + h, u + s / 2)); box(a0, y, a1, y + P, c, 1, 0, 10, 0); }
   };
-  const aircon = (r, ox, oy) => {   // a Tokyo air conditioner (AC) on its rect, moved by (ox, oy): a grey box, a big fan behind rings of grille, louvers and a
-    // blue label at its free side, on a grey knee brace bolted white
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, w = r.x1 - r.x0, h = AC.h * t, x0 = r.x0 + ox, y = r.y0 + oy, f = (u) => (wl ? x0 + u * w : x0 + w - u * w), wx = (wl ? lv.l : lv.r) + ox;
+  const aircon = (r, ox, oy) => {   // a Tokyo air conditioner (AC; the owner's pick, research/variants/tokyo-aircon2-2-px.png E) on its rect, moved by (ox, oy): a grey
+    // box off the wall on two pipes clamped grey (E's were purple), a black fan behind eight grey spokes, a black seam, the side panel's green light and black louvers,
+    // on a grey knee brace bolted white
+    const t = kitT, P = kitP, wl = r.x0 + r.x1 < lv.l + lv.r, w = r.x1 - r.x0, h = AC.h * t, x0 = r.x0 + ox, y = r.y0 + oy, f = (u) => (wl ? x0 + u * w : x0 + w - u * w), wx = (wl ? lv.l : lv.r) + ox, d = wl ? 1 : -1;
+    for (const v of [0.42, 0.62]) { const py = snap(y + v * h), cx = snap((wx + f(0)) / 2); box(Math.min(wx, f(0)), py, Math.max(wx, f(0)), py + 2 * P, PAL.gray, 1, 0, 10, 0); box(cx - P, py - P, cx + 2 * P, py + 3 * P, PAL.gray, 1, 0, 10, 0); }
     box(x0, y, x0 + w, y + h, PAL.gray, 1, 0, 10, 0);
-    const fx = f(0.34), fy = y + 0.54 * h, fr = 0.4 * h;
-    disc(fx, fy, fr, PAL.black, 1); F(fx, fy, fr, 0, 0, fr, PAL.gray, 1, 4); F(fx, fy, 0.58 * fr, 0, 0, 0.58 * fr, PAL.gray, 1, 4);
-    box(fx - fr, fy - P / 2, fx + fr, fy + P / 2, PAL.gray, 1, 0, 10, 0); box(fx - P / 2, fy - fr, fx + P / 2, fy + fr, PAL.gray, 1, 0, 10, 0); disc(fx, fy, 0.14 * fr, PAL.gray, 1);
-    const l0 = snap(Math.min(f(0.7), f(0.92))), l1 = snap(Math.max(f(0.7), f(0.92)));
-    for (let i = 0; i < 5; i++) { const ly = snap(y + (0.36 + 0.11 * i) * h); box(l0, ly, l1, ly + P, PAL.black, 1, 0, 10, 0); }
-    box(l0, snap(y + 0.12 * h), l1, snap(y + 0.24 * h), PAL.blue, 1, 0, 10, 0);
-    const by = snap(y + h) + P, bh = snap(AC.brace * t), d = wl ? 1 : -1;
+    const fx = f(0.37), fy = y + 0.53 * h, fr = 0.36 * h;
+    disc(fx, fy, fr, PAL.black, 1);
+    for (let k = 0; k < 8; k++) { const a = ((k + 0.5) * Math.PI) / 4; rod(fx + Math.cos(a) * 0.25 * fr, fy + Math.sin(a) * 0.25 * fr, fx + Math.cos(a) * 0.88 * fr, fy + Math.sin(a) * 0.88 * fr, PAL.gray); }
+    disc(fx, fy, 0.24 * fr, PAL.gray, 1);
+    const sx = snap(f(0.74)), p0 = snap(Math.min(f(0.79), f(0.95))), p1 = snap(Math.max(f(0.79), f(0.95)));
+    box(sx, y + 2 * P, sx + P, y + h - 2 * P, PAL.black, 1, 0, 10, 0);
+    box(p0, snap(y + 0.1 * h), p1, snap(y + 0.22 * h), PAL.green, 1, 0, 10, 0);
+    for (let i = 0; i < 5; i++) { const ly = snap(y + (0.34 + 0.11 * i) * h); box(p0, ly, p1, ly + P, PAL.black, 1, 0, 10, 0); }
+    const by = snap(y + h) + P, bh = snap(AC.brace * t);
     brace(wx, d, by, bh, 2 * P, PAL.gray);
     for (const [u, v] of [[2 * P, 0], [bh - P, 0], [2 * P, bh - 2 * P]]) { const bx = snap(wx + d * u); box(Math.min(bx, bx + d * P), by + v, Math.max(bx, bx + d * P), by + v + P, PAL.white, 1, 0, 10, 0); }
   };
@@ -2291,7 +2295,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, WIRE.a, 0, 10, 0); }
     }
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);   // in the way of a door, or its glow (owner: nothing covers one)
-    const acNear = (wl, ya, yb) => lv.rects.some((q) => q.ac && !q.gone && (q.x0 <= lv.l + 1) === wl && q.y0 < yb && q.y0 + (AC.h + AC.brace) * t > ya);   // an air conditioner hangs over [ya, yb] on that wall
+    const acNear = (wl, ya, yb) => lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < lv.l + lv.r) === wl && q.y0 < yb && q.y0 + (AC.h + AC.brace) * t > ya);   // an air conditioner hangs over [ya, yb] on that wall
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.28 * t, 0.46 * t);
@@ -2596,13 +2600,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);   // the ways into a shop or a stash, over the worlds' back layers: nothing covers them (owner)
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
+  const vaultSpan = (r) => {   // a vault's cracked floor from cage wall to cage wall: the slot rule (Level.place) cut it back from a wall its cage stands
+    // at, so it is drawn across the gap it left (too narrow for the hero to pass)
+    let a = -Infinity, b = Infinity;
+    for (const q of lv.rects) if (q.cage && q !== r && q.y0 < r.y1 && q.y1 > r.y0) { if (q.x1 <= r.x0 + 1) a = Math.max(a, q.x1); else if (q.x0 >= r.x1 - 1) b = Math.min(b, q.x0); }
+    return [a > -Infinity ? a : r.x0, b < Infinity ? b : r.x1];
+  };
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
-    if (r.cage) {   // a vault's cage (owner: a cage, not a heap of blocks): bars in the world's ink a third of a tile apart, a rail over and under them, its top edge white
-      const P = PIX.size, n = Math.max(1, Math.round((r.x1 - r.x0) / (0.3 * R)));
-      box(r.x0, r.y0, r.x1, r.y0 + 2 * P, th.block, 1, 0, 10, 0); box(r.x0, r.y1 - 2 * P, r.x1, r.y1, th.block, 1, 0, 10, 0);
-      for (let k = 0; k <= n; k++) { const x = Math.round((r.x0 + ((r.x1 - r.x0 - 2 * P) * k) / n) / P) * P; box(x, r.y0, x + 2 * P, r.y1, th.block, 1, 0, 10, 0); }
-      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
+    if (r.cage) {   // a vault's cage (owner: all of bars, a cage): bars in the world's ink a third of a tile apart, a rail over and under them, its top edge white;
+      // its cracked floor has a bar broken in the middle and, now and then, a glint of gold there (hit here)
+      const P = PIX.size, [x0, x1] = r.crack ? vaultSpan(r) : [r.x0, r.x1], n = Math.max(1, Math.round((x1 - x0) / (0.3 * R)));
+      box(x0, r.y0, x1, r.y0 + 2 * P, th.block, 1, 0, 10, 0); box(x0, r.y1 - 2 * P, x1, r.y1, th.block, 1, 0, 10, 0);
+      for (let k = 0; k <= n; k++) { const x = Math.round((x0 + ((x1 - x0 - 2 * P) * k) / n) / P) * P; if (!(r.crack && k === n >> 1)) box(x, r.y0, x + 2 * P, r.y1, th.block, 1, 0, 10, 0); }
+      if (r.crack && (T * 1.3 + r.x0 * 0.01) % 2 < 0.25) { const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2; box(cx - P, cy - P, cx + P, cy + P, INK.coin, 1, 0, 10, 0); }
+      box(x0, r.y0, x1, r.y0 + 2.5, th.lip, 1, 1.25);
       continue;
     }
     if (r.cap) { box(lv.l - 2, Math.max(r.y0, top), lv.r + 2, r.y1, th.wall, 1, 0); box(lv.l - 2, r.y1 - 2.5, lv.r + 2, r.y1, th.lip, 1, 0); continue; }
@@ -2680,6 +2692,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(c.x, c.y, r * s, 0, 0, r, INK.coinD, 1, 9, 0);
     F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6);
     F(c.x - r * s * 0.3, c.y - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0);
+  }
+  for (const r of lv.rects) if (r.cage && r.crack && seen(r.y0 - 2 * lv.tile, r.y1)) {   // a vault's cage in front of its coins (owner: they are in a cage): thin bars
+    const P = PIX.size, [x0, x1] = vaultSpan(r), n = Math.max(1, Math.round((x1 - x0) / (0.3 * R)));   // from its floor up to its roof, two rows of tiles, wall to wall;
+    for (let k = 1; k < n; k++) { const x = Math.round((x0 + ((x1 - x0) * k) / n) / P) * P; box(x, r.y0 - 2 * lv.tile, x + P, r.y0, th.block, 1, 0, 10, 0); }   // broken in, it is open: they go with the floor
   }
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);

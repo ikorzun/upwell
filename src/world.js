@@ -204,6 +204,7 @@ const THEMES = {
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
   tokyo: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { win: true, town: true }),   // Tokyo's town at night (see TOKYO)
+  blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { win: 'grid', panels: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
@@ -312,6 +313,13 @@ const CRYPT = Object.assign({}, WORLDS[2], { id: 'crypt', name: { en: 'Crypt', e
 // lines sagging across the shaft, signs up its walls in the game's own kana, vending machines on its ledges (THEMES.tokyo `town`, drawn
 // by the renderer), a level crossing in most of its levels (`crossing`: the chance). It shows by itself at ?play=tokyo, to look at,
 // before it is a world of the map.
+// The Tower Blocks (user: Soviet brutalism, stairs and panel blocks; the campaign's world 5): raw concrete, a regular grid of windows
+// far off (BG_FS uWin 2), riser pipes, satellite dishes and entrances with a bench on its walls and ledges, balconies, heating pipes,
+// stairs you walk up (the 'T' step), old mattresses for springs (THEMES.blocks `panels`, drawn by the renderer). ?play=blocks shows it.
+const BLOCKS = Object.assign({}, WORLDS[2], { id: 'blocks', name: { en: 'Tower Blocks', es: 'Bloques', pt: 'Blocos', ja: 'だんち' }, theme: THEMES.blocks, dark: [], maxD: 2, magnet: 0,
+  chunks: { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 2, rest: 1, vault: 1 },
+  enemies: { crawler: 3, climber: 2, shell: 1, spitter: 2 },
+  intro: [{ news: { en: 'stairs: just walk up', es: 'escaleras: sube andando', pt: 'escadas: é só subir andando', ja: 'かいだん: あるいて のぼれる' } }, {}, {}] });
 const TOKYO = Object.assign({}, WORLDS[1], { id: 'tokyo', name: { en: 'Tokyo', es: 'Tokio', pt: 'Tóquio', ja: 'とうきょう' }, theme: THEMES.tokyo, dark: [], crossing: 0.85, maxD: 2, awnings: true,
   chunks: { stairs: 3, planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 2, lift: 2, movers: 1, bridge: 1, rubberwall: 1, fork: 1, rest: 1, vault: 1 },
   enemies: { crawler: 3, climber: 2, shell: 2, spitter: 1 },
@@ -380,6 +388,14 @@ const BOSSES = {
     defeat: { en: 'Shift is over… go on, then.', es: 'Se acabó el turno… sigue, pues.', pt: 'O turno acabou… vai, então.', ja: 'シフト おわり… いきな。' },
     hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
     how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
+  // World 5's: the Crane (the Tower Blocks'): the Cork's dive (hover, warn, dive, dazed, rise) as a load swinging on a crane's cable.
+  crane: { name: { en: 'Crane', es: 'Grúa', pt: 'Guindaste', ja: 'クレーン' }, design: 'loaf', crane: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+    intro: [{ en: 'Hard hats only.', es: 'Solo con casco.', pt: 'Só de capacete.', ja: 'ヘルメット ちゃくよう！' },
+      { en: 'One more floor. Then another.', es: 'Un piso más. Y otro.', pt: 'Mais um andar. E outro.', ja: 'あと いっかい。それから もう いっかい。' },
+      { en: 'Stand clear of the load!', es: '¡Apártate de la carga!', pt: 'Afaste-se da carga!', ja: 'にもつの したに たつな！' }],
+    quip: [{ en: 'Flattened. Like a panel.', es: 'Aplastado. Como un panel.', pt: 'Achatado. Como um painel.', ja: 'ぺしゃんこ。パネルみたい。' },
+      { en: 'Back to the ground floor.', es: 'De vuelta a la planta baja.', pt: 'De volta ao térreo.', ja: 'いっかいに もどって。' }],
+    defeat: { en: 'Shift over… the roof is yours.', es: 'Fin del turno… el tejado es tuyo.', pt: 'Fim do turno… o telhado é seu.', ja: 'しごと おわり… やねは きみの もの。' } },
   // World 4's: the Tram (Tokyo's streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
   // its pantograph up to an overhead wire.
   tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
@@ -404,6 +420,7 @@ const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
 const TOWN = { stairs: 3, planks: 2, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, rubberwall: 1 };   // Tokyo's (shelves off the walls: awnings)
+const PANEL = { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 1 };   // the Tower Blocks' (flights of stairs; shelves: balconies)
 // A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12
 // (its knitted pictures: the Heat, a drop like the hero, the Light) and what Aunt Moti reads in them.
 const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
@@ -484,6 +501,26 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
   { role: 'rest', len: 28, fire: 0.4, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 3, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
+] },
+// World 5, the Tower Blocks (the user's Soviet brutalism; its kit in the renderer, see THEMES.blocks): stairs you walk up, old balconies
+// that give way, old mattresses that bounce, then winter (icicles off the roofs, the twist); the Crane. Its runes: a frame, a tower, two
+// rings (they stacked floor on floor to reach the sky; the top was only a roof).
+{ world: BLOCKS, runes: 'BMQ', lore: { en: 'They stacked floor on floor to reach the sky.\nThe top was only a roof.', es: 'Apilaron piso sobre piso para llegar al cielo.\nArriba solo había un tejado.', pt: 'Empilharam andar sobre andar para chegar ao céu.\nNo alto só havia um telhado.', ja: 'そらに とどこうと かいを かさねた。\nてっぺんは ただの やねだった。' }, levels: [
+  { role: 'teach', len: 34, fire: 0.46, calm: 8, maxD: 2, chunks: PANEL, intro: ['flight'], enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 6101,
+    news: { en: 'stairs: just walk up', es: 'escaleras: sube andando', pt: 'escadas: é só subir andando', ja: 'かいだん: あるいて のぼれる' } },
+  { role: 'teach', len: 38, fire: 0.48, maxD: 2, chunks: { ...PANEL, crumble: 3 }, intro: ['crumble'], enemies: ['crawler', 'climber'], foes: 0.5, candy: ['fizz'], gate: 'gate', seed: 6102,
+    news: { en: 'old balconies give way', es: 'los balcones viejos ceden', pt: 'as sacadas velhas cedem', ja: 'ふるい ベランダは くずれる' } },
+  { role: 'teach', len: 40, fire: 0.48, maxD: 2, chunks: { ...PANEL, spring: 3 }, intro: ['spring'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['smash'], seed: 6103,
+    news: { en: 'old mattresses bounce', es: 'los colchones viejos rebotan', pt: 'colchões velhos quicam', ja: 'ふるい マットレスで はねる' } },
+  { role: 'apply', len: 46, fire: 0.5, maxD: 2, chunks: PANEL, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.6, pair: 0.15, candy: ['smash', 'fizz'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 6104 },
+  { role: 'peak', len: 38, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6105 },
+  { role: 'bonus', len: 46, bonus: 2, time: 50, seed: 6106 },
+  { role: 'twist', len: 40, fire: 0.5, maxD: 2, chunks: PANEL, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 6107,
+    news: { en: 'winter: icicles fall off the roofs', es: 'invierno: caen carámbanos de los tejados', pt: 'inverno: pingentes caem dos telhados', ja: 'ふゆ: やねから つららが おちる' } },
+  { role: 'peak', len: 42, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, spikes: 1, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', seed: 9039 },
+  { role: 'rest', len: 30, fire: 0.42, maxD: 2, chunks: { flight: 3, stairs: 2, planks: 3, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 6109,
+    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+  { role: 'boss', boss: 'crane' },
 ] }];
 
 // Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
@@ -590,6 +627,9 @@ ICONS.runeY = '............/...ww......./...www....../...www....../....ww.www../
 ICONS.runeH = '.....ww...../.ww.wwww.ww./.ww.wwww.ww./...w.ww.w.../.ww.wwww.ww./wwwwwwwwwwww/wwwwwwwwwwww/.ww.wwww.ww./...w.ww.w.../.ww.wwww.ww./.ww.wwww.ww./.....ww.....';
 ICONS.runeW = '.....ww...../....wwww..../....wwww..../...wwwwww.../.wwwwwwwwww./wwwwwwwwwwww/wwwwwwwwwwww/.wwwwwwwwww./...wwwwww.../....wwww..../....wwww..../.....ww.....';
 ICONS.runeu = '....wwww..../..wwwwwwww../.wwwwwwwwww./.ww..ww..ww./www..ww..www/wwwwwwwwwwww/wwwwwwwwwwww/www.wwww.www/.www....www./.wwwwwwwwww./..wwwwwwww../....wwww....';
+ICONS.runeB = '....wwww..../....wwww..../....wwww..../....wwww..../wwww....wwww/wwww....wwww/wwww....wwww/wwww....wwww/....wwww..../....wwww..../....wwww..../....wwww....';
+ICONS.runeM = '............/.w.......w../www.....www./.ww.....ww../...w...w..../....www...../....www...../....www...../...w...w..../.ww.....ww../www.....www./.w.......w..';
+ICONS.runeQ = '.....ww...../..w..ww..w../.www.ww.www./..ww.ww.ww../............/wwww.ww.wwww/wwww.ww.wwww/............/..ww.ww.ww../.www.ww.www./..w..ww..w../.....ww.....';
 // Kana for Tokyo's signs: DotGothic16's own glyphs (the game's Japanese font, SIL OFL) on its 16-dot grid.
 ICONS['kana_ラ'] = '................/...wwwwwwwwww.../................/................/................/..wwwwwwwwwwww../.............w../.............w../.............w../............w.../............w.../...........w..../..........w...../........ww....../...wwwww......../................';
 ICONS['kana_ー'] = '................/................/................/................/................/................/................/..wwwwwwwwwwww../................/................/................/................/................/................/................/................';
@@ -1038,6 +1078,21 @@ const CHUNKS = {
     '.....#######',
     '............',
     '............'] },
+  // Stairs (the Panel Blocks' signature; T a step, a block a tile square): a landing, a flight of steps a tile up and a tile on each,
+  // walked up by pressing on (a step lifts what walks into its riser onto it), a landing; every step with two tiles clear over it
+  // (the last one wide, so the landing's lip is never a tile over a step to wedge the hero under), the landing short of the wall
+  // (a slot past it: under the flight is never a dead end); mirrored they zigzag.
+  flight: { d: 1, rows: [
+    '............',
+    '............',
+    '........TTT.',
+    '......TT....',
+    '.....T......',
+    '....T.......',
+    '...T........',
+    '###.........',
+    '............',
+    '............'] },
   gate3: { d: 3, rows: [
     '............',
     '............',
@@ -1053,7 +1108,7 @@ const CHUNKS = {
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
   walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney'], moving: ['movers', 'lift'], crumbling: ['crumble', 'bridge'],
-  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'], gate: ['gate', 'gate2', 'gate3'] })) for (const id of ids) CHUNKS[id].kind = kind;
+  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
 const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from
@@ -1072,7 +1127,7 @@ for (const id in CHUNKS) {
 }
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
-const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X']);
+const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X', 'T']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
@@ -1424,7 +1479,7 @@ class Level {
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
-    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
+    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
@@ -1459,7 +1514,7 @@ class Level {
     // under it, or a spring on it; none in a pocket, by its door; none in a stash in the wall, a set piece, a gate or the last rest).
     for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set' && c.kind !== 'gate'; i++) {
       const r = this.rects[i], over = (a) => a.x1 > r.x0 && a.x0 < r.x1;
-      if (r.plank || r.spring || r.slick || r.crumble || r.crack || r.moss || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
+      if (r.plank || r.spring || r.slick || r.crumble || r.crack || r.moss || r.stair || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
       if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;
       if (this.rects.slice(from).some((q) => q.spring && over(q) && Math.abs(q.y1 - r.y0) < 1) || !(this.rng() < LEVEL.toPlank)) continue;
       r.plank = true; r.y1 = r.y0 + LEVEL.plank * R;
@@ -1661,6 +1716,7 @@ Body.prototype.collideLevel = function (lv, h) {
       if (x[i] <= x0 || x[i] >= x1 || y[i] <= y0 || y[i] >= y1) continue;
       let face = 0;
       if (r.plank) { if (this.stepMaxY > y0 + 3 || py[i] > y0 + 1) continue; face = 8; }
+      else if (r.stair && this.stepMaxY > r.y0 + 1 && this.stepMaxY < r.y1 + 0.5 * this.R && py[i] < y1 - 2) face = 8;   // a stair step lifts what walks into its riser onto its tread (a step-up), but only a body whose feet are at the riser: one under it is stopped
       else {
         const dT = y[i] - y0, dB = y1 - y[i], dL = x[i] - x0, dR = x1 - x[i];
         let best = Infinity;
@@ -1807,7 +1863,12 @@ void main() {
   if (uGrad > 0.5 && t * t > bayer(g)) c = uBot;   // a theme's fall from its top ink to its bottom one, through the 4x4 dither (the Crypt's)
   int s = uPix < 1.5 ? 2 : 1, py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-CSS-px cells, a dot one game pixel
   ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / float(s)));
-  if (uWin > 0.5) {   // a town far off (Tokyo's): windows lit here and there in rows, its buildings in columns with dark gaps between
+  if (uWin > 1.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dotted between
+    vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(8.0, 10.0)), iw = wp - cw * vec2(8.0, 10.0);
+    float h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
+    if (iw.x >= 2.0 && iw.x < 6.0 && iw.y >= 3.0 && iw.y < 7.0 && h < 0.16) c = uDots;
+    else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x, 3.0) < 1.0) c = uDots;
+  } else if (uWin > 0.5) {   // a town far off (Tokyo's): windows lit here and there in rows, its buildings in columns with dark gaps between
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(6.0, 8.0)), iw = wp - cw * vec2(6.0, 8.0);
     float bx = wp.x - 36.0 * floor(wp.x / 36.0), h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
     if (bx < 30.0 && iw.x >= 2.0 && iw.x < 4.0 && iw.y >= 3.0 && iw.y < 6.0 && h < 0.2) c = uDots;
@@ -1815,6 +1876,7 @@ void main() {
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
     c = ((g.x + g.y) & 3) == 0 ? uWallD : uWall;
+    if (uWin > 1.5 && mod(float(py), 24.0) < 1.0) c = uWallD;   // a panel wall's seams
     if (d > -uPix) c = uLip;
   }
   o = vec4(c, 1.0);
@@ -2138,6 +2200,51 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const dx of [0.25, 0.75]) { disc(x0 + dx * w, r.y0 - 0.2 * t, 0.2 * t, PAL.black, 1); disc(x0 + dx * w, r.y0 - 0.2 * t, 0.07 * t, PAL.gray, 1); }
     }
   }
+  if (th.panels && lv.kind === 'well') {   // the Tower Blocks' kit (THEMES.blocks; see the parts catalog): a riser pipe up each wall on a bracket every
+    // 4 tiles, satellite dishes on the walls, an entrance (a blue door, its canopy and lamp, a bench) at the wall end of some wide ledges.
+    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
+    for (const side of [-1, 1]) {
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
+      const [p0, p1] = span(0.2 * t, 0.42 * t);
+      box(p0, top, p1, bot, PAL.gray, 0.7, 0, 10, 0);
+      for (let k = Math.floor(top / (4 * t)) - 1; k * 4 * t < bot; k++) { const [b0, b1] = span(0, 0.5 * t); box(b0, k * 4 * t, b1, k * 4 * t + 0.12 * t, PAL.gray, 1, 0, 10, 0); }
+      for (let k = Math.floor(top / (14 * t)) - 1; k * 14 * t < bot; k++) {   // a satellite dish on its arm
+        const y = k * 14 * t + (side < 0 ? 5 : 11) * t, cx = at(0.95 * t);
+        if (y < top - t || y > bot + t) continue;
+        box(Math.min(cx, at(0.3 * t)), y + 0.28 * t, Math.max(cx, at(0.3 * t)), y + 0.28 * t + P, PAL.gray, 1, 0, 10, 0);
+        F(cx, y, 0.42 * t, 0, 0, 0.32 * t, PAL.white, 1, 0); F(cx - side * 0.06 * t, y, 0.3 * t, 0, 0, 0.22 * t, PAL.gray, 1, 0);
+      }
+    }
+    for (const r of lv.rects) {
+      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.stair || !(wl || wr) || r.x1 - r.x0 < 4 * t || !seen(r.y0 - 3 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 2) continue;
+      const dw = 1.2 * t, dh = 1.9 * t, x0 = wl ? lv.l + 0.6 * t : lv.r - 0.6 * t - dw, bw = 1.3 * t, bx = wl ? x0 + dw + 0.5 * t : x0 - 0.5 * t - bw;
+      box(x0, r.y0 - dh, x0 + dw, r.y0, PAL.black, 1, 0, 10, 0); box(x0 + P, r.y0 - dh + P, x0 + dw - P, r.y0, PAL.blue, 1, 0, 10, 0); box(x0 + dw * 0.7, r.y0 - dh * 0.5, x0 + dw * 0.7 + 2 * P, r.y0 - dh * 0.5 + P, PAL.black, 1, 0, 10, 0);   // the door, its handle
+      box(x0 - 0.3 * t, r.y0 - dh - 0.25 * t, x0 + dw + 0.3 * t, r.y0 - dh, PAL.gray, 1, 0, 10, 0); disc(x0 + dw / 2, r.y0 - dh - 0.45 * t, 0.12 * t, PAL.white, 1);   // its canopy, its lamp
+      box(bx, r.y0 - 0.55 * t, bx + bw, r.y0 - 0.42 * t, PAL.gray, 1, 0, 10, 0); for (const lx of [bx + 0.1 * t, bx + bw - 0.2 * t]) box(lx, r.y0 - 0.42 * t, lx + 0.1 * t, r.y0, PAL.gray, 1, 0, 10, 0);   // the bench
+    }
+  }
+  // The Tower Blocks' ledges: a step is a concrete step with a handrail post, a plank off a wall a balcony behind its bars, a free plank a
+  // heating pipe in white lagging bands, a block a concrete panel cut square with seams every 2 tiles and window slits in a thick one.
+  const panelsRect = (r) => {
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    if (r.stair) { box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0); const px = snap((r.x0 + r.x1) / 2); box(px - P / 2, r.y0 - 0.9 * t, px + P / 2, r.y0, PAL.gray, 1, 0, 10, 0); box(px - 0.25 * t, r.y0 - 0.9 * t, px + 0.25 * t, r.y0 - 0.9 * t + P, PAL.gray, 1, 0, 10, 0); }
+    else if (r.plank && r.move) return false;
+    else if (r.plank && (wl || wr)) {
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0);
+      for (let x = r.x0 + 0.15 * t; x < r.x1; x += 0.3 * t) box(snap(x), r.y0 - 0.5 * t, snap(x) + P, r.y0, PAL.gray, 0.7, 0, 10, 0);
+      box(r.x0, r.y0 - 0.5 * t, r.x1, r.y0 - 0.5 * t + P, PAL.gray, 0.7, 0, 10, 0);
+    } else if (r.plank) {
+      box(r.x0, r.y0, r.x1, r.y1, PAL.gray, 1, 0, 10, 0);
+      for (let x = r.x0 + 0.6 * t; x < r.x1 - 0.3 * t; x += 1.5 * t) box(snap(x), r.y0, snap(x) + 2 * P, r.y1, PAL.white, 1, 0, 10, 0);
+    } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
+    else {
+      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0);
+      for (let x = r.x0 + 2 * t; x < r.x1 - 0.5 * t; x += 2 * t) box(snap(x), r.y0 + 3 * P, snap(x) + P, r.y1, th.wallD, 1, 0, 10, 0);
+      if (hgt >= 2 * t) for (let y = r.y0 + 0.35 * t; y < r.y1 - 0.6 * t; y += t) for (let x = r.x0 + 0.5 * t; x < r.x1 - 0.9 * t; x += 2 * t) box(snap(x), snap(y), snap(x + t), snap(y + 0.3 * t), PAL.black, 1, 0, 10, 0);
+    }
+    box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+  };
   // The Mine's ledges (see the parts catalog): rock is caramel ore cut by dark strata with sugar crystals in them and a timber brace
   // under it at a wall; a plank is a nailed board; a moving plank is a cage lift on its cable. False for what keeps the common look.
   const mineRect = (r) => {
@@ -2203,6 +2310,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.cap) { box(lv.l - 2, Math.max(r.y0, top), lv.r + 2, r.y1, th.wall, 1, 0); box(lv.l - 2, r.y1 - 2.5, lv.r + 2, r.y1, th.lip, 1, 0); continue; }
     if (r.spring) {
       const k = r.t / SPRING.anim, hh = (r.y1 - r.y0) * (1 - 0.5 * k), w = r.x1 - r.x0;
+      if (th.panels) {   // the Tower Blocks': an old mattress thrown out, blue and white stripes, flattening as it throws
+        const y0 = r.y1 - hh - 0.2 * R; box(r.x0, y0, r.x1, r.y1, PAL.white, 1, 0, 10, 0);
+        for (let x = r.x0 + 2 * kitP; x < r.x1 - kitP; x += 4 * kitP) box(x, y0, x + 2 * kitP, r.y1, th.spring, 1, 0, 10, 0);
+        continue;
+      }
       box(r.x0 + w * 0.3, r.y1 - hh, r.x1 - w * 0.3, r.y1, th.block, 1, 2);
       box(r.x0, r.y1 - hh - 0.2 * R, r.x1, r.y1 - hh, th.spring, 1, 0.1 * R);
       continue;
@@ -2210,7 +2322,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && !r.crumble && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.pit && mineRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
+    const own = !r.slick && !r.crumble && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
@@ -2393,7 +2505,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
     box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
   }
-  if (bs && !bs.dead && bs.def && bs.def.tram) {   // the Tram's car round it, in the town's blue: dark windows, a white band, its pantograph up to the wire
+  if (bs && !bs.dead && bs.def && bs.def.crane) {   // the Crane's load: a cable up out of sight, its hook block, two slings to the load's shoulders
+    const b = bs.body, P = PIX.size, cx = Math.round(b.cx / P) * P, hy = b.minY - 0.7 * R;
+    box(cx - P, top, cx + P, hy, PAL.gray, 1, 0, 10, 0); box(cx - 0.3 * R, hy, cx + 0.3 * R, hy + 0.25 * R, PAL.gray, 1, 0, 10, 0);
+    for (const d of [-1, 1]) for (let k = 0; k <= 6; k++) { const u = k / 6, x = Math.round((cx + d * 0.55 * (b.maxX - b.cx) * u) / P) * P, y = Math.round((hy + 0.25 * R + (b.minY + 0.15 * (b.maxY - b.minY) - hy - 0.25 * R) * u) / P) * P; box(x - P / 2, y - P / 2, x + P / 2, y + P / 2, PAL.gray, 1, 0, 10, 0); }
+  } else if (bs && !bs.dead && bs.def && bs.def.tram) {   // the Tram's car round it, in the town's blue: dark windows, a white band, its pantograph up to the wire
     const b = bs.body, hw = 0.62 * (b.maxX - b.minX), y1 = lv.rail.y, y0 = b.cy - 0.05 * (b.maxY - b.minY), hgt = y1 - y0, wy = b.minY - 1.2 * R, P = PIX.size;
     box(lv.l, wy, lv.r, wy + P, PAL.gray, 1, 0, 10, 0);   // the overhead wire
     for (let k = 0; k <= 8; k++) { const u = k / 8, x = Math.round((b.cx - 0.5 * R + R * Math.abs(u - 0.5)) / P) * P, y = Math.round((b.minY - (b.minY - wy) * u) / P) * P; box(x - P, y - P, x + P, y, PAL.gray, 1, 0, 10, 0); }
@@ -2428,7 +2544,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pg = this.pBg;
   gl.useProgram(pg.p);
   gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, lv.l, lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);
-  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win ? 1 : 0);
+  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win === 'grid' ? 2 : th.win ? 1 : 0);
   gl.uniform3fv(pg.u.uWall, th.wall); gl.uniform3fv(pg.u.uWallD, th.wallD); gl.uniform3fv(pg.u.uLip, th.lip);
   gl.bindVertexArray(this.emptyVao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);

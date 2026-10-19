@@ -527,7 +527,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.camRef = null; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -686,9 +686,11 @@ class Game {
   }
   crack(r) {
     r.gone = true; r.crack = false;
-    crumbleFx(r, this.lv.theme.block, true); fx.ring((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1.4 * this.R, INK.coin);
-    sound.play('crumble', 1, 0.9); sound.play('coin', 0.6, 1.3); shake.add(3); haptics.buzz(20);
+    crumbleFx(r, this.lv.theme.block, true); fx.ring((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, (r.key ? 2.4 : 1.4) * this.R, INK.coin);
+    if (r.key) { crumbleFx(r, this.lv.theme.block, true); sound.play('bosshit', 0.8, 0.7); }   // a gate's keystone: heavier
+    sound.play('crumble', 1, 0.9); sound.play('coin', 0.6, 1.3); shake.add(r.key ? 7 : 3); haptics.buzz(r.key ? 35 : 20);
   }
+  gated() { const H = this.hero; return this.lv.near(H.cy - view.h, H.cy).some((r) => r.key); }   // a whole gate over the hero, within a screen (see GATE)
   // The boost ring (RING): through it the hero rockets up a quarter of the level through all, smashing what breaks and popping
   // the enemies it meets, safe meanwhile; it ends once that high and clear of every ledge.
   ringStep(dt) {
@@ -966,7 +968,7 @@ class Game {
       if (lv.exit.armed && inDoor(lv.exit, -0.3 * H.R)) { this.leaveRoom(); return; }
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
-    if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else this.idleT += dt; }   // no new height: the fire speeds up
+    if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (!this.gated()) this.idleT += dt; }   // no new height: the fire speeds up
     if (H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys
   }
   // From above it is a stomp; anything else is a hit.
@@ -1636,7 +1638,10 @@ class Game {
       let cy = 0;
       for (let i = 0; i < b.n; i++) cy += b.sy[i] + (b.y[i] - b.sy[i]) * alpha;
       cy /= b.n;
-      const target = cy - CAM.anchor * view.h;
+      // Platform snapping (the vertical level-design article the user gave): in the air the camera keeps to where the hero last held
+      // on, so a hop does not drag it, and climbs with the hero only past the view's top `high`; on a higher ledge it settles up.
+      if (this.contact() || this.rocket || this.camRef == null || Math.abs(cy - this.camRef) > view.h) this.camRef = cy;
+      const target = Math.min(this.camRef - CAM.anchor * view.h, cy - CAM.high * view.h);
       if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * dt));
       const down = Math.min(b.maxY + this.room() - view.h, lv.floor + this.room() - view.h);   // and down with a fall, keeping the hero well over the touch keys, as far as the floor:
       if (down > lv.cam) lv.cam += (down - lv.cam) * (1 - Math.exp(-10 * dt));   // smoothly (a hard follow jerked with every bounce),

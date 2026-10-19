@@ -567,7 +567,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.camRef = null; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -1678,10 +1678,7 @@ class Game {
       let cy = 0;
       for (let i = 0; i < b.n; i++) cy += b.sy[i] + (b.y[i] - b.sy[i]) * alpha;
       cy /= b.n;
-      // Platform snapping (the vertical level-design article the user gave): in the air the camera keeps to where the hero last held
-      // on, so a hop does not drag it, and climbs with the hero only past the view's top `high`; on a higher ledge it settles up.
-      if (this.contact() || this.rocket || this.camRef == null || Math.abs(cy - this.camRef) > view.h) this.camRef = cy;
-      const target = Math.min(this.camRef - CAM.anchor * view.h, cy - CAM.high * view.h);
+      const target = cy - CAM.anchor * view.h;
       if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * dt));
       const down = Math.min(b.maxY + this.room() - view.h, lv.floor + this.room() - view.h);   // and down with a fall, keeping the hero well over the touch keys, as far as the floor:
       if (down > lv.cam) lv.cam += (down - lv.cam) * (1 - Math.exp(-10 * dt));   // smoothly (a hard follow jerked with every bounce),

@@ -38,7 +38,7 @@ const random = () => {
 
 // ── saving and restoring everything a step can change ──
 const GAME_KEYS = ['hp', 'maxHp', 'invuln', 'sinceContact', 'queueT', 'air', 'hitstop', 'touch', 'queued', 'rising', 'combo', 'coins',
-  'kills', 'bestCombo', 'levelM', 'idleT', 'camRef', 'gunT', 'gunCD', 'gunMax', 'dashT', 'dashCD', 'mantleCD', 'airDash', 'pow', 'ram', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY', 'freed', 'crouch', 'noteK', 'noteT', 'bonusT', 'lastBy', 'kept', 'swarm'];   // (a bonus level's clock too: tries ran it out)
+  'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunCD', 'gunMax', 'dashT', 'dashCD', 'mantleCD', 'airDash', 'pow', 'ram', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY', 'freed', 'crouch', 'noteK', 'noteT', 'bonusT', 'lastBy', 'kept', 'swarm'];   // (a bonus level's clock too: tries ran it out)
 const copyItem = (e) => (e && typeof e === 'object' && !('x0' in e) ? Object.assign({}, e) : e);   // boxes stay shared
 function snapBody(b) {
   const o = {};
@@ -96,8 +96,7 @@ function step() {
   g.step(DT);
   const lv = g.lv, b = g.hero;
   if (lv.kind === 'well' && g.state === 'play') {   // the camera, as Game.frame moves it
-    if (g.contact() || g.rocket || g.camRef == null || Math.abs(b.cy - g.camRef) > view.h) g.camRef = b.cy;   // platform snapping, as there
-    const target = Math.min(g.camRef - CAM.anchor * view.h, b.cy - CAM.high * view.h);
+    const target = b.cy - CAM.anchor * view.h;
     if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * DT));
     lv.cam = Math.max(lv.cam, lv.capY - CAM.top);
   }

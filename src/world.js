@@ -2179,6 +2179,13 @@ Renderer.prototype.init = function () {
   if (this.low) this.makeTarget();
   return true;
 };
+// Each frame's vertices into a fresh store (orphaning), not over the old one: Gum's bufferSubData wrote into the buffer the last
+// frame's draws might still be reading, and the CPU waited on the GPU for it (most of a frame's time; a phone saving its battery stuttered).
+Renderer.prototype.upload = function (target, buf, data, len) {
+  const gl = this.gl;
+  gl.bindBuffer(target, buf);
+  gl.bufferData(target, data, gl.DYNAMIC_DRAW, 0, Math.max(len, 1));
+};
 Renderer.prototype.resize = function (w, h, scale) {
   gumResize.call(this, w, h, scale);
   this.low = [Math.max(1, Math.round(w / PIX.size)), Math.max(1, Math.round(h / PIX.size))];

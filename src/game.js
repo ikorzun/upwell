@@ -2497,6 +2497,7 @@ let paused = document.hidden, started = false, firstFrame = false, layoutQueued 
 
 // The view is a portrait column: the whole screen on a phone held upright, a 9:16
 // column in the middle of a wider window.
+const PIXELATED = !!(window.CSS && CSS.supports && CSS.supports('image-rendering', 'pixelated'));   // (Safari and iOS 10 on, Chrome, Firefox: caniuse 97%)
 function layout() {
   const vw = window.innerWidth, vh = window.innerHeight;
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
@@ -2505,7 +2506,9 @@ function layout() {
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
-  renderer.resize(W, H, window.devicePixelRatio || 1);   // the canvas a device pixel per pixel: the game pixels are copied up onto it
+  renderer.resize(W, H, PIXELATED ? 1 / PIX.size : window.devicePixelRatio || 1);   // the canvas as many pixels as the game draws, the page scales it up
+  // pixelated (index.html): a phone gets no full-resolution copy of each frame to keep and compose (on a 3x iPhone 20 times the pixels for nothing);
+  // a browser that cannot scale it pixelated gets the copy, a device pixel per pixel, as before
   game.applyMods();
   if (started && Math.abs(W - game.builtW) > 2) game.resized();
   else if (started && ui.open === 'menu') ui.menu();   // only taller or shorter: the menu's rows, and the hero over them, placed again
@@ -2560,7 +2563,18 @@ function frame(now) {
   if (raw > 0 && raw < 100) loop.ema += (raw - loop.ema) * 0.1;
   if (!started || paused || loop.frozen || renderer.lost || !renderer.ok) { loop.last = now; perf.last = 0; return; }
   if (coarse && loop.ema < 10 && (++loop.n & 1)) return;   // 120 Hz touch screens: draw at ~60
-  runFrame(now); perfFrame(now);
+  runFrame(now); perfFrame(now); fpsFrame(now);
+}
+// ?fps: the frames drawn in the last second, their middle and their longest gap, over the game (to look at on a phone; nothing without the flag)
+const fps = { el: /[?&]fps\b/.test(location.search) ? document.body.appendChild(Object.assign(document.createElement('div'), { id: 'fps' })) : null, t: [], at: 0 };
+function fpsFrame(now) {
+  if (!fps.el) return;
+  fps.t.push(now);
+  while (now - fps.t[0] > 1000) fps.t.shift();
+  if (now - fps.at < 500 || fps.t.length < 2) return;
+  fps.at = now;
+  const d = fps.t.slice(1).map((v, i) => v - fps.t[i]).sort((a, b) => a - b);
+  fps.el.textContent = (fps.t.length - 1) + ' fps · ' + d[d.length >> 1].toFixed(1) + ' ms · max ' + d[d.length - 1].toFixed(1) + ' ms';
 }
 // performance_sample (Playgama's telemetry guide): the drawn frames of play only, menus, pauses and hidden time left out
 // (a gap there is no frame), sent as one sample about every 30 s.

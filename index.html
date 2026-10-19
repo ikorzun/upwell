@@ -42,8 +42,9 @@
     color: var(--white);
   }
   body { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
-  #gl { position: absolute; top: 0; left: 0; display: block; touch-action: none; }
+  #gl { position: absolute; top: 0; left: 0; display: block; touch-action: none; image-rendering: pixelated; }
   #gl.wait { visibility: hidden; }
+  #fps { position: fixed; left: 4px; bottom: 4px; z-index: 60; padding: 2px 4px; background: var(--ink); color: var(--white); font: 12px monospace; pointer-events: none; }   /* ?fps */
   /* everything over the canvas column; layout() gives it the canvas's box */
   #ui { position: absolute; top: 0; left: 0; pointer-events: none; overflow: hidden; }
   button { font: inherit; color: inherit; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }

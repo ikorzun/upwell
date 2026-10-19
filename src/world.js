@@ -53,7 +53,7 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // floor, and caught by a ledge or the fire. The ceiling over an exit stops the camera `top` px
 // under the screen's top; were the hero ever to drop `deathPad` below the bottom anyway, that
 // costs a heart and puts it back on the last ledge it stood on.
-const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40, keep: 3, high: 0.3, glide: 7, air: 0.5 };   // high, glide, air: see Game.frame
+const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40, keep: 3 };
 const R_PER_M = 2.2;   // a metre of climb is 2.2 hero radii (64 px when the well was 12 tiles), so a level is as many jumps on any screen
 const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09 };
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)

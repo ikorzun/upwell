@@ -28,7 +28,7 @@ SCRIPT = os.path.expanduser('~/.claude/skills/gpt-image/scripts/gpt_image.py')
 # world: (name, what it is like, its own ink, what the other inks already mean there, what is behind it all)
 WORLDS = {
     'tokyo': ('Tokyo', 'a Japanese suburb at night: narrow alleys between small houses and apartment blocks, power lines, vending '
-              'machines, shop signs', 'blue #5bb8ff', 'purple marks moving platforms and grey blocks crumble', 'the plain black night, nothing far off'),
+              'machines, shop signs', 'purple #c996ff', 'blue marks moving platforms and grey blocks crumble', 'the plain black night, nothing far off'),
     # (owner 2026-10-19: the Cave and the Glacier Japanese too, cute and cosy; the Glacier as on Mount Fuji)
     'cave': ('the Cave', 'a cosy Japanese cave under a little mountain shrine: soft moss, stone lanterns, small stone jizo statues, paper lanterns, bamboo, '
              'the steam of a hot spring; cute and warm, kawaii', 'grey #c8c8c8',
@@ -39,7 +39,7 @@ WORLDS = {
              'white is ice you slip on (a whole block or wall of it), grey blocks crumble, purple marks moving planks and springs, green is moss you can hold on to',
              'the black winter night, nothing far off'),
 }
-LEDGE_AT = 'a blue concrete ledge with a white top edge sticking out of the wall'
+LEDGE_AT = 'a purple concrete ledge with a white top edge sticking out of the wall'
 CAVE_AT = 'a grey stone ledge with a white top edge sticking out of the wall'
 FUJI_AT = 'a blue rock ledge with a soft cap of snow and a white top edge sticking out of the wall'
 FUJI_RULE = ('In this world white is ice you slip on (a whole block or wall of white), grey blocks crumble and purple marks moving planks and springs: '
@@ -61,13 +61,13 @@ ELEMENTS = {
                        does='a thin platform: you jump up through it from below and stand on it', material='riveted steel, as on a building site among the houses',
                        size='4 tiles long and a third of a tile thick', place='the beam in the middle of the shaft, clear of the wall (it may hang on thin cables from above, out of the cell, or simply float)',
                        main='steel grey', vary='its profile (an I-beam, a lattice girder, a channel, a box), its ends, the rivets and bolts, how it hangs (cables, hooks or nothing) and the small details on it (a chain, a hook)',
-                       rule='In this world purple marks moving platforms and grey chequered blocks crumble, so keep the beam clearly a steel beam, and purple only for small details.'),
+                       rule='In this world blue marks moving platforms and grey chequered blocks crumble, so keep the beam clearly a steel beam, and blue only for small details.'),
     'tokyo-gondola': dict(world='tokyo', kind='ledge', what="a window cleaner's gondola, a small platform hanging on two cables",
                           does='a thin platform that rides sideways along its row, from wall to wall and back, carrying you; you jump up through its floor from below and stand on it',
                           material='a steel floor with a railing round it, two cables going up out of sight', size='3 tiles long, its floor a third of a tile thick, its railing about half a tile high',
-                          place='the gondola hanging on two cables in the middle of the shaft (the cables go up out of the cell)', main='purple',
+                          place='the gondola hanging on two cables in the middle of the shaft (the cables go up out of the cell)', main='blue',
                           vary='the floor and its railing (bars, mesh or panels), the cables and how they join it (a frame, pulleys, a winch), its ends and the small details on it (a bucket, a squeegee, a little motor)',
-                          rule="Purple is this world's mark for what moves, so it is its main colour; grey only for the cables and small details."),
+                          rule="Blue is this world's mark for what moves, so it is its main colour; grey only for the cables and small details."),
     'tokyo-aircon2': dict(world='tokyo', kind='ledge', what="an air conditioner's outdoor unit on a steel bracket on the shaft wall, big enough to stand on",
                           does='you can stand on its top, but it holds you only 3 seconds: it rattles, then falls off the wall',
                           material='a sheet-steel casing, a big round fan behind a grille, a side panel with louvers, pipes into the wall',
@@ -145,11 +145,11 @@ ELEMENTS = {
                            where='hanging from a short beam off the shaft wall', material='persimmons on strings, a wooden beam', size='three to five strings, each about '
                            '2 tiles long with six fruit', inks='orange fruit with small green or grey stalks, grey strings, a grey beam', scene=FUJI_AT + ' below them'),
     'fuji-cranes': dict(world='fuji', kind='prop', what='a pair of red-crowned cranes (tancho), elegant and cute, dancing or flying',
-                        where='flying across the back of the shaft, far behind the play', material='feathers', size='each about 2 tiles wide',
+                        where='flying across the back of the shaft, far behind the play', material='feathers', size='each about 2 tiles wide', plane='back',
                         inks='grey bodies (white would read as the hero or an edge to stand on), black neck and wing tips, a small orange crown (never red)',
                         scene=FUJI_AT + ' lower down'),
     'fuji-far': dict(world='fuji', kind='prop', what="Mount Fuji far away: its snowy cone and a few soft clouds, seen in the far background between the shaft's walls",
-                     where='far behind everything, filling the width of the shaft, low and faint, so the play reads over it', material='the mountain, snow, clouds',
+                     where='far behind everything, filling the width of the shaft, low and faint, so the play reads over it', material='the mountain, snow, clouds', plane='back',
                      size='about 14 tiles wide and 6 tiles tall', inks='the mountain in a faint blue dither on the black, its snowy top grey with a few white glints, '
                      'the clouds a faint grey dither', scene=FUJI_AT + ' in front of it'),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
@@ -176,7 +176,7 @@ ELEMENTS = {
 }
 
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
-{refnote}One element of the world "{world}" ({mood}): {what}.
+{refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.
 In play: {does}. Material: {material}. Size: {size}; {grid}
 Draw six different design variants of this same element in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
 Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place} in flat side view at game scale, and the hero standing on it for scale: a soft round white blob 2 tiles across with two small black eyes.
@@ -186,7 +186,7 @@ Build every variant from flat rectangles and a few circles: big simple shapes th
 {style} Use only these nine colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
-{refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}.
+{refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}
 Draw six different design variants of this same prop in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
 Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {scene}, the prop in its place in flat side view at game scale, and the hero for scale on a ledge near it: a soft round white blob 2 tiles across with two small black eyes.
@@ -194,6 +194,12 @@ Keep in every variant: the same size and place, a silhouette that reads at a gla
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
 {style} Any glow is a dither too. Use only these nine colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
+# The camera's depth (owner 2026-10-19; the game's DEPTH): the play in full colour; the midground (props on or off the play) solid but with no white and no
+# yellow except a light's own core; the background (behind the shaft) at a quarter of one ink over the black, no white, the least detail.
+PLANES = {'mid': 'It is in the midground, standing on or hanging off the play: solid colours, but no white and no yellow except the core of a light (a lamp\'s glass, '
+                 'a candle\'s flame).',
+          'back': 'It is in the background, behind the shaft: draw it in one colour at about a quarter of its strength over the black (a dark, dim tone of it), '
+                  'no white, the least detail, so the play reads over it.'}
 INKS9 = 'black #141414, white #f3f3f3, grey #c8c8c8, blue #5bb8ff, orange #faa23e, purple #c996ff, green #339c39, red #f43e34, yellow #ffed57'
 GRID = 4   # image pixels an art pixel: a 512 x 512 cell is 8 x 8 tiles
 GRIDNOTE = ('one tile is 16 art pixels, and every art pixel is an exact 4 x 4 square of image pixels on one fixed grid, so a tile is 64 x 64 image pixels '
@@ -213,7 +219,8 @@ def prompt(el: str, ref: bool = False) -> str:
     text = f" and, on the sign, {e['text']}" if e.get('text') else ''
     slab = {'place': 'the element sticking out of that wall', 'main': ink.split()[0], 'vary': 'the silhouette and edge profile, how its free end is finished, how it is fixed '
             'to the wall, its surface pattern and joints, and the small details on it', 'rule': f'In this world {taken}, so use those only for small details.'}
-    return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text,
+    plane = PLANES[e.get('plane', 'mid')]
+    return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
 
 

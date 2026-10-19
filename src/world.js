@@ -116,7 +116,10 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
   crow: ['........................', '................###.....', '...............#kkk#....', '..............#kkwkk##..', '...........###kkkkkkk##.', '........###kkkkkkkkk#...', '.......#kkkkkkkkkkk#....', '......#kkkkkkkkkkk#.....', '.....#kkkkkkkk#kkk#.....', '.....#kkkkkk##kkk#......', '.....#kkkk##kkkkk#......', '.....#kkk#kkkkk##.......', '...##kkkkkkkkk#.........', '..#k#######k##..........', '.###.......#.#..........', '...........#.#..........'],
   crowUp: ['...####.................', '....#kk###..............', '.....#kkkk##............', '......##kkkk##...####...', '........#kkkkk###kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.###kkkkk###.###...', '.........#####..........', '........................', '........................', '........................'],
   crowDown: ['........................', '........................', '........................', '.................####...', '........#########kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.#kkkkkkkkk#.###...', '.......#kkkkkk##........', '......#kkkkk##..........', '.....#kkk###............', '...######...............'] };
-for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// Fuji's cranes (the owner's pick, research/variants/fuji-cranes-1-px.png A): a crane flying, its neck out, its legs trailing, wings up and down
+CRITTER.craneUp = ['........#####...................', '.........######.................', '.....###########................', '.......#########................', '........#########...............', '......###########...............', '........#########........#####..', '.........#########.##########.##', '.........##############.........', '......#############.............', '.######...#######...............', '................................', '................................', '................................', '................................', '................................', '................................', '................................'];
+CRITTER.craneDown = ['................................', '................................', '................................', '................................', '................................', '................................', '.........................#####..', '...........#######.##########.##', '.........##############.........', '......#############.............', '.######..#########..............', '........#########...............', '......###########...............', '........#########...............', '.......#########................', '.....###########................', '.........######.................', '........#####...................'];
+for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
 // The Cave's Buddha (the owner's picture, 2026-10-19), seated, in patterned stripes: 79 x 92 game pixels in ICON_INK's letters, W and B white and blue
 // checkered with black (one box in the game's checker, tone 4); its colours are the owner's in the nearest inks, but it sits in the midground (the
 // owner's depth rule: no white, no yellow there), so its white is grey and its yellow orange. BUDDHA_BOXES: its runs merged into boxes once, [x, y, w, h,
@@ -2352,6 +2355,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // on the frame, lights turning in the dark of the opening, sparks rising up past it.
   const door = (d, kind) => {
     if (th.shrine && kind !== 'exit') { torii(d, kind); return; }   // the Cave's (see torii)
+    if (th.fuji && kind !== 'exit') { hut(d, kind); return; }   // Mount Fuji's (see hut)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -2394,6 +2398,48 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const h = 8 * PIX.size; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, 1, th.wall);
   }
   if (lv.exit) door(lv.exit, 'exit');
+  // Mount Fuji's door into a shop or a stash (the owner's picks, research/variants/fuji-hut-1-px.png: "E and F, the shop"): a mountain hut built round the
+  // doorway, 3.4 tiles out from the wall, its roof deep in snow. The stash's (E): its door framed purple and lit warm inside, a little stone lantern by it; the
+  // shop's (F): a red noren hanging in its doorway, a face on it, and a lit window beside it. What is inside bobs in the doorway; sparks rise past it.
+  const hut = (d, kind) => {
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple;
+    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), xa = Math.min(X(0), X(3.4)), xb = Math.max(X(0), X(3.4)), wy = sn(d.y0 + 0.3 * t), y1 = d.y1;
+    const dx = X(1.25), dw = 0.7 * t, top = sn(wy + 0.55 * t), x = dx, y = (top + y1) / 2;
+    F(dx, y, 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    box(xa, wy, xb, y1, th.block, 1, 0, 10, 2);   // its wooden front
+    for (let v = 0.45; v < (y1 - wy) / t; v += 0.45) box(xa, sn(wy + v * t), xb, sn(wy + v * t) + P, PAL.black, 1, 0, 10, 0);   // its boards
+    if (shop) {   // F: a roof sloping down away from the wall, snow along it
+      for (let i = 0; i <= 20; i++) { const u = i / 20, rx = X(-0.1 + u * 3.9), ry = sn(wy - 1.0 * t + u * 0.75 * t); box(rx - P, ry, rx + 2 * P, wy, th.block, 1, 0, 10, 0); box(rx - P, ry - sn(0.2 * t), rx + 2 * P, ry, PAL.gray, 1, 0, 10, 0); }
+    } else {   // E: a roof curving down both ways from a ridge, a finial, snow heaped on it
+      for (let i = 0; i <= 20; i++) { const u = i / 20, rx = X(-0.3 + u * 4.0), lift = 1 - Math.abs(2 * u - 1) ** 1.6, ry = sn(wy - (0.25 + 0.75 * lift) * t); box(rx - P, ry, rx + 2 * P, wy, th.block, 1, 0, 10, 0); box(rx - P, ry - sn(0.22 * t), rx + 2 * P, ry, PAL.gray, 1, 0, 10, 0); }
+      disc(X(1.7), sn(wy - 1.25 * t), 0.12 * t, PAL.gray, 1);
+    }
+    box(sn(dx - dw), top, sn(dx + dw), y1, INK.dark, 1, 0, 10, 0);   // the doorway
+    if (shop) {   // the noren: red, in three panels, a face on the middle one
+      box(sn(dx - dw), top, sn(dx + dw), sn(top + 0.75 * t), PAL.red, 1, 0, 10, 0);
+      for (const f of [-0.33, 0.33]) box(sn(dx + f * dw), sn(top + 0.2 * t), sn(dx + f * dw) + P, sn(top + 0.75 * t), PAL.black, 1, 0, 10, 0);
+      for (const e of [-1, 1]) box(sn(dx + e * 0.12 * t), sn(top + 0.25 * t), sn(dx + e * 0.12 * t) + P, sn(top + 0.25 * t) + 2 * P, PAL.black, 1, 0, 10, 0);
+      box(sn(dx - 0.12 * t), sn(top + 0.5 * t), sn(dx + 0.12 * t) + P, sn(top + 0.5 * t) + P, PAL.black, 1, 0, 10, 0);
+      const wx0 = Math.min(X(2.2), X(3.1)), wx1 = Math.max(X(2.2), X(3.1)), wy0 = sn(top + 0.2 * t), wy1 = sn(top + 1.1 * t);   // the lit window, its shoji's grid
+      F((wx0 + wx1) / 2, (wy0 + wy1) / 2, 0.7 * t, 0, 0, 0.6 * t, PAL.orange, 0.45, 1); box(wx0, wy0, wx1, wy1, PAL.orange, 1, 0, 10, 0);
+      for (let gx = wx0 + 0.3 * t; gx < wx1 - P; gx += 0.3 * t) box(sn(gx), wy0, sn(gx) + P, wy1, PAL.black, 1, 0, 10, 0); box(wx0, sn((wy0 + wy1) / 2), wx1, sn((wy0 + wy1) / 2) + P, PAL.black, 1, 0, 10, 0);
+    } else {   // its purple frame, the warm light inside, the little lantern by it
+      for (const [a0, b0, a1, b1] of [[dx - dw - 2 * P, top - 2 * P, dx + dw + 2 * P, top], [dx - dw - 2 * P, top, dx - dw, y1], [dx + dw, top, dx + dw + 2 * P, y1]]) box(sn(a0), sn(b0), sn(a1), sn(b1), PAL.purple, 1, 0, 10, 0);
+      F(dx, sn(y1 - 0.6 * t), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
+      const lx = X(2.85), lb = y1;
+      box(sn(lx - 0.18 * t), sn(lb - 0.12 * t), sn(lx + 0.18 * t), lb, PAL.gray, 1, 0, 10, 0); box(sn(lx - 0.06 * t), sn(lb - 0.55 * t), sn(lx + 0.06 * t), sn(lb - 0.12 * t), PAL.gray, 1, 0, 10, 0);
+      box(sn(lx - 0.16 * t), sn(lb - 0.85 * t), sn(lx + 0.16 * t), sn(lb - 0.55 * t), PAL.gray, 1, 0, 10, 0); box(sn(lx - 0.08 * t), sn(lb - 0.78 * t), sn(lx + 0.08 * t), sn(lb - 0.62 * t), PAL.orange, 1, 0, 10, 0);
+      box(sn(lx - 0.28 * t), sn(lb - 0.97 * t), sn(lx + 0.28 * t), sn(lb - 0.85 * t), PAL.gray, 1, 0, 10, 0);
+    }
+    const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, ry = shop ? sn(top + 1.25 * t) : y, rr = dw;
+    if (shop) { disc(x, ry + bob, rr * 0.42, INK.coinD, 1); disc(x, ry + bob, rr * 0.32, INK.coin, 1); disc(x - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
+    else for (let k = 0; k < 3; k++) disc(x + (k - 1) * rr * 0.5, y + rr * 0.3 - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1);
+    for (let k = 0; k < 6; k++) {
+      const u = (T * 0.45 + k / 6) % 1, q = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + q * 2 * dw), spy = y1 - u * (y1 - wy + 2.5 * R);
+      const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;
+      if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
+    }
+  };
   // The Cave's door into a shop or a stash (the owner's pick, research/variants/cave-torii-1-px.png B: "the way into the cave or the shop; the shop's red"):
   // a torii framing the dark doorway, its top beam flared up at its ends, its tie beam through the posts, their feet dark, a shimenawa rope with paper
   // zigzags under it; inside, a glow breathing and what is in there, bobbing; sparks rising past it.
@@ -2537,7 +2583,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
     const free = (r, h) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
-      && r.x1 - r.x0 >= 2 * t && seen(r.y0 - h, r.y0) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+      && r.x1 - r.x0 >= 2.6 * t && seen(r.y0 - h, r.y0) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+    const clear = (x0, y0, x1, y1) => !atDoor(x0, y0, x1, y1) && !lv.rects.some((q) => !q.gone && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);   // nothing laid in front of it
     if (lv.rc && lv.rc.buddha && seen(lv.floor - BUDDHA.length * P, lv.floor)) {
       const x0 = snap((lv.l + lv.r) / 2 - (BUDDHA[0].length * P) / 2), y0 = snap(lv.floor) - BUDDHA.length * P;
       for (const [x, y, w, h, c, tn] of BUDDHA_BOXES) box(x0 + x * P, y0 + y * P, x0 + (x + w) * P, y0 + (y + h) * P, PAL[ICON_INK[c]], 1, 0, 10, tn);
@@ -2556,9 +2603,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
     for (const r of lv.rects) {   // a stone lantern (toro, D) at the wall end of some steady ledges: base, post, its window lit, a roof turned up at its corners, moss over it
-      if (!free(r, 2.2 * t) || mod(Math.round(r.y0 / t), 3)) continue;
-      const wl = r.x0 <= lv.l + 1, cx = snap((wl ? lv.l : lv.r) + (wl ? 1 : -1) * 0.85 * t), b = r.y0, X = (u) => snap(cx + 1.2 * u * t), Y = (v) => snap(b - 1.2 * v * t);
-      if (atDoor(cx - 0.7 * t, b - 2.4 * t, cx + 0.7 * t, b)) continue;
+      if (!free(r, 3.8 * t) || mod(Math.round(r.y0 / t), 3)) continue;   // (its sheet's size: 3.6 tiles tall, owner)
+      const wl = r.x0 <= lv.l + 1, cx = snap((wl ? lv.l : lv.r) + (wl ? 1 : -1) * 1.3 * t), b = r.y0, X = (u) => snap(cx + 2 * u * t), Y = (v) => snap(b - 2 * v * t);
+      if (!clear(cx - 1.2 * t, b - 3.8 * t, cx + 1.2 * t, b - 1)) continue;
       box(X(-0.42), Y(0.14), X(0.42), b, PAL.gray, 1, 0, 10, 0); box(X(-0.3), Y(0.24), X(0.3), Y(0.14), PAL.gray, 1, 0, 10, 0);
       box(X(-0.13), Y(0.85), X(0.13), Y(0.24), PAL.gray, 1, 0, 10, 0);
       box(X(-0.36), Y(0.92), X(0.36), Y(0.85), PAL.gray, 1, 0, 10, 0);
@@ -2572,10 +2619,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     for (const r of lv.rects) {   // a pair of jizo (C), a big one and a small one in a pointed cap, at the wall end of some other steady ledges: grey stone, orange
       // knitted caps and bibs, eyes closed, smiling
-      if (!free(r, 1.6 * t) || mod(Math.round(r.y0 / t), 3) !== 1) continue;
+      if (!free(r, 2.6 * t) || mod(Math.round(r.y0 / t), 3) !== 1) continue;   // (their sheet's size: the big one 1.9 tiles tall, owner)
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, b = r.y0;
-      if (atDoor(Math.min(lv.l, lv.r), b - 1.6 * t, Math.max(lv.l, lv.r), b) && atDoor(wl ? lv.l : lv.r - 1.8 * t, b - 1.6 * t, wl ? lv.l + 1.8 * t : lv.r, b)) continue;
-      for (const [u, k, pointy] of [[0.55, 1, false], [1.35, 0.75, true]]) {   // flat shapes, no texture: a body, a round head, a cap, a bib, two closed eyes
+      if (!clear(wl ? lv.l : lv.r - 3 * t, b - 2.6 * t, wl ? lv.l + 3 * t : lv.r, b - 1)) continue;
+      for (const [u, k, pointy] of [[0.9, 1.65, false], [2.2, 1.25, true]]) {   // flat shapes, no texture: a body, a round head, a cap, a bib, two closed eyes
         const cx = snap((wl ? lv.l : lv.r) + d * u * t), w = 0.7 * k * t, bh = 0.55 * k * t, hr = 0.3 * k * t, hy = snap(b - bh - 0.75 * hr);
         box(snap(cx - w / 2), snap(b - bh), snap(cx + w / 2), b, PAL.gray, 1, 0, 10, 0);
         disc(cx, hy, hr, PAL.gray, 1);
@@ -2587,57 +2634,98 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
-  if (th.fuji && lv.kind === 'well') {   // the Glacier's kit as Mount Fuji in winter (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png, 2026-10-19):
-    // on some ledges' wall ends a kamakura with a snow rabbit by it (E, B), a snow monkey in a hot tub (E with a stone lantern, or D under a little roof), a pine
-    // (C, its ropes off, or D in yukitsuri), by turns of height; all in the midground (the owner's depth rule): no white, no yellow but a light's core.
+  if (th.fuji && lv.kind === 'well') {   // Mount Fuji's kit (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png): each its size on the sheets (owner:
+    // "twice as big: their size from the mockup"), and only where nothing laid stands in front of it. Far off, behind the shaft at a quarter (DIM, the owner's depth
+    // rule): Fuji itself (A), keeping its place on the screen as the climb goes on, and cranes flying across (A). In the midground (solid, no white, no yellow but a
+    // flame's core), on ledges' wall ends by turns of height: a kamakura with a snow rabbit by it (E, B), a snowman (D), a snow monkey in a hot tub (E by a stone
+    // lantern, or D under a little roof), persimmons drying on strings off a beam (E), a pine (C, its ropes off, or D in yukitsuri).
     const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
-    const free = (r, w, h) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
-      && r.x1 - r.x0 >= w * t && seen(r.y0 - h * t, r.y0) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
-    const steam = (x, y, k) => { for (let i = 0; i < 3; i++) { const u = (T * 0.25 + i / 3 + k * 0.37) % 1; F(snap(x + Math.sin(T * 1.3 + i * 2 + k) * 0.12 * t), snap(y - u * 0.9 * t), (0.12 + 0.1 * u) * t, 0, 0, (0.12 + 0.1 * u) * t, PAL.gray, 0.35 * (1 - u), 1); } };
-    const lantern = (x, b) => {   // a little stone lantern, its window lit (the Cave's toro, smaller)
-      box(snap(x - 0.16 * t), snap(b - 0.1 * t), snap(x + 0.16 * t), b, PAL.gray, 1, 0, 10, 0); box(snap(x - 0.05 * t), snap(b - 0.45 * t), snap(x + 0.05 * t), snap(b - 0.1 * t), PAL.gray, 1, 0, 10, 0);
-      box(snap(x - 0.14 * t), snap(b - 0.72 * t), snap(x + 0.14 * t), snap(b - 0.45 * t), PAL.gray, 1, 0, 10, 0); box(snap(x - 0.07 * t), snap(b - 0.66 * t), snap(x + 0.07 * t), snap(b - 0.52 * t), PAL.orange, 1, 0, 10, 0);
-      box(snap(x - 0.24 * t), snap(b - 0.82 * t), snap(x + 0.24 * t), snap(b - 0.72 * t), PAL.gray, 1, 0, 10, 0); disc(x, snap(b - 0.86 * t), 0.05 * t, PAL.gray, 1);
+    const clear = (x0, y0, x1, y1) => !atDoor(x0, y0, x1, y1) && !lv.rects.some((q) => !q.gone && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
+    const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
+      && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+    {   // Fuji far off (A): a cone of blue, its flat top and its snow grey down its ridges, two clouds; low on the screen, sinking a little as the climb goes on
+      const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
+      for (let y = 0; y < ht; y += 2 * P) {
+        const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25), yy = foot - ht + y, sn = 0.3 + 0.07 * Math.sin(y / P * 0.9);
+        box(snap(cx - w), yy, snap(cx + w), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
+        if (u < sn) box(snap(cx - w * Math.min(1, (sn - u) * 9)), yy, snap(cx + w * Math.min(1, (sn - u) * 9)), yy + 2 * P, PAL.gray, DIM, 0, 10, 0);
+      }
+      for (const [dx, dy, w] of [[-4.6, -4.4, 2.8], [4.4, -5.0, 2.3]]) box(snap(cx + (dx - w / 2) * t), snap(foot + dy * t), snap(cx + (dx + w / 2) * t), snap(foot + dy * t) + 3 * P, PAL.gray, DIM, 0, 10, 0);
+    }
+    for (let k = Math.floor(top / (18 * t)) - 1; k * 18 * t < bot; k++) {   // a pair of cranes (A) crossing the shaft, slowly, by turns of height either way
+      const dir = mod(k, 2) ? 1 : -1, span = lv.r - lv.l + 8 * t, x = lv.l - 4 * t + mod(T * 0.9 * t + k * 7.3 * t, span), y = (k * 18 + 9) * t;
+      if (y < top - 2 * t || y > bot) continue;
+      for (const [ox, oy] of [[0, 0], [-2.6, 1.3]]) { const fx = dir > 0 ? x + ox * t : lv.r + lv.l - x - ox * t, fr = Math.floor(T * 2.4 + ox) % 2 ? 'craneUp' : 'craneDown';
+        const rows = CRITTER[fr + (dir > 0 ? '' : 'L')], x0 = snap(fx - rows[0].length * P / 2), y0 = snap(y + oy * t);
+        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(x0 + i * P, y0 + j * P, x0 + e * P, y0 + (j + 1) * P, PAL.gray, DIM, 0, 10, 0); i = e; } }); }
+    }
+    const steam = (x, y, k, s) => { for (let i = 0; i < 3; i++) { const u = (T * 0.25 + i / 3 + k * 0.37) % 1; F(snap(x + Math.sin(T * 1.3 + i * 2 + k) * 0.2 * s * t), snap(y - u * 1.5 * s * t), (0.2 + 0.16 * u) * s * t, 0, 0, (0.2 + 0.16 * u) * s * t, PAL.gray, 0.35 * (1 - u), 1); } };
+    const lantern = (x, b, s) => {   // a little stone lantern, its window lit (the Cave's toro, smaller)
+      const X = (u) => snap(x + u * s * t), Y = (v) => snap(b - v * s * t);
+      box(X(-0.16), Y(0.1), X(0.16), b, PAL.gray, 1, 0, 10, 0); box(X(-0.05), Y(0.45), X(0.05), Y(0.1), PAL.gray, 1, 0, 10, 0);
+      box(X(-0.14), Y(0.72), X(0.14), Y(0.45), PAL.gray, 1, 0, 10, 0); box(X(-0.07), Y(0.66), X(0.07), Y(0.52), PAL.orange, 1, 0, 10, 0);
+      box(X(-0.24), Y(0.82), X(0.24), Y(0.72), PAL.gray, 1, 0, 10, 0); disc(x, Y(0.86), 0.05 * s * t, PAL.gray, 1);
     };
     for (const r of lv.rects) {
-      const k = mod(Math.round(r.y0 / t), 5), wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t);
-      if (k === 0 && free(r, 3, 1.6) && !atDoor(Math.min(X(0), X(3)), b - 1.6 * t, Math.max(X(0), X(3)), b)) {   // a kamakura (E): a dome of snow bricks, its doorway lit by a candle
-        const kx = X(1.2), rx = 1.05 * t, ry = 1.0 * t;
+      if (!seen(r.y0 - 6 * t, r.y0) || !steady(r, 2.4)) continue;
+      const k = mod(Math.round(r.y0 / t), 6), wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
+      const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);
+      if (k === 0 && w >= 4 * t && room(0, 3.8, 3.4)) {   // a kamakura (E): a dome of snow bricks 3.5 tiles across, its doorway lit by a candle, holly on top
+        const kx = X(1.9), rx = 1.75 * t, ry = 1.6 * t;
         F(kx, b, rx, 0, 0, ry, PAL.gray, 1, 0);
-        for (const v of [0.33, 0.66]) { const hw = rx * Math.sqrt(1 - v * v); box(snap(kx - hw), snap(b - v * t), snap(kx + hw), snap(b - v * t) + P, PAL.black, 1, 0, 10, 0);
-          for (let j = -2; j <= 2; j++) { const jx = snap(kx + (j + (v > 0.4 ? 0.5 : 0)) * 0.42 * t); if (Math.abs(jx - kx) < hw - 2 * P) box(jx, snap(b - v * t), jx + P, snap(b - (v - 0.3) * t), PAL.black, 1, 0, 10, 0); } }
-        F(kx, snap(b - 0.3 * t), 0.55 * t, 0, 0, 0.45 * t, PAL.orange, 0.55, 1);
-        box(snap(kx - 0.28 * t), snap(b - 0.52 * t), snap(kx + 0.28 * t), b, PAL.black, 1, 0, 10, 0); disc(kx, snap(b - 0.52 * t), 0.28 * t, PAL.black, 1);
-        F(kx, snap(b - 0.3 * t), 0.3 * t, 0, 0, 0.42 * t, PAL.orange, 0.85, 1);   // the doorway lit warm from inside
-        box(snap(kx) - P, snap(b - 0.16 * t), snap(kx) + P, b, PAL.gray, 1, 0, 10, 0); disc(snap(kx), snap(b - 0.22 * t), 0.05 * t, PAL.orange, 1); box(snap(kx), snap(b - 0.24 * t), snap(kx) + P, snap(b - 0.2 * t), PAL.yellow, 1, 0, 10, 0);   // the candle, its flame's core
-        for (const e of [-1, 1]) box(Math.min(snap(kx + e * 0.05 * t), snap(kx + e * 0.17 * t)), snap(b - ry - 0.08 * t), Math.max(snap(kx + e * 0.05 * t), snap(kx + e * 0.17 * t)), snap(b - ry), PAL.green, 1, 0, 10, 0);   // a sprig of holly on top
-        for (const e of [-1, 1]) box(snap(kx + e * 0.03 * t) - P, snap(b - ry - 0.04 * t) - P, snap(kx + e * 0.03 * t) + P, snap(b - ry - 0.04 * t) + P, PAL.orange, 1, 0, 10, 0);
-        const ux = X(2.45), uh = 0.62 * t;   // the snow rabbit (B): an egg of snow, leaf ears, berry eyes
-        F(ux, snap(b - 0.45 * uh), 0.3 * t, 0, 0, 0.55 * uh, PAL.gray, 1, 0);
-        for (const e of [-1, 1]) for (let j = 0; j < 4; j++) box(snap(ux + e * (0.06 + 0.03 * j) * t), snap(b - uh - (0.05 + 0.06 * j) * t), snap(ux + e * (0.06 + 0.03 * j) * t) + 2 * P, snap(b - uh - (0.05 + 0.06 * j) * t) + 2 * P, PAL.green, 1, 0, 10, 0);
-        for (const e of [-1, 1]) box(snap(ux + e * 0.11 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.11 * t) + P, snap(b - 0.62 * uh) + 2 * P, PAL.orange, 1, 0, 10, 0);
-      } else if (k === 2 && free(r, 2.5, 1.8) && !atDoor(Math.min(X(0), X(2.4)), b - 1.8 * t, Math.max(X(0), X(2.4)), b)) {   // a snow monkey in a hot tub
-        const roof = ((Math.round(r.y0 / t) * 7) & 1) === 1, tx = X(roof ? 0.9 : 1.35), hy = snap(b - 0.62 * t);
-        if (!roof) lantern(X(0.4), b);
-        steam(tx - 0.3 * t, hy - 0.3 * t, 1); steam(tx + 0.35 * t, hy - 0.2 * t, 2);
-        disc(tx, hy, 0.3 * t, PAL.gray, 1); for (const [dx, dy] of [[-0.3, -0.1], [0.3, -0.1], [-0.2, -0.25], [0.2, -0.25], [0, -0.3]]) box(snap(tx + dx * t), snap(hy + dy * t) - P, snap(tx + dx * t) + P, snap(hy + dy * t), PAL.gray, 1, 0, 10, 0);   // its fluffy head
-        disc(tx, snap(hy + 0.04 * t), 0.19 * t, PAL.orange, 1); for (const e of [-1, 1]) box(snap(tx + e * 0.1 * t) - P, snap(hy), snap(tx + e * 0.1 * t) + P, snap(hy) + P, PAL.black, 1, 0, 10, 0); box(snap(tx) - P / 2, snap(hy + 0.12 * t), snap(tx) + P / 2, snap(hy + 0.12 * t) + P, PAL.black, 1, 0, 10, 0);   // its face: eyes closed, a mouth
-        box(snap(tx - 0.45 * t), snap(b - 0.36 * t), snap(tx + 0.45 * t), snap(b - 0.3 * t), PAL.blue, 1, 0, 10, 0);   // the water
-        if (!roof) box(snap(tx - 0.3 * t), snap(b - 0.42 * t), snap(tx + 0.3 * t), snap(b - 0.33 * t), PAL.purple, 1, 0, 10, 0);   // E's towel round its shoulders
-        box(snap(tx - 0.45 * t), snap(b - 0.3 * t), snap(tx + 0.45 * t), b, PAL.orange, 1, 0, 10, 0); box(snap(tx - 0.45 * t), snap(b - 0.3 * t), snap(tx + 0.45 * t), snap(b - 0.3 * t) + P, PAL.black, 1, 0, 10, 0);
-        for (let x = tx - 0.3 * t; x < tx + 0.4 * t; x += 0.15 * t) box(snap(x), snap(b - 0.26 * t), snap(x) + P, b, PAL.black, 1, 0, 10, 0);   // the tub's staves
-        if (roof) {   // D: a little roof over it, snow on it
-          for (let i = 0; i <= 10; i++) { const u = i / 10; for (const e of [-1, 1]) { const rx = snap(tx + e * u * 0.6 * t), ry = snap(hy - 0.5 * t + u * 0.35 * t); box(rx, ry, rx + 2 * P, ry + 2 * P, PAL.blue, 1, 0, 10, 0); } }
-          box(snap(tx - 0.35 * t), snap(hy - 0.62 * t), snap(tx + 0.35 * t), snap(hy - 0.46 * t), PAL.gray, 1, 0, 10, 0);
+        for (const v of [0.4, 0.8, 1.2]) { const hw = rx * Math.sqrt(Math.max(0, 1 - (v * t / ry) ** 2)); box(snap(kx - hw), snap(b - v * t), snap(kx + hw), snap(b - v * t) + P, PAL.black, 1, 0, 10, 0);
+          for (let j = -4; j <= 4; j++) { const jx = snap(kx + (j + (Math.round(v / 0.4) % 2 ? 0.5 : 0)) * 0.5 * t); if (Math.abs(jx - kx) < hw - 2 * P) box(jx, snap(b - v * t), jx + P, snap(b - (v - 0.4) * t), PAL.black, 1, 0, 10, 0); } }
+        F(kx, snap(b - 0.5 * t), 0.9 * t, 0, 0, 0.75 * t, PAL.orange, 0.5, 1);
+        box(snap(kx - 0.45 * t), snap(b - 0.85 * t), snap(kx + 0.45 * t), b, PAL.black, 1, 0, 10, 0); disc(kx, snap(b - 0.85 * t), 0.45 * t, PAL.black, 1);
+        F(kx, snap(b - 0.5 * t), 0.5 * t, 0, 0, 0.7 * t, PAL.orange, 0.85, 1);
+        box(snap(kx) - P, snap(b - 0.3 * t), snap(kx) + 2 * P, b, PAL.gray, 1, 0, 10, 0); disc(snap(kx) + P / 2, snap(b - 0.4 * t), 0.09 * t, PAL.orange, 1); box(snap(kx), snap(b - 0.44 * t), snap(kx) + P, snap(b - 0.38 * t), PAL.yellow, 1, 0, 10, 0);
+        for (const e of [-1, 1]) box(Math.min(snap(kx + e * 0.08 * t), snap(kx + e * 0.34 * t)), snap(b - ry - 0.14 * t), Math.max(snap(kx + e * 0.08 * t), snap(kx + e * 0.34 * t)), snap(b - ry + 0.02 * t), PAL.green, 1, 0, 10, 0);
+        for (const e of [-1, 1]) box(snap(kx + e * 0.06 * t) - P, snap(b - ry - 0.1 * t) - P, snap(kx + e * 0.06 * t) + 2 * P, snap(b - ry - 0.1 * t) + 2 * P, PAL.orange, 1, 0, 10, 0);
+        if (w >= 5.6 * t && room(3.8, 5.3, 2.2)) {   // the snow rabbit (B): an egg of snow, leaf ears, berry eyes
+          const ux = X(4.55), uh = 1.4 * t;
+          F(ux, snap(b - 0.45 * uh), 0.62 * t, 0, 0, 0.55 * uh, PAL.gray, 1, 0);
+          for (const e of [-1, 1]) for (let j = 0; j < 5; j++) box(snap(ux + e * (0.12 + 0.05 * j) * t), snap(b - uh - (0.1 + 0.1 * j) * t), snap(ux + e * (0.12 + 0.05 * j) * t) + 3 * P, snap(b - uh - (0.1 + 0.1 * j) * t) + 3 * P, PAL.green, 1, 0, 10, 0);
+          for (const e of [-1, 1]) box(snap(ux + e * 0.22 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.22 * t) + 2 * P, snap(b - 0.62 * uh) + 3 * P, PAL.orange, 1, 0, 10, 0);
         }
-      } else if (k === 4 && free(r, 2.4, 2.6) && !atDoor(Math.min(X(0), X(2.2)), b - 2.6 * t, Math.max(X(0), X(2.2)), b)) {   // a pine: C (grey trunk, its ropes off) or D (in yukitsuri)
-        const ropes = ((Math.round(r.y0 / t) * 7) & 1) === 1, cx = X(1.05), Y = (v) => b - v * t, PX = (u) => cx + d * u * t;
-        const trunk = (q) => [PX(0.18 * Math.sin(q * Math.PI * 1.6) - 0.05), Y(1.9 * q)];
-        for (let q = 0; q <= 1; q += P / (1.9 * t)) { const [x, y] = trunk(q); disc(x, y, (0.13 - 0.07 * q) * t, ropes ? PAL.orange : PAL.gray, 1); }
-        const pads = [[0, 2.0, 0.42], [-0.5, 1.55, 0.36], [0.5, 1.6, 0.38], [0.45, 1.0, 0.36], [-0.42, 1.05, 0.3]];
-        for (const [u, v, rx] of pads) { F(PX(u), Y(v) - 0.05 * t, rx * t, 0, 0, 0.16 * t, PAL.gray, 1, 0); F(PX(u), Y(v) + 0.03 * t, rx * t, 0, 0, 0.13 * t, PAL.green, 1, 9, 0); }   // a pad of needles, snow on it
-        if (ropes) { const tx = PX(0), ty = Y(2.55); box(snap(tx) - P, snap(ty), snap(tx) + P, snap(Y(2.0)), PAL.orange, 1, 0, 10, 0);   // the pole, its ropes to the pads
+      } else if (k === 1 && room(0, 2.2, 2.9)) {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
+        const sx = X(1.1);
+        disc(sx, snap(b - 0.68 * t), 0.75 * t, PAL.gray, 1); disc(sx, snap(b - 1.72 * t), 0.5 * t, PAL.gray, 1);
+        box(snap(sx - 0.42 * t), snap(b - 2.2 * t), snap(sx + 0.42 * t), snap(b - 2.06 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx - 0.32 * t), snap(b - 2.72 * t), snap(sx + 0.32 * t), snap(b - 2.2 * t), PAL.purple, 1, 0, 10, 0);
+        for (const e of [-1, 1]) box(snap(sx + e * 0.2 * t) - P, snap(b - 1.86 * t), snap(sx + e * 0.2 * t) + 2 * P, snap(b - 1.72 * t), PAL.black, 1, 0, 10, 0);
+        box(snap(sx - 0.48 * t), snap(b - 1.32 * t), snap(sx + 0.48 * t), snap(b - 1.16 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx + 0.08 * t), snap(b - 1.16 * t), snap(sx + 0.26 * t), snap(b - 0.72 * t), PAL.purple, 1, 0, 10, 0);
+      } else if (k === 2 && w >= 3.4 * t && room(0, 3.2, 3.2)) {   // a snow monkey in a hot tub, steam rising
+        const roof = ((Math.round(r.y0 / t) * 7) & 1) === 1, tx = X(roof ? 1.5 : 2.1), hy = snap(b - 1.3 * t);
+        if (!roof) lantern(X(0.5), b, 2);
+        steam(tx - 0.6 * t, hy - 0.6 * t, 1, 2); steam(tx + 0.7 * t, hy - 0.4 * t, 2, 2);
+        disc(tx, hy, 0.62 * t, PAL.gray, 1);
+        for (const [dx, dy] of [[-0.62, -0.2], [0.62, -0.2], [-0.42, -0.5], [0.42, -0.5], [0, -0.62], [-0.2, -0.6], [0.2, -0.6]]) box(snap(tx + dx * t) - P, snap(hy + dy * t) - P, snap(tx + dx * t) + P, snap(hy + dy * t) + P, PAL.gray, 1, 0, 10, 0);   // its fluffy head
+        disc(tx, snap(hy + 0.08 * t), 0.4 * t, PAL.orange, 1);
+        for (const e of [-1, 1]) box(snap(tx + e * 0.18 * t) - P, snap(hy), snap(tx + e * 0.18 * t) + 2 * P, snap(hy) + P, PAL.black, 1, 0, 10, 0);   // eyes closed
+        box(snap(tx) - P, snap(hy + 0.24 * t), snap(tx) + P, snap(hy + 0.24 * t) + P, PAL.black, 1, 0, 10, 0);
+        box(snap(tx - 0.95 * t), snap(b - 0.72 * t), snap(tx + 0.95 * t), snap(b - 0.62 * t), PAL.blue, 1, 0, 10, 0);   // the water
+        if (!roof) box(snap(tx - 0.62 * t), snap(b - 0.86 * t), snap(tx + 0.62 * t), snap(b - 0.68 * t), PAL.purple, 1, 0, 10, 0);   // E's towel round its shoulders
+        box(snap(tx - 0.95 * t), snap(b - 0.62 * t), snap(tx + 0.95 * t), b, PAL.orange, 1, 0, 10, 0); box(snap(tx - 0.95 * t), snap(b - 0.62 * t), snap(tx + 0.95 * t), snap(b - 0.62 * t) + P, PAL.black, 1, 0, 10, 0);
+        for (let x = tx - 0.7 * t; x < tx + 0.8 * t; x += 0.3 * t) box(snap(x), snap(b - 0.55 * t), snap(x) + P, b, PAL.black, 1, 0, 10, 0);   // the tub's staves
+        if (roof) {   // D: a little roof over it, snow on it
+          for (let i = 0; i <= 14; i++) { const u = i / 14; for (const e of [-1, 1]) { const rx = snap(tx + e * u * 1.2 * t), ry = snap(hy - 1.0 * t + u * 0.7 * t); box(rx, ry, rx + 2 * P, ry + 2 * P, PAL.blue, 1, 0, 10, 0); } }
+          box(snap(tx - 0.7 * t), snap(hy - 1.25 * t), snap(tx + 0.7 * t), snap(hy - 0.92 * t), PAL.gray, 1, 0, 10, 0);
+        }
+      } else if (k === 4 && w >= 3.4 * t && room(0.3, 3.5, 4.3)) {   // persimmons drying (E): strings off a beam on a knee brace, purple ties and tassels
+        const by = snap(b - 4.1 * t);
+        box(Math.min(X(0), X(3.3)), by, Math.max(X(0), X(3.3)), by + snap(0.2 * t), PAL.gray, 1, 0, 10, 0); brace(wx, d, by + snap(0.2 * t), snap(0.8 * t), 2 * P, PAL.gray);
+        for (const u of [1.0, 1.6, 2.2, 2.8]) {
+          const sx = X(u); box(sx, by + snap(0.2 * t), sx + P, snap(b - 1.4 * t), PAL.gray, 1, 0, 10, 0); box(sx - P, by + snap(0.2 * t), sx + 2 * P, by + snap(0.45 * t), PAL.purple, 1, 0, 10, 0);
+          for (let j = 0; j < 4; j++) { const fy = snap(by + (0.7 + 0.5 * j) * t); disc(sx + P / 2, fy, 0.2 * t, PAL.orange, 1); box(sx - P, fy - snap(0.24 * t), sx + 2 * P, fy - snap(0.16 * t), PAL.green, 1, 0, 10, 0); }
+          for (const e of [-1, 0, 1]) rod(sx, snap(b - 1.4 * t), sx + e * 0.14 * t, snap(b - 1.12 * t), PAL.purple);   // its tassel
+        }
+      } else if (k === 5 && w >= 3.6 * t && room(0, 4.0, 5.2)) {   // a pine: C (a grey trunk, its ropes off) or D (an orange one in yukitsuri)
+        const ropes = ((Math.round(r.y0 / t) * 7) & 1) === 1, cx = X(1.9), Y = (v) => b - v * t, PX = (u) => cx + d * u * t;
+        const trunk = (q) => [PX(0.36 * Math.sin(q * Math.PI * 1.6) - 0.1), Y(3.8 * q)];
+        for (let q = 0; q <= 1; q += P / (3.8 * t)) { const [x, y] = trunk(q); disc(x, y, (0.26 - 0.14 * q) * t, ropes ? PAL.orange : PAL.gray, 1); }
+        const pads = [[0, 4.0, 0.84], [-1.0, 3.1, 0.72], [1.0, 3.2, 0.76], [0.9, 2.0, 0.72], [-0.84, 2.1, 0.6]];
+        for (const [u, v, rx] of pads) { F(PX(u), Y(v) - 0.1 * t, rx * t, 0, 0, 0.32 * t, PAL.gray, 1, 0); F(PX(u), Y(v) + 0.06 * t, rx * t, 0, 0, 0.26 * t, PAL.green, 1, 9, 0); }
+        if (ropes) { const tx = PX(0), ty = Y(5.1); box(snap(tx) - P, snap(ty), snap(tx) + 2 * P, snap(Y(4.0)), PAL.orange, 1, 0, 10, 0);
           for (const [u, v, rx] of pads) rod(tx, ty, PX(u + Math.sign(u || 1) * rx * 0.9), Y(v), PAL.gray); }
       }
     }

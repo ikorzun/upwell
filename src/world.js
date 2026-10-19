@@ -2283,6 +2283,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let i = 0; i < 3; i++) { const by = snap(y0 + (0.44 + 0.06 * i) * h), bx = c0 + snap(0.05 * w); box(bx, by, bx + P, by + P, PAL.gray, 1, 0, 10, 0); }
       box(g0 + snap(0.05 * w), snap(r.y0 - 0.2 * h), g1 - snap(0.05 * w), snap(r.y0 - 0.11 * h), PAL.black, 1, 0, 10, 0);   // the slot
     }
+    for (const r of lv.rects) {   // a bonsai at the wall end of some other steady ledges, as on a balcony (the owner's pick, research/variants/tokyo-bonsai-1.png F):
+      // a shallow grey pot, an orange trunk in an S and its branches, pads of green needles shaded down to the right; not under an air conditioner, nor by a cage or Moti
+      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
+        || acNear(wl ? -1 : 1, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'))) continue;
+      const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
+      for (const [hw, a0, a1] of [[0.5, 0, 0.07], [0.45, 0.07, 0.17], [0.38, 0.17, 0.25]]) box(snap(cx - hw * t), snap(by + a0 * t), snap(cx + hw * t), snap(by + a1 * t), PAL.gray, 1, 0, 10, 0);
+      for (const f of [-0.27, 0.27]) box(snap(cx + f * t) - P, snap(by + 0.25 * t), snap(cx + f * t) + P, r.y0, PAL.gray, 1, 0, 10, 0);
+      const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03), Y(0.95 * q)];
+      for (let q = 0; q <= 1; q += P / (0.95 * t)) { const [x, y] = trunk(q); disc(x, y, (0.1 - 0.055 * q) * t, PAL.orange, 1); }
+      for (const [q, u, v] of [[0.32, 0.55, 0.52], [0.55, -0.55, 0.5], [0.8, 0.5, 0.92], [0.7, -0.5, 0.86]]) { const [x0, y0] = trunk(q); for (let e = 0; e <= 1; e += 0.12) disc(x0 + (X(u) - x0) * e, y0 + (Y(v) - y0) * e, 0.035 * t, PAL.orange, 1); }
+      for (const [u, v, rx, ry] of [[-0.05, 1.12, 0.32, 0.14], [-0.5, 0.86, 0.28, 0.12], [0.5, 0.92, 0.3, 0.12], [0.55, 0.52, 0.28, 0.11], [-0.55, 0.5, 0.24, 0.1]]) {
+        F(X(u), Y(v), rx * t, 0, 0, ry * t, PAL.green, 1, 9, 0); F(X(u) - d * 0.08 * t, Y(v) - 0.08 * t, 0.6 * rx * t, 0, 0, 0.6 * ry * t, PAL.green, 1, 9, 0);   // a pad, a tuft on it
+      }
+    }
   }
   const MINE_CAP = 8 * kitT;   // the Mine's timber caps, a beat up its walls (and its lamps, every other cap; see the dark's lights)
   const mineLamp = (side, k) => ((k % 2) + 2) % 2 === (side < 0 ? 0 : 1);

@@ -379,6 +379,17 @@ const BOSSES = {
     defeat: { en: 'Shift is over… go on, then.', es: 'Se acabó el turno… sigue, pues.', pt: 'O turno acabou… vai, então.', ja: 'シフト おわり… いきな。' },
     hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
     how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
+  // World 4's: the Tram (Tokyo's streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
+  // its pantograph up to an overhead wire.
+  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+    intro: [{ en: 'Next stop: nowhere.', es: 'Próxima parada: ninguna.', pt: 'Próxima parada: nenhuma.', ja: 'つぎは どこにも とまりません。' },
+      { en: 'Mind the gap. And me.', es: 'Cuidado con el hueco. Y conmigo.', pt: 'Cuidado com o vão. E comigo.', ja: 'すきまに ごちゅうい。わたしにも。' },
+      { en: 'No riding on the roof!', es: '¡Nada de subirse al techo!', pt: 'Nada de andar no teto!', ja: 'やねに のらないで ください！' }],
+    quip: [{ en: 'Ding ding. You missed it.', es: 'Tilín tilín. Lo perdiste.', pt: 'Blim blim. Perdeu.', ja: 'チンチン。のりおくれ。' },
+      { en: 'Please wait for the next one.', es: 'Espera al siguiente, por favor.', pt: 'Espere o próximo, por favor.', ja: 'つぎの でんしゃを おまちください。' }],
+    defeat: { en: 'End of the line… go on up.', es: 'Final de trayecto… sube ya.', pt: 'Fim da linha… pode subir.', ja: 'しゅうてんです… のぼって どうぞ。' },
+    hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },
+    how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dele e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },
   // The random run's summit: the Lid (the plan's last boss, its first look): goo from the start, then helpers, then twice the goo.
   lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
     intro: [{ en: 'Nothing up there. I checked.', es: 'Arriba no hay nada. Lo comprobé.', pt: 'Lá em cima não tem nada. Eu vi.', ja: 'うえには なにも ないよ。' },
@@ -391,6 +402,7 @@ const BOSSES = {
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
+const TOWN = { stairs: 3, planks: 2, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, rubberwall: 1 };   // Tokyo's (shelves off the walls: awnings)
 // A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12
 // (its knitted pictures: the Heat, a drop like the hero, the Light) and what Aunt Moti reads in them.
 const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
@@ -451,6 +463,26 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
   { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'cart', rail: true },   // its rail under the ceiling, moss over its ends
+] },
+// World 4, Tokyo (the user's first new setting; its kit in the renderer, see THEMES.tokyo): awnings that bounce, level crossings, gondolas,
+// then a power cut over the crossings (the twist: the train comes in the dark); the Tram. Its runes: a lattice, a lantern, a lit window
+// (some stopped climbing and built a town; its lights hid the Light).
+{ world: TOKYO, runes: 'HWu', lore: { en: 'Some stopped climbing and built a town.\nIts lights hid the Light.', es: 'Algunos dejaron de subir y construyeron una ciudad.\nSus luces taparon la Luz.', pt: 'Alguns pararam de subir e ergueram uma cidade.\nSuas luzes esconderam a Luz.', ja: 'のぼるのを やめて まちを つくった ものも いた。\nまちの あかりが ひかりを かくした。' }, levels: [
+  { role: 'teach', len: 30, fire: 0.42, calm: 8, maxD: 2, chunks: TOWN, intro: ['shelves'], enemies: ['crawler'], foes: 0.4, candy: [], safe: true, seed: 5101,
+    news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
+  { role: 'teach', len: 36, fire: 0.46, maxD: 2, chunks: TOWN, intro: [], enemies: ['crawler', 'climber'], foes: 0.5, candy: ['fizz'], crossing: true, gate: 'gate', sides: [0, 110808], seed: 5102,
+    news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
+  { role: 'teach', len: 38, fire: 0.46, maxD: 2, chunks: { ...TOWN, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['smash'], seed: 5103,
+    news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' } },
+  { role: 'apply', len: 44, fire: 0.48, maxD: 2, chunks: { ...TOWN, movers: 1, bridge: 1 }, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.55, pair: 0.15, candy: ['smash', 'fizz'], crossing: true, shop: 0.4, stash: 0.3, gate: 'gate2', seed: 5104 },
+  { role: 'peak', len: 36, fire: 0.52, maxD: 3, chunks: { ...TOWN, comb: 3, chimney: 2, movers: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], crossing: true, seed: 5105 },
+  { role: 'bonus', len: 44, bonus: 3, time: 48, seed: 5106 },
+  { role: 'twist', len: 38, fire: 0.48, maxD: 2, chunks: { ...TOWN, lift: 3 }, intro: [], dark: true, enemies: ['crawler', 'climber', 'shell'], foes: 0.55, candy: ['fizz'], stash: 0.3, crossing: true, seed: 5107,
+    news: { en: 'a power cut: watch the crossing lights', es: 'un apagón: mira las luces del paso', pt: 'um apagão: olhe as luzes da passagem', ja: 'ていでん: ふみきりの あかりを みて' } },
+  { role: 'peak', len: 40, fire: 0.52, maxD: 3, chunks: { ...TOWN, comb: 3, movers: 2, spikes: 1, rubberwall: 2 }, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], crossing: true, gate: 'gate3', sides: [14004, 0], seed: 5108 },
+  { role: 'rest', len: 28, fire: 0.4, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 3, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
+    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+  { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
 ] }];
 
 // Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
@@ -554,6 +586,9 @@ ICONS.runey = '............/..www...www./.wwwww.wwwww/wwwwwwwwwwww/wwwwwwwwwwww/
 ICONS.runeL = '............/.w.......w../www.....www./.www...www../..www.www.../...wwwww..../....www...../...wwwww..../..www.www.../.www...www../www.....www./.w.......w..';
 ICONS.runen = '............/.w.w.w.w.w../www.www.www./.www.w.www../w.wwwwwww.w./.w.wwwww.w../wwwwwwwwwww./.w.wwwww.w../w.wwwwwww.w./.www.w.www../www.www.www./.w.w.w.w.w..';
 ICONS.runeY = '............/...ww......./...www....../...www....../....ww.www../.www..wwww../wwww..www.../www.ww....../....www...../....www...../.....ww...../............';
+ICONS.runeH = '.....ww...../.ww.wwww.ww./.ww.wwww.ww./...w.ww.w.../.ww.wwww.ww./wwwwwwwwwwww/wwwwwwwwwwww/.ww.wwww.ww./...w.ww.w.../.ww.wwww.ww./.ww.wwww.ww./.....ww.....';
+ICONS.runeW = '.....ww...../....wwww..../....wwww..../...wwwwww.../.wwwwwwwwww./wwwwwwwwwwww/wwwwwwwwwwww/.wwwwwwwwww./...wwwwww.../....wwww..../....wwww..../.....ww.....';
+ICONS.runeu = '....wwww..../..wwwwwwww../.wwwwwwwwww./.ww..ww..ww./www..ww..www/wwwwwwwwwwww/wwwwwwwwwwww/www.wwww.www/.www....www./.wwwwwwwwww./..wwwwwwww../....wwww....';
 // Kana for Tokyo's signs: DotGothic16's own glyphs (the game's Japanese font, SIL OFL) on its 16-dot grid.
 ICONS['kana_ラ'] = '................/...wwwwwwwwww.../................/................/................/..wwwwwwwwwwww../.............w../.............w../.............w../............w.../............w.../...........w..../..........w...../........ww....../...wwwww......../................';
 ICONS['kana_ー'] = '................/................/................/................/................/................/................/..wwwwwwwwwwww../................/................/................/................/................/................/................/................';
@@ -1124,7 +1159,7 @@ class Level {
     const rr = this.ringRng = mulberry32((o.seed ^ 0x7f4a7c15) >>> 0);   // the boost ring's place, by its own generator
     this.ringAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && rr() < RING.p ? this.floor - o.height * (RING.at[0] + rr() * (RING.at[1] - RING.at[0])) : null;
     const tr = mulberry32((o.seed ^ 0x1b873593) >>> 0), wi = WORLDS.indexOf(o.world);   // the crossing, by its own generator
-    if (o.kind === 'well' && o.height && !rc && !o.world.bonus && (wi > 0 || o.world.crossing) && tr() < (o.world.crossing || TRAIN.p)) { const y = this.floor - o.height * (TRAIN.at[0] + tr() * (TRAIN.at[1] - TRAIN.at[0])), h = TRAIN.h * o.h; this.crossing = { y0: y - h, y1: y, state: 'rest', t: TRAIN.rest[0] + tr() * (TRAIN.rest[1] - TRAIN.rest[0]), x: 0 }; }
+    if (o.kind === 'well' && o.height && !o.world.bonus && (rc ? rc.crossing : (wi > 0 || o.world.crossing) && tr() < (o.world.crossing || TRAIN.p))) { const y = this.floor - o.height * (TRAIN.at[0] + tr() * (TRAIN.at[1] - TRAIN.at[0])), h = TRAIN.h * o.h; this.crossing = { y0: y - h, y1: y, state: 'rest', t: TRAIN.rest[0] + tr() * (TRAIN.rest[1] - TRAIN.rest[0]), x: 0 }; }
     const gr = mulberry32((o.seed ^ 0x5bd1e995) >>> 0), gw = o.world === CRYPT ? CRYPT.at[0] : Math.max(0, WORLDS.indexOf(o.world));   // the gate, by its own generator
     this.gateId = o.kind !== 'well' || !o.height || o.world.bonus ? null : rc ? rc.gate || null : this.stage === 1 ? GATE.run[Math.min(gw, 3)] : null;
     this.gateAt = this.gateId ? this.floor - o.height * (GATE.at[0] + gr() * (GATE.at[1] - GATE.at[0])) : null;
@@ -2299,7 +2334,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
     box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
   }
-  if (bs && !bs.dead && bs.def && bs.def.rail) {   // the Minecart's cart, in front of it: dark, a white rim, two wheels on the rail
+  if (bs && !bs.dead && bs.def && bs.def.tram) {   // the Tram's car round it, in the town's blue: dark windows, a white band, its pantograph up to the wire
+    const b = bs.body, hw = 0.62 * (b.maxX - b.minX), y1 = lv.rail.y, y0 = b.cy - 0.05 * (b.maxY - b.minY), hgt = y1 - y0, wy = b.minY - 1.2 * R, P = PIX.size;
+    box(lv.l, wy, lv.r, wy + P, PAL.gray, 1, 0, 10, 0);   // the overhead wire
+    for (let k = 0; k <= 8; k++) { const u = k / 8, x = Math.round((b.cx - 0.5 * R + R * Math.abs(u - 0.5)) / P) * P, y = Math.round((b.minY - (b.minY - wy) * u) / P) * P; box(x - P, y - P, x + P, y, PAL.gray, 1, 0, 10, 0); }
+    box(b.cx - hw - 2.5, y0 - 2.5, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0, b.cx + hw, y1, th.block, 1, 0);
+    for (let k = -1; k <= 1; k++) box(b.cx + k * 0.62 * hw - 0.22 * hw, y0 + 0.18 * hgt, b.cx + k * 0.62 * hw + 0.22 * hw, y0 + 0.55 * hgt, INK.dark, 1, 0, 10, 0);
+    box(b.cx - hw, y0 + 0.68 * hgt, b.cx + hw, y0 + 0.78 * hgt, PAL.white, 1, 0, 10, 0);
+    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
+  } else if (bs && !bs.dead && bs.def && bs.def.rail) {   // the Minecart's cart, in front of it: dark, a white rim, two wheels on the rail
     const b = bs.body, hw = 0.55 * (b.maxX - b.minX), y0 = b.cy, y1 = lv.rail.y;
     box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
     for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
@@ -2374,6 +2417,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const light = (x, y, r0, r1) => { if (n < 16 && y > top - r1 * P && y < bot + r1 * P) { L.set([x / P, y / P, r0 * Rp, r1 * Rp], n * 4); n++; } };
     const breath = 1 + 0.03 * Math.sin(T * 2.2);
     light(hero.cx, hero.cy, 4.5 * breath, 7.5 * breath);
+    if (lv.crossing) { const xg = lv.crossing, on = xg.state !== 'rest'; for (const x of [lv.l + 0.5 * R, lv.r - 0.5 * R]) light(x, xg.y0 - 0.2 * R, on ? 1.6 : 0.7, on ? 4 : 1.8); if (xg.state === 'pass') light(Math.min(xg.x, lv.r), (xg.y0 + xg.y1) / 2, 2.2, 5); }   // a crossing's lamps (bright while they flash), the train's headlight
     if (lv.portal) light(lv.portal.x, lv.portal.y, 2, 4);
     for (const s of lv.shots) light(s.x, s.y, 0.5, 1.4);   // blobs, the fire's and the spitters'
     for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);

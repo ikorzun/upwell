@@ -120,6 +120,9 @@ for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id]
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, two of them `inset` from the walls, sagging
 // `sag`; wireY is a wire's height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: [0.5, 0.9], sag: [0.8, 1.15], a: 0.5 };   // a: how much of a wire's line is drawn (a dither), the beams' and gondolas' cables' too
+// Tokyo's air conditioners (owner: not so often, and a ledge to stand on that gives way): one a wall every `beat` tiles, the walls `at` out of step,
+// `w` x `h` tiles on a brace `brace` tall; a plank on its top which, stood on, rattles and falls `time` s later, for good (Level.addAircons, Level.update)
+const AC = { beat: 24, at: [5, 17], w: 2.2, h: 1.4, brace: 0.9, time: 3 };
 const wireY = (lv, k, w, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset[w] * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset[w] * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag[w] * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
@@ -1477,6 +1480,7 @@ class Level {
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
     this.flavour(lens[0]);
+    if (this.theme.town && this.kind === 'well') this.addAircons(this.top - h, this.top);
     if (this.ringAt != null && this.top - h < this.ringAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addRing(this.top - h, this.top);
     if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addSpot(this.top - h, this.top);
     if (this.runeAt.length && this.top - h < this.runeAt[0].y && c !== CHUNKS.pocket) this.addRune(this.top - h, this.top);
@@ -1552,12 +1556,26 @@ class Level {
       }
     }
     if (this.theme.town && this.kind === 'well') for (let k = Math.ceil(top / (WIRE.arm * t)); k * WIRE.arm * t < this.top; k++) if (this.crowRng() < FOLK.crowP) {   // Tokyo: a crow on a wire of this chunk's beats,
-      // where nothing laid stands in front of it (CRITTER.crow's 24 x 16 game pixels are at most 1.9 x 1.25 tiles; in tiles, so alike on every screen)
+      // where nothing laid nor a door stands in front of it (CRITTER.crow's 24 x 16 game pixels are at most 1.9 x 1.25 tiles; in tiles, so alike on every screen)
       const cr = this.crowRng, w = cr() < 0.5 ? 0 : 1, dir = cr() < 0.5 ? -1 : 1, hw = 1.1 * t, hh = 1.3 * t;
       for (let n = 0; n < 4; n++) {
         const x = this.l + (this.r - this.l) * (0.2 + 0.6 * cr()), y = wireY(this, k, w, x);
-        if (this.rects.some((q) => q.x1 > x - hw && q.x0 < x + hw && q.y1 > y - hh && q.y0 < y + 0.3 * t)) continue;
+        if ([...this.rects, ...this.bubbles].some((q) => q.x1 > x - hw && q.x0 < x + hw && q.y1 > y - hh && q.y0 < y + 0.3 * t)) continue;
         this.folk.push({ kind: 'crow', x, y, dir, fly: false, t: 0 }); break;
+      }
+    }
+  }
+  // Tokyo's air conditioners (AC) on the walls in the chunk just laid (from y0 down to y1), on their beat: each a plank to stand on that gives way; none
+  // where a ledge, a spike, a door, a coat of its wall (moss, ice, rubber) or the crossing is in its way or over it, nor by the floor
+  addAircons(y0, y1) {
+    const t = this.tile, w = AC.w * t, xg = this.crossing;
+    for (const side of [-1, 1]) {
+      const at = AC.at[side < 0 ? 0 : 1];
+      for (let k = Math.ceil((y0 / t - at) / AC.beat); (k * AC.beat + at) * t < y1; k++) {
+        const y = (k * AC.beat + at) * t, x0 = side < 0 ? this.l : this.r - w, x1 = x0 + w, ya = y - 2.4 * t, yb = y + (AC.h + AC.brace + 0.4) * t;
+        if (y > this.floor - 4 * t || (xg && yb > xg.y0 - 2 * t && ya < xg.y1 + t)) continue;
+        const clear = (q) => q.x1 <= x0 - 0.5 * t || q.x0 >= x1 + 0.5 * t || q.y1 <= ya || q.y0 >= yb;
+        if (this.rects.every(clear) && this.spikes.every(clear) && this.bubbles.every(clear) && !this.coats.some((c) => c.side === (side < 0 ? 1 : 2) && c.y1 > ya && c.y0 < yb)) this.rects.push(this.box(x0, y, x1, y + LEVEL.plank * this.R, { plank: true, ac: true }));
       }
     }
   }
@@ -1571,7 +1589,7 @@ class Level {
       if (this.floor - b.y1 < min) return true;
       for (let j = 0; j < from; j++) {
         const a = rs[j];
-        if (a.cap || a.y0 < b.y1 || a.y0 - b.y1 >= min) continue;
+        if (a.cap || a.ac || a.y0 < b.y1 || a.y0 - b.y1 >= min) continue;   // (an air conditioner is no part of the shaft's lay)
         if (Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0) >= t) return true;
       }
     }
@@ -1726,7 +1744,14 @@ class Level {
         if (x0 < m.a) { x0 = m.a; m.v = Math.abs(m.v); } else if (x0 > m.b) { x0 = m.b; m.v = -Math.abs(m.v); }
         r.dx = x0 - r.x0; r.x0 = x0; r.x1 = x0 + w;
       }
-      if (r.crumble && !r.gone) {
+      if (r.ac) {   // a Tokyo air conditioner (AC): stood on, it rattles, gives way AC.time s later and falls for good (r.t then times its fall, drawn)
+        if (r.gone) r.t += dt;
+        else {
+          if (r.hit && !r.crumbling) { r.crumbling = true; sound.play('crumble', 0.4, 1.6); }
+          r.hit = false;
+          if (r.crumbling && (r.t += dt) > AC.time) { r.gone = true; r.t = 0; sound.play('crumble', 1, 0.55); crumbleFx(r, PAL.gray); }
+        }
+      } else if (r.crumble && !r.gone) {
         if (r.hit && !r.crumbling) { r.crumbling = true; sound.play('crumble', 0.6); }
         r.hit = false;
         if (r.crumbling && (r.t += dt) > (this.crumbleTime || CRUMBLE.time)) { r.gone = true; r.t = 0; crumbleFx(r, this.theme.crumble); }
@@ -1835,7 +1860,7 @@ Body.prototype.collideLevel = function (lv, h) {
         if (!face) { best = dT; face = 8; if (dB < best) { best = dB; face = 4; } if (dL < best) { best = dL; face = 2; } if (dR < best) face = 1; }
       }
       const rf = r.slick ? SLICK.fr : fr, st = !r.slick && !glue[i] && convex[i];
-      if (hero && r.crumble) r.hit = true;
+      if (hero && (r.crumble || r.ac)) r.hit = true;
       if (face === 8) {
         const v = (y[i] - py[i]) / h;
         if (v > hitW[3]) hitW[3] = v;
@@ -2222,7 +2247,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const u of lv.runes) if (seen(u.y - R, u.y + R)) {   // a world's runes on the back wall (RUNE): a faint cloth, the rune knitted on it in the world's ink
     const h = 8 * PIX.size; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, 1, th.wall);
   }
-  for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);
   if (lv.exit) door(lv.exit, 'exit');
   const pt = lv.portal;
   if (pt && seen(pt.y - 3 * pt.r, pt.y + 3 * pt.r)) {
@@ -2239,6 +2263,20 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(l0, y0, l1, y0 + h, c, 1, 0, 10, 0); box(b0, y0, b1, y0 + 2 * P, c, 1, 0, 10, 0);
     for (let y = y0; y < y0 + h; y += P) { const u = y0 + h - y, [a0, a1] = xs(Math.max(P, u - s / 2), Math.min(P + h, u + s / 2)); box(a0, y, a1, y + P, c, 1, 0, 10, 0); }
   };
+  const aircon = (r, ox, oy) => {   // a Tokyo air conditioner (AC) on its rect, moved by (ox, oy): a grey box, a big fan behind rings of grille, louvers and a
+    // blue label at its free side, on a grey knee brace bolted white
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, w = r.x1 - r.x0, h = AC.h * t, x0 = r.x0 + ox, y = r.y0 + oy, f = (u) => (wl ? x0 + u * w : x0 + w - u * w), wx = (wl ? lv.l : lv.r) + ox;
+    box(x0, y, x0 + w, y + h, PAL.gray, 1, 0, 10, 0);
+    const fx = f(0.34), fy = y + 0.54 * h, fr = 0.4 * h;
+    disc(fx, fy, fr, PAL.black, 1); F(fx, fy, fr, 0, 0, fr, PAL.gray, 1, 4); F(fx, fy, 0.58 * fr, 0, 0, 0.58 * fr, PAL.gray, 1, 4);
+    box(fx - fr, fy - P / 2, fx + fr, fy + P / 2, PAL.gray, 1, 0, 10, 0); box(fx - P / 2, fy - fr, fx + P / 2, fy + fr, PAL.gray, 1, 0, 10, 0); disc(fx, fy, 0.14 * fr, PAL.gray, 1);
+    const l0 = snap(Math.min(f(0.7), f(0.92))), l1 = snap(Math.max(f(0.7), f(0.92)));
+    for (let i = 0; i < 5; i++) { const ly = snap(y + (0.36 + 0.11 * i) * h); box(l0, ly, l1, ly + P, PAL.black, 1, 0, 10, 0); }
+    box(l0, snap(y + 0.12 * h), l1, snap(y + 0.24 * h), PAL.blue, 1, 0, 10, 0);
+    const by = snap(y + h) + P, bh = snap(AC.brace * t), d = wl ? 1 : -1;
+    brace(wx, d, by, bh, 2 * P, PAL.gray);
+    for (const [u, v] of [[2 * P, 0], [bh - P, 0], [2 * P, bh - 2 * P]]) { const bx = snap(wx + d * u); box(Math.min(bx, bx + d * P), by + v, Math.max(bx, bx + d * P), by + v + P, PAL.white, 1, 0, 10, 0); }
+  };
   const rod = (x0, y0, x1, y1, c) => {   // a line a game pixel thick (an awning's rods, a bucket's handle)
     const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / kitP));
     for (let k = 0; k <= n; k++) { const x = snap(x0 + ((x1 - x0) * k) / n), y = snap(y0 + ((y1 - y0) * k) / n); box(x, y, x + kitP, y + kitP, c, 1, 0, 10, 0); }
@@ -2252,8 +2290,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (y0 + sag < top || y0 > bot) continue;
       for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, WIRE.a, 0, 10, 0); }
     }
-    const AC = { beat: 12, at: [2.5, 8.5], w: 1.3, h: 0.85, brace: 0.6 }, acY = (side, k) => (k * AC.beat + AC.at[side < 0 ? 0 : 1]) * t;   // the air conditioners, in tiles
-    const acNear = (side, ya, yb) => { const k = Math.floor((yb / t - AC.at[side < 0 ? 0 : 1]) / AC.beat); return acY(side, k) + (AC.h + AC.brace) * t + P > ya; };   // one hangs over [ya, yb]
+    const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);   // in the way of a door, or its glow (owner: nothing covers one)
+    const acNear = (wl, ya, yb) => lv.rects.some((q) => q.ac && !q.gone && (q.x0 <= lv.l + 1) === wl && q.y0 < yb && q.y0 + (AC.h + AC.brace) * t > ya);   // an air conditioner hangs over [ya, yb] on that wall
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.28 * t, 0.46 * t);
@@ -2264,17 +2302,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const d of [0.5, 0.9]) { const x = at(d * t); box(x - P, y - 2 * P, x + P, y, PAL.white, 1, 0, 10, 0); }
         if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, 1, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
-      for (let k = Math.floor(top / (AC.beat * t)) - 1; k * AC.beat * t < bot; k++) {   // an air conditioner every 12 tiles, the two walls out of step (the owner's
-        // pick, research/variants/tokyo-aircon-1.png D): a grey box, its fan behind a cross, a blue panel, vents at its free side, on a grey knee brace bolted white
-        const y = acY(side, k), w = AC.w * t, h = AC.h * t, x0 = side < 0 ? lv.l : lv.r - w, f = (u) => (side < 0 ? x0 + u * w : x0 + w - u * w), fx = f(0.36), fy = y + h / 2, wx = side < 0 ? lv.l : lv.r, by = snap(y + h) + P, bh = snap(AC.brace * t);
-        if (by + bh < top || y > bot) continue;
-        box(x0, y, x0 + w, y + h, PAL.gray, 1, 0, 10, 0);
-        disc(fx, fy, 0.3 * t, PAL.black, 1); box(fx - 0.24 * t, fy - P / 2, fx + 0.24 * t, fy + P / 2, PAL.gray, 1, 0, 10, 0); box(fx - P / 2, fy - 0.24 * t, fx + P / 2, fy + 0.24 * t, PAL.gray, 1, 0, 10, 0); disc(fx, fy, 0.06 * t, PAL.gray, 1);
-        box(snap(Math.min(f(0.66), f(0.84))), y + 0.15 * h, snap(Math.max(f(0.66), f(0.84))), y + 0.85 * h, PAL.blue, 1, 0, 10, 0);
-        for (let i = 0; i < 4; i++) { const vy = snap(y + (0.2 + 0.18 * i) * h), vx = side < 0 ? x0 + w - P : x0; box(vx, vy, vx + P, vy + P, PAL.black, 1, 0, 10, 0); }
-        brace(wx, -side, by, bh, 2 * P, PAL.gray);
-        for (const [u, v] of [[2 * P, 0], [bh - P, 0], [2 * P, bh - 2 * P]]) { const bx = snap(wx - side * u); box(Math.min(bx, bx - side * P), by + v, Math.max(bx, bx - side * P), by + v + P, PAL.white, 1, 0, 10, 0); }
-      }
     }
     const SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'], 'neonFish'], [['カ', 'ラ', 'オ', 'ケ'], 'neonMic']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
     for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
@@ -2282,7 +2309,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       // with grey caps over and under it, in a glow (and dark in the power cut: the dark's lights leave it out)
       const [word, pic] = SIGNS[mod(k - Math.floor(k / 3), 3)], left = mod(k, 2) === 0, sw = gw + 6 * P, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, cx = x0 + sw / 2;
       const y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
-      if (y1 + 0.3 * t < top || y0 - 0.4 * t > bot) continue;
+      if (y1 + 0.3 * t < top || y0 - 0.4 * t > bot || atDoor(left ? lv.l : x0, y0 - 0.3 * t, left ? x0 + sw : lv.r, y1 + 0.2 * t)) continue;
       F(cx, (y0 + y1) / 2, 1.15 * sw, 0, 0, 0.7 * (y1 - y0), PAL.orange, 1, 1);
       for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, 1, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, 1, 0, 10, 0); }   // the arms, bolted on
       box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, 1, 0, 10, 0);
@@ -2296,7 +2323,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       // for what you take), the slot under the front
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 3 * t, r.y0) || mod(Math.round(r.y0 / t), 3)) continue;
-      const w = 1.4 * t, h = 2.2 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w, y0 = r.y0 - h, g0 = snap(wl ? x0 + 0.1 * w : x0 + 0.36 * w), g1 = snap(g0 + 0.54 * w), c0 = snap(wl ? x0 + 0.72 * w : x0 + 0.12 * w);
+      const w = 1.4 * t, h = 2.2 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w, y0 = r.y0 - h;
+      if (atDoor(x0 - 0.15 * t, y0 - 0.2 * t, x0 + w + 0.15 * t, r.y0)) continue;
+      const g0 = snap(wl ? x0 + 0.1 * w : x0 + 0.36 * w), g1 = snap(g0 + 0.54 * w), c0 = snap(wl ? x0 + 0.72 * w : x0 + 0.12 * w);
       box(x0 - 0.15 * t, y0 - 0.2 * t, x0 + w + 0.15 * t, r.y0, PAL.black, 1, 0, 10, 0);   // the niche
       box(x0, y0, x0 + w, r.y0, PAL.blue, 1, 0, 10, 4);   // the cabinet: blue checkered with black, navy
       box(g0, snap(y0 + 0.08 * h), g1, snap(y0 + 0.68 * h), PAL.blue, 1, 0, 10, 0);
@@ -2311,8 +2340,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       // a shallow grey pot, an orange trunk in an S and its branches, pads of green needles shaded down to the right; not under an air conditioner, nor by a cage or Moti
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
-        || acNear(wl ? -1 : 1, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'))) continue;
+        || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'))) continue;
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
+      if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
       for (const [hw, a0, a1] of [[0.5, 0, 0.07], [0.45, 0.07, 0.17], [0.38, 0.17, 0.25]]) box(snap(cx - hw * t), snap(by + a0 * t), snap(cx + hw * t), snap(by + a1 * t), PAL.gray, 1, 0, 10, 0);
       for (const f of [-0.27, 0.27]) box(snap(cx + f * t) - P, snap(by + 0.25 * t), snap(cx + f * t) + P, r.y0, PAL.gray, 1, 0, 10, 0);
       const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03), Y(0.95 * q)];
@@ -2502,6 +2532,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // Returns false for what keeps the common look (ice, crumble, cracks, springs, magnets).
   const townRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+    if (r.ac) {   // an air conditioner (aircon; owner: you may stand on it, for 3 s): its top edge white, and once stood on it rattles, harder as it gives way
+      const u = r.crumbling ? r.t / AC.time : 0, ox = u ? snap(Math.sin(T * 55) * (1 + 2 * u) * P) : 0;
+      aircon(r, ox, 0); box(r.x0 + ox, r.y0, r.x1 + ox, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
     if (r.plank && r.move) {   // a window cleaner's gondola (the owner's pick, research/variants/tokyo-gondola-1.png C): a purple box of panels hung under its
       // floor, its corner posts clamped to two cables up out of sight, a grey bucket at one end and a squeegee at the other (C's were yellow: yellow is for what you take)
       const yb = snap(r.y0 + 0.62 * t), pt = r.y0 - 0.12 * t;
@@ -2560,6 +2594,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
+  for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);   // the ways into a shop or a stash, over the worlds' back layers: nothing covers them (owner)
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
@@ -2610,11 +2645,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x - 0.09 * R, r.y1, x + 0.09 * R, r.y1 + len, INK.dark, a, 0, 10, 0); disc(x, r.y1 + len, 0.14 * R, INK.dark, a);
     }
   }
+  if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
   {   // the platforms' shadows (user: depth, not overdone): cast by a sun that goes from the right to the left through a world's levels,
     // a dithered black band under each and down its far side, over the walls and whatever ledge lies there (the black back wall barely shows them)
     const sun = (g.mode === 'camp' ? g.stage / 9 : g.stage / 2) * 2 - 1, dx = Math.round((-sun * 0.45 * R) / PIX.size) * PIX.size, dy = Math.round((0.32 * R) / PIX.size) * PIX.size;
-    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && !(th.town && r.plank && (r.move || r.bouncy)) && seen(r.y0, r.y1 + dy)) {   // (Tokyo's awnings and
-      // gondolas hang below their floors: the band would lie over their cloth, lantern and box)
+    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && !(th.town && (r.ac || (r.plank && (r.move || r.bouncy)))) && seen(r.y0, r.y1 + dy)) {   // (Tokyo's awnings, gondolas
+      // and air conditioners hang below their floors: the band would lie over their cloth, lantern and box)
       box(r.x0 + dx, r.y1, r.x1 + dx, r.y1 + dy, INK.dark, 0.55, 0, 10, 0);
       if (dx) box(dx > 0 ? r.x1 : r.x0 + dx, r.y0 + dy, dx > 0 ? r.x1 + dx : r.x0, r.y1, INK.dark, 0.55, 0, 10, 0);
     }

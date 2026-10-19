@@ -311,7 +311,7 @@ const CRYPT = Object.assign({}, WORLDS[2], { id: 'crypt', name: { en: 'Crypt', e
 // lines sagging across the shaft, signs up its walls in the game's own kana, vending machines on its ledges (THEMES.tokyo `town`, drawn
 // by the renderer), a level crossing in most of its levels (`crossing`: the chance). It shows by itself at ?play=tokyo, to look at,
 // before it is a world of the map.
-const TOKYO = Object.assign({}, WORLDS[1], { id: 'tokyo', name: { en: 'Tokyo', es: 'Tokio', pt: 'Tóquio', ja: 'とうきょう' }, theme: THEMES.tokyo, dark: [], crossing: 0.85, maxD: 2,
+const TOKYO = Object.assign({}, WORLDS[1], { id: 'tokyo', name: { en: 'Tokyo', es: 'Tokio', pt: 'Tóquio', ja: 'とうきょう' }, theme: THEMES.tokyo, dark: [], crossing: 0.85, maxD: 2, awnings: true,
   chunks: { stairs: 3, planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 2, lift: 2, movers: 1, bridge: 1, rubberwall: 1, fork: 1, rest: 1, vault: 1 },
   enemies: { crawler: 3, climber: 2, shell: 2, spitter: 1 },
   intro: [{ news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } }, {}, {}] });
@@ -1320,6 +1320,7 @@ class Level {
   // Some of a run's ledges as their world has them (user): the Cave's planks bounce, the Mine's blocks pull (BOUNCY, MAGNET).
   flavour(from) {
     const w = this.world;
+    if (w.awnings) { for (const r of this.rects.slice(from)) if (r.plank && !r.move && (r.x0 <= this.l + 1 || r.x1 >= this.r - 1)) r.bouncy = true; return; }   // Tokyo: a plank off a wall is a shop's awning, and an awning always bounces (its kit)
     if (this.rc || !(w.bouncy || w.magnet)) return;
     for (const r of this.rects.slice(from)) {
       if (r.move || r.crumble || r.spring || r.slick || r.cap) continue;
@@ -2020,32 +2021,88 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }
-  if (th.town && lv.kind === 'well') {   // Tokyo's town (THEMES.tokyo), laid by height alone so nothing is kept: power lines, signs, vending machines
-    const t = lv.tile, P = PIX.size, hash = (n) => { const v = Math.sin(n * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
-    for (let k = Math.floor(top / (9 * t)); k * 9 * t < bot; k++) if (hash(k) < 0.6) {   // two or three wires sagging wall to wall, white insulators at the poles
-      const n = hash(k + 0.5) < 0.5 ? 2 : 3, sag = (0.6 + 0.7 * hash(k + 0.25)) * t, step = 3 * P;
-      for (let w = 0; w < n; w++) {
-        const y0 = k * 9 * t + w * 0.5 * t;
-        for (let x = lv.l; x < lv.r; x += step) { const u = (x + step / 2 - lv.l) / (lv.r - lv.l), y = Math.round((y0 + sag * 4 * u * (1 - u)) / P) * P; box(x, y, Math.min(x + step, lv.r), y + P, PAL.gray, 1, 0, 10, 0); }
-        for (const x of [lv.l, lv.r - 2 * P]) box(x, y0 - P, x + 2 * P, y0 + 2 * P, PAL.white, 1, 0, 10, 0);
+  const kitT = lv.tile, kitP = PIX.size, snap = (v) => Math.round(v / kitP) * kitP;
+  if (th.town && lv.kind === 'well') {   // Tokyo's kit (THEMES.tokyo; see the parts catalog): whatever hangs, hangs on something. A utility pole up
+    // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
+    // a wall; vending machines stand in a niche at a ledge's wall end. All on a fixed beat by height, not at random, so nothing is kept.
+    const t = kitT, P = kitP, arm = 9 * t, mod = (k, n) => ((k % n) + n) % n;
+    for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) for (let w = 0; w < 2; w++) {   // the wires, from crossarm to crossarm, sagging
+      const y0 = k * arm + 0.08 * t, x0 = lv.l + (0.5 + 0.4 * w) * t, x1 = lv.r - (0.5 + 0.4 * w) * t, sag = (0.8 + 0.35 * w) * t, st = 3 * P;
+      if (y0 + sag < top || y0 > bot) continue;
+      for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, 1, 0, 10, 0); }
+    }
+    for (const side of [-1, 1]) {
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
+      const [p0, p1] = span(0.28 * t, 0.46 * t);
+      box(p0, top, p1, bot, PAL.gray, 0.6, 0, 10, 0);   // the pole, a step back (see-through: it is no wall)
+      for (let k = Math.floor(top / arm) - 1; k * arm < bot; k++) {
+        const y = k * arm, [a0, a1] = span(0.1 * t, 1.05 * t);
+        box(a0, y, a1, y + 0.16 * t, PAL.gray, 1, 0, 10, 0);   // its crossarm, white insulators on it
+        for (const d of [0.5, 0.9]) { const x = at(d * t); box(x - P, y - 2 * P, x + P, y, PAL.white, 1, 0, 10, 0); }
+        if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, 1, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
+      }
+      for (let k = Math.floor(top / (12 * t)) - 1; k * 12 * t < bot; k++) {   // an air conditioner on its bracket every 12 tiles, the two walls out of step
+        const y = k * 12 * t + (side < 0 ? 2.5 : 8.5) * t, w = 1.15 * t, h = 0.8 * t, x0 = side < 0 ? lv.l : lv.r - w, fx = x0 + w * (side < 0 ? 0.6 : 0.4);
+        if (y + h + 0.4 * t < top || y > bot) continue;
+        box(x0, y, x0 + w, y + h, PAL.gray, 0.85, 0, 10, 0); disc(fx, y + h / 2, 0.28 * t, PAL.black, 1); disc(fx, y + h / 2, 0.07 * t, PAL.gray, 1);
+        const bx = x0 + (side < 0 ? 0.18 : 0.82) * w; box(bx - P, y + h, bx + P, y + h + 0.35 * t, PAL.gray, 1, 0, 10, 0);
       }
     }
     const SIGNS = [['ラ', 'ー', 'メ', 'ン'], ['ス', 'シ'], ['カ', 'ラ', 'オ', 'ケ']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
-    for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (hash(k * 1.37 + 21) < 0.6) {   // a sign up a wall: grey, framed in the town's ink, black kana
-      const word = SIGNS[Math.floor(hash(k * 1.37 + 9) * SIGNS.length)], x0 = hash(k * 1.37 + 3) < 0.5 ? lv.l : lv.r - gw - 4 * P, y0 = k * 11 * t + 3 * t, y1 = y0 + word.length * gw + 4 * P;
+    for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a sign on two arms off a wall, two in every three beats, the walls in turn
+      const word = SIGNS[mod(k * 7, 3)], left = mod(k, 2) === 0, sw = gw + 4 * P, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, y0 = k * 11 * t + 3.5 * t, y1 = y0 + word.length * gw + 4 * P;
       if (y1 < top || y0 > bot) continue;
-      box(x0, y0, x0 + gw + 4 * P, y1, th.block, 1, 0, 10, 0); box(x0 + P, y0 + P, x0 + gw + 3 * P, y1 - P, PAL.gray, 1, 0, 10, 0);
+      for (const y of [y0 + 0.3 * t, y1 - 0.4 * t]) box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, 1, 0, 10, 0);
+      box(x0, y0, x0 + sw, y1, th.block, 1, 0, 10, 0); box(x0 + P, y0 + P, x0 + sw - P, y1 - P, PAL.gray, 1, 0, 10, 0);
       word.forEach((ch, j) => icon('kana_' + ch, x0 + 2 * P + gw / 2, y0 + 2 * P + (j + 0.5) * gw, 1, kk, PAL.black));
     }
-    for (const r of lv.rects) {   // a vending machine on some wide steady ledges: grey, its lit front blue with rows of cans, a slot at its foot (no red or yellow: those mean danger and take)
-      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 3 * t, r.y0) || hash(r.x0 * 0.13 + r.y0 * 0.071) > 0.22) continue;
-      const w = 1.4 * t, h = 2.2 * t, x0 = hash(r.y0 * 0.37) < 0.5 ? r.x0 + 0.3 * t : r.x1 - 0.3 * t - w, y0 = r.y0 - h;
+    for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges: grey, its lit front blue with rows of cans
+      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 3 * t, r.y0) || mod(Math.round(r.y0 / t), 3)) continue;
+      const w = 1.4 * t, h = 2.2 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w, y0 = r.y0 - h;
+      box(x0 - 0.15 * t, y0 - 0.2 * t, x0 + w + 0.15 * t, r.y0, PAL.black, 1, 0, 10, 0);   // the niche
       box(x0, y0, x0 + w, r.y0, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y0 + 2 * P, x0 + w - 2 * P, y0 + 0.6 * h, PAL.blue, 1, 0, 10, 0);
       const cans = [PAL.white, PAL.purple, PAL.white, PAL.gray], cw = (w - 6 * P) / 4;
       for (let j = 0; j < 3; j++) for (let i = 0; i < 4; i++) box(x0 + 3 * P + i * cw + P, y0 + 4 * P + j * 0.17 * h, x0 + 3 * P + (i + 1) * cw - P, y0 + 4 * P + j * 0.17 * h + 0.09 * h, cans[(i + j) % 4], 1, 0, 10, 0);
       box(x0 + 0.25 * w, r.y0 - 0.2 * h, x0 + 0.75 * w, r.y0 - 0.12 * h, PAL.black, 1, 0, 10, 0);
     }
   }
+  // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
+  // beam, a block is a concrete slab cut square with its panels' seams, a steel bracket under it at a wall and windows in a thick one.
+  // Returns false for what keeps the common look (ice, crumble, cracks, springs, magnets).
+  const townRect = (r) => {
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+    if (r.plank && r.move) {   // a window-cleaner's gondola: its floor, a rail round it, two cables up out of sight
+      box(r.x0, r.y0, r.x1, r.y1, th.mover, 1, 0, 10, 2);
+      box(r.x0, r.y0 - 0.55 * t, r.x1, r.y0 - 0.55 * t + P, PAL.gray, 1, 0, 10, 0);
+      for (const x of [r.x0, r.x1 - P]) box(x, r.y0 - 0.55 * t, x + P, r.y0, PAL.gray, 1, 0, 10, 0);
+      for (const x of [r.x0 + 0.25 * t, r.x1 - 0.25 * t - P]) box(x, top, x + P, r.y0 - 0.55 * t, PAL.gray, 1, 0, 10, 0);
+    } else if (r.plank && r.bouncy) {   // a shop's awning off a wall (an awning always bounces): stripes, a scalloped hem, a rod to the wall, a paper lantern
+      const sag = r.t > 0 ? 0.25 * t * (r.t / SPRING.anim) : 0, n = Math.max(2, Math.round((r.x1 - r.x0) / (0.5 * t))), sw = (r.x1 - r.x0) / n;
+      for (let i = 0; i < n; i++) { const c = i % 2 ? PAL.white : th.block; box(r.x0 + i * sw, r.y0 + sag, r.x0 + (i + 1) * sw, r.y1 + sag, c, 1, 0, 10, 0); disc(r.x0 + (i + 0.5) * sw, r.y1 + sag, sw / 2, c, 1); }
+      const ox = wl ? r.x1 - 0.1 * t : r.x0 + 0.1 * t, wx = wl ? lv.l : lv.r;
+      for (let k = 0; k <= 10; k++) { const u = k / 10, x = snap(ox + (wx - ox) * u), y = snap(r.y0 + sag - 1.1 * t * u); box(x - P, y - P, x, y, PAL.gray, 1, 0, 10, 0); }
+      if (r.x1 - r.x0 >= 3 * t) {
+        const lx = snap(wl ? r.x1 - 0.45 * t : r.x0 + 0.45 * t), ly = r.y1 + sag + 0.75 * t;
+        box(lx - P / 2, r.y1 + sag, lx + P / 2, ly - 0.3 * t, PAL.gray, 1, 0, 10, 0);
+        F(lx, ly, 0.24 * t, 0, 0, 0.32 * t, PAL.white, 1, 0); for (const d of [-1, 1]) box(lx - 0.16 * t, ly + d * 0.3 * t - 0.05 * t, lx + 0.16 * t, ly + d * 0.3 * t + 0.05 * t, PAL.black, 1, 0, 10, 0);
+      }
+      box(r.x0, r.y0 + sag, r.x1, r.y0 + sag + 2.5, th.lip, 1, 1.25); return true;
+    } else if (r.plank) {   // a steel beam: grey, a dark web, rivets
+      box(r.x0, r.y0, r.x1, r.y1, PAL.gray, 1, 0, 10, 0); const my = snap((r.y0 + r.y1) / 2); box(r.x0, my, r.x1, my + P, th.wallD, 1, 0, 10, 0);
+      for (let x = r.x0 + 0.3 * t; x < r.x1 - 0.2 * t; x += 0.6 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y0 + 3 * P, th.wallD, 1, 0, 10, 0);
+    } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
+    else {   // a concrete slab
+      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0);
+      for (let x = r.x0 + 3 * t; x < r.x1 - 0.5 * t; x += 3 * t) box(snap(x), r.y0 + 3 * P, snap(x) + P, r.y1, th.wallD, 1, 0, 10, 0);
+      if (!wl) box(r.x0, r.y0, r.x0 + P, r.y1, th.wallD, 1, 0, 10, 0);
+      if (!wr) box(r.x1 - P, r.y0, r.x1, r.y1, th.wallD, 1, 0, 10, 0);
+      if (r.y1 - r.y0 >= 2.5 * t) for (let y = r.y0 + 0.6 * t; y < r.y1 - 0.8 * t; y += 1.2 * t) for (let x = r.x0 + 0.4 * t; x < r.x1 - 0.7 * t; x += 1.1 * t) {
+        const lit = ((Math.round(x / t) * 7 + Math.round(y / t) * 3) % 5) === 0; box(snap(x), snap(y), snap(x + 0.45 * t), snap(y + 0.55 * t), lit ? PAL.gray : th.wallD, 1, 0, 10, 0);
+      } else for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) for (let i = 0; i < 3; i++) { const sq = 0.25 * t; box(Math.min(wx, wx + d * (3 - i) * sq), r.y1 + i * sq, Math.max(wx, wx + d * (3 - i) * sq), r.y1 + (i + 1) * sq, PAL.gray, 1, 0, 10, 0); }
+    }
+    box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+  };
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
@@ -2059,11 +2116,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
-    else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
-    else if (r.crumble) box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, 0, 10, 4);
-    else box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, rad);
-    box(r.x0 + ox + rad * 0.5, r.y0, r.x1 + ox - rad * 0.5, r.y0 + 2.5, th.lip, a, 1.25);
+    const kit = th.town && !r.slick && !r.crumble && !r.crack && !(r.flash > 0) && townRect(r);   // Tokyo's own look (townRect); the overlays below stay
+    if (!kit) {
+      if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
+      else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
+      else if (r.crumble) box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, 0, 10, 4);
+      else box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, rad);
+      box(r.x0 + ox + rad * 0.5, r.y0, r.x1 + ox - rad * 0.5, r.y0 + 2.5, th.lip, a, 1.25);
+    }
     if (r.crumble) for (let x = r.x0 + 9; x < r.x1 - 6; x += 16) disc(x + ox, (r.y0 + r.y1) / 2 + 1, 1.6, th.wallD, a);
     if (r.crack) {   // cracked: a dark zigzag across it, and now and then a glint of gold through it (what is behind)
       const P = PIX.size, w = r.x1 - r.x0, hgt = r.y1 - r.y0;
@@ -2071,12 +2131,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if ((T * 1.3 + r.x0 * 0.01) % 2 < 0.25) box(r.x0 + w * 0.5 - P, r.y0 + hgt * 0.5 - P, r.x0 + w * 0.5 + P, r.y0 + hgt * 0.5 + P, INK.coin, 1, 0, 10, 0);
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
-    if (r.move) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
+    if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
     if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);
     }
-    if (r.bouncy && r.t > 0) box(r.x0, r.y0, r.x1, r.y1 + 0.25 * R * (r.t / SPRING.anim), th.spring, 1, 0, 10, 0);   // a bouncy plank sags as it throws
+    if (r.bouncy && r.t > 0 && !kit) box(r.x0, r.y0, r.x1, r.y1 + 0.25 * R * (r.t / SPRING.anim), th.spring, 1, 0, 10, 0);   // a bouncy plank sags as it throws
     if (r.magnet) for (let k = 0; k < 4; k++) { const u = (T * 1.1 + k / 4) % 1, x = r.x0 + ((k + 0.5) / 4) * (r.x1 - r.x0), d = (1 - u) * 1.8 * R; box(x - 1, r.y0 - d - 2, x + 1, r.y0 - d, PAL.white, 0.9, 0, 10, 0); }   // a magnet: dots drawn in onto it
     if (th.drips && !r.plank && !r.spring && !r.moss) for (let n = Math.max(1, Math.round((r.x1 - r.x0) / (2.2 * R))), k = 0; k < n; k++) {   // the Crypt's black goo, hanging off the stone and stretching slowly
       const x = r.x0 + ((k + 0.5) * (r.x1 - r.x0)) / n + ox, len = (0.25 + 0.4 * (0.5 + 0.5 * Math.sin(T * 0.9 + x * 0.07 + r.y0 * 0.013))) * R;

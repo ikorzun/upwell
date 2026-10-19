@@ -29,8 +29,21 @@ SCRIPT = os.path.expanduser('~/.claude/skills/gpt-image/scripts/gpt_image.py')
 WORLDS = {
     'tokyo': ('Tokyo', 'a Japanese suburb at night: narrow alleys between small houses and apartment blocks, power lines, vending '
               'machines, shop signs', 'blue #5bb8ff', 'purple marks moving platforms and grey blocks crumble', 'the plain black night, nothing far off'),
+    # (owner 2026-10-19: the Cave and the Glacier Japanese too, cute and cosy; the Glacier as on Mount Fuji)
+    'cave': ('the Cave', 'a cosy Japanese cave under a little mountain shrine: soft moss, stone lanterns, small stone jizo statues, paper lanterns, bamboo, '
+             'the steam of a hot spring; cute and warm, kawaii', 'grey #c8c8c8',
+             'green is moss you can hold on to, purple marks springs and rubber walls, blue is ice and moving planks, orange blocks crumble',
+             'the black dark of the cave, nothing far off'),
+    'fuji': ('Mount Fuji', 'the slopes of Mount Fuji in winter, cosy and cute, kawaii: snow on pine trees tied up with yukitsuri ropes, stone lanterns capped '
+             'with snow, kamakura snow huts lit from inside, snow monkeys in a hot spring', 'blue #5bb8ff',
+             'white is ice you slip on (a whole block or wall of it), grey blocks crumble, purple marks moving planks and springs, green is moss you can hold on to',
+             'the black winter night, nothing far off'),
 }
 LEDGE_AT = 'a blue concrete ledge with a white top edge sticking out of the wall'
+CAVE_AT = 'a grey stone ledge with a white top edge sticking out of the wall'
+FUJI_AT = 'a blue rock ledge with a soft cap of snow and a white top edge sticking out of the wall'
+FUJI_RULE = ('In this world white is ice you slip on (a whole block or wall of white), grey blocks crumble and purple marks moving planks and springs: '
+             'so the snow is only a cap on top, and its top is the white edge you stand on.')
 # A ledge: what it is, what it does in play, its material and size; where it is, its main colour, what its variants vary and the inks' rule,
 # when not a slab's (LEDGE_AT). A prop, decor fixed to its place (the catalog's kit: a sign on
 # a wall, a vending machine in a niche on a shelf, a wire between poles): what it is, where it sits, its material, size, the inks it
@@ -69,6 +82,58 @@ ELEMENTS = {
                         'shows it can be broken from below, and the gap in its roof',
                         rule='In this world purple marks moving platforms and grey blocks crumble, so use those only for small details; the coins are gold, yellow '
                         'and orange, as they can be taken.'),
+    'cave-slab': dict(world='cave', kind='ledge', what='the basic ledge, a solid ledge of old stone sticking out of the shaft wall',
+                      does='solid on every side: you stand on it, cling to its sides and jump off it',
+                      material='old dressed stone, as the stone walls and steps of a little mountain shrine', size='4 tiles long and 1 tile thick',
+                      rule='In this world green is moss you can hold on to (under a ledge or on a wall), purple marks springs and rubber walls, blue is ice and '
+                      'moving planks and orange blocks crumble: so no moss on it, and those colours only for tiny details.'),
+    'cave-plank': dict(world='cave', kind='ledge', what='a bamboo plank: a few thick bamboo poles lashed side by side with rope, a thin platform',
+                       does='a thin platform: you jump up through it from below and stand on it', material='dry bamboo, its nodes and the rope lashings',
+                       size='4 tiles long and a third of a tile thick', place='the plank sticking out of that wall', main='grey (dry bamboo)',
+                       vary='the poles (two or three, thin or thick), their nodes, the lashings, the cut ends, how it is fixed to the wall (pegs, ropes up to the '
+                       'wall) and the small details on it (a hanging charm, a strip of paper)',
+                       rule='In this world green is moss you can hold on to, so the bamboo is dry and grey; purple, blue and orange only for tiny details.'),
+    'cave-toro': dict(world='cave', kind='prop', what='a toro, a Japanese stone lantern', where='on the top of a ledge at its wall end',
+                      material='carved stone: a base, a post, a light box with a window, a curved roof cap', size='about 1 tile wide and 2 tiles tall',
+                      inks='grey stone, its window glowing a warm orange with a dither halo of orange round it', scene=CAVE_AT),
+    'cave-jizo': dict(world='cave', kind='prop', what='a small stone jizo statue, a cute round little monk, or two of them side by side',
+                      where='on the top of a ledge at its wall end', material='smooth stone, a knitted cap and a little cloth bib',
+                      size='about 0.8 tiles wide and 1.2 tiles tall each', inks='grey stone, the cap and bib orange (never red: red is danger here), '
+                      'a face drawn in black, its eyes closed and smiling', scene=CAVE_AT),
+    'cave-torii': dict(world='cave', kind='prop', what='a small torii gate of a mountain shrine, standing against the back wall of the cave like a gateway behind the play',
+                       where='against the back wall over a ledge, drawn as part of the far back (its colours dithered with black, so it reads as behind the play '
+                       'and its beams never look like ledges)', material='lacquered wood: two posts, a curved top beam, a straight tie beam, a shimenawa rope with zigzag paper',
+                       size='about 3 tiles wide and 3 tiles tall', inks='orange posts and beams (never red), a grey rope and grey paper zigzags', scene=CAVE_AT),
+    'cave-lanterns': dict(world='cave', kind='prop', what='a string of round paper lanterns (chochin) hung across the shaft for a little festival',
+                          where='on a rope sagging across the shaft from wall to wall', material='paper lanterns ribbed with black, grey caps top and bottom, a rope',
+                          size='each lantern about 0.6 tiles wide and 0.8 tiles tall, four to six on the rope',
+                          inks='orange lanterns glowing with a dither halo of orange, black ribs, grey caps and rope', scene=CAVE_AT + ' below them'),
+    'fuji-slab': dict(world='fuji', kind='ledge', what='the basic ledge, a solid ledge of dark volcanic rock with a soft cap of snow, sticking out of the shaft wall',
+                      does='solid on every side: you stand on it, cling to its sides and jump off it', material='rough volcanic rock of Mount Fuji, snow on top',
+                      size='4 tiles long and 1 tile thick', main='blue (the rock)',
+                      vary="the rock's silhouette and cracks, the snow cap (its thickness, its soft rounded edge, a few lumps and drips over the sides), its free end, "
+                      'how it meets the wall, and the small details on it (a tuft of dry grass, a little icicle)', rule=FUJI_RULE),
+    'fuji-plank': dict(world='fuji', kind='ledge', what='a wooden boardwalk of the mountain trail: a few short boards on a light frame, a thin platform',
+                       does='a thin platform: you jump up through it from below and stand on it', material='weathered wood boards, a frame, a little snow on top',
+                       size='4 tiles long and a third of a tile thick', place='the plank sticking out of that wall', main="blue (the world's own colour)",
+                       vary='the boards and the gaps between them, the frame under them, how it is held to the wall (a post down to the wall, ropes, brackets), '
+                       'the snow on it, and the small details on it (a trail marker, a little bell)', rule=FUJI_RULE),
+    'fuji-kamakura': dict(world='fuji', kind='prop', what='a kamakura, a little snow hut like an igloo, lit warm from inside by a candle',
+                          where='on the top of a ledge at its wall end', material='packed snow, a round doorway, a candle inside',
+                          size='about 2 tiles wide and 1.5 tiles tall', inks='snow in grey with white glints (not flat white: white is ice and the edges you stand on), '
+                          'the doorway black with a warm orange glow inside and a tiny candle', scene=FUJI_AT),
+    'fuji-monkey': dict(world='fuji', kind='prop', what='a snow monkey (a Japanese macaque) bathing in a little hot spring tub, eyes closed, happy',
+                        where='on the top of a ledge at its wall end, in a small wooden tub', material='fluffy fur, a round face, the water, steam rising',
+                        size='about 1.5 tiles wide and 1.2 tiles tall with its tub', inks='grey fur, an orange face (never red: red is danger), blue water, '
+                        'the steam a grey dither rising', scene=FUJI_AT),
+    'fuji-pine': dict(world='fuji', kind='prop', what='a pine tree tied up for winter with yukitsuri: straw ropes from a pole at its top fanning down to hold its branches',
+                      where='on the top of a ledge at its wall end, as in a Japanese garden', material='a twisted trunk, pads of needles, straw ropes, snow on the branches',
+                      size='about 2 tiles wide and 2.5 tiles tall', inks='green needles, an orange or grey trunk, grey ropes, the snow on the branches grey with white glints',
+                      scene=FUJI_AT),
+    'fuji-usagi': dict(world='fuji', kind='prop', what='a yuki usagi, a little snow rabbit children make: a mound of snow with two leaves for ears and two berries for eyes',
+                       where='on the top of a ledge by the wall, one or a few in a row', material='snow, two leaves, two berries',
+                       size='about 0.8 tiles wide and 0.6 tiles tall', inks='snow in grey with white glints, green leaf ears, orange berry eyes (never red: red is danger)',
+                       scene=FUJI_AT),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',

@@ -2709,15 +2709,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
-  {   // the platforms' shadows (user: depth, not overdone): cast by a sun that goes from the right to the left through a world's levels,
-    // a dithered black band under each and down its far side, over the walls and whatever ledge lies there (the black back wall barely shows them)
-    const sun = (g.mode === 'camp' ? g.stage / 9 : g.stage / 2) * 2 - 1, dx = Math.round((-sun * 0.45 * R) / PIX.size) * PIX.size, dy = Math.round((0.32 * R) / PIX.size) * PIX.size;
-    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && !r.cage && !(th.town && (r.ac || (r.plank && (r.move || r.bouncy)))) && seen(r.y0, r.y1 + dy)) {   // (Tokyo's awnings, gondolas
-      // and air conditioners hang below their floors: the band would lie over their cloth, lantern and box)
-      box(r.x0 + dx, r.y1, r.x1 + dx, r.y1 + dy, INK.dark, 0.55, 0, 10, 0);
-      if (dx) box(dx > 0 ? r.x1 : r.x0 + dx, r.y0 + dy, dx > 0 ? r.x1 + dx : r.x0, r.y1, INK.dark, 0.55, 0, 10, 0);
-    }
-  }
   for (const s of lv.spikes) {
     if (!seen(s.y0, s.y1)) continue;
     const vert = s.dir < 2, len = vert ? s.x1 - s.x0 : s.y1 - s.y0, dep = vert ? s.y1 - s.y0 : s.x1 - s.x0;

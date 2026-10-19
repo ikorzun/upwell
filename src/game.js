@@ -2279,6 +2279,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot'];
 const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
+const WORLD_MUSIC = { blocks: 'blocks', sky: 'sky', junk: 'junk' };   // the campaign's worlds 5-7, each its own climb (tools/audio.py)
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {
@@ -2342,7 +2343,7 @@ const sound = {
   frame(g) {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const kind = g.lv.kind;
-    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
+    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
     const duck = g.state === 'play' || g.state === 'menu' ? 1 : 0.35;
     if (duck !== this.duck) { this.duck = duck; this.mus.gain.setTargetAtTime(MUSIC_VOL * duck, this.ctx.currentTime, 0.2); }
   },

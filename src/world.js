@@ -2507,9 +2507,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x0 - 0.15 * t, y0 - 0.2 * t, x0 + w + 0.15 * t, r.y0, PAL.black, 1, 0, 10, 0);   // the niche
       box(x0, y0, x0 + w, r.y0, PAL.blue, 1, 0, 10, 4);   // the cabinet: blue checkered with black, navy
       box(g0, snap(y0 + 0.08 * h), g1, snap(y0 + 0.68 * h), PAL.blue, 1, 0, 10, 0);
-      const cans = [PAL.purple, PAL.purple, PAL.white], cw = (g1 - g0) / 3;
+      const cans = [PAL.purple, PAL.purple, PAL.gray], cw = (g1 - g0) / 3;   // a prop: no white (DEPTH; owner)
       for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) { const cx = g0 + (i + 0.5) * cw, cy = snap(y0 + (0.15 + 0.18 * j) * h); box(snap(cx - 0.28 * cw), cy, snap(cx + 0.28 * cw), cy + snap(0.12 * h), cans[(i + 2 * j) % 3], 1, 0, 10, 0); }
-      for (let i = 0; i < 3; i++) box(g0 + (i + 1) * P, snap(y0 + 0.08 * h) + (3 - i) * P, g0 + (i + 2) * P, snap(y0 + 0.08 * h) + (4 - i) * P, PAL.white, 1, 0, 10, 0);   // the glint
+      for (let i = 0; i < 3; i++) box(g0 + (i + 1) * P, snap(y0 + 0.08 * h) + (3 - i) * P, g0 + (i + 2) * P, snap(y0 + 0.08 * h) + (4 - i) * P, PAL.gray, 1, 0, 10, 0);   // the glint
       box(c0, snap(y0 + 0.3 * h), c0 + snap(0.16 * w), snap(y0 + 0.38 * h), PAL.gray, 1, 0, 10, 0);
       for (let i = 0; i < 3; i++) { const by = snap(y0 + (0.44 + 0.06 * i) * h), bx = c0 + snap(0.05 * w); box(bx, by, bx + P, by + P, PAL.gray, 1, 0, 10, 0); }
       box(g0 + snap(0.05 * w), snap(r.y0 - 0.2 * h), g1 - snap(0.05 * w), snap(r.y0 - 0.11 * h), PAL.black, 1, 0, 10, 0);   // the slot
@@ -2694,7 +2694,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1) continue;
       const w = 1.6 * t, x0 = wl ? lv.l + 0.25 * t : lv.r - 0.25 * t - w, y1 = r.y0 - 0.3 * t, y0 = y1 - 0.75 * t;
-      for (const [dx, rr, c] of [[0.3, 0.3, th.block], [0.55, 0.36, PAL.white], [0.75, 0.28, th.block]]) disc(x0 + dx * w, y0, rr * t, c, 1);   // the ore
+      for (const [dx, rr, c] of [[0.3, 0.3, th.block], [0.55, 0.36, PAL.gray], [0.75, 0.28, th.block]]) disc(x0 + dx * w, y0, rr * t, c, 1);   // the ore (a prop: no white, DEPTH; owner)
       box(x0, y0, x0 + w, y1, PAL.gray, 1, 0, 10, 0); box(x0, y0, x0 + w, y0 + P, PAL.black, 1, 0, 10, 0);
       for (const dx of [0.25, 0.75]) { disc(x0 + dx * w, r.y0 - 0.2 * t, 0.2 * t, PAL.black, 1); disc(x0 + dx * w, r.y0 - 0.2 * t, 0.07 * t, PAL.gray, 1); }
     }

@@ -119,7 +119,7 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
 for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, two of them `inset` from the walls, sagging
 // `sag`; wireY is a wire's height at x, where a crow perches (FOLK.crowP of the beats).
-const WIRE = { arm: 9, drop: 0.08, inset: [0.5, 0.9], sag: [0.8, 1.15] };
+const WIRE = { arm: 9, drop: 0.08, inset: [0.5, 0.9], sag: [0.8, 1.15], a: 0.5 };   // a: how much of a wire's line is drawn (a dither), the beams' and gondolas' cables' too
 const wireY = (lv, k, w, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset[w] * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset[w] * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag[w] * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
@@ -1551,9 +1551,14 @@ class Level {
         this.folk.push(bat ? { kind: 'bat', x, y: r.y1, fly: false, t: 0 } : { kind: 'bug', x, y: r.y0, rect: r, dir: fr() < 0.5 ? -1 : 1, run: false, t: 0 });
       }
     }
-    if (this.theme.town && this.kind === 'well') for (let k = Math.ceil(top / (WIRE.arm * t)); k * WIRE.arm * t < this.top; k++) if (this.crowRng() < FOLK.crowP) {   // Tokyo: a crow on a wire of this chunk's beats
-      const cr = this.crowRng, w = cr() < 0.5 ? 0 : 1, x = this.l + (this.r - this.l) * (0.2 + 0.6 * cr());
-      this.folk.push({ kind: 'crow', x, y: wireY(this, k, w, x), dir: cr() < 0.5 ? -1 : 1, fly: false, t: 0 });
+    if (this.theme.town && this.kind === 'well') for (let k = Math.ceil(top / (WIRE.arm * t)); k * WIRE.arm * t < this.top; k++) if (this.crowRng() < FOLK.crowP) {   // Tokyo: a crow on a wire of this chunk's beats,
+      // where nothing laid stands in front of it (drawn 2 game pixels a dot, CRITTER.crow's 16 x 10 is at most 2.5 x 1.6 tiles; in tiles, so alike on every screen)
+      const cr = this.crowRng, w = cr() < 0.5 ? 0 : 1, dir = cr() < 0.5 ? -1 : 1, hw = 1.4 * t, hh = 1.6 * t;
+      for (let n = 0; n < 4; n++) {
+        const x = this.l + (this.r - this.l) * (0.2 + 0.6 * cr()), y = wireY(this, k, w, x);
+        if (this.rects.some((q) => q.x1 > x - hw && q.x0 < x + hw && q.y1 > y - hh && q.y0 < y + 0.3 * t)) continue;
+        this.folk.push({ kind: 'crow', x, y, dir, fly: false, t: 0 }); break;
+      }
     }
   }
   // Whether a solid ledge just laid (from index `from` on) hangs over an older one, or over the
@@ -2245,14 +2250,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) for (let w = 0; w < 2; w++) {   // the wires, from crossarm to crossarm, sagging (WIRE)
       const y0 = (k * WIRE.arm + WIRE.drop) * t, x0 = lv.l + WIRE.inset[w] * t, x1 = lv.r - WIRE.inset[w] * t, sag = WIRE.sag[w] * t, st = 3 * P;
       if (y0 + sag < top || y0 > bot) continue;
-      for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, 1, 0, 10, 0); }
+      for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, WIRE.a, 0, 10, 0); }
     }
     const AC = { beat: 12, at: [2.5, 8.5], w: 1.3, h: 0.85, brace: 0.6 }, acY = (side, k) => (k * AC.beat + AC.at[side < 0 ? 0 : 1]) * t;   // the air conditioners, in tiles
     const acNear = (side, ya, yb) => { const k = Math.floor((yb / t - AC.at[side < 0 ? 0 : 1]) / AC.beat); return acY(side, k) + (AC.h + AC.brace) * t + P > ya; };   // one hangs over [ya, yb]
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.28 * t, 0.46 * t);
-      box(p0, top, p1, bot, PAL.gray, 0.6, 0, 10, 0);   // the pole, a step back (see-through: it is no wall)
+      box(p0, top, p1, bot, PAL.gray, 0.3, 0, 10, 0);   // the pole, a step back (see-through: it is no wall), half as bright as it was (owner)
       for (let k = Math.floor(top / arm) - 1; k * arm < bot; k++) {
         const y = k * arm, [a0, a1] = span(0.1 * t, 1.05 * t);
         box(a0, y, a1, y + 0.16 * t, PAL.gray, 1, 0, 10, 0);   // its crossarm, white insulators on it
@@ -2502,7 +2507,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const yb = snap(r.y0 + 0.62 * t), pt = r.y0 - 0.12 * t;
       box(r.x0, r.y0, r.x1, yb, th.mover, 1, 0, 10, 0); box(r.x0, yb - P, r.x1, yb, PAL.black, 1, 0, 10, 0);
       for (let x = r.x0 + 0.75 * t; x < r.x1 - 0.4 * t; x += 0.75 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, yb - P, PAL.black, 1, 0, 10, 0);   // its panels' seams
-      for (const x of [r.x0, r.x1 - 2 * P]) { box(x, pt, x + 2 * P, yb, th.mover, 1, 0, 10, 0); box(x + P / 2, top, x + 1.5 * P, pt - 0.16 * t, PAL.gray, 1, 0, 10, 0); box(x - P, pt - 0.16 * t, x + 3 * P, pt, PAL.gray, 1, 0, 10, 0); }   // posts, cables, clamps
+      for (const x of [r.x0, r.x1 - 2 * P]) { box(x, pt, x + 2 * P, yb, th.mover, 1, 0, 10, 0); box(x + P / 2, top, x + 1.5 * P, pt - 0.16 * t, PAL.gray, WIRE.a, 0, 10, 0); box(x - P, pt - 0.16 * t, x + 3 * P, pt, PAL.gray, 1, 0, 10, 0); }   // posts, cables, clamps
       const bx = r.x0 - 0.25 * t, hy = r.y0 + 0.24 * t;   // the bucket, on its handle off the post
       rod(r.x0 - P, r.y0 + 0.04 * t, bx - 0.13 * t, hy, PAL.gray); rod(r.x0 - P, r.y0 + 0.04 * t, bx + 0.13 * t, hy, PAL.gray);
       box(snap(bx - 0.16 * t), snap(hy), snap(bx + 0.16 * t), snap(hy) + 2 * P, PAL.gray, 1, 0, 10, 0); box(snap(bx - 0.13 * t), snap(hy) + 2 * P, snap(bx + 0.13 * t), snap(hy + 0.26 * t), PAL.gray, 1, 0, 10, 2);
@@ -2535,7 +2540,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const x of [r.x0 + 0.34 * t, r.x1 - 0.34 * t]) {
         let up = top; for (const q of lv.rects) if (q !== r && !q.gone && !q.move && q.x0 <= x && q.x1 >= x && q.y1 <= r.y0 && q.y1 > up) up = q.y1;
         const cx = snap(x), sy = r.y0 - 0.2 * t;
-        box(cx, up, cx + P, sy, PAL.gray, 1, 0, 10, 0); box(cx - P, sy, cx + 2 * P, sy + 0.1 * t, PAL.gray, 1, 0, 10, 0);   // the cable, its shackle
+        box(cx, up, cx + P, sy, PAL.gray, WIRE.a, 0, 10, 0); box(cx - P, sy, cx + 2 * P, sy + 0.1 * t, PAL.gray, 1, 0, 10, 0);   // the cable, its shackle
         for (const ax of [cx - P, cx + P]) box(ax, sy + 0.1 * t, ax + P, r.y0, PAL.gray, 1, 0, 10, 0);   // the clamp's arms
       }
     } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
@@ -2641,7 +2646,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
-    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: a tile long
+    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 2, false);   // two game pixels a dot: two tiles long, as big as the hero (owner)
   }
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;

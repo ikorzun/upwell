@@ -19,19 +19,36 @@ import json, os, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPT = os.path.expanduser('~/.claude/skills/gpt-image/scripts/gpt_image.py')
 
-# world: (name, what it is like, its own ink, what the other inks already mean there)
+# world: (name, what it is like, its own ink, what the other inks already mean there, what is behind it all)
 WORLDS = {
     'tokyo': ('Tokyo', 'a Japanese suburb at night: narrow alleys between small houses and apartment blocks, power lines, vending '
-              'machines, shop signs', 'blue #5bb8ff', 'purple marks moving platforms and grey blocks crumble'),
+              'machines, shop signs', 'blue #5bb8ff', 'purple marks moving platforms and grey blocks crumble', 'the plain black night, nothing far off'),
 }
 LEDGE_AT = 'a blue concrete ledge with a white top edge sticking out of the wall'
-# A ledge: what it is, what it does in play, its material and size. A prop, decor fixed to its place (the catalog's kit: a sign on
+# A ledge: what it is, what it does in play, its material and size; where it is, its main colour, what its variants vary and the inks' rule,
+# when not a slab's (LEDGE_AT). A prop, decor fixed to its place (the catalog's kit: a sign on
 # a wall, a vending machine in a niche on a shelf, a wire between poles): what it is, where it sits, its material, size, the inks it
 # may take, what else the cell shows, and any lettering it may carry.
 ELEMENTS = {
     'tokyo-slab': dict(world='tokyo', kind='ledge', what='the basic ledge, a solid ledge sticking out of the shaft wall',
                        does='solid on every side: you stand on it, cling to its sides and jump off it',
                        material='concrete, as on the houses and apartment blocks of the suburb', size='4 tiles long and 1 tile thick'),
+    'tokyo-awning': dict(world='tokyo', kind='ledge', what="a shop's awning, a canvas awning sticking out of the shaft wall over a shop's door",
+                         does='a thin platform: you jump up through it from below and stand on it, and it throws you up like a trampoline, its canvas sagging as you land',
+                         material='striped canvas on a light steel frame, held to the wall by rods or chains', size='4 tiles long and a third of a tile thick, its hem hanging a little lower',
+                         main='blue, striped with white or black', vary='the stripes, the hem (scalloped, straight or fringed), the slope and curve of the canvas, how it hangs from the '
+                         "wall (rods, chains, brackets) and the small details on it (a paper lantern under its edge, a shop's mark on the hem)"),
+    'tokyo-beam': dict(world='tokyo', kind='ledge', what='a steel beam, a thin girder hanging free in the middle of the shaft',
+                       does='a thin platform: you jump up through it from below and stand on it', material='riveted steel, as on a building site among the houses',
+                       size='4 tiles long and a third of a tile thick', place='the beam in the middle of the shaft, clear of the wall (it may hang on thin cables from above, out of the cell, or simply float)',
+                       main='steel grey', vary='its profile (an I-beam, a lattice girder, a channel, a box), its ends, the rivets and bolts, how it hangs (cables, hooks or nothing) and the small details on it (a chain, a hook)',
+                       rule='In this world purple marks moving platforms and grey chequered blocks crumble, so keep the beam clearly a steel beam, and purple only for small details.'),
+    'tokyo-gondola': dict(world='tokyo', kind='ledge', what="a window cleaner's gondola, a small platform hanging on two cables",
+                          does='a thin platform that rides sideways along its row, from wall to wall and back, carrying you; you jump up through its floor from below and stand on it',
+                          material='a steel floor with a railing round it, two cables going up out of sight', size='3 tiles long, its floor a third of a tile thick, its railing about half a tile high',
+                          place='the gondola hanging on two cables in the middle of the shaft (the cables go up out of the cell)', main='purple',
+                          vary='the floor and its railing (bars, mesh or panels), the cables and how they join it (a frame, pulleys, a winch), its ends and the small details on it (a bucket, a squeegee, a little motor)',
+                          rule="Purple is this world's mark for what moves, so it is its main colour; grey only for the cables and small details."),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',
@@ -59,17 +76,17 @@ LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a 
 One element of the world "{world}" ({mood}): {what}.
 In play: {does}. Material: {material}. Size: {size}; one tile is 16 art pixels, and the hero is 2 tiles (32 art pixels) wide.
 Draw six different design variants of this same element in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
-Each cell is a scene from the game: the black night with sparse dots of {ink_name} (far windows), the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), the element sticking out of that wall in flat side view at game scale, and the hero standing on it for scale: a soft round white blob 2 tiles across with two small black eyes.
-Keep in every variant: the same size, the same job in play, a white top edge to stand on, {ink_name} as its main colour.
-Vary between the variants: the silhouette and edge profile, how its free end is finished, how it is fixed to the wall, its surface pattern and joints, and the small details on it. Make the six clearly different from each other.
+Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place} in flat side view at game scale, and the hero standing on it for scale: a soft round white blob 2 tiles across with two small black eyes.
+Keep in every variant: the same size, the same job in play, a white top edge to stand on, {main} as its main colour.
+Vary between the variants: {vary}. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
-Strict style: pixel art; hard pixel edges, no anti-aliasing, no gradients, no glow, no blur; shading only with an ordered 4x4 dither. Use only these nine colours: {inks9}. The world's own colour is {ink}. In this world {taken}, so use those only for small details. White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+Strict style: pixel art; hard pixel edges, no anti-aliasing, no gradients, no glow, no blur; shading only with an ordered 4x4 dither. Use only these nine colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
 A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}.
 Material: {material}. Size: {size}; one tile is 16 art pixels, and the hero is 2 tiles (32 art pixels) wide.
 Draw six different design variants of this same prop in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
-Each cell is a scene from the game: the black night with sparse dots of {ink_name} (far windows), the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {scene}, the prop in its place in flat side view at game scale, and the hero for scale on a ledge near it: a soft round white blob 2 tiles across with two small black eyes.
+Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {scene}, the prop in its place in flat side view at game scale, and the hero for scale on a ledge near it: a soft round white blob 2 tiles across with two small black eyes.
 Keep in every variant: the same size and place, a silhouette that reads at a glance on a phone screen, and nothing on the prop that looks like something to stand on: no white top edges.
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
@@ -79,9 +96,11 @@ INKS9 = 'black #141414, white #f3f3f3, grey #c8c8c8, blue #5bb8ff, orange #faa23
 
 def prompt(el: str) -> str:
     e = ELEMENTS[el]
-    name, mood, ink, taken = WORLDS[e['world']]
+    name, mood, ink, taken, night = WORLDS[e['world']]
     text = f" and, on the sign, {e['text']}" if e.get('text') else ''
-    return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'taken': taken, 'inks9': INKS9, 'text': text})
+    slab = {'place': 'the element sticking out of that wall', 'main': ink.split()[0], 'vary': 'the silhouette and edge profile, how its free end is finished, how it is fixed '
+            'to the wall, its surface pattern and joints, and the small details on it', 'rule': f'In this world {taken}, so use those only for small details.'}
+    return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text})
 
 
 def main() -> None:

@@ -2279,7 +2279,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot'];
 const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
-const WORLD_MUSIC = { blocks: 'blocks', sky: 'sky', junk: 'junk' };   // the campaign's worlds 5-7, each its own climb (tools/audio.py)
+const WORLD_MUSIC = { tokyo: 'tokyo', blocks: 'blocks', sky: 'sky', junk: 'junk' };   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {

@@ -197,6 +197,9 @@ MUSIC = {
              ['chiptune', 'deep soft synth bass', 'dreamy detuned arpeggios', 'spacey reverb pads', 'mysterious and curious',
               'cute video game platformer, outer space', 'steady 96 BPM']),
     # owner 2026-10-19: music for the campaign's worlds 5-7 (the Tower Blocks, the Skyscraper, the Junkyard)
+    'tokyo': (75, 'nostalgic, neon-lit, gently bouncy, steady, no ending',
+              ['lo-fi chiptune', 'city pop inspired chords on a warm electric piano', 'soft round synth bass', 'gentle steady beat with soft brushes',
+               'a pentatonic Japanese melody on a soft square lead', 'cute video game platformer, a Tokyo suburb at night with train crossings', 'steady 98 BPM']),
     'blocks': (75, 'wistful, nostalgic, determined, steady, no ending',
                ['lo-fi chiptune', 'soft square-wave lead with a nostalgic minor-key melody', 'warm synth bass', 'gentle steady beat with a soft snare',
                 'a hint of an old Eastern European folk tune', 'cute video game platformer, concrete apartment blocks in winter', 'steady 100 BPM']),

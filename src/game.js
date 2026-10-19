@@ -115,7 +115,9 @@ const daySeed = (day, w, s, b) => (Math.imul((day ^ 0x9e3779b9) >>> 0, 265443576
 // its enemies and fire by so much, a stash, a bonus race's time), each on a seed of its own. A level leads up to the one over it;
 // tier by tier in turn, the middle one out to both sides or the sides in to the middle (ups). A world opens with the last one's boss.
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
-const CAMP_LEN = CAMPAIGN.length * 30, CAMP_END = CAMP_LEN - 2;   // CAMP_END: the last world's boss
+// The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
+const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 1;
+const CAMP_LEN = CAMP_OPEN * 30, CAMP_END = CAMP_LEN - 2;   // CAMP_END: the last open world's boss
 const sides = new Map();
 const campAt = (i) => {
   const w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, rc = CAMPAIGN[w].levels[s], k = SIDE[c];
@@ -129,7 +131,7 @@ const campHas = (i) => { const s = Math.floor((i % 30) / 3); return s === 0 || s
 const ups = (s, c) => (s >= 8 ? [1] : s === 0 || (s % 2 === 0 && c === 1) ? [0, 1, 2] : s % 2 && c !== 1 ? [c, 1] : [c]);   // the columns a level leads up to
 const campOpen = (i) => {
   const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, below = (d) => w * 30 + (s - 1) * 3 + d;
-  if (!campHas(i) || (w > 0 && !(st[w * 30 - 2] > 0))) return false;
+  if (i >= CAMP_LEN || !campHas(i) || (w > 0 && !(st[w * 30 - 2] > 0))) return false;   // (a world past the open ones: shut, whatever a save says)
   return s === 0 || [0, 1, 2].some((d) => campHas(below(d)) && st[below(d)] > 0 && ups(s - 1, d).includes(c));
 };
 const campNextId = () => {   // where Continue goes: the last one played again if lost, else on up from it (its column, else the middle),
@@ -144,7 +146,7 @@ const campNextId = () => {   // where Continue goes: the last one played again i
   }
   return id;
 };
-const campWorlds = () => { let n = 1; while (n < CAMPAIGN.length && save.camp.stars[n * 30 - 2] > 0) n++; return n; };   // the worlds open
+const campWorlds = () => { let n = 1; while (n < CAMP_OPEN && save.camp.stars[n * 30 - 2] > 0) n++; return n; };   // the worlds open
 const opened = (u) => save.bank >= u.at;
 // The screen shake (Gum's) only when wanted: off by the player, or by the system's reduced motion until turned on (the digest §8).
 const shakeOn = () => (save.shake === undefined ? !matchMedia('(prefers-reduced-motion: reduce)').matches : save.shake);
@@ -1818,10 +1820,10 @@ const ui = {
     const grid = el('div', 'grid2');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid)
     if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
     if (begun) grid.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
-    if (begun) grid.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => game.startRun(true)), 'daily'));   // the day's well, and its best
-    if (r) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one
-    else if (begun) grid.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
-    if (save.wins > 0) {   // a run won: its hard mode's tier, and the endless climb
+    if (begun && ALL) grid.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => game.startRun(true)), 'daily'));   // the day's well, and its best
+    if (r && ALL) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one
+    else if (begun && ALL) grid.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
+    if (save.wins > 0 && ALL) {   // a run won: its hard mode's tier, and the endless climb
       const top = Math.max(1, save.tierMax || 1), tier = Math.min(save.tier != null ? save.tier : save.hard ? 1 : 0, top);
       grid.append(cap(button(t('hard') + ': ' + (tier ? tier : t('off')), 'chip' + (tier ? ' on' : ''), () => { save.tier = (tier + 1) % (top + 1); save.hard = save.tier > 0; persist(); this.menu(); }), 'hard'),
         cap(button(t('endless') + (save.endlessBest ? ' · ' + save.endlessBest + ' ' + t('m') : ''), 'chip', () => game.startRun(false, true)), 'endless'));
@@ -1884,7 +1886,7 @@ const ui = {
     p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => this.worldDone()), 'next'));
   },
   worldDone() {   // its boss beaten, after its tapestry: on into the next world, or word of it coming
-    const p = this.panel('result'), n = game.world + 2, next = n <= CAMPAIGN.length;
+    const p = this.panel('result'), n = game.world + 2, next = n <= CAMP_OPEN;
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', tf(next ? 'worldNext' : 'soon', { n })));
     if (next) p.append(cap(button(t('map'), 'chip wide', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 30 + 1)), 'continue'));
     else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
@@ -1919,6 +1921,7 @@ const ui = {
     const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
     p.append(cap(el('div', 'head', tf('world', { n: w + 1 }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: w + 1 }));
     if (worlds > 1) { const tabs = el('div', 'duo'); for (let k = 0; k < worlds; k++) tabs.append(button(String(k + 1), 'chip' + (k === w ? ' on' : ''), () => this.map(k))); p.append(tabs); }   // the worlds open so far, a tab each
+    if (CAMP_OPEN < CAMPAIGN.length) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet
     const tree = el('div', 'tree'), inner = el('div', 'in'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), X = (col) => 50 + col * 100, Y = (s) => 960 - s * 102;
     svg.setAttribute('viewBox', '0 0 300 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
     for (let s = 0; s < 9; s++) for (let col = 0; col < 3; col++) {

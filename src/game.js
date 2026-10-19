@@ -567,7 +567,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.camRef = null; this.camGlide = null; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -1678,7 +1678,13 @@ class Game {
       let cy = 0;
       for (let i = 0; i < b.n; i++) cy += b.sy[i] + (b.y[i] - b.sy[i]) * alpha;
       cy /= b.n;
-      const target = cy - CAM.anchor * view.h;
+      // Halfway between a plain follow and platform snapping (owner: the snap was sharp and jerky, the plain follow better): the
+      // camera keeps to a point gliding (at `glide`) to where the hero last held on, follows `air` of a rise over that point in the
+      // air, all of it past the view's top `high`. So a hop drags it half as far, and a landing higher starts it slowly, never with a kick.
+      if (this.contact() || this.rocket || this.camRef == null || Math.abs(cy - this.camRef) > view.h) this.camRef = cy;
+      if (this.rocket || this.camGlide == null || Math.abs(this.camGlide - this.camRef) > view.h) this.camGlide = this.camRef;   // (a boost ring's flight: at once)
+      this.camGlide += (this.camRef - this.camGlide) * (1 - Math.exp(-CAM.glide * dt));
+      const target = Math.min(this.camGlide - CAM.anchor * view.h + CAM.air * Math.min(0, cy - this.camGlide), cy - CAM.high * view.h);
       if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * dt));
       const down = Math.min(b.maxY + this.room() - view.h, lv.floor + this.room() - view.h);   // and down with a fall, keeping the hero well over the touch keys, as far as the floor:
       if (down > lv.cam) lv.cam += (down - lv.cam) * (1 - Math.exp(-10 * dt));   // smoothly (a hard follow jerked with every bounce),

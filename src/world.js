@@ -2383,6 +2383,28 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const [dx, dy, sz] of [[0.15, 0, 0.22], [0.4, -0.25, 0.16], [0.35, 0.22, 0.12]]) F(at(dx * t), y + dy * t, sz * t, sz * t, sz * t, -sz * t, mod(k, 2) ? PAL.white : PAL.gray, 1, 0);
       }
     }
+    // Posts (the vertical level-design article's backdrops, as in Hollow Knight and Rogue Legacy: what ties a ledge to the one under it,
+    // so the ground below reads as there): a timber post, as the props up the walls, from a free ledge's cap board down onto the steady
+    // ledge right under it, at most MINE_POST.max tiles; none under moss, hanging spikes or icicles, onto spikes, or across a door or a
+    // rune. A placeholder look, for the owner's pick (tools/variants.py).
+    const MINE_POST = { max: 9, w: 0.38, cap: 1.1 }, steady = (q) => !q.gone && !q.cap && !q.move && !q.crumble && !q.spring && !q.key && !q.cage;
+    for (const a of lv.rects) {
+      if (!steady(a) || a.moss || a.x0 <= lv.l + 1 || a.x1 >= lv.r - 1 || !seen(a.y1, a.y1 + MINE_POST.max * t)) continue;
+      for (const x0 of a.x1 - a.x0 >= 4 * t ? [a.x0 + 0.7 * t, a.x1 - 0.7 * t] : [(a.x0 + a.x1) / 2]) {
+        const hw = (MINE_POST.cap / 2) * t, over = (q, u0, u1) => q.x1 > u0 && q.x0 < u1;
+        const under = (u0, u1) => { let b = null; for (const q of lv.rects) if (q !== a && !q.gone && q.y0 >= a.y1 - 1 && over(q, u0, u1) && (!b || q.y0 < b.y0)) b = q; return b; };
+        const b = under(x0 - hw, x0 + hw);   // what is right under its cap board, and the post moved onto it if it is to one side
+        if (!b || !steady(b) || b.y0 - a.y1 < 0.6 * t || b.y0 - a.y1 > MINE_POST.max * t || Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0) < 0.9 * t) continue;
+        const x = clamp(x0, Math.max(a.x0, b.x0) + 0.45 * t, Math.min(a.x1, b.x1) - 0.45 * t);
+        if (under(x - hw, x + hw) !== b) continue;
+        const y0 = a.y1, y1 = b.y0, u0 = x - hw, u1 = x + hw;
+        if (lv.spikes.some((s) => over(s, u0, u1) && (Math.abs(s.y0 - y0) < 1 || Math.abs(s.y1 - y1) < 1)) || lv.icicles.some((c) => Math.abs(c.x - x) < hw + 0.3 * t && c.y > y0 - t && c.y < y1)
+          || lv.bubbles.some((d) => over(d, u0 - t, u1 + t) && d.y1 > y0 && d.y0 - t < y1) || lv.runes.some((u) => Math.abs(u.x - x) < hw + 10 * P && u.y > y0 - 10 * P && u.y < y1 + 10 * P)) continue;
+        const p0 = snap(x - (MINE_POST.w / 2) * t), p1 = snap(x + (MINE_POST.w / 2) * t), mid = snap(x), c0 = snap(u0), c1 = snap(u1), cb = snap(y0 + 0.22 * t);
+        box(p0, y0, p1, y1, th.block, 0.75, 0, 10, 0); box(mid, y0, mid + P, y1, PAL.black, 0.75, 0, 10, 0);   // the post, a step back, its grain
+        box(c0, y0, c1, cb, th.block, 1, 0, 10, 0); box(c0, cb - P, c1, cb, PAL.black, 1, 0, 10, 0);   // its cap board under the ledge, a dark underside
+      }
+    }
     for (const r of lv.rects) {   // an ore cart parked at the wall end of some wide steady ledges: grey, ore heaped in it, two wheels
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1) continue;

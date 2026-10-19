@@ -522,7 +522,7 @@ class Game {
     this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump;
   }
   get b() { return this.hero && Number.isFinite(this.hero.floorY) ? this.hero.floorY : this.lv.floor; }   // where Body.endStep puts landing dust
-  get wd() { return this.preview || (this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
+  get wd() { return this.preview || (this.state === 'menu' && this.menuWd) || (this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
   bodyList() {
     const a = this.list, lv = this.lv;
     a.length = 0;
@@ -548,7 +548,7 @@ class Game {
   // The menu's backdrop is the first level of a fresh run with the hero standing in it.
   toMenu() {
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
-    this.newRun(); this.state = 'menu'; this.buildLevel(true);
+    this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world; this.buildLevel(true);   // behind the menu, the world Play or Continue goes to
     ui.hideAll(); ui.menu();   // (which sets the camera on the hero)
   }
   startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round

@@ -94,8 +94,7 @@ const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, h
 // The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
 // purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
 // run's progress stays in save.run, for the random run.
-const campFresh = () => ({ open: 0, stars: [], wallet: 0, builds: [], fails: {}, runes: [] });   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level
-const CAMP_LEN = CAMPAIGN.length * 10;   // ten levels a world
+const campFresh = () => ({ last: 1, stars: [], wallet: 0, builds: [], fails: {}, runes: [] });   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level   // last: the level played last
 const met = (kind, id) => { const b = save.book = save.book || {}; const k = b[kind] = b[kind] || {}; if (!k[id]) { k[id] = 1; persist(); } };   // into the book
 // The daily well (the plan after the sandbox): a random run whose levels are the day's, the same for everyone (the day by
 // the platform's clock when it has one: a device's may be set wrong). Each day's best is kept (save.days); three medals
@@ -110,7 +109,42 @@ const MARKS = { at: [3, 5, 7], pay: [30, 60, 120] };
 const weekOf = (day) => Math.floor((day + 3) / 7);
 const weekCard = () => (save.marks && save.marks.week === weekOf(today) ? save.marks : { week: weekOf(today), days: [] });
 const daySeed = (day, w, s, b) => (Math.imul((day ^ 0x9e3779b9) >>> 0, 2654435761) ^ (w * 97 + s * 13 + (b ? 7 : 0))) >>> 0;
-const campAt = (i) => ({ w: Math.floor(i / 10), s: i % 10, rc: CAMPAIGN[Math.floor(i / 10)].levels[i % 10] });
+// The campaign's map (the user: each world a grid of 3 × 10, a route up it to choose, as in Slay the Spire): a world's first level
+// alone at its foot, eight tiers of three over it, then its boss. Level i is world w, tier s, column c (i = w·30 + s·3 + c; the first
+// and the boss in the middle). The middle one is the tier's recipe; the left the same calmer, the right richer and fiercer (SIDE:
+// its enemies and fire by so much, a stash, a bonus race's time), each on a seed of its own. A level leads up to the one over it;
+// tier by tier in turn, the middle one out to both sides or the sides in to the middle (ups). A world opens with the last one's boss.
+const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
+const CAMP_LEN = CAMPAIGN.length * 30, CAMP_END = CAMP_LEN - 2;   // CAMP_END: the last world's boss
+const sides = new Map();
+const campAt = (i) => {
+  const w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, rc = CAMPAIGN[w].levels[s], k = SIDE[c];
+  if (!k || rc.boss) return { w, s, c, rc };
+  const seed = (rc.sides && rc.sides[c >> 1]) || rc.seed + k.seed;   // a recipe's `sides`: its two sides' own seeds, where the bot found the plain ones poor
+  if (!sides.has(i)) sides.set(i, Object.assign({}, rc, rc.bonus != null ? { seed, time: rc.time + k.time }
+    : { seed, foes: rc.foes * k.foes, fire: rc.fire * k.fire, pair: k.pair && (rc.pair || 0) + k.pair, stash: c === 2 ? Math.max(rc.stash || 0, 0.4) : rc.stash }));
+  return { w, s, c, rc: sides.get(i) };
+};
+const campHas = (i) => { const s = Math.floor((i % 30) / 3); return s === 0 || s === 9 ? i % 3 === 1 : true; };
+const ups = (s, c) => (s >= 8 ? [1] : s === 0 || (s % 2 === 0 && c === 1) ? [0, 1, 2] : s % 2 && c !== 1 ? [c, 1] : [c]);   // the columns a level leads up to
+const campOpen = (i) => {
+  const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, below = (d) => w * 30 + (s - 1) * 3 + d;
+  if (!campHas(i) || (w > 0 && !(st[w * 30 - 2] > 0))) return false;
+  return s === 0 || [0, 1, 2].some((d) => campHas(below(d)) && st[below(d)] > 0 && ups(s - 1, d).includes(c));
+};
+const campNextId = () => {   // where Continue goes: the last one played again if lost, else on up from it (its column, else the middle),
+  // else the highest open one not cleared in the last world open (on that column, else the middle): always on, never back down
+  const st = save.camp.stars, L = save.camp.last | 0, a = campAt(L), pref = (x) => (x.c === a.c ? 0 : x.c === 1 ? 1 : 2);
+  if (campHas(L) && campOpen(L) && !(st[L] > 0)) return L;
+  if (a.s < 9) { const up = ups(a.s, a.c).map((c) => a.w * 30 + (a.s + 1) * 3 + c).filter((i) => campOpen(i) && !(st[i] > 0)).sort((i, j) => pref(campAt(i)) - pref(campAt(j))); if (up.length) return up[0]; }
+  let best = null, id = CAMP_END;
+  for (let i = 0; i < CAMP_LEN; i++) if (campOpen(i) && !(st[i] > 0)) {
+    const x = campAt(i);
+    if (!best || x.w > best.w || (x.w === best.w && (x.s > best.s || (x.s === best.s && pref(x) < pref(best))))) { best = x; id = i; }
+  }
+  return id;
+};
+const campWorlds = () => { let n = 1; while (n < CAMPAIGN.length && save.camp.stars[n * 30 - 2] > 0) n++; return n; };   // the worlds open
 const opened = (u) => save.bank >= u.at;
 // The screen shake (Gum's) only when wanted: off by the player, or by the system's reduced motion until turned on (the digest §8).
 const shakeOn = () => (save.shake === undefined ? !matchMedia('(prefers-reduced-motion: reduce)').matches : save.shake);
@@ -119,9 +153,15 @@ shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
-  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = []; c.open = Math.min(Math.max(0, c.open | 0), CAMP_LEN - 1);
-  for (let i = 0; i < CAMP_LEN - 1; i++) if (c.stars[i] > 0) c.open = Math.max(c.open, i + 1);   // a level won opens the next (a world added since: on into it)
-  save.v = 2; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
+  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = [];
+  if ((save.v | 0) < 3) {   // v2 to v3: a world's ten levels in a row onto its map, each the middle of its tier (a boss's losses with it)
+    const at = (i) => Math.floor(i / 10) * 30 + (i % 10) * 3 + 1, old = c.stars, f = {};
+    c.stars = []; old.forEach((n, i) => { if (n > 0) c.stars[at(i)] = n; });
+    for (const k in c.fails) f[/^\d+$/.test(k) ? at(+k) : k] = c.fails[k];
+    c.fails = f; c.last = at(Math.max(0, c.open | 0));
+  }
+  delete c.open;   // what is open comes of the stars (campOpen)
+  save.v = 3; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
 function persist() {
@@ -473,7 +513,7 @@ class Game {
     this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump;
   }
   get b() { return this.hero && Number.isFinite(this.hero.floorY) ? this.hero.floorY : this.lv.floor; }   // where Body.endStep puts landing dust
-  get wd() { return this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT; }   // (the run's Crypt in the Mine)
+  get wd() { return this.preview || (this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
   bodyList() {
     const a = this.list, lv = this.lv;
     a.length = 0;
@@ -553,7 +593,7 @@ class Game {
   }
   heal(n) { this.hp = Math.min(this.maxHp, this.hp + n); }
   offer(n = 3) {
-    const camp = this.mode === 'camp', pool = UPGRADES.filter((u) => (u.stack || !this.taken.includes(u.id)) && (camp ? !u.run && (CARD_FROM[u.id] || 0) <= this.ci : !u.camp));
+    const camp = this.mode === 'camp', pool = UPGRADES.filter((u) => (u.stack || !this.taken.includes(u.id)) && (camp ? !u.run && (CARD_FROM[u.id] || 0) <= this.world * 10 + this.stage : !u.camp));
     const fresh = pool.filter((u) => !lastOffer.includes(u.id)), out = shuffled(Math.random, fresh.length >= n ? fresh : pool).slice(0, n);
     if (n > 1) lastOffer = out.map((u) => u.id);
     return out;
@@ -1159,7 +1199,7 @@ class Game {
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
   failKey() { return this.mode === 'camp' ? this.ci : 'lid'; }   // whose losses running (save.camp.fails): a campaign boss's by its level, the summit's as one
-  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
+  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
@@ -1438,7 +1478,7 @@ class Game {
     if (this.mode === 'camp') { const b = save.camp.builds; (b[this.world] = b[this.world] || []).push(u.id); persist(); }   // the world's build
     this.state = 'wait'; ui.hideAll();   // (an ad may come here: nothing goes on under it)
     ads.between(() => {
-      if (this.mode === 'camp') { this.playLevel(this.ci + 1); return; }
+      if (this.mode === 'camp') { ui.map(); return; }   // the map, to choose the way on
       this.state = 'play'; this.stateT = 0;
       if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
       if (++this.stage >= 3) { this.stage = 0; this.world++; }
@@ -1487,7 +1527,7 @@ class Game {
     ads.between(() => this.goOn());
   }
   goOn() {
-    if (this.mode === 'camp') { this.campKeep(); persist(); this.playLevel(this.ci + 1); return; }   // (the doubled coins in the purse)
+    if (this.mode === 'camp') { this.campKeep(); persist(); ui.map(); return; }   // (the doubled coins in the purse); the map, to choose the way on
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
     this.buildLevel(false); this.saveRun();
     ui.hideAll(); ui.banner();
@@ -1517,24 +1557,24 @@ class Game {
   // colour's own), all the hearts and the purse. Dying costs that level only: Again starts it over (ui.campDead).
   playLevel(i, seed) {
     const { w, s, rc } = campAt(i);
-    this.newRun(); this.mode = 'camp'; this.ci = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
+    this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
     for (const id of save.camp.builds[w] || []) { const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }
-    this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = !(save.camp.stars[i] > 0);
+    this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = ![0, 1, 2].some((d) => save.camp.stars[w * 30 + s * 3 + d] > 0);   // its tier's first clear (an upgrade then: one a tier, whichever way up)
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
-    if (i === 0 && this.first) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);   // the very first level: how to play
+    if (w === 0 && s === 0 && this.first) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);   // the very first level: how to play
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campKeep() { const d = this.coins - this.kept; if (d > 0) save.bank += d; this.kept = this.coins; save.camp.wallet = this.coins; }
   // A level cleared: its best stars, the next one open, the purse; kept at once (a reload loses none of it).
   campDone(n) {
     const c = save.camp, i = this.ci;
-    c.stars[i] = Math.max(c.stars[i] || 0, n); c.open = Math.max(c.open, Math.min(i + 1, CAMP_LEN - 1));
+    c.stars[i] = Math.max(c.stars[i] || 0, n);
     this.campKeep(); persist();
   }
-  campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci + 1)); }   // on from a level played again
+  campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => ui.map()); }   // on from a level played again: the map, to choose the way on
   campAgain() { if (this.state !== 'dead') return; pmsg('level_failed', this.lvl()); this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci)); }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;
@@ -1770,7 +1810,7 @@ const ui = {
     p.append(colors);
     const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }
-    const r = save.run, c = save.camp, next = campAt(c.open), begun = c.open > 0 || c.stars[0] > 0, done = c.stars[CAMP_LEN - 1] > 0;
+    const r = save.run, c = save.camp, ni = campNextId(), next = campAt(ni), begun = c.stars.some((n) => n > 0), done = c.stars[CAMP_END] > 0;
     const grid = el('div', 'grid2');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid)
     if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
     if (begun) grid.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
@@ -1788,8 +1828,8 @@ const ui = {
     if (begun) p.append(week);
     if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }   // a long one smaller, on one line
     if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
-    else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(0)), 'play'));   // one tap to the first level (CrazyGames: one at most)
-    else p.append(cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(c.open)), 'continue'));   // the width of the screen, 12 px in from its edges
+    else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(1)), 'play'));   // one tap to the first level (CrazyGames: one at most)
+    else p.append(cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
@@ -1842,7 +1882,7 @@ const ui = {
   worldDone() {   // its boss beaten, after its tapestry: on into the next world, or word of it coming
     const p = this.panel('result'), n = game.world + 2, next = n <= CAMPAIGN.length;
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', tf(next ? 'worldNext' : 'soon', { n })));
-    if (next) p.append(cap(button(t('map'), 'chip wide', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 10)), 'continue'));
+    if (next) p.append(cap(button(t('map'), 'chip wide', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 30 + 1)), 'continue'));
     else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
   },
   // The book of what has been met (the plan after the sandbox: an encyclopedia), one feed down under its headers (the user:
@@ -1867,22 +1907,42 @@ const ui = {
     }
     p.append(cap(el('div', 'head', t('book')), 'book'), feed, cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
   },
-  // The campaign's map: a world's ten levels, five by two, each its number (the bonus a coin, the boss its face) over its stars;
-  // the open ones to tap, the next one yellow; on to that one under the thumb.
-  map(w = Math.floor(save.camp.open / 10)) {
-    const p = this.panel('map'), c = save.camp, grid = el('div', 'levels'), next = campAt(c.open), done = c.stars[CAMP_LEN - 1] > 0, worlds = Math.floor(c.open / 10) + 1;
+  // The campaign's map (see campAt): a world's levels up its tiers, the first at the foot and the boss on top, the paths between
+  // them (lit where a cleared one leads); each its tier's number, a side's its mark instead (a heart on the calm left, an enemy on
+  // the fierce right; a bonus race a coin, the boss its face), over its stars; the open ones to tap, the next one yellow; it scrolls
+  // by touch to the next one, and on to that one under the thumb.
+  map(w = campAt(campNextId()).w) {
+    const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
     p.append(cap(el('div', 'head', tf('world', { n: w + 1 }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: w + 1 }));
     if (worlds > 1) { const tabs = el('div', 'duo'); for (let k = 0; k < worlds; k++) tabs.append(button(String(k + 1), 'chip' + (k === w ? ' on' : ''), () => this.map(k))); p.append(tabs); }   // the worlds open so far, a tab each
-    for (let i = w * 10; i < w * 10 + 10; i++) {
-      const { s, rc } = campAt(i), open = i <= c.open, n = c.stars[i] || 0, icon = rc.boss ? 'boss' : rc.bonus != null ? 'coin' : null;
-      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === c.open && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) game.playLevel(i); });
+    const tree = el('div', 'tree'), inner = el('div', 'in'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), X = (col) => 50 + col * 100, Y = (s) => 960 - s * 102;
+    svg.setAttribute('viewBox', '0 0 300 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
+    for (let s = 0; s < 9; s++) for (let col = 0; col < 3; col++) {
+      const i = w * 30 + s * 3 + col;
+      if (campHas(i)) for (const u of ups(s, col)) {
+        const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        for (const [k, v] of [['x1', X(col)], ['y1', Y(s)], ['x2', X(u)], ['y2', Y(s + 1)]]) ln.setAttribute(k, v);
+        if (c.stars[i] > 0) ln.setAttribute('class', 'on');
+        svg.append(ln);
+      }
+    }
+    inner.append(svg);
+    let nextEl = null;
+    for (let s = 9; s >= 0; s--) for (let col = 0; col < 3; col++) {
+      const i = w * 30 + s * 3 + col;
+      if (!campHas(i)) continue;
+      const { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, icon = rc.boss ? 'boss' : rc.bonus != null ? 'coin' : col === 0 ? 'heal1' : col === 2 ? 'foe_crawler' : null;
+      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === ni && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) game.playLevel(i); });
       if (icon) b.append(iconEl(icon));
       if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
-      b.setAttribute('aria-label', (w + 1) + '-' + (s + 1)); grid.append(b);
+      b.style.left = (X(col) / 3) + '%'; b.style.top = (Y(s) / 10) + '%';
+      b.setAttribute('aria-label', (w + 1) + '-' + (s + 1) + ['L', '', 'R'][col]); inner.append(b);
+      if (i === ni) nextEl = b;
     }
-    p.append(grid);
+    tree.append(inner); p.append(tree);
+    if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
     if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(c.open)), 'continue'));
+    else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));
   },
   pause() {
     const p = this.panel('pause');
@@ -2472,7 +2532,7 @@ $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.toggl
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 // Safari (user: it got in the way): a finger anywhere over the game, the stick and swipes included, must never start a
 // selection, the loupe or a callout. Only buttons keep their default: their click needs it. Pointer events still come.
-for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
+for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed, .tree'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
 for (const type of ['selectstart', 'contextmenu']) document.addEventListener(type, (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
@@ -2566,6 +2626,7 @@ function start() {
   started = true;
   game.toMenu();
   if (/[?&]play=crypt\b/.test(location.search)) window.__up.go(CRYPT.at[0], CRYPT.at[1]);   // the Crypt by itself, to look at
+  if (/[?&]play=tokyo\b/.test(location.search)) { game.preview = TOKYO; window.__up.go(1, 0); }   // Tokyo by itself, to look at (a run in it)
   loop.last = performance.now();
 }
 

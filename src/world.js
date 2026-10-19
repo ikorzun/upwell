@@ -202,6 +202,7 @@ const THEMES = {
   cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: theme(PAL.orange, { crumble: PAL.gray }),
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
+  tokyo: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { win: true, town: true }),   // Tokyo's town at night (see TOKYO)
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
 };
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
@@ -306,6 +307,14 @@ const SKULL = { reach: 5, rush: 0.7, every: 2.2, k: 2.6 };
 const SUMMIT = { id: 'summit', name: { en: 'Summit', es: 'Cumbre', pt: 'Cume', ja: 'ちょうじょう' }, theme: THEMES.summit, enemies: {}, chunks: {} };
 const CRYPT = Object.assign({}, WORLDS[2], { id: 'crypt', name: { en: 'Crypt', es: 'Cripta', pt: 'Cripta', ja: 'ちかぼち' }, theme: THEMES.crypt, enemies: { skull: 4, spitter: 1 },
   foes: 0.8, maxD: 2, dark: [], at: [2, 1], intro: [{}, { news: { en: 'skulls: they lunge up close', es: 'calaveras: se lanzan de cerca', pt: 'caveiras: atacam de perto', ja: 'ドクロ: ちかいと とびかかる' } }, {}] });
+// Tokyo (user: the new settings' first, a Japanese suburb): its town at night in blue, lit windows far off behind (BG_FS uWin), power
+// lines sagging across the shaft, signs up its walls in the game's own kana, vending machines on its ledges (THEMES.tokyo `town`, drawn
+// by the renderer), a level crossing in most of its levels (`crossing`: the chance). It shows by itself at ?play=tokyo, to look at,
+// before it is a world of the map.
+const TOKYO = Object.assign({}, WORLDS[1], { id: 'tokyo', name: { en: 'Tokyo', es: 'Tokio', pt: 'Tóquio', ja: 'とうきょう' }, theme: THEMES.tokyo, dark: [], crossing: 0.85, maxD: 2,
+  chunks: { stairs: 3, planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 2, lift: 2, movers: 1, bridge: 1, rubberwall: 1, fork: 1, rest: 1, vault: 1 },
+  enemies: { crawler: 3, climber: 2, shell: 2, spitter: 1 },
+  intro: [{ news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } }, {}, {}] });
 // A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about
 // 1.1 s a metre) where no heart is lost; out by the hole on top, out of time or caught by the fire, what it paid is shown
 // with an offer to double it for an ad, then on to the next world (user). Made like a world, with
@@ -395,7 +404,7 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
     news: { en: 'the helmet', es: 'el casco', pt: 'o capacete', ja: 'ヘルメット' } },
   { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
-  { role: 'twist', len: 28, fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
+  { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616,
@@ -407,7 +416,7 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
 { world: WORLDS[1], runes: 'gyI', lore: { en: 'The first climbed without fear.\nMany got stuck.', es: 'Los primeros subieron sin miedo.\nMuchos se quedaron atrapados.', pt: 'Os primeiros subiram sem medo.\nMuitos ficaram presos.', ja: 'さいしょは みんな こわがらず のぼった。\nたくさんが つかまった。' }, levels: [
   { role: 'teach', len: 29, fire: 0.33, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, icewall: 3, iceblocks: 2, mosswall: 1 }, intro: ['icewall', 'iceblocks'], enemies: ['crawler'], foes: 0.35, candy: [], shop: 0.5, safe: true, seed: 4101,
     news: { en: "ice: walls don't hold", es: 'hielo: las paredes no sujetan', pt: 'gelo: as paredes não seguram', ja: 'こおり: かべに くっつけない' } },
-  { role: 'apply', len: 36, gate: 'gate', fire: 0.41, maxD: 2, chunks: { ...GLACIER, rubberwall: 1 }, intro: [], enemies: ['crawler'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 4108,
+  { role: 'apply', len: 36, sides: [13004, 0], gate: 'gate', fire: 0.41, maxD: 2, chunks: { ...GLACIER, rubberwall: 1 }, intro: [], enemies: ['crawler'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 4108,
     news: { en: 'rainbow candy', es: 'caramelo arcoíris', pt: 'bala arco-íris', ja: 'にじの キャンディ' } },
   { role: 'teach', len: 32, fire: 0.4, maxD: 2, chunks: GLACIER, intro: [], enemies: ['shell', 'crawler'], foes: 0.55, candy: ['rainbow'], seed: 4105,
     news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' } },
@@ -415,9 +424,9 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
     news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' } },
   { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'bonus', len: 36, bonus: 1, time: 40, seed: 4104 },
-  { role: 'twist', len: 32, fire: 0.4, maxD: 2, chunks: { ...GLACIER, mosswall: 2 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 4102,
+  { role: 'twist', len: 32, sides: [13975, 0], fire: 0.4, maxD: 2, chunks: { ...GLACIER, mosswall: 2 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 4102,
     news: { en: 'icicles fall', es: 'los carámbanos caen', pt: 'os pingentes caem', ja: 'つららが おちる' } },
-  { role: 'peak', len: 32, gate: 'gate3', fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, rubberwall: 1, twinshaft: 1 }, intro: [], set: 'icicles', enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
+  { role: 'peak', len: 32, sides: [0, 110785], gate: 'gate3', fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, rubberwall: 1, twinshaft: 1 }, intro: [], set: 'icicles', enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'rest', len: 22, fire: 0.33, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, icewall: 1 }, intro: [], enemies: ['shell'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 4104,
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
   { role: 'boss', boss: 'puck', ice: true },   // an ice floor, icicles over it
@@ -434,7 +443,7 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 46, gate: 'gate2', fire: 0.46, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.15, candy: ['fizz', 'smash'], shop: 0.4, seed: 4101,
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
-  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4108 },
+  { role: 'peak', len: 33, sides: [0, 109814], fire: 0.5, maxD: 3, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...MINE, lift: 3, rubberwall: 2 }, intro: ['lift'], enemies: ['spitter', 'crawler'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 4101,
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
@@ -545,6 +554,16 @@ ICONS.runey = '............/..www...www./.wwwww.wwwww/wwwwwwwwwwww/wwwwwwwwwwww/
 ICONS.runeL = '............/.w.......w../www.....www./.www...www../..www.www.../...wwwww..../....www...../...wwwww..../..www.www.../.www...www../www.....www./.w.......w..';
 ICONS.runen = '............/.w.w.w.w.w../www.www.www./.www.w.www../w.wwwwwww.w./.w.wwwww.w../wwwwwwwwwww./.w.wwwww.w../w.wwwwwww.w./.www.w.www../www.www.www./.w.w.w.w.w..';
 ICONS.runeY = '............/...ww......./...www....../...www....../....ww.www../.www..wwww../wwww..www.../www.ww....../....www...../....www...../.....ww...../............';
+// Kana for Tokyo's signs: DotGothic16's own glyphs (the game's Japanese font, SIL OFL) on its 16-dot grid.
+ICONS['kana_ラ'] = '................/...wwwwwwwwww.../................/................/................/..wwwwwwwwwwww../.............w../.............w../.............w../............w.../............w.../...........w..../..........w...../........ww....../...wwwww......../................';
+ICONS['kana_ー'] = '................/................/................/................/................/................/................/..wwwwwwwwwwww../................/................/................/................/................/................/................/................';
+ICONS['kana_メ'] = '................/............w.../............w.../...........w..../....w......w..../.....ww...w...../.......www....../.........ww...../........w..w..../.......w....w.../......w......w../.....w........../...ww.........../..w............./................/................';
+ICONS['kana_ン'] = '................/................/..w............./...ww........w../.....ww......w../.......w.....w../............w.../............w.../...........w..../..........w...../.........w....../.......ww......./.....ww........./..www.........../................/................';
+ICONS['kana_ス'] = '................/................/..wwwwwwwwww..../...........w..../...........w..../..........w...../..........w...../.........w....../.........w....../........w.w...../.......w...w..../.....ww.....w.../...ww........w../.ww...........w./................/................';
+ICONS['kana_シ'] = '................/...www........../.....www......../.......ww......./.www.........w../...www.......w../.....ww......w../............ww../............ww../...........ww.../..........ww..../........www...../.....wwww......./..wwww........../................/................';
+ICONS['kana_カ'] = '.......w......../.......w......../.......w......../..wwwwwwwwwwww../.......w.....w../.......w.....w../......w......w../......w......w../......w......w../.....w.......w../.....w.......w../....w........w../...w........w.../..w.....wwww..../................/................';
+ICONS['kana_オ'] = '...........w..../...........w..../...........w..../...........w..../.wwwwwwwwwwwwww./..........ww..../.........w.w..../........w..w..../.......w...w..../......w....w..../.....w.....w..../....w......w..../..ww.......w..../.w.........w..../.......wwww...../................';
+ICONS['kana_ケ'] = '................/.....w........../.....w........../....w.........../....wwwwwwwwwww./...w......w...../...w......w...../..w.......w...../.w.......w....../.........w....../........w......./........w......./.......w......../.....ww........./...ww.........../................';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
 const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
@@ -1105,7 +1124,7 @@ class Level {
     const rr = this.ringRng = mulberry32((o.seed ^ 0x7f4a7c15) >>> 0);   // the boost ring's place, by its own generator
     this.ringAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && rr() < RING.p ? this.floor - o.height * (RING.at[0] + rr() * (RING.at[1] - RING.at[0])) : null;
     const tr = mulberry32((o.seed ^ 0x1b873593) >>> 0), wi = WORLDS.indexOf(o.world);   // the crossing, by its own generator
-    if (o.kind === 'well' && o.height && !rc && !o.world.bonus && wi > 0 && tr() < TRAIN.p) { const y = this.floor - o.height * (TRAIN.at[0] + tr() * (TRAIN.at[1] - TRAIN.at[0])), h = TRAIN.h * o.h; this.crossing = { y0: y - h, y1: y, state: 'rest', t: TRAIN.rest[0] + tr() * (TRAIN.rest[1] - TRAIN.rest[0]), x: 0 }; }
+    if (o.kind === 'well' && o.height && !rc && !o.world.bonus && (wi > 0 || o.world.crossing) && tr() < (o.world.crossing || TRAIN.p)) { const y = this.floor - o.height * (TRAIN.at[0] + tr() * (TRAIN.at[1] - TRAIN.at[0])), h = TRAIN.h * o.h; this.crossing = { y0: y - h, y1: y, state: 'rest', t: TRAIN.rest[0] + tr() * (TRAIN.rest[1] - TRAIN.rest[0]), x: 0 }; }
     const gr = mulberry32((o.seed ^ 0x5bd1e995) >>> 0), gw = o.world === CRYPT ? CRYPT.at[0] : Math.max(0, WORLDS.indexOf(o.world));   // the gate, by its own generator
     this.gateId = o.kind !== 'well' || !o.height || o.world.bonus ? null : rc ? rc.gate || null : this.stage === 1 ? GATE.run[Math.min(gw, 3)] : null;
     this.gateAt = this.gateId ? this.floor - o.height * (GATE.at[0] + gr() * (GATE.at[1] - GATE.at[0])) : null;
@@ -1742,7 +1761,7 @@ vec3 snapPal(vec3 c) {   // the nearest of the nine, for anything that came in a
 // fixed to the world, with a lip line along the well.
 const BG_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
 uniform vec2 uShake; uniform vec2 uWalls; uniform float uPix;
-uniform vec3 uTop, uBot, uDots, uWall, uWallD, uLip; uniform float uGrad, uH;
+uniform vec3 uTop, uBot, uDots, uWall, uWallD, uLip; uniform float uGrad, uH, uWin;
 void main() {
   ivec2 g = cell();
   float wx = (float(g.x) + 0.5) * uPix;   // CSS px in the world
@@ -1751,7 +1770,11 @@ void main() {
   if (uGrad > 0.5 && t * t > bayer(g)) c = uBot;   // a theme's fall from its top ink to its bottom one, through the 4x4 dither (the Crypt's)
   int s = uPix < 1.5 ? 2 : 1, py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-CSS-px cells, a dot one game pixel
   ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / float(s)));
-  if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = uDots;
+  if (uWin > 0.5) {   // a town far off (Tokyo's): windows lit here and there in rows, its buildings in columns with dark gaps between
+    vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(6.0, 8.0)), iw = wp - cw * vec2(6.0, 8.0);
+    float bx = wp.x - 36.0 * floor(wp.x / 36.0), h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
+    if (bx < 30.0 && iw.x >= 2.0 && iw.x < 4.0 && iw.y >= 3.0 && iw.y < 6.0 && h < 0.2) c = uDots;
+  } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = uDots;
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
     c = ((g.x + g.y) & 3) == 0 ? uWallD : uWall;
@@ -1997,6 +2020,32 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }
+  if (th.town && lv.kind === 'well') {   // Tokyo's town (THEMES.tokyo), laid by height alone so nothing is kept: power lines, signs, vending machines
+    const t = lv.tile, P = PIX.size, hash = (n) => { const v = Math.sin(n * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+    for (let k = Math.floor(top / (9 * t)); k * 9 * t < bot; k++) if (hash(k) < 0.6) {   // two or three wires sagging wall to wall, white insulators at the poles
+      const n = hash(k + 0.5) < 0.5 ? 2 : 3, sag = (0.6 + 0.7 * hash(k + 0.25)) * t, step = 3 * P;
+      for (let w = 0; w < n; w++) {
+        const y0 = k * 9 * t + w * 0.5 * t;
+        for (let x = lv.l; x < lv.r; x += step) { const u = (x + step / 2 - lv.l) / (lv.r - lv.l), y = Math.round((y0 + sag * 4 * u * (1 - u)) / P) * P; box(x, y, Math.min(x + step, lv.r), y + P, PAL.gray, 1, 0, 10, 0); }
+        for (const x of [lv.l, lv.r - 2 * P]) box(x, y0 - P, x + 2 * P, y0 + 2 * P, PAL.white, 1, 0, 10, 0);
+      }
+    }
+    const SIGNS = [['ラ', 'ー', 'メ', 'ン'], ['ス', 'シ'], ['カ', 'ラ', 'オ', 'ケ']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
+    for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (hash(k * 1.37 + 21) < 0.6) {   // a sign up a wall: grey, framed in the town's ink, black kana
+      const word = SIGNS[Math.floor(hash(k * 1.37 + 9) * SIGNS.length)], x0 = hash(k * 1.37 + 3) < 0.5 ? lv.l : lv.r - gw - 4 * P, y0 = k * 11 * t + 3 * t, y1 = y0 + word.length * gw + 4 * P;
+      if (y1 < top || y0 > bot) continue;
+      box(x0, y0, x0 + gw + 4 * P, y1, th.block, 1, 0, 10, 0); box(x0 + P, y0 + P, x0 + gw + 3 * P, y1 - P, PAL.gray, 1, 0, 10, 0);
+      word.forEach((ch, j) => icon('kana_' + ch, x0 + 2 * P + gw / 2, y0 + 2 * P + (j + 0.5) * gw, 1, kk, PAL.black));
+    }
+    for (const r of lv.rects) {   // a vending machine on some wide steady ledges: grey, its lit front blue with rows of cans, a slot at its foot (no red or yellow: those mean danger and take)
+      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 3 * t, r.y0) || hash(r.x0 * 0.13 + r.y0 * 0.071) > 0.22) continue;
+      const w = 1.4 * t, h = 2.2 * t, x0 = hash(r.y0 * 0.37) < 0.5 ? r.x0 + 0.3 * t : r.x1 - 0.3 * t - w, y0 = r.y0 - h;
+      box(x0, y0, x0 + w, r.y0, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y0 + 2 * P, x0 + w - 2 * P, y0 + 0.6 * h, PAL.blue, 1, 0, 10, 0);
+      const cans = [PAL.white, PAL.purple, PAL.white, PAL.gray], cw = (w - 6 * P) / 4;
+      for (let j = 0; j < 3; j++) for (let i = 0; i < 4; i++) box(x0 + 3 * P + i * cw + P, y0 + 4 * P + j * 0.17 * h, x0 + 3 * P + (i + 1) * cw - P, y0 + 4 * P + j * 0.17 * h + 0.09 * h, cans[(i + j) % 4], 1, 0, 10, 0);
+      box(x0 + 0.25 * w, r.y0 - 0.2 * h, x0 + 0.75 * w, r.y0 - 0.12 * h, PAL.black, 1, 0, 10, 0);
+    }
+  }
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
@@ -2217,7 +2266,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pg = this.pBg;
   gl.useProgram(pg.p);
   gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, lv.l, lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);
-  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh);
+  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win ? 1 : 0);
   gl.uniform3fv(pg.u.uWall, th.wall); gl.uniform3fv(pg.u.uWallD, th.wallD); gl.uniform3fv(pg.u.uLip, th.lip);
   gl.bindVertexArray(this.emptyVao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);

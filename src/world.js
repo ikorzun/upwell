@@ -86,9 +86,10 @@ const SWARM = { time: 7, n: [5, 7], size: 0.9, orbit: 2.9, spin: 3.2, back: 0.3,
 const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM };
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
-// now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless.
+// now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless; in Tokyo a crow
+// on a wire of `crowP` of its beats (WIRE), flying off as the hero comes near (owner).
 // Laid by a generator of their own, so the shaft is laid as before; none in a bonus level.
-const FOLK = { cage: [0.3, 0.55], cageP: 0.75, trader: [0.6, 0.85], traderP: 0.5, critterP: 0.3, coins: 8, flee: 3 };
+const FOLK = { cage: [0.3, 0.55], cageP: 0.75, trader: [0.6, 0.85], traderP: 0.5, critterP: 0.3, crowP: 0.5, coins: 8, flee: 3 };
 // The lore's lines (the plan: under eight words, in turn): what one set free says, balls of your kind the sour ones
 // caught on their way up; and Aunt Moti's word at each sale, in her shop or on a ledge.
 const SAY = {
@@ -107,9 +108,19 @@ const SAY = {
     { en: 'Mind the sour ones, sweetie.', es: 'Cuidado con los ácidos, cielo.', pt: 'Cuidado com os azedos, docinho.', ja: 'すっぱい やつに きをつけて。' },
   ],
 };
-const CRITTER = {   // '#' the world's ink, 'w' white; a bat hangs and flaps, a bug walks
+const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs and flaps, a bug walks, a crow sits on a wire and flies off (facing right; ...L mirrored)
   bat: ['#...#', '.###.', '#w#w#', '.###.', '..#..'], batUp: ['#.....#', '##.#.##', '.#w#w#.', '..###..'], batDown: ['..###..', '.#w#w#.', '##.#.##', '#.....#'],
-  bug: ['..##.', '.#w##', '#.#.#'], bug2: ['..##.', '.#w##', '.#.#.'] };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
+  bug: ['..##.', '.#w##', '#.#.#'], bug2: ['..##.', '.#w##', '.#.#.'],
+  // Tokyo's crow (the owner's pick, research/variants/tokyo-crow-1.png E): black on the black night, read by a rim of the world's ink along its back,
+  // a white glint of an eye; on its wire, then two strokes of its wings
+  crow: ['..........###...', '.........#kkk###', '........#kkwkk#.', '.......#kkkkk...', '......#kkkkkk...', '....##kkkkkk#...', '..##kkk###kk#...', '.#kkkkkkkkkk#...', '#kkkkkkkkk##....', '......#..#......'],
+  crowUp: ['.##.............', '..#k#...........', '...#kk#.........', '....#kkk#...###.', '.#...#kkk###kkk#', '.##kkkkkkkkkkwk#', '..###########...'],
+  crowDown: ['............###.', '.#.........#kkk#', '.##########kkwk#', '..##kkkkkkkkkk#.', '....#kkkk####...', '...#kkk#........', '..#kk#..........', '.##.............'] };
+for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, two of them `inset` from the walls, sagging
+// `sag`; wireY is a wire's height at x, where a crow perches (FOLK.crowP of the beats).
+const WIRE = { arm: 9, drop: 0.08, inset: [0.5, 0.9], sag: [0.8, 1.15] };
+const wireY = (lv, k, w, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset[w] * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset[w] * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag[w] * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, the second for `half` its coins, the third for all of them (enemies do not
@@ -1315,7 +1326,7 @@ class Level {
       const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
       if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
     }
-    this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0);   // folk (see FOLK), by their own generator
+    this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0); this.crowRng = mulberry32((o.seed ^ 0x68e31da4) >>> 0);   // folk (see FOLK), by their own generators
     if (o.kind === 'well' && o.height && !o.world.bonus) {
       const fr = this.folkRng, at = ([a, b]) => this.floor - o.height * (a + fr() * (b - a));
       if (rc ? rc.cage : fr() < FOLK.cageP) this.folkAt.push({ kind: 'cage', y: at(FOLK.cage) });
@@ -1539,6 +1550,10 @@ class Level {
         const r = ok[(fr() * ok.length) | 0], x = r.x0 + (r.x1 - r.x0) * (0.2 + 0.6 * fr());
         this.folk.push(bat ? { kind: 'bat', x, y: r.y1, fly: false, t: 0 } : { kind: 'bug', x, y: r.y0, rect: r, dir: fr() < 0.5 ? -1 : 1, run: false, t: 0 });
       }
+    }
+    if (this.theme.town && this.kind === 'well') for (let k = Math.ceil(top / (WIRE.arm * t)); k * WIRE.arm * t < this.top; k++) if (this.crowRng() < FOLK.crowP) {   // Tokyo: a crow on a wire of this chunk's beats
+      const cr = this.crowRng, w = cr() < 0.5 ? 0 : 1, x = this.l + (this.r - this.l) * (0.2 + 0.6 * cr());
+      this.folk.push({ kind: 'crow', x, y: wireY(this, k, w, x), dir: cr() < 0.5 ? -1 : 1, fly: false, t: 0 });
     }
   }
   // Whether a solid ledge just laid (from index `from` on) hangs over an older one, or over the
@@ -2222,9 +2237,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (th.town && lv.kind === 'well') {   // Tokyo's kit (THEMES.tokyo; see the parts catalog): whatever hangs, hangs on something. A utility pole up
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
     // a wall; vending machines stand in a niche at a ledge's wall end. All on a fixed beat by height, not at random, so nothing is kept.
-    const t = kitT, P = kitP, arm = 9 * t, mod = (k, n) => ((k % n) + n) % n;
-    for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) for (let w = 0; w < 2; w++) {   // the wires, from crossarm to crossarm, sagging
-      const y0 = k * arm + 0.08 * t, x0 = lv.l + (0.5 + 0.4 * w) * t, x1 = lv.r - (0.5 + 0.4 * w) * t, sag = (0.8 + 0.35 * w) * t, st = 3 * P;
+    const t = kitT, P = kitP, arm = WIRE.arm * t, mod = (k, n) => ((k % n) + n) % n;
+    for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) for (let w = 0; w < 2; w++) {   // the wires, from crossarm to crossarm, sagging (WIRE)
+      const y0 = (k * WIRE.arm + WIRE.drop) * t, x0 = lv.l + WIRE.inset[w] * t, x1 = lv.r - WIRE.inset[w] * t, sag = WIRE.sag[w] * t, st = 3 * P;
       if (y0 + sag < top || y0 > bot) continue;
       for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, 1, 0, 10, 0); }
     }
@@ -2593,12 +2608,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : ink, 1, 0, 10, 0); });
+    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); });
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
+    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: a tile long
   }
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;

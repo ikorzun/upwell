@@ -917,7 +917,7 @@ class Game {
       if (f.kind === 'cage' && b) {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
-      else if (f.kind === 'bat') {
+      else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
         if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); }
         if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
       } else if (f.kind === 'bug') {

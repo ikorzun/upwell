@@ -11,9 +11,10 @@ variant is picked can be drawn with the renderer's own.
     python3 tools/variants.py <id> --prompt     # print the prompt, to paste into ChatGPT by hand
     python3 tools/variants.py <id>              # one 3 x 2 sheet of six variants, A to F: research/variants/<id>-<n>.png
 
-Needs OPENAI_API_KEY; the gpt-image skill's script makes the call.
+Needs OPENAI_API_KEY: from the shell, or else from "env" in ~/.claude/settings.json, where Claude Code keeps it for its own tools
+only. The gpt-image skill's script makes the call.
 """
-import os, subprocess, sys
+import json, os, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPT = os.path.expanduser('~/.claude/skills/gpt-image/scripts/gpt_image.py')
@@ -60,6 +61,14 @@ def main() -> None:
         print(prompt(el))
         return
     out, env = os.path.join(ROOT, 'research', 'variants'), dict(os.environ)
+    if not env.get('OPENAI_API_KEY'):
+        try:
+            with open(os.path.expanduser('~/.claude/settings.json')) as f:
+                env['OPENAI_API_KEY'] = json.load(f).get('env', {}).get('OPENAI_API_KEY', '')
+        except (OSError, ValueError):
+            pass
+    if not env.get('OPENAI_API_KEY'):
+        sys.exit('No OpenAI key: set OPENAI_API_KEY, or put it under "env" in ~/.claude/settings.json.')
     try:   # python.org's Python has no root certificates of its own (as in audio.py)
         import certifi
         env.setdefault('SSL_CERT_FILE', certifi.where())
@@ -68,7 +77,7 @@ def main() -> None:
     n = 1   # each sheet is kept: they cost money
     while os.path.exists(os.path.join(out, f'{el}-{n}.png')):
         n += 1
-    subprocess.run(['python3', SCRIPT, prompt(el), '--model', 'flare', '--quality', 'medium', '--size', '1536x1024', '--out', out, '--name', f'{el}-{n}'], check=True, env=env)
+    sys.exit(subprocess.run(['python3', SCRIPT, prompt(el), '--model', 'flare', '--quality', 'medium', '--size', '1536x1024', '--out', out, '--name', f'{el}-{n}'], env=env).returncode)
 
 
 if __name__ == '__main__':

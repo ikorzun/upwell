@@ -2428,7 +2428,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
   // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
-  // beam, a block is a concrete slab cut square with its panels' seams, a steel bracket under it at a wall and windows in a thick one.
+  // beam, a block is a concrete slab cut square with its panels' seams, a striped cap on a free end, a knee brace under it at a wall
+  // and windows in a thick one.
   // Returns false for what keeps the common look (ice, crumble, cracks, springs, magnets).
   const townRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
@@ -2452,14 +2453,24 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(r.x0, r.y0, r.x1, r.y1, PAL.gray, 1, 0, 10, 0); const my = snap((r.y0 + r.y1) / 2); box(r.x0, my, r.x1, my + P, th.wallD, 1, 0, 10, 0);
       for (let x = r.x0 + 0.3 * t; x < r.x1 - 0.2 * t; x += 0.6 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y0 + 3 * P, th.wallD, 1, 0, 10, 0);
     } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
-    else {   // a concrete slab
+    else {   // a concrete slab (the owner's pick, research/variants/tokyo-slab-1.png: B with F's end): its panels' seams, a free end capped
+      // in a road barrier's stripes, white for F's yellow (yellow is for what you take), and a knee brace under it at a wall
+      const thin = r.y1 - r.y0 < 2.5 * t, cap = thin && r.x1 - r.x0 >= 2 * t ? 0.6 * t : 0, c0 = wl ? r.x0 : r.x0 + cap, c1 = wr ? r.x1 : r.x1 - cap;
       box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0);
-      for (let x = r.x0 + 3 * t; x < r.x1 - 0.5 * t; x += 3 * t) box(snap(x), r.y0 + 3 * P, snap(x) + P, r.y1, th.wallD, 1, 0, 10, 0);
-      if (!wl) box(r.x0, r.y0, r.x0 + P, r.y1, th.wallD, 1, 0, 10, 0);
-      if (!wr) box(r.x1 - P, r.y0, r.x1, r.y1, th.wallD, 1, 0, 10, 0);
-      if (r.y1 - r.y0 >= 2.5 * t) for (let y = r.y0 + 0.6 * t; y < r.y1 - 0.8 * t; y += 1.2 * t) for (let x = r.x0 + 0.4 * t; x < r.x1 - 0.7 * t; x += 1.1 * t) {
+      for (let x = r.x0 + 3 * t; x < c1 - 0.5 * t; x += 3 * t) box(snap(x), r.y0 + 3 * P, snap(x) + P, r.y1, th.wallD, 1, 0, 10, 0);
+      for (const [free, x0, x1, ex] of [[!wl, r.x0, c0, r.x0], [!wr, c1, r.x1, r.x1 - P]]) if (free) {
+        if (cap) box(snap(x0), r.y0, snap(x1), r.y1, PAL.black, 1, 0, 7, 0.5 * t);
+        box(ex, r.y0, ex + P, r.y1, cap ? PAL.white : th.wallD, 1, 0, 10, 0);
+      }
+      if (!thin) for (let y = r.y0 + 0.6 * t; y < r.y1 - 0.8 * t; y += 1.2 * t) for (let x = r.x0 + 0.4 * t; x < r.x1 - 0.7 * t; x += 1.1 * t) {
         const lit = ((Math.round(x / t) * 7 + Math.round(y / t) * 3) % 5) === 0; box(snap(x), snap(y), snap(x + 0.45 * t), snap(y + 0.55 * t), lit ? PAL.gray : th.wallD, 1, 0, 10, 0);
-      } else for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) for (let i = 0; i < 3; i++) { const sq = 0.25 * t; box(Math.min(wx, wx + d * (3 - i) * sq), r.y1 + i * sq, Math.max(wx, wx + d * (3 - i) * sq), r.y1 + (i + 1) * sq, PAL.gray, 1, 0, 10, 0); }
+      } else for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {   // the brace, a pixel clear of the wall and the slab: a triangle of a leg down
+        // the wall, a bar under the slab and a strut between their ends (nothing in Tokyo's campaign levels, its boss's arena aside, stands within 1.5 tiles under a wall's slab)
+        const h = snap(1.3 * t), s = 3 * P, y0 = snap(r.y1) + P, xs = (a, b) => [snap(Math.min(wx + d * a, wx + d * b)), snap(Math.max(wx + d * a, wx + d * b))];
+        const [l0, l1] = xs(P, P + s), [b0, b1] = xs(P, P + h);
+        box(l0, y0, l1, y0 + h, th.block, 1, 0, 10, 0); box(b0, y0, b1, y0 + 2 * P, th.block, 1, 0, 10, 0);
+        for (let y = y0; y < y0 + h; y += P) { const u = y0 + h - y, [a0, a1] = xs(Math.max(P, u - s / 2), Math.min(P + h, u + s / 2)); box(a0, y, a1, y + P, th.block, 1, 0, 10, 0); }
+      }
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };

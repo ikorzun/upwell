@@ -117,13 +117,13 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
   crowUp: ['...####.................', '....#kk###..............', '.....#kkkk##............', '......##kkkk##...####...', '........#kkkkk###kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.###kkkkk###.###...', '.........#####..........', '........................', '........................', '........................'],
   crowDown: ['........................', '........................', '........................', '.................####...', '........#########kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.#kkkkkkkkk#.###...', '.......#kkkkkk##........', '......#kkkkk##..........', '.....#kkk###............', '...######...............'] };
 for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
-// Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, two of them `inset` from the walls, sagging
-// `sag`; wireY is a wire's height at x, where a crow perches (FOLK.crowP of the beats).
-const WIRE = { arm: 9, drop: 0.08, inset: [0.5, 0.9], sag: [0.8, 1.15], a: 0.5 };   // a: how much of a wire's line is drawn (a dither), the beams' and gondolas' cables' too
+// Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
+// as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
+const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8, a: 0.5 };   // a: how much of a wire's line is drawn (a dither), the beams' and gondolas' cables' too
 // Tokyo's air conditioners (owner: not so often, and a ledge to stand on that gives way): one a wall every `beat` tiles, the walls `at` out of step,
 // `w` x `h` tiles on a brace `brace` tall; a plank on its top which, stood on, rattles and falls `time` s later, for good (Level.addAircons, Level.update)
 const AC = { beat: 24, at: [5, 17], w: 2.2, h: 1.4, brace: 0.9, time: 3, off: 0.25 };   // off: its gap from the wall, its pipes in it
-const wireY = (lv, k, w, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset[w] * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset[w] * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag[w] * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
+const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, the second for `half` its coins, the third for all of them (enemies do not
@@ -217,7 +217,8 @@ const THEMES = {
  
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
-  tokyo: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { dots: PAL.black, town: true }),   // Tokyo's town at night (see TOKYO); a plain black night, no dots (owner: they were noise)
+  tokyo: Object.assign(theme(PAL.purple, { ice: PAL.white, crumble: PAL.gray, mover: PAL.blue }), { dots: PAL.black, town: true }),   // Tokyo's town at night (see TOKYO), purple (owner: blue went with Fuji's;
+  // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
   blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { win: 'grid', panels: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
   junk: Object.assign(theme(PAL.green, { ice: PAL.gray, mover: PAL.blue, spring: PAL.black, crumble: PAL.orange }), { moss: PAL.gray, plank: PAL.orange, win: 'brick', junk: true }),   // the Junkyard (see JUNK)
   sky: Object.assign(theme(PAL.purple, { mover: PAL.blue, spring: PAL.blue, rubber: PAL.blue, crumble: PAL.white }), { dots: PAL.gray, win: 'clouds', glass: true }),   // the Skyscraper (see SKY)
@@ -1560,9 +1561,9 @@ class Level {
     }
     if (this.theme.town && this.kind === 'well') for (let k = Math.ceil(top / (WIRE.arm * t)); k * WIRE.arm * t < this.top; k++) if (this.crowRng() < FOLK.crowP) {   // Tokyo: a crow on a wire of this chunk's beats,
       // where nothing laid nor a door stands in front of it (CRITTER.crow's 24 x 16 game pixels are at most 1.9 x 1.25 tiles; in tiles, so alike on every screen)
-      const cr = this.crowRng, w = cr() < 0.5 ? 0 : 1, dir = cr() < 0.5 ? -1 : 1, hw = 1.1 * t, hh = 1.3 * t;
+      const cr = this.crowRng, dir = cr() < 0.5 ? -1 : 1, hw = 1.1 * t, hh = 1.3 * t;
       for (let n = 0; n < 4; n++) {
-        const x = this.l + (this.r - this.l) * (0.2 + 0.6 * cr()), y = wireY(this, k, w, x);
+        const x = this.l + (this.r - this.l) * (0.2 + 0.6 * cr()), y = wireY(this, k, x);
         if ([...this.rects, ...this.bubbles].some((q) => q.x1 > x - hw && q.x0 < x + hw && q.y1 > y - hh && q.y0 < y + 0.3 * t)) continue;
         this.folk.push({ kind: 'crow', x, y, dir, fly: false, t: 0 }); break;
       }
@@ -2315,8 +2316,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
     // a wall; vending machines stand in a niche at a ledge's wall end. All on a fixed beat by height, not at random, so nothing is kept.
     const t = kitT, P = kitP, arm = WIRE.arm * t, mod = (k, n) => ((k % n) + n) % n;
-    for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) for (let w = 0; w < 2; w++) {   // the wires, from crossarm to crossarm, sagging (WIRE)
-      const y0 = (k * WIRE.arm + WIRE.drop) * t, x0 = lv.l + WIRE.inset[w] * t, x1 = lv.r - WIRE.inset[w] * t, sag = WIRE.sag[w] * t, st = 3 * P;
+    for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) {   // the wire, from crossarm to crossarm, sagging (WIRE)
+      const y0 = (k * WIRE.arm + WIRE.drop) * t, x0 = lv.l + WIRE.inset * t, x1 = lv.r - WIRE.inset * t, sag = WIRE.sag * t, st = 3 * P;
       if (y0 + sag < top || y0 > bot) continue;
       for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, WIRE.a, 0, 10, 0); }
     }
@@ -2329,24 +2330,27 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let k = Math.floor(top / arm) - 1; k * arm < bot; k++) {
         const y = k * arm, [a0, a1] = span(0.1 * t, 1.05 * t);
         box(a0, y, a1, y + 0.16 * t, PAL.gray, 1, 0, 10, 0);   // its crossarm, white insulators on it
-        for (const d of [0.5, 0.9]) { const x = at(d * t); box(x - P, y - 2 * P, x + P, y, PAL.white, 1, 0, 10, 0); }
+        { const x = at(WIRE.inset * t); box(x - P, y - 2 * P, x + P, y, PAL.white, 1, 0, 10, 0); }   // the wire's insulator
         if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, 1, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
     }
     const SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'], 'neonFish'], [['カ', 'ラ', 'オ', 'ケ'], 'neonMic']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
+    const best = g.startY - g.levelM * R_PER_M * R;   // the highest the hero has been in this level (Game.levelM)
     for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
-      // (the owner's pick, research/variants/tokyo-neon-1.png B): orange tubes, its word and a picture of what is sold, framed on a dark box
-      // with grey caps over and under it, in a glow (and dark in the power cut: the dark's lights leave it out)
+      // (the owner's pick, research/variants/tokyo-neon-1.png B): tubes, its word and a picture of what is sold, framed on a dark box with grey caps
+      // over and under it; its tubes off and faint till the hero goes up past it, then lit red or blue, by the sign, in a glow (owner; and dark in
+      // the power cut: the dark's lights leave it out)
       const [word, pic] = SIGNS[mod(k - Math.floor(k / 3), 3)], left = mod(k, 2) === 0, sw = gw + 6 * P, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, cx = x0 + sw / 2;
       const y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
       if (y1 + 0.3 * t < top || y0 - 0.4 * t > bot || atDoor(left ? lv.l : x0, y0 - 0.3 * t, left ? x0 + sw : lv.r, y1 + 0.2 * t)) continue;
-      F(cx, (y0 + y1) / 2, 1.15 * sw, 0, 0, 0.7 * (y1 - y0), PAL.orange, 1, 1);
+      const lit = (y0 + y1) / 2 > best, ink = !lit ? PAL.gray : Math.imul(k, 2654435761) >>> 31 ? PAL.red : PAL.blue, ia = lit ? 1 : 0.35;
+      if (lit) F(cx, (y0 + y1) / 2, 1.15 * sw, 0, 0, 0.7 * (y1 - y0), ink, 1, 1);
       for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, 1, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, 1, 0, 10, 0); }   // the arms, bolted on
       box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, 1, 0, 10, 0);
       box(x0, y0, x0 + sw, y1, PAL.black, 1, 0, 10, 0);
-      for (const [a0, b0, a1, b1] of [[x0 + P, y0 + P, x0 + sw - P, y0 + 2 * P], [x0 + P, y1 - 2 * P, x0 + sw - P, y1 - P], [x0 + P, y0 + P, x0 + 2 * P, y1 - P], [x0 + sw - 2 * P, y0 + P, x0 + sw - P, y1 - P]]) box(a0, b0, a1, b1, PAL.orange, 1, 0, 10, 0);   // the frame's tube
-      word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, 1, kk, PAL.orange));
-      icon(pic, cx, y1 - 3 * P - 0.45 * gw, 1, kk, PAL.orange);
+      for (const [a0, b0, a1, b1] of [[x0 + P, y0 + P, x0 + sw - P, y0 + 2 * P], [x0 + P, y1 - 2 * P, x0 + sw - P, y1 - P], [x0 + P, y0 + P, x0 + 2 * P, y1 - P], [x0 + sw - 2 * P, y0 + P, x0 + sw - P, y1 - P]]) box(a0, b0, a1, b1, ink, ia, 0, 10, 0);   // the frame's tube
+      word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, ia, kk, ink));
+      icon(pic, cx, y1 - 3 * P - 0.45 * gw, ia, kk, ink);
     }
     for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges (the owner's pick, research/variants/tokyo-vending-1.png
       // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is

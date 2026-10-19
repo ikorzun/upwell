@@ -2267,15 +2267,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, 1, kk, PAL.orange));
       icon(pic, cx, y1 - 3 * P - 0.45 * gw, 1, kk, PAL.orange);
     }
-    for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges: grey, its lit front blue with rows of cans
+    for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges (the owner's pick, research/variants/tokyo-vending-1.png
+      // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is
+      // for what you take), the slot under the front
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 3 * t, r.y0) || mod(Math.round(r.y0 / t), 3)) continue;
-      const w = 1.4 * t, h = 2.2 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w, y0 = r.y0 - h;
+      const w = 1.4 * t, h = 2.2 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w, y0 = r.y0 - h, g0 = snap(wl ? x0 + 0.1 * w : x0 + 0.36 * w), g1 = snap(g0 + 0.54 * w), c0 = snap(wl ? x0 + 0.72 * w : x0 + 0.12 * w);
       box(x0 - 0.15 * t, y0 - 0.2 * t, x0 + w + 0.15 * t, r.y0, PAL.black, 1, 0, 10, 0);   // the niche
-      box(x0, y0, x0 + w, r.y0, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y0 + 2 * P, x0 + w - 2 * P, y0 + 0.6 * h, PAL.blue, 1, 0, 10, 0);
-      const cans = [PAL.white, PAL.purple, PAL.white, PAL.gray], cw = (w - 6 * P) / 4;
-      for (let j = 0; j < 3; j++) for (let i = 0; i < 4; i++) box(x0 + 3 * P + i * cw + P, y0 + 4 * P + j * 0.17 * h, x0 + 3 * P + (i + 1) * cw - P, y0 + 4 * P + j * 0.17 * h + 0.09 * h, cans[(i + j) % 4], 1, 0, 10, 0);
-      box(x0 + 0.25 * w, r.y0 - 0.2 * h, x0 + 0.75 * w, r.y0 - 0.12 * h, PAL.black, 1, 0, 10, 0);
+      box(x0, y0, x0 + w, r.y0, PAL.blue, 1, 0, 10, 4);   // the cabinet: blue checkered with black, navy
+      box(g0, snap(y0 + 0.08 * h), g1, snap(y0 + 0.68 * h), PAL.blue, 1, 0, 10, 0);
+      const cans = [PAL.purple, PAL.purple, PAL.white], cw = (g1 - g0) / 3;
+      for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) { const cx = g0 + (i + 0.5) * cw, cy = snap(y0 + (0.15 + 0.18 * j) * h); box(snap(cx - 0.28 * cw), cy, snap(cx + 0.28 * cw), cy + snap(0.12 * h), cans[(i + 2 * j) % 3], 1, 0, 10, 0); }
+      for (let i = 0; i < 3; i++) box(g0 + (i + 1) * P, snap(y0 + 0.08 * h) + (3 - i) * P, g0 + (i + 2) * P, snap(y0 + 0.08 * h) + (4 - i) * P, PAL.white, 1, 0, 10, 0);   // the glint
+      box(c0, snap(y0 + 0.3 * h), c0 + snap(0.16 * w), snap(y0 + 0.38 * h), PAL.gray, 1, 0, 10, 0);
+      for (let i = 0; i < 3; i++) { const by = snap(y0 + (0.44 + 0.06 * i) * h), bx = c0 + snap(0.05 * w); box(bx, by, bx + P, by + P, PAL.gray, 1, 0, 10, 0); }
+      box(g0 + snap(0.05 * w), snap(r.y0 - 0.2 * h), g1 - snap(0.05 * w), snap(r.y0 - 0.11 * h), PAL.black, 1, 0, 10, 0);   // the slot
     }
   }
   const MINE_CAP = 8 * kitT;   // the Mine's timber caps, a beat up its walls (and its lamps, every other cap; see the dark's lights)

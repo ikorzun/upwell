@@ -205,6 +205,7 @@ const THEMES = {
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
   tokyo: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { win: true, town: true }),   // Tokyo's town at night (see TOKYO)
   blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { win: 'grid', panels: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
+  junk: Object.assign(theme(PAL.green, { ice: PAL.gray, mover: PAL.blue, spring: PAL.black, crumble: PAL.orange }), { moss: PAL.gray, plank: PAL.orange, win: 'brick', junk: true }),   // the Junkyard (see JUNK)
   sky: Object.assign(theme(PAL.purple, { mover: PAL.blue, spring: PAL.blue, rubber: PAL.blue, crumble: PAL.white }), { dots: PAL.gray, win: 'clouds', glass: true }),   // the Skyscraper (see SKY)
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
 };
@@ -314,6 +315,13 @@ const CRYPT = Object.assign({}, WORLDS[2], { id: 'crypt', name: { en: 'Crypt', e
 // lines sagging across the shaft, signs up its walls in the game's own kana, vending machines on its ledges (THEMES.tokyo `town`, drawn
 // by the renderer), a level crossing in most of its levels (`crossing`: the chance). It shows by itself at ?play=tokyo, to look at,
 // before it is a world of the map.
+// The Junkyard (user: a New York dump; the campaign's world 7): green brick, lit windows far off, brick walls (BG_FS uWin 4), fire escapes
+// zigzagging up the walls, dumpsters at a ledge's wall end; fire-escape landings for planks off a wall, wooden pallets for free ones, trash
+// bags for springs, greasy steel for ice, chain-link (grey) for the holding moss, a garbage truck through its crossings (THEMES.junk).
+const JUNK = Object.assign({}, WORLDS[2], { id: 'junk', name: { en: 'Junkyard', es: 'Basurero', pt: 'Ferro-velho', ja: 'ゴミすてば' }, theme: THEMES.junk, dark: [], maxD: 2, magnet: 0, crossing: 0.6,
+  chunks: { planks: 2, shelves: 3, stairs: 2, pillars: 2, comb: 2, chimney: 1, spring: 3, iceblocks: 1, crumble: 1, rubberwall: 1, rest: 1, vault: 1 },
+  enemies: { crawler: 3, climber: 2, shell: 2, spitter: 1 },
+  intro: [{ news: { en: 'trash bags bounce', es: 'las bolsas de basura rebotan', pt: 'sacos de lixo quicam', ja: 'ゴミぶくろで はねる' } }, {}, {}] });
 // The Skyscraper (user: a skyscraper and clouds; the campaign's world 6): dusk in purple, banks of cloud far off (BG_FS uWin 3), glass
 // facades up the walls, steel girders for blocks, clouds for the free planks (they dissolve under the hero and gather again; a catwalk
 // off a wall holds), bolts dropped from above for icicles (THEMES.sky `glass`). ?play=sky shows it.
@@ -396,6 +404,17 @@ const BOSSES = {
     defeat: { en: 'Shift is over… go on, then.', es: 'Se acabó el turno… sigue, pues.', pt: 'O turno acabou… vai, então.', ja: 'シフト おわり… いきな。' },
     hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
     how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
+  // World 7's: the Rat King (the Junkyard's): the Puck's slide over a greasy floor (its arena as the Puck's, rc.ice), round ears, a tail.
+  rat: { name: { en: 'Rat King', es: 'Rey Rata', pt: 'Rei Rato', ja: 'ネズミの おう' }, design: 'dome', size: 2.4, slide: true, rat: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+    intro: [{ en: 'Everything here is mine. Even you.', es: 'Todo aquí es mío. Incluso tú.', pt: 'Tudo aqui é meu. Até você.', ja: 'ここの ものは ぜんぶ おれの もの。おまえも。' },
+      { en: 'Finders keepers.', es: 'El que lo encuentra se lo queda.', pt: 'Achado não é roubado.', ja: 'ひろった もの がち。' },
+      { en: 'Squeak. Bow to the king.', es: 'Iiii. Inclínate ante el rey.', pt: 'Iii. Curve-se ao rei.', ja: 'チュー。おうに ひれふせ。' }],
+    quip: [{ en: 'Into the bin with you.', es: 'Al contenedor contigo.', pt: 'Pra caçamba com você.', ja: 'ゴミばこへ どうぞ。' },
+      { en: 'Squeak squeak. Again?', es: 'Iiii iiii. ¿Otra vez?', pt: 'Iii iii. De novo?', ja: 'チューチュー。もう いっかい？' }],
+    defeat: { en: 'Take it… the trash is yours.', es: 'Tómalo… la basura es tuya.', pt: 'Pode levar… o lixo é seu.', ja: 'もってけ… ゴミは おまえの もの。' },
+    top: { en: 'Hard on top. Roll a shell at it!', es: 'Arriba es duro. ¡Lánzale un caparazón!', pt: 'Em cima é duro. Role um casco nele!', ja: 'うえは かたい。こうらを ころがせ！' },
+    hint: { en: 'Flipped! Land on its belly!', es: '¡Volteado! ¡Salta en su panza!', pt: 'Virado! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },
+    how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písalo', pt: 'Role um casco nele e depois pise', ja: 'こうらを ぶつけて、ふみつけろ' } },
   // World 6's: the Pigeon (the Skyscraper's): the Cork's dive (hover, warn, dive, dazed, rise), flapping its grey wings.
   pigeon: { name: { en: 'Pigeon', es: 'Paloma', pt: 'Pombo', ja: 'ハト' }, design: 'drop', pigeon: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'Coo. This ledge is taken.', es: 'Cu-cú. Esta cornisa es mía.', pt: 'Ru-ru. Essa beirada é minha.', ja: 'クルッ。ここは わたしの へり。' },
@@ -436,6 +455,7 @@ const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
 const TOWN = { stairs: 3, planks: 2, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, rubberwall: 1 };   // Tokyo's (shelves off the walls: awnings)
+const JUNKP = { planks: 2, shelves: 3, stairs: 2, pillars: 2, comb: 2, chimney: 1, spring: 2, crumble: 1, rubberwall: 1 };   // the Junkyard's (planks off walls: fire escapes)
 const SKYP = { planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, movers: 1, twinshaft: 1 };   // the Skyscraper's (free planks: clouds)
 const PANEL = { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 1 };   // the Tower Blocks' (flights of stairs; shelves: balconies)
 // A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12
@@ -545,19 +565,39 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
 { world: SKY, runes: 'OUd', lore: { en: 'At the top of the tallest tower\nwere only clouds.', es: 'En lo alto de la torre más alta\nsolo había nubes.', pt: 'No alto da torre mais alta\nsó havia nuvens.', ja: 'いちばん たかい とうの うえには\nくもしか なかった。' }, levels: [
   { role: 'teach', len: 36, fire: 0.5, calm: 8, maxD: 2, chunks: SKYP, intro: ['planks'], enemies: ['crawler', 'climber'], foes: 0.45, candy: [], safe: true, seed: 7101,
     news: { en: 'clouds dissolve under you', es: 'las nubes se deshacen bajo tus pies', pt: 'as nuvens se desfazem sob você', ja: 'くもは あしもとで きえる' } },
-  { role: 'teach', len: 40, fire: 0.52, maxD: 2, chunks: { ...SKYP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['fizz'], gate: 'gate', seed: 7102,
+  { role: 'teach', len: 40, fire: 0.52, maxD: 2, chunks: { ...SKYP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['fizz'], gate: 'gate', sides: [0, 112808], seed: 7102,
     news: { en: 'window-cleaning gondolas', es: 'góndolas de limpiacristales', pt: 'gôndolas de limpar janelas', ja: 'まどふきの ゴンドラ' } },
-  { role: 'teach', len: 42, fire: 0.52, maxD: 2, chunks: SKYP, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.5, candy: ['smash'], seed: 7103,
+  { role: 'teach', len: 42, fire: 0.52, maxD: 2, chunks: SKYP, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.5, candy: ['smash'], sides: [0, 113786], seed: 7103,
     news: { en: 'dropped bolts fall from above', es: 'caen tornillos desde arriba', pt: 'parafusos caem lá de cima', ja: 'うえから ボルトが おちる' } },
   { role: 'apply', len: 48, fire: 0.54, maxD: 2, chunks: SKYP, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'fizz'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 7104 },
-  { role: 'peak', len: 40, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7105 },
+  { role: 'peak', len: 40, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], sides: [0, 112811], seed: 7105 },
   { role: 'bonus', len: 48, bonus: 0, time: 52, seed: 7106 },
   { role: 'twist', len: 42, fire: 0.54, maxD: 2, chunks: SKYP, intro: [], dark: true, enemies: ['crawler', 'climber', 'shell'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 7107,
     news: { en: 'night over the clouds', es: 'noche sobre las nubes', pt: 'noite sobre as nuvens', ja: 'くもの うえの よる' } },
-  { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', seed: 7108 },
+  { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [0, 113791], seed: 7108 },
   { role: 'rest', len: 32, fire: 0.44, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'pigeon' },
+] },
+// World 7, the Junkyard (the user's New York dump; its kit in the renderer, see THEMES.junk): trash bags that bounce, garbage trucks through
+// the crossings, greasy steel that slides, then junk raining off the fire escapes (the twist: icicles); the Rat King on a greasy floor.
+// Its runes: a cross of beads, a diamond, a heap (the ones below kept what the climbers threw away).
+{ world: JUNK, runes: 'krw', lore: { en: 'What the climbers threw away\nthe ones below kept.', es: 'Lo que tiraban los que subían\nlo guardaban los de abajo.', pt: 'O que os que subiam jogavam fora\nos de baixo guardavam.', ja: 'のぼる ものが すてた ものを\nしたの ものが ひろった。' }, levels: [
+  { role: 'teach', len: 38, fire: 0.52, calm: 8, maxD: 2, chunks: { ...JUNKP, spring: 4 }, intro: ['spring'], enemies: ['crawler', 'climber'], foes: 0.45, candy: [], safe: true, seed: 8101,
+    news: { en: 'trash bags bounce', es: 'las bolsas de basura rebotan', pt: 'sacos de lixo quicam', ja: 'ゴミぶくろで はねる' } },
+  { role: 'teach', len: 42, fire: 0.54, maxD: 2, chunks: JUNKP, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['fizz'], crossing: true, gate: 'gate', seed: 8102,
+    news: { en: 'garbage trucks: mind the street', es: 'camiones de basura: cuidado con la calle', pt: 'caminhões de lixo: cuidado com a rua', ja: 'ゴミしゅうしゅうしゃ: どうろに ちゅうい' } },
+  { role: 'teach', len: 44, fire: 0.54, maxD: 2, chunks: { ...JUNKP, iceblocks: 3 }, intro: ['iceblocks'], enemies: ['crawler', 'shell', 'spitter'], foes: 0.5, candy: ['smash'], seed: 8103,
+    news: { en: 'greasy steel: you slide', es: 'acero grasiento: resbalas', pt: 'aço engordurado: você escorrega', ja: 'あぶらの はがね: すべる' } },
+  { role: 'apply', len: 50, fire: 0.56, maxD: 2, chunks: { ...JUNKP, iceblocks: 1 }, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'fizz'], crossing: true, shop: 0.4, stash: 0.3, gate: 'gate2', seed: 8104 },
+  { role: 'peak', len: 42, fire: 0.6, maxD: 3, chunks: { ...JUNKP, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 8105 },
+  { role: 'bonus', len: 50, bonus: 1, time: 55, seed: 8106 },
+  { role: 'twist', len: 44, fire: 0.56, maxD: 2, chunks: JUNKP, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.55, candy: ['fizz'], stash: 0.3, crossing: true, seed: 9084,
+    news: { en: 'junk falls off the fire escapes', es: 'cae chatarra de las escaleras de incendios', pt: 'cai sucata das escadas de incêndio', ja: 'ひじょうかいだんから ガラクタが おちる' } },
+  { role: 'peak', len: 46, fire: 0.6, maxD: 3, chunks: { ...JUNKP, comb: 3, spikes: 1, rubberwall: 2, iceblocks: 1 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', seed: 9085 },
+  { role: 'rest', len: 34, fire: 0.46, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 8109,
+    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+  { role: 'boss', boss: 'rat', ice: true },   // the Puck's arena: its floor all grease, junk hanging under the ceiling
 ] }];
 
 // Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
@@ -670,6 +710,9 @@ ICONS.runeQ = '.....ww...../..w..ww..w../.www.ww.www./..ww.ww.ww../............/
 ICONS.runeO = '..ww...ww.../..www.www.../ww.wwwww.ww./www.www.www./.www.w.www../..www.www.../..www.www.../.www.w.www../www.www.www./ww.wwwww.ww./..www.www.../..ww...ww...';
 ICONS.runeU = '.....ww...../.ww.wwww.ww./.ww.wwww.ww./...w.ww.w.../.ww.w..w.ww./wwww.ww.wwww/wwww.ww.wwww/.ww.w..w.ww./...w.ww.w.../.ww.wwww.ww./.ww.wwww.ww./.....ww.....';
 ICONS.runed = '............/...ww.ww..../...wwwww..../...wwwww..../www.www.www./wwww.w.wwww./.wwww.wwww../wwww.w.wwww./www.www.www./...wwwww..../...wwwww..../...ww.ww....';
+ICONS.runek = '............/............/....w......./...www....../....w......./.w.www.w..../wwwwwwwww.../.w.www.w..../....w......./...www....../....w......./............';
+ICONS.runer = '............/.....w....../....www...../...ww.ww..../..ww.w.ww.../.ww.www.ww../ww.ww.ww.ww./.ww.www.ww../..ww.w.ww.../...ww.ww..../....www...../.....w......';
+ICONS.runew = '....wwww..../..wwwwwwww../.wwwwwwwwww./.wwwwwwwwww./ww..wwww..ww/ww...ww...ww/www..ww..www/wwwwwwwwwwww/.wwwwwwwwww./..www..www../...wwwwww.../....wwww....';
 // Kana for Tokyo's signs: DotGothic16's own glyphs (the game's Japanese font, SIL OFL) on its 16-dot grid.
 ICONS['kana_ラ'] = '................/...wwwwwwwwww.../................/................/................/..wwwwwwwwwwww../.............w../.............w../.............w../............w.../............w.../...........w..../..........w...../........ww....../...wwwww......../................';
 ICONS['kana_ー'] = '................/................/................/................/................/................/................/..wwwwwwwwwwww../................/................/................/................/................/................/................/................';
@@ -1904,16 +1947,16 @@ void main() {
   if (uGrad > 0.5 && t * t > bayer(g)) c = uBot;   // a theme's fall from its top ink to its bottom one, through the 4x4 dither (the Crypt's)
   int s = uPix < 1.5 ? 2 : 1, py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-CSS-px cells, a dot one game pixel
   ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / float(s)));
-  if (uWin > 2.5) {   // banks of cloud far off (the Skyscraper's): a smooth field, its edges dithered
+  if (uWin > 2.5 && uWin < 3.5) {   // banks of cloud far off (the Skyscraper's): a smooth field, its edges dithered
     vec2 wp = vec2(float(g.x), float(py)) * vec2(0.008, 0.03);
     float n = sin(wp.x * 3.1 + sin(wp.y * 1.7) * 2.0) * 0.5 + sin(wp.y * 2.3 + wp.x * 0.7) * 0.5;
     if (n > 0.62 + 0.3 * bayer(g)) c = uDots;   // sparse, so the climb reads over them
-  } else if (uWin > 1.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dotted between
+  } else if (uWin > 1.5 && uWin < 2.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dotted between
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(8.0, 10.0)), iw = wp - cw * vec2(8.0, 10.0);
     float h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
     if (iw.x >= 2.0 && iw.x < 6.0 && iw.y >= 3.0 && iw.y < 7.0 && h < 0.16) c = uDots;
     else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x, 3.0) < 1.0) c = uDots;
-  } else if (uWin > 0.5) {   // a town far off (Tokyo's): windows lit here and there in rows, its buildings in columns with dark gaps between
+  } else if (uWin > 0.5) {   // a town far off (Tokyo's, the Junkyard's; uWin 1 or 4): windows lit here and there in rows, its buildings in columns with dark gaps between
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(6.0, 8.0)), iw = wp - cw * vec2(6.0, 8.0);
     float bx = wp.x - 36.0 * floor(wp.x / 36.0), h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
     if (bx < 30.0 && iw.x >= 2.0 && iw.x < 4.0 && iw.y >= 3.0 && iw.y < 6.0 && h < 0.2) c = uDots;
@@ -1921,7 +1964,8 @@ void main() {
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
     c = ((g.x + g.y) & 3) == 0 ? uWallD : uWall;
-    if (uWin > 1.5 && mod(float(py), uWin > 2.5 ? 16.0 : 24.0) < 1.0) c = uWallD;   // a panel wall's seams, a glass wall's transoms
+    if (uWin > 3.5) { float by = mod(float(py), 6.0), bx = mod(float(g.x) + (mod(floor(float(py) / 6.0), 2.0) < 1.0 ? 0.0 : 5.0), 10.0); if (by < 1.0 || bx < 1.0) c = uWallD; }   // brick: mortar courses, joints in bond
+    else if (uWin > 1.5 && mod(float(py), uWin > 2.5 ? 16.0 : 24.0) < 1.0) c = uWallD;   // a panel wall's seams, a glass wall's transoms
     if (d > -uPix) c = uLip;
   }
   o = vec4(c, 1.0);
@@ -2269,6 +2313,45 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(bx, r.y0 - 0.55 * t, bx + bw, r.y0 - 0.42 * t, PAL.gray, 1, 0, 10, 0); for (const lx of [bx + 0.1 * t, bx + bw - 0.2 * t]) box(lx, r.y0 - 0.42 * t, lx + 0.1 * t, r.y0, PAL.gray, 1, 0, 10, 0);   // the bench
     }
   }
+  if (th.junk && lv.kind === 'well') {   // the Junkyard's kit: a fire escape up each wall (a landing every 6 tiles, a ladder slanting up to the next), and
+    // a dumpster at the wall end of some wide steady ledges
+    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
+    for (const side of [-1, 1]) {
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), off = side < 0 ? 0 : 3 * t;
+      for (let k = Math.floor((top - off) / (6 * t)) - 1; k * 6 * t + off < bot + 6 * t; k++) {
+        const y = k * 6 * t + off, [x0, x1] = [Math.min(at(0), at(1.6 * t)), Math.max(at(0), at(1.6 * t))];
+        box(x0, y, x1, y + 0.15 * t, PAL.black, 1, 0, 10, 0); box(x0, y - 0.6 * t, x1, y - 0.6 * t + P, PAL.gray, 0.8, 0, 10, 0);   // the landing, its rail
+        box(side < 0 ? x1 - P : x0, y - 0.6 * t, side < 0 ? x1 : x0 + P, y, PAL.gray, 0.8, 0, 10, 0);
+        for (let i = 0; i <= 10; i++) { const u = i / 10, x = snap(at((0.2 + 1.2 * u) * t)), yy = snap(y - 6 * t * u); box(x - P / 2, yy - P / 2, x + P / 2, yy + P / 2, PAL.gray, 0.8, 0, 10, 0); }   // the ladder to the next
+      }
+    }
+    for (const r of lv.rects) {
+      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.slick || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 0) continue;
+      const w = 1.8 * t, h = 1.1 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w;
+      box(x0, r.y0 - h, x0 + w, r.y0 - 0.15 * t, th.block, 1, 0, 10, 0); box(x0 - 0.05 * t, r.y0 - h - 0.15 * t, x0 + w + 0.05 * t, r.y0 - h, PAL.black, 1, 0, 10, 0);   // a dumpster, its lid
+      for (const dx of [0.2, 0.8]) disc(x0 + dx * w, r.y0 - 0.12 * t, 0.12 * t, PAL.black, 1);
+    }
+  }
+  // The Junkyard's ledges: a block is green brick (mortar courses, joints in bond), a plank off a wall a fire escape's black grating behind
+  // its rail, a free plank a wooden pallet (orange, its slats).
+  const junkRect = (r) => {
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    if (r.plank && r.move) return false;
+    if (r.plank && (wl || wr)) {
+      box(r.x0, r.y0, r.x1, r.y1, PAL.black, 1, 0, 10, 0); for (let x = r.x0 + 0.2 * t; x < r.x1; x += 0.4 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y1 - P, PAL.gray, 1, 0, 10, 0);
+      for (let x = r.x0 + 0.1 * t; x < r.x1; x += 0.9 * t) box(snap(x), r.y0 - 0.55 * t, snap(x) + P, r.y0, PAL.gray, 0.8, 0, 10, 0);
+      box(r.x0, r.y0 - 0.55 * t, r.x1, r.y0 - 0.55 * t + P, PAL.gray, 0.8, 0, 10, 0);
+    } else if (r.plank) {
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); for (let x = r.x0 + 0.5 * t; x < r.x1 - 0.2 * t; x += 0.5 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y1, PAL.black, 1, 0, 10, 0);
+    } else if (r.move || r.spring || r.magnet || r.bouncy || r.crumble) return false;
+    else {
+      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0);
+      for (let y = r.y0 + 0.5 * t, k = 0; y < r.y1 - 2; y += 0.5 * t, k++) { box(r.x0, snap(y), r.x1, snap(y) + P, PAL.black, 1, 0, 10, 0); for (let x = r.x0 + (k % 2 ? 0.5 : 1) * t; x < r.x1 - 0.2 * t; x += t) box(snap(x), snap(y), snap(x) + P, snap(Math.min(y + 0.5 * t, r.y1)), PAL.black, 1, 0, 10, 0); }
+      for (let x = r.x0 + 0.5 * t; x < r.x1 - 0.2 * t; x += t) box(snap(x), r.y0 + 3 * P, snap(x) + P, snap(Math.min(r.y0 + 0.5 * t, r.y1)), PAL.black, 1, 0, 10, 0);
+    }
+    box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+  };
   if (th.glass && lv.kind === 'well') {   // the Skyscraper's kit: glass facades up both walls (mullions, transoms), a white aviation lamp blinking every 20 tiles
     const t = kitT, P = kitP;
     for (const side of [-1, 1]) {
@@ -2386,6 +2469,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.cap) { box(lv.l - 2, Math.max(r.y0, top), lv.r + 2, r.y1, th.wall, 1, 0); box(lv.l - 2, r.y1 - 2.5, lv.r + 2, r.y1, th.lip, 1, 0); continue; }
     if (r.spring) {
       const k = r.t / SPRING.anim, hh = (r.y1 - r.y0) * (1 - 0.5 * k), w = r.x1 - r.x0;
+      if (th.junk) {   // the Junkyard's: a black trash bag, its grey tie, a glint, flattening as it throws
+        const y0 = r.y1 - hh - 0.25 * R, cx = (r.x0 + r.x1) / 2; F(cx, (y0 + r.y1) / 2, (r.x1 - r.x0) / 2, 0, 0, (r.y1 - y0) / 2 + 0.05 * R, PAL.black, 1, 0);
+        box(cx - 0.08 * R, y0 - 0.15 * R, cx + 0.08 * R, y0, PAL.gray, 1, 0, 10, 0); disc(cx - 0.3 * R, y0 + 0.12 * R, 0.07 * R, PAL.white, 1);
+        continue;
+      }
       if (th.panels) {   // the Tower Blocks': an old mattress thrown out, blue and white stripes, flattening as it throws
         const y0 = r.y1 - hh - 0.2 * R; box(r.x0, y0, r.x1, r.y1, PAL.white, 1, 0, 10, 0);
         for (let x = r.x0 + 2 * kitP; x < r.x1 - kitP; x += 4 * kitP) box(x, y0, x + 2 * kitP, r.y1, th.spring, 1, 0, 10, 0);
@@ -2398,7 +2486,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
@@ -2483,7 +2571,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x - 0.06 * R, xg.y0 - 0.2 * R, x + 0.06 * R, xg.y1, PAL.gray, 1, 0, 10, 0);   // the post
       for (const k of [0, 1]) disc(x + d * (k ? 0.32 : 0) * R, xg.y0 - 0.2 * R, 0.17 * R, on && blink === k ? INK.spike : INK.dark, 1);   // its two lamps
     }
-    if (xg.state === 'pass') {   // the train: dark cars with a white roof line and lit windows, a headlight at its front
+    if (xg.state === 'pass' && th.junk) {   // the Junkyard's: a garbage truck, green, its cab white-windowed at the front, wheels
+      const L = 0.9 * W, x1 = xg.x, x0 = x1 - L, y0 = xg.y0 + 0.08 * R, y1 = xg.y1 - 0.45 * R, c0 = x1 - 0.3 * L;
+      box(Math.max(lv.l, x0), y0, Math.min(lv.r, c0), y1, th.block, 1, 0, 10, 0); box(Math.max(lv.l, c0), y0 + 0.3 * (y1 - y0), Math.min(lv.r, x1), y1, th.block, 1, 0, 10, 0);
+      if (x1 - 0.25 * L > lv.l && x1 - 0.1 * L < lv.r) box(Math.max(lv.l, x1 - 0.25 * L), y0 + 0.4 * (y1 - y0), Math.min(lv.r, x1 - 0.08 * L), y0 + 0.65 * (y1 - y0), PAL.white, 1, 0, 10, 0);
+      for (const f of [0.15, 0.45, 0.85]) { const wx = x0 + f * L; if (wx > lv.l && wx < lv.r) disc(wx, y1, 0.35 * R, PAL.black, 1); }
+    } else if (xg.state === 'pass') {   // the train: dark cars with a white roof line and lit windows, a headlight at its front
       const L = TRAIN.len * W, x1 = xg.x, x0 = x1 - L, y0 = xg.y0 + 0.08 * R, y1 = xg.y1 - 0.45 * R;
       box(Math.max(lv.l, x0), y0, Math.min(lv.r, x1), y1, INK.dark, 1, 0, 10, 0); box(Math.max(lv.l, x0), y0, Math.min(lv.r, x1), y0 + 0.12 * R, PAL.white, 1, 0, 10, 0);
       for (let x = x1 - 0.9 * R; x > x0 + 0.5 * R; x -= 1.3 * R) if (x > lv.l && x < lv.r) box(x - 0.4 * R, y0 + 0.35 * R, x + 0.4 * R, y0 + 0.35 * R + 0.5 * (y1 - y0), INK.coin, 1, 0, 10, 0);
@@ -2582,7 +2675,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
     box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
   }
-  if (bs && !bs.dead && bs.def && bs.def.pigeon) {   // the Pigeon's wings, flapping, and its beak
+  if (bs && !bs.dead && bs.def && bs.def.rat) {   // the Rat King's round ears, its tail
+    const b = bs.body, w = 0.45 * (b.maxX - b.minX), up = b.up && b.up.fails ? 1 : -1;
+    for (const d of [-1, 1]) { disc(b.cx + d * w, b.minY + 0.15 * R, 0.4 * R, PAL.gray, 1); disc(b.cx + d * w, b.minY + 0.15 * R, 0.2 * R, PAL.purple, 1); }
+    for (let k = 0; k < 8; k++) disc(b.maxX + k * 0.18 * R, b.maxY - 0.3 * R - Math.sin(T * 6 + k * 0.7) * 0.15 * R * k * 0.3, 0.07 * R, PAL.gray, 1);
+  } else if (bs && !bs.dead && bs.def && bs.def.pigeon) {   // the Pigeon's wings, flapping, and its beak
     const b = bs.body, w = 0.6 * (b.maxX - b.minX), f = Math.sin(T * (bs.state === 'dive' ? 22 : 9));
     for (const d of [-1, 1]) F(b.cx + d * w, b.cy - 0.1 * R + f * 0.25 * R, 0.55 * R, d * 0.2 * R, 0, (0.3 + 0.12 * f) * R, PAL.gray, 1, 0);
     disc(b.cx, b.cy + 0.15 * (b.maxY - b.minY), 0.16 * R, INK.flame, 1);
@@ -2625,7 +2722,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pg = this.pBg;
   gl.useProgram(pg.p);
   gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, lv.l, lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);
-  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win === 'clouds' ? 3 : th.win === 'grid' ? 2 : th.win ? 1 : 0);
+  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win === 'brick' ? 4 : th.win === 'clouds' ? 3 : th.win === 'grid' ? 2 : th.win ? 1 : 0);
   gl.uniform3fv(pg.u.uWall, th.wall); gl.uniform3fv(pg.u.uWallD, th.wallD); gl.uniform3fv(pg.u.uLip, th.lip);
   gl.bindVertexArray(this.emptyVao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);

@@ -117,6 +117,116 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
   crowUp: ['...####.................', '....#kk###..............', '.....#kkkk##............', '......##kkkk##...####...', '........#kkkkk###kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.###kkkkk###.###...', '.........#####..........', '........................', '........................', '........................'],
   crowDown: ['........................', '........................', '........................', '.................####...', '........#########kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.#kkkkkkkkk#.###...', '.......#kkkkkk##........', '......#kkkkk##..........', '.....#kkk###............', '...######...............'] };
 for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// The Cave's Buddha (the owner's picture, 2026-10-19), seated, in patterned stripes: 79 x 92 game pixels in ICON_INK's letters, W and B white and blue
+// checkered with black (one box in the game's checker, tone 4); its colours are the owner's in the nearest inks, but it sits in the midground (the
+// owner's depth rule: no white, no yellow there), so its white is grey and its yellow orange. BUDDHA_BOXES: its runs merged into boxes once, [x, y, w, h,
+// ink's letter, tone], a few hundred rather than thousands to draw.
+const BUDDHA = [
+  '........................................g......................................',
+  '......................................ggggg....................................',
+  '....................................gggggggg...................................',
+  '....................................gggggggg...................................',
+  '...................................ggggggggggg.................................',
+  '...................................ggggggggggg.................................',
+  '..................................ggggggggggggg................................',
+  '.................................ggggggggggggggg...............................',
+  '................................ggggggggggggggggg..............................',
+  '...............................gggggggggggggggggg..............................',
+  '...............................ggggggggggggggggggg.............................',
+  '...............................ggggggggggggggggggg.............................',
+  '...............................k.bopgbyrybgpobwkry.............................',
+  '...............................k.bopgbyrybgpobwkry.............................',
+  '..............................rk.bopgbyrybgpobwkry.............................',
+  '..............................rk.bopgbyrybgpobwkry.............................',
+  '...............................k.bopgbyrybgpobwkry.............................',
+  '...............................k.bopgbyrybgpobwkry.............................',
+  '...............................k.bopgbyrybgpobwkr..............................',
+  '.................................bopgbyrybgpobwkr..............................',
+  '.................................bopgbyrybgpobwk...............................',
+  '.................................bopgbyrybgpobwk...............................',
+  '.................................bopgbyrybgpobwk...............................',
+  '.................................grgrgrgrgrgrgrg...............................',
+  '................................grgrgrgrgrgrgrgr...............................',
+  '................................rgrgrgrgrgrgrgr................................',
+  '................................gr.rgrgrgrgrgrgr...............................',
+  '...................................grgrgrgrgrgr................................',
+  '................................grgrgrgrgrgrgrgr...............................',
+  '..............................rgrgrgrgrgrgrgrgrgrgr............................',
+  '............................grgrgrgrgrgrgrgrgrgrgrgr...........................',
+  '.........................grgrgrgrgrgrgrgrgrgrgrgrgrgrgrb.......................',
+  '.......................ggrgrgrgrgrgrgrgrgrgrgrgwgrgrgrgbg......................',
+  '......................gbrgrgrgrgrgrgrgrgrgrgrgrwrgrgrgrbbg.....................',
+  '......................bbgrgrgrgrgrgrgrgrgrgrgrgwwrgrgrwbbb.....................',
+  '.....................krybopgbyrkwbopgbyrybgpobwwrybgpwwbwwr....................',
+  '.....................rybbopgbyrkwbopgbyrybgpobwwrybgpobwkry....................',
+  '....................rybgbopgbyrkwbopgbyrybgpobwkrybgpobkrybg...................',
+  '....................ybgpbopgbyrkwbopgbyrybgpobwkrybgpobrybgp...................',
+  '....................bgpobopgbyrkwbopgbyrybgpobwkrybgpobybgpo...................',
+  '....................gpobbopgbyrkwbopgbyrybgpobwkrybgpobbgpob...................',
+  '....................pobwbopgbyrkwbopgbyrybgpobwkrybgpobgpob....................',
+  '...................pobwkbopgbyrkwbopgbyrybgpobwkrybgpobpobwk...................',
+  '...................obwkrbopgbyrkwbopgbyrybgpobwkrybgpobobwkry..................',
+  '...................bwkrybopgbyrkwbopgbyrybgpobwkrybgpobbwkryb..................',
+  '....................krybbopgbyrkwbopgbyrybgpobwkrybgpobwkrybg..................',
+  '...................rbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrb..................',
+  '...................rbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrb..................',
+  '..................brbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrwp.................',
+  '..................brbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbp.................',
+  '..................brbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrb..................',
+  '.................pbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpb................',
+  '.................pbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpb................',
+  '.................pbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpb................',
+  '.................pbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpb................',
+  '.................pbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpb................',
+  '.................pbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpb................',
+  '.................pbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpbrbpb................',
+  '.................bbbbbbbWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbbbbbbbb................',
+  '................bbbbbbbbWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbbbbbbbbb...............',
+  '................kbbbbkkbWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbbkkbbbbk...............',
+  '...........kbbk..kbbkwwkWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbkwwkbbk..kbb...........',
+  '...........kbbk..kbbkwwkWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbkwwkbbk..kbbk..........',
+  '........bkkbbbbkkbbbbkkbWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbbkkbbbbkkbbbbkkbb......',
+  '.......bbbbbbbbbbbbbbbbbWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbbbbbbbbbbbbbbbbbb......',
+  '.......bbbbbbbbbbbbbbbbbWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbbbbbbbbbbbbbbbbbbb.....',
+  '.......bbkkbbbbkkbbbbkkbWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbbkkbbbbkkbbbbkkbbb.....',
+  '.......bkwwkbbkwwkbbkwwkWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbkwwkbbkwwkbbkwwkbb.....',
+  '.......bkwwkbbkwwkbbkwwkWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWbkwwkbbkwwkbbkwwkbb.....',
+  '.......rgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgr.....',
+  '.......rgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgr.....',
+  '........grbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrg......',
+  '........grbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrg......',
+  '.........rbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbr.......',
+  '...rg...grbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrb....rg..',
+  '..brgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrb.grbrgr.',
+  '...rgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrg..',
+  '...rgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrg..',
+  '...rgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrg..',
+  '....grbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbr...',
+  '....grbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrbrgrb....',
+  '.....yyyybbyyyybbyyyybbyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByybbyyyybbyyyybbyyy.....',
+  '....yyyyyyyyyyyyyyyyyyyyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByyyyyyyyyyyyyyyyyyyyy...',
+  '..yyyyyyyyyyyyyyyyyyyyyyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByyyyyyyyyyyyyyyywyyyyy..',
+  '.yybbyyyybbyyyybbyyyybbyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByybbyyyybbyyyybbyyyybby.',
+  'yybkkbyybkkbyybkkbyybkkbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBybkkbyybkkbyybkkbyybkkby',
+  'yybkkbyybkkbyybkkbyybkkbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBybkkbyybkkbyybkkbyybkkby',
+  'yyybbyyyybbyyyybbyyyybbyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByybbyyyybbyyyybbyyyybbyy',
+  '.yyyyyyyyyyyyyyyyyyyyyyyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByyyyyyyyyyyyyyyyyyyyyyyy',
+  '..yyyyyyyyyyyyyyyyyyyyyyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByyyyyyyyyyyyyyyyyyyyyyy.',
+  '.....yyyybbyyyybbyyyybbyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBByybbyyyybbyyyybbyyyy....',
+  '..............................BBBBBBBBBBBBBBBBBB.bk............................'];
+const BUDDHA_BOXES = (() => {
+  const H = BUDDHA.length, W = BUDDHA[0].length, used = BUDDHA.map((r) => new Uint8Array(r.length)), out = [], cap = { W: 's', B: 'b' }, mid = { w: 's', y: 'o' };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const c = BUDDHA[y][x];
+    if (c === '.' || used[y][x]) continue;
+    let x1 = x, y1 = y;
+    while (x1 + 1 < W && BUDDHA[y][x1 + 1] === c && !used[y][x1 + 1]) x1++;
+    for (let ok = true; ok && y1 + 1 < H;) { for (let i = x; i <= x1; i++) if (BUDDHA[y1 + 1][i] !== c || used[y1 + 1][i]) ok = false; if (ok) y1++; }
+    for (let yy = y; yy <= y1; yy++) for (let xx = x; xx <= x1; xx++) used[yy][xx] = 1;
+    out.push([x, y, x1 - x + 1, y1 - y + 1, cap[c] || mid[c] || c, cap[c] ? 4 : 0]);
+  }
+  return out;
+})();
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8, a: 0.5 };   // a: how much of a wire's line is drawn (a dither), the beams' and gondolas' cables' too
@@ -213,7 +323,7 @@ const FOE_COLOR = {
 const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
   slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: theme(PAL.gray), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { pit: true }),   // pit: the Mine's kit (see mineRect)
+  cave: Object.assign(theme(PAL.gray), { shrine: true }), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { pit: true }),   // pit: the Mine's kit (see mineRect)
  
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
@@ -513,7 +623,7 @@ const CAMPAIGN = [
   { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
-  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, buddha: true, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
   { role: 'boss', boss: 'probka', moss: true },   // moss on its arena's walls: a place to sit its dive out
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
@@ -2233,6 +2343,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // inside. A shop's (gold) and a stash's (violet) are magic: a breathing glow round them, white studs and a gem
   // on the frame, lights turning in the dark of the opening, sparks rising up past it.
   const door = (d, kind) => {
+    if (th.shrine && kind !== 'exit') { torii(d, kind); return; }   // the Cave's (see torii)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -2275,6 +2386,31 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const h = 8 * PIX.size; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, 1, th.wall);
   }
   if (lv.exit) door(lv.exit, 'exit');
+  // The Cave's door into a shop or a stash (the owner's pick, research/variants/cave-torii-1-px.png B: "the way into the cave or the shop; the shop's red"):
+  // a torii framing the dark doorway, its top beam flared up at its ends, its tie beam through the posts, their feet dark, a shimenawa rope with paper
+  // zigzags under it; inside, a glow breathing and what is in there, bobbing; sparks rising past it.
+  const torii = (d, kind) => {
+    const P = PIX.size, t = lv.tile, c = kind === 'shop' ? PAL.red : PAL.orange, sn = (v) => Math.round(v / P) * P, rd = (d.x1 - d.x0) / 2;
+    const vx0 = Math.max(d.x0, lv.l), vx1 = Math.min(d.x1, lv.r), pw = sn(0.26 * t), a0 = sn(vx0 + 0.18 * t), a1 = sn(vx1 - 0.18 * t) - pw;
+    const ky = sn(d.y0 + 0.1 * t), kh = sn(0.2 * t), ny = sn(d.y0 + 0.55 * t), nh = sn(0.13 * t), x = (a0 + pw + a1) / 2, y = (ny + nh + d.y1) / 2, rr = (a1 - a0 - pw) / 2;
+    F(x, y, rd * 2, 0, 0, (d.y1 - d.y0) * 0.8, c, 0.45 + 0.14 * Math.sin(T * 2.6 + x), 1);
+    box(a0 + pw, ny + nh, a1, d.y1, INK.dark, 1, 0, 10, 0);
+    for (const px of [a0, a1]) { box(px, ky + kh, px + pw, d.y1, c, 1, 0, 10, 0); box(px, sn(d.y1 - 0.35 * t), px + pw, d.y1, c, 1, 0, 10, 4); }
+    box(sn(vx0 - 0.15 * t), ky, sn(vx1 + 0.15 * t), ky + kh, c, 1, 0, 10, 0); box(sn(vx0 - 0.15 * t), ky, sn(vx1 + 0.15 * t), ky + P, c, 1, 0, 10, 2);
+    for (const [e0, e1] of [[vx0 - 0.15 * t, vx0 + 0.1 * t], [vx1 - 0.1 * t, vx1 + 0.15 * t]]) box(sn(e0), ky - sn(0.08 * t), sn(e1), ky, c, 1, 0, 10, 0);
+    box(sn(a0 - 0.08 * t), ny, sn(a1 + pw + 0.08 * t), ny + nh, c, 1, 0, 10, 0);
+    const r0 = a0 + pw, r1 = a1, ry = ny + nh + P, sag = 0.18 * t, at = (u) => sn(ry + sag * 4 * u * (1 - u));
+    for (let k = 0; k <= 14; k++) { const u = k / 14, rx = sn(r0 + (r1 - r0) * u); box(rx, at(u), rx + 2 * P, at(u) + 2 * P, PAL.gray, 1, 0, 10, 0); }
+    for (const u of [0.25, 0.5, 0.75]) { const zx = sn(r0 + (r1 - r0) * u), zy = at(u) + 2 * P; for (let j = 0; j < 4; j++) { const ox = j % 2 ? P : 0; box(zx + ox, zy + j * 2 * P, zx + ox + 2 * P, zy + (j + 1) * 2 * P, PAL.gray, 1, 0, 10, 0); } }
+    const bob = Math.round(Math.sin(T * 3 + x) * 1.5) * P;
+    if (kind === 'shop') { disc(x, y + bob, rr * 0.45, INK.coinD, 1); disc(x, y + bob, rr * 0.34, INK.coin, 1); disc(x - rr * 0.1, y + bob - rr * 0.1, rr * 0.09, INK.white, 1); }
+    else for (let k = 0; k < 3; k++) disc(x + (k - 1) * rr * 0.5, y + rr * 0.3 - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1);
+    for (let k = 0; k < 6; k++) {
+      const u = (T * 0.45 + k / 6) % 1, q = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, sx = vx0 + q * (vx1 - vx0), sy = d.y1 - u * (d.y1 - d.y0 + 2.5 * R);
+      const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;
+      if (k2 > 0.25) { box(sx - l, sy - P * 0.5, sx + l, sy + P * 0.5, ink, 1, 0, 10, 0); box(sx - P * 0.5, sy - l, sx + P * 0.5, sy + l, ink, 1, 0, 10, 0); }
+    }
+  };
   const pt = lv.portal;
   if (pt && seen(pt.y - 3 * pt.r, pt.y + 3 * pt.r)) {
     const p = 1 + 0.08 * Math.sin(T * 4);
@@ -2384,6 +2520,62 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const [q, u, v] of [[0.32, 0.55, 0.52], [0.55, -0.55, 0.5], [0.8, 0.5, 0.92], [0.7, -0.5, 0.86]]) { const [x0, y0] = trunk(q); for (let e = 0; e <= 1; e += 0.12) disc(x0 + (X(u) - x0) * e, y0 + (Y(v) - y0) * e, 0.035 * t, PAL.orange, 1); }
       for (const [u, v, rx, ry] of [[-0.05, 1.12, 0.32, 0.14], [-0.5, 0.86, 0.28, 0.12], [0.5, 0.92, 0.3, 0.12], [0.55, 0.52, 0.28, 0.11], [-0.55, 0.5, 0.24, 0.1]]) {
         F(X(u), Y(v), rx * t, 0, 0, ry * t, PAL.green, 1, 9, 0); F(X(u) - d * 0.08 * t, Y(v) - 0.08 * t, 0.6 * rx * t, 0, 0, 0.6 * ry * t, PAL.green, 1, 9, 0);   // a pad, a tuft on it
+      }
+    }
+  }
+  if (th.shrine && lv.kind === 'well') {   // the Cave's kit (THEMES.cave; the owner's picks, research/variants/cave-*-1-px.png, 2026-10-19: a cosy cave under a
+    // mountain shrine): strings of festival lanterns across the shaft (C), stone lanterns grown over with moss on some ledges' wall ends (D), a pair of jizo on
+    // others (C); the owner's Buddha seated on the floor of the level that has it (a recipe's buddha). Nothing covers a door.
+    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
+    const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
+    const free = (r, h) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
+      && r.x1 - r.x0 >= 2 * t && seen(r.y0 - h, r.y0) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+    if (lv.rc && lv.rc.buddha && seen(lv.floor - BUDDHA.length * P, lv.floor)) {
+      const x0 = snap((lv.l + lv.r) / 2 - (BUDDHA[0].length * P) / 2), y0 = snap(lv.floor) - BUDDHA.length * P;
+      for (const [x, y, w, h, c, tn] of BUDDHA_BOXES) box(x0 + x * P, y0 + y * P, x0 + (x + w) * P, y0 + (y + h) * P, PAL[ICON_INK[c]], 1, 0, 10, tn);
+    }
+    for (let k = Math.floor(top / (14 * t)) - 1; k * 14 * t < bot + 2 * t; k++) if (mod(k, 3) !== 1) {   // festival lanterns on a rope across the shaft, two beats in three
+      const y0 = (k * 14 + 6) * t, sag = 0.9 * t, x0 = lv.l + 0.3 * t, x1 = lv.r - 0.3 * t, ry = (u) => snap(y0 + sag * 4 * u * (1 - u));
+      if (y0 + sag + 1.2 * t < top || y0 > bot || atDoor(lv.l, y0 - 0.3 * t, lv.r, y0 + sag + 1.3 * t)) continue;
+      for (let x = x0; x < x1; x += 6 * P) box(x, ry((x - x0) / (x1 - x0)), Math.min(x + 6 * P, x1), ry((x - x0) / (x1 - x0)) + P, PAL.gray, 0.25, 0, 10, 0);   // the rope: background, a quarter
+      for (let i = 0; i < 6; i++) {   // a round lantern (C): grey caps, a black mark on it (C's were red: red is danger), a warm glow
+        const u = (i + 0.5) / 6, lx = snap(x0 + (x1 - x0) * u), rl = 0.26 * t, ly = ry(u) + snap(0.3 * t + rl);
+        box(lx, ry(u), lx + P, ly - rl, PAL.gray, 1, 0, 10, 0);
+        F(lx, ly, 2.2 * rl, 0, 0, 2.2 * rl, PAL.orange, 0.4, 1);
+        disc(lx, ly, rl, PAL.orange, 1);
+        for (const e of [-1, 1]) box(snap(lx - 0.6 * rl), snap(ly + e * rl) - P, snap(lx + 0.6 * rl), snap(ly + e * rl) + P, PAL.gray, 1, 0, 10, 0);
+        for (const [dx, dy] of [[0, -0.42], [-0.38, 0.22], [0.38, 0.22]]) box(snap(lx + dx * rl) - P, snap(ly + dy * rl) - P, snap(lx + dx * rl) + P, snap(ly + dy * rl) + P, PAL.black, 1, 0, 10, 0);
+      }
+    }
+    for (const r of lv.rects) {   // a stone lantern (toro, D) at the wall end of some steady ledges: base, post, its window lit, a roof turned up at its corners, moss over it
+      if (!free(r, 2.2 * t) || mod(Math.round(r.y0 / t), 3)) continue;
+      const wl = r.x0 <= lv.l + 1, cx = snap((wl ? lv.l : lv.r) + (wl ? 1 : -1) * 0.85 * t), b = r.y0, X = (u) => snap(cx + 1.2 * u * t), Y = (v) => snap(b - 1.2 * v * t);
+      if (atDoor(cx - 0.7 * t, b - 2.4 * t, cx + 0.7 * t, b)) continue;
+      box(X(-0.42), Y(0.14), X(0.42), b, PAL.gray, 1, 0, 10, 0); box(X(-0.3), Y(0.24), X(0.3), Y(0.14), PAL.gray, 1, 0, 10, 0);
+      box(X(-0.13), Y(0.85), X(0.13), Y(0.24), PAL.gray, 1, 0, 10, 0);
+      box(X(-0.36), Y(0.92), X(0.36), Y(0.85), PAL.gray, 1, 0, 10, 0);
+      F(cx, Y(1.15), 0.9 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
+      box(X(-0.32), Y(1.37), X(0.32), Y(0.92), PAL.gray, 1, 0, 10, 0); box(X(-0.2), Y(1.29), X(0.2), Y(0.99), PAL.orange, 1, 0, 10, 0);
+      box(X(-0.52), Y(1.55), X(0.52), Y(1.37), PAL.gray, 1, 0, 10, 0);
+      for (const e of [-1, 1]) box(Math.min(X(e * 0.52), X(e * 0.62)), Y(1.5), Math.max(X(e * 0.52), X(e * 0.62)), Y(1.42), PAL.gray, 1, 0, 10, 0);
+      box(X(-0.32), Y(1.7), X(0.32), Y(1.55), PAL.gray, 1, 0, 10, 0); disc(cx, Y(1.78), 0.1 * t, PAL.gray, 1);
+      box(X(-0.52), Y(1.57), X(0.5), Y(1.55), PAL.green, 1, 0, 10, 0); box(X(-0.3), Y(1.72), X(0.12), Y(1.7), PAL.green, 1, 0, 10, 0);   // moss over its roof, two strands off it
+      for (const [u, len] of [[-0.48, 0.45], [0.4, 0.3]]) box(X(u), Y(1.39), X(u) + P, snap(Y(1.39) + len * t), PAL.green, 1, 0, 10, 0);
+    }
+    for (const r of lv.rects) {   // a pair of jizo (C), a big one and a small one in a pointed cap, at the wall end of some other steady ledges: grey stone, orange
+      // knitted caps and bibs, eyes closed, smiling
+      if (!free(r, 1.6 * t) || mod(Math.round(r.y0 / t), 3) !== 1) continue;
+      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, b = r.y0;
+      if (atDoor(Math.min(lv.l, lv.r), b - 1.6 * t, Math.max(lv.l, lv.r), b) && atDoor(wl ? lv.l : lv.r - 1.8 * t, b - 1.6 * t, wl ? lv.l + 1.8 * t : lv.r, b)) continue;
+      for (const [u, k, pointy] of [[0.55, 1, false], [1.35, 0.75, true]]) {   // flat shapes, no texture: a body, a round head, a cap, a bib, two closed eyes
+        const cx = snap((wl ? lv.l : lv.r) + d * u * t), w = 0.7 * k * t, bh = 0.55 * k * t, hr = 0.3 * k * t, hy = snap(b - bh - 0.75 * hr);
+        box(snap(cx - w / 2), snap(b - bh), snap(cx + w / 2), b, PAL.gray, 1, 0, 10, 0);
+        disc(cx, hy, hr, PAL.gray, 1);
+        if (pointy) { box(snap(cx - 0.95 * hr), snap(hy - 0.95 * hr), snap(cx + 0.95 * hr), snap(hy - 0.3 * hr), PAL.orange, 1, 0, 10, 0); box(snap(cx - 0.45 * hr), snap(hy - 1.35 * hr), snap(cx + 0.45 * hr), snap(hy - 0.95 * hr), PAL.orange, 1, 0, 10, 0); disc(cx, snap(hy - 1.5 * hr), 0.22 * hr, PAL.orange, 1); }
+        else box(snap(cx - 1.05 * hr), snap(hy - 1.05 * hr), snap(cx + 1.05 * hr), snap(hy - 0.3 * hr), PAL.orange, 1, 0, 10, 0);
+        box(snap(cx - 0.4 * w), snap(hy + 0.9 * hr), snap(cx + 0.4 * w), snap(hy + 0.9 * hr + 0.18 * k * t), PAL.orange, 1, 0, 10, 0);
+        box(snap(cx - 0.18 * w), snap(hy + 0.9 * hr + 0.18 * k * t), snap(cx + 0.18 * w), snap(hy + 0.9 * hr + 0.3 * k * t), PAL.orange, 1, 0, 10, 0);
+        for (const e of [-1, 1]) box(snap(cx + e * 0.4 * hr) - P, snap(hy + 0.15 * hr), snap(cx + e * 0.4 * hr) + P, snap(hy + 0.15 * hr) + P, PAL.black, 1, 0, 10, 0);
       }
     }
   }
@@ -2586,6 +2778,48 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // beam, a block is a concrete slab cut square with its panels' seams, a striped cap on a free end, a knee brace under it at a wall
   // and windows in a thick one.
   // Returns false for what keeps the common look (ice, crumble, cracks, springs, magnets).
+  // The Cave's ledges (the owner's picks, research/variants/cave-*-1-px.png): stone at a wall dressed in courses (C), a free slab rough stones (B), a thick one
+  // in courses; a plank bamboo (E), a pole with its nodes and cut ends, lashed at the wall, a tuft of moss there and a paper lantern off its free end. False for
+  // what keeps the common look (ice, crumble, springs, movers, bouncy planks, magnets, stairs).
+  const caveRect = (r) => {
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0, hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    if (r.plank) {
+      if (r.move || r.bouncy) return false;
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, PAL.black, 1, 0, 10, 0);
+      for (let x = r.x0 + 0.9 * t; x < r.x1 - 0.5 * t; x += 1.1 * t) box(snap(x), r.y0 + P, snap(x) + P, r.y1, PAL.black, 1, 0, 10, 0);   // its nodes
+      if (!wl) box(r.x0 + P, r.y0 + 2 * P, r.x0 + 2 * P, r.y1 - P, PAL.black, 1, 0, 10, 0);   // a cut end, hollow
+      if (!wr) box(r.x1 - 2 * P, r.y0 + 2 * P, r.x1 - P, r.y1 - P, PAL.black, 1, 0, 10, 0);
+      for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {
+        for (const u of [0.2, 0.32]) { const lx = snap(wx + d * u * t); box(lx, r.y0, lx + P, r.y1 + P, PAL.black, 1, 0, 10, 0); }   // the lashing
+        disc(wx + d * 0.14 * t, r.y1, 0.13 * t, PAL.green, 1);   // a tuft of moss at the wall, strands off it
+        for (const [u, len] of [[0.04, 0.45], [0.13, 0.28], [0.22, 0.55]]) { const sx = snap(wx + d * u * t); box(sx, r.y1, sx + P, snap(r.y1 + len * t), PAL.green, 1, 0, 10, 0); }
+        if (r.x1 - r.x0 >= 3 * t) {   // a paper lantern off its free end: grey caps, an orange body ribbed in black, a glow
+          const lx = snap(wl ? r.x1 - 0.22 * t : r.x0 + 0.22 * t), rl = 0.18 * t, ly = snap(r.y1 + 0.35 * t + rl);
+          box(lx, r.y1, lx + P, ly - rl, PAL.gray, 1, 0, 10, 0); F(lx, ly, 2.2 * rl, 0, 0, 2.2 * rl, PAL.orange, 0.4, 1);
+          box(snap(lx - rl), snap(ly - rl), snap(lx + rl), snap(ly + rl), PAL.orange, 1, 0, 10, 0);
+          for (const e of [-1, 1]) box(snap(lx - 0.6 * rl), snap(ly + e * rl) - P, snap(lx + 0.6 * rl), snap(ly + e * rl) + P, PAL.gray, 1, 0, 10, 0);
+          for (const f of [-0.35, 0.35]) box(snap(lx - rl), snap(ly + f * rl), snap(lx + rl), snap(ly + f * rl) + P, PAL.black, 1, 0, 10, 0);
+        }
+      }
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
+    box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0);
+    if (wl || wr || hgt > 1.5 * t) {   // dressed stone in courses half a tile tall: each course's lower half dotted, the joints black and staggered
+      for (let y = r.y0, j = 0; y < r.y1 - 2; y += 0.5 * t, j++) {
+        const y1 = Math.min(r.y1, y + 0.5 * t);
+        box(r.x0, snap((y + y1) / 2), r.x1, snap(y1), th.block, 1, 0, 10, 2);
+        if (j) box(r.x0, snap(y), r.x1, snap(y) + P, PAL.black, 1, 0, 10, 0);
+        for (let x = r.x0 + (j % 2 ? 0.65 : 1.3) * t; x < r.x1 - 0.3 * t; x += 1.3 * t) box(snap(x), snap(y), snap(x) + P, snap(y1), PAL.black, 1, 0, 10, 0);
+      }
+    } else {   // rough stones (B): two rows of stones of the hash's widths, the lower one in shade, its free ends rounded off
+      const mid = snap(r.y0 + (0.45 + 0.1 * hsh(1)) * hgt);
+      box(r.x0, mid, r.x1, r.y1, th.block, 1, 0, 10, 2); box(r.x0, mid, r.x1, mid + P, PAL.black, 1, 0, 10, 0);
+      for (const [y0, y1, n] of [[r.y0, mid, 2], [mid, r.y1, 3]]) for (let x = r.x0 + (0.5 + 0.6 * hsh(n)) * t, i = 0; x < r.x1 - 0.4 * t; x += (0.7 + 0.8 * hsh(n + 7 * ++i)) * t) box(snap(x), y0, snap(x) + P, y1, PAL.black, 1, 0, 10, 0);
+      for (const ex of [r.x0, r.x1 - 2 * P]) box(ex, r.y1 - 2 * P, ex + 2 * P, r.y1, PAL.black, 1, 0, 10, 0);
+    }
+    box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+  };
   const townRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
     if (r.ac) {   // an air conditioner (aircon; owner: you may stand on it, for 3 s): its top edge white, and once stood on it rattles, harder as it gives way
@@ -2697,7 +2931,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);

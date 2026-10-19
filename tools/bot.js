@@ -71,6 +71,7 @@ function snap() {
     enemies: lv.enemies.map((e) => ({ e, f: Object.fromEntries(Object.entries(e).filter(([k, v]) => typeof v !== 'object' || k === 'to' || k === 'from')), b: snapBody(e.body) })),   // (a worm's way over too: replaced, never changed)
     folk: lv.folk.map((f) => ({ f, o: Object.assign({}, f), b: f.body && snapBody(f.body) })), pickups: lv.pickups.slice(), sold: lv.pickups.map((p) => p.sold),
     icicles: lv.icicles.map((c) => Object.assign({}, c)), arenas: lv.arenas.map((a) => ({ a, o: Object.assign({}, a, { foes: a.foes.slice() }) })),
+    cross: lv.crossing && Object.assign({}, lv.crossing),   // the level crossing's clock and train (the tries ran it on)
   };
 }
 function restore(S) {
@@ -89,6 +90,7 @@ function restore(S) {
   lv.folk = S.folk.map(({ f, o, b }) => { for (const k of Object.keys(f)) if (!(k in o)) delete f[k]; Object.assign(f, o); if (b) restoreBody(f.body, b); return f; });   // a body made in a look ahead goes again
   lv.pickups = S.pickups.slice(); lv.pickups.forEach((p, i) => { p.sold = S.sold[i]; });
   lv.icicles = S.icicles.map((c) => Object.assign({}, c)); lv.arenas = S.arenas.map(({ a, o }) => Object.assign(a, o, { foes: o.foes.slice() }));
+  if (lv.crossing) Object.assign(lv.crossing, S.cross);
 }
 
 // ── playing ──
@@ -151,7 +153,7 @@ function decide(best) {
 }
 // What cost a heart and what got stomped, counted on the moves really played (not the tries).
 let live = false, cause = '', killed = {};
-for (const [k, what] of [['meet', (e) => (e === g.lv.boss ? 'boss' : e.type)], ['spikes', () => 'spikes'], ['fireTouch', () => 'fire'], ['shots', () => 'shot'], ['fall', () => 'fall']]) {
+for (const [k, what] of [['meet', (e) => (e === g.lv.boss ? 'boss' : e.type)], ['spikes', () => 'spikes'], ['fireTouch', () => 'fire'], ['shots', () => 'shot'], ['fall', () => 'fall'], ['crossStep', () => 'train']]) {
   const f = g[k];
   g[k] = function (...a) { const hp = this.hp, r = f.apply(this, a); if (live && this.hp < hp) cause = what(...a); return r; };
 }

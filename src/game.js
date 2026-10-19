@@ -160,8 +160,15 @@ function loadSave(s) {
     for (const k in c.fails) f[/^\d+$/.test(k) ? at(+k) : k] = c.fails[k];
     c.fails = f; c.last = at(Math.max(0, c.open | 0));
   }
+  if ((save.v | 0) < 4) {   // v3 to v4 (owner: Tokyo the first world): each world's stars, losses, upgrades, tapestry and last level go with it
+    const to = [1, 2, 3, 0, 4, 5, 6], at = (i) => (to[Math.floor(i / 30)] ?? Math.floor(i / 30)) * 30 + (i % 30), old = c.stars, f = {}, b = [];
+    c.stars = []; old.forEach((n, i) => { if (n > 0) c.stars[at(i)] = n; });
+    for (const k in c.fails) f[/^\d+$/.test(k) ? at(+k) : k] = c.fails[k];
+    c.builds.forEach((u, w) => { b[to[w] ?? w] = u; });
+    c.fails = f; c.builds = b; c.runes = c.runes.map((w) => to[w] ?? w); if (c.last != null) c.last = at(c.last);
+  }
   delete c.open;   // what is open comes of the stars (campOpen)
-  save.v = 3; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
+  save.v = 4; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
 function persist() {
@@ -438,7 +445,7 @@ class Boss {
   // creaks and tips three rocks down. Open from above only: off a ledge high enough, or let go from the moss over a rail's
   // end as it comes under (a ▼ then). Its second phase hurries the bridges and lobs two; its third, faster lifts and a spitter.
   ride(dt, g) {
-    const b = this.body, lv = g.lv, R = lv.R, ph = this.def.phase(this.hp), H = g.hero, rail = lv.rail, k = this.angry > 0 ? 1.5 : 1;   // angry (hit): faster
+    const b = this.body, lv = g.lv, R = lv.R, ph = this.def.phase(this.hp), H = g.hero, rail = lv.rail, k = (this.angry > 0 ? 1.5 : 1) / (this.def.slow || 1);   // angry (hit): faster; a gentle one (slow) slower
     b.wake(); turnUp(b, 6, dt);
     if ((this.t += dt) < CART.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), ((rail.y - 0.75 * b.R - b.cy) * 6 - b.rigVy) * Math.min(1, 6 * dt)); return; }   // still at first, while its name is up
     this.st += dt;
@@ -2276,7 +2283,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot'];
 const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
-const WORLD_MUSIC = { tokyo: 'tokyo', blocks: 'blocks', sky: 'sky', junk: 'junk' };   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
+const WORLD_MUSIC = { cave: 'climb', ice: 'ice', mine: 'mine', tokyo: 'tokyo', blocks: 'blocks', sky: 'sky', junk: 'junk' };   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {

@@ -445,9 +445,9 @@ const BOSSES = {
     quip: [{ en: 'Flattened. Like a panel.', es: 'Aplastado. Como un panel.', pt: 'Achatado. Como um painel.', ja: 'ぺしゃんこ。パネルみたい。' },
       { en: 'Back to the ground floor.', es: 'De vuelta a la planta baja.', pt: 'De volta ao térreo.', ja: 'いっかいに もどって。' }],
     defeat: { en: 'Shift over… the roof is yours.', es: 'Fin del turno… el tejado es tuyo.', pt: 'Fim do turno… o telhado é seu.', ja: 'しごと おわり… やねは きみの もの。' } },
-  // World 4's: the Tram (Tokyo's streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
-  // its pantograph up to an overhead wire.
-  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  // World 1's: the Tram (Tokyo's streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
+  // its pantograph up to an overhead wire; as the first boss, the Cork's hits and phases and its passes and spits a quarter slower (slow).
+  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, design: 'loaf', size: CART.size, rail: true, tram: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
     intro: [{ en: 'Next stop: nowhere.', es: 'Próxima parada: ninguna.', pt: 'Próxima parada: nenhuma.', ja: 'つぎは どこにも とまりません。' },
       { en: 'Mind the gap. And me.', es: 'Cuidado con el hueco. Y conmigo.', pt: 'Cuidado com o vão. E comigo.', ja: 'すきまに ごちゅうい。わたしにも。' },
       { en: 'No riding on the roof!', es: '¡Nada de subirse al techo!', pt: 'Nada de andar no teto!', ja: 'やねに のらないで ください！' }],
@@ -469,30 +469,53 @@ const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
 const TOWN = { stairs: 3, planks: 2, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, rubberwall: 1 };   // Tokyo's (shelves off the walls: awnings)
+const STREET = { stairs: 3, planks: 2, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1 };   // Tokyo's first levels': TOWN before its awnings, gondolas and rubber
 const JUNKP = { planks: 2, shelves: 3, stairs: 2, pillars: 2, comb: 2, chimney: 1, spring: 2, crumble: 1, rubberwall: 1 };   // the Junkyard's (planks off walls: fire escapes)
 const SKYP = { planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, movers: 1, twinshaft: 1 };   // the Skyscraper's (free planks: clouds)
 const PANEL = { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 1 };   // the Tower Blocks' (flights of stairs; shelves: balconies)
 // A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12
 // (its knitted pictures: the Heat, a drop like the hero, the Light) and what Aunt Moti reads in them.
-const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
-  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0, candy: [], safe: true, seed: 3111,
+const CAMPAIGN = [
+// World 1, Tokyo (the owner's first world now, at first a world 4; its kit in the renderer, see THEMES.tokyo): the first steps, in the town at night,
+// one new thing a level (the digest §3): jumps and springs, crawlers and the first gate, shop awnings that bounce, the helmet, a peak, the bonus,
+// gondolas, the level crossing, Aunt Moti's shop; the Tram, gentler than as world 4's (BOSSES.tram). STREET is its pool before the awnings, and
+// the air conditioners come in from the fourth level (aircons: false before). Its runes: a lattice, a lantern, a lit window (some stopped climbing
+// and built a town; its lights hid the Light: the tapestries go with their worlds, owner).
+{ world: TOKYO, runes: 'HWu', lore: { en: 'Some stopped climbing and built a town.\nIts lights hid the Light.', es: 'Algunos dejaron de subir y construyeron una ciudad.\nSus luces taparon la Luz.', pt: 'Alguns pararam de subir e ergueram uma cidade.\nSuas luzes esconderam a Luz.', ja: 'のぼるのを やめて まちを つくった ものも いた。\nまちの あかりが ひかりを かくした。' }, levels: [
+  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0, candy: [], safe: true, aircons: false, seed: 3111,
     news: { en: 'jumps and springs', es: 'saltos y resortes', pt: 'pulos e molas', ja: 'ジャンプと バネ' } },
-  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101,
+  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, aircons: false, seed: 2101,
     news: { en: 'crawlers: land on them', es: 'reptadores: cae sobre ellos', pt: 'rastejantes: pule neles', ja: 'ハイハイ: うえから ふもう' } },
+  { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler'], foes: 0.45, candy: [], safe: true, aircons: false, seed: 5101,
+    news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
+    news: { en: 'the helmet', es: 'el casco', pt: 'o capacete', ja: 'ヘルメット' } },
+  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 5106 },
+  { role: 'twist', len: 30, fire: 0.38, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 5103,
+    news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' } },
+  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2 }, intro: [], enemies: ['crawler', 'climber'], foes: 0.7, pair: 0.25, candy: ['smash'], crossing: true, seed: 5102,
+    news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 5109,
+    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+  { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
+] },
+// World 2, the Cave (at first world 1): its moss, rubber walls; the Cork. The basics are Tokyo's to teach now: its levels do not teach them again.
+{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
+  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: [], foes: 0, candy: [], safe: true, seed: 3111 },
+  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
   { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
     news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' } },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
-    news: { en: 'the helmet', es: 'el casco', pt: 'o capacete', ja: 'ヘルメット' } },
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
   { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
   { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
-  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616,
-    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
   { role: 'boss', boss: 'probka', moss: true },   // moss on its arena's walls: a place to sit its dive out
 ] },
-// World 2, the Glacier (the plan's levels 11-20): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
+// World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
 { world: WORLDS[1], runes: 'gyI', lore: { en: 'The first climbed without fear.\nMany got stuck.', es: 'Los primeros subieron sin miedo.\nMuchos se quedaron atrapados.', pt: 'Os primeiros subiram sem medo.\nMuitos ficaram presos.', ja: 'さいしょは みんな こわがらず のぼった。\nたくさんが つかまった。' }, levels: [
   { role: 'teach', len: 29, fire: 0.33, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, icewall: 3, iceblocks: 2, mosswall: 1 }, intro: ['icewall', 'iceblocks'], enemies: ['crawler'], foes: 0.35, candy: [], shop: 0.5, safe: true, seed: 4101,
@@ -512,7 +535,7 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
   { role: 'boss', boss: 'puck', ice: true },   // an ice floor, icicles over it
 ] },
-// World 3, the Mine (the plan's levels 21-30): crumbling blocks and bridges, the Fizz, spitters, the pit's waves and a fat
+// World 4, the Mine (at first world 3): crumbling blocks and bridges, the Fizz, spitters, the pit's waves and a fat
 // spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Minecart. Its runes: crossed picks, a block of
 // ore, a turn (those tired of climbing began to dig sideways). The worm stays in the random run (user).
 { world: WORLDS[2], runes: 'LnY', lore: { en: 'Those tired of climbing\nbegan to dig sideways.', es: 'Los cansados de subir\nempezaron a cavar de lado.', pt: 'Os cansados de subir\ncomeçaram a cavar de lado.', ja: 'のぼるのに つかれた ものは\nよこへ ほりはじめた。' }, levels: [
@@ -532,26 +555,6 @@ const CAMPAIGN = [{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came fro
   { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'cart', rail: true },   // its rail under the ceiling, moss over its ends
-] },
-// World 4, Tokyo (the user's first new setting; its kit in the renderer, see THEMES.tokyo): awnings that bounce, level crossings, gondolas,
-// then a power cut over the crossings (the twist: the train comes in the dark); the Tram. Its runes: a lattice, a lantern, a lit window
-// (some stopped climbing and built a town; its lights hid the Light).
-{ world: TOKYO, runes: 'HWu', lore: { en: 'Some stopped climbing and built a town.\nIts lights hid the Light.', es: 'Algunos dejaron de subir y construyeron una ciudad.\nSus luces taparon la Luz.', pt: 'Alguns pararam de subir e ergueram uma cidade.\nSuas luzes esconderam a Luz.', ja: 'のぼるのを やめて まちを つくった ものも いた。\nまちの あかりが ひかりを かくした。' }, levels: [
-  { role: 'teach', len: 30, fire: 0.42, calm: 8, maxD: 2, chunks: TOWN, intro: ['shelves'], enemies: ['crawler'], foes: 0.4, candy: [], safe: true, seed: 5101,
-    news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
-  { role: 'teach', len: 36, fire: 0.46, maxD: 2, chunks: TOWN, intro: [], enemies: ['crawler', 'climber'], foes: 0.5, candy: ['fizz'], crossing: true, gate: 'gate', sides: [0, 110808], seed: 5102,
-    news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
-  { role: 'teach', len: 38, fire: 0.46, maxD: 2, chunks: { ...TOWN, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['smash'], seed: 5103,
-    news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' } },
-  { role: 'apply', len: 44, fire: 0.48, maxD: 2, chunks: { ...TOWN, movers: 1, bridge: 1 }, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.55, pair: 0.15, candy: ['smash', 'fizz'], crossing: true, shop: 0.4, stash: 0.3, gate: 'gate2', seed: 5104 },
-  { role: 'peak', len: 36, fire: 0.52, maxD: 3, chunks: { ...TOWN, comb: 3, chimney: 2, movers: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], crossing: true, seed: 5105 },
-  { role: 'bonus', len: 44, bonus: 3, time: 48, seed: 5106 },
-  { role: 'twist', len: 38, fire: 0.48, maxD: 2, chunks: { ...TOWN, lift: 3 }, intro: [], dark: true, enemies: ['crawler', 'climber', 'shell'], foes: 0.55, candy: ['fizz'], stash: 0.3, crossing: true, seed: 5107,
-    news: { en: 'a power cut: watch the crossing lights', es: 'un apagón: mira las luces del paso', pt: 'um apagão: olhe as luzes da passagem', ja: 'ていでん: ふみきりの あかりを みて' } },
-  { role: 'peak', len: 40, fire: 0.52, maxD: 3, chunks: { ...TOWN, comb: 3, movers: 2, spikes: 1, rubberwall: 2 }, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], crossing: true, gate: 'gate3', sides: [14004, 0], seed: 5108 },
-  { role: 'rest', len: 28, fire: 0.4, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 3, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
-    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
 ] },
 // World 5, the Tower Blocks (the user's Soviet brutalism; its kit in the renderer, see THEMES.blocks): stairs you walk up, old balconies
 // that give way, old mattresses that bounce, then winter (icicles off the roofs, the twist); the Crane. Its runes: a frame, a tower, two
@@ -1568,6 +1571,7 @@ class Level {
   // Tokyo's air conditioners (AC) on the walls in the chunk just laid (from y0 down to y1), on their beat: each a plank to stand on that gives way; none
   // where a ledge, a spike, a door, a coat of its wall (moss, ice, rubber) or the crossing is in its way or over it, nor by the floor
   addAircons(y0, y1) {
+    if (this.rc && this.rc.aircons === false) return;   // (Tokyo's first levels: one new thing at a time)
     const t = this.tile, w = AC.w * t, xg = this.crossing;
     for (const side of [-1, 1]) {
       const at = AC.at[side < 0 ? 0 : 1];

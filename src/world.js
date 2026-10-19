@@ -1073,10 +1073,10 @@ const CHUNKS = {
   vault: { d: 1, rows: [   // a stash in the wall (user): coins boxed in over a cracked floor; the way up passes by it, a jump up
     '............',        // from under it breaks in, and a gap in its roof lets the hero on up through it (no dead end)
     '............',
-    '##.....##..#',
-    '.......#oOo#',
-    '.......#ooo#',
-    '.......#XXX#',
+    '##.....HH..H',        // H: its cage, solid as a block but drawn as bars (owner: a cage, not a heap of blocks)
+    '.......HoOoH',
+    '.......HoooH',
+    '.......HXXXH',
     '............',
     '...o........',
     '..###.......',
@@ -1228,7 +1228,7 @@ for (const id in CHUNKS) {
 }
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
-const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X', 'T']);
+const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X', 'T', 'H']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
@@ -1605,7 +1605,7 @@ class Level {
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
-    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
+    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true }, H: { cage: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
@@ -2598,6 +2598,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
+    if (r.cage) {   // a vault's cage (owner: a cage, not a heap of blocks): bars in the world's ink a third of a tile apart, a rail over and under them, its top edge white
+      const P = PIX.size, n = Math.max(1, Math.round((r.x1 - r.x0) / (0.3 * R)));
+      box(r.x0, r.y0, r.x1, r.y0 + 2 * P, th.block, 1, 0, 10, 0); box(r.x0, r.y1 - 2 * P, r.x1, r.y1, th.block, 1, 0, 10, 0);
+      for (let k = 0; k <= n; k++) { const x = Math.round((r.x0 + ((r.x1 - r.x0 - 2 * P) * k) / n) / P) * P; box(x, r.y0, x + 2 * P, r.y1, th.block, 1, 0, 10, 0); }
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
+      continue;
+    }
     if (r.cap) { box(lv.l - 2, Math.max(r.y0, top), lv.r + 2, r.y1, th.wall, 1, 0); box(lv.l - 2, r.y1 - 2.5, lv.r + 2, r.y1, th.lip, 1, 0); continue; }
     if (r.spring) {
       const k = r.t / SPRING.anim, hh = (r.y1 - r.y0) * (1 - 0.5 * k), w = r.x1 - r.x0;
@@ -2649,7 +2656,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   {   // the platforms' shadows (user: depth, not overdone): cast by a sun that goes from the right to the left through a world's levels,
     // a dithered black band under each and down its far side, over the walls and whatever ledge lies there (the black back wall barely shows them)
     const sun = (g.mode === 'camp' ? g.stage / 9 : g.stage / 2) * 2 - 1, dx = Math.round((-sun * 0.45 * R) / PIX.size) * PIX.size, dy = Math.round((0.32 * R) / PIX.size) * PIX.size;
-    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && !(th.town && (r.ac || (r.plank && (r.move || r.bouncy)))) && seen(r.y0, r.y1 + dy)) {   // (Tokyo's awnings, gondolas
+    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && !r.cage && !(th.town && (r.ac || (r.plank && (r.move || r.bouncy)))) && seen(r.y0, r.y1 + dy)) {   // (Tokyo's awnings, gondolas
       // and air conditioners hang below their floors: the band would lie over their cloth, lantern and box)
       box(r.x0 + dx, r.y1, r.x1 + dx, r.y1 + dy, INK.dark, 0.55, 0, 10, 0);
       if (dx) box(dx > 0 ? r.x1 : r.x0 + dx, r.y0 + dy, dx > 0 ? r.x1 + dx : r.x0, r.y1, INK.dark, 0.55, 0, 10, 0);

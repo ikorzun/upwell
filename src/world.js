@@ -2545,7 +2545,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = Math.floor(top / (14 * t)) - 1; k * 14 * t < bot + 2 * t; k++) if (mod(k, 3) !== 1) {   // festival lanterns on a rope across the shaft, two beats in three
       const y0 = (k * 14 + 6) * t, sag = 0.9 * t, x0 = lv.l + 0.3 * t, x1 = lv.r - 0.3 * t, ry = (u) => snap(y0 + sag * 4 * u * (1 - u));
       if (y0 + sag + 1.2 * t < top || y0 > bot || atDoor(lv.l, y0 - 0.3 * t, lv.r, y0 + sag + 1.3 * t)) continue;
-      for (let x = x0; x < x1; x += 6 * P) box(x, ry((x - x0) / (x1 - x0)), Math.min(x + 6 * P, x1), ry((x - x0) / (x1 - x0)) + P, PAL.gray, 0.25, 0, 10, 0);   // the rope: background, a quarter
+      for (let x = x0; x < x1; x += 6 * P) box(x, ry((x - x0) / (x1 - x0)), Math.min(x + 6 * P, x1), ry((x - x0) / (x1 - x0)) + P, PAL.gray, DIM, 0, 10, 0);   // the rope: behind (DEPTH)
       for (let i = 0; i < 6; i++) {   // a round lantern (C): grey caps, a black mark on it (C's were red: red is danger), a warm glow
         const u = (i + 0.5) / 6, lx = snap(x0 + (x1 - x0) * u), rl = 0.26 * t, ly = ry(u) + snap(0.3 * t + rl);
         box(lx, ry(u), lx + P, ly - rl, PAL.gray, 1, 0, 10, 0);

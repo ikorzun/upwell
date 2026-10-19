@@ -7,14 +7,20 @@ is, what it does in play (or, for a prop, where it sits), its material and its s
 they mean, the black night, dithered shading, side view, the hero for scale), and asks for flat boxes and discs, so whichever
 variant is picked can be drawn with the renderer's own.
 
+So that a sheet looks like the game and keeps to its pixels (owner: it smeared), the call sends a real screenshot of the world as
+the style to copy, research/variants/ref-<world>.png, cut from the game at exactly 4 x 4 image pixels a game pixel (1280 x 953 at
+2x on a desktop: a tile is 16 game pixels there); the prompt asks for that grid; and the sheet that comes back is put onto it and
+onto the nine inks (snap), as <id>-<n>-px.png beside the raw one.
+
     python3 tools/variants.py list              # the elements described so far
-    python3 tools/variants.py <id> --prompt     # print the prompt, to paste into ChatGPT by hand
-    python3 tools/variants.py <id>              # one 3 x 2 sheet of six variants, A to F: research/variants/<id>-<n>.png
+    python3 tools/variants.py <id> --prompt     # print the prompt, to paste into ChatGPT by hand (with the reference attached)
+    python3 tools/variants.py <id>              # one 3 x 2 sheet of six variants, A to F: research/variants/<id>-<n>.png and -px.png
+    python3 tools/variants.py <id> --model sunburst --no-ref   # the finer model; no reference
 
 Needs OPENAI_API_KEY: from the shell, or else from "env" in ~/.claude/settings.json, where Claude Code keeps it for its own tools
 only. The gpt-image skill's script makes the call.
 """
-import json, os, subprocess, sys
+import argparse, json, os, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPT = os.path.expanduser('~/.claude/skills/gpt-image/scripts/gpt_image.py')
@@ -79,49 +85,103 @@ ELEMENTS = {
 }
 
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
-One element of the world "{world}" ({mood}): {what}.
-In play: {does}. Material: {material}. Size: {size}; one tile is 16 art pixels, and the hero is 2 tiles (32 art pixels) wide.
+{refnote}One element of the world "{world}" ({mood}): {what}.
+In play: {does}. Material: {material}. Size: {size}; {grid}
 Draw six different design variants of this same element in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
 Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place} in flat side view at game scale, and the hero standing on it for scale: a soft round white blob 2 tiles across with two small black eyes.
 Keep in every variant: the same size, the same job in play, a white top edge to stand on, {main} as its main colour.
 Vary between the variants: {vary}. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
-Strict style: pixel art; hard pixel edges, no anti-aliasing, no gradients, no glow, no blur; shading only with an ordered 4x4 dither. Use only these nine colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+{style} Use only these nine colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
-A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}.
-Material: {material}. Size: {size}; one tile is 16 art pixels, and the hero is 2 tiles (32 art pixels) wide.
+{refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}.
+Material: {material}. Size: {size}; {grid}
 Draw six different design variants of this same prop in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
 Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {scene}, the prop in its place in flat side view at game scale, and the hero for scale on a ledge near it: a soft round white blob 2 tiles across with two small black eyes.
 Keep in every variant: the same size and place, a silhouette that reads at a glance on a phone screen, and nothing on the prop that looks like something to stand on: no white top edges.
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
-Strict style: pixel art; hard pixel edges, no anti-aliasing, no gradients, no blur; shading and any glow only with an ordered 4x4 dither. Use only these nine colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
+{style} Any glow is a dither too. Use only these nine colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
 INKS9 = 'black #141414, white #f3f3f3, grey #c8c8c8, blue #5bb8ff, orange #faa23e, purple #c996ff, green #339c39, red #f43e34, yellow #ffed57'
+GRID = 4   # image pixels an art pixel: a 512 x 512 cell is 8 x 8 tiles
+GRIDNOTE = ('one tile is 16 art pixels, and every art pixel is an exact 4 x 4 square of image pixels on one fixed grid, so a tile is 64 x 64 image pixels '
+            'and the hero, 2 tiles across, is 128 image pixels wide.')
+STYLE = ('Strict style: pixel art on exactly that grid, each art pixel one flat 4 x 4 square of a single colour, edges only along the grid; no anti-aliasing, '
+         'no soft or blurred edges, no gradients, no noise, no glow; shading only with the game\'s dither patterns (a checker, rows of dots, a line every other row).')
+REFNOTE = ('The attached image is a real screenshot of this world in the game at this exact scale (one art pixel is 4 x 4 image pixels): copy its pixel size, its '
+           'colours, its dither patterns (the wall\'s diagonal stripes, the rows of dots and lines that shade a ledge, the checker), its white top edges, the hero '
+           'and its line weights. Do not copy its layout: draw the sheet described here.\n')
+PAL9 = [(0xf3, 0xf3, 0xf3), (0xc8, 0xc8, 0xc8), (0x5b, 0xb8, 0xff), (0xfa, 0xa2, 0x3e), (0xc9, 0x96, 0xff), (0x33, 0x9c, 0x39), (0xf4, 0x3e, 0x34),
+        (0xff, 0xed, 0x57), (0x14, 0x14, 0x14)]   # the nine inks, black last: a block split evenly goes to the colour
 
 
-def prompt(el: str) -> str:
+def prompt(el: str, ref: bool = False) -> str:
     e = ELEMENTS[el]
     name, mood, ink, taken, night = WORLDS[e['world']]
     text = f" and, on the sign, {e['text']}" if e.get('text') else ''
     slab = {'place': 'the element sticking out of that wall', 'main': ink.split()[0], 'vary': 'the silhouette and edge profile, how its free end is finished, how it is fixed '
             'to the wall, its surface pattern and joints, and the small details on it', 'rule': f'In this world {taken}, so use those only for small details.'}
-    return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text})
+    return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text,
+                                                                'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
+
+
+def snap(src: str, dst: str, k: int = GRID) -> None:
+    """Puts a sheet onto the game's grid and its nine inks, in the game's own terms, so nothing smears: a grey pixel goes to black,
+    grey or white and a coloured one to the ink nearest its hue, a tone well between two of those by the 4 x 4 ordered dither the game
+    shades with (laid by art pixel); then each k x k block of image pixels becomes one art pixel, of the ink most of its pixels took."""
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(Image.open(src).convert('RGB'), dtype=np.float32)
+    h, w = a.shape[0] // k * k, a.shape[1] // k * k
+    a, pal = a[:h, :w], np.array(PAL9, dtype=np.float32)
+    lum = lambda c: c @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+    B4 = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]], dtype=np.float32)
+    yy, xx = np.mgrid[0:h, 0:w]
+    thr = (B4[(yy // k) % 4, (xx // k) % 4] + 0.5) / 16
+    L, sat = lum(a), a.max(-1) - a.min(-1)
+    ramp = lambda t: np.clip((t - 0.25) / 0.5, 0, 1)   # a tone within a quarter of an ink is that ink: only the middle is dithered (no dotted flats)
+    WH, GR, BL = 0, 1, 8   # PAL9's white, grey, black
+    lw, lg, lb = lum(pal[WH]), lum(pal[GR]), lum(pal[BL])
+    grey = np.where(L < lg, np.where(ramp((L - lb) / (lg - lb)) > thr, GR, BL), np.where(ramp((L - lg) / (lw - lg)) > thr, WH, GR))
+    hues = np.arange(2, 8)   # blue, orange, purple, green, red, yellow
+    ca, ch = a - a.min(-1, keepdims=True), pal[hues] - pal[hues].min(-1, keepdims=True)
+    cos = (ca @ ch.T) / (np.linalg.norm(ca, axis=-1, keepdims=True) * np.linalg.norm(ch, axis=-1) + 1e-6)
+    hue = hues[cos.argmax(-1)]
+    colour = np.where(ramp(L / lum(pal[hue])) > thr, hue, BL)
+    near = np.where(sat < 48, grey, colour)
+    blocks = near.reshape(h // k, k, w // k, k).transpose(0, 2, 1, 3).reshape(h // k, w // k, k * k)
+    ink = np.stack([(blocks == i).sum(-1) for i in range(len(pal))], -1).argmax(-1)
+    Image.fromarray(pal[ink].astype(np.uint8).repeat(k, 0).repeat(k, 1)).save(dst)
 
 
 def main() -> None:
-    args = [a for a in sys.argv[1:] if not a.startswith('--')]
-    if not args or args[0] == 'list':
+    ap = argparse.ArgumentParser(description='Variants of one world element from OpenAI (see the top of this file).')
+    ap.add_argument('element', nargs='?', default='list')
+    ap.add_argument('--prompt', action='store_true', help='print the prompt and stop')
+    ap.add_argument('--ref', help='the style reference (default: research/variants/ref-<world>.png)')
+    ap.add_argument('--no-ref', action='store_true', help='send no reference')
+    ap.add_argument('--model', default='flare', help='flare (default) or sunburst')
+    a = ap.parse_args()
+    if a.element == 'list':
         for el, e in ELEMENTS.items():
             print(f"{el}: {WORLDS[e['world']][0]}, {e['kind']}, {e['what']}")
         return
-    el = args[0]
+    el = a.element
     if el not in ELEMENTS:
         sys.exit(f'no element {el!r}; see: python3 tools/variants.py list')
-    if '--prompt' in sys.argv:
-        print(prompt(el))
+    out = os.path.join(ROOT, 'research', 'variants')
+    ref = None if a.no_ref else a.ref or os.path.join(out, f"ref-{ELEMENTS[el]['world']}.png")
+    if ref and not os.path.exists(ref):
+        if a.ref:
+            sys.exit(f'no reference at {ref}')
+        ref = None
+    if a.prompt:
+        print(prompt(el, bool(ref)))
+        if ref:
+            print(f'\n(attach {ref})')
         return
-    out, env = os.path.join(ROOT, 'research', 'variants'), dict(os.environ)
+    env = dict(os.environ)
     if not env.get('OPENAI_API_KEY'):
         try:
             with open(os.path.expanduser('~/.claude/settings.json')) as f:
@@ -138,7 +198,13 @@ def main() -> None:
     n = 1   # each sheet is kept: they cost money
     while os.path.exists(os.path.join(out, f'{el}-{n}.png')):
         n += 1
-    sys.exit(subprocess.run(['python3', SCRIPT, prompt(el), '--model', 'flare', '--quality', 'medium', '--size', '1536x1024', '--out', out, '--name', f'{el}-{n}'], env=env).returncode)
+    cmd = ['python3', SCRIPT, prompt(el, bool(ref)), '--model', a.model, '--quality', 'medium', '--size', '1536x1024', '--out', out, '--name', f'{el}-{n}']
+    rc = subprocess.run(cmd + (['--image', ref] if ref else []), env=env).returncode
+    if rc:
+        sys.exit(rc)
+    src, dst = os.path.join(out, f'{el}-{n}.png'), os.path.join(out, f'{el}-{n}-px.png')
+    snap(src, dst)
+    print(dst)
 
 
 if __name__ == '__main__':

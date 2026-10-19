@@ -111,11 +111,11 @@ const SAY = {
 const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs and flaps, a bug walks, a crow sits on a wire and flies off (facing right; ...L mirrored)
   bat: ['#...#', '.###.', '#w#w#', '.###.', '..#..'], batUp: ['#.....#', '##.#.##', '.#w#w#.', '..###..'], batDown: ['..###..', '.#w#w#.', '##.#.##', '#.....#'],
   bug: ['..##.', '.#w##', '#.#.#'], bug2: ['..##.', '.#w##', '.#.#.'],
-  // Tokyo's crow (the owner's pick, research/variants/tokyo-crow-1.png E): black on the black night, read by a rim of the world's ink along its back,
-  // a white glint of an eye; on its wire, then two strokes of its wings
-  crow: ['..........###...', '.........#kkk###', '........#kkwkk#.', '.......#kkkkk...', '......#kkkkkk...', '....##kkkkkk#...', '..##kkk###kk#...', '.#kkkkkkkkkk#...', '#kkkkkkkkk##....', '......#..#......'],
-  crowUp: ['.##.............', '..#k#...........', '...#kk#.........', '....#kkk#...###.', '.#...#kkk###kkk#', '.##kkkkkkkkkkwk#', '..###########...'],
-  crowDown: ['............###.', '.#.........#kkk#', '.##########kkwk#', '..##kkkkkkkkkk#.', '....#kkkk####...', '...#kkk#........', '..#kk#..........', '.##.............'] };
+  // Tokyo's crow (the owner's pick, research/variants/tokyo-crow-1.png E, then smaller and finer, owner): black on the black night, read by a rim of
+  // the world's ink all round it, a white glint of an eye, a heavy beak, a wing, legs to its wire; then two strokes of its wings
+  crow: ['........................', '................###.....', '...............#kkk#....', '..............#kkwkk##..', '...........###kkkkkkk##.', '........###kkkkkkkkk#...', '.......#kkkkkkkkkkk#....', '......#kkkkkkkkkkk#.....', '.....#kkkkkkkk#kkk#.....', '.....#kkkkkk##kkk#......', '.....#kkkk##kkkkk#......', '.....#kkk#kkkkk##.......', '...##kkkkkkkkk#.........', '..#k#######k##..........', '.###.......#.#..........', '...........#.#..........'],
+  crowUp: ['...####.................', '....#kk###..............', '.....#kkkk##............', '......##kkkk##...####...', '........#kkkkk###kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.###kkkkk###.###...', '.........#####..........', '........................', '........................', '........................'],
+  crowDown: ['........................', '........................', '........................', '.................####...', '........#########kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.#kkkkkkkkk#.###...', '.......#kkkkkk##........', '......#kkkkk##..........', '.....#kkk###............', '...######...............'] };
 for (const id of ['crow', 'crowUp', 'crowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, two of them `inset` from the walls, sagging
 // `sag`; wireY is a wire's height at x, where a crow perches (FOLK.crowP of the beats).
@@ -1552,8 +1552,8 @@ class Level {
       }
     }
     if (this.theme.town && this.kind === 'well') for (let k = Math.ceil(top / (WIRE.arm * t)); k * WIRE.arm * t < this.top; k++) if (this.crowRng() < FOLK.crowP) {   // Tokyo: a crow on a wire of this chunk's beats,
-      // where nothing laid stands in front of it (drawn 2 game pixels a dot, CRITTER.crow's 16 x 10 is at most 2.5 x 1.6 tiles; in tiles, so alike on every screen)
-      const cr = this.crowRng, w = cr() < 0.5 ? 0 : 1, dir = cr() < 0.5 ? -1 : 1, hw = 1.4 * t, hh = 1.6 * t;
+      // where nothing laid stands in front of it (CRITTER.crow's 24 x 16 game pixels are at most 1.9 x 1.25 tiles; in tiles, so alike on every screen)
+      const cr = this.crowRng, w = cr() < 0.5 ? 0 : 1, dir = cr() < 0.5 ? -1 : 1, hw = 1.1 * t, hh = 1.3 * t;
       for (let n = 0; n < 4; n++) {
         const x = this.l + (this.r - this.l) * (0.2 + 0.6 * cr()), y = wireY(this, k, w, x);
         if (this.rects.some((q) => q.x1 > x - hw && q.x0 < x + hw && q.y1 > y - hh && q.y0 < y + 0.3 * t)) continue;
@@ -2646,7 +2646,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
-    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 2, false);   // two game pixels a dot: two tiles long, as big as the hero (owner)
+    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: about a tile and a half long
   }
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;

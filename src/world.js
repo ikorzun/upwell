@@ -229,7 +229,7 @@ const BUDDHA_BOXES = (() => {
 })();
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
-const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8, a: 0.5 };   // a: how much of a wire's line is drawn (a dither), the beams' and gondolas' cables' too
+const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the shaft (DEPTH), the beams' and gondolas' cables too
 // Tokyo's air conditioners (owner: not so often, and a ledge to stand on that gives way): one a wall every `beat` tiles, the walls `at` out of step,
 // `w` x `h` tiles on a brace `brace` tall; a plank on its top which, stood on, rattles and falls `time` s later, for good (Level.addAircons, Level.update)
 const AC = { beat: 24, at: [5, 17], w: 2.2, h: 1.4, brace: 0.9, time: 3, off: 0.25 };   // off: its gap from the wall, its pipes in it
@@ -311,6 +311,14 @@ const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at fi
 // taken (coins, items), red is danger (enemies, spikes, fire), white the hero and the edges; a
 // surface that behaves differently (ice, moss, rubber, crumbling, moving, springs) has a colour of its own.
 const INK = { spike: PAL.red, coin: PAL.yellow, coinD: PAL.orange, fire: PAL.red, flame: PAL.orange, white: PAL.white, dark: PAL.black };
+// The camera's depth: three planes, by how bright each may be over the black of the well (owner, 2026-10-19: the wires and what is behind
+// no more than a quarter over it). The play, in front, in full ink: all the hero touches or must read (ledges and what is one, an air
+// conditioner, an awning, a gondola; the walls, hazards, coins, doors, the bodies). Props, in the middle: what stands on or hangs off the
+// play and plays no part, solid, no white or yellow but a light's own core; a light lit (a lamp, a neon once passed) `lit` of the way from
+// the black to its ink. Behind the shaft: poles, wires and cables, crossarms, props, posts and pipes up the walls, fire escapes, mullions,
+// the far layer's windows, clouds and dots: `back` of the way at most, one ink, no white, the least detail. A feature drawn at alpha 1 + x
+// is such a tone, solid (FEAT_FS): DIM for what is behind, LIT for a light.
+const DEPTH = { lit: 0.6, back: 0.25 }, DIM = 1 + DEPTH.back, LIT = 1 + DEPTH.lit;
 const RAINBOW_INK = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'].map((id) => PAL[id]);   // the one thing in all the inks at once
 const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
@@ -2114,7 +2122,7 @@ vec3 snapPal(vec3 c) {   // the nearest of the nine, for anything that came in a
 // The well: black, a sparse grid of the world's ink drifting at half the climb (so a climb
 // reads as motion even past bare wall), and the walls in that ink striped with black,
 // fixed to the world, with a lip line along the well.
-const BG_DOTS = 0.25;   // the dot grid's strength over the black (owner: the dots at the least brightness): the one tone off the nine
+const BG_DOTS = DEPTH.back;   // the dot grid's strength over the black (owner: the dots at the least brightness), and the far layer's (DEPTH)
 const BG_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
 uniform vec2 uShake; uniform vec2 uWalls; uniform float uPix;
 uniform vec3 uTop, uBot, uDots, uWall, uWallD, uLip; uniform float uGrad, uH, uWin;
@@ -2129,16 +2137,16 @@ void main() {
   if (uWin > 2.5 && uWin < 3.5) {   // banks of cloud far off (the Skyscraper's): a smooth field, its edges dithered
     vec2 wp = vec2(float(g.x), float(py)) * vec2(0.008, 0.03);
     float n = sin(wp.x * 3.1 + sin(wp.y * 1.7) * 2.0) * 0.5 + sin(wp.y * 2.3 + wp.x * 0.7) * 0.5;
-    if (n > 0.62 + 0.3 * bayer(g)) c = uDots;   // sparse, so the climb reads over them
+    if (n > 0.62 + 0.3 * bayer(g)) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // sparse, so the climb reads over them; faint (DEPTH)
   } else if (uWin > 1.5 && uWin < 2.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dotted between
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(8.0, 10.0)), iw = wp - cw * vec2(8.0, 10.0);
     float h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
-    if (iw.x >= 2.0 && iw.x < 6.0 && iw.y >= 3.0 && iw.y < 7.0 && h < 0.16) c = uDots;
-    else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x, 3.0) < 1.0) c = uDots;
+    if (iw.x >= 2.0 && iw.x < 6.0 && iw.y >= 3.0 && iw.y < 7.0 && h < 0.16) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
+    else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x, 3.0) < 1.0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
   } else if (uWin > 0.5) {   // a town far off (the Junkyard's, uWin 4; Tokyo's was uWin 1): windows lit here and there in rows, its buildings in columns with dark gaps between
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(6.0, 8.0)), iw = wp - cw * vec2(6.0, 8.0);
     float bx = wp.x - 36.0 * floor(wp.x / 36.0), h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
-    if (bx < 30.0 && iw.x >= 2.0 && iw.x < 4.0 && iw.y >= 3.0 && iw.y < 6.0 && h < 0.2) c = uDots;
+    if (bx < 30.0 && iw.x >= 2.0 && iw.x < 4.0 && iw.y >= 3.0 && iw.y < 6.0 && h < 0.2) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
   } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // a dot, faint (BG_DOTS)
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
@@ -2213,7 +2221,7 @@ void main() {
   }
   else a = aa(abs(length(vL) - 0.82) - 0.1);                                  // ring
   if (a < 0.5 || k <= bayer(g)) discard;
-  o = vec4(col, 1.0);
+  o = vec4(k > 1.0 ? mix(PAL[0], col, k - 1.0) : col, 1.0);   // over 1: a tone k - 1 of the way from the black (DEPTH)
 }`;
 // The squishies in the same terms (in place of Gum's glossy cushion): the body's colour
 // flat, shade as black tones stepping in toward the back and the bottom, a hard white
@@ -2455,19 +2463,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) {   // the wire, from crossarm to crossarm, sagging (WIRE)
       const y0 = (k * WIRE.arm + WIRE.drop) * t, x0 = lv.l + WIRE.inset * t, x1 = lv.r - WIRE.inset * t, sag = WIRE.sag * t, st = 3 * P;
       if (y0 + sag < top || y0 > bot) continue;
-      for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, WIRE.a, 0, 10, 0); }
+      for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, DIM, 0, 10, 0); }
     }
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);   // in the way of a door, or its glow (owner: nothing covers one)
     const acNear = (wl, ya, yb) => lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < lv.l + lv.r) === wl && q.y0 < yb && q.y0 + (AC.h + AC.brace) * t > ya);   // an air conditioner hangs over [ya, yb] on that wall
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.28 * t, 0.46 * t);
-      box(p0, top, p1, bot, PAL.gray, 0.3, 0, 10, 0);   // the pole, a step back (see-through: it is no wall), half as bright as it was (owner)
+      box(p0, top, p1, bot, PAL.gray, DIM, 0, 10, 0);   // the pole, behind (DEPTH)
       for (let k = Math.floor(top / arm) - 1; k * arm < bot; k++) {
         const y = k * arm, [a0, a1] = span(0.1 * t, 1.05 * t);
-        box(a0, y, a1, y + 0.16 * t, PAL.gray, 1, 0, 10, 0);   // its crossarm, white insulators on it
-        { const x = at(WIRE.inset * t); box(x - P, y - 2 * P, x + P, y, PAL.white, 1, 0, 10, 0); }   // the wire's insulator
-        if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, 1, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
+        box(a0, y, a1, y + 0.16 * t, PAL.gray, DIM, 0, 10, 0);   // its crossarm
+        { const x = at(WIRE.inset * t); box(x - P, y - 2 * P, x + P, y, PAL.gray, DIM, 0, 10, 0); }   // the wire's insulator
+        if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, DIM, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
     }
     const SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'], 'neonFish'], [['カ', 'ラ', 'オ', 'ケ'], 'neonMic']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
@@ -2479,10 +2487,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const [word, pic] = SIGNS[mod(k - Math.floor(k / 3), 3)], left = mod(k, 2) === 0, sw = gw + 6 * P, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, cx = x0 + sw / 2;
       const y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
       if (y1 + 0.3 * t < top || y0 - 0.4 * t > bot || atDoor(left ? lv.l : x0, y0 - 0.3 * t, left ? x0 + sw : lv.r, y1 + 0.2 * t)) continue;
-      const lit = (y0 + y1) / 2 > best, ink = !lit ? PAL.gray : Math.imul(k, 2654435761) >>> 31 ? PAL.red : PAL.blue, ia = lit ? 1 : 0.35;
-      if (lit) F(cx, (y0 + y1) / 2, 1.15 * sw, 0, 0, 0.7 * (y1 - y0), ink, 1, 1);
-      for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, 1, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, 1, 0, 10, 0); }   // the arms, bolted on
-      box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, 1, 0, 10, 0);
+      const lit = (y0 + y1) / 2 > best, ink = !lit ? PAL.gray : Math.imul(k, 2654435761) >>> 31 ? PAL.red : PAL.blue, ia = lit ? LIT : DIM;   // behind, or a light (DEPTH)
+      if (lit) F(cx, (y0 + y1) / 2, 1.15 * sw, 0, 0, 0.7 * (y1 - y0), ink, DEPTH.lit, 1);
+      for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, DIM, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, DIM, 0, 10, 0); }   // the arms, bolted on
+      box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, DIM, 0, 10, 0);
       box(x0, y0, x0 + sw, y1, PAL.black, 1, 0, 10, 0);
       for (const [a0, b0, a1, b1] of [[x0 + P, y0 + P, x0 + sw - P, y0 + 2 * P], [x0 + P, y1 - 2 * P, x0 + sw - P, y1 - P], [x0 + P, y0 + P, x0 + 2 * P, y1 - P], [x0 + sw - 2 * P, y0 + P, x0 + sw - P, y1 - P]]) box(a0, b0, a1, b1, ink, ia, 0, 10, 0);   // the frame's tube
       word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, ia, kk, ink));
@@ -2587,22 +2595,22 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.12 * t, 0.5 * t), mid = snap((p0 + p1) / 2);
-      box(p0, top, p1, bot, th.block, 0.75, 0, 10, 0); box(mid, top, mid + P, bot, PAL.black, 0.75, 0, 10, 0);   // the prop, a step back, its grain
+      box(p0, top, p1, bot, th.block, DIM, 0, 10, 0); box(mid, top, mid + P, bot, PAL.black, 1, 0, 10, 0);   // the prop, behind (DEPTH), its grain
       for (let k = Math.floor(top / MINE_CAP) - 1; k * MINE_CAP < bot; k++) {
         const y = k * MINE_CAP, [c0, c1] = span(0, 1.35 * t);
-        box(c0, y, c1, y + 0.3 * t, th.block, 1, 0, 10, 0); box(c0, y + 0.3 * t - P, c1, y + 0.3 * t, PAL.black, 1, 0, 10, 0);   // its cap, a dark underside
-        for (let i = 0; i <= 6; i++) { const u = i / 6, x = snap(at((0.5 + 0.7 * u) * t)), yy = snap(y + 0.3 * t + 0.8 * t * (1 - u)); box(x - P, yy - P, x + P, yy + P, th.block, 1, 0, 10, 0); }   // the knee brace
+        box(c0, y, c1, y + 0.3 * t, th.block, DIM, 0, 10, 0); box(c0, y + 0.3 * t - P, c1, y + 0.3 * t, PAL.black, 1, 0, 10, 0);   // its cap, a dark underside
+        for (let i = 0; i <= 6; i++) { const u = i / 6, x = snap(at((0.5 + 0.7 * u) * t)), yy = snap(y + 0.3 * t + 0.8 * t * (1 - u)); box(x - P, yy - P, x + P, yy + P, th.block, DIM, 0, 10, 0); }   // the knee brace
         if (mineLamp(side, k)) {   // a lamp off the cap: a hook, a grey cage, white glass, a flame in it
           const lx = snap(at(1.05 * t)), ly = y + 0.3 * t;
-          box(lx - P / 2, ly, lx + P / 2, ly + 0.3 * t, PAL.gray, 1, 0, 10, 0);
-          box(lx - 0.2 * t, ly + 0.3 * t, lx + 0.2 * t, ly + 0.85 * t, PAL.gray, 1, 0, 10, 0); box(lx - 0.12 * t, ly + 0.38 * t, lx + 0.12 * t, ly + 0.77 * t, PAL.white, 1, 0, 10, 0);
-          disc(lx, ly + 0.6 * t, 0.07 * t, INK.flame, 1);
+          box(lx - P / 2, ly, lx + P / 2, ly + 0.3 * t, PAL.gray, DIM, 0, 10, 0);
+          box(lx - 0.2 * t, ly + 0.3 * t, lx + 0.2 * t, ly + 0.85 * t, PAL.gray, DIM, 0, 10, 0); box(lx - 0.12 * t, ly + 0.38 * t, lx + 0.12 * t, ly + 0.77 * t, PAL.white, LIT, 0, 10, 0);   // its glass a light (DEPTH)
+          disc(lx, ly + 0.6 * t, 0.07 * t, INK.flame, LIT);
         }
       }
       for (let k = Math.floor(top / (10 * t)) - 1; k * 10 * t < bot; k++) {   // sugar crystals in the wall's rock, three to a cluster
         const y = k * 10 * t + (side < 0 ? 4 : 9) * t;
         if (y < top - t || y > bot + t) continue;
-        for (const [dx, dy, sz] of [[0.15, 0, 0.22], [0.4, -0.25, 0.16], [0.35, 0.22, 0.12]]) F(at(dx * t), y + dy * t, sz * t, sz * t, sz * t, -sz * t, mod(k, 2) ? PAL.white : PAL.gray, 1, 0);
+        for (const [dx, dy, sz] of [[0.15, 0, 0.22], [0.4, -0.25, 0.16], [0.35, 0.22, 0.12]]) F(at(dx * t), y + dy * t, sz * t, sz * t, sz * t, -sz * t, PAL.gray, DIM, 0);
       }
     }
     // Posts (the vertical level-design article's backdrops, as in Hollow Knight and Rogue Legacy: what ties a ledge to the one under it,
@@ -2623,8 +2631,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         if (lv.spikes.some((s) => over(s, u0, u1) && (Math.abs(s.y0 - y0) < 1 || Math.abs(s.y1 - y1) < 1)) || lv.icicles.some((c) => Math.abs(c.x - x) < hw + 0.3 * t && c.y > y0 - t && c.y < y1)
           || lv.bubbles.some((d) => over(d, u0 - t, u1 + t) && d.y1 > y0 && d.y0 - t < y1) || lv.runes.some((u) => Math.abs(u.x - x) < hw + 10 * P && u.y > y0 - 10 * P && u.y < y1 + 10 * P)) continue;
         const p0 = snap(x - (MINE_POST.w / 2) * t), p1 = snap(x + (MINE_POST.w / 2) * t), mid = snap(x), c0 = snap(u0), c1 = snap(u1), cb = snap(y0 + 0.22 * t);
-        box(p0, y0, p1, y1, th.block, 0.75, 0, 10, 0); box(mid, y0, mid + P, y1, PAL.black, 0.75, 0, 10, 0);   // the post, a step back, its grain
-        box(c0, y0, c1, cb, th.block, 1, 0, 10, 0); box(c0, cb - P, c1, cb, PAL.black, 1, 0, 10, 0);   // its cap board under the ledge, a dark underside
+        box(p0, y0, p1, y1, th.block, DIM, 0, 10, 0); box(mid, y0, mid + P, y1, PAL.black, 1, 0, 10, 0);   // the post, behind (DEPTH), its grain
+        box(c0, y0, c1, cb, th.block, DIM, 0, 10, 0); box(c0, cb - P, c1, cb, PAL.black, 1, 0, 10, 0);   // its cap board under the ledge, a dark underside
       }
     }
     for (const r of lv.rects) {   // an ore cart parked at the wall end of some wide steady ledges: grey, ore heaped in it, two wheels
@@ -2642,13 +2650,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.2 * t, 0.42 * t);
-      box(p0, top, p1, bot, PAL.gray, 0.7, 0, 10, 0);
-      for (let k = Math.floor(top / (4 * t)) - 1; k * 4 * t < bot; k++) { const [b0, b1] = span(0, 0.5 * t); box(b0, k * 4 * t, b1, k * 4 * t + 0.12 * t, PAL.gray, 1, 0, 10, 0); }
+      box(p0, top, p1, bot, PAL.gray, DIM, 0, 10, 0);   // the riser, behind (DEPTH), its brackets
+      for (let k = Math.floor(top / (4 * t)) - 1; k * 4 * t < bot; k++) { const [b0, b1] = span(0, 0.5 * t); box(b0, k * 4 * t, b1, k * 4 * t + 0.12 * t, PAL.gray, DIM, 0, 10, 0); }
       for (let k = Math.floor(top / (14 * t)) - 1; k * 14 * t < bot; k++) {   // a satellite dish on its arm
         const y = k * 14 * t + (side < 0 ? 5 : 11) * t, cx = at(0.95 * t);
         if (y < top - t || y > bot + t) continue;
-        box(Math.min(cx, at(0.3 * t)), y + 0.28 * t, Math.max(cx, at(0.3 * t)), y + 0.28 * t + P, PAL.gray, 1, 0, 10, 0);
-        F(cx, y, 0.42 * t, 0, 0, 0.32 * t, PAL.white, 1, 0); F(cx - side * 0.06 * t, y, 0.3 * t, 0, 0, 0.22 * t, PAL.gray, 1, 0);
+        box(Math.min(cx, at(0.3 * t)), y + 0.28 * t, Math.max(cx, at(0.3 * t)), y + 0.28 * t + P, PAL.gray, DIM, 0, 10, 0);
+        F(cx, y, 0.42 * t, 0, 0, 0.32 * t, PAL.gray, DIM, 0); F(cx - side * 0.06 * t, y, 0.3 * t, 0, 0, 0.22 * t, PAL.black, 1, 0);   // behind (DEPTH): its face, its hollow
       }
     }
     for (const r of lv.rects) {
@@ -2667,9 +2675,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), off = side < 0 ? 0 : 3 * t;
       for (let k = Math.floor((top - off) / (6 * t)) - 1; k * 6 * t + off < bot + 6 * t; k++) {
         const y = k * 6 * t + off, [x0, x1] = [Math.min(at(0), at(1.6 * t)), Math.max(at(0), at(1.6 * t))];
-        box(x0, y, x1, y + 0.15 * t, PAL.black, 1, 0, 10, 0); box(x0, y - 0.6 * t, x1, y - 0.6 * t + P, PAL.gray, 0.8, 0, 10, 0);   // the landing, its rail
-        box(side < 0 ? x1 - P : x0, y - 0.6 * t, side < 0 ? x1 : x0 + P, y, PAL.gray, 0.8, 0, 10, 0);
-        for (let i = 0; i <= 10; i++) { const u = i / 10, x = snap(at((0.2 + 1.2 * u) * t)), yy = snap(y - 6 * t * u); box(x - P / 2, yy - P / 2, x + P / 2, yy + P / 2, PAL.gray, 0.8, 0, 10, 0); }   // the ladder to the next
+        box(x0, y, x1, y + 0.15 * t, PAL.black, 1, 0, 10, 0); box(x0, y - 0.6 * t, x1, y - 0.6 * t + P, PAL.gray, DIM, 0, 10, 0);   // the landing, its rail, behind (DEPTH)
+        box(side < 0 ? x1 - P : x0, y - 0.6 * t, side < 0 ? x1 : x0 + P, y, PAL.gray, DIM, 0, 10, 0);
+        for (let i = 0; i <= 10; i++) { const u = i / 10, x = snap(at((0.2 + 1.2 * u) * t)), yy = snap(y - 6 * t * u); box(x - P / 2, yy - P / 2, x + P / 2, yy + P / 2, PAL.gray, DIM, 0, 10, 0); }   // the ladder to the next
       }
     }
     for (const r of lv.rects) {
@@ -2703,9 +2711,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const t = kitT, P = kitP;
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d);
-      for (const d of [0.55, 1.7]) { const x = snap(at(d * t)); box(x, top, x + P, bot, PAL.gray, 0.6, 0, 10, 0); }
-      for (let k = Math.floor(top / (3 * t)) - 1; k * 3 * t < bot; k++) box(Math.min(at(0), at(1.7 * t)), k * 3 * t, Math.max(at(0), at(1.7 * t)), k * 3 * t + P, PAL.gray, 0.6, 0, 10, 0);
-      for (let k = Math.floor(top / (20 * t)) - 1; k * 20 * t < bot; k++) if (Math.floor(T * 1.5 + (side < 0 ? 0 : 0.5)) % 2) disc(at(0.3 * t), k * 20 * t + (side < 0 ? 6 : 16) * t, 0.12 * t, PAL.white, 1);
+      for (const d of [0.55, 1.7]) { const x = snap(at(d * t)); box(x, top, x + P, bot, PAL.gray, DIM, 0, 10, 0); }   // the mullions and transoms, behind (DEPTH)
+      for (let k = Math.floor(top / (3 * t)) - 1; k * 3 * t < bot; k++) box(Math.min(at(0), at(1.7 * t)), k * 3 * t, Math.max(at(0), at(1.7 * t)), k * 3 * t + P, PAL.gray, DIM, 0, 10, 0);
+      for (let k = Math.floor(top / (20 * t)) - 1; k * 20 * t < bot; k++) if (Math.floor(T * 1.5 + (side < 0 ? 0 : 0.5)) % 2) disc(at(0.3 * t), k * 20 * t + (side < 0 ? 6 : 16) * t, 0.12 * t, PAL.white, LIT);   // the lamp, a light
     }
   }
   // The Skyscraper's ledges: a block is a steel girder (a dark web, rivets, a brace under it at a wall), a free plank a cloud (white puffs,
@@ -2831,7 +2839,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const yb = snap(r.y0 + 0.62 * t), pt = r.y0 - 0.12 * t;
       box(r.x0, r.y0, r.x1, yb, th.mover, 1, 0, 10, 0); box(r.x0, yb - P, r.x1, yb, PAL.black, 1, 0, 10, 0);
       for (let x = r.x0 + 0.75 * t; x < r.x1 - 0.4 * t; x += 0.75 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, yb - P, PAL.black, 1, 0, 10, 0);   // its panels' seams
-      for (const x of [r.x0, r.x1 - 2 * P]) { box(x, pt, x + 2 * P, yb, th.mover, 1, 0, 10, 0); box(x + P / 2, top, x + 1.5 * P, pt - 0.16 * t, PAL.gray, WIRE.a, 0, 10, 0); box(x - P, pt - 0.16 * t, x + 3 * P, pt, PAL.gray, 1, 0, 10, 0); }   // posts, cables, clamps
+      for (const x of [r.x0, r.x1 - 2 * P]) { box(x, pt, x + 2 * P, yb, th.mover, 1, 0, 10, 0); box(x + P / 2, top, x + 1.5 * P, pt - 0.16 * t, PAL.gray, DIM, 0, 10, 0); box(x - P, pt - 0.16 * t, x + 3 * P, pt, PAL.gray, 1, 0, 10, 0); }   // posts, cables, clamps
       const bx = r.x0 - 0.25 * t, hy = r.y0 + 0.24 * t;   // the bucket, on its handle off the post
       rod(r.x0 - P, r.y0 + 0.04 * t, bx - 0.13 * t, hy, PAL.gray); rod(r.x0 - P, r.y0 + 0.04 * t, bx + 0.13 * t, hy, PAL.gray);
       box(snap(bx - 0.16 * t), snap(hy), snap(bx + 0.16 * t), snap(hy) + 2 * P, PAL.gray, 1, 0, 10, 0); box(snap(bx - 0.13 * t), snap(hy) + 2 * P, snap(bx + 0.13 * t), snap(hy + 0.26 * t), PAL.gray, 1, 0, 10, 2);
@@ -2864,7 +2872,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const x of [r.x0 + 0.34 * t, r.x1 - 0.34 * t]) {
         let up = top; for (const q of lv.rects) if (q !== r && !q.gone && !q.move && q.x0 <= x && q.x1 >= x && q.y1 <= r.y0 && q.y1 > up) up = q.y1;
         const cx = snap(x), sy = r.y0 - 0.2 * t;
-        box(cx, up, cx + P, sy, PAL.gray, WIRE.a, 0, 10, 0); box(cx - P, sy, cx + 2 * P, sy + 0.1 * t, PAL.gray, 1, 0, 10, 0);   // the cable, its shackle
+        box(cx, up, cx + P, sy, PAL.gray, DIM, 0, 10, 0); box(cx - P, sy, cx + 2 * P, sy + 0.1 * t, PAL.gray, 1, 0, 10, 0);   // the cable, its shackle
         for (const ax of [cx - P, cx + P]) box(ax, sy + 0.1 * t, ax + P, r.y0, PAL.gray, 1, 0, 10, 0);   // the clamp's arms
       }
     } else if (r.move || r.spring || r.magnet || r.bouncy) return false;

@@ -723,8 +723,12 @@ ICONS['kana_シ'] = '................/...www........../.....www......../.......w
 ICONS['kana_カ'] = '.......w......../.......w......../.......w......../..wwwwwwwwwwww../.......w.....w../.......w.....w../......w......w../......w......w../......w......w../.....w.......w../.....w.......w../....w........w../...w........w.../..w.....wwww..../................/................';
 ICONS['kana_オ'] = '...........w..../...........w..../...........w..../...........w..../.wwwwwwwwwwwwww./..........ww..../.........w.w..../........w..w..../.......w...w..../......w....w..../.....w.....w..../....w......w..../..ww.......w..../.w.........w..../.......wwww...../................';
 ICONS['kana_ケ'] = '................/.....w........../.....w........../....w.........../....wwwwwwwwwww./...w......w...../...w......w...../..w.......w...../.w.......w....../.........w....../........w......./........w......./.......w......../.....ww........./...ww.........../................';
+// Under a Tokyo neon sign's word, a picture of what is sold there (drawn in the tube's ink): a bowl of noodles steaming, a fish, a microphone
+ICONS.neonBowl = '...o..o..o.../...o..o..o.../............./ooooooooooooo/.ooooooooooo./..ooooooooo../...ooooooo.../....ooooo....';
+ICONS.neonFish = '...ooooo...../.ooooooooo..o/oo.oooooooooo/ooooooooooooo/.ooooooooo..o/...ooooo.....';
+ICONS.neonMic = '...ooo.../..ooooo../..ooooo../..ooooo../...ooo.../....o..../....o..../....o..../..ooooo..';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
-const ICON_INK = { k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
+const ICON_INK ={ k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
 // standing on a floor, and runnier than at first (firm 2.0, then 1.4; user: it rattled about at speed, then: softer still).
 DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 1.2, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
@@ -2235,13 +2239,20 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         const bx = x0 + (side < 0 ? 0.18 : 0.82) * w; box(bx - P, y + h, bx + P, y + h + 0.35 * t, PAL.gray, 1, 0, 10, 0);
       }
     }
-    const SIGNS = [['ラ', 'ー', 'メ', 'ン'], ['ス', 'シ'], ['カ', 'ラ', 'オ', 'ケ']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
-    for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a sign on two arms off a wall, two in every three beats, the walls in turn
-      const word = SIGNS[mod(k * 7, 3)], left = mod(k, 2) === 0, sw = gw + 4 * P, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, y0 = k * 11 * t + 3.5 * t, y1 = y0 + word.length * gw + 4 * P;
-      if (y1 < top || y0 > bot) continue;
-      for (const y of [y0 + 0.3 * t, y1 - 0.4 * t]) box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, 1, 0, 10, 0);
-      box(x0, y0, x0 + sw, y1, th.block, 1, 0, 10, 0); box(x0 + P, y0 + P, x0 + sw - P, y1 - P, PAL.gray, 1, 0, 10, 0);
-      word.forEach((ch, j) => icon('kana_' + ch, x0 + 2 * P + gw / 2, y0 + 2 * P + (j + 0.5) * gw, 1, kk, PAL.black));
+    const SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'], 'neonFish'], [['カ', 'ラ', 'オ', 'ケ'], 'neonMic']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
+    for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
+      // (the owner's pick, research/variants/tokyo-neon-1.png B): orange tubes, its word and a picture of what is sold, framed on a dark box
+      // with grey caps over and under it, in a glow (and dark in the power cut: the dark's lights leave it out)
+      const [word, pic] = SIGNS[mod(k - Math.floor(k / 3), 3)], left = mod(k, 2) === 0, sw = gw + 6 * P, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, cx = x0 + sw / 2;
+      const y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
+      if (y1 + 0.3 * t < top || y0 - 0.4 * t > bot) continue;
+      F(cx, (y0 + y1) / 2, 1.15 * sw, 0, 0, 0.7 * (y1 - y0), PAL.orange, 1, 1);
+      for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, 1, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, 1, 0, 10, 0); }   // the arms, bolted on
+      box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, 1, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, 1, 0, 10, 0);
+      box(x0, y0, x0 + sw, y1, PAL.black, 1, 0, 10, 0);
+      for (const [a0, b0, a1, b1] of [[x0 + P, y0 + P, x0 + sw - P, y0 + 2 * P], [x0 + P, y1 - 2 * P, x0 + sw - P, y1 - P], [x0 + P, y0 + P, x0 + 2 * P, y1 - P], [x0 + sw - 2 * P, y0 + P, x0 + sw - P, y1 - P]]) box(a0, b0, a1, b1, PAL.orange, 1, 0, 10, 0);   // the frame's tube
+      word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, 1, kk, PAL.orange));
+      icon(pic, cx, y1 - 3 * P - 0.45 * gw, 1, kk, PAL.orange);
     }
     for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges: grey, its lit front blue with rows of cans
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;

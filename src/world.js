@@ -2234,6 +2234,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(l0, y0, l1, y0 + h, c, 1, 0, 10, 0); box(b0, y0, b1, y0 + 2 * P, c, 1, 0, 10, 0);
     for (let y = y0; y < y0 + h; y += P) { const u = y0 + h - y, [a0, a1] = xs(Math.max(P, u - s / 2), Math.min(P + h, u + s / 2)); box(a0, y, a1, y + P, c, 1, 0, 10, 0); }
   };
+  const rod = (x0, y0, x1, y1, c) => {   // a line a game pixel thick (an awning's rods, a bucket's handle)
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / kitP));
+    for (let k = 0; k <= n; k++) { const x = snap(x0 + ((x1 - x0) * k) / n), y = snap(y0 + ((y1 - y0) * k) / n); box(x, y, x + kitP, y + kitP, c, 1, 0, 10, 0); }
+  };
   if (th.town && lv.kind === 'well') {   // Tokyo's kit (THEMES.tokyo; see the parts catalog): whatever hangs, hangs on something. A utility pole up
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
     // a wall; vending machines stand in a niche at a ledge's wall end. All on a fixed beat by height, not at random, so nothing is kept.
@@ -2493,25 +2497,47 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // Returns false for what keeps the common look (ice, crumble, cracks, springs, magnets).
   const townRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
-    if (r.plank && r.move) {   // a window-cleaner's gondola: its floor, a rail round it, two cables up out of sight
-      box(r.x0, r.y0, r.x1, r.y1, th.mover, 1, 0, 10, 2);
-      box(r.x0, r.y0 - 0.55 * t, r.x1, r.y0 - 0.55 * t + P, PAL.gray, 1, 0, 10, 0);
-      for (const x of [r.x0, r.x1 - P]) box(x, r.y0 - 0.55 * t, x + P, r.y0, PAL.gray, 1, 0, 10, 0);
-      for (const x of [r.x0 + 0.25 * t, r.x1 - 0.25 * t - P]) box(x, top, x + P, r.y0 - 0.55 * t, PAL.gray, 1, 0, 10, 0);
-    } else if (r.plank && r.bouncy) {   // a shop's awning off a wall (an awning always bounces): stripes, a scalloped hem, a rod to the wall, a paper lantern
-      const sag = r.t > 0 ? 0.25 * t * (r.t / SPRING.anim) : 0, n = Math.max(2, Math.round((r.x1 - r.x0) / (0.5 * t))), sw = (r.x1 - r.x0) / n;
-      for (let i = 0; i < n; i++) { const c = i % 2 ? PAL.white : th.block; box(r.x0 + i * sw, r.y0 + sag, r.x0 + (i + 1) * sw, r.y1 + sag, c, 1, 0, 10, 0); disc(r.x0 + (i + 0.5) * sw, r.y1 + sag, sw / 2, c, 1); }
-      const ox = wl ? r.x1 - 0.1 * t : r.x0 + 0.1 * t, wx = wl ? lv.l : lv.r;
-      for (let k = 0; k <= 10; k++) { const u = k / 10, x = snap(ox + (wx - ox) * u), y = snap(r.y0 + sag - 1.1 * t * u); box(x - P, y - P, x, y, PAL.gray, 1, 0, 10, 0); }
-      if (r.x1 - r.x0 >= 3 * t) {
-        const lx = snap(wl ? r.x1 - 0.45 * t : r.x0 + 0.45 * t), ly = r.y1 + sag + 0.75 * t;
-        box(lx - P / 2, r.y1 + sag, lx + P / 2, ly - 0.3 * t, PAL.gray, 1, 0, 10, 0);
-        F(lx, ly, 0.24 * t, 0, 0, 0.32 * t, PAL.white, 1, 0); for (const d of [-1, 1]) box(lx - 0.16 * t, ly + d * 0.3 * t - 0.05 * t, lx + 0.16 * t, ly + d * 0.3 * t + 0.05 * t, PAL.black, 1, 0, 10, 0);
+    if (r.plank && r.move) {   // a window cleaner's gondola (the owner's pick, research/variants/tokyo-gondola-1.png C): a purple box of panels hung under its
+      // floor, its corner posts clamped to two cables up out of sight, a grey bucket at one end and a squeegee at the other (C's were yellow: yellow is for what you take)
+      const yb = snap(r.y0 + 0.62 * t), pt = r.y0 - 0.12 * t;
+      box(r.x0, r.y0, r.x1, yb, th.mover, 1, 0, 10, 0); box(r.x0, yb - P, r.x1, yb, PAL.black, 1, 0, 10, 0);
+      for (let x = r.x0 + 0.75 * t; x < r.x1 - 0.4 * t; x += 0.75 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, yb - P, PAL.black, 1, 0, 10, 0);   // its panels' seams
+      for (const x of [r.x0, r.x1 - 2 * P]) { box(x, pt, x + 2 * P, yb, th.mover, 1, 0, 10, 0); box(x + P / 2, top, x + 1.5 * P, pt - 0.16 * t, PAL.gray, 1, 0, 10, 0); box(x - P, pt - 0.16 * t, x + 3 * P, pt, PAL.gray, 1, 0, 10, 0); }   // posts, cables, clamps
+      const bx = r.x0 - 0.25 * t, hy = r.y0 + 0.24 * t;   // the bucket, on its handle off the post
+      rod(r.x0 - P, r.y0 + 0.04 * t, bx - 0.13 * t, hy, PAL.gray); rod(r.x0 - P, r.y0 + 0.04 * t, bx + 0.13 * t, hy, PAL.gray);
+      box(snap(bx - 0.16 * t), snap(hy), snap(bx + 0.16 * t), snap(hy) + 2 * P, PAL.gray, 1, 0, 10, 0); box(snap(bx - 0.13 * t), snap(hy) + 2 * P, snap(bx + 0.13 * t), snap(hy + 0.26 * t), PAL.gray, 1, 0, 10, 2);
+      const sx = r.x1 + 0.32 * t, sy = snap(r.y0 + 0.06 * t);   // the squeegee, its blade over its handle
+      box(snap(sx - 0.22 * t), sy, snap(sx + 0.22 * t), sy + 2 * P, PAL.gray, 1, 0, 10, 0); box(snap(sx) - P / 2, sy + 2 * P, snap(sx) + P / 2, snap(r.y0 + 0.6 * t), PAL.gray, 1, 0, 10, 0);
+      box(r.x1, sy + P, snap(sx - 0.22 * t), sy + 2 * P, PAL.gray, 1, 0, 10, 0);
+    } else if (r.plank && r.bouncy) {   // a shop's awning off a wall, which always bounces (the owner's pick, research/variants/tokyo-awning-1.png D): blue and white
+      // checks in two rows, its belly and scalloped hem hanging lower in the middle, two rods to bolts in the wall, a paper lantern off its free end, orange (D's was red:
+      // red is danger); landed on, it sags in a curve, its top edge with it (at rest straight, where it is stood on)
+      const wx = wl ? lv.l : lv.r, d = wl ? 1 : -1, w = r.x1 - r.x0, n = Math.max(4, Math.round(w / (0.4 * t))), cw = w / n, amp = r.t > 0 ? 0.3 * t * (r.t / SPRING.anim) : 0, rh = snap(0.17 * t);
+      for (let i = 0; i < n; i++) {
+        const u = (i + 0.5) / n, k = 4 * u * (1 - u), y = r.y0 + snap(amp * k), x0 = snap(r.x0 + i * cw), x1 = snap(r.x0 + (i + 1) * cw), yh = y + 2 * rh + snap(0.12 * t * k), lo = i % 2 ? th.block : PAL.white;
+        box(x0, y, x1, y + rh, i % 2 ? PAL.white : th.block, 1, 0, 10, 0); box(x0, y + rh, x1, yh, lo, 1, 0, 10, 0); disc((x0 + x1) / 2, yh, (x1 - x0) / 2, lo, 1);
+        box(x0, y, x1, y + 2.5, th.lip, 1, 0, 10, 0);
       }
-      box(r.x0, r.y0 + sag, r.x1, r.y0 + sag + 2.5, th.lip, 1, 1.25); return true;
-    } else if (r.plank) {   // a steel beam: grey, a dark web, rivets
-      box(r.x0, r.y0, r.x1, r.y1, PAL.gray, 1, 0, 10, 0); const my = snap((r.y0 + r.y1) / 2); box(r.x0, my, r.x1, my + P, th.wallD, 1, 0, 10, 0);
-      for (let x = r.x0 + 0.3 * t; x < r.x1 - 0.2 * t; x += 0.6 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y0 + 3 * P, th.wallD, 1, 0, 10, 0);
+      for (const [by, cy] of [[r.y0 - 0.45 * t, r.y0 + 0.08 * t], [r.y0 + 0.75 * t, r.y0 + 0.3 * t]]) { rod(wx + d * 0.12 * t, by, wx + d * 0.32 * t, cy, PAL.gray); disc(wx + d * 0.1 * t, by, 0.09 * t, PAL.gray, 1); }
+      if (w >= 3 * t) {   // the lantern: grey caps, an orange body ribbed in black, on a hook
+        const lx = snap(wl ? r.x1 - 0.25 * t : r.x0 + 0.25 * t), ly = r.y0 + 2 * rh + 0.2 * t;
+        box(lx - P / 2, r.y0 + 2 * rh, lx + P / 2, ly, PAL.gray, 1, 0, 10, 0); box(snap(lx - 0.12 * t), ly, snap(lx + 0.12 * t), ly + 2 * P, PAL.gray, 1, 0, 10, 0);
+        const l0 = ly + 2 * P, l1 = snap(ly + 0.66 * t);
+        box(snap(lx - 0.22 * t), l0, snap(lx + 0.22 * t), l1, PAL.orange, 1, 0, 10, 0);
+        for (const f of [0.36, 0.68]) { const ry = snap(l0 + f * (l1 - l0)); box(snap(lx - 0.22 * t), ry, snap(lx + 0.22 * t), ry + P, PAL.black, 1, 0, 10, 0); }
+        box(snap(lx - 0.12 * t), l1, snap(lx + 0.12 * t), l1 + 2 * P, PAL.gray, 1, 0, 10, 0);
+      }
+      return true;
+    } else if (r.plank) {   // a steel beam (the owner's pick, research/variants/tokyo-beam-1.png F): a flat grey bar, a bolt at each end, hung on two cables up to
+      // the underside of what is over it (or out of sight), shackled grey (F's shackles were yellow: yellow is for what you take)
+      box(r.x0, r.y0, r.x1, r.y1, PAL.gray, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, PAL.black, 1, 0, 10, 2);
+      for (const x of [r.x0 + 0.16 * t, r.x1 - 0.16 * t]) { const bx = snap(x), by = snap((r.y0 + r.y1) / 2); box(bx - P, by - P, bx + 2 * P, by + 2 * P, PAL.black, 1, 0, 10, 0); box(bx, by, bx + P, by + P, PAL.white, 1, 0, 10, 0); }
+      for (const x of [r.x0 + 0.34 * t, r.x1 - 0.34 * t]) {
+        let up = top; for (const q of lv.rects) if (q !== r && !q.gone && !q.move && q.x0 <= x && q.x1 >= x && q.y1 <= r.y0 && q.y1 > up) up = q.y1;
+        const cx = snap(x), sy = r.y0 - 0.2 * t;
+        box(cx, up, cx + P, sy, PAL.gray, 1, 0, 10, 0); box(cx - P, sy, cx + 2 * P, sy + 0.1 * t, PAL.gray, 1, 0, 10, 0);   // the cable, its shackle
+        for (const ax of [cx - P, cx + P]) box(ax, sy + 0.1 * t, ax + P, r.y0, PAL.gray, 1, 0, 10, 0);   // the clamp's arms
+      }
     } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
     else {   // a concrete slab (the owner's pick, research/variants/tokyo-slab-1.png: B with F's end): its panels' seams, a free end capped
       // in a road barrier's stripes, white for F's yellow (yellow is for what you take), and a knee brace under it at a wall
@@ -2582,7 +2608,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   {   // the platforms' shadows (user: depth, not overdone): cast by a sun that goes from the right to the left through a world's levels,
     // a dithered black band under each and down its far side, over the walls and whatever ledge lies there (the black back wall barely shows them)
     const sun = (g.mode === 'camp' ? g.stage / 9 : g.stage / 2) * 2 - 1, dx = Math.round((-sun * 0.45 * R) / PIX.size) * PIX.size, dy = Math.round((0.32 * R) / PIX.size) * PIX.size;
-    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && seen(r.y0, r.y1 + dy)) {
+    if (lv.kind === 'well') for (const r of lv.rects) if (!r.gone && !r.cap && !(th.town && r.plank && (r.move || r.bouncy)) && seen(r.y0, r.y1 + dy)) {   // (Tokyo's awnings and
+      // gondolas hang below their floors: the band would lie over their cloth, lantern and box)
       box(r.x0 + dx, r.y1, r.x1 + dx, r.y1 + dy, INK.dark, 0.55, 0, 10, 0);
       if (dx) box(dx > 0 ? r.x1 : r.x0 + dx, r.y0 + dy, dx > 0 ? r.x1 + dx : r.x0, r.y1, INK.dark, 0.55, 0, 10, 0);
     }

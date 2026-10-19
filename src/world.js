@@ -331,7 +331,7 @@ const FOE_COLOR = {
 const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
   slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: Object.assign(theme(PAL.gray), { shrine: true }), ice: theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { pit: true }),   // pit: the Mine's kit (see mineRect)
+  cave: Object.assign(theme(PAL.gray), { shrine: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { pit: true }),   // pit: the Mine's kit (see mineRect)
  
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
@@ -2587,6 +2587,61 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
+  if (th.fuji && lv.kind === 'well') {   // the Glacier's kit as Mount Fuji in winter (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png, 2026-10-19):
+    // on some ledges' wall ends a kamakura with a snow rabbit by it (E, B), a snow monkey in a hot tub (E with a stone lantern, or D under a little roof), a pine
+    // (C, its ropes off, or D in yukitsuri), by turns of height; all in the midground (the owner's depth rule): no white, no yellow but a light's core.
+    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
+    const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
+    const free = (r, w, h) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
+      && r.x1 - r.x0 >= w * t && seen(r.y0 - h * t, r.y0) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+    const steam = (x, y, k) => { for (let i = 0; i < 3; i++) { const u = (T * 0.25 + i / 3 + k * 0.37) % 1; F(snap(x + Math.sin(T * 1.3 + i * 2 + k) * 0.12 * t), snap(y - u * 0.9 * t), (0.12 + 0.1 * u) * t, 0, 0, (0.12 + 0.1 * u) * t, PAL.gray, 0.35 * (1 - u), 1); } };
+    const lantern = (x, b) => {   // a little stone lantern, its window lit (the Cave's toro, smaller)
+      box(snap(x - 0.16 * t), snap(b - 0.1 * t), snap(x + 0.16 * t), b, PAL.gray, 1, 0, 10, 0); box(snap(x - 0.05 * t), snap(b - 0.45 * t), snap(x + 0.05 * t), snap(b - 0.1 * t), PAL.gray, 1, 0, 10, 0);
+      box(snap(x - 0.14 * t), snap(b - 0.72 * t), snap(x + 0.14 * t), snap(b - 0.45 * t), PAL.gray, 1, 0, 10, 0); box(snap(x - 0.07 * t), snap(b - 0.66 * t), snap(x + 0.07 * t), snap(b - 0.52 * t), PAL.orange, 1, 0, 10, 0);
+      box(snap(x - 0.24 * t), snap(b - 0.82 * t), snap(x + 0.24 * t), snap(b - 0.72 * t), PAL.gray, 1, 0, 10, 0); disc(x, snap(b - 0.86 * t), 0.05 * t, PAL.gray, 1);
+    };
+    for (const r of lv.rects) {
+      const k = mod(Math.round(r.y0 / t), 5), wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t);
+      if (k === 0 && free(r, 3, 1.6) && !atDoor(Math.min(X(0), X(3)), b - 1.6 * t, Math.max(X(0), X(3)), b)) {   // a kamakura (E): a dome of snow bricks, its doorway lit by a candle
+        const kx = X(1.2), rx = 1.05 * t, ry = 1.0 * t;
+        F(kx, b, rx, 0, 0, ry, PAL.gray, 1, 0);
+        for (const v of [0.33, 0.66]) { const hw = rx * Math.sqrt(1 - v * v); box(snap(kx - hw), snap(b - v * t), snap(kx + hw), snap(b - v * t) + P, PAL.black, 1, 0, 10, 0);
+          for (let j = -2; j <= 2; j++) { const jx = snap(kx + (j + (v > 0.4 ? 0.5 : 0)) * 0.42 * t); if (Math.abs(jx - kx) < hw - 2 * P) box(jx, snap(b - v * t), jx + P, snap(b - (v - 0.3) * t), PAL.black, 1, 0, 10, 0); } }
+        F(kx, snap(b - 0.3 * t), 0.55 * t, 0, 0, 0.45 * t, PAL.orange, 0.55, 1);
+        box(snap(kx - 0.28 * t), snap(b - 0.52 * t), snap(kx + 0.28 * t), b, PAL.black, 1, 0, 10, 0); disc(kx, snap(b - 0.52 * t), 0.28 * t, PAL.black, 1);
+        F(kx, snap(b - 0.3 * t), 0.3 * t, 0, 0, 0.42 * t, PAL.orange, 0.85, 1);   // the doorway lit warm from inside
+        box(snap(kx) - P, snap(b - 0.16 * t), snap(kx) + P, b, PAL.gray, 1, 0, 10, 0); disc(snap(kx), snap(b - 0.22 * t), 0.05 * t, PAL.orange, 1); box(snap(kx), snap(b - 0.24 * t), snap(kx) + P, snap(b - 0.2 * t), PAL.yellow, 1, 0, 10, 0);   // the candle, its flame's core
+        for (const e of [-1, 1]) box(Math.min(snap(kx + e * 0.05 * t), snap(kx + e * 0.17 * t)), snap(b - ry - 0.08 * t), Math.max(snap(kx + e * 0.05 * t), snap(kx + e * 0.17 * t)), snap(b - ry), PAL.green, 1, 0, 10, 0);   // a sprig of holly on top
+        for (const e of [-1, 1]) box(snap(kx + e * 0.03 * t) - P, snap(b - ry - 0.04 * t) - P, snap(kx + e * 0.03 * t) + P, snap(b - ry - 0.04 * t) + P, PAL.orange, 1, 0, 10, 0);
+        const ux = X(2.45), uh = 0.62 * t;   // the snow rabbit (B): an egg of snow, leaf ears, berry eyes
+        F(ux, snap(b - 0.45 * uh), 0.3 * t, 0, 0, 0.55 * uh, PAL.gray, 1, 0);
+        for (const e of [-1, 1]) for (let j = 0; j < 4; j++) box(snap(ux + e * (0.06 + 0.03 * j) * t), snap(b - uh - (0.05 + 0.06 * j) * t), snap(ux + e * (0.06 + 0.03 * j) * t) + 2 * P, snap(b - uh - (0.05 + 0.06 * j) * t) + 2 * P, PAL.green, 1, 0, 10, 0);
+        for (const e of [-1, 1]) box(snap(ux + e * 0.11 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.11 * t) + P, snap(b - 0.62 * uh) + 2 * P, PAL.orange, 1, 0, 10, 0);
+      } else if (k === 2 && free(r, 2.5, 1.8) && !atDoor(Math.min(X(0), X(2.4)), b - 1.8 * t, Math.max(X(0), X(2.4)), b)) {   // a snow monkey in a hot tub
+        const roof = ((Math.round(r.y0 / t) * 7) & 1) === 1, tx = X(roof ? 0.9 : 1.35), hy = snap(b - 0.62 * t);
+        if (!roof) lantern(X(0.4), b);
+        steam(tx - 0.3 * t, hy - 0.3 * t, 1); steam(tx + 0.35 * t, hy - 0.2 * t, 2);
+        disc(tx, hy, 0.3 * t, PAL.gray, 1); for (const [dx, dy] of [[-0.3, -0.1], [0.3, -0.1], [-0.2, -0.25], [0.2, -0.25], [0, -0.3]]) box(snap(tx + dx * t), snap(hy + dy * t) - P, snap(tx + dx * t) + P, snap(hy + dy * t), PAL.gray, 1, 0, 10, 0);   // its fluffy head
+        disc(tx, snap(hy + 0.04 * t), 0.19 * t, PAL.orange, 1); for (const e of [-1, 1]) box(snap(tx + e * 0.1 * t) - P, snap(hy), snap(tx + e * 0.1 * t) + P, snap(hy) + P, PAL.black, 1, 0, 10, 0); box(snap(tx) - P / 2, snap(hy + 0.12 * t), snap(tx) + P / 2, snap(hy + 0.12 * t) + P, PAL.black, 1, 0, 10, 0);   // its face: eyes closed, a mouth
+        box(snap(tx - 0.45 * t), snap(b - 0.36 * t), snap(tx + 0.45 * t), snap(b - 0.3 * t), PAL.blue, 1, 0, 10, 0);   // the water
+        if (!roof) box(snap(tx - 0.3 * t), snap(b - 0.42 * t), snap(tx + 0.3 * t), snap(b - 0.33 * t), PAL.purple, 1, 0, 10, 0);   // E's towel round its shoulders
+        box(snap(tx - 0.45 * t), snap(b - 0.3 * t), snap(tx + 0.45 * t), b, PAL.orange, 1, 0, 10, 0); box(snap(tx - 0.45 * t), snap(b - 0.3 * t), snap(tx + 0.45 * t), snap(b - 0.3 * t) + P, PAL.black, 1, 0, 10, 0);
+        for (let x = tx - 0.3 * t; x < tx + 0.4 * t; x += 0.15 * t) box(snap(x), snap(b - 0.26 * t), snap(x) + P, b, PAL.black, 1, 0, 10, 0);   // the tub's staves
+        if (roof) {   // D: a little roof over it, snow on it
+          for (let i = 0; i <= 10; i++) { const u = i / 10; for (const e of [-1, 1]) { const rx = snap(tx + e * u * 0.6 * t), ry = snap(hy - 0.5 * t + u * 0.35 * t); box(rx, ry, rx + 2 * P, ry + 2 * P, PAL.blue, 1, 0, 10, 0); } }
+          box(snap(tx - 0.35 * t), snap(hy - 0.62 * t), snap(tx + 0.35 * t), snap(hy - 0.46 * t), PAL.gray, 1, 0, 10, 0);
+        }
+      } else if (k === 4 && free(r, 2.4, 2.6) && !atDoor(Math.min(X(0), X(2.2)), b - 2.6 * t, Math.max(X(0), X(2.2)), b)) {   // a pine: C (grey trunk, its ropes off) or D (in yukitsuri)
+        const ropes = ((Math.round(r.y0 / t) * 7) & 1) === 1, cx = X(1.05), Y = (v) => b - v * t, PX = (u) => cx + d * u * t;
+        const trunk = (q) => [PX(0.18 * Math.sin(q * Math.PI * 1.6) - 0.05), Y(1.9 * q)];
+        for (let q = 0; q <= 1; q += P / (1.9 * t)) { const [x, y] = trunk(q); disc(x, y, (0.13 - 0.07 * q) * t, ropes ? PAL.orange : PAL.gray, 1); }
+        const pads = [[0, 2.0, 0.42], [-0.5, 1.55, 0.36], [0.5, 1.6, 0.38], [0.45, 1.0, 0.36], [-0.42, 1.05, 0.3]];
+        for (const [u, v, rx] of pads) { F(PX(u), Y(v) - 0.05 * t, rx * t, 0, 0, 0.16 * t, PAL.gray, 1, 0); F(PX(u), Y(v) + 0.03 * t, rx * t, 0, 0, 0.13 * t, PAL.green, 1, 9, 0); }   // a pad of needles, snow on it
+        if (ropes) { const tx = PX(0), ty = Y(2.55); box(snap(tx) - P, snap(ty), snap(tx) + P, snap(Y(2.0)), PAL.orange, 1, 0, 10, 0);   // the pole, its ropes to the pads
+          for (const [u, v, rx] of pads) rod(tx, ty, PX(u + Math.sign(u || 1) * rx * 0.9), Y(v), PAL.gray); }
+      }
+    }
+  }
   const MINE_CAP = 8 * kitT;   // the Mine's timber caps, a beat up its walls (and its lamps, every other cap; see the dark's lights)
   const mineLamp = (side, k) => ((k % 2) + 2) % 2 === (side < 0 ? 0 : 1);
   if (th.pit && lv.kind === 'well') {   // the Mine's kit (THEMES.mine; see the parts catalog): a timber prop up each wall, a cap beam off it every MINE_CAP on
@@ -2828,6 +2883,41 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
+  // Mount Fuji's ledges (the Glacier's; the owner's picks, research/variants/fuji-*-1-px.png): a block is dark volcanic rock (F), blue, cracks zigzagging down it
+  // and notches in its underside, a cap of snow on top (its white is the edge stood on); a plank is a trail's boardwalk (C), on a knee brace at the wall, a
+  // garland of rope under it and a bell off its free end (C's was yellow: the midground has none). False for what keeps the common look.
+  const fujiRect = (r) => {
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    if (r.plank) {
+      if (r.move || r.bouncy) return false;
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 2);
+      for (let x = r.x0 + 0.7 * t; x < r.x1 - 0.3 * t; x += 0.7 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y1, PAL.black, 1, 0, 10, 0);
+      for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {
+        brace(wx, d, snap(r.y1) + P, snap(0.9 * t), 2 * P, th.plank);
+        if (r.x1 - r.x0 >= 3 * t) {
+          const g0 = wx + d * 1.0 * t, g1 = wl ? r.x1 - 0.35 * t : r.x0 + 0.35 * t, gy = snap(r.y1) + P;
+          for (let i = 0; i <= 16; i++) { const u = i / 16, gx = snap(g0 + (g1 - g0) * u), yy = snap(gy + 0.35 * t * 4 * u * (1 - u)); box(gx, yy, gx + P, yy + P, PAL.orange, 1, 0, 10, 0); }
+          const bx = snap(wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t);
+          box(bx, r.y1, bx + P, snap(r.y1 + 0.16 * t), PAL.gray, 1, 0, 10, 0);
+          box(snap(bx - 0.08 * t), snap(r.y1 + 0.16 * t), snap(bx + 0.08 * t) + P, snap(r.y1 + 0.3 * t), PAL.orange, 1, 0, 10, 0);
+          box(snap(bx - 0.15 * t), snap(r.y1 + 0.3 * t), snap(bx + 0.15 * t) + P, snap(r.y1 + 0.38 * t), PAL.orange, 1, 0, 10, 0); box(bx, snap(r.y1 + 0.38 * t), bx + P, snap(r.y1 + 0.38 * t) + P, PAL.black, 1, 0, 10, 0);
+        }
+      }
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
+    box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0);
+    for (let y0 = r.y0 + 0.25 * t, row = 0; y0 < r.y1 - 0.5 * t; y0 += 1.8 * t, row++) for (let x = r.x0 + (0.8 + 0.6 * hsh(1 + row)) * t, i = 0; x < r.x1 - 0.5 * t; x += (1.6 + 0.8 * hsh(2 + i + 9 * row)) * t, i++) {   // cracks a tile long
+      let cx = x, j = 0; for (let y = y0; y < Math.min(r.y1 - P, y0 + 1.1 * t); y += 2 * P) { box(snap(cx), snap(y), snap(cx) + P, snap(y) + 2 * P, PAL.black, 1, 0, 10, 0); cx += hsh(i * 13 + j++ + 31 * row) < 0.5 ? -P : P; }
+    }
+    for (let x = r.x0 + 0.4 * t, i = 0; x < r.x1 - 0.3 * t; x += (0.5 + 0.5 * hsh(30 + i)) * t, i++) box(snap(x), snap(r.y1 - (1 + Math.round(2 * hsh(50 + i))) * P), snap(x + (0.15 + 0.2 * hsh(70 + i)) * t), r.y1, PAL.black, 1, 0, 10, 0);   // notches in its underside
+    const sy = snap(r.y0 + 0.16 * t);
+    box(r.x0, r.y0, r.x1, sy, PAL.white, 1, 0, 10, 0);   // the snow
+    for (let x = r.x0, i = 0; x < r.x1; x += 0.35 * t, i++) box(snap(x), sy, snap(Math.min(r.x1, x + 0.35 * t)), sy + (1 + Math.round(2 * hsh(90 + i))) * P, PAL.white, 1, 0, 10, 0);   // its lumpy edge
+    if (!wl) box(r.x0, sy, r.x0 + 2 * P, snap(r.y0 + 0.4 * t), PAL.white, 1, 0, 10, 0);   // a drip over a free end
+    if (!wr) box(r.x1 - 2 * P, sy, r.x1, snap(r.y0 + 0.35 * t), PAL.white, 1, 0, 10, 0);
+    return true;
+  };
   const townRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
     if (r.ac) {   // an air conditioner (aircon; owner: you may stand on it, for 3 s): its top edge white, and once stood on it rattles, harder as it gives way
@@ -2939,7 +3029,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);

@@ -134,6 +134,24 @@ ELEMENTS = {
                        where='on the top of a ledge by the wall, one or a few in a row', material='snow, two leaves, two berries',
                        size='about 0.8 tiles wide and 0.6 tiles tall', inks='snow in grey with white glints, green leaf ears, orange berry eyes (never red: red is danger)',
                        scene=FUJI_AT),
+    'fuji-hut': dict(world='fuji', kind='prop', what='a little mountain hut (yama-goya) with a warm lit window, snow on its roof, a lantern by its door',
+                     where='built against the shaft wall at the wall end of a ledge, standing on the ledge, as part of the back', material='old wooden boards, a small '
+                     'paper window, a snowy roof', size='about 3 tiles wide and 2.5 tiles tall', inks='blue or grey wooden walls, a warm orange window glowing with a dither '
+                     'halo, the snow on the roof grey with white glints', scene=FUJI_AT),
+    'fuji-yukidaruma': dict(world='fuji', kind='prop', what='a yukidaruma, a Japanese snowman: two snowballs, a little bucket on its head, charcoal eyes, a cosy scarf',
+                            where='on the top of a ledge by the wall', material='snow, a bucket, charcoal, a knitted scarf', size='about 1 tile wide and 1.5 tiles tall',
+                            inks='snow in grey with white glints, an orange or blue bucket, black eyes, a green or blue scarf (never red: red is danger)', scene=FUJI_AT),
+    'fuji-hoshigaki': dict(world='fuji', kind='prop', what='strings of dried persimmons (hoshigaki) hanging in rows to dry, as under the eaves of a farmhouse',
+                           where='hanging from a short beam off the shaft wall', material='persimmons on strings, a wooden beam', size='three to five strings, each about '
+                           '2 tiles long with six fruit', inks='orange fruit with small green or grey stalks, grey strings, a grey beam', scene=FUJI_AT + ' below them'),
+    'fuji-cranes': dict(world='fuji', kind='prop', what='a pair of red-crowned cranes (tancho), elegant and cute, dancing or flying',
+                        where='flying across the back of the shaft, far behind the play', material='feathers', size='each about 2 tiles wide',
+                        inks='grey bodies (white would read as the hero or an edge to stand on), black neck and wing tips, a small orange crown (never red)',
+                        scene=FUJI_AT + ' lower down'),
+    'fuji-far': dict(world='fuji', kind='prop', what="Mount Fuji far away: its snowy cone and a few soft clouds, seen in the far background between the shaft's walls",
+                     where='far behind everything, filling the width of the shaft, low and faint, so the play reads over it', material='the mountain, snow, clouds',
+                     size='about 14 tiles wide and 6 tiles tall', inks='the mountain in a faint blue dither on the black, its snowy top grey with a few white glints, '
+                     'the clouds a faint grey dither', scene=FUJI_AT + ' in front of it'),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',

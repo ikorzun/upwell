@@ -2003,6 +2003,7 @@ vec3 snapPal(vec3 c) {   // the nearest of the nine, for anything that came in a
 // The well: black, a sparse grid of the world's ink drifting at half the climb (so a climb
 // reads as motion even past bare wall), and the walls in that ink striped with black,
 // fixed to the world, with a lip line along the well.
+const BG_DOTS = 0.25;   // the dot grid's strength over the black (owner: the dots at the least brightness): the one tone off the nine
 const BG_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
 uniform vec2 uShake; uniform vec2 uWalls; uniform float uPix;
 uniform vec3 uTop, uBot, uDots, uWall, uWallD, uLip; uniform float uGrad, uH, uWin;
@@ -2027,7 +2028,7 @@ void main() {
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(6.0, 8.0)), iw = wp - cw * vec2(6.0, 8.0);
     float bx = wp.x - 36.0 * floor(wp.x / 36.0), h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
     if (bx < 30.0 && iw.x >= 2.0 && iw.x < 4.0 && iw.y >= 3.0 && iw.y < 6.0 && h < 0.2) c = uDots;
-  } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = uDots;
+  } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // a dot, faint (BG_DOTS)
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
     c = ((g.x + g.y) & 3) == 0 ? uWallD : uWall;

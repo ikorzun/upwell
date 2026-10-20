@@ -2456,7 +2456,8 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   const dot = (ux, uy, ax, ay, c) => { frame(ux, uy, ax, 0, 0, ay); put(c[0], c[1], c[2], 0); };   // an upright oval in one ink
   // The hero's helmet (b.helmet): the moto one while the smash is on (user: in place of its pips), the astro one in an astro's flight. An astro one goes under the face, which
   // shows in its window: a white dome, grey on its right, the window's black rim, and in it the hero's own colour.
-  if (b.helmet === 'astro') { dot(0.1, 0.05, 1.03, 1.02, PAL.gray); dot(-0.05, -0.04, 0.96, 0.97, PAL.white); dot(0.93, 0.1, 0.12, 0.22, PAL.gray); dot(0, 0.13, 0.68, 0.49, ink); dot(0, 0.13, 0.56, 0.38, b.color.base); }
+  const kolo = this.kolobok >= 0 && b === game.hero && b.color.id === save.color;   // the Dark Forest's hero, a Kolobok (see kolobokFace)
+  if (b.helmet === 'astro') { dot(0.1, 0.05, 1.03, 1.02, PAL.gray); dot(-0.05, -0.04, 0.96, 0.97, PAL.white); dot(0.93, 0.1, 0.12, 0.22, PAL.gray); dot(0, 0.13, 0.68, 0.49, ink); dot(0, 0.13, 0.56, 0.38, kolo ? KOLOBOK.base : b.color.base); }
   gumWriteFace.call(this, b, X, Y, cx, cy);
   const closed = fc.squint > 0.45, lx = fc.lx * 0.05, ly = fc.ly * 0.035, [ex, ey] = f.eye, [rx, ry] = f.eyeR, m = f.mouthW;
   if (fc.frown) {
@@ -2474,7 +2475,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
     if (fc.surprise <= 0.35) { frame(f.mouth[0], f.mouth[1] + m * 0.42, m * 0.5, 0, 0, m * 0.36); put(THEME.blush[0], THEME.blush[1], THEME.blush[2], 0); }
   }
-  if (this.kolobok >= 0 && b === game.hero && b.color.id === save.color) kolobokFace(this, b, dot, frame, put, f, fc);   // (over Gum's face, under a helmet)
+  if (kolo && b.helmet !== 'astro') kolobokFace(this, b, dot, frame, put, f, fc);   // (over Gum's face, under the moto helmet; none in the astro one's window)
   if (b.helmet === 'moto') {   // a moto one over the face: a shell over the brow, red (white on a red hero), a stripe down its crown of
     // the other with a grey side, goggles across the eyes with blue lenses that look where the eyes look, a glint; the mouth shows under it
     const shell = b.color.base === PAL.red ? PAL.white : PAL.red, stripe = shell === PAL.red ? PAL.white : PAL.red;

@@ -1,5 +1,5 @@
 {
- "commit": "930605c",
+ "commit": "694d051",
  "made": "2026-10-20",
  "levels": {
   "c1-1": {
@@ -148,12 +148,12 @@
   },
   "c2-10": {
    "result": "won",
-   "time": 16,
+   "time": 26.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
-   "boss": "Cork",
-   "dealt": "5/5"
+   "boss": "Minecart",
+   "dealt": "6/6"
   },
   "c3-1": {
    "result": "clear",
@@ -317,12 +317,12 @@
   },
   "c4-10": {
    "result": "won",
-   "time": 26.5,
+   "time": 16,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
-   "boss": "Minecart",
-   "dealt": "6/6"
+   "boss": "Cork",
+   "dealt": "5/5"
   },
   "c5-1": {
    "result": "clear",

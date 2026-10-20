@@ -48,6 +48,11 @@ WORLDS = {
                 'bamboo and cedar, gardens with koi ponds and stone lanterns, sakura in full bloom', 'orange #faa23e',
                 'green is moss you can hold on to, purple marks springs and rubber walls, blue is ice and moving planks, grey blocks crumble',
                 'the black spring night, nothing far off'),
+    # (owner 2026-10-20: the whole game in Japan; a world of rivers, the sea and an island between Fuji and Tokyo, its colour a turquoise sky blue)
+    'sea': ('the Sea', 'the Japanese seaside in summer, cosy and cute, kawaii: a fishing village on an island, wooden jetties and boathouses over the water, '
+            'a torii standing in the sea, rocky shores with pine trees, a river running down to the sea under an arched bridge, the lanterns of night fishing boats',
+            'aqua #6fe0ee', 'white is wet rock you slip on (a whole block of it), green is seaweed you can hold on to, purple marks springs and rubber walls, '
+            'orange marks boats and planks that move, grey blocks crumble', 'the black summer night by the sea, nothing far off'),
     'blocks': ('the Tower Blocks', 'a housing estate of concrete tower blocks, a danchi, at night: raw concrete panels, balconies with bars, riser pipes, '
                'satellite dishes, stairwells', 'grey #c8c8c8', 'blue marks moving platforms and springs, orange blocks crumble, green is moss you can hold on to',
                'the black night, a regular grid of windows far off'),
@@ -62,6 +67,7 @@ LEDGE_AT = 'a purple concrete ledge with a white top edge sticking out of the wa
 CAVE_AT = 'a grey stone ledge with a white top edge sticking out of the wall'
 FUJI_AT = 'a blue rock ledge with a soft cap of snow and a white top edge sticking out of the wall'
 VILLAGE_AT = 'an orange earthen terrace ledge with a white top edge sticking out of the wall'
+SEA_AT = 'an aqua rock ledge with a white top edge sticking out of the wall'
 SAKURA = 'sakura blossom in purple, the nearest the palette has to pink (never red, never white)'
 FUJI_RULE = ('In this world white is ice you slip on (a whole block or wall of white), grey blocks crumble and purple marks moving planks and springs: '
              'so the snow is only a cap on top, and its top is the white edge you stand on.')
@@ -220,6 +226,51 @@ ELEMENTS = {
     'village-far': dict(world='village', kind='prop', what='the countryside far away: terraced hills, a village of thatched roofs and sakura, seen far behind the shaft',
                         plane='back', where='far behind everything, low and faint, so the play reads over it', material='hills, terraces, roofs, trees',
                         size='about 14 tiles wide and 6 tiles tall', inks='a faint orange and a faint purple dither on the black', scene=VILLAGE_AT + ' in front of it'),
+    'sea-slab': dict(world='sea', kind='ledge', what='the basic ledge, a ledge of sea-worn rock sticking out of the shaft wall, as on a rocky shore',
+                     does='solid on every side: you stand on it, cling to its sides and jump off it', material='smooth rock worn by the sea, a little tide pool, barnacles '
+                     'and limpets, a tiny crab', size='4 tiles long and 1 tile thick', main='aqua (the rock)'),
+    'sea-plank': dict(world='sea', kind='ledge', what='a little wooden jetty: boards on two beams, a mooring rope tied to it', does='a thin platform: you jump up '
+                      'through it from below and stand on it', material='weathered wood, rope', size='4 tiles long and a third of a tile thick',
+                      place='the jetty sticking out of that wall', main='aqua (painted wood)', vary='the boards and the gaps between them, the beams and posts under '
+                      'it, how it is fixed to the wall, and the small details on it (a mooring post, a coil of rope, a paper lantern, a bucket)'),
+    'sea-boat': dict(world='sea', kind='ledge', what='a moving platform of the seaside', does='a thin platform that rides sideways along its row, from wall to wall '
+                     'and back, carrying you; you jump up through it from below and stand on it', material='wood, rope, a shell', size='3 tiles long, its top a third '
+                     'of a tile thick', place='the moving platform in the middle of the shaft', main='orange',
+                     vary='what it is: A and B a little wooden boat hung from a rope across the shaft (a rope ferry), C and D a big sea turtle swimming through the '
+                     'air with you on its shell (as in the tale of Urashima Taro), E and F a raft riding a thin stream of water that runs across the shaft; and the '
+                     'small details on it (a lantern on a pole, an oar, a basket of fish)', rule="Orange is this world's mark for what moves, so it is its main colour."),
+    'sea-raft': dict(world='sea', kind='ledge', what='a raft of old driftwood logs lashed with rope, whose logs give way under you', does='a row of logs you stand '
+                     'on, that come apart a moment after you touch them and come back a while later', material='driftwood logs, frayed rope, a little seaweed',
+                     size='4 tiles long and 1 tile thick', place='the raft sticking out of that wall', main='grey', vary='the logs and the gaps between them, the '
+                     'rope lashings, how it is tied to the wall, and the small details on it (a float, a shell, a starfish)',
+                     rule="Grey is this world's mark for what crumbles, so it is its main colour."),
+    'sea-lighthouse': dict(world='sea', kind='prop', what='a little lighthouse (todai) on a rock, its lamp lit', where='on the top of a ledge at its wall end',
+                           material='a round tower of painted stone, a lamp room of glass, a little gallery round it', size='about 1.5 tiles wide and 4 tiles tall',
+                           inks='a tower in bands of aqua and grey (no white), the lamp lit orange with a yellow core (a light), a black door', scene=SEA_AT),
+    'sea-net': dict(world='sea', kind='prop', what='fishing nets hung to dry on bamboo poles, round glass floats (ukidama) caught in them', where='on the top of a '
+                    'ledge, along it', material='a net of knotted rope, bamboo poles, glass floats', size='about 4 tiles wide and 2.5 tiles tall',
+                    inks='a grey net, orange poles, floats in blue, green and purple with a glint (no white)', scene=SEA_AT),
+    'sea-gull': dict(world='sea', kind='prop', what='a seagull (kamome) standing on a mooring post, cute', where="on a short mooring post at a ledge's free end",
+                     material='feathers, a wooden post', size='the gull about 1 tile tall, the post 1 tile tall', inks='a grey gull with black wing tips and an orange '
+                     'beak and feet (no white), an orange post', scene=SEA_AT),
+    'sea-octopus': dict(world='sea', kind='prop', what='octopus pots (takotsubo) stacked by the water, a little octopus peeking out of one', where='on the top of a '
+                        'ledge at its wall end', material='clay pots, ropes, a soft octopus', size='about 2 tiles wide and 1.5 tiles tall',
+                        inks='orange clay pots, a purple octopus with big black eyes (never red), grey ropes', scene=SEA_AT),
+    'sea-flags': dict(world='sea', kind='prop', what='tairyo-bata, the bright big-catch flags of a fishing boat, flying on a pole: a fish, waves and a rising sun on '
+                      'them', where="on a pole standing at a ledge's wall end", material='cloth flags, a bamboo pole', size='the pole about 4.5 tiles tall, each flag '
+                      'about 2 tiles wide', inks='flags in blue, purple, orange and green with black and grey patterns, the rising sun orange (never red), a grey pole',
+                      scene=SEA_AT),
+    'sea-house': dict(world='sea', kind='prop', what='a funaya, a little boathouse built over the water as in Ine, whose door is a way into a shop or a stash',
+                      where='built against the shaft wall at a ledge, its door open, a noren hanging in it', material='wooden walls, a tiled roof, its boat bay below at '
+                      'the water, a noren', size='about 3.5 tiles wide and 3.5 tiles tall', inks='aqua and grey wooden walls, a dark grey tiled roof, a warm orange '
+                      'window glowing, the noren red or purple', scene=SEA_AT),
+    'sea-wave': dict(world='sea', kind='prop', what="the Great Wave far away, as in Hokusai's print: a big curling wave with claws of foam, a tiny Fuji under it",
+                     plane='back', where='far behind everything, low and faint, so the play reads over it', material='water, foam', size='about 10 tiles wide and '
+                     '6 tiles tall', inks='the wave a faint aqua dither on the black, its foam a faint grey (no white)', scene=SEA_AT + ' in front of it'),
+    'sea-far': dict(world='sea', kind='prop', what='the sea far away: islands with pines on them, a torii standing in the water, a river running into the sea '
+                    'under an arched bridge, the lights of night fishing boats', plane='back', where='far behind everything, low and faint, so the play reads over it',
+                    material='water, islands, pines, a torii, a bridge, boats', size='about 14 tiles wide and 6 tiles tall', inks='a faint aqua and a faint orange '
+                    'dither on the black (no white)', scene=SEA_AT + ' in front of it'),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',
@@ -312,7 +363,7 @@ Each cell is a scene from the game: {night}, the shaft wall as a thin vertical s
 Keep in every variant: the same size, the same job in play, a white top edge to stand on, {main} as its main colour.
 Vary between the variants: {vary}. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
-{style} Use only these nine colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+{style} Use only these ten colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
@@ -322,7 +373,7 @@ Each cell is a scene from the game: {night}, the shaft wall as a thin vertical s
 Keep in every variant: the same size and place, a silhouette that reads at a glance on a phone screen, and nothing on the prop that looks like something to stand on: no white top edges.
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
-{style} Any glow is a dither too. Use only these nine colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
+{style} Any glow is a dither too. Use only these ten colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
 BOSS = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
 {refnote}The boss of the world "{world}" ({mood}), drawn as a Japanese yokai that belongs in this place. It is in the foreground, the play itself: full colour.
 Its fight: {does} Its size: {size}; {grid}
@@ -330,14 +381,14 @@ Draw six variants in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D,
 Each cell is a scene from the fight: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place}, the boss in flat side view at game scale, and the hero for scale: a soft round white blob 2 tiles across with two small black eyes.
 Keep in every variant: the same size and the same fight, {main} as its main colour, a face that reads at a glance on a phone (big eyes, an angry brow, a mouth), and a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {parts}. Cute and a little spooky, never gory: the game is for everyone.
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
-{style} Use only these nine colours: {inks9}. The world's own colour is {ink}. {rule} White only for the hero, the edges you stand on and tiny glints; red only for danger: the boss flashes red when it is hit, so it is never red itself; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+{style} Use only these ten colours: {inks9}. The world's own colour is {ink}. {rule} White only for the hero, the edges you stand on and tiny glints; red only for danger: the boss flashes red when it is hit, so it is never red itself; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 # The camera's depth (owner 2026-10-19; the game's DEPTH): the play in full colour; the midground (props on or off the play) solid but with no white and no
 # yellow except a light's own core; the background (behind the shaft) at a quarter of one ink over the black, no white, the least detail.
 PLANES = {'mid': 'It is in the midground, standing on or hanging off the play: solid colours, but no white and no yellow except the core of a light (a lamp\'s glass, '
                  'a candle\'s flame).',
           'back': 'It is in the background, behind the shaft: draw it in one colour at about a quarter of its strength over the black (a dark, dim tone of it), '
                   'no white, the least detail, so the play reads over it.'}
-INKS9 = 'black #141414, white #f3f3f3, grey #c8c8c8, blue #5bb8ff, orange #faa23e, purple #c996ff, green #339c39, red #f43e34, yellow #ffed57'
+INKS9 = 'black #141414, white #f3f3f3, grey #c8c8c8, blue #5bb8ff, orange #faa23e, purple #c996ff, green #339c39, red #f43e34, yellow #ffed57, aqua #6fe0ee'   # (aqua: the sea's, owner 2026-10-20)
 GRID = 4   # image pixels an art pixel: a 512 x 512 cell is 8 x 8 tiles
 GRIDNOTE = ('one tile is 16 art pixels, and every art pixel is an exact 4 x 4 square of image pixels on one fixed grid, so a tile is 64 x 64 image pixels '
             'and the hero, 2 tiles across, is 128 image pixels wide.')
@@ -347,7 +398,7 @@ REFNOTE = ('The attached image is a real screenshot of this world in the game at
            'colours, its dither patterns (the wall\'s diagonal stripes, the rows of dots and lines that shade a ledge, the checker), its white top edges, the hero '
            'and its line weights. Do not copy its layout: draw the sheet described here.\n')
 PAL9 = [(0xf3, 0xf3, 0xf3), (0xc8, 0xc8, 0xc8), (0x5b, 0xb8, 0xff), (0xfa, 0xa2, 0x3e), (0xc9, 0x96, 0xff), (0x33, 0x9c, 0x39), (0xf4, 0x3e, 0x34),
-        (0xff, 0xed, 0x57), (0x14, 0x14, 0x14)]   # the nine inks, black last: a block split evenly goes to the colour
+        (0xff, 0xed, 0x57), (0x6f, 0xe0, 0xee), (0x14, 0x14, 0x14)]   # the ten inks (aqua the sea's), black last: a block split evenly goes to the colour
 
 
 def prompt(el: str, ref: bool = False) -> str:
@@ -392,10 +443,10 @@ def snap(src: str, dst: str, k: int = GRID) -> None:
     thr = (B4[(yy // k) % 4, (xx // k) % 4] + 0.5) / 16
     L, sat = lum(a), a.max(-1) - a.min(-1)
     ramp = lambda t: np.clip((t - 0.25) / 0.5, 0, 1)   # a tone within a quarter of an ink is that ink: only the middle is dithered (no dotted flats)
-    WH, GR, BL = 0, 1, 8   # PAL9's white, grey, black
+    WH, GR, BL = 0, 1, 9   # PAL9's white, grey, black
     lw, lg, lb = lum(pal[WH]), lum(pal[GR]), lum(pal[BL])
     grey = np.where(L < lg, np.where(ramp((L - lb) / (lg - lb)) > thr, GR, BL), np.where(ramp((L - lg) / (lw - lg)) > thr, WH, GR))
-    hues = np.arange(2, 8)   # blue, orange, purple, green, red, yellow
+    hues = np.arange(2, 9)   # blue, orange, purple, green, red, yellow, aqua
     ca, ch = a - a.min(-1, keepdims=True), pal[hues] - pal[hues].min(-1, keepdims=True)
     cos = (ca @ ch.T) / (np.linalg.norm(ca, axis=-1, keepdims=True) * np.linalg.norm(ch, axis=-1) + 1e-6)
     hue = hues[cos.argmax(-1)]

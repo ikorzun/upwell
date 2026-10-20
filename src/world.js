@@ -341,7 +341,7 @@ const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // `shells` by phase); rests `rest` s, winds up `wind` s (backing off, flat, flashing) and dashes wall to wall at `dash`
 // R/s, its wall shaking `icicles` down by phase. Its top is hard; a shell rolled into it turns it belly up for `flip` s.
 // It keeps still its first `calm` s, while its name is up (the plan: an encounter starts safe).
-// The Minecart (BOSSES.cart, world 3): `size` R, rides its rail end to end in `pass` s by phase, lobs blobs (two from its
+// The Minecart (BOSSES.cart, the Cave's): `size` R, rides its rail end to end in `pass` s by phase, lobs blobs (two from its
 // second phase) every `spit` s after winding up `wind` s, creaks `creak` s at an end and tips three rocks (`rock` R) down.
 // From its second phase the bridges go in `crumble[0]` s and come back in `crumble[1]`; in its third the lifts run `lifts` times as fast.
 // In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it. It keeps still its first `calm` s.
@@ -561,8 +561,9 @@ const BONUS = [
 // adds as they go (0: dives only, 1: drops goo as it hovers too, 2: calls crawlers too: one thing more a phase, the digest
 // §5); what it says coming in (by turns), when the hero dies (a quip) and when it is beaten. The lines under eight words.
 // `ink` its colour (owner, 2026-10-20: each its own; never red, it flashes red when hit, nor yellow or white: what can be taken, the hero).
+// The Cork's dive went to the Village and the Minecart to the Cave (owner, 2026-10-20): the colours stayed with the worlds, the Village's boss blue, the Cave's orange.
 const BOSSES = {
-  probka: { name: { en: 'Cork', es: 'Tapón', pt: 'Rolha', ja: 'コルク' }, ink: 'orange', hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  probka: { name: { en: 'Cork', es: 'Tapón', pt: 'Rolha', ja: 'コルク' }, ink: 'blue', hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
     intro: [{ en: "It's warm here. Why climb?", es: 'Aquí se está calentito. ¿Para qué subir?', pt: 'Aqui é quentinho. Pra que subir?', ja: 'ここは あったかい。なんで のぼるの？' },
       { en: 'Shoo. This spot is mine.', es: 'Fuera. Este sitio es mío.', pt: 'Xô. Esse lugar é meu.', ja: 'しっしっ。ここは わたしの ばしょ。' },
       { en: 'Nobody gets past the Cork.', es: 'Nadie pasa del Tapón.', pt: 'Ninguém passa da Rolha.', ja: 'コルクの さきへは いかせない。' }],
@@ -580,8 +581,8 @@ const BOSSES = {
     top: { en: 'Hard on top. Roll a shell at it!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
     hint: { en: 'Flipped! Land on its belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
     how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
-  // World 3's: the Minecart (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
-  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, ink: 'blue', design: 'loaf', size: CART.size, rail: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  // The Cave's: the Minecart (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
+  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'No outsiders in the pit!', es: '¡Prohibido entrar a la mina!', pt: 'Proibido entrar na mina!', ja: 'ぶがいしゃは たちいり きんし！' },
       { en: "Mind the rocks. Or don't.", es: 'Cuidado con las rocas. O no.', pt: 'Cuidado com as pedras. Ou não.', ja: 'いわに きをつけな。' },
       { en: 'My rail, my rules.', es: 'Mi riel, mis reglas.', pt: 'Meu trilho, minhas regras.', ja: 'わたしの レール、わたしの ルール。' }],
@@ -672,7 +673,7 @@ const CAMPAIGN = [
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
 ] },
-// World 2, the Cave (at first world 1): its moss, rubber walls; the Cork. The basics are Tokyo's to teach now: its levels do not teach them again.
+// World 2, the Cave (at first world 1): its moss, rubber walls; the Minecart. The basics are Tokyo's to teach now: its levels do not teach them again.
 { world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
   { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: [], foes: 0, candy: [], safe: true, seed: 3111 },
   { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
@@ -685,7 +686,7 @@ const CAMPAIGN = [
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, buddha: true, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
-  { role: 'boss', boss: 'probka', moss: true },   // moss on its arena's walls: a place to sit its dive out
+  { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
@@ -708,7 +709,7 @@ const CAMPAIGN = [
   { role: 'boss', boss: 'puck', ice: true },   // an ice floor, icicles over it
 ] },
 // World 4, the Mine (at first world 3): crumbling blocks and bridges, the Fizz, spitters, the pit's waves and a fat
-// spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Minecart. Its runes: crossed picks, a block of
+// spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Cork's dive. Its runes: crossed picks, a block of
 // ore, a turn (those tired of climbing began to dig sideways). The worm stays in the random run (user).
 { world: WORLDS[2], runes: 'LnY', lore: { en: 'Those tired of climbing\nbegan to dig sideways.', es: 'Los cansados de subir\nempezaron a cavar de lado.', pt: 'Os cansados de subir\ncomeçaram a cavar de lado.', ja: 'のぼるのに つかれた ものは\nよこへ ほりはじめた。' }, levels: [
   { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutShop', 'tutEnemy', 'tutHelmet', 'tutMix', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
@@ -727,7 +728,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['fizz'], seed: 4102 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'cart', rail: true },   // its rail under the ceiling, moss over its ends
+  { role: 'boss', boss: 'probka', moss: true },   // the Cork's dive (owner, 2026-10-20: the first boss's fight); moss on its arena's walls: a place to sit its dive out
 ] },
 // World 5, the Tower Blocks (the user's Soviet brutalism; its kit in the renderer, see THEMES.blocks): stairs you walk up, old balconies
 // that give way, old mattresses that bounce, then winter (icicles off the roofs, the twist); the Crane. Its runes: a frame, a tower, two

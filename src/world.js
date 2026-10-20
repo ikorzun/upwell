@@ -251,6 +251,7 @@ const neonSign = (lv, k) => {
 const NEON_REACH = 3;   // in R: a sign lights with the hero this near it (as near as a crow lets it come, FOLK.flee)
 const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.5 * lv.tile;   // a sign the hero can get to: some of it between the level's floor and its cap
 const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
+const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plank): its frame's height over its floor and its pulley's over that, in tiles (its cable runs there)
 const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
@@ -349,7 +350,7 @@ const FOE_COLOR = {
 const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
   slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: Object.assign(theme(PAL.gray), { shrine: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { pit: true }),   // pit: the Mine's kit (see mineRect)
+  cave: Object.assign(theme(PAL.gray), { shrine: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { village: true }),   // the Village's kit (see villageRect; the Mine's world, its id kept)
  
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
@@ -443,7 +444,8 @@ const WORLDS = [
   { id: 'ice', name: { en: 'Glacier', es: 'Glaciar', pt: 'Geleira', ja: 'ひょうが' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1, fork: 1, fork2: 1, vault: 1 },
     foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { en: 'ice blocks, circlers and shells', es: 'bloques de hielo, rondadores y caparazones', pt: 'blocos de gelo, rondadores e cascos', ja: 'こおり ブロック、グルグル、こうら' } }] },
-  { id: 'mine', name: { en: 'Mine', es: 'Mina', pt: 'Mina', ja: 'こうざん' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1], magnet: 0.25,
+  // The Mine became the Village (owner, 2026-10-20: the Japanese countryside in spring); its id stays 'mine' (the saves, its music).
+  { id: 'mine', name: { en: 'Village', es: 'Aldea', pt: 'Aldeia', ja: 'むら' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1], magnet: 0.25,
     chunks: { crumble: 3, bridge: 3, lift: 3, planks: 2, shelves: 2, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1, fork2: 2, vault: 1 },
     foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2, worm: 1 },
     intro: [{ news: { en: 'bridges, lifts, spitters and splitters', es: 'puentes, elevadores, escupidores y divisores', pt: 'pontes, elevadores, cuspidores e divisores', ja: 'はし、リフト、ペッペ、ブンレツ' } }, {}, { news: { en: 'spikes', es: 'pinchos', pt: 'espinhos', ja: 'トゲ' } }] },
@@ -2375,6 +2377,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const door = (d, kind) => {
     if (th.shrine && kind !== 'exit') { torii(d, kind); return; }   // the Cave's (see torii)
     if (th.fuji && kind !== 'exit') { hut(d, kind); return; }   // Mount Fuji's (see hut)
+    if (th.village && kind !== 'exit') { farmhouse(d, kind); return; }   // the Village's (see farmhouse)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -2459,6 +2462,65 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
     }
   };
+  // The Village's door into a shop or a stash (the owner's picks, research/variants/village-house-1-px.png: "E, D"): a thatched farmhouse built round the
+  // doorway on the ledge (E's stilts and stair left out: the way in is at the ledge), 64 of the sheet's pixels a tile. The shop's (E): a steep thatch under a
+  // ridge beam, wooden posts, a lit lattice window, a red noren in the doorway (the owner's shop red) with a white crest, a potted bush by it. The stash's (D):
+  // a thatch in two tiers under a dark ridge, grey posts on a stone footing, a lit window, a purple noren, a lantern off a bracket. What is inside bobs in the
+  // doorway; sparks rise past it.
+  const farmhouse = (d, kind) => {
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple, y1 = d.y1, px = P / t;
+    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
+    const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
+    const on = (u) => lv.rects.some((q) => !q.gone && Math.abs(q.y0 - y1) < 2 && Math.min(X(u - 0.3), X(u + 0.3)) >= q.x0 && Math.max(X(u - 0.3), X(u + 0.3)) <= q.x1);   // its ledge goes on out under u
+    const roof = (u0, u1, w0, w1, v0, v1) => {   // a thatch: rows from (u0, u1) at its eave v0 in to (w0, w1) at v1, sparse dots in the straw, its eave ragged
+      const n = Math.max(1, Math.round(((v1 - v0) * t) / (2 * P)));
+      for (let i = 0; i < n; i++) { const q = (i + 0.5) / n; bx(u0 + (w0 - u0) * q, v0 + ((v1 - v0) * i) / n, u1 + (w1 - u1) * q, v0 + ((v1 - v0) * (i + 1)) / n, th.block, 1); }
+      bx(u0, v0 - px, u1, v0, th.block, 4);
+    };
+    const dx = X(1.25), dw = sn(0.7 * t), eave = shop ? 2.6 : 2.2, dh = shop ? 2.1 : 2.0, noren = shop ? 0.75 : 0.85;
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    if (shop) {
+      bx(0, 0, 3.9, eave, PAL.black);   // its front, dark between its posts
+      for (const u of [0.3, 2.15, 3.72]) bx(u, 0, u + 0.18, eave, th.block, 4);   // wooden posts (E's, chequered), the beam over them
+      bx(0, eave - 0.18, 3.9, eave, th.block, 4);
+      F(X(2.97), Y(1.7), 0.75 * t, 0, 0, 0.65 * t, PAL.orange, 0.45, 1); bx(2.4, 1.15, 3.55, 2.25, PAL.orange);   // the lit window, its lattice
+      for (const u of [2.78, 3.17]) bx(u, 1.15, u + px, 2.25, PAL.black);
+      bx(2.4, 1.7, 3.55, 1.7 + px, PAL.black);
+      roof(-0.25, 4.15, 0.75, 3.15, eave, 4.35);   // E's steep thatch, its ridge beam, a flick up at its end
+      bx(0.85, 4.35, 3.05, 4.6, th.block, 4); bx(3.05, 4.5, 3.15, 4.72, th.block);
+      if (on(4.5)) {   // a potted bush by the house (E's): its pot, the bush lumpy
+        bx(4.32, 0, 4.68, 0.32, th.block); bx(4.28, 0.32, 4.72, 0.4, th.block, 4);
+        for (const [u, v, rr] of [[4.5, 0.68, 0.32], [4.3, 0.6, 0.18], [4.7, 0.62, 0.18]]) F(X(u), Y(v), rr * t, 0, 0, 0.85 * rr * t, PAL.green, 1, 0);
+      }
+    } else {
+      bx(0, 0, 3.35, eave, PAL.black);
+      bx(0, 0, 3.35, 0.3, PAL.gray, 2);   // a stone footing (D's dotted grey), grey posts on it, the beam over them
+      for (const u of [0.3, 2.12, 3.18]) bx(u, 0.3, u + 0.13, eave, PAL.gray, 2);
+      bx(0, eave - 0.13, 3.35, eave, PAL.gray, 2);
+      F(X(2.7), Y(1.4), 0.6 * t, 0, 0, 0.6 * t, PAL.orange, 0.45, 1); bx(2.36, 0.9, 3.04, 1.9, PAL.orange);   // the lit window, its lattice
+      for (const u of [2.58, 2.81]) bx(u, 0.9, u + px, 1.9, PAL.black);
+      for (const v of [1.23, 1.57]) bx(2.36, v, 3.04, v + px, PAL.black);
+      roof(-0.35, 3.7, -0.1, 3.45, eave, 2.85); roof(0.35, 3.05, 0.6, 2.8, 2.85, 3.5);   // D's thatch in two tiers, its ridge dark
+      bx(0.85, 3.5, 2.55, 3.72, PAL.gray, 0, DIM);
+      if (on(4.1)) {   // a lantern off a bracket (D's): its post and arm, the cord, the lantern lit
+        bx(3.5, 0, 3.62, 2.05, th.block, 4); bx(3.5, 1.95, 4.25, 2.05, th.block, 4); bx(4.11, 1.8, 4.11 + px, 1.95, PAL.gray);
+        F(X(4.12), Y(1.52), 0.5 * t, 0, 0, 0.5 * t, PAL.orange, 0.4, 1); bx(3.97, 1.25, 4.27, 1.8, PAL.orange); bx(3.97, 1.51, 4.27, 1.51 + px, PAL.black);
+      }
+    }
+    bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
+    F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
+    bx(0.55, dh - noren, 1.95, dh, c);   // the noren in three panels, a white crest on its middle one
+    for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.2, PAL.black);
+    for (const [u, v] of [[1.25, dh - 0.22], [1.15, dh - 0.38], [1.35, dh - 0.38]]) bx(u - px, v - px, u + px, v + px, INK.white);
+    const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
+    if (shop) { const ry = Y(0.8); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
+    else { const ry = Y(0.55); for (let k = 0; k < 3; k++) disc(dx + (k - 1) * rr * 0.5, ry - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
+    for (let k = 0; k < 6; k++) {
+      const u = (T * 0.45 + k / 6) % 1, q = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + q * 2 * dw), spy = y1 - u * (eave * t + 2.5 * R);
+      const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;
+      if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
+    }
+  };
   // The Cave's door into a shop or a stash (the owner's pick, research/variants/cave-torii-1-px.png B: "the way into the cave or the shop; the shop's red"):
   // a torii framing the dark doorway, its top beam flared up at its ends, its tie beam through the posts, their feet dark, a shimenawa rope with paper
   // zigzags under it; inside, a glow breathing and what is in there, bobbing; sparks rising past it.
@@ -2520,6 +2582,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const rod = (x0, y0, x1, y1, c) => {   // a line a game pixel thick (an awning's rods, a bucket's handle)
     const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / kitP));
     for (let k = 0; k <= n; k++) { const x = snap(x0 + ((x1 - x0) * k) / n), y = snap(y0 + ((y1 - y0) * k) / n); box(x, y, x + kitP, y + kitP, c, 1, 0, 10, 0); }
+  };
+  const line = (x0, y0, x1, y1, c, a = 1, w = 1, tn = 0) => {   // a line w game pixels thick at any slope in one feature, a box turned along it (the Village's ropes, branches, blades)
+    const ax = (x1 - x0) / 2, ay = (y1 - y0) / 2, l = Math.hypot(ax, ay) || 1, hw = ((w + 0.1) * kitP) / 2;
+    F((x0 + x1) / 2, (y0 + y1) / 2, ax, ay, (-ay / l) * hw, (ax / l) * hw, c, a, 10, l, hw, tn);
   };
   if (th.town && lv.kind === 'well') {   // Tokyo's kit (THEMES.tokyo; see the parts catalog): whatever hangs, hangs on something. A utility pole up
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
@@ -2747,61 +2813,100 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
-  const MINE_CAP = 8 * kitT;   // the Mine's timber caps, a beat up its walls (and its lamps, every other cap; see the dark's lights)
-  const mineLamp = (side, k) => ((k % 2) + 2) % 2 === (side < 0 ? 0 : 1);
-  if (th.pit && lv.kind === 'well') {   // the Mine's kit (THEMES.mine; see the parts catalog): a timber prop up each wall, a cap beam off it every MINE_CAP on
-    // a knee brace, a mine lamp hanging off every other cap, sugar crystals in the rock between; ore carts parked at a ledge's wall end.
-    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
-    for (const side of [-1, 1]) {
-      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
-      const [p0, p1] = span(0.12 * t, 0.5 * t), mid = snap((p0 + p1) / 2);
-      box(p0, top, p1, bot, th.block, DIM, 0, 10, 0); box(mid, top, mid + P, bot, PAL.black, 1, 0, 10, 0);   // the prop, behind (DEPTH), its grain
-      for (let k = Math.floor(top / MINE_CAP) - 1; k * MINE_CAP < bot; k++) {
-        const y = k * MINE_CAP, [c0, c1] = span(0, 1.35 * t);
-        box(c0, y, c1, y + 0.3 * t, th.block, DIM, 0, 10, 0); box(c0, y + 0.3 * t - P, c1, y + 0.3 * t, PAL.black, 1, 0, 10, 0);   // its cap, a dark underside
-        for (let i = 0; i <= 6; i++) { const u = i / 6, x = snap(at((0.5 + 0.7 * u) * t)), yy = snap(y + 0.3 * t + 0.8 * t * (1 - u)); box(x - P, yy - P, x + P, yy + P, th.block, DIM, 0, 10, 0); }   // the knee brace
-        if (mineLamp(side, k)) {   // a lamp off the cap: a hook, a grey cage, white glass, a flame in it
-          const lx = snap(at(1.05 * t)), ly = y + 0.3 * t;
-          box(lx - P / 2, ly, lx + P / 2, ly + 0.3 * t, PAL.gray, DIM, 0, 10, 0);
-          box(lx - 0.2 * t, ly + 0.3 * t, lx + 0.2 * t, ly + 0.85 * t, PAL.gray, DIM, 0, 10, 0); box(lx - 0.12 * t, ly + 0.38 * t, lx + 0.12 * t, ly + 0.77 * t, PAL.white, LIT, 0, 10, 0);   // its glass a light (DEPTH)
-          disc(lx, ly + 0.6 * t, 0.07 * t, INK.flame, LIT);
+  const vlamps = [];   // the Village's stone lanterns lit on this screen (the dark's lights)
+  if (th.village) for (const r of lv.rects) if (r.plank && r.move && seen(r.y0 - 4 * kitT, r.y0)) {   // a yaen's cable across the shaft at its pulley, behind (DEPTH)
+    const cy = snap(r.y0 - snap(YAEN.frame * kitT) - YAEN.wheel * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.gray, DIM, 0, 10, 0);
+  }
+  if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
+    // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter
+    // (DIM): the countryside far off (F), its forest of cedars and bamboo purple, a farmhouse, a torii and terraces orange, keeping its place low on the screen; a
+    // bamboo grove up each wall (E, its red berries left out: one ink behind). In the midground (solid, no white, no yellow but a light's core), on ledges' wall
+    // ends by turns of height: a sakura in bloom (C), a scarecrow in young rice (F, its coat indigo for F's red: red is danger), a little Inari shrine, its foxes,
+    // a stone lantern and a branch of sakura out of the wall (D), koinobori flying off a pole (D). Nothing covers a door.
+    const t = kitT, P = kitP, px = P / t, mod = (k, n) => ((k % n) + n) % n;
+    const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
+    const clear = (x0, y0, x1, y1) => !atDoor(x0, y0, x1, y1) && !lv.rects.some((q) => !q.gone && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
+    const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick || r.magnet) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
+      && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+    {   // the countryside far off (F), low on the screen and sinking a little as the climb goes on
+      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
+      const fb = (u0, v0, u1, v1, c, tn = 0) => box(U(u0), V(v1), U(u1), V(v0), c, DIM, 0, 10, tn);
+      for (const [u0, u1, v] of [[-2.6, 7.9, 0.3], [-1.8, 7.2, 0.85], [-1.0, 6.4, 1.4], [-0.2, 5.4, 1.95]]) fb(u0, v, u1, v + px, PAL.orange);   // terraces
+      for (const [u, h] of [[-7.55, 6.2], [-7.15, 5.4], [-6.6, 6.6], [-6.2, 4.9]]) fb(u, 0, u + px, h, PAL.purple);   // bamboo
+      for (const [u, h] of [[-5.3, 4.6], [-4.3, 3.6], [-3.2, 4.2], [1.4, 3.9], [2.6, 4.8], [5.9, 4.4], [7.0, 3.5]]) {   // cedars: a trunk, three tiers
+        fb(u - px / 2, 0, u + px / 2, 0.4 * h, PAL.purple);
+        for (const [b0, h0, hw] of [[0.25, 0.4, 0.6], [0.45, 0.35, 0.47], [0.65, 0.35, 0.33]]) { const hd = (h0 * h * t) / 2; F(U(u), V(b0 * h) - hd, hw * t, 0, 0, hd, PAL.purple, DIM, 6, hw * t, hd, 2 * hw * t); }
+      }
+      fb(-1.6, 2.2, 0.4, 2.8, PAL.orange, 4); for (const u of [-1.25, -0.25]) fb(u, 2.35, u + 0.3, 2.6, PAL.black);   // a farmhouse, its windows dark
+      for (const [u0, u1, v0, v1] of [[-2.0, 0.8, 2.8, 3.1], [-1.75, 0.55, 3.1, 3.4], [-1.45, 0.25, 3.4, 3.7]]) fb(u0, v0, u1, v1, PAL.orange);   // its thatch
+      for (const u of [3.7, 4.55]) fb(u, 0.9, u + 2 * px, 2.7, PAL.orange);   // a torii: its posts, its beams, their ends turned up
+      fb(3.35, 2.7, 4.95, 2.9, PAL.orange); fb(3.55, 2.35, 4.75, 2.45, PAL.orange); fb(3.25, 2.85, 3.4, 3.0, PAL.orange); fb(4.9, 2.85, 5.05, 3.0, PAL.orange);
+    }
+    for (const side of [-1, 1]) {   // a bamboo grove up each wall (E): two stalks in segments, a node between, sprays of three leaves off the inner one
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), seg = 2.2 * t;
+      for (const [d, w, ph] of [[0.3, 3, 0], [1.15, 2, 0.8]]) {
+        const x0 = snap(Math.min(at(d * t), at(d * t + w * P)));
+        for (let k = Math.floor((top - ph * t) / seg) - 1; k * seg + ph * t < bot; k++) { const y0 = snap(k * seg + ph * t); box(x0, y0, x0 + w * P, snap(y0 + seg) - P, PAL.green, DIM, 0, 10, 0); }
+      }
+      for (let k = Math.floor(top / (5 * t)) - 1; k * 5 * t < bot + t; k++) {   // now off toward the shaft, now toward the wall
+        const y = (k * 5 + (side < 0 ? 1.1 : 3.6)) * t, x = at(1.15 * t + P), e = mod(k, 2) ? -side : side;
+        for (const [ang, len] of [[0.45, 0.6], [0.85, 0.65], [1.25, 0.5]]) { const h = 0.5 * len * t, ax = Math.cos(ang) * h * e, ay = Math.sin(ang) * h; F(x + ax, y + ay, ax, ay, (-ay / h) * 0.08 * t, (ax / h) * 0.08 * t, PAL.green, DIM, 0); }
+      }
+    }
+    for (const r of lv.rects) {
+      if (!seen(r.y0 - 5.5 * t, r.y0) || !steady(r, 2.2)) continue;
+      const k = Math.floor(((Math.imul(Math.round(r.y0 / t), 0x9e3779b1) >>> 0) / 4294967296) * 6), wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, w = r.x1 - r.x0;   // by a hash of its height
+      const X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t), room = (u1, h) => clear(Math.min(X(0), X(u1)), b - h * t, Math.max(X(0), X(u1)), b - 1);
+      const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
+      const el = (u, v, ru, rv, c) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, 1, 0), ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);
+      if (k === 0 && w >= 2.6 * t && room(4.6, 4.9)) {   // a sakura in full bloom (C): its gnarled trunk grey (C's dark grey), its branches, clouds of blossom, petals falling
+        const bark = 1.5;   // a grey half the way from the black: C's trunk was dark
+        bx(0.95, 0, 1.55, 0.22, PAL.gray, 0, bark); bx(1.05, 0.22, 1.45, 1.1, PAL.gray, 0, bark); bx(1.12, 1.1, 1.5, 1.75, PAL.gray, 0, bark); bx(1.22, 1.75, 1.55, 2.25, PAL.gray, 0, bark); bx(1.2, 0.35, 1.2 + px, 1.5, PAL.black);
+        for (const [u0, v0, u1, v1] of [[1.35, 2.15, 0.75, 2.7], [1.45, 2.05, 2.55, 2.4], [1.4, 2.2, 1.65, 3.6], [1.5, 2.2, 3.1, 3.05]]) line(X(u0), Y(v0), X(u1), Y(v1), PAL.gray, bark, 2);
+        for (const [u, v, ru, rv] of [[1.0, 4.05, 0.62, 0.42], [1.75, 4.3, 0.7, 0.45], [2.4, 4.05, 0.55, 0.38], [1.6, 3.82, 0.55, 0.32], [3.0, 3.3, 0.5, 0.38], [3.65, 3.38, 0.5, 0.36],
+          [3.95, 3.18, 0.35, 0.25], [0.72, 2.62, 0.45, 0.33], [1.25, 2.72, 0.45, 0.32], [2.75, 2.02, 0.4, 0.3], [3.25, 2.07, 0.4, 0.3]]) el(u, v, ru, rv, PAL.purple);   // purple: the nearest the inks have to pink
+        for (const [u, v] of [[1.3, 4.2], [2.1, 4.05], [3.35, 3.35], [0.85, 2.65], [3.0, 2.05], [1.7, 3.9]]) bx(u, v, u + 2 * px, v + px, PAL.gray);   // light specks in it
+        for (let i = 0; i < 4; i++) { const q = (T * 0.22 + i / 4) % 1, u = [2.2, 3.5, 0.9, 2.9][i] + 0.25 * Math.sin(T * 1.1 + i * 2), v = 1.9 * (1 - q); bx(u, v, u + px, v + px, PAL.purple); }   // a petal drifting down
+      } else if (k === 1 && w >= 3.0 * t && room(3.5, 3.8)) {   // a scarecrow (kakashi, F) in young rice: its pole straw-wrapped, trousers and coat indigo, straw hands, a cloth face, a straw hat
+        bx(1.44, 0, 1.67, 1.15, th.block, 2);
+        bx(1.12, 1.1, 1.98, 1.62, PAL.blue); bx(1.54, 1.1, 1.54 + px, 1.45, PAL.black);
+        bx(0.7, 1.62, 2.34, 2.73, PAL.blue); bx(1.54, 1.65, 1.54 + px, 2.6, PAL.black); for (const v of [2.0, 2.3]) bx(1.72, v, 1.72 + px, v + px, PAL.black);
+        for (const [u0, u1] of [[0.42, 0.7], [2.34, 2.62]]) bx(u0, 2.12, u1, 2.5, PAL.blue);
+        for (const [u0, u1] of [[0.16, 0.42], [2.62, 2.88]]) bx(u0, 2.08, u1, 2.54, th.block, 3);
+        bx(1.07, 2.73, 2.03, 3.02, PAL.gray); for (const u of [1.32, 1.74]) bx(u, 2.86, u + px, 2.86 + 2 * px, PAL.black); bx(1.42, 2.8, 1.66, 2.8 + px, PAL.black);   // (F's face half red)
+        bx(0.47, 3.0, 2.66, 3.2, th.block); bx(1.0, 3.2, 2.1, 3.62, th.block, 1); bx(1.2, 3.62, 1.9, 3.72, th.block);
+        for (const [u, h, l] of [[0.45, 0.7, -0.08], [0.62, 0.95, 0.05], [0.88, 0.6, 0.1], [1.12, 0.8, -0.05], [2.05, 0.75, 0.06], [2.75, 0.9, -0.06], [2.98, 0.65, 0.08], [3.25, 0.8, 0.03]]) ln(u, 0, u + l, h, PAL.green);
+        ln(2.3, 0, 2.3, 0.85, PAL.green); bx(2.18, 0.85, 2.42, 1.09, PAL.purple); bx(2.29, 0.95, 2.29 + px, 0.95 + px, PAL.black);   // a flower (F's yellow: yellow is for what you take)
+      } else if (k === 2 && w >= 4.0 * t && room(4.0, 4.4)) {   // a little Inari shrine (D): a stone lantern lit, a fox either side on its plinth, the shrine, a branch of sakura out of the wall
+        bx(0.3, 0, 0.96, 0.12, PAL.gray); bx(0.55, 0.12, 0.72, 1.05, PAL.gray); bx(0.38, 1.05, 0.88, 1.6, PAL.gray);
+        F(X(0.63), Y(1.3), 0.75 * t, 0, 0, 0.6 * t, PAL.orange, 0.4, 1); bx(0.5, 1.15, 0.76, 1.45, PAL.orange);   // its window, a light's core (D's yellow: orange, as the Cave's)
+        bx(0.25, 1.6, 1.01, 1.74, PAL.gray); bx(0.56, 1.74, 0.71, 1.94, PAL.gray);
+        vlamps.push([X(0.63), Y(1.3)]);
+        for (const [c, f] of [[1.4, 1], [3.45, -1]]) {   // a fox, facing the shrine: grey stone, its tail up behind it, an orange bib (D's collar red)
+          bx(c - 0.4, 0, c + 0.4, 0.26, PAL.gray); bx(c - 0.4, 0.26, c + 0.4, 0.26 + px, PAL.black);
+          bx(c - 0.24, 0.3, c + 0.24, 0.86, PAL.gray); bx(c - f * 0.24, 0.3, c - f * 0.38, 0.78, PAL.gray); bx(c - 0.17, 0.6, c + 0.17, 0.76, PAL.orange);
+          bx(c - 0.19, 0.86, c + 0.19, 1.18, PAL.gray); bx(c + f * 0.19, 0.9, c + f * 0.31, 1.04, PAL.gray); bx(c + f * 0.09, 1.04, c + f * 0.09 + px, 1.04 + px, PAL.black);
+          for (const e of [-1, 1]) bx(c + e * 0.13 - 0.06, 1.18, c + e * 0.13 + 0.06, 1.36, PAL.gray);
+        }
+        bx(1.75, 0, 3.1, 0.16, PAL.gray, 2); bx(1.85, 0.16, 3.0, 0.32, PAL.gray, 2);   // the shrine (hokora): stone steps, its doors with orange slats, its frame, its roof, the eaves turned up
+        bx(1.98, 0.42, 2.86, 1.76, PAL.gray); for (const u of [2.2, 2.55]) bx(u, 0.5, u + 0.1, 1.66, th.block); bx(2.42, 0.45, 2.42 + px, 1.7, PAL.black);
+        for (const u of [1.85, 2.86]) bx(u, 0.32, u + 0.13, 1.95, th.block, 4); bx(1.85, 1.76, 2.99, 1.95, th.block, 4);
+        bx(1.3, 1.95, 3.55, 2.2, PAL.gray, 2); bx(1.12, 2.08, 1.35, 2.34, PAL.gray); bx(3.5, 2.08, 3.73, 2.34, PAL.gray); bx(1.55, 2.2, 3.3, 2.5, PAL.gray);
+        bx(2.05, 2.5, 2.8, 2.78, PAL.gray, 2); bx(2.35, 2.26, 2.5, 2.42, th.block); bx(2.37, 2.78, 2.48, 3.0, PAL.gray); el(2.42, 3.08, 0.09, 0.09, PAL.gray); bx(2.4, 3.15, 2.45, 3.4, PAL.gray);
+        ln(0, 2.3, 1.2, 2.95, th.block, 3, 4); ln(1.2, 2.95, 2.05, 3.42, th.block, 2, 4); ln(0.65, 2.62, 0.55, 3.3, th.block, 2, 4);   // the branch, its blossoms
+        for (const [u, v] of [[0.3, 3.9], [1.0, 4.0], [1.75, 3.88], [0.48, 3.35], [1.3, 3.32], [2.05, 3.45]]) { bx(u - 0.13, v - 0.04, u + 0.13, v + 0.04, PAL.purple); bx(u - 0.04, v - 0.13, u + 0.04, v + 0.13, PAL.purple); }
+      } else if (k === 4 && w >= 2.2 * t && room(4.4, 5.3)) {   // koinobori (D): a stone foot, the pole, a wheel on its top (D's gold: orange), three carps on arms off it waving in the wind
+        bx(0.74, 0, 1.74, 0.55, PAL.gray); for (const v of [0.16, 0.3]) bx(0.92, v, 1.56, v + px, PAL.black);
+        bx(1.15, 0.55, 1.34, 4.48, PAL.gray);
+        el(1.25, 4.85, 0.34, 0.34, th.block); for (const [u0, v0, u1, v1] of [[1.25, 4.55, 1.25, 5.15], [1.03, 4.66, 1.47, 5.04], [1.03, 5.04, 1.47, 4.66]]) ln(u0, v0, u1, v1, PAL.black); el(1.25, 4.85, 0.08, 0.08, PAL.gray);
+        for (const [i, v, c, tn] of [[0, 3.95, PAL.gray, 5], [1, 2.95, th.block, 1], [2, 2.0, PAL.blue, 1]]) {   // black (its grey through the black), orange, blue; scales dotted
+          const wv = (s) => Math.round(Math.sin(T * 3.2 - s * 1.1 + i * 1.7) * 0.8 * s) * px;   // the wind down its body, more toward the tail
+          bx(1.34, v - 0.04, 1.62, v + 0.04, PAL.gray);
+          for (const [s, u0, u1, hh] of [[0, 1.62, 2.22, 0.45], [1, 2.22, 3.1, 0.38], [2, 3.1, 3.8, 0.28]]) bx(u0, v - hh + wv(s), u1, v + hh + wv(s), c, tn);
+          for (const e of [-1, 1]) bx(3.8, v + e * 0.08 + wv(3), 4.3, v + e * 0.32 + wv(3), c, tn);   // its tail, forked
+          bx(1.62, v - 0.45, 1.7, v + 0.45, PAL.gray); el(1.95, v + 0.08, 0.2, 0.2, PAL.gray); el(1.97, v + 0.08, 0.09, 0.09, PAL.black);   // its mouth's hoop, its eye
         }
       }
-      for (let k = Math.floor(top / (10 * t)) - 1; k * 10 * t < bot; k++) {   // sugar crystals in the wall's rock, three to a cluster
-        const y = k * 10 * t + (side < 0 ? 4 : 9) * t;
-        if (y < top - t || y > bot + t) continue;
-        for (const [dx, dy, sz] of [[0.15, 0, 0.22], [0.4, -0.25, 0.16], [0.35, 0.22, 0.12]]) F(at(dx * t), y + dy * t, sz * t, sz * t, sz * t, -sz * t, PAL.gray, DIM, 0);
-      }
-    }
-    // Posts (the vertical level-design article's backdrops, as in Hollow Knight and Rogue Legacy: what ties a ledge to the one under it,
-    // so the ground below reads as there): a timber post, as the props up the walls, from a free ledge's cap board down onto the steady
-    // ledge right under it, at most MINE_POST.max tiles; none under moss, hanging spikes or icicles, onto spikes, or across a door or a
-    // rune. A placeholder look, for the owner's pick (tools/variants.py).
-    const MINE_POST = { max: 9, w: 0.38, cap: 1.1 }, steady = (q) => !q.gone && !q.cap && !q.move && !q.crumble && !q.spring && !q.key && !q.cage;
-    for (const a of lv.rects) {
-      if (!steady(a) || a.moss || a.x0 <= lv.l + 1 || a.x1 >= lv.r - 1 || !seen(a.y1, a.y1 + MINE_POST.max * t)) continue;
-      for (const x0 of a.x1 - a.x0 >= 4 * t ? [a.x0 + 0.7 * t, a.x1 - 0.7 * t] : [(a.x0 + a.x1) / 2]) {
-        const hw = (MINE_POST.cap / 2) * t, over = (q, u0, u1) => q.x1 > u0 && q.x0 < u1;
-        const under = (u0, u1) => { let b = null; for (const q of lv.rects) if (q !== a && !q.gone && q.y0 >= a.y1 - 1 && over(q, u0, u1) && (!b || q.y0 < b.y0)) b = q; return b; };
-        const b = under(x0 - hw, x0 + hw);   // what is right under its cap board, and the post moved onto it if it is to one side
-        if (!b || !steady(b) || b.y0 - a.y1 < 0.6 * t || b.y0 - a.y1 > MINE_POST.max * t || Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0) < 0.9 * t) continue;
-        const x = clamp(x0, Math.max(a.x0, b.x0) + 0.45 * t, Math.min(a.x1, b.x1) - 0.45 * t);
-        if (under(x - hw, x + hw) !== b) continue;
-        const y0 = a.y1, y1 = b.y0, u0 = x - hw, u1 = x + hw;
-        if (lv.spikes.some((s) => over(s, u0, u1) && (Math.abs(s.y0 - y0) < 1 || Math.abs(s.y1 - y1) < 1)) || lv.icicles.some((c) => Math.abs(c.x - x) < hw + 0.3 * t && c.y > y0 - t && c.y < y1)
-          || lv.bubbles.some((d) => over(d, u0 - t, u1 + t) && d.y1 > y0 && d.y0 - t < y1) || lv.runes.some((u) => Math.abs(u.x - x) < hw + 10 * P && u.y > y0 - 10 * P && u.y < y1 + 10 * P)) continue;
-        const p0 = snap(x - (MINE_POST.w / 2) * t), p1 = snap(x + (MINE_POST.w / 2) * t), mid = snap(x), c0 = snap(u0), c1 = snap(u1), cb = snap(y0 + 0.22 * t);
-        box(p0, y0, p1, y1, th.block, DIM, 0, 10, 0); box(mid, y0, mid + P, y1, PAL.black, 1, 0, 10, 0);   // the post, behind (DEPTH), its grain
-        box(c0, y0, c1, cb, th.block, DIM, 0, 10, 0); box(c0, cb - P, c1, cb, PAL.black, 1, 0, 10, 0);   // its cap board under the ledge, a dark underside
-      }
-    }
-    for (const r of lv.rects) {   // an ore cart parked at the wall end of some wide steady ledges: grey, ore heaped in it, two wheels
-      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
-      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1) continue;
-      const w = 1.6 * t, x0 = wl ? lv.l + 0.25 * t : lv.r - 0.25 * t - w, y1 = r.y0 - 0.3 * t, y0 = y1 - 0.75 * t;
-      for (const [dx, rr, c] of [[0.3, 0.3, th.block], [0.55, 0.36, PAL.gray], [0.75, 0.28, th.block]]) disc(x0 + dx * w, y0, rr * t, c, 1);   // the ore (a prop: no white, DEPTH; owner)
-      box(x0, y0, x0 + w, y1, PAL.gray, 1, 0, 10, 0); box(x0, y0, x0 + w, y0 + P, PAL.black, 1, 0, 10, 0);
-      for (const dx of [0.25, 0.75]) { disc(x0 + dx * w, r.y0 - 0.2 * t, 0.2 * t, PAL.black, 1); disc(x0 + dx * w, r.y0 - 0.2 * t, 0.07 * t, PAL.gray, 1); }
     }
   }
   if (th.panels && lv.kind === 'well') {   // the Tower Blocks' kit (THEMES.blocks; see the parts catalog): a riser pipe up each wall on a bracket every
@@ -2919,28 +3024,82 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
-  // The Mine's ledges (see the parts catalog): rock is caramel ore cut by dark strata with sugar crystals in them and a timber brace
-  // under it at a wall; a plank is a nailed board; a moving plank is a cage lift on its cable. False for what keeps the common look.
-  const mineRect = (r) => {
+  // The Village's ledges (the Mine's world; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese countryside in spring). A block
+  // is a terrace's earth (F): its white edge over a fringe of grass, sparse dots in it, a ragged underside, on a free end its edge curled over, blades of grass
+  // and a flower (F's white and yellow: purple); F's long green strands hang only off moss (see the moss below: green is the moss you hold). A plank is a
+  // footbridge (C): boards on a bracket at the wall, a rail of dried bamboo on two posts lashed at their tops (C's was green, the moss's colour), a charm on a
+  // string off its free end (C's white and yellow: grey and orange). A moving plank is a yaen (C): a blue cable box, a railed basket under its floor, its frame
+  // up to a pulley on the cable across the shaft (the cable behind, see YAEN). A crumbling block is a rickety bridge (E): grey planks the block's own height (so
+  // nothing solid is out of sight) with gaps between, each shaking its own way as it gives, at a wall a peg and the rope down off it, at a free end a rope
+  // hanging with a weight on it. False for what keeps the common look (ice, springs, magnets, bouncy planks, stairs).
+  const villageRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
-    if (r.plank && r.move) {   // a cage lift: its floor, a grey frame round it, a cable up from its top
-      box(r.x0, r.y0, r.x1, r.y1, th.mover, 1, 0, 10, 2);
-      for (const x of [r.x0, r.x1 - 2 * P]) box(x, r.y0 - 1.1 * t, x + 2 * P, r.y0, PAL.gray, 1, 0, 10, 0);
-      box(r.x0, r.y0 - 1.1 * t, r.x1, r.y0 - 1.1 * t + 2 * P, PAL.gray, 1, 0, 10, 0);
-      const cx = snap((r.x0 + r.x1) / 2); box(cx - P / 2, top, cx + P / 2, r.y0 - 1.1 * t, PAL.gray, 1, 0, 10, 0);
-    } else if (r.plank) {   // a board: its grain, nails at its joints
-      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); const gy = snap(r.y0 + 0.55 * hgt); box(r.x0 + P, gy, r.x1 - P, gy + P, PAL.black, 1, 0, 10, 0);
-      for (let x = r.x0; x < r.x1 + 1; x += 1.3 * t) { const nx = snap(Math.min(x, r.x1 - 2 * P)); box(nx, r.y0 + 2 * P, nx + P, r.y0 + 3 * P, PAL.gray, 1, 0, 10, 0); }
-    } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
-    else {   // ore rock
-      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 2);
-      const lines = hgt > 1.5 * t ? [0.38, 0.72] : [0.58];
-      for (const f of lines) { const y = snap(r.y0 + f * hgt); for (let x = r.x0 + ((Math.round(r.y0 / t + f * 3) % 2) ? 0.2 : 0.9) * t; x < r.x1 - 0.3 * t; x += 2 * t) {
-        box(snap(x), y, snap(Math.min(x + 1.5 * t, r.x1 - 0.2 * t)), y + P, PAL.black, 1, 0, 10, 0); F(snap(x + 0.75 * t), y - P, 1.5 * P, 1.5 * P, 1.5 * P, -1.5 * P, PAL.white, 1, 0);   // a stratum, a sugar crystal on it
-      } }
-      if (hgt <= t + 1) for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) for (let i = 0; i <= 5; i++) { const u = i / 5, x = snap(wx + d * 0.9 * t * u), y = snap(r.y1 + 0.9 * t * (1 - u)); box(x - P, y - P, x + P, y + P, th.block, 1, 0, 10, 0); }   // a timber brace up to its foot
+    if (r.crumble) {
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round((r.x1 - r.x0) / (1.1 * t))), pw = (r.x1 - r.x0) / n, ny = snap(r.y0 + 0.35 * Math.min(hgt, t));
+      for (let i = 0; i < n; i++) {
+        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 ? P : 0) + ox;
+        box(x0, r.y0, x1, r.y1, th.crumble, a, 0, 10, 0); box(x0, r.y1 - 2 * P, x1, r.y1, th.crumble, a, 0, 10, 4);   // a plank, its underside in shade, a nail at each end
+        box(x0 + 2 * P, ny, x0 + 3 * P, ny + P, PAL.black, a, 0, 10, 0); box(x1 - 3 * P, ny, x1 - 2 * P, ny + P, PAL.black, a, 0, 10, 0);
+        box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
+      }
+      for (const [on, wx, d, ex] of [[wl, lv.l, 1, r.x0], [wr, lv.r, -1, r.x1]]) {
+        if (on) {   // a peg in the wall over it, the rope down off it to its first plank
+          const ky = snap(r.y0 - 1.0 * t), kx = snap(wx + d * 0.17 * t);
+          box(snap(Math.min(wx, wx + d * 0.32 * t)), ky, snap(Math.max(wx, wx + d * 0.32 * t)), ky + snap(0.28 * t), PAL.gray, a, 0, 10, 0); box(kx, ky + P, kx + P, ky + 2 * P, PAL.black, a, 0, 10, 0);
+          line(wx + d * 0.3 * t, ky + 0.22 * t, wx + d * 0.85 * t, r.y0 + 2 * P, PAL.gray, a);
+        } else {
+          const hx = snap(ex + d * 0.22 * t), wy = snap(r.y1 + 0.75 * t);
+          if (wl || wr) { box(hx, r.y1, hx + P, wy, PAL.gray, a, 0, 10, 0); box(hx - 2 * P, wy, hx + 3 * P, wy + 4 * P, PAL.gray, a, 0, 10, 0); box(hx, wy + P, hx + P, wy + 2 * P, PAL.black, a, 0, 10, 0); }   // its rope, a weight on it
+          else box(hx, r.y1, hx + P, snap(r.y1 + 0.3 * t), PAL.gray, a, 0, 10, 0);   // a frayed end of rope
+        }
+      }
+      return true;
     }
-    box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    if (r.plank && r.move) {
+      const yb = snap(r.y0 + 0.85 * t), pt = r.y0 - snap(YAEN.frame * t), cx = snap((r.x0 + r.x1) / 2), py = snap(pt - YAEN.wheel * t);
+      box(r.x0, r.y0, r.x1, yb, th.mover, 1, 0, 10, 0);   // the basket under its floor, black between its rails, a post in its middle, its bottom's edge
+      for (const [v0, v1] of [[0.22, 0.38], [0.5, 0.66]]) box(r.x0 + 2 * P, snap(r.y0 + v0 * t), r.x1 - 2 * P, snap(r.y0 + v1 * t), PAL.black, 1, 0, 10, 0);
+      box(cx - P, r.y0, cx + P, yb, th.mover, 1, 0, 10, 0); box(r.x0, yb - P, r.x1, yb, th.mover, 1, 0, 10, 4);
+      for (const x of [r.x0, r.x1 - 2 * P]) box(x, pt, x + 2 * P, r.y0, th.mover, 1, 0, 10, 0);   // the frame's posts, its top bar, the hanger up to the pulley on the cable
+      box(r.x0, pt, r.x1, pt + 2 * P, th.mover, 1, 0, 10, 0); box(cx - snap(0.14 * t), py, cx + snap(0.14 * t), pt, th.mover, 1, 0, 10, 0);
+      disc(cx, py, 0.26 * t, th.mover, 1); disc(cx, py, 0.1 * t, PAL.black, 1);
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
+    if (r.plank) {
+      if (r.bouncy) return false;
+      for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {   // a bracket under it at the wall, chequered (C's), its nail
+        box(snap(Math.min(wx, wx + d * 0.45 * t)), r.y0, snap(Math.max(wx, wx + d * 0.45 * t)), snap(r.y1 + 0.7 * t), th.plank, 1, 0, 10, 4);
+        box(snap(wx + d * 0.22 * t), snap(r.y1 + 0.25 * t), snap(wx + d * 0.22 * t) + P, snap(r.y1 + 0.25 * t) + P, PAL.gray, 1, 0, 10, 0);
+      }
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, snap(r.y0 + 0.17 * t), r.x1, snap(r.y0 + 0.17 * t) + P, th.plank, 1, 0, 10, 4); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);   // its boards, a row of nails, a rough underside
+      const pw = snap(0.2 * t), ph = snap(1.15 * t), ry = snap(r.y0 - 0.7 * t), ps = [snap(wl ? r.x0 + 0.5 * t : r.x0 + 0.05 * t), snap(wr ? r.x1 - 0.5 * t : r.x1 - 0.05 * t) - pw];
+      if (ps[1] - ps[0] > 1.2 * t) {   // its rail of dried bamboo on two posts lashed at their tops, their nodes black
+        for (const x of ps) {
+          box(x, r.y0 - ph, x + pw, r.y0, th.plank, 1, 0, 10, 0); box(x - P, r.y0 - ph, x + pw + P, r.y0 - ph + snap(0.24 * t), th.plank, 1, 0, 10, 4);
+          for (const v of [0.38, 0.76]) box(x, snap(r.y0 - v * t), x + pw, snap(r.y0 - v * t) + P, PAL.black, 1, 0, 10, 0);
+        }
+        box(ps[0] + pw, ry - P, ps[1], ry + P, th.plank, 1, 0, 10, 0);
+        for (let x = ps[0] + 0.9 * t; x < ps[1] - 0.3 * t; x += 0.9 * t) box(snap(x), ry - P, snap(x) + P, ry + P, PAL.black, 1, 0, 10, 0);
+      }
+      if (wl !== wr && r.x1 - r.x0 >= 3 * t) {   // a charm on a string off its free end: an orange bead, a grey paper omamori written on in purple
+        const cx = snap(wl ? r.x1 - 0.18 * t : r.x0 + 0.18 * t), by = snap(r.y1 + 0.55 * t), c0 = snap(cx - 0.13 * t), c1 = snap(cx + 0.13 * t) + P, cy0 = by + 3 * P, cy1 = snap(by + 0.62 * t);
+        box(cx, r.y1, cx + P, by, PAL.gray, 1, 0, 10, 0); box(cx - P, by, cx + 2 * P, by + 2 * P, PAL.orange, 1, 0, 10, 0);
+        box(c0, cy0, c1, cy1, PAL.gray, 1, 0, 10, 0); for (const k of [2, 5]) box(c0 + P, cy0 + k * P, c1 - P, cy0 + (k + 1) * P, PAL.purple, 1, 0, 10, 0);
+      }
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
+    const g0 = snap(r.y0 + 2.5), g1 = g0 + 2 * P;
+    box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 1);   // the earth, sparse dots in it, a fringe of grass under its edge (ragged), its underside ragged
+    box(r.x0, g0, r.x1, g1, PAL.green, 1, 0, 10, 0); box(r.x0, g1, r.x1, g1 + P, PAL.green, 1, 0, 10, 4);
+    box(r.x0, r.y1 - P, r.x1, r.y1, th.block, 1, 0, 10, 4);
+    box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
+    if (r.x1 - r.x0 >= 2 * t) for (const [on, ex, d] of [[wl, r.x0, 1], [wr, r.x1, -1]]) if (!on) {   // a free end: its edge curled over it, blades of grass, a flower
+      box(snap(Math.min(ex, ex + d * P)), r.y0, snap(Math.max(ex, ex + d * P)), r.y0 + 3 * P, th.lip, 1, 0, 10, 0);
+      for (const [u, h] of [[0.18, 2], [0.42, 3]]) { const x = snap(ex + d * u * t); box(x, r.y0 - h * P, x + P, r.y0, PAL.green, 1, 0, 10, 0); }
+      const fx = snap(ex + d * 0.62 * t); box(fx, r.y0 - 3 * P, fx + P, r.y0, PAL.green, 1, 0, 10, 0); box(fx - P, r.y0 - 5 * P, fx + 2 * P, r.y0 - 3 * P, PAL.purple, 1, 0, 10, 0);
+    }
+    return true;
   };
   // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
   // beam, a block is a concrete slab cut square with its panels' seams, a striped cap on a free end, a knee brace under it at a wall
@@ -3134,7 +3293,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.pit && mineRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, mineRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud || th.village) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
@@ -3150,7 +3309,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
+    if (r.moss && th.village) {   // the Village's moss under it (F's): a strip and strands hanging off it, long and short (the green you hold; see villageRect)
+      box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
+      for (let x = r.x0 + 0.1 * R; x < r.x1 - 0.15 * R; x += 0.28 * R) {
+        const h = (((Math.round(x / kitP) * 2654435761) ^ (Math.round(r.y0 / kitP) * 40503)) >>> 0) / 4294967296, w = (h > 0.6 ? 3 : 2) * kitP;
+        box(snap(x) + ox, r.y1 + 2 * kitP, snap(x) + w + ox, snap(r.y1 + 2 * kitP + (0.2 + 0.95 * h) * R), th.moss, a, 0, 10, 0);
+      }
+    } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);
     }
@@ -3419,7 +3584,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const p of lv.fizz) if (!p.taken) light(p.x, p.y, 0.8, 2);
     if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) light((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 1.2, 3.4); }   // Tokyo's lit neon
     for (const sp of lv.spots) if (!sp.used) light(sp.x, sp.y, 1.4, 3.2);   // the flip side's pools glow (its way back out)
-    if (th.pit && lv.kind === 'well') for (let k = Math.floor(top / MINE_CAP) - 1; k * MINE_CAP < bot; k++) for (const side of [-1, 1]) if (mineLamp(side, k)) light(side < 0 ? lv.l + 1.05 * kitT : lv.r - 1.05 * kitT, k * MINE_CAP + 0.85 * kitT, 0.9, 2.8);   // the Mine's lamps
+    for (const [x, y] of vlamps) light(x, y, 0.9, 2.6);   // the Village's stone lanterns (see its kit)
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);

@@ -681,7 +681,7 @@ const LOOKS = {
   rat: ['rat', 'rat', 'umbrella', 'umbrella', 'pot', 'pot'],   // Tesso, Kasa-obake, a tsukumogami heap
 };
 for (const k in LOOKS) BOSSES[k].looks = Object.fromEntries(LOOKS[k].map((t, i) => { const [design, ink] = t.split(':'); return ['ABCDEFG'[i], { id: k + '-' + 'ABCDEFG'[i], design, ink }]; }));
-const LOOK_PICK = { probka: 'F', cart: 'C', puck: 'F', crane: 'F', pigeon: 'A' };   // the owner's picks (2026-10-20): a Bake-danuki with its leaf, Tsuchigumo, Tsurara-onna, Nuppeppo, a Karasu-tengu; the Tram's to come
+const LOOK_PICK = { probka: 'F', cart: 'C', puck: 'F', crane: 'F', pigeon: 'A', tram: 'E' };   // the owner's picks (2026-10-20): a Bake-danuki with its leaf, Tsuchigumo, Tsurara-onna, Nuppeppo, a Karasu-tengu, a tsukumogami tram
 for (const k in LOOK_PICK) BOSSES[k].look = LOOK_PICK[k];
 const LOOK = (/[?&]look=([A-G])\b/.exec(location.search) || [])[1] || null;
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber

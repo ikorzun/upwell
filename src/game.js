@@ -2345,7 +2345,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
 const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
-const WORLD_MUSIC = { cave: 'climb', ice: 'ice', mine: 'mine', tokyo: 'tokyo', blocks: 'blocks', sky: 'sky', junk: 'junk' };   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
+const WORLD_MUSIC = { cave: 'shrine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', junk: 'junk' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {
@@ -2357,7 +2357,7 @@ const sound = {
     this.fx = c.createGain(); this.fx.gain.value = FX_VOL; this.fx.connect(this.out);
     this.mus = c.createGain(); this.mus.gain.value = MUSIC_VOL; this.mus.connect(this.out);
     for (const n of SOUNDS) this.load(n, 'assets/sfx/' + n + '.mp3');
-    for (const n of ['calm', 'climb']) this.fetchMusic(n);
+    for (const n of ['calm', WORLD_MUSIC[game.wd.id] || 'climb']) this.fetchMusic(n);   // the menu's, and its world's climb
   },
   load(name, path) { return fetch(path).then((r) => r.arrayBuffer()).then((a) => this.ctx.decodeAudioData(a)).then((b) => { this.bufs[name] = b; }).catch(() => {}); },
   fetchMusic(name) {

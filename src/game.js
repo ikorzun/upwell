@@ -368,7 +368,8 @@ class Foe {
 class Boss {
   constructor(lv, def) {   // def: a campaign boss's (BOSSES); the random run's summit boss has none
     const R = lv.R * ((def && def.size) || BOSS.size), slide = !!(def && def.slide), rail = def && def.rail && lv.rail;   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
-    this.body = new Body(designById((def && def.design) || 'cat'), FOE_COLOR.boss, rail ? rail.x1 : slide ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, rail ? rail.y - 0.75 * R : slide ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
+    this.ink = def && def.ink ? { id: 'boss', base: PAL[def.ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink)
+    this.body = new Body(designById((def && def.design) || 'cat'), this.ink, rail ? rail.x1 : slide ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, rail ? rail.y - 0.75 * R : slide ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = slide ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
@@ -382,14 +383,14 @@ class Boss {
     const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
     this.t += dt * k; this.st += dt; b.wake();   // never asleep: lying dazed it would doze off, and then not get up
     if (this.state !== 'dazed') turnUp(b, 6, dt);   // upright in the air, as the crawlers on their walls
-    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = FOE_COLOR.boss;
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
     if (this.state === 'warn' || this.state === 'dive' || this.state === 'dazed') {
       if (this.state === 'warn') {   // over the hero (kept to the middle, clear of the ledges), shaking, flashing
         const tx = clamp(g.hero.cx, cx - 0.2 * W + b.R, cx + 0.2 * W - b.R), q = Math.min(1, 6 * dt);
         addVel(b, ((tx - b.cx) * 4 - b.rigVx) * q, -b.rigVy * q);
         if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.12);
-        b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : FOE_COLOR.boss;   // 2.5 flashes a second: under WCAG's 3
-        if (this.st > BOSS.warn) { this.to('dive'); b.color = FOE_COLOR.boss; sound.play('airjump', 0.9, 0.5); }
+        b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+        if (this.st > BOSS.warn) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
       } else if (this.state === 'dive') {
         setVel(b, 0, BOSS.dive * R);
         for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > b.minX && q.minX < b.maxX && q.minY < b.maxY + 4 && q.maxY > b.minY) g.kill(e, false); }   // its own helpers squashed under it
@@ -432,14 +433,14 @@ class Boss {
     if ((this.t += dt) < PUCK.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first
     this.st += dt;
     if (this.state !== 'dazed') turnUp(b, 6, dt);   // the dome up (on its back, Gum's own righting is held off: flip)
-    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = FOE_COLOR.boss;
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
     if (this.state === 'dazed') { addVel(b, -b.rigVx * Math.min(1, 4 * dt), 0); if (this.st > PUCK.flip * this.help) this.rise(); return; }
     if (this.state === 'rise') { if (this.st > 0.5) this.to('hover'); return; }
     if (this.state === 'warn') {
       addVel(b, (-this.dir * 1.2 * R - b.rigVx) * Math.min(1, 6 * dt), 0);
       if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, 0.14);
-      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : FOE_COLOR.boss;   // 2.5 flashes a second: under WCAG's 3
-      if (this.st > PUCK.wind) { this.to('dive'); b.color = FOE_COLOR.boss; sound.play('airjump', 0.9, 0.5); }
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (this.st > PUCK.wind) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
       return;
     }
     if (this.state === 'dive') {
@@ -468,7 +469,7 @@ class Boss {
     b.wake(); turnUp(b, 6, dt);
     if ((this.t += dt) < CART.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), ((rail.y - 0.75 * b.R - b.cy) * 6 - b.rigVy) * Math.min(1, 6 * dt)); return; }   // still at first, while its name is up
     this.st += dt;
-    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = FOE_COLOR.boss;
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
     if (ph >= 1 && !lv.crumbleTime) { lv.crumbleTime = CART.crumble[0]; lv.crumbleBack = CART.crumble[1]; }
     if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
     let vx = 0;
@@ -495,7 +496,7 @@ class Boss {
     if (this.mark && !this.marked) { this.marked = true; ui.toast(L2(this.def.hint), 2200); }
   }
   flip() {   // a rolling shell has turned the Puck over: belly up, a stomp hurts it now
-    const b = this.body; this.to('dazed'); b.color = FOE_COLOR.boss; turnOver(b); b.up.on = false; b.up.fails = BODY.upFails; b.kickSquash(0, 1, 1.6); setVel(b, b.rigVx * 0.3, -3 * b.R);   // over, with a hop, and kept so
+    const b = this.body; this.to('dazed'); b.color = this.ink; turnOver(b); b.up.on = false; b.up.fails = BODY.upFails; b.kickSquash(0, 1, 1.6); setVel(b, b.rigVx * 0.3, -3 * b.R);   // over, with a hop, and kept so
     shake.add(7); haptics.buzz(30); sound.play('bosshit', 0.8, 1.3);
     if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
   }
@@ -1167,7 +1168,7 @@ class Game {
     if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = 1 - 0.06 * (bs.max - bs.hp); ui.toast(tf('bossLeft', { n: bs.hp })); if (bs.state === 'dazed') bs.rise(); return; }
     bs.dead = true; this.kills++; met('boss', this.rc && this.rc.boss ? this.rc.boss : 'lid'); delete save.camp.fails[this.failKey()];
     if (bs.def) ui.toast(L2(bs.def.defeat), 2200);
-    splatFx(b.cx, b.cy, b.R * 1.4, FOE_COLOR.boss.base, 24); shake.add(9); haptics.buzz(60);
+    splatFx(b.cx, b.cy, b.R * 1.4, bs.ink.base, 24); shake.add(9); haptics.buzz(60);
     this.drop(b.cx, b.cy, BOSS.coins);
     for (const o of this.lv.enemies.slice()) this.kill(o, false);
     this.lv.shots.length = 0;
@@ -2113,7 +2114,7 @@ const ui = {
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
     const bh = $('bossHp'), bs = g.lv.boss, bon = !!bs && !bs.dead && playing;   // a boss's hearts, under the HUD (Lucky Tower's players asked for them)
     bh.classList.toggle('on', bon);
-    if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax)) { this.bhp = bs.hp; this.bmax = bs.max; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); }
+    if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax || bs !== this.bboss)) { this.bhp = bs.hp; this.bmax = bs.max; this.bboss = bs; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); bh.style.setProperty('--pip', `var(--${(bs.def && bs.def.ink) || 'purple'})`); }   // in its colour
     if (bon) bh.style.top = Math.round(view.hudB + 6) + 'px';
     const gun = $('gun'), left = g.gunT > 0 && g.state === 'play' ? Math.ceil((g.gunT / g.gunMax) * 10) : 0;   // the fizz left, in tenths, blinking near the end
     gun.classList.toggle('on', left > 0);

@@ -528,8 +528,9 @@ const BONUS = [
 // The campaign's bosses (the plan: ten, each beaten its own way; the first so far): `hp` its hearts and `phase(hp)` what it
 // adds as they go (0: dives only, 1: drops goo as it hovers too, 2: calls crawlers too: one thing more a phase, the digest
 // §5); what it says coming in (by turns), when the hero dies (a quip) and when it is beaten. The lines under eight words.
+// `ink` its colour (owner, 2026-10-20: each its own; never red, it flashes red when hit, nor yellow or white: what can be taken, the hero).
 const BOSSES = {
-  probka: { name: { en: 'Cork', es: 'Tapón', pt: 'Rolha', ja: 'コルク' }, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  probka: { name: { en: 'Cork', es: 'Tapón', pt: 'Rolha', ja: 'コルク' }, ink: 'orange', hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
     intro: [{ en: "It's warm here. Why climb?", es: 'Aquí se está calentito. ¿Para qué subir?', pt: 'Aqui é quentinho. Pra que subir?', ja: 'ここは あったかい。なんで のぼるの？' },
       { en: 'Shoo. This spot is mine.', es: 'Fuera. Este sitio es mío.', pt: 'Xô. Esse lugar é meu.', ja: 'しっしっ。ここは わたしの ばしょ。' },
       { en: 'Nobody gets past the Cork.', es: 'Nadie pasa del Tapón.', pt: 'Ninguém passa da Rolha.', ja: 'コルクの さきへは いかせない。' }],
@@ -537,7 +538,7 @@ const BOSSES = {
       { en: 'Too slow, little drop.', es: 'Muy lento, gotita.', pt: 'Muito lento, gotinha.', ja: 'おそいよ、しずくちゃん。' }],
     defeat: { en: 'Fine, fine… go on up.', es: 'Vale, vale… sube ya.', pt: 'Tá bom, tá bom… pode subir.', ja: 'わかったよ… のぼりな。' } },
   // World 2's: the Puck (the plan's §5.4): a dome over the ice, beaten by its own shells (PUCK, Boss.slide).
-  puck: { name: { en: 'Puck', es: 'Disco', pt: 'Disco', ja: 'パック' }, design: 'dome', size: 2.4, slide: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  puck: { name: { en: 'Puck', es: 'Disco', pt: 'Disco', ja: 'パック' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'Slippery? Your feet are the problem.', es: '¿Resbala? El problema son tus pies.', pt: 'Escorrega? O problema são seus pés.', ja: 'すべる？ きみの あしが わるい。' },
       { en: 'This ice is mine. So is the floor.', es: 'Este hielo es mío. Y el suelo.', pt: 'Este gelo é meu. E o chão.', ja: 'この こおりは わたしの もの。' },
       { en: 'Nobody stops on my ice.', es: 'Nadie se para en mi hielo.', pt: 'Ninguém para no meu gelo.', ja: 'わたしの こおりで とまれない。' }],
@@ -548,7 +549,7 @@ const BOSSES = {
     hint: { en: 'Flipped! Land on its belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
     how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
   // World 3's: the Minecart (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
-  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, design: 'loaf', size: CART.size, rail: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, ink: 'blue', design: 'loaf', size: CART.size, rail: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'No outsiders in the pit!', es: '¡Prohibido entrar a la mina!', pt: 'Proibido entrar na mina!', ja: 'ぶがいしゃは たちいり きんし！' },
       { en: "Mind the rocks. Or don't.", es: 'Cuidado con las rocas. O no.', pt: 'Cuidado com as pedras. Ou não.', ja: 'いわに きをつけな。' },
       { en: 'My rail, my rules.', es: 'Mi riel, mis reglas.', pt: 'Meu trilho, minhas regras.', ja: 'わたしの レール、わたしの ルール。' }],
@@ -558,7 +559,7 @@ const BOSSES = {
     hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
     how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
   // World 7's: the Rat King (the Junkyard's): the Puck's slide over a greasy floor (its arena as the Puck's, rc.ice), round ears, a tail.
-  rat: { name: { en: 'Rat King', es: 'Rey Rata', pt: 'Rei Rato', ja: 'ネズミの おう' }, design: 'dome', size: 2.4, slide: true, rat: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  rat: { name: { en: 'Rat King', es: 'Rey Rata', pt: 'Rei Rato', ja: 'ネズミの おう' }, ink: 'purple', design: 'dome', size: 2.4, slide: true, rat: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'Everything here is mine. Even you.', es: 'Todo aquí es mío. Incluso tú.', pt: 'Tudo aqui é meu. Até você.', ja: 'ここの ものは ぜんぶ おれの もの。おまえも。' },
       { en: 'Finders keepers.', es: 'El que lo encuentra se lo queda.', pt: 'Achado não é roubado.', ja: 'ひろった もの がち。' },
       { en: 'Squeak. Bow to the king.', es: 'Iiii. Inclínate ante el rey.', pt: 'Iii. Curve-se ao rei.', ja: 'チュー。おうに ひれふせ。' }],
@@ -569,7 +570,7 @@ const BOSSES = {
     hint: { en: 'Flipped! Land on its belly!', es: '¡Volteado! ¡Salta en su panza!', pt: 'Virado! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },
     how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písalo', pt: 'Role um casco nele e depois pise', ja: 'こうらを ぶつけて、ふみつけろ' } },
   // World 6's: the Pigeon (the Skyscraper's): the Cork's dive (hover, warn, dive, dazed, rise), flapping its grey wings.
-  pigeon: { name: { en: 'Pigeon', es: 'Paloma', pt: 'Pombo', ja: 'ハト' }, design: 'drop', pigeon: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  pigeon: { name: { en: 'Pigeon', es: 'Paloma', pt: 'Pombo', ja: 'ハト' }, ink: 'gray', design: 'drop', pigeon: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'Coo. This ledge is taken.', es: 'Cu-cú. Esta cornisa es mía.', pt: 'Ru-ru. Essa beirada é minha.', ja: 'クルッ。ここは わたしの へり。' },
       { en: 'Crumbs first. Then the sky.', es: 'Primero las migas. Luego el cielo.', pt: 'Primeiro as migalhas. Depois o céu.', ja: 'まず パンくず。そらは そのあと。' },
       { en: 'Nobody flies higher than me.', es: 'Nadie vuela más alto que yo.', pt: 'Ninguém voa mais alto que eu.', ja: 'わたしより たかく とぶ ものは いない。' }],
@@ -577,7 +578,7 @@ const BOSSES = {
       { en: 'Back to the pavement.', es: 'De vuelta a la acera.', pt: 'De volta para a calçada.', ja: 'ほどうに もどって。' }],
     defeat: { en: 'Fine… the sky is big enough.', es: 'Vale… el cielo es grande.', pt: 'Tá bom… o céu é grande.', ja: 'わかった… そらは ひろいから。' } },
   // World 5's: the Crane (the Tower Blocks'): the Cork's dive (hover, warn, dive, dazed, rise) as a load swinging on a crane's cable.
-  crane: { name: { en: 'Crane', es: 'Grúa', pt: 'Guindaste', ja: 'クレーン' }, design: 'loaf', crane: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  crane: { name: { en: 'Crane', es: 'Grúa', pt: 'Guindaste', ja: 'クレーン' }, ink: 'orange', design: 'loaf', crane: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'Hard hats only.', es: 'Solo con casco.', pt: 'Só de capacete.', ja: 'ヘルメット ちゃくよう！' },
       { en: 'One more floor. Then another.', es: 'Un piso más. Y otro.', pt: 'Mais um andar. E outro.', ja: 'あと いっかい。それから もう いっかい。' },
       { en: 'Stand clear of the load!', es: '¡Apártate de la carga!', pt: 'Afaste-se da carga!', ja: 'にもつの したに たつな！' }],
@@ -586,7 +587,7 @@ const BOSSES = {
     defeat: { en: 'Shift over… the roof is yours.', es: 'Fin del turno… el tejado es tuyo.', pt: 'Fim do turno… o telhado é seu.', ja: 'しごと おわり… やねは きみの もの。' } },
   // World 1's: the Tram (Tokyo's streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
   // its pantograph up to an overhead wire; as the first boss, the Cork's hits and phases and its passes and spits a quarter slower (slow).
-  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, design: 'loaf', size: CART.size, rail: true, tram: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
     intro: [{ en: 'Next stop: nowhere.', es: 'Próxima parada: ninguna.', pt: 'Próxima parada: nenhuma.', ja: 'つぎは どこにも とまりません。' },
       { en: 'Mind the gap. And me.', es: 'Cuidado con el hueco. Y conmigo.', pt: 'Cuidado com o vão. E comigo.', ja: 'すきまに ごちゅうい。わたしにも。' },
       { en: 'No riding on the roof!', es: '¡Nada de subirse al techo!', pt: 'Nada de andar no teto!', ja: 'やねに のらないで ください！' }],
@@ -924,7 +925,7 @@ function portrait(design, ink, n = 16) {
   return rows;
 }
 for (const k in ENEMY) ICONS['foe_' + k] = portrait(ENEMY[k].design, 'r');
-for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', 'p');
+for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', Object.keys(ICON_INK).find((c) => ICON_INK[c] === (BOSSES[k].ink || 'purple')));   // in its own ink
 ICONS.foe_skull = ['................', '.....wwwwww.....', '...wwwwwwwwww...', '..wwwwwwwswwww..', '..wwswwwwwwwww..', '.wwkkkkwwkkkkww.', '.wkkkkkwwkkkkkw.', '.wkkrkkwwkkrkkw.',
   '.wwkkkwwwwkkkww.', '..wwwwwkkwwwww..', '...wwwwwwwwww...', '...wkwkwkwkwk...', '..ssssssssssss..', '.ssssssssssssss.', '.ss.sss..sss.ss.', '..s..s....s..s..'];   // a skull over its goo (the user's picture)
 // The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs

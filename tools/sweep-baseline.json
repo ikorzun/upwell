@@ -1,5 +1,5 @@
 {
- "commit": "c06d63c+changes",
+ "commit": "564f2e8+changes",
  "made": "2026-10-21",
  "levels": {
   "c1-1": {
@@ -500,12 +500,10 @@
   },
   "c6-10": {
    "result": "won",
-   "time": 19,
-   "heartsLost": 1,
+   "time": 18.5,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "shot@hover"
-   ],
+   "hits": [],
    "boss": "Nuppeppo",
    "dealt": "6/6"
   },

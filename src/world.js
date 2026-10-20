@@ -679,16 +679,17 @@ const BOSSES = {
     defeat: { en: '…Light. I had forgotten it.', es: '…Luz. La había olvidado.', pt: '…Luz. Eu tinha esquecido.', ja: '…ひかり。わすれてた。' } },
 };
 // The bosses' looks (owner, 2026-10-20: each boss a yokai of its world, picked from tools/variants.py's sheets boss-<id>, A to F, as the
-// game's code draws them): its body's design; the renderer draws the rest round it (look) and on it (LOOK_FACE). Its fight, size and colour stay its own.
+// game's code draws them): its body's design (and size, where its drawing is in whole game pixels on it: BOSS_FIT); the renderer draws the rest round it (look) and on
+// it (LOOK_FACE). Its fight and colour stay its own.
 const LOOKS = {
   probka: ['F', 'tanuki'],   // the Village's: a Bake-danuki with its leaf, on the Cork's dive
-  cart: ['C', 'round'],   // the Cave's: Tsuchigumo, walking the Minecart's rail
+  cart: ['C', 'round', 2.2],   // the Cave's: Tsuchigumo, walking the Minecart's rail (its body its drawing's at 2x: the round of it, its legs out)
   puck: ['F', 'round'],   // Fuji's: Tsurara-onna, her spikes swept back
   tram: ['E', 'tram'],   // Tokyo's: a tsukumogami tram
-  crane: ['F', 'lump'],   // the Tower Blocks': Nuppeppo in its ropes
+  crane: ['F', 'round', 2.74],   // the Tower Blocks': Nuppeppo in its ropes (its body the round of its drawing at 2x)
   pigeon: ['A', 'tengu'],   // the Sky's: a Karasu-tengu
 };
-for (const k in LOOKS) BOSSES[k].look = { id: k + '-' + LOOKS[k][0], design: LOOKS[k][1] };
+for (const k in LOOKS) BOSSES[k].look = { id: k + '-' + LOOKS[k][0], design: LOOKS[k][1], size: LOOKS[k][2] };
 const FOREST_V = { kikimora: 'C', leshy: 'B' };   // the Dark Forest's enemies (owner, 2026-10-20: «1c 2b»): a Kikimora with her broom, a Leshy with fly agarics
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
@@ -1049,11 +1050,10 @@ DESIGNS.push(
     face: { eye: [0.22, 0.0], eyeR: [0.07, 0.09], mouth: [0, 0.22], mouthW: 0.12, blush: [0.5, 0.15] } },
   { id: 'slug', n: 34, size: 1.0, firm: 1.2, kernel: [0, 0], sdf: (x, y) => sdRoundBox(x, y, 0.62, 1.0, 0.55),
     face: { eye: [0.22, -0.3], eyeR: [0.07, 0.09], mouth: [0, -0.08], mouthW: 0.1, blush: [0.4, -0.15] } },
-  // The bosses' looks (LOOKS), the owner's picks: a streetcar, a tanuki sitting up, a sagging lump, a tengu (a face of their own
+  // The bosses' looks (LOOKS), the owner's picks: a streetcar, a tanuki sitting up, a tengu (a face of their own
   // each, LOOK_FACE; these are for Gum's)
   { id: 'tram', n: 40, size: 1.0, firm: 1.6, kernel: [0, 0.05], sdf: (x, y) => sdRoundBox(x, y, 1.33, 0.74, 0.42), face: { eye: [0.3, -0.05], eyeR: [0.07, 0.09], mouth: [0, 0.25], mouthW: 0.12, blush: [0.5, 0.15] } },
   { id: 'tanuki', n: 36, size: 1.0, firm: 1.3, kernel: [0, 0.08], sdf: (x, y) => Math.max(sdEll(x, y, 0.92, 1.02), y - 0.9), face: { eye: [0.3, -0.3], eyeR: [0.07, 0.09], mouth: [0, 0.0], mouthW: 0.12, blush: [0.5, -0.1] } },
-  { id: 'lump', n: 38, size: 1.0, firm: 1.1, kernel: [0, 0.12], sdf: (x, y) => smin(sdEll(x, y - 0.1, 0.95, 0.8), sdEll(x, y - 0.55, 1.12, 0.4), 0.3), face: { eye: [0.3, -0.2], eyeR: [0.07, 0.09], mouth: [0, 0.1], mouthW: 0.12, blush: [0.5, 0.0] } },
   { id: 'tengu', n: 34, size: 1.0, firm: 1.3, kernel: [0, 0.05], sdf: (x, y) => sdEll(x, y, 0.78, 1.02), face: { eye: [0.26, -0.25], eyeR: [0.07, 0.09], mouth: [0, 0.05], mouthW: 0.1, blush: [0.42, -0.1] } },
 );
 // The book's pictures of each enemy and boss (the user: each its own, in detail): its own shape as Gum's design gives its
@@ -2538,11 +2538,11 @@ const FOE_SPRITES = {
 // The bosses' too (owner, 2026-10-20: «Переделай всех шестерых боссов по рисунку листа»): each pick cut from its cell (clear what lies round it,
 // its holes kept black, a black rim on it), fitted over its body (BOSS_FIT: the ink of it that flashes with the body, and how far down the body
 // sits under it), so the fight stays; the body itself unseen (the renderer draws neither it nor its shadow).
-const BOSS_FIT = { 'probka-F': ['b', 0.5, 0], 'cart-C': ['o', 0.5, 0], 'puck-F': ['s', 0.5, 1], 'tram-E': ['g', 0.55, -1], 'crane-F': ['o', 0.55, 0], 'pigeon-A': ['s', 0.55, -1] };   // [its ink, its body's place down it, the way its cell has it face (0: at you)]
+const BOSS_FIT = { 'probka-F': ['b', 0.5, 0], 'cart-C': ['o', 0.44, 0, 2], 'puck-F': ['s', 0.5, 1], 'tram-E': ['g', 0.55, -1], 'crane-F': ['o', 0.57, 0, 2], 'pigeon-A': ['s', 0.55, -1] };   // [its ink, its body's place down it, the way its cell has it face (0: at you), its pixel in game pixels (none: fitted over its body)]
 const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
   const H = rows.length, W = rows[0].length, m = flip ? -1 : 1, sh = d.b.s;
   if (fit && !sh.ext) sh.ext = [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
-  const k = fit ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : PIX.size / d.b.R, cy = (fit ? fit[1] : 0.62) * H;   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
+  const k = fit && !fit[3] ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : ((fit ? fit[3] : 1) * PIX.size) / d.b.R, cy = (fit ? fit[1] : 0.62) * H;   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
   const o = fit ? (0.5 * PIX.size) / d.b.R : 0.004;   // its boxes' overlap: half a pixel on a boss, whose body is not under it to fill the seams when it squashes
   rows.forEach((row, j) => { for (let i = 0; i < W;) { const ch = row[i]; let e = i + 1; while (row[e] === ch) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k, (j + 0.5 - cy) * k, ((e - i) / 2) * k + o, 0, 0, 0.5 * k + o, fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : PAL[ICON_INK[ch]]); i = e; } });
   return true;

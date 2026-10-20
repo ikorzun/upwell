@@ -398,6 +398,7 @@ const THEMES = {
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
   blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { win: 'grid', panels: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
   sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
+  skazka: Object.assign(theme(PAL.green, { crumble: PAL.orange, mover: PAL.purple, spring: PAL.blue, rubber: PAL.blue }), { moss: PAL.gray, skazka: true }),   // the Dark Forest (see SKAZKA): grey cobwebs you hold, purple what flies by witchcraft, orange rotten logs
   junk: Object.assign(theme(PAL.green, { ice: PAL.gray, mover: PAL.blue, spring: PAL.black, crumble: PAL.orange }), { moss: PAL.gray, plank: PAL.orange, win: 'brick', junk: true }),   // the Junkyard (see JUNK)
   sky: Object.assign(theme(PAL.purple, { mover: PAL.blue, spring: PAL.blue, rubber: PAL.blue, crumble: PAL.white }), { dots: PAL.gray, win: 'clouds', glass: true }),   // the Skyscraper (see SKY)
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
@@ -539,6 +540,12 @@ const TOKYO = Object.assign({}, WORLDS[1], { id: 'tokyo', name: { en: 'Tokyo', e
 const SEA = Object.assign({}, WORLDS[1], { id: 'sea', name: { en: 'Sea', es: 'Mar', pt: 'Mar', ja: 'うみ' }, theme: THEMES.sea, dark: [], maxD: 2,
   chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 2, movers: 1, crumble: 2, bridge: 2, mosswall: 1, rest: 1, vault: 1 },
   enemies: { crawler: 3, climber: 2, shell: 2 }, intro: [{}, {}, {}] });
+// The Dark Forest (owner, 2026-10-20: a bonus world of scary Russian fairy tales, a dark forest with skulls, Baba Yaga, Kikimora, Koschei, Leshy, the stove;
+// very gloomy, very scary, very dark; on its levels the hero is a Kolobok): dark on every level, its kit to the owner's picks (research/variants/skazka-*).
+// Not in the game yet: ?play=skazka to look at it.
+const SKAZKA = Object.assign({}, WORLDS[1], { id: 'skazka', name: { en: 'Dark Forest', es: 'Bosque oscuro', pt: 'Floresta sombria', ja: 'くらい もり' }, theme: THEMES.skazka, dark: [0, 1, 2], maxD: 2,
+  chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 1, movers: 2, crumble: 2, mosswall: 2, rest: 1, vault: 1 },
+  enemies: { skull: 3, crawler: 2, climber: 1, spitter: 1 }, intro: [{}, {}, {}] });
 // A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about
 // 1.1 s a metre) where no heart is lost; out by the hole on top, out of time or caught by the fire, what it paid is shown
 // with an offer to double it for an ad, then on to the next world (user). Made like a world, with

@@ -53,6 +53,12 @@ WORLDS = {
             'a torii standing in the sea, rocky shores with pine trees, a river running down to the sea under an arched bridge, the lanterns of night fishing boats',
             'aqua #6fe0ee', 'white is wet rock you slip on (a whole block of it), green is seaweed you can hold on to, purple marks springs and rubber walls, '
             'orange marks boats and planks that move, grey blocks crumble', 'the black summer night by the sea, nothing far off'),
+    # (owner 2026-10-20: a bonus world of scary Russian fairy tales in a dark forest, very gloomy, very dark; the hero a Kolobok there)
+    'skazka': ('the Dark Forest', 'a dark forest out of scary Russian fairy tales at night, very gloomy, very frightening and very dark, as in Ivan Bilibin\'s '
+               'illustrations: black spruces and dead trees hung with grey cobwebs, a swamp, old bones and skulls, Baba Yaga\'s hut on chicken legs behind a fence of '
+               'skulls whose eye sockets glow, a Russian stove; frightening, but never gory: the game is for everyone', 'green #339c39',
+               'grey is cobweb you can hold on to, purple marks what flies by witchcraft, blue marks springs, orange logs crumble',
+               'the black night in a dark forest, nothing far off'),
     'blocks': ('the Tower Blocks', 'a housing estate of concrete tower blocks, a danchi, at night: raw concrete panels, balconies with bars, riser pipes, '
                'satellite dishes, stairwells', 'grey #c8c8c8', 'blue marks moving platforms and springs, orange blocks crumble, green is moss you can hold on to',
                'the black night, a regular grid of windows far off'),
@@ -68,6 +74,7 @@ CAVE_AT = 'a grey stone ledge with a white top edge sticking out of the wall'
 FUJI_AT = 'a blue rock ledge with a soft cap of snow and a white top edge sticking out of the wall'
 VILLAGE_AT = 'an orange earthen terrace ledge with a white top edge sticking out of the wall'
 SEA_AT = 'an aqua rock ledge with a white top edge sticking out of the wall'
+SKAZKA_AT = 'a green earthen ledge with a white top edge sticking out of the wall'
 SAKURA = 'sakura blossom in purple, the nearest the palette has to pink (never red, never white)'
 FUJI_RULE = ('In this world white is ice you slip on (a whole block or wall of white), grey blocks crumble and purple marks moving planks and springs: '
              'so the snow is only a cap on top, and its top is the white edge you stand on.')
@@ -271,6 +278,47 @@ ELEMENTS = {
                     'under an arched bridge, the lights of night fishing boats', plane='back', where='far behind everything, low and faint, so the play reads over it',
                     material='water, islands, pines, a torii, a bridge, boats', size='about 14 tiles wide and 6 tiles tall', inks='a faint aqua and a faint orange '
                     'dither on the black (no white)', scene=SEA_AT + ' in front of it'),
+    # The Dark Forest (owner 2026-10-20): the first batch, what a bonus level and a whole world both need
+    'skazka-slab': dict(world='skazka', kind='ledge', what='the basic ledge, a ledge of black forest earth held together by roots, sticking out of the shaft wall',
+                        does='solid on every side: you stand on it, cling to its sides and jump off it', material='earth, twisted roots hanging under it, moss, an old '
+                        'bone or a little skull half buried in it, a toadstool', size='4 tiles long and 1 tile thick', main='green (the mossy earth)'),
+    'skazka-plank': dict(world='skazka', kind='ledge', what='a gnarled dead branch growing out of the shaft wall', does='a thin platform: you jump up through it '
+                         'from below and stand on it', material='dead wood, bark, a cobweb', size='4 tiles long and a third of a tile thick',
+                         place='the branch growing out of that wall', main='green (mossy wood)', vary='the shape of the branch (straight, crooked, forked, knotted), '
+                         'its twigs, how it grows out of the wall, and the small details on it (a cobweb, a bast shoe hanging off it, a bundle of herbs, a bone charm '
+                         'on a string)'),
+    'skazka-mortar': dict(world='skazka', kind='ledge', what="Baba Yaga's mortar (stupa), flying through the air", does='a thin platform that rides sideways '
+                          'along its row, from wall to wall and back, carrying you; you jump up through it from below and stand on its rim',
+                          material='a wooden mortar bound with iron hoops, a pestle, a broom of twigs', size='3 tiles long, its rim a third of a tile thick, the '
+                          'mortar hanging under the rim', place='the moving platform in the middle of the shaft', main='purple',
+                          vary='how it flies: A and B a wide mortar with the pestle stuck in it, C and D a mortar with a broom sweeping behind it and a trail of '
+                          'sparks, E and F a mortar riding a dark cloud of smoke; its hoops and cracks, and the small details on it (a lit candle, a bundle of herbs, '
+                          'a black cat peeking over the rim)', rule="Purple is this world's mark for what flies by witchcraft, so it is its main colour."),
+    'skazka-log': dict(world='skazka', kind='ledge', what='a rotten log whose wood gives way under you', does='a row of rotten wood you stand on, that falls apart '
+                       'a moment after you touch it and comes back a while later', material='rotten bark, toadstools, woodworm holes, moss', size='4 tiles long and '
+                       '1 tile thick', place='the log sticking out of that wall', main='orange', vary='the cracks and gaps that show where it will break, the bark, how '
+                       'it is fixed to the wall, and the small details on it (toadstools, a beetle, a snail, a cobweb)',
+                       rule="Orange is this world's mark for what crumbles, so it is its main colour."),
+    'skazka-fence': dict(world='skazka', kind='prop', what="a stretch of Baba Yaga's fence: sharpened stakes, a skull on each, their eye sockets glowing",
+                         where='on the top of a ledge at its wall end', material='old wooden stakes bound with rope, bone skulls', size='about 3 tiles wide and '
+                         '2.5 tiles tall', inks='grey stakes, grey bone skulls (no white), their eye sockets glowing orange with a yellow core: they are the lights '
+                         'of the dark', scene=SKAZKA_AT),
+    'skazka-izba': dict(world='skazka', kind='prop', what="Baba Yaga's hut on chicken legs (izbushka), whose door is a way into a shop", where='standing on a ledge '
+                        'against the shaft wall, its door open', material='a log cabin with a mossy roof, carved window frames, two big scaly chicken legs under it',
+                        size='about 3.5 tiles wide and 4 tiles tall, legs included', inks='green and grey logs, a dark mossy roof, a dim orange window, the open door '
+                        'dark inside with a red cloth hung in it (red is the shop\'s mark), grey chicken legs with black claws', scene=SKAZKA_AT),
+    'skazka-stove': dict(world='skazka', kind='prop', what='a big old Russian stove (pech), its mouth open: the way into a stash', where='standing on a ledge '
+                         'against the shaft wall', material='whitewashed brick, a chimney, the round-topped mouth, clay pots and a poker beside it',
+                         size='about 3 tiles wide and 3.5 tiles tall', inks='a grey stove (no white), black soot round its mouth, the mouth glowing purple inside '
+                         '(purple is the stash\'s mark) with a few orange embers', scene=SKAZKA_AT),
+    'skazka-far': dict(world='skazka', kind='prop', what='the dark forest far away: the jagged tops of black spruces against a huge moon, a dead tree with an owl, '
+                       'Baba Yaga flying across the moon in her mortar, mist over a swamp', plane='back', where='far behind everything, low and faint, so the play '
+                       'reads over it', material='spruces, the moon, mist', size='about 14 tiles wide and 6 tiles tall', inks='a faint green and a faint grey dither '
+                       'on the black, the moon a faint grey (no white)', scene=SKAZKA_AT + ' in front of it'),
+    'skazka-kolobok': dict(world='skazka', kind='hero', what='Kolobok, the round bun of the Russian tale who ran away from the old man and the old woman',
+                           size='2 tiles across', main='orange (a baked crust)', scene=SKAZKA_AT,
+                           vary='the crust (its shading, a shine of glaze, cracks, a dusting of flour, a darker baked bottom) and the face (the eyes, the brows, a '
+                           'cheeky grin, a sly smile, a scared look, rosy cheeks in orange); nothing on it but the bun itself: no hat, no arms, no legs'),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',
@@ -355,21 +403,21 @@ ELEMENTS.update({
                      'blocks crumble: those only for small details; the boss is purple all over.'),
 })
 
-LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
+LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.
 In play: {does}. Material: {material}. Size: {size}; {grid}
 Draw six different design variants of this same element in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
-Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place} in flat side view at game scale, and the hero standing on it for scale: a soft round white blob 2 tiles across with two small black eyes.
+Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place} in flat side view at game scale, and the hero standing on it for scale: {hero_scale}.
 Keep in every variant: the same size, the same job in play, a white top edge to stand on, {main} as its main colour.
 Vary between the variants: {vary}. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
 {style} Use only these ten colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 
-PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
+PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}
 Draw six different design variants of this same prop in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
-Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {scene}, the prop in its place in flat side view at game scale, and the hero for scale on a ledge near it: a soft round white blob 2 tiles across with two small black eyes.
+Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {scene}, the prop in its place in flat side view at game scale, and the hero for scale on a ledge near it: {hero_scale}.
 Keep in every variant: the same size and place, a silhouette that reads at a glance on a phone screen, and nothing on the prop that looks like something to stand on: no white top edges.
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
@@ -382,6 +430,19 @@ Each cell is a scene from the fight: {night}, the shaft wall as a thin vertical 
 Keep in every variant: the same size and the same fight, {main} as its main colour, a face that reads at a glance on a phone (big eyes, an angry brow, a mouth), and a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {parts}. Cute and a little spooky, never gory: the game is for everyone.
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
 {style} Use only these ten colours: {inks9}. The world's own colour is {ink}. {rule} White only for the hero, the edges you stand on and tiny glints; red only for danger: the boss flashes red when it is hit, so it is never red itself; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+HERO = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round hero climbs up a narrow shaft at night.
+{refnote}In the world "{world}" ({mood}) the hero turns into {what}. It is the hero, the play itself: full colour, the clearest thing on the screen.
+In play: a soft round body that squashes when it lands, stretches when it jumps and wobbles; it always faces the player. Size: {size}; {grid}
+Draw six different design variants of this same hero in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
+Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {scene}, the hero standing on it in flat front view at game scale, and beside it a second copy of the same hero squashed wide as it lands.
+Keep in every variant: the round soft silhouette 2 tiles across, {main} as its main colour, a white rim round it so it reads on the dark (white is the hero's mark), a face that reads at a glance on a phone.
+Vary between the variants: {vary}. Make the six clearly different from each other.
+Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
+{style} Use only these ten colours: {inks9}. The world's own colour is {ink}. Red only for danger, so on the hero at most a tiny tongue; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+# The hero as the sheets draw it, by world (the Dark Forest's a Kolobok, owner 2026-10-20): the opening line's, the scale figure's.
+HEROES = {'skazka': ('a small round hero (here Kolobok, the runaway bun of the Russian tale)', 'Kolobok, a soft round orange bun 2 tiles across with a white rim, '
+                     'two small black eyes and a smile')}
+HERO_PLAIN = ('a small round white hero', 'a soft round white blob 2 tiles across with two small black eyes')
 # The camera's depth (owner 2026-10-19; the game's DEPTH): the play in full colour; the midground (props on or off the play) solid but with no white and no
 # yellow except a light's own core; the background (behind the shaft) at a quarter of one ink over the black, no white, the least detail.
 PLANES = {'mid': 'It is in the midground, standing on or hanging off the play: solid colours, but no white and no yellow except the core of a light (a lamp\'s glass, '
@@ -408,7 +469,8 @@ def prompt(el: str, ref: bool = False) -> str:
     slab = {'place': 'the element sticking out of that wall', 'main': ink.split()[0], 'vary': 'the silhouette and edge profile, how its free end is finished, how it is fixed '
             'to the wall, its surface pattern and joints, and the small details on it', 'rule': f'In this world {taken}, so use those only for small details.'}
     plane = PLANES[e.get('plane', 'mid')]
-    return {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS}[e['kind']].format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text, 'plane': plane,
+    hero_short, hero_scale = HEROES.get(e['world'], HERO_PLAIN)
+    return {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO}[e['kind']].format(**{**slab, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
 
 

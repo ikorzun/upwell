@@ -2845,6 +2845,7 @@ function start() {
   if (/[?&]play=sky\b/.test(location.search)) { game.preview = SKY; window.__up.go(2, 0); }   // the Skyscraper by itself
   if (/[?&]play=junk\b/.test(location.search)) { game.preview = JUNK; window.__up.go(2, 0); }   // the Junkyard by itself
   if (/[?&]play=sea\b/.test(location.search)) { game.preview = SEA; window.__up.go(1, 0); }   // the Sea by itself (not in the campaign yet)
+  if (/[?&]play=skazka\b/.test(location.search)) { game.preview = SKAZKA; window.__up.go(1, 0); }   // the Dark Forest by itself (not in the game yet)
   loop.last = performance.now();
 }
 

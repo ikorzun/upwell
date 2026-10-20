@@ -669,7 +669,7 @@ const BOSSES = {
 // a boss, two takes on each, A to F): its body's design; the renderer draws the rest round it (look) and on it (LOOK_FACE). BOSSES[k].look
 // is the one in play (none yet: as before); ?look=C shows every boss's C, to see it fight. Its fight, size and colour stay its own.
 const LOOKS = {
-  tram: ['carriage', 'carriage', 'carriage', 'carriage', 'tram', 'tram'],   // Oboroguruma, Kasha, a tsukumogami tram
+  tram: ['carriage', 'carriage', 'carriage', 'carriage', 'tram', 'tram', 'tramS'],   // Oboroguruma, Kasha, a tsukumogami tram; G: E's own pixels (LOOK_SPRITES)
   probka: ['round', 'round', 'fox', 'fox', 'tanuki', 'tanuki'],   // the Village's, on the Cork's dive (owner: the fights swapped): Wanyudo, a Nogitsune, a Bake-danuki
   puck: ['kappa', 'kappa', 'umibozu', 'umibozu', 'round', 'round'],   // a Kappa, Umibozu, Tsurara-onna
   cart: ['lantern', 'lantern', 'round', 'round', 'slab:gray', 'slab:gray'],   // the Cave's, the dark mine's, on the Minecart's rail: Chochin-obake, Tsuchigumo, Nurikabe (grey, as its sheet)
@@ -677,8 +677,8 @@ const LOOKS = {
   pigeon: ['tengu', 'tengu', 'slug', 'slug', 'round', 'round'],   // a Karasu-tengu, Ittan-momen, Raiju
   rat: ['rat', 'rat', 'umbrella', 'umbrella', 'pot', 'pot'],   // Tesso, Kasa-obake, a tsukumogami heap
 };
-for (const k in LOOKS) BOSSES[k].looks = Object.fromEntries(LOOKS[k].map((t, i) => { const [design, ink] = t.split(':'); return ['ABCDEF'[i], { id: k + '-' + 'ABCDEF'[i], design, ink }]; }));
-const LOOK = (/[?&]look=([A-F])\b/.exec(location.search) || [])[1] || null;
+for (const k in LOOKS) BOSSES[k].looks = Object.fromEntries(LOOKS[k].map((t, i) => { const [design, ink] = t.split(':'); return ['ABCDEFG'[i], { id: k + '-' + 'ABCDEFG'[i], design, ink }]; }));
+const LOOK = (/[?&]look=([A-G])\b/.exec(location.search) || [])[1] || null;
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
@@ -1033,6 +1033,7 @@ DESIGNS.push(
   { id: 'kappa', n: 36, size: 1.0, firm: 1.4, kernel: [0, 0.1], sdf: (x, y) => Math.max(sdEll(x, y - 0.05, 1.05, 0.86), y - 0.72), face: { eye: [0.3, -0.05], eyeR: [0.07, 0.09], mouth: [0, 0.25], mouthW: 0.12, blush: [0.5, 0.15] } },
   { id: 'umibozu', n: 38, size: 1.0, firm: 1.5, kernel: [0, 0.1], sdf: (x, y) => Math.max(sdEll(x, y + 0.08, 0.98, 1.1), y - 0.78), face: { eye: [0.3, 0.2], eyeR: [0.07, 0.09], mouth: [0, 0.48], mouthW: 0.12, blush: [0.5, 0.38] } },
   { id: 'rat', n: 40, size: 1.0, firm: 1.5, kernel: [0, 0.08], sdf: (x, y) => Math.max(sdEll(x, y, 1.28, 0.74), y - 0.62), face: { eye: [0.3, -0.1], eyeR: [0.07, 0.09], mouth: [0, 0.2], mouthW: 0.12, blush: [0.5, 0.1] } },
+  { id: 'tramS', n: 40, size: 1.0, firm: 1.6, kernel: [0, 0.05], sdf: (x, y) => sdRoundBox(x, y, 1.35, 0.5, 0.2), face: { eye: [0.3, -0.05], eyeR: [0.07, 0.09], mouth: [0, 0.2], mouthW: 0.12, blush: [0.5, 0.1] } },   // the sheet's streetcar (LOOK_SPRITES)
   { id: 'umbrella', n: 40, size: 1.0, firm: 1.6, kernel: [0, 0.2], sdf: (x, y) => smin(Math.max(Math.abs(x) * 0.763 - (y + 1.0) * 0.646, y - 0.28), sdRoundBox(x, y - 0.62, 0.17, 0.34, 0.1), 0.06),
     face: { eye: [0.2, -0.2], eyeR: [0.07, 0.09], mouth: [0, 0.05], mouthW: 0.1, blush: [0.4, 0.0] } },
 );
@@ -2517,6 +2518,66 @@ const LF = {
   frown(d, x, y, w) { d.shape(10, x, y, w, 0, 0, 0.035, d.ink); for (const s of [-1, 1]) d.shape(10, x + s * w * 1.1, y + 0.035, w * 0.22, w * 0.14 * s, 0, 0.03, d.ink); },   // flat, its ends down
 };
 const LOOK_FACE = {}, lookFace = (ids, fn) => ids.forEach((id, v) => { LOOK_FACE[id] = (d) => fn(d, v, d.fd); });
+// A look drawn from its sheet's own pixels (owner, 2026-10-20: path A, its details as the sheet has them): the variant cut out of its sheet
+// (research/variants/boss-<id>-<n>-px.png, on the game's grid) as rows of ICON_INK letters ('.' clear; 'g' is the body's ink, so it flashes red
+// with it), drawn on the body in its own frame, so it squashes and wobbles with it; `car` is the part of it the body's design is (its proportions),
+// `faces` the way the sheet has it look (-1: left; mirrored the other way), its eyes left out (`eyes`: middles and half sizes) for live ones.
+const LOOK_SPRITES = {
+  'tram-G': { faces: -1, car: [3, 15, 57, 35], k: 0.054, eyes: [[8.5, 27.5, 4.5, 4.5], [20.5, 27.5, 4.5, 4.5]], rows: [
+    '.............................gggggggg.........................',
+    '............................ggggkkggkg........................',
+    '...........................ggkkggggkkgg.......................',
+    '..........................ggkkkkggkkkkkg......................',
+    '.........................ggkkkkggggkkkkgg.....................',
+    '........................ggkkkkggkkkgkkkkkg....................',
+    '........................gkkkkkggkkkggkkkkg....................',
+    '.........................gkkkkkggkgkkkkkg.....................',
+    '..........................ggkkkkgggkkkgg......................',
+    '...........................ggkkkgggkkgg.......................',
+    '............................ggggkkgggg........................',
+    '............ssssssssksswswswkggggggggg........................',
+    '...............skkksskwswwwswkkkkkkkkkkkkksswwwswww...........',
+    '.........wksssssssssskswssssskswwwswswwwsksssskwswsw..........',
+    '.......................ssssswkwswwwwwwwwwwkswswsssws..........',
+    '........ggggggggggggggggkkggggkg..............................',
+    '......gggggkwwwwwggggggggkggggggggggggggggggggggggggggg.......',
+    '.....ggggggkwwwwwgggggggggkgggggggggggggggggggkgkgkkkkkg......',
+    '......gggggkkkgkkkkggggkggkkkkkkkkggggggggggggggggggggggg.....',
+    '....ggkgggggggggggggggkkggggggggkggggggggggggggggggkggggg.....',
+    '.........ggggggggggggkkkkggkkkggggkkkkggkkkkgggggggkggggg.....',
+    '.....gkkkkkggggggggggggggggkkskgggkkkkggkskkggkkkkgkkkkkg.....',
+    '.....gggkkkkgggggggggggggggkskkgggkkkkggskskggskkkgkkkskg.....',
+    '......ggggkkkkgggggggggggggkkkkgggkkkkggkkkkggkkkkgkkkkkg.....',
+    '.....ggggggkkggggggggggggggkskkgggkkskggskskggskskgkskskg.....',
+    '.....gggggggkggggggggggggggkkskgggkkkkggkkkkggkkkkgkkkkkg.....',
+    '.....gggggggkggggggggggggggkskkgggkkkkggkkskggskkkgkkkskg.....',
+    '.....gggggggkggggggggggggggkkkkgggkkkkggkkkkggkkkkgkkkkkg.....',
+    '.....ggggggggggggggggggggggggggggggggggggggggggggggkggggg.....',
+    '.....ggggggggkkkgggggggggggwwwwwkwwwwwswwwwwwwswswskwwwww.....',
+    '.....ggggggkkkkkgkgggggggggggggggggggggggggggggggggkggggg.....',
+    '...gkgkkgggkggkggkgggkkggggggggggggggggggggggggggggkggggg.....',
+    '...gkkwwkggkggkggkgggwwkgggggggggggggggggggggggggggkggggg.....',
+    '.....gkkgggkggkggkgggkkggggggggggggggggggggggggggggkggggg.....',
+    '.....ggggggkgggggkggggggggkgggggkggggggggggggggggggkggggg.....'] },   // boss-tram-1-px.png, E
+};
+const drawSprite = (d, sp) => {   // a box for each run of one ink, its colour the body's for 'g'; its eyes live, yellow headlights (as its sheet), looking about and blinking
+  const m = d.fd === sp.faces ? 1 : -1, [x0, y0, x1, y1] = sp.car, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, k = sp.k, { fc } = d;
+  sp.rows.forEach((row, j) => {
+    for (let i = 0; i < row.length;) {
+      const ch = row[i]; let e = i + 1;
+      while (row[e] === ch) e++;
+      if (ch !== '.') d.shape(10, m * ((i + e) / 2 - cx) * k, (j + 0.5 - cy) * k, ((e - i) / 2) * k + 0.004, 0, 0, 0.5 * k + 0.004, ch === 'g' ? d.c : PAL[ICON_INK[ch]]);
+      i = e;
+    }
+  });
+  for (const [ex, ey, rx, ry] of sp.eyes) {
+    const x = m * (ex - cx) * k, y = (ey - cy) * k, a = rx * k, b = ry * k, px = (fc.lx * 0.35 + 0.12 * d.fd) * a, py = fc.ly * 0.3 * b;
+    if (fc.squint > 0.45) { d.shape(10, x, y, a, 0, 0, b * 0.18, d.ink); continue; }
+    d.dot(x, y, a * 0.92, b * 0.92, d.ink); d.dot(x, y, a * 0.76, b * 0.76, PAL.yellow); d.dot(x + px, y + py, a * 0.36, b * 0.4, d.ink); d.dot(x + px - a * 0.12, y + py - b * 0.15, a * 0.12, b * 0.12, PAL.white);
+  }
+  return true;
+};
+LOOK_FACE['tram-G'] = (d) => drawSprite(d, LOOK_SPRITES['tram-G']);
 // Tokyo's: Oboroguruma, a great face over the front of its ox-cart, the cart's lattice behind; Kasha, a cat's face on its gilt cart; a streetcar, its headlights its eyes
 lookFace(['tram-A', 'tram-B'], (d, v, f) => {
   const { dot, shape, ink, c } = d, fx = 0.72 * f;
@@ -4113,7 +4174,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // A boss's look (LOOKS; owner 2026-10-20: its yokai, as its sheet draws it): the parts round its body, behind it (front false) or before it, in
   // its colour (red with it when it is hit) and the sheet's; turned the way it goes (side on), riding, flapping, flickering on the level's clock.
   const look = (bs, front) => {
-    const b = bs.body, id = bs.look, k = id.slice(0, -2), n = 'ABCDEF'.indexOf(id.slice(-1)), p = n >> 1, v = n & 1, c = b.color.base, df = bs.def || {};
+    const b = bs.body, id = bs.look, k = id.slice(0, -2), n = 'ABCDEFG'.indexOf(id.slice(-1)), p = n >> 1, v = n & 1, c = b.color.base, df = bs.def || {};
     const x = b.cx, y = b.cy, w = (b.maxX - b.minX) / 2, h = (b.maxY - b.minY) / 2, r = b.R, P = PIX.size, dk = INK.dark, gr = PAL.gray, fl = INK.flame;
     const d = df.rail || df.slide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
     if (!front) b.lookDir = d;   // (its face on it turns too: LOOK_FACE)
@@ -4142,6 +4203,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         if (!p && v) for (const s2 of [-1, 1]) spike(fx + s2 * 0.22 * w, y - 0.85 * h, 0.22 * r, 0.42 * r, s2 * 0.4, PAL.white);   // its oni's horns (B)
         if (p) for (const s2 of [-1, 1]) { spike(fx + s2 * 0.24 * w, y - 0.82 * h, 0.3 * r, 0.42 * r, s2 * 0.3, c); spike(fx + s2 * 0.24 * w, y - 0.8 * h, 0.14 * r, 0.22 * r, s2 * 0.3, dk); }   // Kasha's cat ears
       }
+      if (p === 3 && !front) { const wy = y - 2.5 * h; box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0); }   // G: the overhead wire its pantograph (in its pixels) runs on
       if (p === 2 && !front) {   // the streetcar's pantograph up to its wire, its gear on the roof, its bogies on the rail
         const wy = top0 - 1.15 * R, mx = x - d * 0.2 * w;
         box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0);

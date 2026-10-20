@@ -77,6 +77,7 @@ function snap() {
     cross: lv.crossing && Object.assign({}, lv.crossing),   // the level crossing's clock and train (the tries ran it on)
     tasks: (lv.tasks || []).map((q) => q.n), neon: new Map(lv.neonLit), tended: new Map(lv.tended), taken: lv.taken && lv.taken.slice(), gone: lv.gone && lv.gone.slice(),   // the level's tasks so far, the neon lit, the kits' things tended (a try did it)
     boss: lv.boss && { f: Object.fromEntries(Object.entries(lv.boss).filter(([, v]) => typeof v !== 'object')), b: snapBody(lv.boss.body) }, crumble: [lv.crumbleTime, lv.crumbleBack],   // its hearts, turn and clocks; the Minecart's quicker bridges
+    rocket: g.rocket && Object.assign({}, g.rocket), rings: lv.rings.map((r) => [r, r.used]),   // a flight under way (an astro's, a boost ring's; its band moves up) and the rings flown through
   };
 }
 function restore(S) {
@@ -103,6 +104,7 @@ function restore(S) {
     Object.assign(bs, o); restoreBody(bs.body, S.boss.b);
   }
   [lv.crumbleTime, lv.crumbleBack] = S.crumble;
+  g.rocket = S.rocket && Object.assign({}, S.rocket); lv.rings = S.rings.map(([r, used]) => Object.assign(r, { used }));   // a try's flight neither flies the real hero up nor cuts its own short
 }
 
 // ── playing ──

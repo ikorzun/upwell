@@ -210,7 +210,9 @@ const chunkAt = (y) => { const c = g.lv.placed.find((q) => y <= q.y1 && y > q.y0
 let run = null;
 function start(world, stage = 0, s = 1, opts = {}) {
   seed = s;
-  if (opts.daily) __up.daily(s, stage); else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s);   // a campaign level (its recipe; the map's column, see campAt) or a random run's
+  const real = Math.random; Math.random = random;   // built on the bot's seed too: a tier's three parts in an order of their own (campMerge), a boss's arena
+  try { if (opts.daily) __up.daily(s, stage); else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s); }   // a campaign level (its recipe; the map's column, see campAt) or a random run's
+  finally { Math.random = real; }
   g.makeHero();   // a fresh body, so a level plays the same whatever was played before it
   g.mods = MODS(); g.taken = []; g.maxHp = HEALTH.start; g.hp = g.maxHp; g.coins = 0; g.kills = 0; g.bestCombo = 0; g.applyMods();   // a fresh run's state for every level
   if (opts.god) g.invuln = 1e9;

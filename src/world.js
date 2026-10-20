@@ -670,9 +670,9 @@ const BOSSES = {
 // is the one in play (none yet: as before); ?look=C shows every boss's C, to see it fight. Its fight, size and colour stay its own.
 const LOOKS = {
   tram: ['carriage', 'carriage', 'carriage', 'carriage', 'tram', 'tram'],   // Oboroguruma, Kasha, a tsukumogami tram
-  probka: ['lantern', 'lantern', 'round', 'round', 'slab:gray', 'slab:gray'],   // Chochin-obake, Tsuchigumo, Nurikabe (grey, as its sheet has it)
+  probka: ['round', 'round', 'fox', 'fox', 'tanuki', 'tanuki'],   // the Village's, on the Cork's dive (owner: the fights swapped): Wanyudo, a Nogitsune, a Bake-danuki
   puck: ['kappa', 'kappa', 'umibozu', 'umibozu', 'round', 'round'],   // a Kappa, Umibozu, Tsurara-onna
-  cart: ['round', 'round', 'fox', 'fox', 'tanuki', 'tanuki'],   // Wanyudo, a Nogitsune, a Bake-danuki
+  cart: ['lantern', 'lantern', 'round', 'round', 'slab:gray', 'slab:gray'],   // the Cave's, the dark mine's, on the Minecart's rail: Chochin-obake, Tsuchigumo, Nurikabe (grey, as its sheet)
   crane: ['round', 'round', 'egg', 'egg', 'lump', 'lump'],   // Tsurube-otoshi, Okubi, Nuppeppo
   pigeon: ['tengu', 'tengu', 'slug', 'slug', 'round', 'round'],   // a Karasu-tengu, Ittan-momen, Raiju
   rat: ['rat', 'rat', 'umbrella', 'umbrella', 'pot', 'pot'],   // Tesso, Kasa-obake, a tsukumogami heap
@@ -2537,15 +2537,15 @@ lookFace(['tram-E', 'tram-F'], (d, v, f) => {
   for (const s of [-1, 1]) { const x = fx + s * 0.27; dot(x, -0.1, 0.23, 0.25, ink); dot(x, -0.1, 0.19, 0.21, PAL.yellow); dot(x + 0.04 * f, -0.07, 0.09, 0.1, ink); dot(x - 0.05, -0.17, 0.04, 0.04, PAL.white); shape(10, x, -0.4, 0.22, -0.09 * s, 0, 0.045, ink); }
   LF.mouth(d, fx, 0.36, v ? 0.3 : 0.22, 0.1, { teeth: v ? 6 : 4 }); return true;
 });
-// the Cave's: Chochin-obake, one eye and a long red tongue on a ribbed lantern; Tsuchigumo, a spider's angry eyes and fangs; Nurikabe, a wall's scowl (cracked: F)
-lookFace(['probka-A', 'probka-B'], (d, v) => {
+// the Cave's (on the rail): Chochin-obake, one eye and a long red tongue on a ribbed lantern; Tsuchigumo, a spider's angry eyes and fangs; Nurikabe, a wall's scowl (cracked: F)
+lookFace(['cart-A', 'cart-B'], (d, v) => {
   const { dot, shape, ink } = d;
   for (let i = 0; i < 6; i++) { const y = -0.75 + 0.3 * i; shape(10, 0, y, 0.8 * Math.sqrt(Math.max(0, 1 - (y / 1.06) ** 2)), 0, 0, 0.022, ink); }
   LF.eyes(d, v ? 0.36 : 0.1, -0.3, 0, 0.24, 0.26, { one: 1, look: v ? 0.15 : 0 });
   dot(0.1 * v, 0.28, 0.16, 0.06, ink); dot(0.04 + 0.1 * v, 0.62, 0.12, 0.34, PAL.red); return true;
 });
-lookFace(['probka-C', 'probka-D'], (d) => { LF.eyes(d, 0, 0.12, 0.3, 0.15, 0.16); LF.mouth(d, 0, 0.44, 0.12, 0.05, { fangs: true }); return true; });
-lookFace(['probka-E', 'probka-F'], (d, v) => {
+lookFace(['cart-C', 'cart-D'], (d) => { LF.eyes(d, 0, 0.12, 0.3, 0.15, 0.16); LF.mouth(d, 0, 0.44, 0.12, 0.05, { fangs: true }); return true; });
+lookFace(['cart-E', 'cart-F'], (d, v) => {
   LF.eyes(d, 0, -0.18, 0.32, 0.14, 0.15); d.shape(10, 0, 0.3, 0.14, 0, 0, 0.03, d.ink);
   if (v) { d.shape(10, -0.6, 0.35, 0.18, 0.12, 0, 0.022, d.ink); d.shape(10, 0.55, -0.55, 0.14, -0.1, 0, 0.022, d.ink); } return true;
 });
@@ -2553,10 +2553,10 @@ lookFace(['probka-E', 'probka-F'], (d, v) => {
 lookFace(['puck-A', 'puck-B'], (d, v, f) => { LF.eyes(d, 0.38 * f, -0.14, 0.2, 0.11, 0.12, { look: 0.2 * f }); return true; });
 lookFace(['puck-C', 'puck-D'], (d) => { LF.eyes(d, 0, 0.18, 0.32, 0.12, 0.13); LF.frown(d, 0, 0.5, 0.12); return true; });
 lookFace(['puck-E', 'puck-F'], (d) => { LF.eyes(d, 0, -0.1, 0.3, 0.14, 0.15); LF.frown(d, 0, 0.35, 0.14); return true; });
-// the Village's: Wanyudo's face in its burning wheel; a Nogitsune's sly eye and white chin; a Bake-danuki's mask and belly
-lookFace(['cart-A', 'cart-B'], (d) => { LF.eyes(d, 0, -0.12, 0.34, 0.17, 0.18); d.dot(0, 0.18, 0.06, 0.05, d.ink); for (const s of [-1, 1]) d.shape(10, s * 0.09, 0.3, 0.1, -0.06 * s, 0, 0.03, d.ink); return true; });
-lookFace(['cart-C', 'cart-D'], (d, v, f) => { for (let i = 0; i < 3; i++) d.shape(10, (-0.6 + 0.4 * i) * f, -0.15, 0.03, 0.06, 0, 0.18, d.ink); return true; });   // its fur's lines (its head is drawn up at its front: look)
-lookFace(['cart-E', 'cart-F'], (d) => { d.dot(0, -0.32, 0.7, 0.2, d.ink); LF.eyes(d, 0, -0.33, 0.3, 0.12, 0.12); d.dot(0, 0.45, 0.55, 0.42, PAL.white); d.dot(0, -0.1, 0.07, 0.05, d.ink); LF.mouth(d, 0, 0.04, 0.12, 0.05); return true; });
+// the Village's (on the dive): Wanyudo's face in its burning wheel; a Nogitsune's fur (its head is drawn up at its front: look); a Bake-danuki's mask and belly
+lookFace(['probka-A', 'probka-B'], (d) => { LF.eyes(d, 0, -0.12, 0.34, 0.17, 0.18); d.dot(0, 0.18, 0.06, 0.05, d.ink); for (const s of [-1, 1]) d.shape(10, s * 0.09, 0.3, 0.1, -0.06 * s, 0, 0.03, d.ink); return true; });
+lookFace(['probka-C', 'probka-D'], (d, v, f) => { for (let i = 0; i < 3; i++) d.shape(10, (-0.6 + 0.4 * i) * f, -0.15, 0.03, 0.06, 0, 0.18, d.ink); return true; });   // its fur's lines (its head is drawn up at its front: look)
+lookFace(['probka-E', 'probka-F'], (d) => { d.dot(0, -0.32, 0.7, 0.2, d.ink); LF.eyes(d, 0, -0.33, 0.3, 0.12, 0.12); d.dot(0, 0.45, 0.55, 0.42, PAL.white); d.dot(0, -0.1, 0.07, 0.05, d.ink); LF.mouth(d, 0, 0.04, 0.12, 0.05); return true; });
 // the Tower Blocks': Tsurube-otoshi's grin; Okubi side on, its ear and its scowl (a shout: D); Nuppeppo's sleepy lids and folds
 lookFace(['crane-A', 'crane-B'], (d, v) => { LF.eyes(d, 0, -0.08, 0.34, 0.2, 0.22, { wink: v ? 1 : 0 }); LF.mouth(d, 0, 0.42, 0.5, 0.17, { teeth: 6, low: true }); return true; });
 lookFace(['crane-C', 'crane-D'], (d, v, f) => {
@@ -4124,7 +4124,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const flame = (fx, fy, sw, sh, ang, col = fl, i = 0) => { const f = 0.72 + 0.28 * Math.sin(T * 13 + i * 2.1); spike(fx, fy, sw, sh * f, ang, col); spike(fx - sw * 0.3, fy, sw * 0.5, sh * f * 0.6, ang - 0.3, col); spike(fx + sw * 0.3, fy, sw * 0.5, sh * f * 0.7, ang + 0.3, col); };   // a tongue of fire with two small ones, flickering
     const wheel = (cx, cy, wr, rim, spoke) => { F(cx, cy, wr, 0, 0, wr, rim, 1, 4); for (let i = 0; i < 4; i++) { const a = roll + (i * Math.PI) / 4; line(cx - Math.cos(a) * wr * 0.78, cy - Math.sin(a) * wr * 0.78, cx + Math.cos(a) * wr * 0.78, cy + Math.sin(a) * wr * 0.78, spoke, 1, 2); } disc(cx, cy, 0.2 * wr, rim, 1); };   // spoked, turning as it rides
     const hook = (hy) => { const hx = Math.round(x / P) * P; box(hx - P, top, hx + P, hy - 0.3 * R, gr, 1, 0, 10, 0); box(x - 0.22 * R, hy - 0.3 * R, x + 0.22 * R, hy - 0.05 * R, gr, 1, 0, 10, 0); F(x, hy + 0.12 * R, 0.17 * R, 0, 0, 0.17 * R, gr, 1, 4); };   // a crane's cable down out of the sky, its block and hook
-    const thread = () => { if (!dazed && !fast) line(x, top, x, b.minY + 2 * P, gr); };
     const legs = (n, len) => { for (let i = 0; i < n; i++) { const lx = x + (i / Math.max(1, n - 1) - 0.5) * w * 1.1; box(lx - 0.07 * r, b.maxY - 0.15 * h, lx + 0.07 * r, b.maxY + len * r, c, 1, 0, 10, 0); oval(lx + 0.06 * r * d, b.maxY + len * r, 0.12 * r, 0.06 * r, c); } };
     if (k === 'tram') {   // the carriage's units: its face's place over its front (LOOK_FACE: 0.72 of 1.3), its roof over the rest
       const fx = x + d * 0.55 * w, top0 = b.minY, back = x - d * 0.45 * w;
@@ -4150,45 +4149,42 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const u of [-0.6, 0.3]) box(x + u * w - 0.2 * r, top0 - 0.12 * h, x + u * w + 0.2 * r, top0 + 0.02 * h, gr, 1, 0, 10, 0);
         for (const u of [-0.62, 0.62]) { disc(x + u * w, ry - 0.05 * R, 0.24 * R, dk, 1); disc(x + u * w, ry - 0.05 * R, 0.12 * R, gr, 1); }
       }
-    } else if (k === 'cart') {
-      if (p === 0) {   // Wanyudo: tall fire either side of its face, its chassis and two big wheels on the rail
-        if (!front) for (const s2 of [-1, 1]) for (let i = 0; i < 3 + v; i++) flame(x + s2 * (0.8 + 0.1 * i) * w, y + (0.5 - 0.42 * i) * h, 0.5 * r, (1.1 + 0.25 * v - 0.12 * i) * r, s2 * (0.15 + 0.12 * i), fl, i + 3 * s2);
-        else { box(x - 0.95 * w, b.maxY - 0.25 * h, x + 0.95 * w, b.maxY - 0.1 * h, dk, 1, 0, 10, 0); for (const s2 of [-1, 1]) wheel(x + s2 * 0.62 * w, b.maxY - 0.05 * h, 0.52 * h, c, dk); }
-      } else {
-        const cartTop = y + (p === 1 ? 0.15 : 0.45) * h;
-        if (!front && p === 1) for (let i = 0; i < 3 + 2 * v; i++) { const u = i / (2 + 2 * v) - 0.5, a = -d * (1.05 - u * 1.4) + Math.sin(T * 3 + i) * 0.12, l = (1.15 + 0.1 * v) * r, tx = x - d * 0.6 * w + Math.sin(a) * l * 0.55, ty = y - 0.1 * h - Math.cos(a) * l * 0.55; tilt(tx, ty, 0.42 * r, l * 0.62, a, c); tilt(tx + Math.sin(a) * l * 0.48, ty - Math.cos(a) * l * 0.48, 0.24 * r, 0.26 * r, a, PAL.white); }   // a Nogitsune's tails
-        if (!front && p === 2) { for (const s2 of [-1, 1]) { disc(x + s2 * 0.55 * w, b.minY + 0.1 * h, 0.24 * r, c, 1); disc(x + s2 * 0.55 * w, b.minY + 0.1 * h, 0.12 * r, dk, 1); } for (let i = 0; i < 6; i++) { const u = i / 5; disc(x - d * (0.85 + 0.22 * i) * w, y + (0.4 - 0.9 * u * u) * h + Math.sin(T * 3 + i) * 0.05 * r, (0.26 - 0.02 * i) * r, i % 2 ? dk : c, 1); } for (let i = 0; i < 2; i++) { const bx = x - d * (0.6 + 0.5 * i) * w; box(bx - 0.28 * r, cartTop - 0.5 * r, bx + 0.28 * r, cartTop + 0.05 * r, PAL.yellow, 1, 3); box(bx - 0.28 * r, cartTop - 0.28 * r, bx + 0.28 * r, cartTop - 0.22 * r, dk, 1, 0, 10, 0); } }   // a Bake-danuki's ears, ringed tail, rice bales
-        if (front) {
-          if (p === 1) {   // its head up at its front: ears, an eye, a white chin, its snout
-            const hx = x + d * 0.72 * w, hy = b.minY - 0.05 * h, hr = 0.5 * r;
-            for (const s2 of [-0.45, 0.35]) { spike(hx + d * s2 * hr, hy - 0.55 * hr, 0.42 * hr, 0.85 * hr, d * 0.2 + s2 * 0.3, c); spike(hx + d * s2 * hr, hy - 0.5 * hr, 0.2 * hr, 0.42 * hr, d * 0.2 + s2 * 0.3, PAL.white); }
-            oval(hx, hy, hr * 1.05, hr * 0.85, c); tilt(hx + d * 0.9 * hr, hy + 0.2 * hr, 0.7 * hr, 0.32 * hr, d * 0.15, c); oval(hx + d * 0.55 * hr, hy + 0.42 * hr, 0.5 * hr, 0.22 * hr, PAL.white); disc(hx + d * 1.55 * hr, hy + 0.12 * hr, 0.12 * hr, dk, 1);
-            disc(hx + d * 0.2 * hr, hy - 0.12 * hr, 0.22 * hr, dk, 1); disc(hx + d * 0.2 * hr, hy - 0.12 * hr, 0.17 * hr, PAL.white, 1); disc(hx + d * 0.28 * hr, hy - 0.1 * hr, 0.09 * hr, dk, 1); line(hx - d * 0.05 * hr, hy - 0.42 * hr, hx + d * 0.45 * hr, hy - 0.3 * hr, dk, 1, 2);
-          }
-          if (p === 2 && !v) { box(x - 0.32 * w, b.minY - 0.12 * h, x + 0.32 * w, b.minY + 0.06 * h, c, 1, 3); disc(x, b.minY - 0.16 * h, 0.1 * r, c, 1); }   // a little hat (E)
-          box(x - 1.05 * w - 2.5, cartTop - 2.5, x + 1.05 * w + 2.5, ry - 0.1 * R + 2.5, dk, 1, 0); box(x - 1.05 * w, cartTop, x + 1.05 * w, ry - 0.1 * R, c, 1, 0, 8, 4 * P);   // its little cart of planks
-          for (const s2 of [-0.62, 0.62]) wheel(x + s2 * w, ry - 0.05 * R, 0.3 * R, c, dk);
-        }
-      }
-    } else if (k === 'probka') {
-      if (p === 0) {   // Chochin-obake on its hanger: grey caps, will-o'-wisps round it
-        if (!front) thread();
+    } else if (k === 'probka') {   // the Village's, flying the Cork's dive (owner, 2026-10-20: the fights swapped)
+      if (p === 0) {   // Wanyudo: a face in a burning ox-cart wheel, spinning as it flies, fire all round its rim
+        const spin = T * (fast ? 9 : 3) * d;
+        if (!front) { const m = v ? 12 : 9; for (let i = 0; i < m; i++) { const a = (i / m) * 2 * Math.PI + spin * 0.3; flame(x + Math.cos(a) * 1.22 * w, y + Math.sin(a) * 1.22 * h, 0.4 * r, (v ? 0.85 : 0.65) * r, a + Math.PI / 2, fl, i); } F(x, y, 1.25 * w, 0, 0, 1.25 * h, gr, 1, 4); for (let i = 0; i < 8; i++) { const a = spin + (i * Math.PI) / 4; line(x + Math.cos(a) * 0.95 * w, y + Math.sin(a) * 0.95 * h, x + Math.cos(a) * 1.22 * w, y + Math.sin(a) * 1.22 * h, gr, 1, 2); } }
+      } else if (p === 1) {   // a Nogitsune flying, its tails fanned behind it, fox-fire going round it, its head up at its front
+        if (!front) { for (let i = 0; i < 3 + 2 * v; i++) { const u = i / (2 + 2 * v) - 0.5, a = -d * (1.05 - u * 1.4) + Math.sin(T * 3 + i) * 0.12, l = (1.15 + 0.1 * v) * r, tx = x - d * 0.6 * w + Math.sin(a) * l * 0.55, ty = y - 0.1 * h - Math.cos(a) * l * 0.55; tilt(tx, ty, 0.42 * r, l * 0.62, a, c); tilt(tx + Math.sin(a) * l * 0.48, ty - Math.cos(a) * l * 0.48, 0.24 * r, 0.26 * r, a, PAL.white); } for (const s2 of [-0.4, 0.5]) oval(x + d * s2 * w, b.maxY + 0.02 * h, 0.16 * r, 0.1 * r, c); }
         else {
+          const hx = x + d * 0.72 * w, hy = b.minY - 0.05 * h, hr = 0.5 * r;
+          for (const s2 of [-0.45, 0.35]) { spike(hx + d * s2 * hr, hy - 0.55 * hr, 0.42 * hr, 0.85 * hr, d * 0.2 + s2 * 0.3, c); spike(hx + d * s2 * hr, hy - 0.5 * hr, 0.2 * hr, 0.42 * hr, d * 0.2 + s2 * 0.3, PAL.white); }
+          oval(hx, hy, hr * 1.05, hr * 0.85, c); tilt(hx + d * 0.9 * hr, hy + 0.2 * hr, 0.7 * hr, 0.32 * hr, d * 0.15, c); oval(hx + d * 0.55 * hr, hy + 0.42 * hr, 0.5 * hr, 0.22 * hr, PAL.white); disc(hx + d * 1.55 * hr, hy + 0.12 * hr, 0.12 * hr, dk, 1);
+          disc(hx + d * 0.2 * hr, hy - 0.12 * hr, 0.22 * hr, dk, 1); disc(hx + d * 0.2 * hr, hy - 0.12 * hr, 0.17 * hr, PAL.white, 1); disc(hx + d * 0.28 * hr, hy - 0.1 * hr, 0.09 * hr, dk, 1); line(hx - d * 0.05 * hr, hy - 0.42 * hr, hx + d * 0.45 * hr, hy - 0.3 * hr, dk, 1, 2);
+          for (let i = 0; i < 2 + v; i++) { const a = T * 1.5 + (i * 2 * Math.PI) / (2 + v), fx2 = x + Math.cos(a) * 1.7 * w, fy2 = y + Math.sin(a) * 1.0 * h; disc(fx2, fy2, 0.12 * r, PAL.blue, 1); spike(fx2, fy2 - 0.05 * r, 0.22 * r, 0.4 * r, 0, PAL.blue); disc(fx2, fy2, 0.05 * r, PAL.white, 1); }   // kitsune-bi
+        }
+      } else {   // a Bake-danuki flying on a puff of its own smoke: its ears, its ringed tail; a little hat (E) or the leaf it changes with (F)
+        if (!front) { for (const s2 of [-1, 1]) { disc(x + s2 * 0.55 * w, b.minY + 0.1 * h, 0.24 * r, c, 1); disc(x + s2 * 0.55 * w, b.minY + 0.1 * h, 0.12 * r, dk, 1); } for (let i = 0; i < 6; i++) { const u = i / 5; disc(x - d * (0.85 + 0.22 * i) * w, y + (0.4 - 0.9 * u * u) * h + Math.sin(T * 3 + i) * 0.05 * r, (0.26 - 0.02 * i) * r, i % 2 ? dk : c, 1); } if (!fast && !dazed) for (let i = 0; i < 3; i++) oval(x + (i - 1) * 0.6 * w + Math.sin(T * 2 + i) * 0.1 * r, b.maxY + 0.1 * h, 0.4 * r, 0.22 * r, gr, 0.8, 1); }
+        else if (!v) { box(x - 0.32 * w, b.minY - 0.12 * h, x + 0.32 * w, b.minY + 0.06 * h, c, 1, 3); disc(x, b.minY - 0.16 * h, 0.1 * r, c, 1); }
+        else { tilt(x + 0.1 * w, b.minY - 0.08 * h, 0.16 * r, 0.32 * r, 0.5, PAL.green); line(x + 0.1 * w, b.minY - 0.08 * h, x + 0.25 * w, b.minY - 0.3 * h, dk, 1, 1); }
+      }
+    } else if (k === 'cart') {   // the Cave's, the dark mine's, riding the Minecart's rail
+      const mcart = (top2) => { box(x - 1.0 * w - 2.5, top2 - 2.5, x + 1.0 * w + 2.5, ry + 2.5, th.lip, 1, 0); box(x - 1.0 * w, top2, x + 1.0 * w, ry, INK.dark, 1, 0, 8, 4 * P); for (const s2 of [-0.62, 0.62]) wheel(x + s2 * w, ry, 0.26 * R, th.lip, dk); };   // a minecart, as the Minecart's: dark, rimmed, its wheels on the rail
+      if (p === 0) {   // Chochin-obake riding a minecart: grey caps, will-o'-wisps going round it
+        if (front) {
           box(x - 0.42 * w, b.minY - 0.08 * h, x + 0.42 * w, b.minY + 0.06 * h, gr, 1, 0, 10, 0); F(x, b.minY - 0.18 * h, 0.14 * r, 0, 0, 0.14 * r, gr, 1, 4);
-          box(x - 0.38 * w, b.maxY - 0.08 * h, x + 0.38 * w, b.maxY + 0.04 * h, PAL.white, 1, 0, 10, 0);
           for (let i = 0; i < 2 + v; i++) { const a = T * 1.4 + (i * 2 * Math.PI) / (2 + v), wx = x + Math.cos(a) * 1.5 * w, wyy = y + Math.sin(a) * 0.7 * h; disc(wx, wyy, 0.13 * r, fl, 1); spike(wx, wyy - 0.05 * r, 0.24 * r, 0.42 * r, 0, fl); }
+          mcart(y + 0.62 * h);
         }
-      } else if (p === 1 && !front) {   // Tsuchigumo on its thread, four legs a side arching out and down
-        thread();
+      } else if (p === 1 && !front) {   // Tsuchigumo walking the rail on its eight legs, a pair at a time
         for (const s2 of [-1, 1]) for (let i = 0; i < 4; i++) {
-          const q = Math.sin(T * 8 + i * 1.3 + s2) * 0.06 * r, hx = x + s2 * 0.8 * w, hy = y + (-0.2 + 0.18 * i) * h;
-          const kx = x + s2 * (1.35 + 0.08 * i) * w, ky = dazed ? y : y - (0.75 - 0.3 * i) * h + q, fx = x + s2 * (1.62 + 0.05 * i) * w, fy = dazed ? b.maxY : y + (0.55 + 0.15 * i) * h + q;
-          line(hx, hy, kx, ky, c, 1, 2 + v); line(kx, ky, fx, fy, c, 1, 2 + v);
+          const st = Math.sin(T * 10 + (i * Math.PI) / 2 + (s2 > 0 ? Math.PI : 0)), lift = Math.max(0, st) * 0.25 * r, hx = x + s2 * 0.8 * w, hy = y + (-0.2 + 0.18 * i) * h;
+          const fx = x + s2 * (0.75 + 0.22 * i) * w + st * 0.12 * r, kx = (hx + fx) / 2 + s2 * 0.35 * w, ky = y - (0.55 - 0.12 * i) * h;
+          line(hx, hy, kx, ky, c, 1, 2 + v); line(kx, ky, fx, ry - lift, c, 1, 2 + v);
         }
-        if (v && bs.state === 'warn') for (const s2 of [-1, 1]) F(x + s2 * 1.75 * w, y - 0.6 * h, 0.12 * r, 0, 0, 0.3 * r, PAL.white, 1, 4);   // shaking (D)
-      } else if (p === 2) {   // Nurikabe: round arms, moss on its corners (falling: F)
-        if (!front) for (const s2 of [-1, 1]) { disc(x + s2 * 1.08 * w, y + 0.05 * h, 0.34 * r, dk, 1); disc(x + s2 * 1.08 * w, y + 0.05 * h, 0.3 * r, c, 1); }
-        else { for (const [u, t2] of [[-0.85, -0.85], [-0.55, -0.95], [0.6, -0.92], [0.88, -0.8], [-0.88, 0.75], [0.85, 0.8]]) oval(x + u * w, y + t2 * h, 0.18 * r, 0.12 * r, PAL.green); if (v && fast) for (let i = -1; i <= 1; i++) box(x + i * 0.4 * w - P, b.minY - 1.4 * R, x + i * 0.4 * w + P, b.minY - 0.4 * R, gr, 1, 0, 10, 0); }
+        if (v && bs.state === 'warn') for (const s2 of [-1, 1]) F(x + s2 * 1.75 * w, y - 0.6 * h, 0.12 * r, 0, 0, 0.3 * r, PAL.white, 1, 4);   // its legs drum at the rail's end (D)
+      } else if (p === 2) {   // Nurikabe riding a minecart, its round arms on the cart's rim, moss on its corners (crumbling: F)
+        if (!front) for (const s2 of [-1, 1]) { disc(x + s2 * 1.02 * w, y + 0.35 * h, 0.32 * r, dk, 1); disc(x + s2 * 1.02 * w, y + 0.35 * h, 0.28 * r, c, 1); }
+        else { for (const [u, t2] of [[-0.85, -0.85], [-0.55, -0.95], [0.6, -0.92], [0.88, -0.8]]) oval(x + u * w, y + t2 * h, 0.18 * r, 0.12 * r, PAL.green); mcart(y + 0.45 * h); if (v) for (let i = 0; i < 2; i++) disc(x + (i ? 0.7 : -0.6) * w, b.minY - ((T * 0.8 + i * 0.5) % 1) * 0.6 * r, 0.08 * r, gr, 1); }
       }
     } else if (k === 'crane') {
       if (p === 0) {   // Tsurube-otoshi in its bucket's band off the crane's hook (falling: B)

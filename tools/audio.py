@@ -227,6 +227,10 @@ MUSIC = {
     'sora': (75, 'soaring, airy, hopeful, steady, no ending',
              ['lo-fi chiptune', 'a breathy bamboo flute lead with a pentatonic melody', 'shimmering synth pads like wind over clouds', 'a light steady beat with soft claps and small bells',
               'high above the clouds over Japan at dawn', 'cute video game platformer, the sky above the clouds', 'steady 108 BPM']),
+    # owner 2026-10-20: a bonus world of scary Russian fairy tales, a dark forest with skulls, very gloomy (the hero a Kolobok): Worlds' SKAZKA
+    'skazka': (75, 'ominous, creepy, gloomy, steady, no ending',
+               ['dark chiptune', 'an eerie minor-key folk melody on a plucked gusli-like lead', 'a deep droning bass', 'a steady low tom drum on every beat like a slow heartbeat',
+                'creaking wood and a cold wind', 'cute but scary video game platformer, a black haunted fairy-tale forest with skulls on the fence', 'steady 84 BPM']),
     'bonus': (60, 'upbeat, exciting, fast, sparkling, steady, no ending',
               ['chiptune', 'bright catchy lead melody', 'fast arpeggios', 'punchy drums', 'joyful rush',
                'video game bonus stage, collecting coins', 'steady 140 BPM']),

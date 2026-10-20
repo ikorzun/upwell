@@ -399,9 +399,8 @@ class Foe {
 // for a moment: then it hurts to touch.
 class Boss {
   constructor(lv, def) {   // def: a campaign boss's (BOSSES); the random run's summit boss has none
-    const lk = def && def.looks && def.looks[LOOK || def.look], R = lv.R * ((def && def.size) || BOSS.size), slide = !!(def && def.slide), rail = def && def.rail && lv.rail;   // lk: its look (LOOKS)   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
-    const ink = (lk && lk.ink) || (def && def.ink);
-    this.ink = ink ? { id: 'boss', base: PAL[ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink; a look's own, LOOKS)
+    const lk = def && def.look, R = lv.R * ((def && def.size) || BOSS.size), slide = !!(def && def.slide), rail = def && def.rail && lv.rail;   // lk: its look (LOOKS)   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
+    this.ink = def && def.ink ? { id: 'boss', base: PAL[def.ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink)
     this.body = new Body(designById((lk && lk.design) || (def && def.design) || 'cat'), this.ink, rail ? rail.x1 : slide ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, rail ? rail.y - 0.75 * R : slide ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = slide ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
     this.look = this.body.look = lk ? lk.id : null;   // drawn round it by the renderer (look), on it by writeFace (LOOK_FACE)

@@ -347,16 +347,17 @@ const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
 // its side does not; then it rises again. A stomp bounces at `bounce` of a jump's speed.
 const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9,
   hover: 3.6, fast: 0.65, high: 12, sway: 0.15, warn: 0.8, dive: 40, dazed: 2.8 };
-// The Puck (BOSSES.puck, world 2): it slides the ice at `slide` R/s, flicking a shell out every `every` s (as many as
+// The Puck (BOSSES.puck, Fuji's): it slides the ice at `slide` R/s, flicking a shell out every `every` s (as many as
 // `shells` by phase); rests `rest` s, winds up `wind` s (backing off, flat, flashing) and dashes wall to wall at `dash`
-// R/s, its wall shaking `icicles` down by phase. Its top is hard; a shell rolled into it turns it belly up for `flip` s.
+// R/s, its wall shaking `icicles` down by phase: one, and only in its last (owner, 2026-10-20: worlds 1-3 not hard; the
+// icicles were most of the hearts it took). Its top is hard; a shell rolled into it turns it belly up for `flip` s.
 // It keeps still its first `calm` s, while its name is up (the plan: an encounter starts safe).
 // The Minecart (BOSSES.cart, the Cave's): `size` R, rides its rail end to end in `pass` s by phase, lobs blobs (two from its
 // second phase) every `spit` s after winding up `wind` s, creaks `creak` s at an end and tips three rocks (`rock` R) down.
 // From its second phase the bridges go in `crumble[0]` s and come back in `crumble[1]`; in its third the lifts run `lifts` times as fast.
 // In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it. It keeps still its first `calm` s.
 const CART = { size: 2.2, pass: [4, 3.4, 2.6], spit: 2.5, wind: 0.6, creak: 0.8, rock: 0.35, crumble: [0.35, 4.5], lifts: 1.5, hold: 2, calm: 2.5 };
-const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 1, 2], flip: 2.5, calm: 2.5 };
+const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 0, 1], flip: 2.5, calm: 2.5 };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -596,8 +597,9 @@ const BOSSES = {
     quip: [{ en: 'Told you. Stay down here.', es: 'Te lo dije. Quédate abajo.', pt: 'Eu avisei. Fica aqui embaixo.', ja: 'ほらね。ここに いなよ。' },
       { en: 'Too slow, little drop.', es: 'Muy lento, gotita.', pt: 'Muito lento, gotinha.', ja: 'おそいよ、しずくちゃん。' }],
     defeat: { en: 'Fine, fine… go on up.', es: 'Vale, vale… sube ya.', pt: 'Tá bom, tá bom… pode subir.', ja: 'わかったよ… のぼりな。' } },
-  // World 2's: the Puck (the plan's §5.4): a dome over the ice, beaten by its own shells (PUCK, Boss.slide).
-  puck: { name: { en: 'Puck', es: 'Disco', pt: 'Disco', ja: 'パック' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  // Fuji's: the Puck (the plan's §5.4): a dome over the ice, beaten by its own shells (PUCK, Boss.slide). The first three bosses'
+  // five hearts and the Cork's phases (owner, 2026-10-20: its round Tsurara-onna kept, the fight softened, worlds 1-3 not hard).
+  puck: { name: { en: 'Puck', es: 'Disco', pt: 'Disco', ja: 'パック' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
     intro: [{ en: 'Slippery? Your feet are the problem.', es: '¿Resbala? El problema son tus pies.', pt: 'Escorrega? O problema são seus pés.', ja: 'すべる？ きみの あしが わるい。' },
       { en: 'This ice is mine. So is the floor.', es: 'Este hielo es mío. Y el suelo.', pt: 'Este gelo é meu. E o chão.', ja: 'この こおりは わたしの もの。' },
       { en: 'Nobody stops on my ice.', es: 'Nadie se para en mi hielo.', pt: 'Ninguém para no meu gelo.', ja: 'わたしの こおりで とまれない。' }],

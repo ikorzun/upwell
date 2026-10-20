@@ -3208,7 +3208,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
       const fl = (u0, v0, u1, v1, c, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), c, a, wd);
       const tri = (u, v0, hw, h, c, a = DIM, sk = 0) => { const hd = (h * t) / 2; F(U(u + sk), Vv(v0) - hd, hw * t, 0, 0, hd, c, a, 6, hw * t, hd, 2 * hw * t); };
-      const spruce = (u, v, h, a = DIM) => { fb(u - 0.06, v, u + 0.06, v + 0.5, G, a); for (let i = 0; i < 4; i++) tri(u, v + 0.35 + i * h * 0.2, (0.62 - 0.12 * i) * h * 0.45, h * 0.32, G, a, (i % 2 ? 0.08 : -0.06) * h * 0.2); };   // a spruce, its tiers crooked
+      const spruce = (u, v, h, a = DIM) => { fb(u - 0.06, v, u + 0.06, v + 0.5, G, a); for (let i = 0; i < 3; i++) tri(u, v + 0.35 + i * h * 0.27, (0.62 - 0.15 * i) * h * 0.45, h * 0.38, G, a, (i % 2 ? 0.08 : -0.06) * h * 0.2); };   // a spruce, its tiers crooked
       const row = (u0, u1, step, v, hs) => { for (let u = u0, i = 0; u < u1; u += step, i++) spruce(u, v, hs[i % hs.length]); };
       const moon = (u, v, rr) => { fe(u, v, rr, rr, G, LIT); vlamps.push([U(u), Vv(v), rr * 1.05, rr * 1.6]); };   // the moon, a light in the dark
       const dead = (u, v, h, s, n = 0) => {   // a dead tree: a crooked trunk, branches clawing out and up, their twigs bent
@@ -3615,10 +3615,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
     const G = PAL.gray, K = PAL.black, HALF = 1.5;   // grey, black; roots half of the way from the black (DEPTH)
     const root = (x, len, n, wd = 3, a = HALF, y = r.y1 - P) => {   // a root clawing down from (x, y), len tiles, winding, thinning, a crooked side root off it
-      const k = Math.max(3, Math.round(len * 5)), ph = hsh(n) * 6.28, sw = (0.14 + 0.12 * hsh(n + 1)) * t;
+      const k = Math.max(3, Math.round(len * 3)), ph = hsh(n) * 6.28, sw = (0.14 + 0.12 * hsh(n + 1)) * t;
       let x0 = x, y0 = y;
       for (let i = 1; i <= k; i++) { const q = i / k, x1 = snap(x + Math.sin(ph + q * 6) * sw * (0.4 + q)), y1 = snap(y + q * len * t); line(x0, y0, x1, y1, G, a, Math.max(1, Math.round(wd * (1 - 0.7 * q))));
-        if (i === Math.round(k * 0.4) || i === Math.round(k * 0.75)) { const s = (i % 2 ? -1 : 1) * (hsh(n + i) < 0.5 ? -1 : 1), bx1 = snap(x1 + s * 0.4 * t), by1 = snap(y1 + 0.25 * t); line(x1, y1, bx1, by1, G, a, 1); line(bx1, by1, snap(bx1 + s * 0.12 * t), snap(by1 + 0.3 * t), G, a, 1); }
+        if (i === Math.round(k * 0.5)) { const s = (i % 2 ? -1 : 1) * (hsh(n + i) < 0.5 ? -1 : 1), bx1 = snap(x1 + s * 0.4 * t), by1 = snap(y1 + 0.25 * t); line(x1, y1, bx1, by1, G, a, 1); line(bx1, by1, snap(bx1 + s * 0.12 * t), snap(by1 + 0.3 * t), G, a, 1); }
         x0 = x1; y0 = y1; }
     };
     const toad = (x, s = 1, a = 1, y = r.y0) => {   // a grey toadstool, black spots: 0.6 tiles across
@@ -3644,12 +3644,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     };
     const hollow = (x, y, rw, rh, n, eyes = false, a = 1) => {   // a hollow: black, a rim of roots round it; eyes glowing in it, or not
       F(x, y, rw * t + 2 * P, 0, 0, rh * t + 2 * P, G, a * HALF, 0); F(x, y, rw * t, 0, 0, rh * t, K, a, 0);
-      for (let i = 0; i < 5; i++) { const q = (i / 5) * 6.28 + hsh(n + i); line(snap(x + Math.cos(q) * rw * t), snap(y + Math.sin(q) * rh * t), snap(x + Math.cos(q) * (rw + 0.25) * t), snap(y + Math.sin(q) * (rh + 0.25) * t), G, HALF, 2); }
+      for (let i = 0; i < 3; i++) { const q = (i / 3) * 6.28 + 0.5 + hsh(n + i); line(snap(x + Math.cos(q) * rw * t), snap(y + Math.sin(q) * rh * t), snap(x + Math.cos(q) * (rw + 0.25) * t), snap(y + Math.sin(q) * (rh + 0.25) * t), G, HALF, 2); }
       if (eyes) skEyes(x, y, Math.min(1, rw / 0.4), n);
     };
     const claws = (x, y, s, n, up = -1) => {   // twigs like a clawing hand off a free end: three curling fingers
       for (let i = 0; i < 3; i++) { let x0 = x, y0 = y, ang = -Math.PI / 2 + (i - 1) * 0.55 + (up > 0 ? Math.PI : 0); const len = (0.55 + 0.25 * hsh(n + i)) * s * t;
-        for (let j = 0; j < 4; j++) { const x1 = snap(x0 + Math.cos(ang) * len / 4 * (d > 0 ? 1 : -1) * (i === 1 ? 0.6 : 1) + d * (i - 1) * 0.04 * t), y1 = snap(y0 + Math.sin(ang) * len / 4); line(x0, y0, x1, y1, G, 1, j < 2 ? 2 : 1); x0 = x1; y0 = y1; ang += 0.32 * (i === 0 ? -1 : 1); } }
+        for (let j = 0; j < 3; j++) { const x1 = snap(x0 + Math.cos(ang) * len / 3 * (d > 0 ? 1 : -1) * (i === 1 ? 0.6 : 1) + d * (i - 1) * 0.04 * t), y1 = snap(y0 + Math.sin(ang) * len / 3); line(x0, y0, x1, y1, G, 1, j < 1 ? 2 : 1); x0 = x1; y0 = y1; ang += 0.42 * (i === 0 ? -1 : 1); } }
     };
     if (r.crumble) {   // a rotten log (log): grey in black rot, its end splintered, holes, a spiral knot, grey toadstools; a hollow with eyes, a face; its pieces shake as it gives
       const k = V.log, u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, cut = k === 1 ? 0.58 : -1;
@@ -3722,19 +3722,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       // it, a face in its roots, a bony hand reaching down, ribs, a big dark hollow by the variant
       const k = V.slab, c = th.block;
       box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 1); box(r.x0, Y(Math.max(0.35, ht - 0.3)), r.x1, r.y1, c, 1, 0, 10, 4);
-      for (let x = r.x0 + snap(0.15 * t), i = 0; x < r.x1 - snap(0.2 * t); i++) { const ww = snap((0.2 + 0.25 * hsh(i + 300)) * t), dd = snap((0.15 + 0.3 * hsh(i + 330)) * t); F(snap(x + ww / 2), r.y1 + dd / 2, ww / 2, 0, 0, -dd / 2, c, 1, 6, ww / 2, dd / 2, ww); x += ww + snap((0.15 + 0.4 * hsh(i + 360)) * t); }   // earth hanging off its underside in teeth
+      for (let x = r.x0 + snap(0.15 * t), i = 0; x < r.x1 - snap(0.2 * t); i++) { const ww = snap((0.2 + 0.25 * hsh(i + 300)) * t), dd = snap((0.15 + 0.3 * hsh(i + 330)) * t); F(snap(x + ww / 2), r.y1 + dd / 2, ww / 2, 0, 0, -dd / 2, c, 1, 6, ww / 2, dd / 2, ww); x += ww + snap((0.45 + 0.5 * hsh(i + 360)) * t); }   // earth hanging off its underside in teeth
       const roots = (us, len, wd) => us.filter((u) => u < wt - 0.25).forEach((u, i) => root(W(u), len * (0.65 + 0.5 * hsh(i + 70)), 100 + i * 17 + k * 7, wd));
-      if (k === 0) { roots([0.4, 1.9, 3.1, 3.6], 1.7, 3); hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); if (wt > 3) hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, true); }   // hollows in its roots: a skull in one, eyes in the other (A)
-      else if (k === 1) { roots([0.5, 1.4, 2.5, 3.3], 2.2, 3); skull(E(0.8), r.y0 - snap(0.36 * t), 0.75); line(E(0.25), r.y0, E(0.1), r.y0 - snap(0.5 * t), G, 1, 1); line(E(0.12), r.y0 - snap(0.42 * t), E(0.0), r.y0 - snap(0.6 * t), G, 1, 1);   // a skull on it, a sprout
+      if (k === 0) { roots([0.4, 1.9, 3.4], 1.7, 3); hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); if (wt > 3) hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, true); }   // hollows in its roots: a skull in one, eyes in the other (A)
+      else if (k === 1) { roots([0.5, 1.6, 2.9], 2.2, 3); skull(E(0.8), r.y0 - snap(0.36 * t), 0.75); line(E(0.25), r.y0, E(0.1), r.y0 - snap(0.5 * t), G, 1, 1); line(E(0.12), r.y0 - snap(0.42 * t), E(0.0), r.y0 - snap(0.6 * t), G, 1, 1);   // a skull on it, a sprout
         F(snap(E(0) - d * 0.2 * t), r.y1 + snap(0.3 * t), 0.25 * t, 0, 0, -0.35 * t, c, 1, 6, 0.25 * t, 0.35 * t, 0.5 * t); }   // its end a claw hanging (B)
-      else if (k === 2) { roots([0.3, 0.7, 2.6, 3.0, 3.4], 1.4, 2); const fx = W(Math.min(1.7, wt / 2)), fy = Y(ht + 0.55); F(fx, fy, 0.7 * t, 0, 0, 0.6 * t, G, HALF, 0);   // a face in its roots (C): its eyes, its mouth agape
+      else if (k === 2) { roots([0.3, 0.8, 2.7, 3.3], 1.4, 2); const fx = W(Math.min(1.7, wt / 2)), fy = Y(ht + 0.55); F(fx, fy, 0.7 * t, 0, 0, 0.6 * t, G, HALF, 0);   // a face in its roots (C): its eyes, its mouth agape
         for (const e of [-1, 1]) F(snap(fx + e * 0.28 * t), fy - snap(0.15 * t), 0.14 * t, 0, 0, 0.11 * t, K, 1, 0); F(fx, fy + snap(0.25 * t), 0.13 * t, 0, 0, 0.2 * t, K, 1, 0); toad(E(0.45), 1.1); }
       else if (k === 3) { roots([0.4, 2.8, 3.4], 1.8, 3); const hx = W(Math.min(2.0, wt * 0.55)), hy = r.y1; box(hx - snap(0.18 * t), hy, hx + snap(0.18 * t), hy + snap(0.3 * t), G, 1, 0, 10, 0);   // a bony hand reaching down out of it (D): its palm,
         for (let i = 0; i < 4; i++) { const fx = hx + snap((i - 1.5) * 0.11 * t), a0 = 0.15 * (i - 1.5); line(fx, hy + snap(0.3 * t), snap(fx + a0 * t), hy + snap(0.65 * t), G, 1, 2); line(snap(fx + a0 * t), hy + snap(0.65 * t), snap(fx + a0 * 1.6 * t), hy + snap(0.95 * t), G, 1, 1); }   // its finger bones
         skull(W(1.0), Y(ht - 0.15), 0.55); line(E(0), r.y1, snap(E(0) + d * 0.2 * t), Y(ht + 0.8), c, 1, 4); }   // a skull in it, its end bent down
-      else if (k === 4) { roots([0.5, 1.2, 2.6, 3.3], 1.7, 3); hollow(W(Math.min(1.9, wt * 0.5)), Y(ht + 0.35), 0.5, 0.32, 2400, true);   // a hollow, eyes in it (E), ribs on it
+      else if (k === 4) { roots([0.5, 2.6, 3.3], 1.7, 3); hollow(W(Math.min(1.9, wt * 0.5)), Y(ht + 0.35), 0.5, 0.32, 2400, true);   // a hollow, eyes in it (E), ribs on it
         line(E(0.35), r.y0 - snap(0.1 * t), E(0.95), r.y0 - snap(0.06 * t), G, 1, 2); for (let i = 0; i < 4; i++) { const rx = E(0.42 + 0.15 * i), h = (0.42 - 0.05 * i) * t; line(rx, r.y0 - snap(0.08 * t), snap(rx - d * 0.1 * t), snap(r.y0 - 0.5 * h), G, 1, 2); line(snap(rx - d * 0.1 * t), snap(r.y0 - 0.5 * h), snap(rx + d * 0.02 * t), snap(r.y0 - h), G, 1, 2); } }   // ribs on it, a spine
-      else if (k === 5) { roots([0.4, 0.9, 2.9, 3.4], 1.9, 2); hollow(W(Math.min(1.8, wt * 0.48)), Y(ht + 0.15), 0.8, 0.35, 2600); for (let i = 0; i < 4; i++) root(W(Math.min(1.8, wt * 0.48) + (i - 1.5) * 0.4), 1.1, 2500 + i, 2, HALF, Y(ht + 0.3));   // a big dark hollow, roots off its rim
+      else if (k === 5) { roots([0.4, 2.9, 3.4], 1.9, 2); hollow(W(Math.min(1.8, wt * 0.48)), Y(ht + 0.15), 0.8, 0.35, 2600); for (let i = 0; i < 4; i++) root(W(Math.min(1.8, wt * 0.48) + (i - 1.5) * 0.4), 1.1, 2500 + i, 2, HALF, Y(ht + 0.3));   // a big dark hollow, roots off its rim
         skull(E(0.95), r.y0 - snap(0.36 * t), 0.7); line(E(0.4), r.y0, E(0.3), r.y0 - snap(0.9 * t), G, 1, 2); line(E(0.33), r.y0 - snap(0.55 * t), E(0.1), r.y0 - snap(0.8 * t), G, 1, 1); }   // a skull on it, a dead twig
       lip(); return true;
     }

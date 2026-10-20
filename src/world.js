@@ -257,7 +257,7 @@ const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.
 const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
 // The Sea's variants while the owner picks (each of the six on its sheet, research/variants/sea-*-1-px.png, drawn by the game; window.__seaV for the gallery):
 // which variant of each element, A = 0 to F = 5
-const SEA_V = { slab: 0, plank: 0, boat: 0, raft: 0 };
+const SEA_V = { slab: 0, plank: 0, boat: 0, raft: 0, lighthouse: 0, net: 0, gull: 0, octopus: 0, flags: 0 };
 const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plank): its frame's height over its floor and its pulley's over that, in tiles (its cable runs there)
 // The kits' things on the ledges, one a ledge at most, the same for the game and the renderer (as neonSign is): the Village's (a sakura, a scarecrow, a
 // little shrine whose stone lantern the hero lights, koinobori), the Cave's (a stone lantern, a pair of jizo the hero leaves flowers at), Mount Fuji's bell
@@ -284,6 +284,13 @@ const kitThing = (lv, r) => {
     const k = ((Math.round(b / t) % 3) + 3) % 3;
     if (k === 0 && steady(2.6) && room(0.1, 2.5, 3.8)) out = { kind: 'toro' };
     else if (k === 1 && steady(2.6) && room(0, 3, 2.6)) out = { kind: 'jizo', x: X(1.55), y: b - 1.0 * t };
+  } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer; the owner picks their variants)
+    const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
+    if (k === 0 && steady(3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse' };
+    else if (k === 1 && steady(4.2) && room(0, 4.3, 2.9)) out = { kind: 'net' };
+    else if (k === 2 && steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)) out = { kind: 'gull' };
+    else if (k === 3 && steady(2.8) && room(0, 2.7, 2.6)) out = { kind: 'octopus' };
+    else if (k === 4 && steady(3) && room(0, 3, 4.9)) out = { kind: 'flags' };
   } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t) out = { kind: 'bell', x: wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t, y: r.y1 + 0.4 * t };
   return (r.kit = out);
 };
@@ -592,7 +599,8 @@ const BOSSES = {
     hint: { en: 'Flipped! Land on its belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
     how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
   // The Cave's: the Minecart (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
-  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  // The gentler of the two on a rail, as the earlier (owner, 2026-10-20: it and the Tram traded): the Cork's hits and phases, its passes and spits a quarter slower (slow).
+  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
     intro: [{ en: 'No outsiders in the pit!', es: '¡Prohibido entrar a la mina!', pt: 'Proibido entrar na mina!', ja: 'ぶがいしゃは たちいり きんし！' },
       { en: "Mind the rocks. Or don't.", es: 'Cuidado con las rocas. O no.', pt: 'Cuidado com as pedras. Ou não.', ja: 'いわに きをつけな。' },
       { en: 'My rail, my rules.', es: 'Mi riel, mis reglas.', pt: 'Meu trilho, minhas regras.', ja: 'わたしの レール、わたしの ルール。' }],
@@ -628,9 +636,9 @@ const BOSSES = {
     quip: [{ en: 'Flattened. Like a panel.', es: 'Aplastado. Como un panel.', pt: 'Achatado. Como um painel.', ja: 'ぺしゃんこ。パネルみたい。' },
       { en: 'Back to the ground floor.', es: 'De vuelta a la planta baja.', pt: 'De volta ao térreo.', ja: 'いっかいに もどって。' }],
     defeat: { en: 'Shift over… the roof is yours.', es: 'Fin del turno… el tejado es tuyo.', pt: 'Fim do turno… o telhado é seu.', ja: 'しごと おわり… やねは きみの もの。' } },
-  // World 1's: the Tram (Tokyo's streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
-  // its pantograph up to an overhead wire; as the first boss, the Cork's hits and phases and its passes and spits a quarter slower (slow).
-  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  // Tokyo's: the Tram (its streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
+  // its pantograph up to an overhead wire; the rail at full strength, as the later of the two (owner, 2026-10-20: the Minecart has its gentleness).
+  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'Next stop: nowhere.', es: 'Próxima parada: ninguna.', pt: 'Próxima parada: nenhuma.', ja: 'つぎは どこにも とまりません。' },
       { en: 'Mind the gap. And me.', es: 'Cuidado con el hueco. Y conmigo.', pt: 'Cuidado com o vão. E comigo.', ja: 'すきまに ごちゅうい。わたしにも。' },
       { en: 'No riding on the roof!', es: '¡Nada de subirse al techo!', pt: 'Nada de andar no teto!', ja: 'やねに のらないで ください！' }],
@@ -661,7 +669,7 @@ const PANEL = { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1
 const CAMPAIGN = [
 // World 1, Tokyo (the owner's first world now, at first a world 4; its kit in the renderer, see THEMES.tokyo): the first steps, in the town at night,
 // one new thing a level (the digest §3): jumps and springs, crawlers and the first gate, shop awnings that bounce, the helmet, a peak, the bonus,
-// gondolas, the level crossing, Aunt Moti's shop; the Tram, gentler than as world 4's (BOSSES.tram). STREET is its pool before the awnings, and
+// gondolas, the level crossing, Aunt Moti's shop; the Tram (BOSSES.tram). STREET is its pool before the awnings, and
 // the air conditioners come in from the fourth level (aircons: false before). Its runes: a lattice, a lantern, a lit window (some stopped climbing
 // and built a town; its lights hid the Light: the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'Some stopped climbing and built a town.\nIts lights hid the Light.', es: 'Algunos dejaron de subir y construyeron una ciudad.\nSus luces taparon la Luz.', pt: 'Alguns pararam de subir e ergueram uma cidade.\nSuas luzes esconderam a Luz.', ja: 'のぼるのを やめて まちを つくった ものも いた。\nまちの あかりが ひかりを かくした。' }, levels: [
@@ -2966,6 +2974,92 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (k < 2) { const cy = snap(r.y0 - 1.7 * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.orange, DIM, 0, 10, 0); }
     else if (k >= 4) { const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + ((T * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0); }   // (its ripples going by)
   }
+  if (th.sea && lv.kind === 'well') {   // the Sea's props (the owner's sheets research/variants/sea-*-1-px.png; all six variants in the game's own code while the owner
+    // picks: SEA_V, or window.__seaV): on ledges, by kitThing, a lighthouse, nets drying with glass floats, a gull on a mooring post, octopus pots, the big-catch flags.
+    // In the midground: solid, no white (the sheets' white is grey here), no yellow but a lamp's core, no red (orange).
+    const t = kitT, P = kitP, px = P / t, V = window.__seaV || SEA_V, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'];
+    for (const r of lv.rects) {
+      const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
+      if (!p || !PROPS.includes(p.kind)) continue;
+      const k = V[p.kind] || 0, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, fx = d > 0 ? r.x1 : r.x0, b = r.y0;
+      const X = (u) => snap(wx + d * u * t), Q = (u) => snap(fx - d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, in from its free end, up from its top
+      const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
+      const bq = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(Q(u0), Q(u1)), Y(Math.max(v0, v1)), Math.max(Q(u0), Q(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
+      const el = (u, v, ru, rv, c, a = 1) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0), ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);
+      const float = (u, v, c) => { el(u, v, 0.2, 0.2, c); bx(u - 0.08, v + 0.05, u - 0.08 + 2 * px, v + 0.05 + 2 * px, PAL.gray); };   // a glass float, a grey glint (the sheets' white)
+      if (p.kind === 'lighthouse') {   // a little lighthouse on its ledge, its lamp lit (a light's core yellow, its glow)
+        const cx = 2.3, lamp = () => {   // the gallery, the lamp room, the roof by the variant
+          bx(cx - 0.8, 2.9, cx + 0.8, 3.18, th.block); for (let u = cx - 0.65; u < cx + 0.7; u += 0.26) bx(u, 2.97, u + 2 * px, 3.1, PAL.black);
+          F(X(cx), Y(3.5), 0.9 * t, 0, 0, 0.8 * t, PAL.orange, 0.45, 1); bx(cx - 0.42, 3.18, cx + 0.42, 3.82, th.block); bx(cx - 0.32, 3.24, cx + 0.32, 3.76, PAL.orange); bx(cx - 0.12, 3.34, cx + 0.12, 3.62, PAL.yellow);
+          for (const u of [cx - 0.34, cx + 0.32]) bx(u, 3.18, u + 2 * px, 3.82, th.block);
+          vlamps.push([X(cx), Y(3.5)]);
+        }, cone = (w0, h0) => { for (let i = 0, n = 6; i < n; i++) { const q = i / n; bx(cx - w0 * (1 - q), 3.82 + h0 * q, cx + w0 * (1 - q), 3.82 + h0 * (q + 1 / n), th.block); } };
+        if (k === 0) { for (const [v0, v1, c] of [[0, 0.9, th.block], [0.9, 1.4, PAL.gray], [1.4, 2.0, th.block], [2.0, 2.5, PAL.gray], [2.5, 2.9, th.block]]) bx(cx - 0.68, v0, cx + 0.68, v1, c, c === th.block ? 2 : 0); bx(cx - 0.2, 0, cx + 0.2, 0.6, PAL.black); lamp(); cone(0.62, 0.5); bx(cx - px, 4.32, cx + px, 4.62, th.block); }
+        else if (k === 1) { for (const e of [-1, 1]) ln(cx + e * 0.8, 0, cx + e * 0.45, 2.9, th.block, 3); for (const [v0, v1] of [[0, 0.95], [0.95, 1.9], [1.9, 2.9]]) { const w0 = 0.8 - 0.35 * (v0 / 2.9), w1 = 0.8 - 0.35 * (v1 / 2.9); ln(cx - w0, v0, cx + w1, v1, th.block, 2); ln(cx + w0, v0, cx - w1, v1, th.block, 2); bx(cx - w1, v1 - 0.05, cx + w1, v1 + 0.05, th.block); }
+          lamp(); cone(0.55, 0.45); bx(cx - px, 4.27, cx + px, 4.62, th.block); }
+        else if (k === 2) { bx(cx - 0.72, 0, cx + 0.72, 0.5, th.block, 2); bx(cx - 0.62, 0.5, cx + 0.62, 2.9, PAL.gray); bx(cx - 0.18, 0, cx + 0.18, 0.62, PAL.black); bx(cx - 0.06, 1.7, cx + 0.06, 2.0, PAL.black); el(cx, 3.82, 0.45, 0.36, th.block); bx(cx - 0.06, 4.14, cx + 0.06, 4.32, th.block); el(cx, 4.36, 0.08, 0.08, th.block); lamp(); }   // its dome, the lamp room under it
+        else if (k === 3) { for (let u = cx - 0.7; u <= cx + 0.75; u += 0.35) bx(u, 0, u + 2 * px, 0.42, th.block); bx(cx - 0.8, 0.42, cx + 0.8, 0.56, th.block); bx(cx - 0.65, 0.56, cx + 0.65, 1.2, th.block, 2); bx(cx - 0.6, 1.2, cx + 0.6, 2.3, PAL.gray); bx(cx - 0.08, 1.6, cx + 0.06, 1.95, PAL.black); bx(cx - 0.65, 2.3, cx + 0.65, 2.9, th.block);
+          lamp(); cone(0.6, 0.5); bx(cx - px, 4.32, cx + px, 4.75, th.block); bx(cx, 4.55, cx + 0.32, 4.7, th.block); }
+        else if (k === 4) { for (let i = 0, n = 10; i < n; i++) { const v0 = (2.9 * i) / n, ww = 0.9 - 0.28 * (i / n); bx(cx - ww, v0, cx + ww, v0 + 2.9 / n, PAL.gray, 1); } bx(cx - 0.2, 0, cx + 0.2, 0.62, PAL.black); lamp();
+          bx(cx - 0.85, 3.82, cx + 0.85, 3.95, th.block); for (const e of [-1, 1]) bx(cx + e * 0.85, 3.9, cx + e * 0.98, 4.02, th.block); cone(0.55, 0.42); el(cx, 4.32, 0.09, 0.09, th.block); }
+        else { for (const [v0, v1, c] of [[0, 0.9, th.block], [0.9, 1.6, PAL.gray], [1.6, 2.0, th.block], [2.0, 2.6, PAL.gray], [2.6, 3.0, th.block]]) bx(cx - 0.6, v0, cx + 0.6, Math.min(v1, 2.9), c); bx(cx - 0.18, 0, cx + 0.18, 0.62, PAL.black); lamp(); cone(0.55, 0.45);
+          bx(cx - px, 4.27, cx + px, 5.2, PAL.gray); bx(cx + px, 4.95, cx + 0.42, 5.15, PAL.orange, 2); }   // its flag orange (F's red)
+      } else if (p.kind === 'net') {   // fishing nets drying, round glass floats in them
+        const pole = (u, h) => bx(u, 0, u + 0.14, h, PAL.orange, 2), sag = (u0, u1, v, s) => { for (let i = 0; i < 12; i++) { const q0 = i / 12, q1 = (i + 1) / 12; ln(u0 + (u1 - u0) * q0, v - s * 4 * q0 * (1 - q0), u0 + (u1 - u0) * q1, v - s * 4 * q1 * (1 - q1), PAL.orange); } };
+        const mesh = (u0, u1, v0, v1) => bx(u0, v0, u1, v1, PAL.gray, 4);
+        if (k === 0) { pole(1.3, 2.2); pole(3.6, 2.2); sag(1.4, 3.65, 2.15, 0.3); for (let i = 0; i < 8; i++) { const q = (i + 0.5) / 8, u = 1.45 + 2.15 * q, top = 2.1 - 0.3 * 4 * q * (1 - q); mesh(u - 0.14, u + 0.14, top - 0.9 - 0.25 * Math.sin(q * Math.PI), top); } float(1.9, 1.6, PAL.blue); float(2.5, 1.15, PAL.green); float(3.15, 1.6, PAL.purple); }
+        else if (k === 1) { for (const u of [1.2, 2.45, 3.7]) pole(u, 2.3); bx(1.2, 2.18, 3.84, 2.3, PAL.orange); mesh(1.34, 2.45, 0.7, 2.18); mesh(2.59, 3.7, 0.7, 2.18); float(1.75, 1.5, PAL.purple); float(2.52, 1.5, PAL.blue); float(3.2, 1.45, PAL.green); }
+        else if (k === 2) { pole(1.1, 2.6); pole(3.85, 1.6); ln(1.2, 2.55, 3.9, 1.55, PAL.orange, 2); for (let i = 0; i < 10; i++) { const q = (i + 0.5) / 10, u = 1.25 + 2.6 * q, top = 2.5 - 0.95 * q; mesh(u - 0.13, u + 0.13, 0.35 + 0.9 * Math.abs(q - 0.5) + 0.2, top); } float(1.95, 1.4, PAL.blue); float(2.85, 0.95, PAL.purple); }
+        else if (k === 3) { bx(2.55, 3.15, 2.55 + 2 * px, 3.5, PAL.orange); ln(2.4, 3.05, 2.7, 3.25, PAL.orange); ln(2.7, 3.05, 2.4, 3.25, PAL.orange); for (let i = 0; i < 9; i++) { const v = 3.05 - 0.2 * i, ww = 0.55 * Math.sin(Math.PI * Math.min(1, (i + 1) / 7)); mesh(2.56 - ww, 2.56 + ww, v - 0.2, v); }
+          float(2.35, 2.4, PAL.blue); float(2.8, 2.15, PAL.green); float(2.5, 1.7, PAL.purple); }
+        else if (k === 4) { for (const u of [1.1, 2.55, 4.0]) pole(u, 2.4); sag(1.2, 2.6, 2.3, 0.18); sag(2.65, 4.05, 2.3, 0.18); mesh(1.24, 2.55, 0.25, 2.1); mesh(2.69, 4.0, 0.25, 2.1); float(1.75, 1.2, PAL.blue); float(2.62, 1.2, PAL.green); float(3.45, 1.2, PAL.purple); }
+        else { pole(1.3, 2.7); bx(1.3, 2.58, 3.5, 2.7, PAL.orange); bx(1.85, 2.3, 1.85 + px, 2.58, PAL.orange); for (let i = 0; i < 7; i++) { const v = 2.3 - 0.2 * i, ww = 0.42 * Math.sin(Math.PI * Math.min(1, (i + 1) / 5)); mesh(1.86 - ww, 1.86 + ww, v - 0.2, v); }
+          float(1.75, 1.7, PAL.blue); float(1.95, 1.25, PAL.green); bx(3.1, 2.25, 3.1 + px, 2.58, PAL.gray); el(3.1, 2.0, 0.24, 0.24, PAL.orange); bx(2.88, 1.98, 3.32, 2.02 + px, PAL.gray); }   // and an orange float on its own (F's red)
+      } else if (p.kind === 'gull') {   // a seagull on a mooring post at the ledge's free end, its beak and feet orange, its wing tips black (the sheets' white is grey)
+        const ph = k === 3 ? 1.3 : 1.0, gu = 0.3, gv = ph + 0.32;   // the post's height; the gull's middle, in from the free end
+        bq(0.1, 0, 0.5, ph, PAL.orange, 2);
+        if (k === 1) for (const v of [0.35, 0.65]) { line(Q(0.06), Y(v), Q(0.54), Y(v + 0.12), PAL.black); line(Q(0.06), Y(v + 0.12), Q(0.54), Y(v), PAL.black); }
+        if (k === 2) { bq(0.52, 0.6, 0.52 + px, 0.8, PAL.gray); F(Q(0.62), Y(0.55), 0.13 * t, 0, 0, 0.16 * t, PAL.gray, 1, 4); }
+        if (k === 4) bq(0.08, 0.55, 0.52, 0.72, PAL.blue);
+        if (k === 5) bq(0.06, ph - 0.25, 0.54, ph, PAL.purple, 4);
+        for (const e of [-0.07, 0.07]) bq(gu + e, ph, gu + e + px, ph + 0.14, PAL.orange);   // its legs
+        F(Q(gu), Y(gv), 0.36 * t, 0, 0, 0.2 * t, PAL.gray, 1, 0); F(Q(gu + 0.28), Y(gv - 0.04), 0.14 * t, 0, 0, 0.08 * t, PAL.gray, 1, 0);   // its body, its tail
+        F(Q(gu - 0.2), Y(gv + 0.24), 0.15 * t, 0, 0, 0.15 * t, k === 2 ? PAL.gray : PAL.gray, 1, 0); bq(gu - 0.24, gv + 0.26, gu - 0.24 + px, gv + 0.26 + px, PAL.black);   // its head, an eye
+        bq(gu + 0.05, gv - 0.02, gu + 0.4, gv + 0.06, PAL.black);   // its wing's black tip
+        if (k === 3) { bq(gu - 0.34, gv + 0.24, gu - 0.52, gv + 0.24 + px, PAL.orange); bq(gu - 0.34, gv + 0.2, gu - 0.5, gv + 0.2 + px, PAL.orange); for (const [u0, v0] of [[-0.62, 0.36], [-0.68, 0.24], [-0.62, 0.12]]) bq(gu + u0, gv + v0, gu + u0 - 0.1, gv + v0 + px, PAL.gray); }   // crying out
+        else bq(gu - 0.34, gv + 0.22, gu - 0.52, gv + 0.26, PAL.orange);   // its beak
+      } else if (p.kind === 'octopus') {   // clay octopus pots (takotsubo) at the wall end, a little purple octopus peeking out of one
+        const pot = (u0, u1, v0, v1) => { bx(u0 + 2 * px, v0, u1 - 2 * px, v1, PAL.orange); bx(u0, v0 + 2 * px, u1, v1 - 2 * px, PAL.orange); for (const f of [0.35, 0.7]) bx(u0, v0 + (v1 - v0) * f, u1, v0 + (v1 - v0) * f + px, PAL.black); };
+        const neck = (u0, u1, v0) => { bx(u0, v0, u1, v0 + 0.18, PAL.orange); bx(u0 - 0.06, v0 + 0.18, u1 + 0.06, v0 + 0.26, PAL.orange); };
+        const tako = (u, v, s = 1) => { el(u, v, 0.28 * s, 0.24 * s, PAL.purple); for (const e of [-0.1, 0.1]) bx(u + e * s - px, v + 0.02, u + e * s + px, v + 0.02 + 2 * px, PAL.black); for (const e of [-0.2, -0.07, 0.07, 0.2]) bx(u + e * s - px, v - 0.3 * s, u + e * s + px, v - 0.15 * s, PAL.purple); };
+        const mouth = (u, v, rr) => { el(u, v, rr + 0.06, rr + 0.06, PAL.orange); el(u, v, rr, rr, PAL.black); };
+        if (k === 0) { pot(0.35, 1.55, 0, 1.0); mouth(1.35, 0.5, 0.36); tako(1.35, 0.5, 0.9); pot(1.7, 2.6, 0, 1.0); neck(1.9, 2.4, 1.0); }
+        else if (k === 1) { pot(0.5, 1.9, 0, 0.75); pot(0.6, 1.8, 0.75, 1.45); pot(0.72, 1.68, 1.45, 2.05); neck(0.95, 1.45, 2.05); tako(1.2, 2.45); bx(0.4, 0.2, 0.4 + px, 2.0, PAL.gray); }
+        else if (k === 2) { pot(0.3, 2.3, 0, 1.4); neck(0.95, 1.65, 1.4); for (let u = 0.45; u < 2.3; u += 0.3) bx(u, 0.05, u + px, 1.35, PAL.gray); for (let v = 0.25; v < 1.4; v += 0.3) bx(0.32, v, 2.28, v + px, PAL.gray); mouth(1.75, 0.55, 0.36); tako(1.75, 0.55, 0.9); }   // wrapped in a net
+        else if (k === 3) { pot(0.45, 1.85, 0, 0.9); pot(0.6, 1.7, 0.9, 1.75); neck(0.9, 1.4, 1.75); for (const [u, v0, v1] of [[0.5, 0.4, 1.6], [0.75, 0.9, 1.9], [1.75, 0.3, 1.4], [1.55, 1.1, 1.9]]) bx(u, v0, u + 2 * px, v1, PAL.green); }
+        else if (k === 4) { pot(0.3, 2.2, 0, 1.1); for (const u of [0.75, 1.25, 1.75]) bx(u, 0, u + px, 1.1, PAL.gray); bx(0.3, 0.52, 2.2, 0.52 + px, PAL.gray); mouth(2.05, 0.55, 0.36); tako(2.05, 0.55, 0.9); }
+        else { pot(0.45, 1.85, 0, 0.95); pot(0.55, 1.75, 0.95, 1.8); tako(1.15, 2.0, 1.2); for (const u of [0.55, 1.75]) bx(u - px, 1.2, u + px, 1.85, PAL.purple); bx(1.12, 0, 1.12 + px, 1.8, PAL.gray); }
+      } else {   // the big-catch flags (tairyo-bata) on a pole: three, their patterns by the variant (the sheets' white grey, their red orange)
+        const sh = k === 5 ? 0.55 : 0, flag = (v, c, pat) => { const u0 = 0.85 + sh, u1 = 2.75 + sh, v0 = v, v1 = v + 0.72; bx(u0, v0, u1, v1, c); bx(u1 - 0.12, v0 + 0.3, u1, v0 + 0.42, PAL.black); bx(0.72, v1 - 0.1, u0, v1 - 0.04, PAL.gray); bx(0.72, v0 + 0.04, u0, v0 + 0.1, PAL.gray);   // a flag, a swallowtail, its ties (along a rope out to it, F)
+          if (pat === 'eye') { el(u0 + 0.3, (v0 + v1) / 2, 0.18, 0.18, PAL.gray); el(u0 + 0.3, (v0 + v1) / 2, 0.08, 0.08, PAL.black); bx(u0 + 0.6, v0 + 0.1, u1 - 0.3, v1 - 0.1, c, 2); }
+          else if (pat === 'fish') { el(1.8 + sh, (v0 + v1) / 2, 0.45, 0.2, PAL.black); bx(2.2 + sh, v0 + 0.2, 2.4 + sh, v1 - 0.2, PAL.black); bx(1.55 + sh, (v0 + v1) / 2 + 0.05, 1.55 + sh + px, (v0 + v1) / 2 + 0.05 + px, c); }
+          else if (pat === 'wave') for (let u = u0 + 0.1; u < u1 - 0.2; u += 0.3) { bx(u, v0 + 0.2, u + 0.16, v0 + 0.26, PAL.gray); bx(u + 0.12, v0 + 0.26, u + 0.2, v0 + 0.36, PAL.gray); }
+          else if (pat === 'sun') { el(1.8, v0 + 0.25, 0.35, 0.3, PAL.orange); bx(u0, v0, u1, v0 + 0.22, PAL.blue); for (let u = u0 + 0.1; u < u1 - 0.2; u += 0.3) bx(u, v0 + 0.12, u + 0.16, v0 + 0.18, th.block); for (const e of [-1, 0, 1]) ln(1.8 + e * 0.32, v0 + 0.5, 1.8 + e * 0.5, v1 - 0.06, PAL.orange); }
+          else if (pat === 'check') bx(u0 + 0.05, v0 + 0.08, u1 - 0.15, v1 - 0.08, PAL.blue, 4);
+          else if (pat === 'dots') bx(u0 + 0.1, v0 + 0.12, u1 - 0.2, v1 - 0.12, PAL.gray, 1);
+        };
+        bx(0.6, 0, 0.6 + 2 * px, k === 1 ? 4.5 : 4.4, PAL.gray);   // the pole
+        const sets = [[[PAL.blue, 'eye'], [PAL.purple, 'eye'], [th.mover, 'eye']], [[PAL.blue, 'sun'], [PAL.purple, 'fish'], [PAL.green, 'wave']], [[th.mover, 'eye'], [PAL.blue, 'eye'], [PAL.purple, 'eye']],
+          [[PAL.purple, 'dots'], [PAL.blue, 'fish'], [th.mover, 'wave']], [[PAL.green, 'fish'], [th.mover, 'dots'], [PAL.blue, 'check']], [[PAL.blue, 'eye'], [PAL.purple, 'wave'], [PAL.green, 'eye']]][k];
+        sets.forEach(([c, pat], i) => flag(3.55 - 0.85 * i, c, pat));
+        if (k === 0 || k === 4) el(0.62, 4.5, 0.12, 0.12, PAL.gray);   // its top: a ball, a crossbar, a gull, a lantern, a gallows and a lantern on it
+        else if (k === 1) bx(0.6, 4.4, 2.8, 4.5, PAL.gray);
+        else if (k === 2) { F(X(0.68), Y(4.55), 0.22 * t, 0, 0, 0.12 * t, PAL.gray, 1, 0); el(0.5, 4.65, 0.09, 0.09, PAL.gray); bx(0.36, 4.64, 0.44, 4.64 + px, PAL.orange); }
+        else if (k === 3) { bx(0.48, 4.4, 0.78, 4.75, PAL.gray); bx(0.55, 4.47, 0.71, 4.66, PAL.orange); bx(0.44, 4.75, 0.82, 4.82, PAL.gray); }
+        else { bx(0.6, 4.4, 1.25, 4.45, PAL.gray); bx(1.18, 4.18, 1.18 + px, 4.4, PAL.gray); bx(1.02, 3.65, 1.34, 4.18, th.block); bx(1.12, 3.82, 1.24, 3.98, PAL.orange); }
+      }
+    }
+  }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter
     // (DIM): the countryside far off (F), its forest of cedars and bamboo purple, a farmhouse, a torii and terraces orange, keeping its place low on the screen; a
@@ -3354,7 +3448,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const [u, v] of [[0.5, 0.5], [0.7, 0.62]]) barn(E(u), Y(v)); }
       else if (k === 4) { for (let y = r.y0 + 2 * P, i = 0; y < r.y1 - P; y += 2 * P, i++) { const cx = E(0.9 + (i % 2 ? 0.04 : 0)); box(cx, y, cx + P, y + 2 * P, PAL.black, 1, 0, 10, 0); }   // a crack
         for (const [u, v] of [[0.25, 0.55], [0.45, 0.7], [0.3, 0.85]]) barn(W(u), Y(v)); }
-      else { lump(13, 0.4); for (const [u, v] of [[0.3, 0.45], [0.55, 0.6], [0.35, 0.72]]) barn(E(u), Y(v)); be(0.08, -0.2, 0.68, 0, PAL.orange); be(0.16, -0.34, 0.6, -0.2, PAL.orange); be(0.26, -0.42, 0.5, -0.34, PAL.orange); for (const u of [0.24, 0.44]) be(u, -0.22, u + 0.07, -0.15, PAL.black); }   // a limpet on it (F)
+      else if (k === 5) { lump(13, 0.4); for (const [u, v] of [[0.3, 0.45], [0.55, 0.6], [0.35, 0.72]]) barn(E(u), Y(v)); be(0.08, -0.2, 0.68, 0, PAL.orange); be(0.16, -0.34, 0.6, -0.2, PAL.orange); be(0.26, -0.42, 0.5, -0.34, PAL.orange); for (const u of [0.24, 0.44]) be(u, -0.22, u + 0.07, -0.15, PAL.black); }   // a limpet on it (F)
       lip(); return true;
     }
   };

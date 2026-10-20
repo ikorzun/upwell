@@ -1,4 +1,6 @@
 // The Sea's gallery (tools/gallery, see compose.py): each variant of its ledges and props drawn by the game in one scene, a step each.
+// (The owner picked the Sea's on 2026-10-20 and SEA_V went with the variants, so this no longer runs as it is: it is the template for the next
+// world's gallery. Copy it and point it at that world's own variant table and preview world.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), els = window.__galEls || ['slab', 'plank', 'boat', 'raft'];
   const scene = async (el, k) => {

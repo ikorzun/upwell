@@ -255,9 +255,6 @@ const neonSign = (lv, k) => {
 const NEON_REACH = 3;   // in R: a sign lights with the hero this near it (as near as a crow lets it come, FOLK.flee)
 const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.5 * lv.tile;   // a sign the hero can get to: some of it between the level's floor and its cap
 const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
-// The Sea's variants while the owner picks (each of the six on its sheet, research/variants/sea-*-1-px.png, drawn by the game; window.__seaV for the gallery):
-// which variant of each element, A = 0 to F = 5
-const SEA_V = { slab: 0, plank: 0, boat: 0, raft: 0, lighthouse: 0, net: 0, gull: 0, octopus: 0, flags: 0, shop: 0, stash: 1, far: 0 };
 const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plank): its frame's height over its floor and its pulley's over that, in tiles (its cable runs there)
 // The kits' things on the ledges, one a ledge at most, the same for the game and the renderer (as neonSign is): the Village's (a sakura, a scarecrow, a
 // little shrine whose stone lantern the hero lights, koinobori), the Cave's (a stone lantern, a pair of jizo the hero leaves flowers at), Mount Fuji's bell
@@ -284,9 +281,9 @@ const kitThing = (lv, r) => {
     const k = ((Math.round(b / t) % 3) + 3) % 3;
     if (k === 0 && steady(2.6) && room(0.1, 2.5, 3.8)) out = { kind: 'toro' };
     else if (k === 1 && steady(2.6) && room(0, 3, 2.6)) out = { kind: 'jizo', x: X(1.55), y: b - 1.0 * t };
-  } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer; the owner picks their variants)
+  } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
     const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
-    if (k === 0 && steady(3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse' };
+    if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse' };
     else if (k === 1 && steady(4.2) && room(0, 4.3, 2.9)) out = { kind: 'net' };
     else if (k === 2 && steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)) out = { kind: 'gull' };
     else if (k === 3 && steady(2.8) && room(0, 2.7, 2.6)) out = { kind: 'octopus' };
@@ -2667,37 +2664,32 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
     }
   };
-  // The Sea's door into a shop or a stash (the owner's sheet research/variants/sea-house-1-px.png; its six variants in the game's own code while the owner picks:
-  // SEA_V.shop and SEA_V.stash, or window.__seaV): a funaya, a boathouse over the water as in Ine, built round the doorway on the ledge, its boat bay under the
-  // ledge behind (DIM); the noren red for the shop, purple for the stash (the owner's), a lit window, a lantern or floats by the variant. What is inside bobs in
-  // the doorway; sparks rise past it.
+  // The Sea's door into a shop or a stash (the owner's pick, research/variants/sea-house-game.png D, for both, 2026-10-20): a funaya, a boathouse over the
+  // water as in Ine, built round the doorway on the ledge, its boat bay under the ledge behind (DIM); the noren red for the shop, purple for the stash (the
+  // owner's), a lit window, a lattice panel by the door, a lantern off its eave. What is inside bobs in the doorway; sparks rise past it.
   const funaya = (d, kind) => {
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', V = window.__seaV || SEA_V, k = shop ? V.shop : V.stash, wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple, y1 = d.y1, px = P / t;
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple, y1 = d.y1, px = P / t;
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
-    const W = k === 4 ? 3.9 : k === 3 ? 3.2 : 3.6, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);
+    const W = 3.2, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
     for (const u of [0.3, 1.4, 2.5, W - 0.2]) bx(u, -1.7, u + 0.12, 0, th.block, 0, DIM);   // its boat bay under the ledge, behind: piles, the boat, the water
     bx(0.6, -1.25, 2.6, -0.95, PAL.gray, 0, DIM); bx(0.9, -1.45, 2.3, -1.25, PAL.gray, 0, DIM); for (const u of [0.2, 1.3, 2.4]) bx(u, -1.75, u + 0.8, -1.7, th.block, 0, DIM);
     bx(0, 0, W, eave, PAL.black); bx(0, 0, W, eave, th.block, 2); for (const u of [0.45, 2.05, W - 0.15]) bx(u, 0, u + 0.13, eave, th.block);   // its wooden front, dotted, its posts
     bx(0, eave - 0.15, W, eave, th.block);
     const win = (u0, u1, v0, v1) => { F(X((u0 + u1) / 2), Y((v0 + v1) / 2), 0.7 * t, 0, 0, 0.6 * t, PAL.orange, 0.45, 1); bx(u0, v0, u1, v1, PAL.orange); bx((u0 + u1) / 2, v0, (u0 + u1) / 2 + px, v1, PAL.black); bx(u0, (v0 + v1) / 2, u1, (v0 + v1) / 2 + px, PAL.black); };
-    if (k === 4) win(2.25, 3.6, 0.85, 2.0); else win(2.3, 3.15, 1.0, 1.85);
+    win(2.3, 3.15, 1.0, 1.85);
     const gable = (u0, u1, v0, h, rw) => { for (let i = 0, n = Math.max(3, Math.round((h * t) / (2 * P))); i < n; i++) { const q = i / n; bx(u0 + (u1 - u0) * 0.5 * q * rw, v0 + h * q, u1 - (u1 - u0) * 0.5 * q * rw, v0 + h * (q + 1 / n), PAL.gray, 4); } bx(u0, v0, u1, v0 + 0.08, PAL.gray); };
-    if (k === 4) { gable(-0.3, W + 0.4, eave, 1.2, 0.85); bx(-0.3, eave + 0.55, W + 0.4, eave + 0.62, PAL.gray); } else if (k === 3) gable(-0.2, W + 0.25, eave, 1.15, 0.95); else gable(-0.25, W + 0.3, eave, 1.3, 0.95);   // the roof, its tiles grey
-    bx((W - 0.3) / 2, eave + (k === 4 ? 1.2 : k === 3 ? 1.15 : 1.3), (W - 0.3) / 2 + 2 * px, eave + (k === 4 ? 1.35 : 1.45), PAL.gray);   // its ridge's end
+    gable(-0.2, W + 0.25, eave, 1.15, 0.95);   // the roof, its tiles grey
+    bx((W - 0.3) / 2, eave + 1.15, (W - 0.3) / 2 + 2 * px, eave + 1.45, PAL.gray);   // its ridge's end
     bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
     F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-    bx(0.55, dh - noren, 1.95, dh, c, k === 2 ? 4 : 0);   // the noren (C's chequered), its slits, its crest
+    bx(0.55, dh - noren, 1.95, dh, c);   // the noren, its slits, its crest
     for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.22, PAL.black);
-    if (k === 2) { bx(1.2, dh - 0.55, 1.3, dh - 0.25, INK.white); bx(1.05, dh - 0.32, 1.45, dh - 0.25, INK.white); bx(1.05, dh - 0.62, 1.12, dh - 0.5, INK.white); bx(1.38, dh - 0.62, 1.45, dh - 0.5, INK.white); }   // an anchor
-    else if (k === 5) for (let u = 0.75; u < 1.8; u += 0.3) { bx(u, dh - 0.45, u + 0.16, dh - 0.4, INK.white); bx(u + 0.12, dh - 0.4, u + 0.2, dh - 0.32, INK.white); }   // a wave
-    else for (const [u, v] of [[1.25, dh - 0.24], [1.15, dh - 0.4], [1.35, dh - 0.4]]) bx(u - px, v - px, u + px, v + px, INK.white);
+    for (const [u, v] of [[1.25, dh - 0.24], [1.15, dh - 0.4], [1.35, dh - 0.4]]) bx(u - px, v - px, u + px, v + px, INK.white);
     const lan = (u, v) => { bx(u, v + 0.3, u + px, eave - 0.15, PAL.gray); bx(u - 0.15, v - 0.2, u + 0.17, v + 0.3, PAL.orange); bx(u - 0.15, v + 0.04, u + 0.17, v + 0.04 + px, PAL.black); F(X(u), Y(v + 0.05), 0.45 * t, 0, 0, 0.45 * t, PAL.orange, 0.4, 1); };   // a lantern off the eave, lit
-    const flt = (u, v) => { bx(u, v + 0.2, u + px, eave - 0.15, PAL.gray); F(X(u), Y(v), 0.17 * t, 0, 0, 0.17 * t, PAL.blue, 1, 0); };   // a glass float
-    if (k === 0) lan(W + 0.25, 1.4); else if (k === 1) { lan(W + 0.25, 1.5); flt(W + 0.55, 1.0); } else if (k === 3) lan(W + 0.25, 1.3); else if (k === 4) { lan(W + 0.25, 1.5); flt(W + 0.5, 0.95); flt(W + 0.25, 0.6); } else if (k === 5) lan(W + 0.25, 1.4);
-    if (k === 2 || k === 5) { bx(2.15, 0.85, W + 0.1, 0.92, PAL.gray); for (let u = 2.2; u < W + 0.1; u += 0.25) bx(u, 0.55, u + px, 0.85, PAL.gray); }   // a little balcony rail
-    if (k === 3) { bx(2.2, 0, 2.95, 0.85, PAL.gray, 4); }   // a lattice panel by the door
+    lan(W + 0.25, 1.3);
+    bx(2.2, 0, 2.95, 0.85, PAL.gray, 4);   // a lattice panel by the door
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
     if (shop) { const ry = Y(0.8); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
     else { const ry = Y(0.55); for (let i = 0; i < 3; i++) disc(dx + (i - 1) * rr * 0.5, ry - (i === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
@@ -3010,21 +3002,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (th.village) for (const r of lv.rects) if (r.plank && r.move && seen(r.y0 - 4 * kitT, r.y0)) {   // a yaen's cable across the shaft at its pulley, behind (DEPTH)
     const cy = snap(r.y0 - snap(YAEN.frame * kitT) - YAEN.wheel * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.gray, DIM, 0, 10, 0);
   }
-  if (th.sea) for (const r of lv.rects) if (r.plank && r.move && seen(r.y0 - 2 * kitT, r.y1 + kitT)) {   // a Sea boat's rope across the shaft (A, B) or its stream (E, F), behind (DEPTH)
-    const k = (window.__seaV || SEA_V).boat;
-    if (k < 2) { const cy = snap(r.y0 - 1.7 * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.orange, DIM, 0, 10, 0); }
-    else if (k >= 4) { const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + ((T * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0); }   // (its ripples going by)
+  if (th.sea) for (const r of lv.rects) if (r.plank && r.move && seen(r.y1, r.y1 + kitT)) {   // a Sea raft's stream across the shaft under it, its ripples going by, behind (DEPTH)
+    const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + ((T * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0);
   }
-  if (th.sea && lv.kind === 'well') {   // the Sea's props (the owner's sheets research/variants/sea-*-1-px.png; all six variants in the game's own code while the owner
-    // picks: SEA_V, or window.__seaV): on ledges, by kitThing, a lighthouse, nets drying with glass floats, a gull on a mooring post, octopus pots, the big-catch flags.
-    // In the midground: solid, no white (the sheets' white is grey here), no yellow but a lamp's core, no red (orange).
-    const t = kitT, P = kitP, px = P / t, V = window.__seaV || SEA_V, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'];
-    {   // the sea far off (the owner's two sheets, research/variants/sea-wave and sea-far: SEA_V.far, 0-5 the wave sheet's A-F, 6-11 the far sheet's): screen-fixed,
-      // low on the screen and sinking a little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
-      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t), f = V.far;
+  if (th.sea && lv.kind === 'well') {   // the Sea's props (the owner's picks, research/variants/sea-*-game.png, 2026-10-20): on ledges, by kitThing, a lighthouse
+    // (E), nets drying with glass floats (A), a gull crying out on a mooring post (D), octopus pots wrapped in a net (C), the big-catch flags (E). In the
+    // midground: solid, no white (the sheets' white is grey here), no yellow but a lamp's core, no red (orange).
+    const t = kitT, P = kitP, px = P / t, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'];
+    {   // the sea far off (the owner's picks, the wave sheet's B and the far sheet's F, a level each in turn): screen-fixed, low on the screen and sinking a
+      // little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
+      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
       const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
-      const tri = (u, v0, hw, h, c) => { const hd = (h * t) / 2; F(U(u), Vv(v0) - hd, hw * t, 0, 0, hd, c, DIM, 6, hw * t, hd, 2 * hw * t); };   // a triangle: a pine's tier, a mountain, a roof
+      const tri = (u, v0, hw, h, c) => { const hd = (h * t) / 2; F(U(u), Vv(v0) - hd, hw * t, 0, 0, hd, c, DIM, 6, hw * t, hd, 2 * hw * t); };   // a triangle: a pine's tier, a roof
       const water = () => { for (let i = 0; i < 10; i++) { const v = 0.1 + 0.28 * i, u0 = -7.6 + ((i * 37) % 7) * 0.4, u1 = u0 + 2.2 + ((i * 13) % 5) * 0.6; fb(u0, v, u1, v + px, PAL.aqua); fb(u1 + 0.8, v, u1 + 2.4, v + px, PAL.aqua); } };
       const pine = (u, v, s) => { fb(u - px / 2, v, u + px / 2, v + 0.8 * s, PAL.gray); for (const [dv, rw] of [[0.55, 0.42], [0.8, 0.32], [1.0, 0.2]]) fe(u, v + dv * s, rw * s, 0.1 * s, PAL.green); };
       const isle = (u0, u1, v, h, pines) => { fe((u0 + u1) / 2, v, (u1 - u0) / 2, h, PAL.green); for (const [pu, ps] of pines) pine(pu, v + h * 0.7, ps); };
@@ -3032,110 +3022,57 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         fb(u - 0.65 * s, v + 1.15 * s, u + 0.65 * s, v + 1.22 * s, PAL.blue); for (let i = 1; i < 5; i++) for (const e of [-1, 1]) fb(u + e * 0.55 * s, v - 0.18 * i, u + e * 0.55 * s + 2 * px, v - 0.18 * i + px, PAL.blue); };   // its reflection
       const boat = (u, v, s, lit) => { fb(u - 0.7 * s, v, u + 0.7 * s, v + 0.18 * s, PAL.blue); fb(u - 0.5 * s, v - 0.08 * s, u + 0.5 * s, v, PAL.blue); fb(u - px, v + 0.18 * s, u, v + 1.0 * s, PAL.blue); fb(u - 0.25 * s, v + 0.18 * s, u + 0.2 * s, v + 0.42 * s, PAL.blue);
         for (const [lu, lv0] of lit) { fb(u + lu * s, v + lv0 * s, u + lu * s + 2 * px, v + lv0 * s + 2 * px, PAL.orange, LIT); for (let i = 1; i < 4; i++) fb(u + lu * s, v - 0.15 * i, u + lu * s + 2 * px, v - 0.15 * i + px, PAL.orange, DIM); } };   // its lanterns and their light on the water
-      const wave = (u, v, s) => {   // the Great Wave: a swell rising into a wall of water that curls over, its lip in claws of foam, spray off it
-        fe(u - 0.4 * s, v + 0.3 * s, 2.2 * s, 0.45 * s, PAL.blue);
-        const pts = []; for (let i = 0; i <= 14; i++) { const q = i / 14, a = Math.PI * (1.05 - 1.25 * q), rr = (1.0 + 0.5 * q) * s; pts.push([u + Math.cos(a) * rr * 1.1 + 0.6 * s * q, v + 1.0 * s + Math.sin(a) * rr]); }
-        for (let i = 0; i < 14; i++) { const [u0, v0] = pts[i], [u1, v1] = pts[i + 1], wp = Math.round((7 - 4 * (i / 14)) * s); line(U(u0), Vv(v0), U(u1), Vv(v1), PAL.blue, DIM, Math.max(2, wp)); }   // the wall and its curl
-        for (let i = 6; i <= 14; i++) { const [cu, cv] = pts[i]; fb(cu - 0.08, cv - 0.04, cu + 0.12, cv + 0.12, PAL.gray); if (i % 2) fb(cu + 0.1, cv - 0.22, cu + 0.2, cv - 0.12, PAL.gray); }   // the foam along its lip, its claws
-        for (const [du, dv] of [[0.9, 2.5], [1.3, 2.2], [1.1, 2.75], [1.6, 2.5]]) fb(u + du * s, v + dv * s, u + du * s + 2 * px, v + dv * s + 2 * px, PAL.gray);   // spray
-      };
-      const fuji = (u, v, s) => { tri(u, v, 1.3 * s, 1.1 * s, PAL.blue); tri(u, v + 0.75 * s, 0.42 * s, 0.35 * s, PAL.gray); };
-      const bridge = (u, v, w) => { for (let i = 0; i < 16; i++) { const q0 = i / 16, q1 = (i + 1) / 16; fb(u - w / 2 + w * q0, v + 0.9 * Math.sin(Math.PI * q0), u - w / 2 + w * q1, v + 0.9 * Math.sin(Math.PI * q1) + 0.12, PAL.blue); if (i % 3 === 0) fb(u - w / 2 + w * q0, v + 0.9 * Math.sin(Math.PI * q0), u - w / 2 + w * q0 + px, v + 0.9 * Math.sin(Math.PI * q0) + 0.35, PAL.blue); } };
       const stilts = (u0, n, v, lit) => { for (let i = 0; i < n; i++) { const u = u0 + i * 1.5; for (const e of [0.1, 0.6, 1.1]) fb(u + e, v, u + e + px, v + 0.5, PAL.blue); fb(u, v + 0.5, u + 1.2, v + 1.1, PAL.blue); tri(u + 0.6, v + 1.1, 0.75, 0.5, PAL.gray);
         if (lit) for (const e of [0.3, 0.75]) fb(u + e, v + 0.7, u + e + 2 * px, v + 0.7 + 2 * px, PAL.orange, LIT); } };
-      // (the water first: the islands, the boats and the rest stand in it)
-      if (f === 0) { water(); wave(-4.2, 0.6, 1.4); fuji(1.2, 0.6, 1.3); isle(3.5, 7.5, 0.6, 0.35, []); }
-      else if (f === 1) { water(); stilts(-7.2, 3, 0.6, true); for (const [u, s] of [[-6.3, 1.1], [-3.4, 1.0]]) pine(u, 2.1, s); boat(3.6, 0.7, 1.4, [[0.6, 0.9]]); }
-      else if (f === 2) { water(); isle(-7.6, -3.4, 0.6, 0.9, [[-6.6, 1.1], [-5.2, 1.3], [-4.2, 0.9]]); torii(2.6, 0.6, 1.4); }
-      else if (f === 3) { water(); isle(-7.8, -2.8, 0.4, 1.6, [[-7.0, 1.1], [-5.6, 1.0]]); isle(2.2, 7.8, 0.4, 1.4, [[3.4, 1.0], [6.4, 1.1]]); bridge(-0.4, 1.0, 4.6); fb(-0.3, 0.2, -0.1, 1.2, PAL.aqua, DIM, 3); }   // a bridge over the river, its fall
-      else if (f === 4) { water(); wave(-5.0, 0.6, 1.2); fuji(0.6, 0.6, 1.2); boat(4.4, 0.6, 1.2, [[0.6, 0.85]]); }
-      else if (f === 5) { water(); stilts(-7.4, 2, 0.6, true); boat(1.8, 0.6, 0.9, [[0.4, 0.7]]); boat(5.0, 0.6, 1.3, [[0.6, 0.9]]); }
-      else if (f === 6) { water(); isle(-7.6, -3.8, 0.8, 0.5, [[-6.8, 0.9], [-5.6, 1.0]]); isle(3.8, 7.6, 0.8, 0.5, [[4.8, 0.9], [6.6, 1.0]]); torii(0, 0.8, 1.1); boat(-1.8, 0.5, 0.6, [[0.2, 0.5]]); boat(2.4, 0.4, 0.8, [[0.4, 0.7]]); }
-      else if (f === 7) { water(); isle(-7.8, -1.6, 0.4, 2.0, [[-6.6, 1.1], [-5.0, 1.2], [-3.2, 1.0]]); isle(2.6, 7.8, 0.4, 1.7, [[4.0, 1.0], [6.2, 1.1]]); bridge(0.5, 1.1, 4.2); for (const [u, v] of [[-4.6, 1.6], [5.0, 1.4]]) fb(u, v, u + 2 * px, v + 2 * px, PAL.orange, LIT); }
-      else if (f === 8) { water(); stilts(-7.4, 3, 0.7, true); for (const u of [-6.6, -3.6]) pine(u, 2.3, 1.0); boat(5.0, 0.6, 1.2, [[0.6, 0.9], [0.6, 0.6], [0.6, 0.3]]); }
-      else if (f === 9) { water(); isle(-7.8, -2.6, 0.7, 0.8, [[-7.0, 1.0], [-5.4, 1.1], [-3.8, 0.9]]); isle(5.0, 7.8, 0.7, 0.35, []); fe(4.2, 4.0, 0.55, 0.55, PAL.aqua); boat(2.6, 0.5, 0.9, [[0.4, 0.8]]); }   // a moon
-      else if (f === 10) { water(); isle(-7.8, -2.2, 0.9, 0.7, [[-6.6, 1.0], [-4.4, 1.1]]); isle(4.6, 7.8, 0.9, 0.6, [[5.8, 0.9]]); boat(1.8, 0.5, 2.2, [[-0.3, 1.1], [0, 1.25], [0.3, 1.1], [0.55, 0.95]]); }   // a fishing boat, its lanterns on lines
-      else { water(); isle(-7.8, -3.4, 0.7, 0.6, [[-6.8, 1.0], [-5.0, 0.9]]); isle(3.8, 7.8, 0.7, 0.6, [[5.2, 0.9], [6.8, 1.0]]); torii(0.4, 0.7, 1.4); boat(-2.4, 0.4, 0.6, [[0.3, 0.5]]); boat(3.0, 0.35, 0.8, [[0.4, 0.7]]); }
+      water();   // (the water first: the islands, the boats and the rest stand in it)
+      if (lv.stage % 2 === 0) { stilts(-7.2, 3, 0.6, true); for (const [u, s] of [[-6.3, 1.1], [-3.4, 1.0]]) pine(u, 2.1, s); boat(3.6, 0.7, 1.4, [[0.6, 0.9]]); }   // stilt houses lit, pines behind them, a boat (B)
+      else { isle(-7.8, -3.4, 0.7, 0.6, [[-6.8, 1.0], [-5.0, 0.9]]); isle(3.8, 7.8, 0.7, 0.6, [[5.2, 0.9], [6.8, 1.0]]); torii(0.4, 0.7, 1.4); boat(-2.4, 0.4, 0.6, [[0.3, 0.5]]); boat(3.0, 0.35, 0.8, [[0.4, 0.7]]); }   // a torii in the water between two islands, boats (F)
     }
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
       if (!p || !PROPS.includes(p.kind)) continue;
-      const k = V[p.kind] || 0, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, fx = d > 0 ? r.x1 : r.x0, b = r.y0;
+      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, fx = d > 0 ? r.x1 : r.x0, b = r.y0;
       const X = (u) => snap(wx + d * u * t), Q = (u) => snap(fx - d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, in from its free end, up from its top
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
       const bq = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(Q(u0), Q(u1)), Y(Math.max(v0, v1)), Math.max(Q(u0), Q(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
       const el = (u, v, ru, rv, c, a = 1) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0), ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);
       const float = (u, v, c) => { el(u, v, 0.2, 0.2, c); bx(u - 0.08, v + 0.05, u - 0.08 + 2 * px, v + 0.05 + 2 * px, PAL.gray); };   // a glass float, a grey glint (the sheets' white)
-      if (p.kind === 'lighthouse') {   // a little lighthouse on its ledge, its lamp lit (a light's core yellow, its glow)
-        const cx = 2.3, lamp = () => {   // the gallery, the lamp room, the roof by the variant
+      if (p.kind === 'lighthouse') {   // a little lighthouse on its ledge: a grey tower narrowing up, its door, its gallery, its lamp lit (a light's core yellow, its glow)
+        const cx = 2.3, lamp = () => {   // the gallery, the lamp room
           bx(cx - 0.8, 2.9, cx + 0.8, 3.18, th.block); for (let u = cx - 0.65; u < cx + 0.7; u += 0.26) bx(u, 2.97, u + 2 * px, 3.1, PAL.black);
           F(X(cx), Y(3.5), 0.9 * t, 0, 0, 0.8 * t, PAL.orange, 0.45, 1); bx(cx - 0.42, 3.18, cx + 0.42, 3.82, th.block); bx(cx - 0.32, 3.24, cx + 0.32, 3.76, PAL.orange); bx(cx - 0.12, 3.34, cx + 0.12, 3.62, PAL.yellow);
           for (const u of [cx - 0.34, cx + 0.32]) bx(u, 3.18, u + 2 * px, 3.82, th.block);
           vlamps.push([X(cx), Y(3.5)]);
         }, cone = (w0, h0) => { for (let i = 0, n = 6; i < n; i++) { const q = i / n; bx(cx - w0 * (1 - q), 3.82 + h0 * q, cx + w0 * (1 - q), 3.82 + h0 * (q + 1 / n), th.block); } };
-        if (k === 0) { for (const [v0, v1, c] of [[0, 0.9, th.block], [0.9, 1.4, PAL.gray], [1.4, 2.0, th.block], [2.0, 2.5, PAL.gray], [2.5, 2.9, th.block]]) bx(cx - 0.68, v0, cx + 0.68, v1, c, c === th.block ? 2 : 0); bx(cx - 0.2, 0, cx + 0.2, 0.6, PAL.black); lamp(); cone(0.62, 0.5); bx(cx - px, 4.32, cx + px, 4.62, th.block); }
-        else if (k === 1) { for (const e of [-1, 1]) ln(cx + e * 0.8, 0, cx + e * 0.45, 2.9, th.block, 3); for (const [v0, v1] of [[0, 0.95], [0.95, 1.9], [1.9, 2.9]]) { const w0 = 0.8 - 0.35 * (v0 / 2.9), w1 = 0.8 - 0.35 * (v1 / 2.9); ln(cx - w0, v0, cx + w1, v1, th.block, 2); ln(cx + w0, v0, cx - w1, v1, th.block, 2); bx(cx - w1, v1 - 0.05, cx + w1, v1 + 0.05, th.block); }
-          lamp(); cone(0.55, 0.45); bx(cx - px, 4.27, cx + px, 4.62, th.block); }
-        else if (k === 2) { bx(cx - 0.72, 0, cx + 0.72, 0.5, th.block, 2); bx(cx - 0.62, 0.5, cx + 0.62, 2.9, PAL.gray); bx(cx - 0.18, 0, cx + 0.18, 0.62, PAL.black); bx(cx - 0.06, 1.7, cx + 0.06, 2.0, PAL.black); el(cx, 3.82, 0.45, 0.36, th.block); bx(cx - 0.06, 4.14, cx + 0.06, 4.32, th.block); el(cx, 4.36, 0.08, 0.08, th.block); lamp(); }   // its dome, the lamp room under it
-        else if (k === 3) { for (let u = cx - 0.7; u <= cx + 0.75; u += 0.35) bx(u, 0, u + 2 * px, 0.42, th.block); bx(cx - 0.8, 0.42, cx + 0.8, 0.56, th.block); bx(cx - 0.65, 0.56, cx + 0.65, 1.2, th.block, 2); bx(cx - 0.6, 1.2, cx + 0.6, 2.3, PAL.gray); bx(cx - 0.08, 1.6, cx + 0.06, 1.95, PAL.black); bx(cx - 0.65, 2.3, cx + 0.65, 2.9, th.block);
-          lamp(); cone(0.6, 0.5); bx(cx - px, 4.32, cx + px, 4.75, th.block); bx(cx, 4.55, cx + 0.32, 4.7, th.block); }
-        else if (k === 4) { for (let i = 0, n = 10; i < n; i++) { const v0 = (2.9 * i) / n, ww = 0.9 - 0.28 * (i / n); bx(cx - ww, v0, cx + ww, v0 + 2.9 / n, PAL.gray, 1); } bx(cx - 0.2, 0, cx + 0.2, 0.62, PAL.black); lamp();
-          bx(cx - 0.85, 3.82, cx + 0.85, 3.95, th.block); for (const e of [-1, 1]) bx(cx + e * 0.85, 3.9, cx + e * 0.98, 4.02, th.block); cone(0.55, 0.42); el(cx, 4.32, 0.09, 0.09, th.block); }
-        else { for (const [v0, v1, c] of [[0, 0.9, th.block], [0.9, 1.6, PAL.gray], [1.6, 2.0, th.block], [2.0, 2.6, PAL.gray], [2.6, 3.0, th.block]]) bx(cx - 0.6, v0, cx + 0.6, Math.min(v1, 2.9), c); bx(cx - 0.18, 0, cx + 0.18, 0.62, PAL.black); lamp(); cone(0.55, 0.45);
-          bx(cx - px, 4.27, cx + px, 5.2, PAL.gray); bx(cx + px, 4.95, cx + 0.42, 5.15, PAL.orange, 2); }   // its flag orange (F's red)
-      } else if (p.kind === 'net') {   // fishing nets drying, round glass floats in them
+        for (let i = 0, n = 10; i < n; i++) { const v0 = (2.9 * i) / n, ww = 0.9 - 0.28 * (i / n); bx(cx - ww, v0, cx + ww, v0 + 2.9 / n, PAL.gray, 1); } bx(cx - 0.2, 0, cx + 0.2, 0.62, PAL.black); lamp();
+        bx(cx - 0.85, 3.82, cx + 0.85, 3.95, th.block); for (const e of [-1, 1]) bx(cx + e * 0.85, 3.9, cx + e * 0.98, 4.02, th.block); cone(0.55, 0.42); el(cx, 4.32, 0.09, 0.09, th.block);   // its roof, a ball on it
+      } else if (p.kind === 'net') {   // fishing nets drying, sagging between two poles, round glass floats in them
         const pole = (u, h) => bx(u, 0, u + 0.14, h, PAL.orange, 2), sag = (u0, u1, v, s) => { for (let i = 0; i < 12; i++) { const q0 = i / 12, q1 = (i + 1) / 12; ln(u0 + (u1 - u0) * q0, v - s * 4 * q0 * (1 - q0), u0 + (u1 - u0) * q1, v - s * 4 * q1 * (1 - q1), PAL.orange); } };
-        const mesh = (u0, u1, v0, v1) => bx(u0, v0, u1, v1, PAL.gray, 4);
-        if (k === 0) { pole(1.3, 2.2); pole(3.6, 2.2); sag(1.4, 3.65, 2.15, 0.3); for (let i = 0; i < 8; i++) { const q = (i + 0.5) / 8, u = 1.45 + 2.15 * q, top = 2.1 - 0.3 * 4 * q * (1 - q); mesh(u - 0.14, u + 0.14, top - 0.9 - 0.25 * Math.sin(q * Math.PI), top); } float(1.9, 1.6, PAL.blue); float(2.5, 1.15, PAL.green); float(3.15, 1.6, PAL.purple); }
-        else if (k === 1) { for (const u of [1.2, 2.45, 3.7]) pole(u, 2.3); bx(1.2, 2.18, 3.84, 2.3, PAL.orange); mesh(1.34, 2.45, 0.7, 2.18); mesh(2.59, 3.7, 0.7, 2.18); float(1.75, 1.5, PAL.purple); float(2.52, 1.5, PAL.blue); float(3.2, 1.45, PAL.green); }
-        else if (k === 2) { pole(1.1, 2.6); pole(3.85, 1.6); ln(1.2, 2.55, 3.9, 1.55, PAL.orange, 2); for (let i = 0; i < 10; i++) { const q = (i + 0.5) / 10, u = 1.25 + 2.6 * q, top = 2.5 - 0.95 * q; mesh(u - 0.13, u + 0.13, 0.35 + 0.9 * Math.abs(q - 0.5) + 0.2, top); } float(1.95, 1.4, PAL.blue); float(2.85, 0.95, PAL.purple); }
-        else if (k === 3) { bx(2.55, 3.15, 2.55 + 2 * px, 3.5, PAL.orange); ln(2.4, 3.05, 2.7, 3.25, PAL.orange); ln(2.7, 3.05, 2.4, 3.25, PAL.orange); for (let i = 0; i < 9; i++) { const v = 3.05 - 0.2 * i, ww = 0.55 * Math.sin(Math.PI * Math.min(1, (i + 1) / 7)); mesh(2.56 - ww, 2.56 + ww, v - 0.2, v); }
-          float(2.35, 2.4, PAL.blue); float(2.8, 2.15, PAL.green); float(2.5, 1.7, PAL.purple); }
-        else if (k === 4) { for (const u of [1.1, 2.55, 4.0]) pole(u, 2.4); sag(1.2, 2.6, 2.3, 0.18); sag(2.65, 4.05, 2.3, 0.18); mesh(1.24, 2.55, 0.25, 2.1); mesh(2.69, 4.0, 0.25, 2.1); float(1.75, 1.2, PAL.blue); float(2.62, 1.2, PAL.green); float(3.45, 1.2, PAL.purple); }
-        else { pole(1.3, 2.7); bx(1.3, 2.58, 3.5, 2.7, PAL.orange); bx(1.85, 2.3, 1.85 + px, 2.58, PAL.orange); for (let i = 0; i < 7; i++) { const v = 2.3 - 0.2 * i, ww = 0.42 * Math.sin(Math.PI * Math.min(1, (i + 1) / 5)); mesh(1.86 - ww, 1.86 + ww, v - 0.2, v); }
-          float(1.75, 1.7, PAL.blue); float(1.95, 1.25, PAL.green); bx(3.1, 2.25, 3.1 + px, 2.58, PAL.gray); el(3.1, 2.0, 0.24, 0.24, PAL.orange); bx(2.88, 1.98, 3.32, 2.02 + px, PAL.gray); }   // and an orange float on its own (F's red)
-      } else if (p.kind === 'gull') {   // a seagull on a mooring post at the ledge's free end, its beak and feet orange, its wing tips black (the sheets' white is grey)
-        const ph = k === 3 ? 1.3 : 1.0, gu = 0.3, gv = ph + 0.32;   // the post's height; the gull's middle, in from the free end
+        pole(1.3, 2.2); pole(3.6, 2.2); sag(1.4, 3.65, 2.15, 0.3); for (let i = 0; i < 8; i++) { const q = (i + 0.5) / 8, u = 1.45 + 2.15 * q, top = 2.1 - 0.3 * 4 * q * (1 - q); bx(u - 0.14, top - 0.9 - 0.25 * Math.sin(q * Math.PI), u + 0.14, top, PAL.gray, 4); }   // the net, its mesh
+        float(1.9, 1.6, PAL.blue); float(2.5, 1.15, PAL.green); float(3.15, 1.6, PAL.purple);
+      } else if (p.kind === 'gull') {   // a seagull crying out on a mooring post at the ledge's free end, its beak and feet orange, its wing tips black (the sheets' white is grey)
+        const ph = 1.3, gu = 0.3, gv = ph + 0.32;   // the post's height; the gull's middle, in from the free end
         bq(0.1, 0, 0.5, ph, PAL.orange, 2);
-        if (k === 1) for (const v of [0.35, 0.65]) { line(Q(0.06), Y(v), Q(0.54), Y(v + 0.12), PAL.black); line(Q(0.06), Y(v + 0.12), Q(0.54), Y(v), PAL.black); }
-        if (k === 2) { bq(0.52, 0.6, 0.52 + px, 0.8, PAL.gray); F(Q(0.62), Y(0.55), 0.13 * t, 0, 0, 0.16 * t, PAL.gray, 1, 4); }
-        if (k === 4) bq(0.08, 0.55, 0.52, 0.72, PAL.blue);
-        if (k === 5) bq(0.06, ph - 0.25, 0.54, ph, PAL.purple, 4);
         for (const e of [-0.07, 0.07]) bq(gu + e, ph, gu + e + px, ph + 0.14, PAL.orange);   // its legs
         F(Q(gu), Y(gv), 0.36 * t, 0, 0, 0.2 * t, PAL.gray, 1, 0); F(Q(gu + 0.28), Y(gv - 0.04), 0.14 * t, 0, 0, 0.08 * t, PAL.gray, 1, 0);   // its body, its tail
-        F(Q(gu - 0.2), Y(gv + 0.24), 0.15 * t, 0, 0, 0.15 * t, k === 2 ? PAL.gray : PAL.gray, 1, 0); bq(gu - 0.24, gv + 0.26, gu - 0.24 + px, gv + 0.26 + px, PAL.black);   // its head, an eye
+        F(Q(gu - 0.2), Y(gv + 0.24), 0.15 * t, 0, 0, 0.15 * t, PAL.gray, 1, 0); bq(gu - 0.24, gv + 0.26, gu - 0.24 + px, gv + 0.26 + px, PAL.black);   // its head, an eye
         bq(gu + 0.05, gv - 0.02, gu + 0.4, gv + 0.06, PAL.black);   // its wing's black tip
-        if (k === 3) { bq(gu - 0.34, gv + 0.24, gu - 0.52, gv + 0.24 + px, PAL.orange); bq(gu - 0.34, gv + 0.2, gu - 0.5, gv + 0.2 + px, PAL.orange); for (const [u0, v0] of [[-0.62, 0.36], [-0.68, 0.24], [-0.62, 0.12]]) bq(gu + u0, gv + v0, gu + u0 - 0.1, gv + v0 + px, PAL.gray); }   // crying out
-        else bq(gu - 0.34, gv + 0.22, gu - 0.52, gv + 0.26, PAL.orange);   // its beak
-      } else if (p.kind === 'octopus') {   // clay octopus pots (takotsubo) at the wall end, a little purple octopus peeking out of one
+        bq(gu - 0.34, gv + 0.24, gu - 0.52, gv + 0.24 + px, PAL.orange); bq(gu - 0.34, gv + 0.2, gu - 0.5, gv + 0.2 + px, PAL.orange); for (const [u0, v0] of [[-0.62, 0.36], [-0.68, 0.24], [-0.62, 0.12]]) bq(gu + u0, gv + v0, gu + u0 - 0.1, gv + v0 + px, PAL.gray);   // its beak open, crying out
+      } else if (p.kind === 'octopus') {   // a clay octopus pot (takotsubo) at the wall end wrapped in a net, a little purple octopus peeking out of it
         const pot = (u0, u1, v0, v1) => { bx(u0 + 2 * px, v0, u1 - 2 * px, v1, PAL.orange); bx(u0, v0 + 2 * px, u1, v1 - 2 * px, PAL.orange); for (const f of [0.35, 0.7]) bx(u0, v0 + (v1 - v0) * f, u1, v0 + (v1 - v0) * f + px, PAL.black); };
         const neck = (u0, u1, v0) => { bx(u0, v0, u1, v0 + 0.18, PAL.orange); bx(u0 - 0.06, v0 + 0.18, u1 + 0.06, v0 + 0.26, PAL.orange); };
         const tako = (u, v, s = 1) => { el(u, v, 0.28 * s, 0.24 * s, PAL.purple); for (const e of [-0.1, 0.1]) bx(u + e * s - px, v + 0.02, u + e * s + px, v + 0.02 + 2 * px, PAL.black); for (const e of [-0.2, -0.07, 0.07, 0.2]) bx(u + e * s - px, v - 0.3 * s, u + e * s + px, v - 0.15 * s, PAL.purple); };
         const mouth = (u, v, rr) => { el(u, v, rr + 0.06, rr + 0.06, PAL.orange); el(u, v, rr, rr, PAL.black); };
-        if (k === 0) { pot(0.35, 1.55, 0, 1.0); mouth(1.35, 0.5, 0.36); tako(1.35, 0.5, 0.9); pot(1.7, 2.6, 0, 1.0); neck(1.9, 2.4, 1.0); }
-        else if (k === 1) { pot(0.5, 1.9, 0, 0.75); pot(0.6, 1.8, 0.75, 1.45); pot(0.72, 1.68, 1.45, 2.05); neck(0.95, 1.45, 2.05); tako(1.2, 2.45); bx(0.4, 0.2, 0.4 + px, 2.0, PAL.gray); }
-        else if (k === 2) { pot(0.3, 2.3, 0, 1.4); neck(0.95, 1.65, 1.4); for (let u = 0.45; u < 2.3; u += 0.3) bx(u, 0.05, u + px, 1.35, PAL.gray); for (let v = 0.25; v < 1.4; v += 0.3) bx(0.32, v, 2.28, v + px, PAL.gray); mouth(1.75, 0.55, 0.36); tako(1.75, 0.55, 0.9); }   // wrapped in a net
-        else if (k === 3) { pot(0.45, 1.85, 0, 0.9); pot(0.6, 1.7, 0.9, 1.75); neck(0.9, 1.4, 1.75); for (const [u, v0, v1] of [[0.5, 0.4, 1.6], [0.75, 0.9, 1.9], [1.75, 0.3, 1.4], [1.55, 1.1, 1.9]]) bx(u, v0, u + 2 * px, v1, PAL.green); }
-        else if (k === 4) { pot(0.3, 2.2, 0, 1.1); for (const u of [0.75, 1.25, 1.75]) bx(u, 0, u + px, 1.1, PAL.gray); bx(0.3, 0.52, 2.2, 0.52 + px, PAL.gray); mouth(2.05, 0.55, 0.36); tako(2.05, 0.55, 0.9); }
-        else { pot(0.45, 1.85, 0, 0.95); pot(0.55, 1.75, 0.95, 1.8); tako(1.15, 2.0, 1.2); for (const u of [0.55, 1.75]) bx(u - px, 1.2, u + px, 1.85, PAL.purple); bx(1.12, 0, 1.12 + px, 1.8, PAL.gray); }
-      } else {   // the big-catch flags (tairyo-bata) on a pole: three, their patterns by the variant (the sheets' white grey, their red orange)
-        const sh = k === 5 ? 0.55 : 0, flag = (v, c, pat) => { const u0 = 0.85 + sh, u1 = 2.75 + sh, v0 = v, v1 = v + 0.72; bx(u0, v0, u1, v1, c); bx(u1 - 0.12, v0 + 0.3, u1, v0 + 0.42, PAL.black); bx(0.72, v1 - 0.1, u0, v1 - 0.04, PAL.gray); bx(0.72, v0 + 0.04, u0, v0 + 0.1, PAL.gray);   // a flag, a swallowtail, its ties (along a rope out to it, F)
-          if (pat === 'eye') { el(u0 + 0.3, (v0 + v1) / 2, 0.18, 0.18, PAL.gray); el(u0 + 0.3, (v0 + v1) / 2, 0.08, 0.08, PAL.black); bx(u0 + 0.6, v0 + 0.1, u1 - 0.3, v1 - 0.1, c, 2); }
-          else if (pat === 'fish') { el(1.8 + sh, (v0 + v1) / 2, 0.45, 0.2, PAL.black); bx(2.2 + sh, v0 + 0.2, 2.4 + sh, v1 - 0.2, PAL.black); bx(1.55 + sh, (v0 + v1) / 2 + 0.05, 1.55 + sh + px, (v0 + v1) / 2 + 0.05 + px, c); }
-          else if (pat === 'wave') for (let u = u0 + 0.1; u < u1 - 0.2; u += 0.3) { bx(u, v0 + 0.2, u + 0.16, v0 + 0.26, PAL.gray); bx(u + 0.12, v0 + 0.26, u + 0.2, v0 + 0.36, PAL.gray); }
-          else if (pat === 'sun') { el(1.8, v0 + 0.25, 0.35, 0.3, PAL.orange); bx(u0, v0, u1, v0 + 0.22, PAL.blue); for (let u = u0 + 0.1; u < u1 - 0.2; u += 0.3) bx(u, v0 + 0.12, u + 0.16, v0 + 0.18, th.block); for (const e of [-1, 0, 1]) ln(1.8 + e * 0.32, v0 + 0.5, 1.8 + e * 0.5, v1 - 0.06, PAL.orange); }
+        pot(0.3, 2.3, 0, 1.4); neck(0.95, 1.65, 1.4); for (let u = 0.45; u < 2.3; u += 0.3) bx(u, 0.05, u + px, 1.35, PAL.gray); for (let v = 0.25; v < 1.4; v += 0.3) bx(0.32, v, 2.28, v + px, PAL.gray); mouth(1.75, 0.55, 0.36); tako(1.75, 0.55, 0.9);   // the net round it
+      } else {   // the big-catch flags (tairyo-bata) on a pole, a ball on its top: a fish, dots, a check (the sheets' white grey, their red orange)
+        const flag = (v, c, pat) => { const u0 = 0.85, u1 = 2.75, v0 = v, v1 = v + 0.72; bx(u0, v0, u1, v1, c); bx(u1 - 0.12, v0 + 0.3, u1, v0 + 0.42, PAL.black); bx(0.72, v1 - 0.1, u0, v1 - 0.04, PAL.gray); bx(0.72, v0 + 0.04, u0, v0 + 0.1, PAL.gray);   // a flag, a swallowtail, its ties
+          if (pat === 'fish') { el(1.8, (v0 + v1) / 2, 0.45, 0.2, PAL.black); bx(2.2, v0 + 0.2, 2.4, v1 - 0.2, PAL.black); bx(1.55, (v0 + v1) / 2 + 0.05, 1.55 + px, (v0 + v1) / 2 + 0.05 + px, c); }
           else if (pat === 'check') bx(u0 + 0.05, v0 + 0.08, u1 - 0.15, v1 - 0.08, PAL.blue, 4);
-          else if (pat === 'dots') bx(u0 + 0.1, v0 + 0.12, u1 - 0.2, v1 - 0.12, PAL.gray, 1);
+          else bx(u0 + 0.1, v0 + 0.12, u1 - 0.2, v1 - 0.12, PAL.gray, 1);   // dots
         };
-        bx(0.6, 0, 0.6 + 2 * px, k === 1 ? 4.5 : 4.4, PAL.gray);   // the pole
-        const sets = [[[PAL.blue, 'eye'], [PAL.purple, 'eye'], [th.mover, 'eye']], [[PAL.blue, 'sun'], [PAL.purple, 'fish'], [PAL.green, 'wave']], [[th.mover, 'eye'], [PAL.blue, 'eye'], [PAL.purple, 'eye']],
-          [[PAL.purple, 'dots'], [PAL.blue, 'fish'], [th.mover, 'wave']], [[PAL.green, 'fish'], [th.mover, 'dots'], [PAL.blue, 'check']], [[PAL.blue, 'eye'], [PAL.purple, 'wave'], [PAL.green, 'eye']]][k];
-        sets.forEach(([c, pat], i) => flag(3.55 - 0.85 * i, c, pat));
-        if (k === 0 || k === 4) el(0.62, 4.5, 0.12, 0.12, PAL.gray);   // its top: a ball, a crossbar, a gull, a lantern, a gallows and a lantern on it
-        else if (k === 1) bx(0.6, 4.4, 2.8, 4.5, PAL.gray);
-        else if (k === 2) { F(X(0.68), Y(4.55), 0.22 * t, 0, 0, 0.12 * t, PAL.gray, 1, 0); el(0.5, 4.65, 0.09, 0.09, PAL.gray); bx(0.36, 4.64, 0.44, 4.64 + px, PAL.orange); }
-        else if (k === 3) { bx(0.48, 4.4, 0.78, 4.75, PAL.gray); bx(0.55, 4.47, 0.71, 4.66, PAL.orange); bx(0.44, 4.75, 0.82, 4.82, PAL.gray); }
-        else { bx(0.6, 4.4, 1.25, 4.45, PAL.gray); bx(1.18, 4.18, 1.18 + px, 4.4, PAL.gray); bx(1.02, 3.65, 1.34, 4.18, th.block); bx(1.12, 3.82, 1.24, 3.98, PAL.orange); }
+        bx(0.6, 0, 0.6 + 2 * px, 4.4, PAL.gray);   // the pole
+        [[PAL.green, 'fish'], [th.mover, 'dots'], [PAL.blue, 'check']].forEach(([c, pat], i) => flag(3.55 - 0.85 * i, c, pat));
+        el(0.62, 4.5, 0.12, 0.12, PAL.gray);   // its top, a ball
       }
     }
   }
@@ -3422,19 +3359,18 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     return true;
   };
-  // The Sea's ledges (the owner's sheets, research/variants/sea-*-1-px.png): while the owner picks, all six variants of each in the game's own code (SEA_V, or
-  // window.__seaV from the gallery harness). A block is sea-worn rock (slab), a plank a jetty (plank), a moving plank a ferry boat, a sea turtle or a raft on a
-  // stream (boat; the rope and the stream behind, see the back layer), a crumbling block a raft of driftwood (raft). The sheets' red and yellow are orange
-  // here (red is danger, yellow what you take), their white grey but for the edges you stand on. False for what keeps the common look.
+  // The Sea's ledges (the owner's picks, research/variants/sea-*-game.png, 2026-10-20): a block is sea-worn rock in layers, barnacles on it (slab C); a plank
+  // a jetty on a brace, an unlit lantern hung under its free end (plank B); a moving plank a raft of three logs riding a stream, a lantern on a pole and a basket
+  // of fish on it (boat F; the stream behind, see the back layer); a crumbling block a raft of driftwood, rope between its logs, lashed to the wall, a starfish
+  // under it (raft C). The sheets' red and yellow are orange here (red is danger, yellow what you take), their white grey but for the edges you stand on.
+  // False for what keeps the common look.
   const seaRect = (r) => {
-    const t = kitT, P = kitP, px = P / t, V = window.__seaV || SEA_V, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, hgt = r.y1 - r.y0, ht = hgt / t;
+    const t = kitT, P = kitP, px = P / t, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, hgt = r.y1 - r.y0, ht = hgt / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
-    const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
     const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
     const barn = (x, y) => { box(x - P, y - P, x + 3 * P, y + 3 * P, PAL.gray, 1, 0, 10, 0); box(x, y, x + 2 * P, y + 2 * P, PAL.black, 1, 0, 10, 0); };   // a barnacle, a grey ring (the sheets' white)
-    const ring = (x, y) => { box(x - P, y - P, x + 2 * P, y + 2 * P, PAL.gray, 1, 0, 10, 0); box(x, y, x + P, y + P, PAL.black, 1, 0, 10, 0); };   // a rope's ring
     const lantern = (x, y, lit) => {   // a paper lantern on a hook, ribbed, its caps orange (the sheets' yellow); lit, orange in a glow
       if (lit) F(x, y, 0.6 * t, 0, 0, 0.6 * t, PAL.orange, 0.45, 1);
       const c = lit ? PAL.orange : th.block, x0 = snap(x - 0.18 * t), x1 = snap(x + 0.18 * t) + P, y0 = snap(y - 0.26 * t), y1 = snap(y + 0.26 * t);
@@ -3442,94 +3378,40 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const f of [0.33, 0.66]) box(x0, snap(y0 + f * (y1 - y0)), x1, snap(y0 + f * (y1 - y0)) + P, lit ? PAL.black : PAL.gray, 1, 0, 10, 0);
       box(snap(x - 0.1 * t), y0 - 2 * P, snap(x + 0.1 * t) + P, y0, PAL.orange, 1, 0, 10, 0); box(snap(x - 0.1 * t), y1, snap(x + 0.1 * t) + P, y1 + 2 * P, PAL.orange, 1, 0, 10, 0);
     };
-    if (r.crumble) {   // a raft of driftwood (raft): logs with rounded ends, each shaking its own way as it gives, lashed to the wall with orange rope
-      const k = V.raft, u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round(w / (1.3 * t))), pw = w / n;
+    if (r.crumble) {   // a raft of driftwood: logs with rounded ends, each shaking its own way as it gives, bands of orange rope between them, lashed to the wall with it
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round(w / (1.3 * t))), pw = w / n;
       for (let i = 0; i < n; i++) {
         const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * pw) + ox;
-        box(x0, r.y0 + 3 * P, x1, r.y1 - 3 * P, th.crumble, a, 0, 10, [2, 2, 2, 4, 0, 3][k]); box(x0 + P, r.y0 + P, x1 - P, r.y1 - P, th.crumble, a, 0, 10, [2, 2, 2, 4, 0, 3][k]); box(x0 + 3 * P, r.y0, x1 - 3 * P, r.y1, th.crumble, a, 0, 10, [2, 2, 2, 4, 0, 3][k]);   // a log, its ends round
+        box(x0, r.y0 + 3 * P, x1, r.y1 - 3 * P, th.crumble, a, 0, 10, 2); box(x0 + P, r.y0 + P, x1 - P, r.y1 - P, th.crumble, a, 0, 10, 2); box(x0 + 3 * P, r.y0, x1 - 3 * P, r.y1, th.crumble, a, 0, 10, 2);   // a log, its ends round
         box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y0 + 2.5, th.lip, a, 1.25);
-        if ((k === 2 || k === 5) && i) box(x0 - P, r.y0 - P, x0 + P, r.y1 + P, PAL.orange, a, 0, 10, 0);   // a band of rope between two logs (C, F)
+        if (i) box(x0 - P, r.y0 - P, x0 + P, r.y1 + P, PAL.orange, a, 0, 10, 0);   // a band of rope between two logs
       }
       if (on) { line(W(0.02), Y(0.1), W(0.32), Y(ht - 0.1), PAL.orange, a); line(W(0.02), Y(ht - 0.1), W(0.32), Y(0.1), PAL.orange, a); bw(0.06, 0, 0.06 + px, ht, PAL.orange, 0, a); }   // its lashing at the wall
-      if (k === 1 || k === 5) { const fx = E(0.3); box(fx, r.y1, fx + P, Y(ht + 0.3), PAL.gray, a, 0, 10, 0); disc(fx + P / 2, Y(ht + 0.48), 0.17 * t, PAL.orange, a); box(fx - snap(0.15 * t), Y(ht + 0.45), fx + snap(0.15 * t) + P, Y(ht + 0.45) + P, PAL.gray, a, 0, 10, 0); }   // a float off its free end (B, F; theirs red)
-      if (k === 2) { const sx = E(0.3), sy = Y(ht + 0.1); for (const [dx, dy] of [[0, -2], [0, 2], [-2, 0], [2, 0], [-1, -1], [1, 1], [-1, 1], [1, -1], [0, 0]]) box(sx + dx * P, sy + dy * P, sx + (dx + 1) * P, sy + (dy + 1) * P, PAL.orange, a, 0, 10, 0);   // a starfish (C)
-        if (on) { bw(0.18, ht, 0.18 + px, ht + 0.35, PAL.orange, 0, a); bw(0.18, ht + 0.35, 0.32, ht + 0.35 + px, PAL.orange, 0, a); bw(0.32 - px, ht + 0.25, 0.32, ht + 0.35, PAL.orange, 0, a); } }   // a hook off the lashing
-      if (k === 3) { if (on) { bw(0.18, ht, 0.18 + px, ht + 0.75, PAL.orange, 0, a); bw(0.06, ht + 0.55, 0.32, ht + 0.55 + px, PAL.orange, 0, a); bw(0.02, ht + 0.75, 0.36, ht + 0.75 + px, PAL.orange, 0, a); for (const u of [0.02, 0.36 - px]) bw(u, ht + 0.65, u + px, ht + 0.75, PAL.orange, 0, a); }   // a rope down to an anchor (D)
-        const fx = E(0.3); box(fx, r.y1, fx + P, Y(ht + 0.25), PAL.gray, a, 0, 10, 0); be(0.15, ht + 0.25, 0.45, ht + 0.45, PAL.purple, 0, a); be(0.22, ht + 0.45, 0.38, ht + 0.55, PAL.purple, 0, a); }   // a shell on a string
+      const sx = E(0.3), sy = Y(ht + 0.1); for (const [dx, dy] of [[0, -2], [0, 2], [-2, 0], [2, 0], [-1, -1], [1, 1], [-1, 1], [1, -1], [0, 0]]) box(sx + dx * P, sy + dy * P, sx + (dx + 1) * P, sy + (dy + 1) * P, PAL.orange, a, 0, 10, 0);   // a starfish
+      if (on) { bw(0.18, ht, 0.18 + px, ht + 0.35, PAL.orange, 0, a); bw(0.18, ht + 0.35, 0.32, ht + 0.35 + px, PAL.orange, 0, a); bw(0.32 - px, ht + 0.25, 0.32, ht + 0.35, PAL.orange, 0, a); }   // a hook off the lashing
       return true;
     }
-    if (r.plank && r.move) {   // a boat (boat): A and B a ferry boat hung from a rope, C and D a sea turtle carrying you on its shell, E and F a raft riding a stream
-      const k = V.boat, cx = snap((r.x0 + r.x1) / 2), ahead = r.move.v < 0 ? -1 : 1, fr = ahead > 0 ? r.x1 : r.x0, bk = ahead > 0 ? r.x0 : r.x1, A = (u) => snap(fr - ahead * u * t), B = (u) => snap(bk + ahead * u * t);
-      if (k < 2) {
-        for (const [i0, v0, v1] of [[0, 0, 0.3], [0.12, 0.3, 0.52], [0.35, 0.52, 0.68]]) box(snap(r.x0 + i0 * t), Y(v0), snap(r.x1 - i0 * t), Y(v1), th.mover, 1, 0, 10, 0);   // its hull, narrowing to the keel, its planking
-        for (const v of [0.3, 0.52]) box(snap(r.x0 + 0.12 * t), Y(v), snap(r.x1 - 0.12 * t), Y(v) + P, PAL.black, 1, 0, 10, 0);
-        for (const x of [snap(r.x0 + 0.22 * t), snap(r.x1 - 0.22 * t)]) { box(x, Y(-1.7), x + P, r.y0, th.mover, 1, 0, 10, 0); box(x - P, r.y0 - P, x + 2 * P, r.y0 + 2 * P, th.mover, 1, 0, 10, 0); }   // the ropes it hangs by
-        if (k === 0) { const hx = A(0.4); box(hx, Y(0.62), hx + P, Y(0.85), PAL.gray, 1, 0, 10, 0); box(hx - P, Y(0.85), hx + 2 * P, Y(1.0), PAL.blue, 1, 0, 10, 0); box(hx, Y(1.0), hx + P, Y(1.05), PAL.gray, 1, 0, 10, 0); }   // a charm under it
-        else { const lx = B(0.35); box(lx, Y(-0.95), lx + P, r.y0, th.mover, 1, 0, 10, 0); box(lx, Y(-0.95), lx + snap(0.3 * t), Y(-0.9), th.mover, 1, 0, 10, 0); lantern(lx + snap(0.3 * t), Y(-0.68), true);   // a lantern on a pole, an oar
-          line(A(0.3), Y(0.1), A(-0.15), Y(0.95), th.mover, 1, 2); box(A(-0.25), Y(0.9), A(-0.05), Y(1.2), th.mover, 1, 0, 10, 0); }
-      } else if (k < 4) {
-        const s0 = snap(r.x0 + 0.1 * t), s1 = snap(r.x1 - 0.1 * t);
-        F(A(-0.45), Y(0.5), 0.36 * t, 0, 0, 0.3 * t, th.mover, 1, 0); box(A(-0.55), Y(0.4), A(-0.55) + 2 * P, Y(0.4) + 2 * P, PAL.black, 1, 0, 10, 0); box(A(-0.7), Y(0.62), A(-0.5), Y(0.62) + P, PAL.black, 1, 0, 10, 0);   // its head, an eye, a smile
-        line(A(0.15), Y(0.7), A(-0.45), Y(1.15), th.mover, 1, 5); line(B(0.6), Y(0.75), B(0.05), Y(1.1), th.mover, 1, 4);   // its flippers
-        line(B(-0.1), Y(0.55), B(-0.42), Y(0.7), th.mover, 1, 2);   // its tail
-        box(snap(r.x0 + 0.3 * t), Y(0.66), snap(r.x1 - 0.3 * t), Y(0.82), th.mover, 1, 0, 10, 0);   // its belly, under the shell
-        for (const [i0, v0, v1] of [[0, 0, 0.24], [-0.18, 0.24, 0.46], [-0.26, 0.46, 0.66]]) box(snap(r.x0 + i0 * t), Y(v0), snap(r.x1 - i0 * t), Y(v1), PAL.purple, 1, 0, 10, 0);   // the shell, a dome
-        for (const [v0, v1, o] of [[0.06, 0.24, 0], [0.24, 0.46, 0.3], [0.46, 0.66, 0]]) for (let x = r.x0 + (0.45 + o) * t; x < r.x1 - 0.2 * t; x += 0.6 * t) box(snap(x), Y(v0), snap(x) + P, Y(v1), PAL.black, 1, 0, 10, 0);   // its plates
-        for (const v of [0.24, 0.46]) box(snap(r.x0 - 0.1 * t), Y(v), snap(r.x1 + 0.1 * t), Y(v) + P, PAL.black, 1, 0, 10, 0);
-        box(snap(r.x0 - 0.26 * t), Y(0.64), snap(r.x1 + 0.26 * t), Y(0.66), th.mover, 1, 0, 10, 0);   // its rim
-        if (k === 3) { const fx = B(0.9); box(fx - snap(0.3 * t), Y(-0.36), fx + snap(0.3 * t), r.y0, th.mover, 1, 0, 10, 4); for (const dx of [-0.18, 0, 0.18]) disc(fx + dx * t, Y(-0.4), 0.1 * t, PAL.blue, 1);   // a basket of fish, a flag
-          const px0 = B(0.35); box(px0, Y(-1.0), px0 + P, r.y0, th.mover, 1, 0, 10, 0); box(px0 + P, Y(-1.0), px0 + snap(0.32 * t), Y(-0.8), PAL.orange, 1, 0, 10, 2); }
-      } else {
-        const n = 3, lw = w / n;
-        for (let i = 0; i < n; i++) { const x0 = snap(r.x0 + i * lw) + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * lw); box(x0, r.y0 + P, x1, Y(0.4), th.mover, 1, 0, 10, 2); box(x0 + P, r.y0, x1 - P, r.y0 + P, th.mover, 1, 0, 10, 0); }   // its logs
-        const lx = B(0.3); box(lx, Y(-1.0), lx + P, r.y0, th.mover, 1, 0, 10, 0); box(lx, Y(-1.0), lx + snap(0.25 * t), Y(-0.95), th.mover, 1, 0, 10, 0); lantern(lx + snap(0.25 * t), Y(-0.72), true);   // a lantern on a pole
-        const bx0 = A(k === 4 ? 0.9 : 0.6), bw0 = (k === 4 ? 0.34 : 0.24) * t;   // a basket of fish
-        box(snap(bx0 - bw0), Y(-0.34), snap(bx0 + bw0), r.y0, th.mover, 1, 0, 10, 4); for (const dx of k === 4 ? [-0.18, 0, 0.18] : [-0.1, 0.1]) disc(bx0 + dx * t, Y(-0.38), 0.09 * t, PAL.blue, 1);
-      }
+    if (r.plank && r.move) {   // a raft riding a stream: three logs, a lantern on a pole at its back, a basket of fish at its front
+      const ahead = r.move.v < 0 ? -1 : 1, fr = ahead > 0 ? r.x1 : r.x0, bk = ahead > 0 ? r.x0 : r.x1, A = (u) => snap(fr - ahead * u * t), B = (u) => snap(bk + ahead * u * t);
+      const n = 3, lw = w / n;
+      for (let i = 0; i < n; i++) { const x0 = snap(r.x0 + i * lw) + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * lw); box(x0, r.y0 + P, x1, Y(0.4), th.mover, 1, 0, 10, 2); box(x0 + P, r.y0, x1 - P, r.y0 + P, th.mover, 1, 0, 10, 0); }   // its logs
+      const lx = B(0.3); box(lx, Y(-1.0), lx + P, r.y0, th.mover, 1, 0, 10, 0); box(lx, Y(-1.0), lx + snap(0.25 * t), Y(-0.95), th.mover, 1, 0, 10, 0); lantern(lx + snap(0.25 * t), Y(-0.72), true);   // a lantern on a pole
+      const bx0 = A(0.6), bw0 = 0.24 * t;   // a basket of fish
+      box(snap(bx0 - bw0), Y(-0.34), snap(bx0 + bw0), r.y0, th.mover, 1, 0, 10, 4); for (const dx of [-0.1, 0.1]) disc(bx0 + dx * t, Y(-0.38), 0.09 * t, PAL.blue, 1);
       lip(); return true;
     }
-    if (r.plank) {   // a jetty (plank): boards on beams, posts down into the water, a bollard with its rope, a lantern, a bucket or a coil of rope
+    if (r.plank) {   // a jetty: boards on a brace at the wall, an unlit lantern hung under its free end
       if (r.bouncy) return false;
-      const k = V.plank, segs = [3, 1, 5, 1, 3, 1][k], post = (u, fromWall, len, lash) => {   // a post down from under it, dotted, perhaps lashed
-        const x0 = fromWall ? W(u) : E(u), x1 = fromWall ? W(u + 0.3) : E(u + 0.3), a0 = Math.min(x0, x1), a1 = Math.max(x0, x1);
-        box(a0, r.y1, a1, Y(ht + len), th.plank, 1, 0, 10, 2);
-        if (lash) { line(a0 - P, Y(ht + 0.35), a1 + P, Y(ht + 0.6), PAL.gray); line(a0 - P, Y(ht + 0.6), a1 + P, Y(ht + 0.35), PAL.gray); }
-      }, brace = () => { if (on) line(W(0.08), Y(ht + 0.9), W(0.95), Y(ht), th.plank, 1, 3, 2); }, bollard = () => {   // a bollard on its free end, its rope wound round it and hanging to a ring
-        be(0.1, -0.36, 0.42, 0, th.plank); for (const v of [-0.27, -0.15]) be(0.1, v, 0.42, v + px, PAL.gray);
-        line(E(0.26), Y(-0.1), E(-0.12), Y(ht + 1.05), PAL.gray); ring(E(-0.14), Y(ht + 1.12));
-      };
-      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);   // its boards, a rough underside, the gaps between them
-      for (let i = 1; i < segs; i++) { const x = snap(r.x0 + (w * i) / segs); box(x, r.y0, x + P, r.y1, PAL.black, 1, 0, 10, 0); }
-      if (k === 0) { brace(); post(1.0, false, 1.8, false); bollard(); }
-      else if (k === 1) { brace(); const lx = E(0.18); box(lx, r.y1, lx + P, Y(ht + 0.35), PAL.gray, 1, 0, 10, 0); lantern(lx, Y(ht + 0.62), false); }
-      else if (k === 2) { post(0.6, true, 1.9, true); post(0.6, false, 1.9, true); be(0.1, -0.34, 0.46, 0, th.plank); be(0.08, -0.5, 0.48, -0.5 + px, PAL.orange); be(0.08, -0.5, 0.08 + px, -0.34, PAL.orange); be(0.48 - px, -0.5, 0.48, -0.34, PAL.orange); }   // a bucket, its handle orange (C's yellow)
-      else if (k === 3) { if (on) { post(0.08, true, 2.0, false); line(W(0.3), Y(ht + 1.0), W(1.1), Y(ht), th.plank, 1, 3, 2); } bollard(); }
-      else if (k === 4) { post(0.6, true, 1.9, true); post(0.9, false, 1.9, true); be(0.05, -0.3, 0.75, 0, PAL.gray); be(0.13, -0.24, 0.67, -0.06, PAL.black); be(0.2, -0.2, 0.6, -0.1, PAL.gray); be(0.3, -0.17, 0.5, -0.13, PAL.black); }   // a coil of rope, its rings
-      else { brace(); post(0.4, false, 1.9, true); bollard(); }
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);   // its boards, a rough underside
+      if (on) line(W(0.08), Y(ht + 0.9), W(0.95), Y(ht), th.plank, 1, 3, 2);   // its brace
+      const lx = E(0.18); box(lx, r.y1, lx + P, Y(ht + 0.35), PAL.gray, 1, 0, 10, 0); lantern(lx, Y(ht + 0.62), false);
       lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
-    {   // sea-worn rock (slab): dotted, its underside worn, barnacles; a tide pool, a crab, stones, layers, a crack or a limpet by the variant
-      const k = V.slab, lump = (n0, depth) => {   // its underside worn lumpy: notches cut up into it
-        for (let x = r.x0 + snap(0.2 * t), i = 0; x < r.x1 - P; i++) { const ww = snap((0.2 + 0.4 * hsh(n0 + i)) * t), dd = snap(depth * (0.35 + 0.65 * hsh(n0 + 50 + i)) * Math.min(1, ht) * t); box(x, r.y1 - dd, Math.min(r.x1, x + ww), r.y1, PAL.black, 1, 0, 10, 0); x += ww + snap((0.5 + 0.7 * hsh(n0 + 90 + i)) * t); }
-      }, pool = (u0, u1) => { be(u1, 0.1, u0, 0.32, PAL.blue); be(u1, 0.26, u0, 0.32, PAL.blue, 4); be(u1 + 0.12, 0.08, u1, 0.34, PAL.gray); be(u0, 0.08, u0 - 0.12, 0.34, PAL.gray); };   // a tide pool under its edge, grey stone round it
-      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, k === 2 ? 0 : 2);
-      if (k === 0) { lump(1, 0.35); pool(1.0, 2.6); for (const [u, v] of [[0.55, 0.45], [0.75, 0.62], [0.42, 0.7]]) barn(E(u), Y(v));
-        const cx0 = E(0.2), cy0 = Y(0.5), C = (x0, y0, x1, y1, c = PAL.orange) => box(snap(cx0 + x0 * t), snap(cy0 + y0 * t), snap(cx0 + x1 * t), snap(cy0 + y1 * t), c, 1, 0, 10, 0);   // a crab (A's red), its claws up
-        C(-0.3, -0.02, 0.3, 0.24); C(-0.4, -0.26, -0.26, -0.02); C(0.26, -0.26, 0.4, -0.02); C(-0.45, -0.3, -0.33, -0.2); C(0.33, -0.3, 0.45, -0.2); for (const e of [-1, 1]) for (const f of [0.12, 0.26]) C(e * f - 0.04, 0.24, e * f + 0.04, 0.36);
-        C(-0.14, 0.04, -0.08, 0.1, PAL.black); C(0.08, 0.04, 0.14, 0.1, PAL.black); }
-      else if (k === 1) { const mid = Y(0.5 * ht); for (let x = r.x0 + 0.05 * t, i = 0; x < r.x1 - 0.3 * t; i++) { const sw = (0.75 + 0.35 * hsh(i)) * t; F(x + sw / 2, mid + 0.22 * t, sw / 2 + P, 0, 0, 0.27 * t + P, PAL.black, 1, 0); F(x + sw / 2, mid + 0.22 * t, sw / 2 - P, 0, 0, 0.27 * t - P, th.block, 1, 0); x += sw; }   // stones in its underside
-        for (const [u, v] of [[0.25, 0.3], [0.45, 0.45], [0.3, 0.6], [0.5, 0.72]]) barn(E(u), Y(v)); box(E(0.6), Y(ht + 0.15), E(0.6) + P, Y(ht + 0.15) + P, th.block, 1, 0, 10, 0); }
-      else if (k === 2) { for (const [v, n0] of [[0.38, 3], [0.6, 5], [0.8, 7]]) for (let x = r.x0, i = 0; x < r.x1; i++) { const sw = snap((0.6 + 0.9 * hsh(n0 + i)) * t); box(x, Y(v * ht), Math.min(r.x1, x + sw), Y(v * ht) + P, PAL.black, 1, 0, 10, 0); x += sw + 2 * P; }   // in layers
-        for (const [u, v] of [[0.6, 0.62], [0.35, 0.78], [0.8, 0.85]]) barn(E(u), Y(v)); }
-      else if (k === 3) { lump(7, 0.3); pool(0.55, 1.75); for (const u of [1.3, 2.4]) { const dx = W(u); box(dx, r.y1, dx + P, Y(ht + 0.35), th.block, 1, 0, 10, 0); box(dx - P, Y(ht + 0.35), dx + 2 * P, Y(ht + 0.45), th.block, 1, 0, 10, 0); }   // drips
-        be(0.8, -0.4, 1.55, 0, PAL.gray); be(0.9, -0.5, 1.45, -0.4, PAL.gray); for (const u of [1.0, 1.3]) be(u, -0.3, u + 0.07, -0.22, PAL.black); be(1.1, -0.14, 1.25, -0.14 + px, PAL.black);   // a grey stone sitting on it, eyes and a smile
-        for (const [u, v] of [[0.5, 0.5], [0.7, 0.62]]) barn(E(u), Y(v)); }
-      else if (k === 4) { for (let y = r.y0 + 2 * P, i = 0; y < r.y1 - P; y += 2 * P, i++) { const cx = E(0.9 + (i % 2 ? 0.04 : 0)); box(cx, y, cx + P, y + 2 * P, PAL.black, 1, 0, 10, 0); }   // a crack
-        for (const [u, v] of [[0.25, 0.55], [0.45, 0.7], [0.3, 0.85]]) barn(W(u), Y(v)); }
-      else if (k === 5) { lump(13, 0.4); for (const [u, v] of [[0.3, 0.45], [0.55, 0.6], [0.35, 0.72]]) barn(E(u), Y(v)); be(0.08, -0.2, 0.68, 0, PAL.orange); be(0.16, -0.34, 0.6, -0.2, PAL.orange); be(0.26, -0.42, 0.5, -0.34, PAL.orange); for (const u of [0.24, 0.44]) be(u, -0.22, u + 0.07, -0.15, PAL.black); }   // a limpet on it (F)
-      lip(); return true;
-    }
+    box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0);   // sea-worn rock: in layers, barnacles on it
+    for (const [v, n0] of [[0.38, 3], [0.6, 5], [0.8, 7]]) for (let x = r.x0, i = 0; x < r.x1; i++) { const sw = snap((0.6 + 0.9 * hsh(n0 + i)) * t); box(x, Y(v * ht), Math.min(r.x1, x + sw), Y(v * ht) + P, PAL.black, 1, 0, 10, 0); x += sw + 2 * P; }
+    for (const [u, v] of [[0.6, 0.62], [0.35, 0.78], [0.8, 0.85]]) barn(E(u), Y(v));
+    lip(); return true;
   };
   // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
   // beam, a block is a concrete slab cut square with its panels' seams, a striped cap on a free end, a knee brace under it at a wall

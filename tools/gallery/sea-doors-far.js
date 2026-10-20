@@ -1,4 +1,6 @@
 // The gallery, batch 3: the Sea's doors (funaya, each variant as the sheet had it: A, C, E a shop, B, D, F a stash) and its far layer (wave A-F, far A-F).
+// (The owner picked the Sea's on 2026-10-20 and SEA_V went with the variants, so this no longer runs as it is: it is the template for the next
+// world's gallery. Copy it and point it at that world's own variant table and preview world.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const wipe = (lv) => { lv.rects = lv.rects.filter((r) => r.cap); for (const a of ['coins', 'folk', 'spawns', 'spikes', 'icicles', 'bubbles', 'enemies', 'pickups', 'coats', 'runes', 'fizz', 'rings', 'spots', 'arenas']) if (Array.isArray(lv[a])) lv[a].length = 0; };

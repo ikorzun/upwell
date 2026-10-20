@@ -667,7 +667,7 @@ const BOSSES = {
 };
 // The looks to choose from (owner 2026-10-20: the bosses as yokai of their worlds, after tools/variants.py's sheets boss-<id>: three yokai
 // a boss, two takes on each, A to F): its body's design; the renderer draws the rest round it (look) and on it (LOOK_FACE). BOSSES[k].look
-// is the one in play (none yet: as before); ?look=C shows every boss's C, to see it fight. Its fight, size and colour stay its own.
+// is the one in play (LOOK_PICK; none: as before); ?look=C shows every boss's C, to see it fight. Its fight, size and colour stay its own.
 const LOOKS = {
   tram: ['carriage', 'carriage', 'carriage', 'carriage', 'tram', 'tram', 'tramS'],   // Oboroguruma, Kasha, a tsukumogami tram; G: E's own pixels (LOOK_SPRITES)
   probka: ['round', 'round', 'fox', 'fox', 'tanuki', 'tanuki'],   // the Village's, on the Cork's dive (owner: the fights swapped): Wanyudo, a Nogitsune, a Bake-danuki
@@ -678,6 +678,8 @@ const LOOKS = {
   rat: ['rat', 'rat', 'umbrella', 'umbrella', 'pot', 'pot'],   // Tesso, Kasa-obake, a tsukumogami heap
 };
 for (const k in LOOKS) BOSSES[k].looks = Object.fromEntries(LOOKS[k].map((t, i) => { const [design, ink] = t.split(':'); return ['ABCDEFG'[i], { id: k + '-' + 'ABCDEFG'[i], design, ink }]; }));
+const LOOK_PICK = { probka: 'F', cart: 'C', puck: 'F', crane: 'F', pigeon: 'A' };   // the owner's picks (2026-10-20): a Bake-danuki with its leaf, Tsuchigumo, Tsurara-onna, Nuppeppo, a Karasu-tengu; the Tram's to come
+for (const k in LOOK_PICK) BOSSES[k].look = LOOK_PICK[k];
 const LOOK = (/[?&]look=([A-G])\b/.exec(location.search) || [])[1] || null;
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers

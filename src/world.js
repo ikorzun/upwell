@@ -695,6 +695,7 @@ const JUNKP = { planks: 2, shelves: 3, stairs: 2, pillars: 2, comb: 2, chimney: 
 const SKYP = { planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, movers: 1, twinshaft: 1 };   // the Skyscraper's (free planks: clouds)
 const PANEL = { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 1 };   // the Tower Blocks' (flights of stairs; shelves: balconies)
 const SEAP = { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 2, crumble: 2, bridge: 2, mosswall: 1, iceblocks: 1 };   // the Sea's (rafts on streams: lifts; driftwood: crumble; wet rock: ice)
+const FOREST = { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 2, crumble: 2, mosswall: 2 };   // the Dark Forest's (mortars: lifts; rotten logs: crumble; cobwebs: moss)
 // A world's tapestry, shown once its boss is beaten (the plan: the story as a reward, after): three runes in Yarndings 12
 // (its knitted pictures: the Heat, a drop like the hero, the Light) and what Aunt Moti reads in them.
 const CAMPAIGN = [
@@ -779,6 +780,29 @@ const CAMPAIGN = [
   { role: 'rest', len: 22, fire: 0.35, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, iceblocks: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 6109,
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
   { role: 'boss', boss: 'rat', ice: true },   // the Rat's slide for now (the Junkyard's, which is dropped), its floor wet rock; the Sea's own look and name from the boss chat
+] },
+// The Dark Forest (the owner's bonus world, 2026-10-20: scary Russian fairy tales; its kit in the renderer, see THEMES.skazka; where it opens is the owner's to
+// say; not in CAMP_ORDER yet): every level dark, the hero a Kolobok. One new thing a level: the dark itself, skulls that lunge, the Kikimora on the walls, Baba Yaga's mortars, a
+// peak, a bonus, the Leshy who leads you round, a peak, a cage. First numbers, for the sweep to tune, about Tokyo's with the dark on top. Its boss for now the
+// random run's Lid, until the boss chat brings Koschei. Its runes: a skull, a tree, crossed bones (some took the forest path round the climb; the forest
+// never let them go).
+{ world: SKAZKA, runes: 'wgL', lore: { en: 'Some took the forest path round the climb.\nThe forest never let them go.', es: 'Algunos tomaron el camino del bosque para rodear la subida.\nEl bosque nunca los dejó ir.', pt: 'Alguns pegaram a trilha da floresta para contornar a subida.\nA floresta nunca os deixou sair.', ja: 'のぼらずに もりの みちを えらんだ ものも いた。\nもりは かれらを はなさなかった。' }, levels: [
+  { role: 'teach', len: 30, fire: 0.38, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.35, candy: [], shop: 0.5, safe: true, seed: 7101,
+    news: { en: 'the dark: your light shows the way', es: 'la oscuridad: tu luz muestra el camino', pt: 'o escuro: sua luz mostra o caminho', ja: 'くらやみ: きみの ひかりが みちを てらす' } },
+  { role: 'apply', len: 36, gate: 'gate', fire: 0.42, maxD: 2, chunks: FOREST, intro: [], dark: true, enemies: ['skull', 'crawler'], foes: 0.5, pair: 0.1, candy: ['smash', 'smash'], seed: 7108,
+    news: { en: 'skulls: they lunge up close', es: 'calaveras: se lanzan de cerca', pt: 'caveiras: atacam de perto', ja: 'ドクロ: ちかいと とびかかる' } },
+  { role: 'teach', len: 33, fire: 0.42, maxD: 2, chunks: FOREST, intro: [], dark: true, enemies: ['kikimora', 'crawler'], foes: 0.55, candy: ['smash'], seed: 7105,
+    news: { en: 'the kikimora creeps on the walls', es: 'la kikimora trepa por las paredes', pt: 'a kikimora rasteja nas paredes', ja: 'キキモラが かべを はう' } },
+  { role: 'apply', len: 40, gate: 'gate2', fire: 0.44, maxD: 2, chunks: { ...FOREST, lift: 3 }, intro: ['lift'], dark: true, enemies: ['kikimora', 'skull', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 7103,
+    news: { en: "Baba Yaga's mortars fly", es: 'los morteros de Baba Yaga vuelan', pt: 'os pilões da Baba Yaga voam', ja: 'ババヤガの うすが とぶ' } },
+  { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...FOREST, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], dark: true, enemies: ['kikimora', 'skull', 'spitter', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7102 },
+  { role: 'bonus', len: 36, bonus: 3, time: 42, seed: 7104 },
+  { role: 'twist', len: 34, fire: 0.44, maxD: 2, chunks: { ...FOREST, pillars: 4, crumble: 1 }, intro: [], dark: true, enemies: ['leshy', 'skull'], foes: 0.65, candy: ['smash'], stash: 0.3, seed: 7106,
+    news: { en: 'the leshy leads you round', es: 'el leshi te hace dar vueltas', pt: 'o leshy te faz andar em círculos', ja: 'レーシーが ぐるぐる まわらせる' } },
+  { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...FOREST, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], dark: true, enemies: ['leshy', 'kikimora', 'skull', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7107 },
+  { role: 'rest', len: 22, fire: 0.3, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
+    news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
+  { role: 'boss', boss: 'lid' },   // the random run's Lid for now; Koschei from the boss chat
 ] },
 // World 4, the Mine (at first world 3): crumbling blocks and bridges, the Fizz, spitters, the pit's waves and a fat
 // spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Cork's dive. Its runes: crossed picks, a block of

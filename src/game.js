@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_flower: 'Flowers for every jizo!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', resumed: 'On from where you were', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_flower: 'Flowers for every jizo!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -28,7 +28,7 @@ const STR = {
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_flower: '¡Flores para cada jizo!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', resumed: 'Sigues donde lo dejaste', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_flower: '¡Flores para cada jizo!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
@@ -45,7 +45,7 @@ const STR = {
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_flower: 'Flores para cada jizo!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', resumed: 'Continuando de onde parou', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_flower: 'Flores para cada jizo!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
@@ -62,7 +62,7 @@ const STR = {
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_flower: 'おじぞうさまに おはなを ぜんぶ！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', resumed: 'さっきの つづきから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_flower: 'おじぞうさまに おはなを ぜんぶ！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
@@ -162,10 +162,12 @@ const campNextId = () => {   // where Continue goes: the last one played again i
   }
   return id;
 };
-const campMerge = (w, s, rc) => {   // a tier's level: its calm, plain and fierce versions one over another, in a new order each time, all as long
+const campMerge = (w, s, rc, order) => {   // a tier's level: its calm, plain and fierce versions one over another, in a new order each time (or
+  // `order`, a level under way's: Game.resume), all as long
   if (s === 0 || rc.boss || rc.bonus != null) return rc;   // (the first and the boss alone; a bonus race stays one race)
-  const parts = shuffled(Math.random, [0, 1, 2]).map((c) => campAt(w * 30 + s * 3 + c).rc);
-  return Object.assign({}, rc, { len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })) });
+  order = order || shuffled(Math.random, [0, 1, 2]);
+  const parts = order.map((c) => campAt(w * 30 + s * 3 + c).rc);
+  return Object.assign({}, rc, { order, len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })) });
 };
 const campWorlds = () => { let n = 1; while (n < CAMP_OPEN && save.camp.stars[n * 30 - 2] > 0) n++; return n; };   // the worlds open
 const opened = (u) => save.bank >= u.at;
@@ -207,10 +209,12 @@ function loadSave(s) {
   }
   c.order = ids;   // the worlds' order this save is in (the next change follows it)
   delete c.open;   // what is open comes of the stars (campOpen)
-  save.v = 6; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
+  save.v = 6; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
+let saveIn = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
 function persist() {
+  if (!saveIn) return;
   const s = JSON.stringify(save);
   if (ads.ok) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});
   else try { localStorage.setItem(SAVE_KEY, s); } catch (e) { /* private mode: this visit only */ }
@@ -630,6 +634,8 @@ class Game {
     lv.tasks = [];
     if (lv.kind !== 'well' || !Number.isFinite(lv.endY) || this.bonus) return;
     lv.ensure(-Infinity);
+    lv.coins.forEach((c, i) => { c.id = i; }); lv.folk.forEach((f, i) => { f.id = i; }); lv.rects.forEach((r, i) => { r.id = i; });   // each its number (Game.saveCur): taken
+    lv.taken = []; lv.gone = []; lv.sig = [lv.rects.length, lv.coins.length, lv.folk.length].join();   // and gone kept by them; the level's measure, to know it again
     const kits = (kind) => lv.rects.filter((r) => { const k = kitThing(lv, r); return k && k.kind === kind && k.y > lv.capY && k.y < lv.floor; }).length;   // the kits' (kitThing): the ones the hero can get to
     for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0], ['lantern', kits('lantern')], ['flower', kits('jizo')], ['bell', kits('bell')]]) if (of) lv.tasks.push({ id, n: 0, of });
   }
@@ -982,7 +988,7 @@ class Game {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
-        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); if (f.kind === 'crow') this.task('crow'); }
+        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); if (f.kind === 'crow') { this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id); } }
         if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
       } else if (f.kind === 'bug') {
         const r = f.rect;
@@ -1055,7 +1061,7 @@ class Game {
     const b = f.body, R = this.R, i = this.lv.folk.indexOf(f);
     f.open = true; b.face.frown = false; b.face.surprise = 1;
     if (i >= 0) this.lv.folk.splice(i, 1);
-    this.task('cage');
+    this.task('cage'); if (this.lv.gone && !this.well) this.lv.gone.push(f.id);
     b.thread = true; b.gScale = 0; this.followers.push(f);   // and off it goes after the hero (followStep)
     sparkFx(b.cx, b.maxY - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, INK.coin], 0.6); fx.ring(b.cx, b.cy, 1.6 * R, INK.white);
     sound.play('crumble', 0.7, 1.3); sound.play('bubble', 0.9, 1.2); haptics.buzz(16);
@@ -1265,6 +1271,39 @@ class Game {
     if (r) r.safe = true;
     this.safes.push({ r, dx });
     if (this.safes.length > 4) this.safes.shift();
+    this.saveCur();   // a new ledge stood on: the level under way kept from here
+  }
+  // The level under way kept (owner: «вообще нужны сохранения»; a phone's browser drops a page left in the background, and a tier's level is
+  // long): a campaign tier's, from its last steady ledge, at most every 10 s (a platform's storage may be over the network), and at once as the page goes away or pauses: its seed and its
+  // parts' order, the hero's height and the fire's under it in tiles, what is taken and done (Game.setTasks' numbers). Continue goes on from it.
+  saveCur(now) {
+    const lv = this.lv, H = this.hero, t0 = performance.now();
+    if (this.mode !== 'camp' || (this.state !== 'play' && this.state !== 'pause') || this.well || !lv.taken || !H || (this.rc && this.rc.boss) || this.bonus || (!now && t0 - (this.curAt || 0) < 10000)) return;
+    this.curAt = t0; const tl = lv.tile;
+    save.cur = { ci: this.ci, seed: this.seed, order: this.rc.order || null, sig: lv.sig, y: (lv.floor - H.maxY) / tl, fire: lv.fire ? (lv.fire.y - H.maxY) / tl : null, hp: this.hp,
+      coins: this.coins, got: lv.coinsTaken, kills: this.kills, m: this.levelM, t: lv.t, taken: lv.taken.slice(), gone: lv.gone.slice(), neon: [...lv.neonLit.keys()],
+      tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n) };
+    persist();
+  }
+  // Continue into the level under way (saveCur): the level laid again, what was taken and done off it, the hero on the highest steady ledge
+  // at or under where it stood, the fire as far under it; a level that is not the same any more (a new build, another width): from its start
+  resume() {
+    const cur = save.cur;
+    this.playLevel(cur.ci, cur.seed, cur.order);
+    const lv = this.lv, tl = lv.tile, R = this.R;
+    if (lv.sig !== cur.sig) return;
+    const taken = new Set(cur.taken), gone = new Set(cur.gone), tended = new Set(cur.tended);
+    lv.coins = lv.coins.filter((c) => !taken.has(c.id)); lv.taken = cur.taken.slice(); lv.coinsTaken = cur.got;
+    lv.folk = lv.folk.filter((f) => !gone.has(f.id)); lv.gone = cur.gone.slice();
+    for (const k of cur.neon) lv.neonLit.set(k, -10);
+    for (const r of lv.rects) if (tended.has(r.id)) lv.tended.set(r, -10);
+    lv.tasks.forEach((q, i) => { q.n = cur.tasks[i] || 0; });
+    const y = lv.floor - cur.y * tl, r = lv.rects.filter((q) => !q.cap && !q.plank && !q.crumble && !q.move && !q.spring && !q.crack && q.x1 - q.x0 > 2 * R && q.y0 >= y - 0.5 * tl).sort((a, b) => a.y0 - b.y0)[0];
+    if (r) { this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }]; r.safe = true; }
+    lv.cam = Math.max(this.hero.cy - CAM.anchor * view.h, lv.capY - CAM.top);
+    if (lv.fire) lv.fire.y = this.hero.maxY + Math.max(cur.fire == null ? 0 : cur.fire * tl, 0.6 * view.h);   // as far under it as it was, a breath at least
+    this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t;   // (this.kept: the purse at its start, so its coins count once)
+    save.cur = cur; ui.toast(t('resumed'), 1800);
   }
   // Where a fall comes back to: the newest of those ledges still there, a little above it.
   safeSpot() {
@@ -1417,7 +1456,7 @@ class Game {
       }
       if (c.moving) { if (!home) { c.vx *= k; c.vy *= k; } c.x += c.vx * dt; c.y += c.vy * dt; }
       if (d < H.R * H.growth * 0.85 + (c.v > 1 ? 1.4 : 1) * cr && !(c.drop && c.t < COIN.home)) {   // a dropped one only once its burst is over: a combo's fountain is seen
-        cs.splice(i, 1); this.coins += c.v; if (!c.drop) this.lv.coinsTaken++; fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
+        cs.splice(i, 1); this.coins += c.v; if (!c.drop) { this.lv.coinsTaken++; if (this.lv.taken && c.id != null) this.lv.taken.push(c.id); } fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
     }
   }
   payCombo() {
@@ -1637,8 +1676,9 @@ class Game {
   // ── The campaign ──
   // A level of it (CAMPAIGN): from its recipe and seed (or `seed`: the bot's), with its world's upgrades so far (after the
   // colour's own), all the hearts and the purse. Dying costs that level only: Again starts it over (ui.campDead).
-  playLevel(i, seed) {
-    const { w, s } = campAt(i), rc = campMerge(w, s, campAt(i).rc);
+  playLevel(i, seed, order) {
+    const { w, s } = campAt(i), rc = campMerge(w, s, campAt(i).rc, order);
+    delete save.cur;   // a level begun (Game.resume puts back the one it goes on with)
     this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
     for (const id of save.camp.builds[w] || []) { const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }
     this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = ![0, 1, 2].some((d) => save.camp.stars[w * 30 + s * 3 + d] > 0);   // its tier's first clear (an upgrade then: one a tier, whichever way up)
@@ -1653,6 +1693,7 @@ class Game {
   // A level cleared: its best stars, the next one open, the purse; kept at once (a reload loses none of it).
   campDone(n) {
     const c = save.camp, i = this.ci;
+    delete save.cur;
     c.stars[i] = Math.max(c.stars[i] || 0, n);
     this.campKeep(); persist();
   }
@@ -1665,7 +1706,7 @@ class Game {
     this.dieT = this.deathWhy() === 'fall' ? 0 : DIE.beat; if (this.dieT) sound.play('hurt'); else this.pop();   // held a beat in what did it (the hit heard at once), then the pop (frame)
     input.clear(); haptics.buzz(30);
     if (this.lv.boss) save.camp.fails[this.failKey()] = (save.camp.fails[this.failKey()] || 0) + 1;   // a loss at a boss, counted (help after three)
-    if (this.mode === 'camp') { this.campKeep(); persist(); return; }   // the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
+    if (this.mode === 'camp') { delete save.cur; this.campKeep(); persist(); return; }   // (lost: no going on from the last ledge by a reload) the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
     if (this.coins < this.revivePrice()) this.finish(false);
   }
   pop() {   // the burst, each death its own: where it can be seen (a fall ends below the screen), in the colour it was held in
@@ -1723,7 +1764,7 @@ class Game {
   where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + this.num; }
   get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
   togglePause(on) {
-    if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); }
+    if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); }
     else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); }
   }
 
@@ -1909,7 +1950,9 @@ const ui = {
     for (let k = 0; k < 7; k++) week.append(el('i', k < wk.days.length ? 'on' : MARKS.at.includes(k + 1) ? 'pay' : null));
     if (begun) p.append(week);
     if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }   // a long one smaller, on one line
-    if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
+    const cur = save.cur && campOpen(save.cur.ci) ? save.cur : null, at = cur && campAt(cur.ci);   // a level under way (Game.saveCur): on with it first, from its height
+    if (cur) p.append(cap(button(t('continue') + ' · ' + (at.w + 1) + '-' + (at.s + 1) + ' · ' + Math.floor(cur.m) + ' ' + t('m'), 'big thumb', () => game.resume()), 'continue'));
+    else if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
     else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(1)), 'play'));   // one tap to the first level (CrazyGames: one at most)
     else p.append(cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
@@ -2026,7 +2069,7 @@ const ui = {
     tree.append(inner); p.append(tree);
     if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
     if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));
+    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni))), 'continue'));
   },
   pause() {
     const p = this.panel('pause');
@@ -2631,6 +2674,7 @@ document.addEventListener('visibilitychange', () => {
   if (paused) { input.clear(); game.togglePause(true); }
 });
 window.addEventListener('blur', () => input.clear());
+window.addEventListener('pagehide', () => game.saveCur(true));   // (a phone's browser may drop the page after this without a word)
 window.addEventListener('resize', queueLayout);
 window.addEventListener('orientationchange', queueLayout);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', queueLayout);

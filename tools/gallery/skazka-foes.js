@@ -1,5 +1,6 @@
 // The Dark Forest's enemies' gallery (tools/gallery, see compose.py): a Kikimora on the shaft's wall, a Leshy circling its block, each variant
-// (FOREST_V, through window.__fv) with the Kolobok on a ledge for scale. Q='?play=skazka'.
+// (FOREST_V, through window.__fv) with the Kolobok on a ledge for scale. Q='?play=skazka'. (The owner picked on 2026-10-20 and the other
+// variants went, so this shows the picks only: a template for the next enemies' gallery.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const scene = async (el, k) => {

@@ -257,7 +257,7 @@ const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.
 const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
 // The Sea's variants while the owner picks (each of the six on its sheet, research/variants/sea-*-1-px.png, drawn by the game; window.__seaV for the gallery):
 // which variant of each element, A = 0 to F = 5
-const SEA_V = { slab: 0, plank: 0, boat: 0, raft: 0, lighthouse: 0, net: 0, gull: 0, octopus: 0, flags: 0 };
+const SEA_V = { slab: 0, plank: 0, boat: 0, raft: 0, lighthouse: 0, net: 0, gull: 0, octopus: 0, flags: 0, shop: 0, stash: 1, far: 0 };
 const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plank): its frame's height over its floor and its pulley's over that, in tiles (its cable runs there)
 // The kits' things on the ledges, one a ledge at most, the same for the game and the renderer (as neonSign is): the Village's (a sakura, a scarecrow, a
 // little shrine whose stone lantern the hero lights, koinobori), the Cave's (a stone lantern, a pair of jizo the hero leaves flowers at), Mount Fuji's bell
@@ -2523,6 +2523,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (th.shrine && kind !== 'exit') { torii(d, kind); return; }   // the Cave's (see torii)
     if (th.fuji && kind !== 'exit') { hut(d, kind); return; }   // Mount Fuji's (see hut)
     if (th.village && kind !== 'exit') { farmhouse(d, kind); return; }   // the Village's (see farmhouse)
+    if (th.sea && kind !== 'exit') { funaya(d, kind); return; }   // the Sea's (see funaya)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -2663,6 +2664,46 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = 0; k < 6; k++) {
       const u = (T * 0.45 + k / 6) % 1, q = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + q * 2 * dw), spy = y1 - u * (eave * t + 2.5 * R);
       const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;
+      if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
+    }
+  };
+  // The Sea's door into a shop or a stash (the owner's sheet research/variants/sea-house-1-px.png; its six variants in the game's own code while the owner picks:
+  // SEA_V.shop and SEA_V.stash, or window.__seaV): a funaya, a boathouse over the water as in Ine, built round the doorway on the ledge, its boat bay under the
+  // ledge behind (DIM); the noren red for the shop, purple for the stash (the owner's), a lit window, a lantern or floats by the variant. What is inside bobs in
+  // the doorway; sparks rise past it.
+  const funaya = (d, kind) => {
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', V = window.__seaV || SEA_V, k = shop ? V.shop : V.stash, wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple, y1 = d.y1, px = P / t;
+    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
+    const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
+    const W = k === 4 ? 3.9 : k === 3 ? 3.2 : 3.6, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    for (const u of [0.3, 1.4, 2.5, W - 0.2]) bx(u, -1.7, u + 0.12, 0, th.block, 0, DIM);   // its boat bay under the ledge, behind: piles, the boat, the water
+    bx(0.6, -1.25, 2.6, -0.95, PAL.gray, 0, DIM); bx(0.9, -1.45, 2.3, -1.25, PAL.gray, 0, DIM); for (const u of [0.2, 1.3, 2.4]) bx(u, -1.75, u + 0.8, -1.7, th.block, 0, DIM);
+    bx(0, 0, W, eave, PAL.black); bx(0, 0, W, eave, th.block, 2); for (const u of [0.45, 2.05, W - 0.15]) bx(u, 0, u + 0.13, eave, th.block);   // its wooden front, dotted, its posts
+    bx(0, eave - 0.15, W, eave, th.block);
+    const win = (u0, u1, v0, v1) => { F(X((u0 + u1) / 2), Y((v0 + v1) / 2), 0.7 * t, 0, 0, 0.6 * t, PAL.orange, 0.45, 1); bx(u0, v0, u1, v1, PAL.orange); bx((u0 + u1) / 2, v0, (u0 + u1) / 2 + px, v1, PAL.black); bx(u0, (v0 + v1) / 2, u1, (v0 + v1) / 2 + px, PAL.black); };
+    if (k === 4) win(2.25, 3.6, 0.85, 2.0); else win(2.3, 3.15, 1.0, 1.85);
+    const gable = (u0, u1, v0, h, rw) => { for (let i = 0, n = Math.max(3, Math.round((h * t) / (2 * P))); i < n; i++) { const q = i / n; bx(u0 + (u1 - u0) * 0.5 * q * rw, v0 + h * q, u1 - (u1 - u0) * 0.5 * q * rw, v0 + h * (q + 1 / n), PAL.gray, 4); } bx(u0, v0, u1, v0 + 0.08, PAL.gray); };
+    if (k === 4) { gable(-0.3, W + 0.4, eave, 1.2, 0.85); bx(-0.3, eave + 0.55, W + 0.4, eave + 0.62, PAL.gray); } else if (k === 3) gable(-0.2, W + 0.25, eave, 1.15, 0.95); else gable(-0.25, W + 0.3, eave, 1.3, 0.95);   // the roof, its tiles grey
+    bx((W - 0.3) / 2, eave + (k === 4 ? 1.2 : k === 3 ? 1.15 : 1.3), (W - 0.3) / 2 + 2 * px, eave + (k === 4 ? 1.35 : 1.45), PAL.gray);   // its ridge's end
+    bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
+    F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
+    bx(0.55, dh - noren, 1.95, dh, c, k === 2 ? 4 : 0);   // the noren (C's chequered), its slits, its crest
+    for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.22, PAL.black);
+    if (k === 2) { bx(1.2, dh - 0.55, 1.3, dh - 0.25, INK.white); bx(1.05, dh - 0.32, 1.45, dh - 0.25, INK.white); bx(1.05, dh - 0.62, 1.12, dh - 0.5, INK.white); bx(1.38, dh - 0.62, 1.45, dh - 0.5, INK.white); }   // an anchor
+    else if (k === 5) for (let u = 0.75; u < 1.8; u += 0.3) { bx(u, dh - 0.45, u + 0.16, dh - 0.4, INK.white); bx(u + 0.12, dh - 0.4, u + 0.2, dh - 0.32, INK.white); }   // a wave
+    else for (const [u, v] of [[1.25, dh - 0.24], [1.15, dh - 0.4], [1.35, dh - 0.4]]) bx(u - px, v - px, u + px, v + px, INK.white);
+    const lan = (u, v) => { bx(u, v + 0.3, u + px, eave - 0.15, PAL.gray); bx(u - 0.15, v - 0.2, u + 0.17, v + 0.3, PAL.orange); bx(u - 0.15, v + 0.04, u + 0.17, v + 0.04 + px, PAL.black); F(X(u), Y(v + 0.05), 0.45 * t, 0, 0, 0.45 * t, PAL.orange, 0.4, 1); };   // a lantern off the eave, lit
+    const flt = (u, v) => { bx(u, v + 0.2, u + px, eave - 0.15, PAL.gray); F(X(u), Y(v), 0.17 * t, 0, 0, 0.17 * t, PAL.blue, 1, 0); };   // a glass float
+    if (k === 0) lan(W + 0.25, 1.4); else if (k === 1) { lan(W + 0.25, 1.5); flt(W + 0.55, 1.0); } else if (k === 3) lan(W + 0.25, 1.3); else if (k === 4) { lan(W + 0.25, 1.5); flt(W + 0.5, 0.95); flt(W + 0.25, 0.6); } else if (k === 5) lan(W + 0.25, 1.4);
+    if (k === 2 || k === 5) { bx(2.15, 0.85, W + 0.1, 0.92, PAL.gray); for (let u = 2.2; u < W + 0.1; u += 0.25) bx(u, 0.55, u + px, 0.85, PAL.gray); }   // a little balcony rail
+    if (k === 3) { bx(2.2, 0, 2.95, 0.85, PAL.gray, 4); }   // a lattice panel by the door
+    const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
+    if (shop) { const ry = Y(0.8); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
+    else { const ry = Y(0.55); for (let i = 0; i < 3; i++) disc(dx + (i - 1) * rr * 0.5, ry - (i === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
+    for (let i = 0; i < 6; i++) {
+      const u = (T * 0.45 + i / 6) % 1, q = ((Math.sin(i * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + q * 2 * dw), spy = y1 - u * (eave * t + 2.5 * R);
+      const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = i & 1 ? INK.white : c;
       if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
     }
   };
@@ -2978,6 +3019,44 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     // picks: SEA_V, or window.__seaV): on ledges, by kitThing, a lighthouse, nets drying with glass floats, a gull on a mooring post, octopus pots, the big-catch flags.
     // In the midground: solid, no white (the sheets' white is grey here), no yellow but a lamp's core, no red (orange).
     const t = kitT, P = kitP, px = P / t, V = window.__seaV || SEA_V, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'];
+    {   // the sea far off (the owner's two sheets, research/variants/sea-wave and sea-far: SEA_V.far, 0-5 the wave sheet's A-F, 6-11 the far sheet's): screen-fixed,
+      // low on the screen and sinking a little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
+      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t), f = V.far;
+      const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
+      const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
+      const tri = (u, v0, hw, h, c) => { const hd = (h * t) / 2; F(U(u), Vv(v0) - hd, hw * t, 0, 0, hd, c, DIM, 6, hw * t, hd, 2 * hw * t); };   // a triangle: a pine's tier, a mountain, a roof
+      const water = () => { for (let i = 0; i < 10; i++) { const v = 0.1 + 0.28 * i, u0 = -7.6 + ((i * 37) % 7) * 0.4, u1 = u0 + 2.2 + ((i * 13) % 5) * 0.6; fb(u0, v, u1, v + px, PAL.aqua); fb(u1 + 0.8, v, u1 + 2.4, v + px, PAL.aqua); } };
+      const pine = (u, v, s) => { fb(u - px / 2, v, u + px / 2, v + 0.8 * s, PAL.gray); for (const [dv, rw] of [[0.55, 0.42], [0.8, 0.32], [1.0, 0.2]]) fe(u, v + dv * s, rw * s, 0.1 * s, PAL.green); };
+      const isle = (u0, u1, v, h, pines) => { fe((u0 + u1) / 2, v, (u1 - u0) / 2, h, PAL.green); for (const [pu, ps] of pines) pine(pu, v + h * 0.7, ps); };
+      const torii = (u, v, s) => { for (const e of [-1, 1]) fb(u + e * 0.55 * s, v, u + e * 0.55 * s + 2 * px, v + 1.4 * s, PAL.blue); fb(u - 0.85 * s, v + 1.4 * s, u + 0.85 * s, v + 1.55 * s, PAL.blue); for (const e of [-1, 1]) fb(u + e * 0.85 * s, v + 1.5 * s, u + e * 0.95 * s, v + 1.62 * s, PAL.blue);
+        fb(u - 0.65 * s, v + 1.15 * s, u + 0.65 * s, v + 1.22 * s, PAL.blue); for (let i = 1; i < 5; i++) for (const e of [-1, 1]) fb(u + e * 0.55 * s, v - 0.18 * i, u + e * 0.55 * s + 2 * px, v - 0.18 * i + px, PAL.blue); };   // its reflection
+      const boat = (u, v, s, lit) => { fb(u - 0.7 * s, v, u + 0.7 * s, v + 0.18 * s, PAL.blue); fb(u - 0.5 * s, v - 0.08 * s, u + 0.5 * s, v, PAL.blue); fb(u - px, v + 0.18 * s, u, v + 1.0 * s, PAL.blue); fb(u - 0.25 * s, v + 0.18 * s, u + 0.2 * s, v + 0.42 * s, PAL.blue);
+        for (const [lu, lv0] of lit) { fb(u + lu * s, v + lv0 * s, u + lu * s + 2 * px, v + lv0 * s + 2 * px, PAL.orange, LIT); for (let i = 1; i < 4; i++) fb(u + lu * s, v - 0.15 * i, u + lu * s + 2 * px, v - 0.15 * i + px, PAL.orange, DIM); } };   // its lanterns and their light on the water
+      const wave = (u, v, s) => {   // the Great Wave: a swell rising into a wall of water that curls over, its lip in claws of foam, spray off it
+        fe(u - 0.4 * s, v + 0.3 * s, 2.2 * s, 0.45 * s, PAL.blue);
+        const pts = []; for (let i = 0; i <= 14; i++) { const q = i / 14, a = Math.PI * (1.05 - 1.25 * q), rr = (1.0 + 0.5 * q) * s; pts.push([u + Math.cos(a) * rr * 1.1 + 0.6 * s * q, v + 1.0 * s + Math.sin(a) * rr]); }
+        for (let i = 0; i < 14; i++) { const [u0, v0] = pts[i], [u1, v1] = pts[i + 1], wp = Math.round((7 - 4 * (i / 14)) * s); line(U(u0), Vv(v0), U(u1), Vv(v1), PAL.blue, DIM, Math.max(2, wp)); }   // the wall and its curl
+        for (let i = 6; i <= 14; i++) { const [cu, cv] = pts[i]; fb(cu - 0.08, cv - 0.04, cu + 0.12, cv + 0.12, PAL.gray); if (i % 2) fb(cu + 0.1, cv - 0.22, cu + 0.2, cv - 0.12, PAL.gray); }   // the foam along its lip, its claws
+        for (const [du, dv] of [[0.9, 2.5], [1.3, 2.2], [1.1, 2.75], [1.6, 2.5]]) fb(u + du * s, v + dv * s, u + du * s + 2 * px, v + dv * s + 2 * px, PAL.gray);   // spray
+      };
+      const fuji = (u, v, s) => { tri(u, v, 1.3 * s, 1.1 * s, PAL.blue); tri(u, v + 0.75 * s, 0.42 * s, 0.35 * s, PAL.gray); };
+      const bridge = (u, v, w) => { for (let i = 0; i < 16; i++) { const q0 = i / 16, q1 = (i + 1) / 16; fb(u - w / 2 + w * q0, v + 0.9 * Math.sin(Math.PI * q0), u - w / 2 + w * q1, v + 0.9 * Math.sin(Math.PI * q1) + 0.12, PAL.blue); if (i % 3 === 0) fb(u - w / 2 + w * q0, v + 0.9 * Math.sin(Math.PI * q0), u - w / 2 + w * q0 + px, v + 0.9 * Math.sin(Math.PI * q0) + 0.35, PAL.blue); } };
+      const stilts = (u0, n, v, lit) => { for (let i = 0; i < n; i++) { const u = u0 + i * 1.5; for (const e of [0.1, 0.6, 1.1]) fb(u + e, v, u + e + px, v + 0.5, PAL.blue); fb(u, v + 0.5, u + 1.2, v + 1.1, PAL.blue); tri(u + 0.6, v + 1.1, 0.75, 0.5, PAL.gray);
+        if (lit) for (const e of [0.3, 0.75]) fb(u + e, v + 0.7, u + e + 2 * px, v + 0.7 + 2 * px, PAL.orange, LIT); } };
+      // (the water first: the islands, the boats and the rest stand in it)
+      if (f === 0) { water(); wave(-4.2, 0.6, 1.4); fuji(1.2, 0.6, 1.3); isle(3.5, 7.5, 0.6, 0.35, []); }
+      else if (f === 1) { water(); stilts(-7.2, 3, 0.6, true); for (const [u, s] of [[-6.3, 1.1], [-3.4, 1.0]]) pine(u, 2.1, s); boat(3.6, 0.7, 1.4, [[0.6, 0.9]]); }
+      else if (f === 2) { water(); isle(-7.6, -3.4, 0.6, 0.9, [[-6.6, 1.1], [-5.2, 1.3], [-4.2, 0.9]]); torii(2.6, 0.6, 1.4); }
+      else if (f === 3) { water(); isle(-7.8, -2.8, 0.4, 1.6, [[-7.0, 1.1], [-5.6, 1.0]]); isle(2.2, 7.8, 0.4, 1.4, [[3.4, 1.0], [6.4, 1.1]]); bridge(-0.4, 1.0, 4.6); fb(-0.3, 0.2, -0.1, 1.2, PAL.aqua, DIM, 3); }   // a bridge over the river, its fall
+      else if (f === 4) { water(); wave(-5.0, 0.6, 1.2); fuji(0.6, 0.6, 1.2); boat(4.4, 0.6, 1.2, [[0.6, 0.85]]); }
+      else if (f === 5) { water(); stilts(-7.4, 2, 0.6, true); boat(1.8, 0.6, 0.9, [[0.4, 0.7]]); boat(5.0, 0.6, 1.3, [[0.6, 0.9]]); }
+      else if (f === 6) { water(); isle(-7.6, -3.8, 0.8, 0.5, [[-6.8, 0.9], [-5.6, 1.0]]); isle(3.8, 7.6, 0.8, 0.5, [[4.8, 0.9], [6.6, 1.0]]); torii(0, 0.8, 1.1); boat(-1.8, 0.5, 0.6, [[0.2, 0.5]]); boat(2.4, 0.4, 0.8, [[0.4, 0.7]]); }
+      else if (f === 7) { water(); isle(-7.8, -1.6, 0.4, 2.0, [[-6.6, 1.1], [-5.0, 1.2], [-3.2, 1.0]]); isle(2.6, 7.8, 0.4, 1.7, [[4.0, 1.0], [6.2, 1.1]]); bridge(0.5, 1.1, 4.2); for (const [u, v] of [[-4.6, 1.6], [5.0, 1.4]]) fb(u, v, u + 2 * px, v + 2 * px, PAL.orange, LIT); }
+      else if (f === 8) { water(); stilts(-7.4, 3, 0.7, true); for (const u of [-6.6, -3.6]) pine(u, 2.3, 1.0); boat(5.0, 0.6, 1.2, [[0.6, 0.9], [0.6, 0.6], [0.6, 0.3]]); }
+      else if (f === 9) { water(); isle(-7.8, -2.6, 0.7, 0.8, [[-7.0, 1.0], [-5.4, 1.1], [-3.8, 0.9]]); isle(5.0, 7.8, 0.7, 0.35, []); fe(4.2, 4.0, 0.55, 0.55, PAL.aqua); boat(2.6, 0.5, 0.9, [[0.4, 0.8]]); }   // a moon
+      else if (f === 10) { water(); isle(-7.8, -2.2, 0.9, 0.7, [[-6.6, 1.0], [-4.4, 1.1]]); isle(4.6, 7.8, 0.9, 0.6, [[5.8, 0.9]]); boat(1.8, 0.5, 2.2, [[-0.3, 1.1], [0, 1.25], [0.3, 1.1], [0.55, 0.95]]); }   // a fishing boat, its lanterns on lines
+      else { water(); isle(-7.8, -3.4, 0.7, 0.6, [[-6.8, 1.0], [-5.0, 0.9]]); isle(3.8, 7.8, 0.7, 0.6, [[5.2, 0.9], [6.8, 1.0]]); torii(0.4, 0.7, 1.4); boat(-2.4, 0.4, 0.6, [[0.3, 0.5]]); boat(3.0, 0.35, 0.8, [[0.4, 0.7]]); }
+    }
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
       if (!p || !PROPS.includes(p.kind)) continue;

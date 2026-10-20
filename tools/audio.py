@@ -231,6 +231,9 @@ MUSIC = {
     'skazka': (75, 'ominous, creepy, gloomy, steady, no ending',
                ['dark chiptune', 'an eerie minor-key folk melody on a plucked gusli-like lead', 'a deep droning bass', 'a steady low tom drum on every beat like a slow heartbeat',
                 'creaking wood and a cold wind', 'cute but scary video game platformer, a black haunted fairy-tale forest with skulls on the fence', 'steady 84 BPM']),
+    'sea': (75, 'breezy, bright, flowing, steady, no ending',   # the Sea (rivers, the sea, islands), between Fuji and Tokyo
+            ['lo-fi chiptune', 'a flowing pentatonic melody on a soft bamboo flute lead', 'rolling harp-like arpeggios like waves', 'a light steady beat with soft taiko and a shaker',
+             'a Japanese seaside with islands, a torii in the sea and wooden piers', 'cute video game platformer, rafts on rivers and the open sea', 'steady 104 BPM']),
     'bonus': (60, 'upbeat, exciting, fast, sparkling, steady, no ending',
               ['chiptune', 'bright catchy lead melody', 'fast arpeggios', 'punchy drums', 'joyful rush',
                'video game bonus stage, collecting coins', 'steady 140 BPM']),

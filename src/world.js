@@ -800,9 +800,10 @@ const SYNERGIES = [
 ];
 // The worlds in the order they are played (owner, 2026-10-20: the Village, the Cave, the mountain, the rivers and the sea, Tokyo, the
 // modern concrete, the sky, space, another planet, open space last and endless; no junkyard: it has no place in Japan), by world id.
-// A world built goes into CAMPAIGN anywhere and its id here in its place; a save follows the worlds by id (loadSave), so this may change.
-const CAMP_ORDER = ['mine', 'cave', 'ice', 'tokyo', 'blocks', 'sky'];   // (mine: the Village's id; blocks: the concrete's place for now)
-CAMPAIGN.splice(0, CAMPAIGN.length, ...CAMP_ORDER.map((id) => CAMPAIGN.find((c) => c.world.id === id)));
+// A world goes into CAMPAIGN anywhere and its id here in its place (one not built yet waits here: only those in CAMPAIGN are played); a save
+// follows the worlds by id (loadSave), so this may change.
+const CAMP_ORDER = ['mine', 'cave', 'ice', 'sea', 'tokyo', 'blocks', 'sky'];   // (mine: the Village's id; blocks: the concrete's place for now)
+CAMPAIGN.splice(0, CAMPAIGN.length, ...CAMP_ORDER.map((id) => CAMPAIGN.find((c) => c.world.id === id)).filter(Boolean));
 // In the campaign a card is offered only once what it is for has been met: after the level (its index) where that
 // came in: the shop and the candies at 1-1 (the tutorial), the spikes at 1-5 (the Village's peak).
 const CARD_FROM = { member: 1, long: 1, iron: 4 };

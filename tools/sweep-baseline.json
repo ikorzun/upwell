@@ -1,0 +1,1339 @@
+{
+ "commit": "a49f4d9",
+ "made": "2026-10-20",
+ "levels": {
+  "c1-1": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-2L": {
+   "result": "clear",
+   "time": 11,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-2": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-2R": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-3L": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-3": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-3R": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-4L": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-4": {
+   "result": "clear",
+   "time": 7.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-4R": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-5L": {
+   "result": "clear",
+   "time": 7.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-5": {
+   "result": "clear",
+   "time": 5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-5R": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-6L": {
+   "result": "clear",
+   "time": 6,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-6": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-6R": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-7L": {
+   "result": "clear",
+   "time": 7.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-7": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-7R": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-8L": {
+   "result": "clear",
+   "time": 12.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "spikes@gate3"
+   ]
+  },
+  "c1-8": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-8R": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-9L": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-9": {
+   "result": "clear",
+   "time": 5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-9R": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c1-10": {
+   "result": "won",
+   "time": 26,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": [],
+   "boss": "Tram",
+   "dealt": "5/5"
+  },
+  "c2-1": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-2L": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-2": {
+   "result": "clear",
+   "time": 13.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-2R": {
+   "result": "clear",
+   "time": 11,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-3L": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-3": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-3R": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-4L": {
+   "result": "clear",
+   "time": 11,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-4": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-4R": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-5L": {
+   "result": "clear",
+   "time": 7.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-5": {
+   "result": "clear",
+   "time": 5.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-5R": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-6L": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-6": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-6R": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-7L": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-7": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-7R": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-8L": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-8": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-8R": {
+   "result": "clear",
+   "time": 20,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-9L": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-9": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-9R": {
+   "result": "clear",
+   "time": 6,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c2-10": {
+   "result": "won",
+   "time": 14.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": [],
+   "boss": "Cork",
+   "dealt": "5/5"
+  },
+  "c3-1": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-2L": {
+   "result": "clear",
+   "time": 11,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-2": {
+   "result": "clear",
+   "time": 13.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-2R": {
+   "result": "clear",
+   "time": 16.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-3L": {
+   "result": "clear",
+   "time": 7,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-3": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-3R": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-4L": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-4": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-4R": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-5L": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-5": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-5R": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-6L": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-6": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-6R": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-7L": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-7": {
+   "result": "clear",
+   "time": 17,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-7R": {
+   "result": "clear",
+   "time": 14,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-8L": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-8": {
+   "result": "clear",
+   "time": 15,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "shot@icicles"
+   ]
+  },
+  "c3-8R": {
+   "result": "clear",
+   "time": 14.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-9L": {
+   "result": "clear",
+   "time": 4.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-9": {
+   "result": "clear",
+   "time": 5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-9R": {
+   "result": "clear",
+   "time": 5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c3-10": {
+   "result": "won",
+   "time": 53.5,
+   "heartsLost": 3,
+   "stuck": [],
+   "hits": [
+    "shot@warn",
+    "shot@warn",
+    "shot@warn"
+   ],
+   "boss": "Puck",
+   "dealt": "6/6"
+  },
+  "c4-1": {
+   "result": "clear",
+   "time": 11.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-2L": {
+   "result": "clear",
+   "time": 14.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-2": {
+   "result": "clear",
+   "time": 15.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-2R": {
+   "result": "clear",
+   "time": 16.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-3L": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-3": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-3R": {
+   "result": "clear",
+   "time": 12.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-4L": {
+   "result": "clear",
+   "time": 20,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-4": {
+   "result": "clear",
+   "time": 12.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-4R": {
+   "result": "clear",
+   "time": 15,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-5L": {
+   "result": "clear",
+   "time": 14.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-5": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-5R": {
+   "result": "clear",
+   "time": 12.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "shot@icicles"
+   ]
+  },
+  "c4-6L": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-6": {
+   "result": "clear",
+   "time": 11.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-6R": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-7L": {
+   "result": "clear",
+   "time": 19,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-7": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-7R": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-8L": {
+   "result": "clear",
+   "time": 13.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-8": {
+   "result": "clear",
+   "time": 16,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "shot@crumble"
+   ]
+  },
+  "c4-8R": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-9L": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-9": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-9R": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c4-10": {
+   "result": "won",
+   "time": 26.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": [],
+   "boss": "Minecart",
+   "dealt": "6/6"
+  },
+  "c5-1": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-2L": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-2": {
+   "result": "clear",
+   "time": 14,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-2R": {
+   "result": "clear",
+   "time": 16.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-3L": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-3": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-3R": {
+   "result": "clear",
+   "time": 16,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-4L": {
+   "result": "clear",
+   "time": 12.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-4": {
+   "result": "clear",
+   "time": 30.5,
+   "heartsLost": 0,
+   "stuck": [
+    "spring@90"
+   ],
+   "hits": []
+  },
+  "c5-4R": {
+   "result": "clear",
+   "time": 17,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-5L": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-5": {
+   "result": "clear",
+   "time": 16,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-5R": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-6L": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-6": {
+   "result": "clear",
+   "time": 27,
+   "heartsLost": 0,
+   "stuck": [
+    "planks@9"
+   ],
+   "hits": []
+  },
+  "c5-6R": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-7L": {
+   "result": "clear",
+   "time": 28.5,
+   "heartsLost": 0,
+   "stuck": [
+    "flight@30"
+   ],
+   "hits": []
+  },
+  "c5-7": {
+   "result": "clear",
+   "time": 17,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-7R": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-8L": {
+   "result": "clear",
+   "time": 21,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-8": {
+   "result": "clear",
+   "time": 18.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-8R": {
+   "result": "clear",
+   "time": 17,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-9L": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-9": {
+   "result": "clear",
+   "time": 6.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-9R": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c5-10": {
+   "result": "won",
+   "time": 17.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": [],
+   "boss": "Crane",
+   "dealt": "6/6"
+  },
+  "c6-1": {
+   "result": "clear",
+   "time": 9.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-2L": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-2": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-2R": {
+   "result": "clear",
+   "time": 11,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-3L": {
+   "result": "clear",
+   "time": 14,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-3": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "crawler@overhang"
+   ]
+  },
+  "c6-3R": {
+   "result": "clear",
+   "time": 26,
+   "heartsLost": 0,
+   "stuck": [
+    "icicles@67"
+   ],
+   "hits": []
+  },
+  "c6-4L": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-4": {
+   "result": "clear",
+   "time": 14.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-4R": {
+   "result": "clear",
+   "time": 13.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-5L": {
+   "result": "clear",
+   "time": 12.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "spitter@movers"
+   ]
+  },
+  "c6-5": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-5R": {
+   "result": "clear",
+   "time": 11,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-6L": {
+   "result": "clear",
+   "time": 13.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-6": {
+   "result": "clear",
+   "time": 14,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-6R": {
+   "result": "clear",
+   "time": 18,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-7L": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-7": {
+   "result": "clear",
+   "time": 10,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-7R": {
+   "result": "clear",
+   "time": 16,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-8L": {
+   "result": "clear",
+   "time": 19.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-8": {
+   "result": "clear",
+   "time": 20,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-8R": {
+   "result": "clear",
+   "time": 14.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-9L": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-9": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-9R": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c6-10": {
+   "result": "won",
+   "time": 26.5,
+   "heartsLost": 2,
+   "stuck": [],
+   "hits": [
+    "boss@hover",
+    "boss@warn"
+   ],
+   "boss": "Pigeon",
+   "dealt": "6/6"
+  },
+  "c7-1": {
+   "result": "clear",
+   "time": 8,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-2L": {
+   "result": "clear",
+   "time": 22,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-2": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-2R": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-3L": {
+   "result": "clear",
+   "time": 13.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-3": {
+   "result": "clear",
+   "time": 11.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-3R": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "shot@spring"
+   ]
+  },
+  "c7-4L": {
+   "result": "clear",
+   "time": 13,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-4": {
+   "result": "clear",
+   "time": 11.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-4R": {
+   "result": "clear",
+   "time": 12.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "crawler@pillars"
+   ]
+  },
+  "c7-5L": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-5": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-5R": {
+   "result": "clear",
+   "time": 12,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "crawler@pillars"
+   ]
+  },
+  "c7-6L": {
+   "result": "clear",
+   "time": 11.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-6": {
+   "result": "clear",
+   "time": 11.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-6R": {
+   "result": "clear",
+   "time": 13.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-7L": {
+   "result": "clear",
+   "time": 21.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-7": {
+   "result": "clear",
+   "time": 14,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "train@icicles"
+   ]
+  },
+  "c7-7R": {
+   "result": "clear",
+   "time": 55,
+   "heartsLost": 0,
+   "stuck": [
+    "icicles@66",
+    "icicles@71",
+    "comb@77"
+   ],
+   "hits": []
+  },
+  "c7-8L": {
+   "result": "clear",
+   "time": 31,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-8": {
+   "result": "clear",
+   "time": 16,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-8R": {
+   "result": "clear",
+   "time": 30,
+   "heartsLost": 0,
+   "stuck": [
+    "gate3@75"
+   ],
+   "hits": []
+  },
+  "c7-9L": {
+   "result": "clear",
+   "time": 11,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-9": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-9R": {
+   "result": "clear",
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c7-10": {
+   "result": "won",
+   "time": 53.5,
+   "heartsLost": 3,
+   "stuck": [],
+   "hits": [
+    "shot@warn",
+    "shot@warn",
+    "shot@warn"
+   ],
+   "boss": "Rat King",
+   "dealt": "6/6"
+  }
+ }
+}

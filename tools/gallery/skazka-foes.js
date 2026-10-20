@@ -15,7 +15,7 @@
     if (el === 'kikimora') lv.enemies.push(new Foe({ type: 'kikimora', x: lv.l + 0.74 * R, y: y0 - 1.6 * t, wall: { side: 1, y0: y0 - 2.2 * t, y1: y0 - 1.0 * t } }, lv));
     else { const blk = lv.box(lv.l + 1.0 * t, y0 - 2.6 * t, lv.l + 2.4 * t, y0 - 2.0 * t, {}); lv.rects.push(blk); lv.enemies.push(new Foe({ type: 'leshy', x: lv.l + 1.7 * t, y: y0 - 3.4 * t, rect: blk }, lv)); }
     const cam = y0 - 0.45 * view.h; lv.cam = cam; __up.tick(30); lv.cam = cam; __up.tick(1); lv.cam = cam; await wait(200);
-    return { el, k, sy: Math.round(y0 - cam), w: 6.5, at: 0.74 };
+    return { el, k, sy: Math.round(y0 - cam), w: 6.5, at: 0.8 };
   };
   window.__steps = ['kikimora', 'leshy'].flatMap((el) => [0, 1, 2, 3, 4, 5].map((k) => async () => { input.clear(); return scene(el, k); }));
 })();

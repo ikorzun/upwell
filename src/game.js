@@ -2844,6 +2844,7 @@ function start() {
   if (/[?&]play=blocks\b/.test(location.search)) { game.preview = BLOCKS; window.__up.go(2, 0); }   // the Tower Blocks by themselves
   if (/[?&]play=sky\b/.test(location.search)) { game.preview = SKY; window.__up.go(2, 0); }   // the Skyscraper by itself
   if (/[?&]play=junk\b/.test(location.search)) { game.preview = JUNK; window.__up.go(2, 0); }   // the Junkyard by itself
+  if (/[?&]play=sea\b/.test(location.search)) { game.preview = SEA; window.__up.go(1, 0); }   // the Sea by itself (not in the campaign yet)
   loop.last = performance.now();
 }
 

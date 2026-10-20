@@ -357,7 +357,8 @@ const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2 };   // a 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at first (user)
   red: hex('#f43e34'), blue: hex('#5bb8ff'), yellow: hex('#ffed57'), green: hex('#339c39'),
-  purple: hex('#c996ff'), orange: hex('#faa23e'), gray: hex('#c8c8c8'), white: hex('#f3f3f3') };
+  purple: hex('#c996ff'), orange: hex('#faa23e'), gray: hex('#c8c8c8'), white: hex('#f3f3f3'),
+  aqua: hex('#6fe0ee') };   // the tenth ink, last (white stays PAL[8]): the Sea's turquoise sky blue (owner, 2026-10-20: research/variants/sea-ink-swatches.png D)
 // 80/20: the world in its one ink, and the bright inks mean something: yellow is what can be
 // taken (coins, items), red is danger (enemies, spikes, fire), white the hero and the edges; a
 // surface that behaves differently (ice, moss, rubber, crumbling, moving, springs) has a colour of its own.
@@ -389,6 +390,7 @@ const THEMES = {
   tokyo: Object.assign(theme(PAL.purple, { ice: PAL.white, crumble: PAL.gray, mover: PAL.blue }), { dots: PAL.black, town: true }),   // Tokyo's town at night (see TOKYO), purple (owner: blue went with Fuji's;
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
   blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { win: 'grid', panels: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
+  sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
   junk: Object.assign(theme(PAL.green, { ice: PAL.gray, mover: PAL.blue, spring: PAL.black, crumble: PAL.orange }), { moss: PAL.gray, plank: PAL.orange, win: 'brick', junk: true }),   // the Junkyard (see JUNK)
   sky: Object.assign(theme(PAL.purple, { mover: PAL.blue, spring: PAL.blue, rubber: PAL.blue, crumble: PAL.white }), { dots: PAL.gray, win: 'clouds', glass: true }),   // the Skyscraper (see SKY)
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
@@ -525,6 +527,11 @@ const TOKYO = Object.assign({}, WORLDS[1], { id: 'tokyo', name: { en: 'Tokyo', e
   chunks: { stairs: 3, planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 2, lift: 2, movers: 1, bridge: 1, rubberwall: 1, fork: 1, rest: 1, vault: 1 },
   enemies: { crawler: 3, climber: 2, shell: 2, spitter: 1 },
   intro: [{ news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } }, {}, {}] });
+// The Sea (owner, 2026-10-20: rivers, the sea and an island, between Fuji and Tokyo; its kit to the owner's picks, research/variants/sea-*): not in the
+// campaign yet (UPwell's CAMP_ORDER), ?play=sea to look at it.
+const SEA = Object.assign({}, WORLDS[1], { id: 'sea', name: { en: 'Sea', es: 'Mar', pt: 'Mar', ja: 'うみ' }, theme: THEMES.sea, dark: [], maxD: 2,
+  chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 2, movers: 1, crumble: 2, bridge: 2, mosswall: 1, rest: 1, vault: 1 },
+  enemies: { crawler: 3, climber: 2, shell: 2 }, intro: [{}, {}, {}] });
 // A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about
 // 1.1 s a metre) where no heart is lost; out by the hole on top, out of time or caught by the fire, what it paid is shown
 // with an offer to double it for an ad, then on to the next world (user). Made like a world, with
@@ -931,7 +938,7 @@ ICONS.neonBowl = '...o..o..o.../...o..o..o.../............./ooooooooooooo/.ooooo
 ICONS.neonFish = '...ooooo...../.ooooooooo..o/oo.oooooooooo/ooooooooooooo/.ooooooooo..o/...ooooo.....';
 ICONS.neonMic = '...ooo.../..ooooo../..ooooo../..ooooo../...ooo.../....o..../....o..../....o..../..ooooo..';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
-const ICON_INK ={ k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white' };
+const ICON_INK ={ k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white', c: 'aqua' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
 // standing on a floor, and runnier than at first (firm 2.0, then 1.4; user: it rattled about at speed, then: softer still).
 DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 1.2, kernel: [0, 0], sdf: (x, y) => Math.hypot(x, y) - 1,
@@ -2250,7 +2257,7 @@ function crumbleFx(r, c, up) {   // a block breaking up: puffs and solid chunks 
 // of the palette sheet's ramps, light to dark: 0 none, 1 sparse dots, 2 dots, 3 lines,
 // 4 checker, 5 dense, 6 solid; bayer() is a 4×4 threshold for anything see-through.
 const PIX_GLSL = `uniform vec2 uGrid;
-const vec3 PAL[9] = vec3[9](${Object.values(PAL).map((c) => `vec3(${c.map((v) => v.toFixed(4)).join(', ')})`).join(', ')});
+const vec3 PAL[${Object.keys(PAL).length}] = vec3[${Object.keys(PAL).length}](${Object.values(PAL).map((c) => `vec3(${c.map((v) => v.toFixed(4)).join(', ')})`).join(', ')});
 ivec2 cell() { return ivec2(floor(vec2(gl_FragCoord.x, -gl_FragCoord.y) + uGrid)); }
 float tone(int k, ivec2 g) {
   int x = g.x & 3, y = g.y & 3;
@@ -2266,7 +2273,7 @@ const float B4[16] = float[16](0., 8., 2., 10., 12., 4., 14., 6., 3., 11., 1., 9
 float bayer(ivec2 g) { return (B4[(g.y & 3) * 4 + (g.x & 3)] + 0.5) / 16.0; }
 vec3 snapPal(vec3 c) {   // the nearest of the nine, for anything that came in another colour
   vec3 r = PAL[0]; float best = 1e9;
-  for (int i = 0; i < 9; i++) { vec3 d = c - PAL[i]; float e = dot(d, d); if (e < best) { best = e; r = PAL[i]; } }
+  for (int i = 0; i < ${Object.keys(PAL).length}; i++) { vec3 d = c - PAL[i]; float e = dot(d, d); if (e < best) { best = e; r = PAL[i]; } }
   return r;
 }
 `;

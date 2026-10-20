@@ -1,4 +1,6 @@
 // The Dark Forest's gallery (tools/gallery, see compose.py): the hero as a Kolobok, each variant on a plain ledge in the forest's dark, a step each.
+// (The owner picked the Dark Forest's on 2026-10-20 and SKAZKA_V went with the variants, so this no longer runs as it is: it is a template for the next
+// world's gallery, as the Sea's are.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const scene = async (k) => {

@@ -1,5 +1,7 @@
 // The Dark Forest's gallery (tools/gallery, see compose.py): Baba Yaga's fence on its ledge, the hero beside it (its skulls' eyes lit by him), and the forest far
 // off, each variant in the forest's dark, a step each. window.__only = 'far' or 'fence' picks one.
+// (The owner picked the Dark Forest's on 2026-10-20 and SKAZKA_V went with the variants, so this no longer runs as it is: it is a template for the next
+// world's gallery, as the Sea's are.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const wipe = (lv) => { lv.rects = lv.rects.filter((r) => r.cap); for (const a of ['coins', 'folk', 'spawns', 'spikes', 'icicles', 'bubbles', 'enemies', 'pickups', 'coats', 'runes', 'fizz', 'rings', 'spots', 'arenas']) if (Array.isArray(lv[a])) lv[a].length = 0; };

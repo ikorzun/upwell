@@ -255,9 +255,6 @@ const neonSign = (lv, k) => {
 const NEON_REACH = 3;   // in R: a sign lights with the hero this near it (as near as a crow lets it come, FOLK.flee)
 const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.5 * lv.tile;   // a sign the hero can get to: some of it between the level's floor and its cap
 const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
-// The Dark Forest's variants while the owner picks (each of the six on its sheet, research/variants/skazka-*-1-px.png, drawn by the game; window.__skV for the
-// gallery): which variant of each element, A = 0 to F = 5
-const SKAZKA_V = { slab: 0, plank: 0, mortar: 0, log: 0, fence: 0, izba: 0, stove: 0, far: 0, kolobok: 0 };
 const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plank): its frame's height over its floor and its pulley's over that, in tiles (its cable runs there)
 // The kits' things on the ledges, one a ledge at most, the same for the game and the renderer (as neonSign is): the Village's (a sakura, a scarecrow, a
 // little shrine whose stone lantern the hero lights, koinobori), the Cave's (a stone lantern, a pair of jizo the hero leaves flowers at), Mount Fuji's bell
@@ -2462,19 +2459,11 @@ void main() { if (vSA * vSA * uShadowA <= bayer(cell())) discard; o = vec4(PAL[0
 // small glint low in each eye and a tongue in its smile.
 for (const d of DESIGNS) { d.face.eyeR = d.face.eyeR.map((v) => v * 1.45); d.face.mouthW *= 1.3; }
 const gumWriteFace = Renderer.prototype.writeFace;
-// The Kolobok's crust and face by the variant (the owner's sheet research/variants/skazka-kolobok-1-px.png; SKAZKA_V.kolobok while the owner picks): A flour
-// dusted on his top, B thick with flour, C a shine of glaze, D scared (brows up, his mouth an O), E rosy cheeks, F sly (lids half down, glazed). Over Gum's
-// face, in the hero's units (its radius 1, y down).
-const kolobokFace = (rd, b, dot, frame, put, f, fc) => {
-  const k = rd.kolobok, ink = THEME.ink, [ex, ey] = f.eye, [rx, ry] = f.eyeR, lx = fc.lx * 0.05, ly = fc.ly * 0.035, m = f.mouthW, base = KOLOBOK.base;
-  const speck = (n, r0, c) => { for (let i = 0; i < n; i++) { const a = -Math.PI * (0.2 + 0.6 * (((i * 0.6180339) % 1))), rr = r0 + (0.93 - r0) * (((i * 0.4142135) % 1)); dot(Math.cos(a) * rr, Math.sin(a) * rr, 0.055, 0.045, c); } };   // flour on his crown
-  if (k === 0) speck(10, 0.6, PAL.white);
-  if (k === 1) { speck(28, 0.5, PAL.white); speck(12, 0.62, PAL.gray); }
-  if (k === 2 || k === 5) { dot(-0.48, -0.5, 0.2, 0.11, PAL.white); dot(-0.62, -0.28, 0.07, 0.07, PAL.white); }   // a shine of glaze
-  if (k === 3) { for (let side = -1; side <= 1; side += 2) { const kk = 0.6 * side, w = rx * 1.4, h = ry * 0.45; frame(ex * side + lx + rx * 0.1 * side, ey + ly - ry * 2.3, w, w * kk, -h * kk, h); put(ink[0], ink[1], ink[2], 0); }   // brows up
-    dot(f.mouth[0], f.mouth[1] + m * 0.25, m * 0.75, m * 0.45, base); dot(f.mouth[0], f.mouth[1] + m * 0.3, m * 0.28, m * 0.34, ink); }   // his mouth an O
-  if (k === 4) for (let side = -1; side <= 1; side += 2) dot(side * (Math.abs(ex) + rx * 1.3), ey + ry * 1.9, 0.16, 0.11, PAL.red);   // rosy cheeks
-  if (k === 5) for (let side = -1; side <= 1; side += 2) { dot(ex * side + lx, ey + ly - ry * 0.55, rx * 1.25, ry * 0.62, base); dot(ex * side + lx, ey + ly - ry * 0.05, rx * 1.25, ry * 0.12, ink); }   // lids half down
+// The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units
+// (its radius 1, y down).
+const kolobokFace = (dot, f) => {
+  const [ex, ey] = f.eye, [rx, ry] = f.eyeR;
+  for (let side = -1; side <= 1; side += 2) dot(side * (Math.abs(ex) + rx * 1.3), ey + ry * 1.9, 0.16, 0.11, PAL.red);   // rosy cheeks
 };
 Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   const s = b.s, f = s.face, fc = b.face, ink = THEME.ink, P0 = this.p0, P1 = this.p1, P2 = this.p2;
@@ -2483,7 +2472,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   const dot = (ux, uy, ax, ay, c) => { frame(ux, uy, ax, 0, 0, ay); put(c[0], c[1], c[2], 0); };   // an upright oval in one ink
   // The hero's helmet (b.helmet): the moto one while the smash is on (user: in place of its pips), the astro one in an astro's flight. An astro one goes under the face, which
   // shows in its window: a white dome, grey on its right, the window's black rim, and in it the hero's own colour.
-  const kolo = this.kolobok >= 0 && b === game.hero && b.color.id === save.color;   // the Dark Forest's hero, a Kolobok (see kolobokFace)
+  const kolo = this.kolobok && b === game.hero && b.color.id === save.color;   // the Dark Forest's hero, a Kolobok (see kolobokFace)
   if (b.helmet === 'astro') { dot(0.1, 0.05, 1.03, 1.02, PAL.gray); dot(-0.05, -0.04, 0.96, 0.97, PAL.white); dot(0.93, 0.1, 0.12, 0.22, PAL.gray); dot(0, 0.13, 0.68, 0.49, ink); dot(0, 0.13, 0.56, 0.38, kolo ? KOLOBOK.base : b.color.base); }
   gumWriteFace.call(this, b, X, Y, cx, cy);
   const closed = fc.squint > 0.45, lx = fc.lx * 0.05, ly = fc.ly * 0.035, [ex, ey] = f.eye, [rx, ry] = f.eyeR, m = f.mouthW;
@@ -2502,7 +2491,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
     if (fc.surprise <= 0.35) { frame(f.mouth[0], f.mouth[1] + m * 0.42, m * 0.5, 0, 0, m * 0.36); put(THEME.blush[0], THEME.blush[1], THEME.blush[2], 0); }
   }
-  if (kolo && b.helmet !== 'astro') kolobokFace(this, b, dot, frame, put, f, fc);   // (over Gum's face, under the moto helmet; none in the astro one's window)
+  if (kolo && b.helmet !== 'astro') kolobokFace(dot, f);   // (over Gum's face, under the moto helmet; none in the astro one's window)
   if (b.helmet === 'moto') {   // a moto one over the face: a shell over the brow, red (white on a red hero), a stripe down its crown of
     // the other with a grey side, goggles across the eyes with blue lenses that look where the eyes look, a glint; the mouth shows under it
     const shell = b.color.base === PAL.red ? PAL.white : PAL.red, stripe = shell === PAL.red ? PAL.white : PAL.red;
@@ -2766,10 +2755,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       else { disc(ex, y, 0.075 * kitT * s + kitP / 2, PAL.orange, 1); box(ex - kitP / 2, y - kitP / 2, ex + kitP / 2, y + kitP / 2, PAL.yellow, 1, 0, 10, 0); } }
     vlamps.push([x, y, 0.2 * s, 0.6 * s]);
   };
-  // The Dark Forest's doors (the owner's second sheets research/variants/skazka-izba-2-px.png and skazka-stove-2-px.png, black and white and crooked; all six variants
-  // of each in the game's own code while the owner picks: SKAZKA_V.izba and SKAZKA_V.stove, or window.__skV): the shop is Baba Yaga's hut on chicken legs, leaning,
-  // its floor at the ledge, its legs down behind the ledge (half dark), a tattered red cloth in its door; the stash a crooked Russian stove, its mouth the door,
-  // glowing purple inside, embers. What is inside bobs in the doorway; sparks rise past it; a glow breathes round it. Grey and black but the doors' marks and lights.
+  // The Dark Forest's doors (the owner's picks, 2026-10-20, from research/variants/skazka-izba-game.png and skazka-stove-game.png, E for both, black and white
+  // and crooked): the shop is Baba Yaga's hut on chicken legs, leaning, its floor at the ledge, its legs down behind the ledge (half dark), a tattered red cloth
+  // in its door; the stash a crooked Russian stove, its mouth the door, glowing purple inside, embers. What is inside bobs in the doorway; sparks rise past
+  // it; a glow breathes round it. Grey and black but the doors' marks and lights.
   const skDoorAt = (d) => {   // the frame both draw in: tiles out from the wall, up from the ledge
     const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, y1 = d.y1;
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
@@ -2787,10 +2776,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
     }
   };
-  const izba = (d) => {   // Baba Yaga's hut on chicken legs (the shop), leaning, its roof sagging: A dead twigs on its roof, B a horse's skull on its ridge, C a crooked chimney
-    // and crossed sticks, D a crow on its roof, E a smoking chimney and a skull over its door, F crossed ridge poles, charms hung off its eave
-    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__skV || SKAZKA_V).izba, c = PAL.red, G = PAL.gray, K = PAL.black, HALF = 1.5;
-    const Wd = 3.3, eave = 2.5, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t), lean = [0.6, -0.5, 0.75, -0.6, 0.5, 0.8][k];   // tiles its top leans out (−: in to the wall)
+  const izba = (d) => {   // Baba Yaga's hut on chicken legs (the shop, E), leaning out, its roof sagging, a smoking chimney, a skull over its door
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.red, G = PAL.gray, K = PAL.black, HALF = 1.5;
+    const Wd = 3.3, eave = 2.5, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t), lean = 0.5;   // tiles its top leans out
     const sk = (v) => (lean * v) / eave;   // how far a height leans
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
     for (const [u, s] of [[0.9, 1], [2.5, -1]]) {   // its gnarled chicken legs, down behind the ledge: a scaly thigh, a shin bent back, three long claws and a spur
@@ -2807,43 +2795,25 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const u of [0.95, 1.5]) bx(u, dh - 0.75, u + px, dh - 0.2, K); bx(0.42 + sk(dh), dh, 2.08 + sk(dh), dh + 0.12, G);   // its slits, the lintel
     { const u0 = 2.35 + sk(1.4), u1 = 3.0 + sk(1.4), v0 = 1.05, v1 = 1.75; F(X((u0 + u1) / 2), Y((v0 + v1) / 2), 0.6 * t, 0, 0, 0.55 * t, PAL.orange, 0.35, 1); bx(u0 - 0.1, v0 - 0.1, u1 + 0.1, v1 + 0.1, G); bx(u0, v0, u1, v1, PAL.orange);   // a window lit (a light), its crooked frame
       bx((u0 + u1) / 2 - px / 2, v0, (u0 + u1) / 2 + px / 2, v1, K); bx(u0, (v0 + v1) / 2, u1, (v0 + v1) / 2 + px, K); ln(u0 - 0.15, v1 + 0.12, u1 + 0.2, v1 + 0.22, G, 2); vlamps.push([X((u0 + u1) / 2), Y((v0 + v1) / 2), 0.4, 1.2]); }
-    const skull = (u, v, s = 1) => { F(X(u), Y(v), 0.26 * t * s, 0, 0, 0.24 * t * s, G, 1, 0); bx(u - 0.14 * s, v - 0.3 * s, u + 0.14 * s, v - 0.14 * s, G); for (const e of [-0.1, 0.1]) disc(X(u + e * s), Y(v), 0.07 * t * s, K, 1); for (const e of [-0.08, 0, 0.08]) bx(u + e * s, v - 0.3 * s, u + e * s + px, v - 0.2 * s, K); };
-    const twig = (u, v, du, dv) => { ln(u, v, u + du, v + dv, G, 2); ln(u + du * 0.6, v + dv * 0.6, u + du * 0.6 + 0.2, v + dv * 0.6 + 0.25, G, 1); ln(u + du, v + dv, u + du - 0.15, v + dv + 0.2, G, 1); };   // a dead twig, forked
-    if (k === 0) { twig(ru - 0.6, top - 0.3, -0.5, 0.8); twig(ru + 0.5, top - 0.4, 0.6, 0.7); twig(ru, top, 0.1, 0.6); }
-    else if (k === 1) { F(X(ru), Y(top + 0.25), 0.34 * t, 0, 0, 0.22 * t, G, 1, 0); bx(ru + 0.15, top + 0.05, ru + 0.55, top + 0.2, G); for (const e of [-1, 1]) disc(X(ru + e * 0.12), Y(top + 0.28), 0.06 * t, K, 1); ln(ru - 0.2, top + 0.4, ru - 0.5, top + 0.8, G, 2); ln(ru + 0.1, top + 0.45, ru + 0.3, top + 0.85, G, 2); }   // a horse's skull, its ears
-    else if (k === 2) { ln(0.6 + lean, eave + 0.6, 0.45 + lean, top + 0.6, G, 5); ln(0.45 + lean, top + 0.6, 0.62 + lean, top + 0.95, G, 4); for (const e of [-1, 1]) twig(ru, top, e * 0.7, 0.75); }   // a crooked chimney, crossed sticks
-    else if (k === 3) { const cx0 = X(ru + 0.3), cy0 = Y(top + 0.25); F(cx0, cy0, 0.3 * t, 0, 0, 0.2 * t, G, 1, 0); F(cx0, cy0, 0.26 * t, 0, 0, 0.16 * t, K, 1, 0); F(cx0 - snap(0.22 * t), cy0 - snap(0.12 * t), 0.13 * t, 0, 0, 0.12 * t, G, 1, 0); F(cx0 - snap(0.22 * t), cy0 - snap(0.12 * t), 0.1 * t, 0, 0, 0.09 * t, K, 1, 0);   // a crow on its roof, a grey rim round it,
-      box(cx0 - snap(0.44 * t), cy0 - snap(0.13 * t), cx0 - snap(0.3 * t), cy0 - snap(0.09 * t), G, 1, 0, 10, 0); box(cx0 - snap(0.24 * t), cy0 - snap(0.15 * t), cx0 - snap(0.2 * t), cy0 - snap(0.11 * t), PAL.orange, 1, 0, 10, 0); twig(ru - 0.9, top - 0.6, -0.4, 0.7); }   // its beak, its eye
-    else if (k === 4) { ln(Wd - 0.6 + lean, eave + 0.5, Wd - 0.5 + lean, top + 0.5, G, 5); for (let i = 0; i < 3; i++) F(X(Wd - 0.5 + lean + 0.15 * Math.sin(T + i)), Y(top + 0.85 + 0.4 * i), (0.18 + 0.05 * i) * t, 0, 0, 0.12 * t, G, DIM, 4); skull(1.25 + sk(dh), dh + 0.42, 0.8); }   // a smoking chimney, a skull over its door
-    else { for (const e of [-1, 1]) ln(ru, top, ru + e * 0.55, top + 0.7, G, 3); for (const u of [0.0, Wd + 0.1]) { ln(u + lean, eave - 0.1, u + lean, eave - 0.6, G, 1); ln(u + lean, eave - 0.6, u + lean, eave - 1.0, G, 3); } }   // crossed ridge poles, charms hung off its eaves
+    ln(Wd - 0.6 + lean, eave + 0.5, Wd - 0.5 + lean, top + 0.5, G, 5); for (let i = 0; i < 3; i++) F(X(Wd - 0.5 + lean + 0.15 * Math.sin(T + i)), Y(top + 0.85 + 0.4 * i), (0.18 + 0.05 * i) * t, 0, 0, 0.12 * t, G, DIM, 4);   // a smoking chimney
+    { const u = 1.25 + sk(dh), v = dh + 0.42, s = 0.8; F(X(u), Y(v), 0.3 * t * s, 0, 0, 0.28 * t * s, K, 1, 0); F(X(u), Y(v), 0.26 * t * s, 0, 0, 0.24 * t * s, G, 1, 0); bx(u - 0.14 * s, v - 0.3 * s, u + 0.14 * s, v - 0.14 * s, G);   // a skull over its door, dark round it so it reads on the logs
+      for (const e of [-0.1, 0.1]) disc(X(u + e * s), Y(v), 0.07 * t * s, K, 1); for (const e of [-0.08, 0, 0.08]) bx(u + e * s, v - 0.3 * s, u + e * s + px, v - 0.2 * s, K); }
     skInside(d, 'shop', c, dx, dw, top);
   };
-  const pech = (d) => {   // a crooked Russian stove (the stash), lumpy and cracked, its mouth the door: A a poker and a pot, B rounded, a bundle hung off a stick, pots, C a
-    // cobweb off its chimney, jars, D a skull on its front, a pitchfork, a jar, E tall and bent, dried herbs, firewood, a pot on a shelf, F a barred window, skulls on sticks
-    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__skV || SKAZKA_V).stove, c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
-    const Wd = k === 4 ? 2.6 : 3.0, ht = k === 4 ? 3.0 : k === 1 ? 2.2 : 2.5, bend = [0.25, -0.2, 0.35, 0.15, 0.5, -0.25][k];   // its chimney's crook
+  const pech = (d) => {   // a crooked Russian stove (the stash, E), tall and lumpy and cracked, its mouth the door, its chimney bent, a bench step off it with a shelf over it
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    const Wd = 2.6, ht = 3.0, bend = 0.5;   // its width, its height, its chimney's crook
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its mouth
     for (const [u, v, ru, rv] of [[0.4, ht - 0.35, 0.55, 0.45], [Wd - 0.4, ht - 0.4, 0.55, 0.5], [Wd / 2, ht - 0.25, Wd * 0.4, 0.4], [-0.02, 0.6, 0.18, 0.6], [Wd + 0.02, 0.7, 0.16, 0.55]]) F(X(u), Y(v), ru * t, 0, 0, rv * t, G, 1, 0);   // its lumpy shoulders, its sides bulging
     bx(0, 0, Wd, ht - 0.3, G, 1); bx(0, 0, Wd, 0.25, G, 2);   // its whitewash (grey), dotted, a plinth
     for (const [u, v, n] of [[0.25, ht - 0.6, 4], [Wd - 0.45, 1.6, 5], [Wd - 0.3, 0.6, 3]]) for (let i = 0; i < n; i++) bx(u + (i % 2) * 0.06, v - i * 0.13, u + (i % 2) * 0.06 + px, v - i * 0.13 - 0.13, K);   // its cracks
-    if (k === 4) { bx(Wd, 0, Wd + 0.9, 1.1, G, 1); bx(Wd - 0.05, 1.1, Wd + 1.0, 1.2, G); }   // a bench step off it (E)
-    const cu = k === 4 ? 1.1 : 1.85; ln(cu, ht - 0.2, cu + bend, ht + 0.6, G, 7); ln(cu + bend, ht + 0.6, cu + bend * 0.5, ht + 1.1, G, 6); bx(cu + bend * 0.5 - 0.35, ht + 1.1, cu + bend * 0.5 + 0.35, ht + 1.22, G, 4);   // its crooked chimney, a cap
+    bx(Wd, 0, Wd + 0.9, 1.1, G, 1); bx(Wd - 0.05, 1.1, Wd + 1.0, 1.2, G);   // the bench step off it
+    const cu = 1.1; ln(cu, ht - 0.2, cu + bend, ht + 0.6, G, 7); ln(cu + bend, ht + 0.6, cu + bend * 0.5, ht + 1.1, G, 6); bx(cu + bend * 0.5 - 0.35, ht + 1.1, cu + bend * 0.5 + 0.35, ht + 1.22, G, 4);   // its crooked chimney, a cap
     F(dx, Y(1.55), 0.86 * t, 0, 0, 0.62 * t, K, 1, 0); bx(0.38, 0, 2.12, 1.55, K);   // soot round its mouth
     F(dx, Y(1.5), 0.7 * t, 0, 0, 0.5 * t, INK.dark, 1, 0); bx(0.55, 0, 1.95, 1.5, INK.dark);   // its mouth, dark
     F(dx, Y(0.7), 0.65 * t, 0, 0, 0.75 * t, c, 0.55, 1);   // the purple glow in it (the stash's mark)
     for (let i = 0; i < 5; i++) { const fl = Math.sin(T * 9 + i * 1.7) > 0 ? 1 : 0; bx(0.7 + 0.24 * i, 0.12, 0.7 + 0.24 * i + 2 * px, 0.2 + 0.08 * fl, PAL.orange); }   // embers flickering
-    const pot = (u, s = 1) => { F(X(u), Y(0.3 * s), 0.3 * t * s, 0, 0, 0.3 * t * s, G, 1, 0); bx(u - 0.18 * s, 0.5 * s, u + 0.18 * s, 0.62 * s, G); F(X(u), Y(0.3 * s), 0.3 * t * s, 0, 0, 0.3 * t * s, K, 1, 4); };   // a clay pot
-    const jar = (u, h = 0.6) => { bx(u - 0.16, 0, u + 0.16, h, G, 4); bx(u - 0.19, h, u + 0.19, h + 0.08, G); };   // a jar, dark inside the glass
-    const poker = (u, fork = false) => { ln(u, 0, u + 0.35, 2.0, G, 2); if (fork) for (const e of [-0.12, 0, 0.12]) ln(u + 0.35 + e, 2.0, u + 0.35 + e * 1.3, 2.35, G, 1); else { ln(u + 0.35, 2.0, u + 0.2, 2.25, G, 1); ln(u + 0.35, 2.0, u + 0.5, 2.25, G, 1); } };   // an oven fork, or a pitchfork
-    const skull = (u, v, s = 1) => { F(X(u), Y(v), 0.26 * t * s, 0, 0, 0.24 * t * s, G, 1, 0); bx(u - 0.14 * s, v - 0.3 * s, u + 0.14 * s, v - 0.14 * s, G); for (const e of [-0.1, 0.1]) disc(X(u + e * s), Y(v), 0.07 * t * s, K, 1); for (const e of [-0.08, 0, 0.08]) bx(u + e * s, v - 0.3 * s, u + e * s + px, v - 0.2 * s, K); };
-    if (k === 0) { poker(-0.25); pot(Wd + 0.55, 0.9); }
-    else if (k === 1) { ln(Wd - 0.2, ht + 0.2, Wd + 0.6, ht + 0.6, G, 2); ln(Wd + 0.45, ht + 0.52, Wd + 0.45, ht - 0.1, G, 1); for (let i = 0; i < 5; i++) ln(Wd + 0.45 + (i - 2) * 0.05, ht - 0.1, Wd + 0.45 + (i - 2) * 0.09, ht - 0.7, G, 1); pot(Wd + 0.5, 0.8); pot(Wd + 1.0, 0.6); }   // a bundle hung off a stick
-    else if (k === 2) { const cx0 = cu + bend * 0.5; for (const q of [0, 0.4, 0.8]) ln(cx0, ht + 1.0, cx0 + 0.9, ht + 1.0 - 0.9 * q, G, 1, DIM); for (const f of [0.4, 0.75]) ln(cx0 + 0.9 * f, ht + 1.0, cx0 + 0.9 * f, ht + 1.0 - 0.9 * f * 0.8, G, 1, DIM); ln(cx0 + 0.9, ht + 1.0, cx0 + 0.9, ht - 0.2, G, 1, DIM); jar(Wd + 0.4); jar(Wd + 0.8, 0.45); }   // a cobweb off its chimney, jars
-    else if (k === 3) { skull(Wd / 2 + 0.05, ht - 0.45, 0.9); poker(Wd + 0.15, true); jar(Wd + 0.8, 0.5); }   // a skull on its front, a pitchfork, a jar
-    else if (k === 4) { ln(-0.3, ht - 0.1, -0.3, ht - 0.45, G, 1); for (let i = 0; i < 5; i++) ln(-0.3 + (i - 2) * 0.05, ht - 0.45, -0.3 + (i - 2) * 0.08, ht - 1.1, G, 1); for (const [u, v] of [[-0.6, 0.15], [-0.3, 0.15], [-0.45, 0.42]]) F(X(u), Y(v), 0.15 * t, 0, 0, 0.14 * t, G, 1, 4);   // dried herbs, firewood
-      bx(Wd + 0.1, 1.6, Wd + 0.9, 1.66, G); pot(Wd + 0.5, 0.55); }   // a pot on a shelf (it stands on the bench step)
-    else { bx(cu + bend * 0.5 - 0.3, ht + 0.25, cu + bend * 0.5 + 0.3, ht + 0.8, K); for (const e of [-0.15, 0, 0.15]) bx(cu + bend * 0.5 + e, ht + 0.25, cu + bend * 0.5 + e + px, ht + 0.8, G);   // a barred window in its chimney
-      for (const [u, h] of [[Wd + 0.35, 1.5], [Wd + 0.8, 1.9]]) { ln(u, 0, u + 0.05, h, G, 2); skull(u + 0.05, h + 0.2, 0.7); skEyes(X(u + 0.05), Y(h + 0.22), 0.6, Math.round(u * 100)); } }   // skulls on sticks, their eyes glowing
+    bx(Wd + 0.1, 1.6, Wd + 0.9, 1.66, G); { const u = Wd + 0.5, s = 0.55; F(X(u), Y(1.66 + 0.3 * s), 0.3 * t * s, 0, 0, 0.3 * t * s, G, 1, 0); bx(u - 0.18 * s, 1.66 + 0.5 * s, u + 0.18 * s, 1.66 + 0.62 * s, G); F(X(u), Y(1.66 + 0.3 * s), 0.3 * t * s, 0, 0, 0.3 * t * s, K, 1, 4); }   // a shelf, a clay pot on it
     skInside(d, 'stash', c, dx, dw, ht);
   };
   // The Cave's door into a shop or a stash (the owner's pick, research/variants/cave-torii-1-px.png B: "the way into the cave or the shop; the shop's red"):
@@ -3223,46 +3193,36 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
-  if (th.skazka && lv.kind === 'well') {   // the Dark Forest's props and its far layer (the owner's second sheets research/variants/skazka-*-2-px.png, black and white and
-    // crooked; all six variants in the game's own code while the owner picks: SKAZKA_V, or window.__skV). Props in the midground: grey, no white; colour only
-    // for lights (eyes, windows), as the dark's.
-    const t = kitT, P = kitP, px = P / t, V = window.__skV || SKAZKA_V, hero = g.hero, G = PAL.gray, K = PAL.black;
-    {   // the forest far off: screen-fixed, low on the screen and sinking a little as the climb goes on; at a quarter (DIM), the moon brighter (a light: it shows
-      // through the dark, the crooked treetops black against it), eyes and a window LIT
-      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t), f = V.far;
+  if (th.skazka && lv.kind === 'well') {   // the Dark Forest's props and its far layer (the owner's picks, 2026-10-20, from research/variants/skazka-*-game.png,
+    // black and white and crooked). Props in the midground: grey, no white; colour only for lights (eyes), as the dark's.
+    const t = kitT, P = kitP, px = P / t, hero = g.hero, G = PAL.gray, K = PAL.black;
+    {   // the forest far off (F): spruces, a dead tree with eyes in it, the moon, mist; screen-fixed, low on the screen and sinking a little as the climb goes on;
+      // at a quarter (DIM), the moon brighter (a light: it shows through the dark, the crooked treetops black against it), the eyes LIT
+      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
       const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
       const fl = (u0, v0, u1, v1, c, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), c, a, wd);
       const tri = (u, v0, hw, h, c, a = DIM, sk = 0) => { const hd = (h * t) / 2; F(U(u + sk), Vv(v0) - hd, hw * t, 0, 0, hd, c, a, 6, hw * t, hd, 2 * hw * t); };
       const spruce = (u, v, h, a = DIM) => { fb(u - 0.06, v, u + 0.06, v + 0.5, G, a); for (let i = 0; i < 3; i++) tri(u, v + 0.35 + i * h * 0.27, (0.62 - 0.15 * i) * h * 0.45, h * 0.38, G, a, (i % 2 ? 0.08 : -0.06) * h * 0.2); };   // a spruce, its tiers crooked
       const row = (u0, u1, step, v, hs) => { for (let u = u0, i = 0; u < u1; u += step, i++) spruce(u, v, hs[i % hs.length]); };
-      const moon = (u, v, rr) => { fe(u, v, rr, rr, G, LIT); vlamps.push([U(u), Vv(v), rr * 1.05, rr * 1.6]); };   // the moon, a light in the dark
       const dead = (u, v, h, s, n = 0) => {   // a dead tree: a crooked trunk, branches clawing out and up, their twigs bent
         let x0 = u, y0 = v; for (let i = 1; i <= 4; i++) { const x1 = u + 0.15 * s * Math.sin(i * 1.7 + n), y1 = v + (h * i) / 4; fl(x0, y0, x1, y1, G, DIM, Math.max(1, 4 - i)); x0 = x1; y0 = y1; }
         for (const [q, du, dv] of [[0.4, -1.1, 0.6], [0.55, 1.0, 0.75], [0.75, -0.7, 0.55], [0.9, 0.6, 0.6]]) { const bu = u + 0.15 * s * Math.sin(q * 4 * 1.7 + n), bv = v + h * q;
           fl(bu, bv, bu + du * s, bv + dv * s, G, DIM, 2); fl(bu + du * s, bv + dv * s, bu + du * s * 1.35, bv + dv * s * 1.1, G, DIM, 1); fl(bu + du * s, bv + dv * s, bu + du * s * 1.1, bv + dv * s * 1.6, G, DIM, 1); } };
-      const mist = (v0) => { for (let i = 0; i < 6; i++) { const v = v0 + 0.22 * i, u0 = -7.5 + ((i * 29) % 7) * 0.6; fb(u0, v, u0 + 2.4 + (i % 3) * 0.8, v + px, G); fb(u0 + 4.2, v, u0 + 6.0, v + px, G); } };   // mist over the swamp
-      const eyes = (u, v) => { for (const e of [-0.12, 0.12]) fb(u + e, v, u + e + 2 * px, v + 2 * px, PAL.orange, LIT); vlamps.push([U(u), Vv(v), 0.15, 0.45]); };   // a pair of eyes glowing, far off
-      if (f === 0) { moon(3.4, 4.6, 1.6); row(-7.4, 0.8, 1.15, 0.3, [3.2, 4.2, 2.8, 3.8]); dead(5.4, 0.3, 4.4, 1.0, 1); mist(0.1);   // Baba Yaga across the moon (A): her mortar, her, her broom
-        fb(2.6, 4.3, 3.4, 4.75, K, 1); fe(3.2, 4.95, 0.22, 0.28, K, 1); fl(3.3, 5.15, 3.75, 4.95, K, 1, 3); fl(2.65, 4.5, 1.9, 4.2, K, 1, 2); for (let i = 0; i < 4; i++) fl(1.95, 4.22, 1.5, 3.9 + 0.12 * i, K, 1, 1); }
-      else if (f === 1) { moon(3.6, 5.0, 1.3); dead(-5.2, 0.3, 5.0, 1.3, 2); fe(-5.0, 2.6, 0.38, 0.5, K, 1); eyes(-5.0, 2.65); row(-2.6, 7.6, 1.2, 0.3, [3.0, 3.8, 2.6, 4.2]); mist(0.1); }   // a twisted tree, eyes in its hollow (B)
-      else if (f === 2) { moon(-1.0, 5.0, 1.4); dead(4.2, 0.3, 4.8, 1.1, 3); fe(4.6, 3.7, 0.3, 0.38, G); eyes(4.6, 3.8); row(-7.4, -2.8, 1.1, 0.3, [3.4, 4.0, 3.0]); row(0.6, 3.0, 1.2, 0.3, [2.6, 3.4]);   // an owl on a dead tree (C)
-        for (const u of [-1.6, -1.2, 1.4, 1.8]) fl(u, 0.2, u + 0.1, 0.9 + (Math.abs(u) % 1), G); mist(0.1); }
-      else if (f === 3) { moon(4.4, 5.0, 1.3); dead(-6.0, 0.3, 4.0, 0.9, 4); row(-4.4, -1.4, 1.1, 0.3, [3.4, 4.0]);   // the hut on chicken legs on a hill behind its fence of skulls (D)
-        fe(1.8, 0.4, 3.2, 0.7, G); for (const e of [-0.45, 0.55]) { fl(1.6 + e, 0.9, 1.4 + e, 1.7, G, DIM, 2); fl(1.4 + e, 0.9, 1.1 + e, 0.7, G); fl(1.4 + e, 0.9, 1.7 + e, 0.7, G); }
-        fb(0.6, 1.7, 2.7, 3.1, G); tri(1.65, 3.1, 1.4, 1.1, G, DIM, 0.3); fb(1.3, 2.2, 1.8, 2.6, PAL.orange, LIT); vlamps.push([U(1.55), Vv(2.4), 0.2, 0.6]);
-        for (const u of [-0.6, -0.1, 0.4, 3.2, 3.7]) { fl(u, 0.5, u + 0.08, 1.6, G, DIM, 2); fe(u + 0.08, 1.7, 0.18, 0.16, G); eyes(u + 0.08, 1.72); } }
-      else if (f === 4) { moon(3.0, 5.2, 1.2); dead(-3.6, 0.3, 5.2, 1.5, 5); row(4.6, 7.6, 1.2, 0.3, [3.6, 3.0]); mist(0.1);   // a great dead tree clawing at the sky, a skull and ribs in the swamp (E)
-        fe(1.0, 0.45, 0.32, 0.27, G); for (const e of [-0.1, 0.1]) fb(1.0 + e - px, 0.45, 1.0 + e + px, 0.55, K, 1); for (let i = 0; i < 4; i++) { fl(1.6 + 0.22 * i, 0.3, 1.5 + 0.22 * i, 0.75 - 0.05 * i, G, DIM, 1); } }
-      else { moon(3.8, 5.0, 1.5); row(-7.4, -3.0, 1.2, 0.3, [3.0, 3.8, 3.2]); dead(5.8, 0.3, 4.8, 1.0, 6); fe(5.9, 2.8, 0.32, 0.42, K, 1); eyes(5.9, 2.85); row(-1.6, 4.2, 1.15, 0.3, [2.8, 3.6, 3.0, 3.8]); mist(0.1); }   // spruces, a dead tree with eyes in it (F)
+      fe(3.8, 5.0, 1.5, 1.5, G, LIT); vlamps.push([U(3.8), Vv(5.0), 1.5 * 1.05, 1.5 * 1.6]);   // the moon, a light in the dark
+      row(-7.4, -3.0, 1.2, 0.3, [3.0, 3.8, 3.2]); dead(5.8, 0.3, 4.8, 1.0, 6); fe(5.9, 2.8, 0.32, 0.42, K, 1);   // a dead tree, a hollow in it,
+      for (const e of [-0.12, 0.12]) fb(5.9 + e, 2.85, 5.9 + e + 2 * px, 2.85 + 2 * px, PAL.orange, LIT); vlamps.push([U(5.9), Vv(2.85), 0.15, 0.45]);   // eyes glowing in it
+      row(-1.6, 4.2, 1.15, 0.3, [2.8, 3.6, 3.0, 3.8]);
+      for (let i = 0; i < 6; i++) { const v = 0.1 + 0.22 * i, u0 = -7.5 + ((i * 29) % 7) * 0.6; fb(u0, v, u0 + 2.4 + (i % 3) * 0.8, v + px, G); fb(u0 + 4.2, v, u0 + 6.0, v + px, G); }   // mist over the swamp
     }
-    for (const r of lv.rects) {   // Baba Yaga's fence on a ledge: crooked sharpened stakes leaning every way, a skull on each whose sockets glow the nearer the hero comes, the cores looking at him
+    for (const r of lv.rects) {   // Baba Yaga's fence on a ledge (E): broken stakes, a fallen one across them, a long pole leaning out over the shaft with a skull on its end whose
+      // sockets glow the nearer the hero comes, their cores looking at him
       const p = !r.gone && seen(r.y0 - 4 * t, r.y0) && kitThing(lv, r);
       if (!p || p.kind !== 'fence') continue;
-      const k = V.fence, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, b = r.y0;
+      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, b = r.y0;
       const X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, up from its top
       const ln = (u0, v0, u1, v1, c, wp = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wp);
-      const near = Math.max(0, Math.min(1, 1 - (Math.hypot(hero.cx - X(1.5), hero.cy - Y(2)) - 2.5 * R) / (5 * R)));   // 1 with the hero close, 0 from 7.5 R off
+      const near = Math.max(0, Math.min(1, 1 - (Math.hypot(hero.cx - X(2.8), hero.cy - Y(2.35)) - 2.5 * R) / (5 * R)));   // 1 with the hero close to its skull, 0 from 7.5 R off
       const stake = (u, h, lean, wd = 5, broken = false) => {   // a stake from the ledge at u, h tall, leaning (tiles over at its top), sharpened or broken off; returns its top
         const tu = u + lean; ln(u, 0, tu, h, G, wd); ln(u + 0.05, 0.1, tu + 0.05, h - 0.1, K, 1);   // its grain
         if (broken) for (let i = 0; i < 3; i++) ln(tu + (i - 1) * 0.06, h, tu + (i - 1) * 0.09, h + 0.15 + 0.1 * (i % 2), G, 2);   // splinters
@@ -3277,17 +3237,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           if (near > 0.15) { const lx = Math.sign(hero.cx - ex) * P, ly = Math.sign(hero.cy - ey) * P; box(snap(ex + lx) - P / 2, snap(ey + ly) - P / 2, snap(ex + lx) + P / 2, snap(ey + ly) + P / 2, PAL.yellow, 1, 0, 10, 0); }
           else box(snap(ex) - P / 2, snap(ey) - P / 2, snap(ex) + P / 2, snap(ey) + P / 2, PAL.orange, DIM, 0, 10, 0); }
       };
-      const sag = (u0, v0, u1, v1, s, c = G) => { for (let i = 0; i < 8; i++) { const q0 = i / 8, q1 = (i + 1) / 8; ln(u0 + (u1 - u0) * q0, v0 + (v1 - v0) * q0 - s * 4 * q0 * (1 - q0), u0 + (u1 - u0) * q1, v0 + (v1 - v0) * q1 - s * 4 * q1 * (1 - q1), c, 1); } };   // a rope sagging
-      const lash = (u0, u1, v) => { ln(u0, v - 0.15, u1, v + 0.15, G, 1); ln(u0, v + 0.15, u1, v - 0.15, G, 1); };   // a lashing across
-      const webd = (u0, u1, v) => { for (const f of [0.35, 0.7]) ln(u0, v - f * 0.5, u1, v - f * 0.5 - 0.1, G, 1, DIM); for (const q of [0.25, 0.5, 0.75]) ln(u0 + (u1 - u0) * q, v, u0 + (u1 - u0) * q, v - 0.55, G, 1, DIM); };   // a cobweb, dim
-      if (k === 0) { const tops = [[0.5, 2.3, 0.08], [1.15, 2.6, -0.06], [1.8, 2.0, 0.1, true], [2.45, 2.4, -0.12]].map(([u, h, l, br]) => [stake(u, h, l, 5, br), h, br]); tops.forEach(([tu, h, br]) => { if (!br) skull(tu, h - 0.4); }); lash(0.5, 1.15, 0.9); lash(1.15, 1.8, 1.1); lash(1.8, 2.45, 0.8); }   // (A) one broken off
-      else if (k === 1) { [[0.45, 2.2, -0.35], [1.2, 2.7, 0.25], [1.9, 2.1, -0.2], [2.6, 1.6, 0.4, true]].forEach(([u, h, l, br]) => { const tu = stake(u, h, l, 5, br); if (!br) skull(tu, h - 0.4); }); }   // leaning every way (B)
-      else if (k === 2) { const t1 = stake(0.6, 2.4, -0.1), t2 = stake(1.5, 2.9, 0.05), t3 = stake(2.4, 2.3, 0.18); skull(t1, 2.0); skull(t2, 2.5); skull(t3, 1.9); sag(t1, 1.6, t2, 2.0, 0.35); sag(t2, 2.0, t3, 1.5, 0.4); }   // ropes sagging between (C)
-      else if (k === 3) { const ts = [[0.5, 2.1, 0.05], [1.2, 2.7, -0.05], [1.9, 2.4, 0.5], [2.7, 1.9, -0.15]].map(([u, h, l]) => [stake(u, h, l), h]); ts.forEach(([tu, h], i) => { if (i !== 2) skull(tu, h - 0.4); }); webd(1.25, 1.95, 1.8); }   // a cobweb, one leaning hard (D)
-      else if (k === 4) { stake(0.4, 1.4, 0.05, 5, true); stake(1.0, 1.8, -0.1); ln(0.2, 0.3, 2.6, 0.9, G, 4); const tu = stake(1.6, 2.6, 1.1, 4); skull(tu + 0.1, 2.35); stake(2.5, 1.3, 0.1, 5, true); }   // a long pole leaning out, a skull on its end; a fallen stake across (E)
-      else { const t1 = stake(0.6, 2.2, 0.08), t2 = stake(1.5, 2.8, -0.06), t3 = stake(2.4, 2.2, 0.1); skull(t1, 1.8); skull(t2, 2.4); skull(t3, 1.8); sag(t1, 1.45, t3, 1.45, 0.35);   // bones hung on a rope between (F)
-        for (const q of [0.25, 0.75]) { const bu = t1 + (t3 - t1) * q, bv = 1.45 - 0.35 * 4 * q * (1 - q); ln(bu, bv, bu, bv - 0.4, G, 1); ln(bu, bv - 0.4, bu, bv - 0.9, G, 3); for (const e of [-1, 1]) { ln(bu, bv - 0.4, bu + e * 0.08, bv - 0.36, G, 2); ln(bu, bv - 0.9, bu + e * 0.08, bv - 0.94, G, 2); } } }
-      vlamps.push([X(1.5), Y(2.0), 0.6 + 0.8 * near, 2.2 + 1.2 * near]);   // the fence's glow: it lights the dark round it, more as the hero comes
+      stake(0.4, 1.4, 0.05, 5, true); stake(1.0, 1.8, -0.1); ln(0.2, 0.3, 2.6, 0.9, G, 4); const tu = stake(1.6, 2.6, 1.1, 4); skull(tu + 0.1, 2.35); stake(2.5, 1.3, 0.1, 5, true);
+      vlamps.push([X(2.6), Y(2.2), 0.6 + 0.8 * near, 2.2 + 1.2 * near]);   // the skull's glow: it lights the dark round it, more as the hero comes
     }
   }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
@@ -3627,16 +3578,16 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const [u, v] of [[0.6, 0.62], [0.35, 0.78], [0.8, 0.85]]) barn(E(u), Y(v));
     lip(); return true;
   };
-  // The Dark Forest's ledges (the owner's second sheets, research/variants/skazka-*-2-px.png, black and white and crooked; 2026-10-20: «весь в чб … и более
-  // коряво жуткий»): while the owner picks, all six variants of each in the game's own code (SKAZKA_V, or window.__skV from the gallery), at the sheets' size.
-  // A block is earth clawed together by roots (slab), a plank a gnarled dead branch (plank), a moving plank Baba Yaga's mortar (mortar), a crumbling block a
-  // rotten log (log). Grey and black only, the edges you stand on white; colour only for eyes glowing in a hollow or a candle (lights, see skEyes). Roots half
-  // dark (behind the ledge's face), a cobweb that is only decor dim (the white one you hold is this world's moss). False for what keeps the common look.
+  // The Dark Forest's ledges (the owner's picks, 2026-10-20, from research/variants/skazka-*-game.png, black and white and crooked): a block is earth clawed
+  // together by roots, hollows in them, a skull in one, eyes glowing in the other (slab A); a plank a gnarled dead branch off a trunk that climbs the wall, its
+  // free end clawing, a cobweb under it (plank F); a moving plank Baba Yaga's mortar riding curls of smoke, its pestle, a candle and a black cat's eyes over its
+  // rim (mortar F); a crumbling block a rotten log broken in two, a spiral knot, toadstools, a snail (log B). Grey and black only, the edges you stand on white;
+  // colour only for lights (eyes, see skEyes; a candle). Roots half dark (behind the ledge's face), a cobweb that is only decor dim (the white one you hold is
+  // this world's moss). False for what keeps the common look.
   const skazkaRect = (r) => {
-    const t = kitT, P = kitP, px = P / t, V = window.__skV || SKAZKA_V, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
-    const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
     const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
     const G = PAL.gray, K = PAL.black, HALF = 1.5;   // grey, black; roots half of the way from the black (DEPTH)
@@ -3653,16 +3604,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const [e, f] of [[-0.17, 0.45], [0.04, 0.54], [0.17, 0.42]]) box(snap(x + e * t * s), snap(y - f * t * s), snap(x + e * t * s) + P, snap(y - f * t * s) + P, K, a, 0, 10, 0);
       box(snap(x - 0.3 * t * s), snap(y - 0.36 * t * s), snap(x + 0.3 * t * s), snap(y - 0.34 * t * s), K, a, 0, 10, 0);   // the shade under its cap
     };
-    const bone = (x, y, ang = 0.35, s = 1, a = 1) => {   // a grey bone 0.8 tiles long, its knobbed ends
-      const dx = Math.cos(ang) * 0.32 * t * s, dy = Math.sin(ang) * 0.32 * t * s; line(snap(x - dx), snap(y - dy), snap(x + dx), snap(y + dy), G, a, 3);
-      for (const e of [-1, 1]) for (const f of [-1, 1]) disc(snap(x + e * dx - f * dy * 0.3), snap(y + e * dy + f * dx * 0.3), 0.08 * t * s + P / 2, G, a);
-    };
     const skull = (x, y, s = 1, a = 1) => {   // a grey skull 0.95 tiles across, black sockets, a nose, teeth
       disc(x, y, 0.42 * t * s, G, a); box(snap(x - 0.25 * t * s), snap(y + 0.18 * t * s), snap(x + 0.25 * t * s), snap(y + 0.46 * t * s), G, a, 0, 10, 0);
       for (const e of [-1, 1]) disc(snap(x + e * 0.17 * t * s), snap(y + 0.04 * t * s), 0.12 * t * s, K, a);
       box(snap(x) - P, snap(y + 0.18 * t * s), snap(x) + P, snap(y + 0.26 * t * s), K, a, 0, 10, 0); for (const e of [-0.13, 0, 0.13]) box(snap(x + e * t * s), snap(y + 0.34 * t * s), snap(x + e * t * s) + P, snap(y + 0.46 * t * s), K, a, 0, 10, 0);
     };
-    const web = (x, y, dx, s = 1) => {   // a cobweb in the corner under it, dim: three threads out of the corner, two sagging rings across them, a strand hanging
+    const web = (x, y, dx, s = 1) => {   // a cobweb under it, dim: three threads out of a corner, two sagging rings across them, a strand hanging
       const L = 1.4 * t * s, at = (a, f) => [snap(x + dx * Math.cos(a) * L * f), snap(y + Math.sin(a) * L * f)];
       for (const a of [0.12, 0.75, 1.4]) { const [ex, ey] = at(a, 1); line(x, y, ex, ey, G, DIM); }
       for (const f of [0.45, 0.85]) { const p0 = at(0.12, f), p1 = at(0.75, f * 0.86), p2 = at(1.4, f); line(p0[0], p0[1], p1[0], p1[1], G, DIM); line(p1[0], p1[1], p2[0], p2[1], G, DIM); }
@@ -3673,95 +3620,60 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let i = 0; i < 3; i++) { const q = (i / 3) * 6.28 + 0.5 + hsh(n + i); line(snap(x + Math.cos(q) * rw * t), snap(y + Math.sin(q) * rh * t), snap(x + Math.cos(q) * (rw + 0.25) * t), snap(y + Math.sin(q) * (rh + 0.25) * t), G, HALF, 2); }
       if (eyes) skEyes(x, y, Math.min(1, rw / 0.4), n);
     };
-    const claws = (x, y, s, n, up = -1) => {   // twigs like a clawing hand off a free end: three curling fingers
+    const claws = (x, y, s, n, up = -1) => {   // twigs like a clawing hand: three curling fingers
       for (let i = 0; i < 3; i++) { let x0 = x, y0 = y, ang = -Math.PI / 2 + (i - 1) * 0.55 + (up > 0 ? Math.PI : 0); const len = (0.55 + 0.25 * hsh(n + i)) * s * t;
         for (let j = 0; j < 3; j++) { const x1 = snap(x0 + Math.cos(ang) * len / 3 * (d > 0 ? 1 : -1) * (i === 1 ? 0.6 : 1) + d * (i - 1) * 0.04 * t), y1 = snap(y0 + Math.sin(ang) * len / 3); line(x0, y0, x1, y1, G, 1, j < 1 ? 2 : 1); x0 = x1; y0 = y1; ang += 0.42 * (i === 0 ? -1 : 1); } }
     };
-    if (r.crumble) {   // a rotten log (log): grey in black rot, its end splintered, holes, a spiral knot, grey toadstools; a hollow with eyes, a face; its pieces shake as it gives
-      const k = V.log, u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, cut = k === 1 ? 0.58 : -1;
-      const parts = cut > 0 ? [[0, cut - 0.03], [cut + 0.03, 1]] : [[0, 1]];
-      parts.forEach(([q0, q1], i) => {
+    if (r.crumble) {   // a rotten log broken in two: grey in black rot, its grain split, holes, a spiral knot, grey toadstools, a snail; its pieces shake as it gives
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, cut = 0.58;
+      [[0, cut - 0.03], [cut + 0.03, 1]].forEach(([q0, q1], i) => {
         const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(Math.min(W(q0 * wt), W(q1 * wt))) + ox, x1 = snap(Math.max(W(q0 * wt), W(q1 * wt))) + ox;
         box(x0, r.y0 + 2 * P, x1, r.y1 - 2 * P, th.crumble, a, 0, 10, 1); box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y1, th.crumble, a, 0, 10, 1);   // a piece, its ends round, its rot speckled
         box(x0 + 2 * P, Y(ht * 0.6), x1 - 2 * P, r.y1 - P, th.crumble, a, 0, 10, 4);   // its underside darker
         for (let x = x0 + snap(0.2 * t), j = 0; x < x1 - snap(0.3 * t); j++) { const ww = snap((0.3 + 0.5 * hsh(j + i * 50)) * t), yy = Y(ht * (0.25 + 0.4 * hsh(j + 9 + i * 50))); box(x, yy, Math.min(x1 - 2 * P, x + ww), yy + P, K, a, 0, 10, 0); x += ww + snap((0.25 + 0.35 * hsh(j + 21)) * t); }   // its grain split
         box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y0 + 2.5, th.lip, a, 1.25);
       });
-      if (k !== 1) { const ex = E(0); for (let i = 0; i < 4; i++) { const v0 = ht * (0.1 + 0.22 * i), dv = ht * 0.11, tip = (0.25 + 0.3 * hsh(i + 40)) * (i % 2 ? 1 : 0.6); F(snap(ex + d * (tip / 2 - 0.05) * t), Y(v0 + dv), (tip / 2 + 0.05) * t * (k === 3 ? 1.4 : 1), 0, 0, dv * t, th.crumble, a, 0); }   // its end splintered
-        be(-0.1, ht * 0.3, 0.12, ht * 0.38, K, 0, a); be(-0.05, ht * 0.62, 0.15, ht * 0.7, K, 0, a); }
-      if (k === 3) { box(r.x0, r.y1 - snap(0.15 * t), r.x1, r.y1, K, a, 0, 10, 0); for (const q of [0.3, 0.6].filter((x) => x * wt > 0.5)) root(W(q * wt), 1.4, 900 + q * 10, 2, HALF * a); }   // its rotten belly, roots hanging (D)
-      const holes = k === 3 || k === 5 ? 3 : k === 2 || k === 4 ? 1 : 2;
-      for (let i = 0; i < holes; i++) { const hx = snap(r.x0 + (0.2 + 0.55 * hsh(i + 3)) * w), hy = snap(r.y0 + (0.45 + 0.2 * hsh(i + 13)) * (r.y1 - r.y0)); F(hx, hy, 0.13 * t, 0, 0, 0.1 * t, K, a, 0); }   // woodworm holes
-      if (k === 1 || k === 5) { const kx = k === 1 ? W(cut * wt * 0.5) : W(wt * 0.45), ky = Y(ht * 0.55); for (const rr of [0.32, 0.22, 0.12]) F(kx, ky, rr * t, 0, 0, rr * 0.8 * t, K, a, 4); }   // a spiral knot
-      if (k === 2) hollow(snap((r.x0 + r.x1) / 2), Y(ht * 0.55), 0.55, 0.32, 1200, true, a);   // a hollow, eyes in it (C)
-      if (k === 4) { const fx = W(wt * 0.6), fy = Y(ht * 0.5); for (const e of [-1, 1]) F(snap(fx + e * 0.3 * t), fy - snap(0.08 * t), 0.13 * t, 0, 0, 0.11 * t, K, a, 0); F(fx, fy + snap(0.18 * t), 0.2 * t, 0, 0, 0.12 * t, K, a, 0); }   // a face in its knots (E)
-      if (k === 0 || k === 1 || k === 4 || k === 5) { toad(W(0.35), 1, a); toad(W(0.75), 0.7, a); }
-      if (k === 0 || k === 4) toad(W(wt * 0.55), 0.85, a);
-      if (k === 1 || k === 2) { const sx = E(k === 1 ? 0.8 : 1.0), sy = r.y0; box(sx - snap(0.32 * t), sy - snap(0.12 * t), sx + snap(0.22 * t), sy, G, a, 0, 10, 0); for (const e of [0.1, 0.2]) box(sx + snap(e * t), sy - snap(0.32 * t), sx + snap(e * t) + P, sy - snap(0.12 * t), G, a, 0, 10, 0);   // a snail: its body, its horns,
+      for (let i = 0; i < 2; i++) { const hx = snap(r.x0 + (0.2 + 0.55 * hsh(i + 3)) * w), hy = snap(r.y0 + (0.45 + 0.2 * hsh(i + 13)) * (r.y1 - r.y0)); F(hx, hy, 0.13 * t, 0, 0, 0.1 * t, K, a, 0); }   // woodworm holes
+      { const kx = W(cut * wt * 0.5), ky = Y(ht * 0.55); for (const rr of [0.32, 0.22, 0.12]) F(kx, ky, rr * t, 0, 0, rr * 0.8 * t, K, a, 4); }   // a spiral knot
+      toad(W(0.35), 1, a); toad(W(0.75), 0.7, a);
+      { const sx = E(0.8), sy = r.y0; box(sx - snap(0.32 * t), sy - snap(0.12 * t), sx + snap(0.22 * t), sy, G, a, 0, 10, 0); for (const e of [0.1, 0.2]) box(sx + snap(e * t), sy - snap(0.32 * t), sx + snap(e * t) + P, sy - snap(0.12 * t), G, a, 0, 10, 0);   // a snail: its body, its horns,
         disc(sx - snap(0.12 * t), sy - snap(0.3 * t), 0.24 * t, G, a); for (const rr of [0.16, 0.08]) F(sx - snap(0.12 * t), sy - snap(0.3 * t), rr * t, 0, 0, rr * t, K, a, 4); }   // its shell in rings
-      if (k === 5) bone(E(0.8), r.y0 - snap(0.1 * t), 0.1, 0.8, a);
       return true;
     }
-    if (r.plank && r.move) {   // Baba Yaga's mortar (mortar), crooked and cracked, the rim you stand on: A and B a wide bowl with its pestle (B a spider hanging off it), C and D a tall
-      // tub sweeping a broom behind it, E and F one riding curls of smoke, a candle on it (F a black cat's eyes over its rim)
-      const k = V.mortar, ahead = r.move.v < 0 ? -1 : 1, fr = ahead > 0 ? r.x1 : r.x0, bk = ahead > 0 ? r.x0 : r.x1, A = (u) => snap(fr - ahead * u * t), B = (u) => snap(bk + ahead * u * t);
-      const cx = snap((r.x0 + r.x1) / 2), hw = w / 2 / t, c = th.mover, wide = k === 0 || k === 1 || k >= 4, lean = (k === 1 || k === 3 ? -1 : 1) * ahead * 0.12;   // how much it leans, a row at a time
+    if (r.plank && r.move) {   // Baba Yaga's mortar, crooked and cracked, riding curls of smoke, the rim you stand on: its pestle, a candle lit on its rim, a black cat's eyes over it
+      const ahead = r.move.v < 0 ? -1 : 1, bk = ahead > 0 ? r.x0 : r.x1, B = (u) => snap(bk + ahead * u * t);
+      const cx = snap((r.x0 + r.x1) / 2), hw = w / 2 / t, c = th.mover, lean = ahead * 0.12;   // how much it leans, a row at a time
       const row = (v0, v1, i0, j, tn = 0) => box(snap(cx - (hw - i0 - lean * j) * t), Y(v0), snap(cx + (hw - i0 + lean * j) * t), Y(v1), c, 1, 0, 10, tn);   // a band of it, i0 in from each end, leaning
-      if (k >= 4) { F(cx, Y(2.05), (hw + 0.6) * t, 0, 0, 0.6 * t, G, 0.6, 1); for (const [dx, dv, rr] of [[-hw - 0.5, 1.8, 0.32], [hw + 0.55, 1.9, 0.28], [-0.4, 2.5, 0.36], [0.6, 2.45, 0.3]]) { F(snap(cx + dx * t), Y(dv), rr * t, 0, 0, rr * t, G, 0.5, 1); F(snap(cx + dx * t), Y(dv), rr * 0.6 * t, 0, 0, rr * 0.6 * t, G, DIM, 4); } }   // the smoke it rides, curling
-      const bands = wide ? [[0, 0.3, 0], [0.3, 1.0, 0.12], [1.0, 1.5, 0.45], [1.5, 1.8, 0.8]] : [[0, 0.28, 0], [0.28, 1.0, 0.22], [1.0, k === 3 ? 1.75 : 1.5, 0.32], [k === 3 ? 1.75 : 1.5, k === 3 ? 2.0 : 1.75, 0.5]];
-      bands.forEach(([v0, v1, i0], j) => { row(v0, v1, i0, j, j ? 1 : 0); if (j) box(snap(cx + (hw - i0 + lean * j) * t * 0.35), Y(v0), snap(cx + (hw - i0 + lean * j) * t), Y(v1), c, 1, 0, 10, 4); });   // its staves dotted, its far side in shade
+      F(cx, Y(2.05), (hw + 0.6) * t, 0, 0, 0.6 * t, G, 0.6, 1); for (const [dx, dv, rr] of [[-hw - 0.5, 1.8, 0.32], [hw + 0.55, 1.9, 0.28], [-0.4, 2.5, 0.36], [0.6, 2.45, 0.3]]) { F(snap(cx + dx * t), Y(dv), rr * t, 0, 0, rr * t, G, 0.5, 1); F(snap(cx + dx * t), Y(dv), rr * 0.6 * t, 0, 0, rr * 0.6 * t, G, DIM, 4); }   // the smoke it rides, curling
+      const bands = [[0, 0.3, 0], [0.3, 1.0, 0.12], [1.0, 1.5, 0.45], [1.5, 1.8, 0.8]];   // a wide bowl
+      bands.forEach(([v0, v1, i0], j) => { row(v0, v1, i0, j, j ? 1 : 0); if (j) box(snap(cx + (hw - i0 + lean * j) * t * 0.35), Y(v0), snap(cx + (hw - i0 + lean * j) * t), Y(v1), c, 1, 0, 10, 4); });   // its staves, its far side in shade
       bands.slice(1).forEach(([v0, , i0], j) => box(snap(cx - (hw - i0 - lean * (j + 1)) * t), Y(v0), snap(cx + (hw - i0 + lean * (j + 1)) * t), Y(v0) + P, K, 1, 0, 10, 0));   // its iron hoops
       for (const [u, v0, n] of [[0.25, 0.35, 4], [0.65, 0.5, 5], [0.45, 1.05, 3]]) for (let i = 0; i < n; i++) box(snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2), Y(v0 + i * 0.12), snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2) + P, Y(v0 + i * 0.12 + 0.12), K, 1, 0, 10, 0);   // its cracks
-      if (k === 0 || k === 1 || k >= 4) { const tip = k === 1 ? -1.7 : -1.45; line(B(0.75), Y(0.2), B(0.3), Y(tip), c, 1, 5); disc(B(0.3), Y(tip), 0.18 * t, c, 1); box(B(0.3) - P, Y(tip) - P, B(0.3) + P, Y(tip) + P, K, 1, 0, 10, 0); }   // the pestle stuck in it
-      if (k === 1) { const sx = snap(cx - lean * 3 * t), sy = Y(1.8); line(sx, sy, sx, Y(2.7), G, DIM); disc(sx, Y(2.8), 0.12 * t, K, 1); for (const e of [-1, 1]) for (const f of [-0.06, 0.04]) line(sx, Y(2.8 + f), snap(sx + e * 0.22 * t), Y(2.7 + f * 2), G, 1); }   // a spider hanging off it on a thread (B)
-      if (k === 2 || k === 3) {   // the broom behind it, bound, grey sparks off it
-        line(B(0.3), Y(0.55), B(-0.95), Y(0.5), c, 1, 3); box(Math.min(B(-0.85), B(-1.02)), Y(0.36), Math.max(B(-0.85), B(-1.02)), Y(0.64), K, 1, 0, 10, 0);
-        for (let i = 0; i < 7; i++) line(B(-1.0), Y(0.42 + 0.025 * i), B(-2.0 - 0.15 * ((i * 3) % 4) / 3), Y(0.02 + 0.16 * i + 0.05 * Math.sin(i * 2)), c, 1, i % 2 ? 1 : 2);
-        for (let i = 0; i < 7; i++) if (Math.sin(T * 7 + i * 1.7) > -0.3) { const sx = B(-1.3 - 0.3 * (i % 3)), sy = Y(0.9 + 0.2 * i); box(sx, sy, sx + P, sy + P, G, 1, 0, 10, 0); }
-      }
-      if (k === 4 || k === 5) { const lx = B(k === 5 ? 1.1 : 0.95); box(lx - snap(0.08 * t), Y(-0.5), lx + snap(0.08 * t), r.y0, G, 1, 0, 10, 0); box(lx - P, Y(-0.75), lx + P, Y(-0.5), PAL.orange, 1, 0, 10, 0); box(lx - P / 2, Y(-0.7), lx + P / 2, Y(-0.56), PAL.yellow, 1, 0, 10, 0); vlamps.push([lx, Y(-0.62), 0.5, 1.6]); }   // a candle lit on its rim (a light)
-      if (k === 5) skEyes(B(0.3), Y(-0.15), 0.7, 1300);   // a black cat's eyes over its rim, glowing
+      { const tip = -1.45; line(B(0.75), Y(0.2), B(0.3), Y(tip), c, 1, 5); disc(B(0.3), Y(tip), 0.18 * t, c, 1); box(B(0.3) - P, Y(tip) - P, B(0.3) + P, Y(tip) + P, K, 1, 0, 10, 0); }   // the pestle stuck in it
+      { const lx = B(1.1); box(lx - snap(0.08 * t), Y(-0.5), lx + snap(0.08 * t), r.y0, G, 1, 0, 10, 0); box(lx - P, Y(-0.75), lx + P, Y(-0.5), PAL.orange, 1, 0, 10, 0); box(lx - P / 2, Y(-0.7), lx + P / 2, Y(-0.56), PAL.yellow, 1, 0, 10, 0); vlamps.push([lx, Y(-0.62), 0.5, 1.6]); }   // a candle lit on its rim (a light)
+      skEyes(B(0.3), Y(-0.15), 0.7, 1300);   // a black cat's eyes over its rim, glowing
       lip(); return true;
     }
-    if (r.plank) {   // a gnarled dead branch (plank): thick at the wall, bark split, its free end in twigs like a clawing hand; a cobweb, a knot like an eye, dried herbs, a
-      // bast shoe, a bone on a string, a hollow with eyes, a trunk up the wall by the variant
+    if (r.plank) {   // a gnarled dead branch off a trunk that climbs the wall: thick at the wall, bark split, its free end in twigs like a clawing hand, thorns and a dim cobweb under it
       if (r.bouncy) return false;
-      const k = V.plank, c = th.plank;
+      const c = th.plank;
       box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, r.y1 - 2 * P, r.x1, r.y1, c, 1, 0, 10, 4);   // its wood, its underside in shade
       for (let x = r.x0 + snap(0.3 * t), j = 0; x < r.x1 - snap(0.4 * t); j++) { const ww = snap((0.2 + 0.3 * hsh(j)) * t); box(x, Y(ht * 0.45), x + ww, Y(ht * 0.45) + P, K, 1, 0, 10, 0); x += ww + snap((0.35 + 0.5 * hsh(j + 7)) * t); }   // its bark split
       if (on) line(W(0), Y(ht + 0.45), W(1.3), Y(ht * 0.6), c, 1, 4, 2);   // thick where it grows out of the wall
       be(0, ht * 0.55, 0.3, ht, K);   // its free end thinning
-      claws(E(0.15), r.y0, k === 2 ? 2.8 : k === 0 ? 2.3 : 1.9, 1400 + k);   // twigs like a clawing hand
+      claws(E(0.15), r.y0, 1.9, 1405);   // twigs like a clawing hand
       for (const [u, ln0] of [[0.9, 0.35], [1.7, 0.25]].filter(([q]) => q < wt - 0.5)) line(W(u), r.y1, snap(W(u) + d * 0.1 * t), Y(ht + ln0), c, 1, 1);   // thorns under it
-      if (k === 0) web(W(0), r.y1, d, 1.0); if (k === 5) web(snap((r.x0 + r.x1) / 2), r.y1, d, 0.7);   // dim cobwebs
-      if (k === 1 || k === 3) { const kx = W(k === 1 ? 0.5 : wt * 0.55), ky = Y(ht / 2); disc(kx, ky, 0.36 * t, c, 1); F(kx, ky, 0.36 * t, 0, 0, 0.3 * t, K, 1, 4); disc(kx, ky, (k === 3 ? 0.14 : 0.1) * t, K, 1); }   // a knot like an eye
-      const hang = (u, len) => { const hx = E(u); box(hx, r.y1, hx + P, Y(ht + len), G, 1, 0, 10, 0); return hx; };   // a string hanging off it
-      if (k === 1) { const hx = hang(0.6, 0.3); box(hx - snap(0.2 * t), Y(ht + 0.3), hx + snap(0.2 * t), Y(ht + 0.4), G, 1, 0, 10, 0); for (let i = 0; i < 6; i++) line(hx + snap((i - 2.5) * 0.06 * t), Y(ht + 0.4), hx + snap((i - 2.5) * 0.1 * t), Y(ht + 1.25 - 0.08 * (i % 3)), G, 1, 1); }   // a bundle of dried twigs
-      if (k === 2) { const hx = hang(0.4, 0.35); box(hx - snap(0.22 * t), Y(ht + 0.35), hx + snap(0.25 * t), Y(ht + 1.1), G, 1, 0, 10, 4); box(hx - snap(0.22 * t), Y(ht + 0.35), hx + snap(0.25 * t), Y(ht + 0.45), G, 1, 0, 10, 0); }   // a bast shoe (lapot), woven
-      if (k === 3) { root(W(1.2), 1.6, 1500, 2, 1); const hx = hang(0.45, 0.55); bone(hx + P / 2, Y(ht + 0.9), Math.PI / 2, 0.9); }   // a crooked root hanging, a bone on a string
-      if (k === 4) hollow(W(wt * 0.45), Y(ht + 0.25), 0.45, 0.3, 1600, true);   // a hollow under it, eyes in it
-      if (k === 5 && on) { line(W(0.15), Y(ht + 1.6), W(0.25), Y(-2.0), c, 1, 6, 2); for (const [v, s] of [[-1.2, 1], [-1.7, -1]]) claws(W(0.25), Y(v), 0.9, 1700 + Math.round(v * 10), s > 0 ? -1 : 1); }   // the trunk it grows off, up the wall, its own twigs
+      web(snap((r.x0 + r.x1) / 2), r.y1, d, 0.7);   // a dim cobweb
+      if (on) { line(W(0.15), Y(ht + 1.6), W(0.25), Y(-2.0), c, 1, 6, 2); for (const [v, s] of [[-1.2, 1], [-1.7, -1]]) claws(W(0.25), Y(v), 0.9, 1700 + Math.round(v * 10), s > 0 ? -1 : 1); }   // the trunk it grows off, up the wall, its own twigs
       lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
-    {   // earth clawed together by roots (slab): dotted grey, its underside jagged and dark, roots like fingers; hollows (a skull in one, eyes in another), a skull on
-      // it, a face in its roots, a bony hand reaching down, ribs, a big dark hollow by the variant
-      const k = V.slab, c = th.block;
+    {   // earth clawed together by roots: dotted grey, its underside jagged and dark, roots like fingers, hollows in them, a skull in one, eyes glowing in the other
+      const c = th.block;
       box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 1); box(r.x0, Y(Math.max(0.35, ht - 0.3)), r.x1, r.y1, c, 1, 0, 10, 4);
       for (let x = r.x0 + snap(0.15 * t), i = 0; x < r.x1 - snap(0.2 * t); i++) { const ww = snap((0.2 + 0.25 * hsh(i + 300)) * t), dd = snap((0.15 + 0.3 * hsh(i + 330)) * t); F(snap(x + ww / 2), r.y1 + dd / 2, ww / 2, 0, 0, -dd / 2, c, 1, 6, ww / 2, dd / 2, ww); x += ww + snap((0.45 + 0.5 * hsh(i + 360)) * t); }   // earth hanging off its underside in teeth
-      const roots = (us, len, wd) => us.filter((u) => u < wt - 0.25).forEach((u, i) => root(W(u), len * (0.65 + 0.5 * hsh(i + 70)), 100 + i * 17 + k * 7, wd));
-      if (k === 0) { roots([0.4, 1.9, 3.4], 1.7, 3); hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); if (wt > 3) hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, true); }   // hollows in its roots: a skull in one, eyes in the other (A)
-      else if (k === 1) { roots([0.5, 1.6, 2.9], 2.2, 3); skull(E(0.8), r.y0 - snap(0.36 * t), 0.75); line(E(0.25), r.y0, E(0.1), r.y0 - snap(0.5 * t), G, 1, 1); line(E(0.12), r.y0 - snap(0.42 * t), E(0.0), r.y0 - snap(0.6 * t), G, 1, 1);   // a skull on it, a sprout
-        F(snap(E(0) - d * 0.2 * t), r.y1 + snap(0.3 * t), 0.25 * t, 0, 0, -0.35 * t, c, 1, 6, 0.25 * t, 0.35 * t, 0.5 * t); }   // its end a claw hanging (B)
-      else if (k === 2) { roots([0.3, 0.8, 2.7, 3.3], 1.4, 2); const fx = W(Math.min(1.7, wt / 2)), fy = Y(ht + 0.55); F(fx, fy, 0.7 * t, 0, 0, 0.6 * t, G, HALF, 0);   // a face in its roots (C): its eyes, its mouth agape
-        for (const e of [-1, 1]) F(snap(fx + e * 0.28 * t), fy - snap(0.15 * t), 0.14 * t, 0, 0, 0.11 * t, K, 1, 0); F(fx, fy + snap(0.25 * t), 0.13 * t, 0, 0, 0.2 * t, K, 1, 0); toad(E(0.45), 1.1); }
-      else if (k === 3) { roots([0.4, 2.8, 3.4], 1.8, 3); const hx = W(Math.min(2.0, wt * 0.55)), hy = r.y1; box(hx - snap(0.18 * t), hy, hx + snap(0.18 * t), hy + snap(0.3 * t), G, 1, 0, 10, 0);   // a bony hand reaching down out of it (D): its palm,
-        for (let i = 0; i < 4; i++) { const fx = hx + snap((i - 1.5) * 0.11 * t), a0 = 0.15 * (i - 1.5); line(fx, hy + snap(0.3 * t), snap(fx + a0 * t), hy + snap(0.65 * t), G, 1, 2); line(snap(fx + a0 * t), hy + snap(0.65 * t), snap(fx + a0 * 1.6 * t), hy + snap(0.95 * t), G, 1, 1); }   // its finger bones
-        skull(W(1.0), Y(ht - 0.15), 0.55); line(E(0), r.y1, snap(E(0) + d * 0.2 * t), Y(ht + 0.8), c, 1, 4); }   // a skull in it, its end bent down
-      else if (k === 4) { roots([0.5, 2.6, 3.3], 1.7, 3); hollow(W(Math.min(1.9, wt * 0.5)), Y(ht + 0.35), 0.5, 0.32, 2400, true);   // a hollow, eyes in it (E), ribs on it
-        line(E(0.35), r.y0 - snap(0.1 * t), E(0.95), r.y0 - snap(0.06 * t), G, 1, 2); for (let i = 0; i < 4; i++) { const rx = E(0.42 + 0.15 * i), h = (0.42 - 0.05 * i) * t; line(rx, r.y0 - snap(0.08 * t), snap(rx - d * 0.1 * t), snap(r.y0 - 0.5 * h), G, 1, 2); line(snap(rx - d * 0.1 * t), snap(r.y0 - 0.5 * h), snap(rx + d * 0.02 * t), snap(r.y0 - h), G, 1, 2); } }   // ribs on it, a spine
-      else if (k === 5) { roots([0.4, 2.9, 3.4], 1.9, 2); hollow(W(Math.min(1.8, wt * 0.48)), Y(ht + 0.15), 0.8, 0.35, 2600); for (let i = 0; i < 4; i++) root(W(Math.min(1.8, wt * 0.48) + (i - 1.5) * 0.4), 1.1, 2500 + i, 2, HALF, Y(ht + 0.3));   // a big dark hollow, roots off its rim
-        skull(E(0.95), r.y0 - snap(0.36 * t), 0.7); line(E(0.4), r.y0, E(0.3), r.y0 - snap(0.9 * t), G, 1, 2); line(E(0.33), r.y0 - snap(0.55 * t), E(0.1), r.y0 - snap(0.8 * t), G, 1, 1); }   // a skull on it, a dead twig
+      [0.4, 1.9, 3.4].filter((u) => u < wt - 0.25).forEach((u, i) => root(W(u), 1.7 * (0.65 + 0.5 * hsh(i + 70)), 100 + i * 17, 3));
+      hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); if (wt > 3) hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, hsh(2020) < 0.34);   // eyes in one in three (the owner's rule on detail: a screen of eyes is noise)
       lip(); return true;
     }
   };
@@ -4097,7 +4009,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   let sig = '';
   for (const b of list) if (b !== hero || !heroOff) sig += b.id + ',';
   this.idxDirty = sig !== this.idxSig;
-  this.kolobok = th.skazka ? (window.__skV || SKAZKA_V).kolobok : -1;   // the Dark Forest's hero a Kolobok (see writeFace)
+  this.kolobok = !!th.skazka;   // the Dark Forest's hero a Kolobok (see writeFace)
   for (const b of list) if (b !== hero || !heroOff) this.buildBody(b, alpha);
   const front = this.nf;
   fx.write(this);
@@ -4218,7 +4130,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const r of this.ranges) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
-    const kb = this.kolobok >= 0 && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
+    const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
     gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P));
     {   // the target always has a stencil
       // Fill by winding number (as in Gum), so a crushed outline that turns back on

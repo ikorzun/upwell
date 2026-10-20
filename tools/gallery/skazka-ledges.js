@@ -1,5 +1,7 @@
 // The Dark Forest's gallery (tools/gallery, see compose.py): each variant of its ledges drawn by the game in one scene, a step each, in its dark (the hero's
 // light shows them). window.__galEls picks the elements.
+// (The owner picked the Dark Forest's on 2026-10-20 and SKAZKA_V went with the variants, so this no longer runs as it is: it is a template for the next
+// world's gallery, as the Sea's are.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), els = window.__galEls || ['slab', 'plank', 'mortar', 'log'];
   const scene = async (el, k) => {

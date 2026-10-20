@@ -3,7 +3,7 @@
 // (python3 tools/serve.py 8793). Prints one JSON line per level. NOFOES=1 plays the same
 // levels with the enemies taken out.
 // Usage: node tools/botrun.mjs [seed] [level…]     e.g. node tools/botrun.mjs 5 2-3 3-1 (a random run's), c1-4 (the campaign's; c1-4L, c1-4R its map's sides);
-// the seed r plays a campaign level on its recipe's own seed.
+// the seed r plays a campaign level on its recipe's own seed. d1, d2, d3: the daily well's levels, the seed its day (days since 1970: 20746 is 2026-10-20).
 import { spawn } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -51,7 +51,8 @@ await run('__up.freeze(true)');
 try {
   for (const name of levels) {
     const camp = name[0] === 'c', col = /L$/.test(name) ? 0 : /R$/.test(name) ? 2 : 1, [w, s] = name.replace(/^c/, '').replace(/[LR]$/, '').split('-').map(Number);
-    const a = await run(`__bot.level(${w - 1}, ${s - 1}, ${seed === 'r' ? 'null' : +seed}, { noFoes: ${process.env.NOFOES === '1'}, camp: ${camp}, col: ${col} })`);
+    const daily = /^d\d$/.test(name), a = await run(daily ? `__bot.level(0, ${name[1] - 1}, ${+seed}, { noFoes: ${process.env.NOFOES === '1'}, daily: true })`
+      : `__bot.level(${w - 1}, ${s - 1}, ${seed === 'r' ? 'null' : +seed}, { noFoes: ${process.env.NOFOES === '1'}, camp: ${camp}, col: ${col} })`);
     console.log(JSON.stringify({ level: name, result: a.result, time: a.time, heartsLost: a.heartsLost, hits: a.hits.map((h) => `${h.by}@${h.chunk}`),
       foes: a.spawned, stomped: a.killed, coins: `${a.coins}/${a.coinsPlaced}`, combo: a.combo, stuck: a.stuck.map((q) => `${q.chunk}@${q.at}`), tight: a.tightness, chunks: a.chunks }));
   }

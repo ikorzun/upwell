@@ -96,10 +96,12 @@ const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, h
 // run's progress stays in save.run, for the random run.
 const campFresh = () => ({ last: 1, stars: [], wallet: 0, builds: [], fails: {}, runes: [] });   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level   // last: the level played last
 const met = (kind, id) => { const b = save.book = save.book || {}; const k = b[kind] = b[kind] || {}; if (!k[id]) { k[id] = 1; persist(); } };   // into the book
-// The daily well (the plan after the sandbox): a random run whose levels are the day's, the same for everyone (the day by
-// the platform's clock when it has one: a device's may be set wrong). Each day's best is kept (save.days); three medals
-// stand at fixed heights, worlds 1-3 done, not at a rank among strangers (the digest §6).
-const MEDALS = [114, 264, 450];
+// The daily well (owner, 2026-10-20: the day's three Tokyo recipes): three levels of the Tokyo map in a row, one from its tiers 2-3,
+// one from 4-5, one from 7-8, each on a column the day picks, laid on the day's seeds: the same for everyone (the day by the platform's
+// clock when it has one: a device's may be set wrong), at the same difficulty (no hard mode). Tries are free and each day's best is kept
+// (save.days; the digest §6, the day's task: one seed for all, new each day, the best of many tries). A level cleared counts its whole
+// length; a medal stands where each ends, a fixed height, not a rank among strangers (the digest §6).
+const DAY_TIERS = [[1, 2], [3, 4], [6, 7]];
 const BOARD = 10000;   // Playgama's boards keep no days: a score is its day × BOARD + the day's best height, so today's lead and the days before sink under them
 let today = Math.floor(Date.now() / 86400000);
 // The week's marks (the plan after the sandbox; the digest §6: a streak back to zero punishes whoever missed a day): a day
@@ -109,6 +111,8 @@ const MARKS = { at: [3, 5, 7], pay: [30, 60, 120] };
 const weekOf = (day) => Math.floor((day + 3) / 7);
 const weekCard = () => (save.marks && save.marks.week === weekOf(today) ? save.marks : { week: weekOf(today), days: [] });
 const daySeed = (day, w, s, b) => (Math.imul((day ^ 0x9e3779b9) >>> 0, 2654435761) ^ (w * 97 + s * 13 + (b ? 7 : 0))) >>> 0;
+const dayPlan = (day) => { const r = mulberry32(daySeed(day, 9, 9, true)); return DAY_TIERS.map(([a, b]) => (r() < 0.5 ? a : b) * 3 + ((r() * 3) | 0)); };   // the daily well's three levels of the map (see campAt)
+const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += campAt(i).rc.len)); };   // its medals: where each of them ends
 // The campaign's map (the user: each world a grid of 3 × 10, a route up it to choose, as in Slay the Spire): a world's first level
 // alone at its foot, eight tiers of three over it, then its boss. Level i is world w, tier s, column c (i = w·30 + s·3 + c; the first
 // and the boss in the middle). The middle one is the tier's recipe; the left the same calmer, the right richer and fiercer (SIDE:
@@ -522,7 +526,7 @@ class Game {
     this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump;
   }
   get b() { return this.hero && Number.isFinite(this.hero.floorY) ? this.hero.floorY : this.lv.floor; }   // where Body.endStep puts landing dust
-  get wd() { return this.preview || (this.state === 'menu' && this.menuWd) || (this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
+  get wd() { return this.preview || (this.state === 'menu' && this.menuWd) || (this.mode === 'camp' || this.daily != null ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
   bodyList() {
     const a = this.list, lv = this.lv;
     a.length = 0;
@@ -552,13 +556,13 @@ class Game {
     ui.hideAll(); ui.menu();   // (which sets the camera on the hero)
   }
   startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round
-    this.newRun(); if (daily) this.daily = today; this.endless = !!endless; save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
+    this.newRun(); if (daily) { this.daily = today; this.tier = 0; this.hard = false; } this.endless = !!endless;   // (the daily well the same for all: no hard mode) save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
     if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
   }
   buildLevel(newHero) {
-    const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
+    const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = campAt(dayPlan(this.daily)[this.stage]).rc) : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
     const seed = nextSeed != null ? nextSeed : this.daily != null ? daySeed(this.daily, this.world, this.stage, !!this.bonus) : (Math.random() * 4294967296) >>> 0;
@@ -1208,9 +1212,9 @@ class Game {
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
   failKey() { return this.mode === 'camp' ? this.ci : 'lid'; }   // whose losses running (save.camp.fails): a campaign boss's by its level, the summit's as one
-  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
+  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
-  lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
+  lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
   fall() {
     if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
@@ -1469,7 +1473,7 @@ class Game {
       this.stars = { n: 1 + half + allCoins, coins: [lv.coinsTaken, lv.coinTotal] };
       this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
     }
-    this.climbed += this.levelM; this.levelM = 0;
+    this.climbed += this.daily != null ? this.rc.len : this.levelM; this.levelM = 0;   // (the daily's: its whole length, where its medal stands)
     if (this.mode === 'camp' && !this.bonus) this.campDone(this.stars.n);
     haptics.buzz(20); sound.play('portal');   // no toast: it would hide the hole
   }
@@ -1628,11 +1632,11 @@ class Game {
     ads.between(() => { this.state = 'play'; this.stateT = 0; this.buildLevel(false); this.saveRun(); ui.hideAll(); ui.toast(tf('loop', { n: this.loop + 1 }), 2200); });
   }
   finish(won) {
-    const bank0 = save.bank, total = Math.floor(this.climbed + this.levelM), firstWin = won && save.wins === 0;
+    const run = won && this.daily == null, bank0 = save.bank, total = Math.floor(this.climbed + this.levelM), firstWin = run && save.wins === 0;   // (the daily's top is no run won: nothing opens for it)
     save.bank += this.coins; save.best = Math.max(save.best, total);
-    if (won) save.wins++;
+    if (run) save.wins++;
     let tierUp = 0;
-    if (won && this.tier >= (save.tierMax || 0) && (save.tierMax || 0) < 5) { save.tierMax = this.tier + 1; tierUp = save.tierMax; }   // a win at the top tier opens the next (up to 5)
+    if (run && this.tier >= (save.tierMax || 0) && (save.tierMax || 0) < 5) { save.tierMax = this.tier + 1; tierUp = save.tierMax; }   // a win at the top tier opens the next (up to 5)
     if (this.endless) save.endlessBest = Math.max(save.endlessBest || 0, total);
     delete save.run;   // over: nothing to continue
     if (!won) pmsg('level_failed', this.lvl());   // only now: a death with a revive after it is the same go at the level
@@ -1647,7 +1651,8 @@ class Game {
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
     this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp, why: this.deathWhy() };
   }
-  where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + (this.world + 1) + '-' + (this.stage + 1); }
+  where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + this.num; }
+  get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
   togglePause(on) {
     if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); }
     else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); }
@@ -1675,7 +1680,7 @@ class Game {
     while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after
     this.stateT += dt;
     if (this.dieT > 0 && (this.dieT -= dt) <= 0 && this.state === 'dead') this.pop();
-    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else ui.cards(this.offer()); }   // an upgrade the first time a campaign level is cleared
+    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else if (this.daily != null && this.stage >= 2) { this.finish(true); ui.result(this.result); } else ui.cards(this.offer()); }   // (the daily's third: its top)   // an upgrade the first time a campaign level is cleared
     if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
     if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.runes(); else ui.result(this.result); }
     if (this.winT > 0 && this.state === 'play' && (this.winT -= dt) <= 0) this.win();
@@ -1820,8 +1825,8 @@ const ui = {
     const grid = el('div', 'grid2');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid)
     if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
     if (begun) grid.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
-    if (begun && ALL) grid.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => game.startRun(true)), 'daily'));   // the day's well, and its best
-    if (r && ALL) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one
+    if (begun) grid.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => (r && r.daily === today && !r.world && r.bonus < 0 ? game.continueRun() : game.startRun(true))), 'daily'));   // the day's well (today's try kept: on with it), and its best
+    if (r && r.daily == null && ALL) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one
     else if (begun && ALL) grid.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
     if (save.wins > 0 && ALL) {   // a run won: its hard mode's tier, and the endless climb
       const top = Math.max(1, save.tierMax || 1), tier = Math.min(save.tier != null ? save.tier : save.hard ? 1 : 0, top);
@@ -1986,7 +1991,7 @@ const ui = {
     box.append(tb);
     if (r.daily) {
       const row = el('div', 'medals');
-      MEDALS.forEach((m, k) => { const c = el('div', 'medal'); c.append(iconEl(r.daily.best >= m ? ['medalB', 'medalS', 'medalG'][k] : 'medalOff'), px(m + ' ' + t('m'))); row.append(c); });
+      dayMedals(r.daily.day).forEach((m, k) => { const c = el('div', 'medal'); c.append(iconEl(r.daily.best >= m ? ['medalB', 'medalS', 'medalG'][k] : 'medalOff'), px(m + ' ' + t('m'))); row.append(c); });
       box.append(el('div', 'label', tf('dailyBest', { n: r.daily.best })), row);
       if (ads.ok && bridge.leaderboards && bridge.leaderboards.type === 'in_game') bridge.leaderboards.getEntries('daily_height').then((all) => {
         const day = (e) => Math.floor(Number(e.score) / BOARD), es = all.filter((e) => day(e) === r.daily.day), ahead = all.filter((e) => day(e) > r.daily.day).length;   // today's only (see BOARD), ranked among themselves (a clock set ahead sends days to come)
@@ -2021,8 +2026,8 @@ const ui = {
     const bs = game.lv.boss;
     if (bs && bs.def) { const n = save.camp.fails[game.failKey()] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? (bs.def.how ? L2(bs.def.how) : t('bossHow')) : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
     if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
-    const intro = game.mode === 'camp' ? game.rc : (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');
-    this.toast(tf('world', { n: game.world + 1 }) + ' · ' + L2(game.wd.name) + '  ' + (game.world + 1) + '-' + (game.stage + 1) + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
+    const intro = game.rc || (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');   // (a recipe's: the campaign's, the daily well's)
+    this.toast((game.daily != null ? t('daily') : tf('world', { n: game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
   comboPop(n) { const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
   comboEnd() { $('combo').classList.remove('show'); },
@@ -2073,7 +2078,7 @@ const ui = {
     if (left) { gun.dataset.k = g.pow; gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
     const m = Math.floor(g.climbed + g.levelM);
     if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
-    const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : (g.world + 1) + '-' + (g.stage + 1);   // a bonus level counts its seconds down
+    const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : g.num;   // a bonus level counts its seconds down
     if (st !== this.stage) { this.stage = st; $('stage').replaceChildren(px(st)); }
     const c = $('combo');
     if (g.combo > 0 && g.hero) c.style.transform = 'translate(' + Math.round(g.hero.cx) + 'px,' + Math.round(g.hero.minY - g.lv.cam - 30) + 'px) translateX(-50%)';
@@ -2677,6 +2682,7 @@ window.__up = {
   // jump straight to world w (0-based; 4 is the boss), level s
   bonus(w, seed) { this.go(w, 2, seed); game.startBonus(BONUS[w]); return this.state; },   // straight into world w's bonus level
   camp(i, seed) { game.playLevel(i, seed); ui.hideAll(); return this.state; },   // straight into campaign level i (0-based)
+  daily(day, k = 0) { game.startRun(true); game.daily = day; game.stage = k; game.buildLevel(false); ui.hideAll(); return this.state; },   // straight into the daily well of `day` (days since 1970), its level k (0-based)
   go(w, s = 0, seed) { if (game.state === 'menu') game.startRun(); game.mode = 'run'; game.rc = null; game.world = w; game.stage = s; nextSeed = seed == null ? null : seed; game.state = 'play'; game.buildLevel(false); ui.hideAll(); return this.state; },
   god(on = true) { game.invuln = on ? 1e9 : 0; return game.invuln; },
   give(n) { game.coins += n; return game.coins; },

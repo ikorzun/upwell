@@ -387,6 +387,7 @@ const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
   boss: { id: 'boss', base: PAL.purple, deep: PAL.black },
   goo: { id: 'goo', base: PAL.black, deep: PAL.gray },   // a skull's black goo (the user's picture)
+  gray: { id: 'gray', base: PAL.gray, deep: PAL.black },   // the Dark Forest's enemies (black and white, their eyes lit)
 };
 // A world in one ink over black for its walls, ledges and far dots, with white for the edge you
 // stand on; the surfaces that behave differently in colours of their own (`o` picks others where
@@ -425,6 +426,8 @@ const ENEMY = {
   crawler: { design: 'loaf', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 3, speed: 60, step: 0.6, move: 'crawl' },
   climber: { design: 'mochi', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall' },
   circler: { design: 'cat', color: 'red', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },
+  kikimora: { design: 'mochi', color: 'gray', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall' },   // the Dark Forest's climber, a Kikimora (FOREST_V)
+  leshy: { design: 'cat', color: 'gray', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },   // the Dark Forest's circler, a Leshy (FOREST_V)
   hedgehog: { design: 'star', color: 'red', size: 0.8, grav: 1, stomp: false, coins: 6, speed: 46, step: 0.7, move: 'crawl' },
   shell: { design: 'dome', color: 'red', size: 0.82, grav: 1, stomp: true, coins: 4, speed: 44, step: 0.8, move: 'crawl' },
   spitter: { design: 'drop', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 5, speed: 38, step: 0.7, move: 'crawl' },
@@ -454,6 +457,8 @@ const FOE_DESC = {
   crawler: { en: 'Crawls its ledge. Land on it!', es: 'Repta por su saliente. ¡Cae encima!', pt: 'Rasteja na sua borda. Pule em cima!', ja: 'いたの うえを はう。うえから ふもう！' },
   climber: { en: 'Crawls up and down the walls.', es: 'Sube y baja por las paredes.', pt: 'Sobe e desce pelas paredes.', ja: 'かべを のぼりおりする。' },
   circler: { en: 'Circles round its block.', es: 'Da vueltas a su bloque.', pt: 'Gira em volta do seu bloco.', ja: 'ブロックの まわりを まわる。' },
+  kikimora: { en: 'Creeps up and down the walls.', es: 'Sube y baja por las paredes.', pt: 'Sobe e desce pelas paredes.', ja: 'かべを のぼりおりする。' },
+  leshy: { en: 'Leads you round in circles.', es: 'Te hace dar vueltas.', pt: 'Faz você andar em círculos.', ja: 'ぐるぐる まわって まよわせる。' },
   hedgehog: { en: 'Red and prickly: never stomp it.', es: 'Rojo y con púas: no lo pises.', pt: 'Vermelho e espinhoso: não pise.', ja: 'トゲトゲ: ふんでは だめ。' },
   shell: { en: 'Stomped, it rolls into the others.', es: 'Pisado, rueda contra los demás.', pt: 'Pisado, rola contra os outros.', ja: 'ふむと ころがって ぶつかる。' },
   spitter: { en: 'Lobs blobs at you. Dodge, then stomp.', es: 'Te lanza bolas. Esquiva y pisa.', pt: 'Atira bolas em você. Desvie e pise.', ja: 'たまを なげる。よけて ふもう。' },
@@ -466,6 +471,7 @@ const FOE_DESC = {
 const FOE_NAMES = {
   crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
   circler: { en: 'Circler', es: 'Rondador', pt: 'Rondador', ja: 'グルグル' }, hedgehog: { en: 'Hedgehog', es: 'Erizo', pt: 'Ouriço', ja: 'ハリネズミ' },
+  kikimora: { en: 'Kikimora', es: 'Kikimora', pt: 'Kikimora', ja: 'キキモラ' }, leshy: { en: 'Leshy', es: 'Leshy', pt: 'Leshy', ja: 'レーシー' },
   shell: { en: 'Shell', es: 'Caparazón', pt: 'Casco', ja: 'こうら' }, spitter: { en: 'Spitter', es: 'Escupidor', pt: 'Cuspidor', ja: 'ペッペ' },
   splitter: { en: 'Splitter', es: 'Divisor', pt: 'Divisor', ja: 'ブンレツ' }, mini: { en: 'Mini', es: 'Mini', pt: 'Mini', ja: 'チビ' },
   chaser: { en: 'Chaser', es: 'Perseguidor', pt: 'Perseguidor', ja: 'オイカケ' }, worm: { en: 'Worm', es: 'Gusano', pt: 'Minhoca', ja: 'ワーム' },
@@ -679,6 +685,7 @@ const LOOKS = {
   pigeon: ['A', 'tengu'],   // the Sky's: a Karasu-tengu
 };
 for (const k in LOOKS) BOSSES[k].look = { id: k + '-' + LOOKS[k][0], design: LOOKS[k][1] };
+const FOREST_V = { kikimora: 'A', leshy: 'A' };   // the Dark Forest's enemies' variants (owner, 2026-10-20: six each to pick from; window.__fv while he picks)
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
@@ -2528,6 +2535,7 @@ const LOOK_FACE = {
   },
   'pigeon-A': (d) => { LF.eyes(d, 0, -0.3, 0.27, 0.12, 0.13); return true; },
 };
+for (const t in FOREST_V) for (const L of 'ABCDEF') LOOK_FACE[t + '-' + L] = () => true;   // a forest enemy's face is its glowing eyes (forestFoe)
 const gumWriteFace = Renderer.prototype.writeFace;
 // The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units
 // (its radius 1, y down).
@@ -4102,7 +4110,51 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   };
+  // The Dark Forest's enemies (FOREST_V: the variant in play; window.__fv while the owner picks): a Kikimora on the wall, a Leshy circling, each
+  // round its soft body (a climber's, a circler's) in grey, black and white, its eyes two small lights (skEyes) in place of Gum's face.
+  const forestFoe = (e, front) => {
+    const b = e.body, t = e.type, V = (window.__fv && window.__fv[t]) || FOREST_V[t], x = b.cx, y = b.cy, w = (b.maxX - b.minX) / 2, h = (b.maxY - b.minY) / 2, r = b.R, c = b.color.base, dk = INK.dark, wh = PAL.white;
+    b.look = t + '-' + V;   // its face its glowing eyes (LOOK_FACE: nothing on it)
+    const d = Math.sign(g.hero.cx - x) || 1;
+    const spk = (bx, by, sw, sh, ang, col) => { const sn = Math.sin(ang), cs = Math.cos(ang); F(bx + (sn * sh) / 2, by - (cs * sh) / 2, (cs * sw) / 2, (sn * sw) / 2, (-sn * sh) / 2, (cs * sh) / 2, col, 1, 6, sw / 2, sh / 2, sw); };   // a triangle pointing at ang (0: up)
+    const twig = (x0, y0, ang, len, n, col) => { let px = x0, py = y0; for (let i = 0; i < n; i++) { const a = ang + (i % 2 ? 0.35 : -0.35), qx = px + Math.sin(a) * len, qy = py - Math.cos(a) * len; line(px, py, qx, qy, col, 1, 2); if (i) { const a2 = a + (i % 2 ? 0.8 : -0.8); line(qx, qy, qx + Math.sin(a2) * len * 0.6, qy - Math.cos(a2) * len * 0.6, col, 1, 1); } px = qx; py = qy; } };   // a crooked branch, twigs off it
+    if (t === 'kikimora') {
+      const ws = x < (lv.l + lv.r) / 2 ? -1 : 1, sway = Math.sin(T * 6 + b.id) * 0.08 * r;   // the wall it clings to; its creep
+      if (!front) {
+        for (const k of [-1, 1]) for (const s2 of [0, 1]) { const ay = y + k * 0.45 * h, kx = x + ws * (0.95 + 0.25 * s2) * w, ky = ay - 0.35 * r + k * sway; line(x + ws * 0.6 * w, ay, kx, ky, c, 1, 2); line(kx, ky, x + ws * 1.3 * w, ay + 0.15 * r * k, c, 1, 2); }   // four long thin limbs to the wall
+        if (V === 'A' || V === 'E') for (let i = 0; i < 7; i++) spk(x + (i - 3) * 0.24 * w, b.minY + 0.15 * h, 0.22 * r, (0.45 + 0.15 * (i % 2)) * r, (i - 3) * 0.32, c);   // spiky hair (wild: E)
+        if (V === 'B') for (let i = 0; i < 6; i++) { const u = (i - 2.5) * 0.3 * w; line(x + u, b.minY + 0.1 * h, x + u + Math.sin(T * 2 + i) * 0.1 * r, b.maxY + 0.45 * r, c, 1, 2); }   // long stringy hair hanging
+        if (V === 'D') for (const s2 of [-1, 1]) twig(x + s2 * 0.3 * w, b.minY + 0.1 * h, s2 * 0.4, 0.3 * r, 3, c);   // hair grown into antlers
+        if (V === 'F') { F(x, b.minY + 0.35 * h, 1.05 * w, 0, 0, 0.75 * h, dk, 1, 0); spk(x - d * 0.5 * w, b.minY - 0.1 * h, 0.5 * r, 0.6 * r, -d * 0.6, dk); }   // a dark hood over its head
+        if (V === 'E') for (let i = 0; i < 5; i++) spk(x + (i - 2) * 0.4 * w, b.maxY + 0.05 * h, 0.3 * r, 0.45 * r, Math.PI + (i - 2) * 0.15, c);   // a ragged skirt
+      } else {
+        spk(x + d * 0.85 * w, y - 0.05 * h, 0.24 * r, 0.6 * r, d * (Math.PI / 2 + 0.25), c);   // its long beak of a nose
+        skEyes(x + d * 0.3 * w, y - 0.35 * h, 0.8, b.id);
+        const hx = x - ws * 0.2 * w, hy = y + 0.6 * h;   // its free hand's
+        if (V === 'A') for (const s2 of [-1, 0, 1]) spk(x + ws * 1.3 * w, y + s2 * 0.4 * h, 0.1 * r, 0.25 * r, ws * Math.PI / 2, wh);   // claws in the wall
+        if (V === 'B') { line(hx, hy, hx, hy + 0.6 * r, wh, 1, 1); disc(hx, hy + 0.3 * r, 0.12 * r, c, 1); }   // a spindle
+        if (V === 'C') { line(hx - 0.5 * r, hy - 0.8 * r, hx + 0.3 * r, hy + 0.7 * r, c, 1, 2); for (let i = -2; i <= 2; i++) spk(hx + 0.3 * r + i * 0.05 * r, hy + 0.7 * r, 0.12 * r, 0.5 * r, Math.PI + i * 0.2, c); }   // a broom
+        if (V === 'D') { line(hx, hy, hx, hy + 0.4 * r, c, 1, 1); box(hx - 0.14 * r, hy + 0.4 * r, hx + 0.14 * r, hy + 0.75 * r, dk, 1, 0, 10, 0); disc(hx, hy + 0.58 * r, 0.09 * r, PAL.orange, 1); vlamps.push([hx, hy + 0.58 * r, 0.15, 0.5]); }   // a lantern, lit
+        if (V === 'F') { line(hx, hy, hx, hy + 0.45 * r, c, 1, 1); F(hx, hy + 0.7 * r, 0.3 * r, 0, 0, 0.24 * r, dk, 1, 0); box(hx - 0.3 * r, hy + 0.5 * r, hx + 0.3 * r, hy + 0.55 * r, c, 1, 0, 10, 0); }   // a pot on a cord
+      }
+    } else {   // a Leshy: bark and moss, a beard of grass and twigs, bough arms, horns (none, a bird's nest: C; huge: F)
+      if (!front) {
+        const big = V === 'F' ? 1.6 : V === 'D' ? 0.8 : 1;
+        if (V !== 'C') for (const s2 of [-1, 1]) twig(x + s2 * 0.35 * w, b.minY + 0.15 * h, s2 * 0.5, 0.32 * r * big, V === 'F' ? 4 : 3, c);   // its horns, branching
+        for (const s2 of [-1, 1]) { const ax = x + s2 * 0.85 * w, ay = y - 0.1 * h, sw2 = Math.sin(T * 2 + s2) * 0.15 * r; line(ax, ay, ax + s2 * 0.35 * r, y + 0.9 * h + sw2, c, 1, 2); for (let i = 0; i < 3; i++) line(ax + s2 * 0.35 * r, y + 0.9 * h + sw2, ax + s2 * (0.25 + 0.15 * i) * r, y + 1.25 * h + sw2, c, 1, 1); }   // its long bough arms, twig fingers
+      } else {
+        for (let i = 0; i < 3; i++) line(x + (i - 1) * 0.4 * w, b.minY + 0.4 * h, x + (i - 1) * 0.45 * w, b.maxY - 0.1 * h, dk, 1, 1);   // bark
+        const nb = V === 'D' ? 3 : 5; for (let i = 0; i < nb; i++) spk(x + (i - (nb - 1) / 2) * 0.26 * w, y + 0.35 * h, 0.22 * r, (V === 'D' ? 0.7 : 0.55) * r, Math.PI + (i - (nb - 1) / 2) * 0.12, i % 2 ? wh : c);   // its beard of grass and twigs (long and thin: D)
+        skEyes(x, y - 0.25 * h, 0.85, b.id);
+        if (V === 'D') for (const s2 of [-1, 1]) box(x + s2 * 0.42 * w - 0.05 * r, y - 0.05 * h, x + s2 * 0.42 * w + 0.05 * r, y + 0.25 * h, dk, 1, 0, 10, 0);   // hollow cheeks
+        if (V === 'B') for (const [u, v] of [[-0.6, -0.75], [0.55, -0.85], [0.8, -0.3]]) { F(x + u * w, y + v * h, 0.22 * r, 0, 0, 0.12 * r, PAL.red, 1, 0); box(x + u * w - 0.04 * r, y + v * h, x + u * w + 0.04 * r, y + v * h + 0.15 * r, wh, 1, 0, 10, 0); disc(x + u * w - 0.08 * r, y + v * h - 0.04 * r, 0.03 * r, wh, 1); }   // fly agarics (red: a danger's)
+        if (V === 'C') { F(x, b.minY - 0.05 * h, 0.7 * w, 0, 0, 0.28 * h, c, 1, 0); for (let i = -2; i <= 2; i++) line(x + i * 0.25 * w, b.minY - 0.2 * h, x + i * 0.25 * w + 0.15 * w, b.minY + 0.1 * h, dk, 1, 1); for (const u of [-0.2, 0.15]) disc(x + u * w, b.minY - 0.22 * h, 0.1 * r, wh, 1); }   // a bird's nest on its head, eggs in it
+        if (V === 'E') { for (const [u, v] of [[-0.7, -0.6], [0.65, -0.7], [-0.3, -0.95], [0.85, 0.1]]) spk(x + u * w, y + v * h, 0.18 * r, 0.3 * r, u, wh); for (const [u, v] of [[-0.75, 0.3], [0.7, 0.45]]) { F(x + u * w, y + v * h, 0.16 * r, 0, 0, 0.09 * r, wh, 1, 0); box(x + u * w - 0.03 * r, y + v * h, x + u * w + 0.03 * r, y + v * h + 0.12 * r, PAL.gray, 1, 0, 10, 0); } }   // leaves and pale mushrooms
+      }
+    }
+  };
   if (lv.boss && !lv.boss.dead && lv.boss.look) look(lv.boss, false);   // its look's parts behind it
+  for (const e of lv.enemies) if (FOREST_V[e.type] && seen(e.body.minY - 2 * R, e.body.maxY + 2 * R)) forestFoe(e, false);   // a forest enemy's parts behind it
   for (const e of lv.enemies) if (e.type === 'worm' && seen(e.body.minY - 3 * R, e.body.maxY + 3 * R)) {   // a worm's tubes, behind its knot
     e.tubes(R, T).forEach((tube, k) => {
       const n = tube.length;
@@ -4182,6 +4234,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
     box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
   }
+  for (const e of lv.enemies) if (FOREST_V[e.type] && seen(e.body.minY - 2 * R, e.body.maxY + 2 * R)) forestFoe(e, true);   // and before it, its eyes
   if (bs && !bs.dead && bs.look) look(bs, true);   // its look's parts before it (LOOKS), instead of what is below
   else if (bs && !bs.dead && bs.def && bs.def.rat) {   // the Rat King's round ears, its tail
     const b = bs.body, w = 0.45 * (b.maxX - b.minX), up = b.up && b.up.fails ? 1 : -1;

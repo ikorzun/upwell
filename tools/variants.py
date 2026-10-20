@@ -12,6 +12,11 @@ the style to copy, research/variants/ref-<world>.png, cut from the game at exact
 2x on a desktop: a tile is 16 game pixels there); the prompt asks for that grid; and the sheet that comes back is put onto it and
 onto the nine inks (snap), as <id>-<n>-px.png beside the raw one.
 
+A boss (owner 2026-10-20: each a Japanese yokai fitting its world; three of them a sheet, two cells each: A-B, C-D, E-F) keeps its
+fight, its size and its colour (BOSSES: ink), and is one soft body with a face and a few rigid parts round it, as the game draws a
+boss. Its reference is its own arena without it and the hero in it, research/variants/ref-<id>.png: an element's own goes before its
+world's.
+
     python3 tools/variants.py list              # the elements described so far
     python3 tools/variants.py <id> --prompt     # print the prompt, to paste into ChatGPT by hand (with the reference attached)
     python3 tools/variants.py <id>              # one 3 x 2 sheet of six variants, A to F: research/variants/<id>-<n>.png and -px.png
@@ -43,6 +48,15 @@ WORLDS = {
                 'bamboo and cedar, gardens with koi ponds and stone lanterns, sakura in full bloom', 'orange #faa23e',
                 'green is moss you can hold on to, purple marks springs and rubber walls, blue is ice and moving planks, grey blocks crumble',
                 'the black spring night, nothing far off'),
+    'blocks': ('the Tower Blocks', 'a housing estate of concrete tower blocks, a danchi, at night: raw concrete panels, balconies with bars, riser pipes, '
+               'satellite dishes, stairwells', 'grey #c8c8c8', 'blue marks moving platforms and springs, orange blocks crumble, green is moss you can hold on to',
+               'the black night, a regular grid of windows far off'),
+    'sky': ('the Skyscraper', 'the top of a glass skyscraper among the clouds at dusk: glass facades with steel mullions, steel girders, catwalks, clouds you '
+            'stand on that dissolve under you', 'purple #c996ff', 'blue marks moving platforms, springs and rubber walls, white clouds dissolve under you, '
+            'green is moss you can hold on to', 'the black dusk, banks of grey cloud far off'),
+    'junk': ('the Junkyard', 'a junkyard behind old brick buildings at night: heaps of scrap, wooden pallets, fire escapes zigzagging up the walls, dumpsters, '
+             'bags of rubbish', 'green #339c39', 'grey is greasy steel you slip on and chain-link you hold on to, blue marks moving platforms, black rubbish '
+             'bags are springs, orange blocks crumble', 'the black night, lit windows far off'),
 }
 LEDGE_AT = 'a purple concrete ledge with a white top edge sticking out of the wall'
 CAVE_AT = 'a grey stone ledge with a white top edge sticking out of the wall'
@@ -229,6 +243,67 @@ ELEMENTS = {
                        scene=LEDGE_AT + ' below it', text='a short katakana word (ラーメン, スシ or カラオケ) or a simple pictogram'),
 }
 
+# A boss: its fight (does), its size, where the cell shows it (place), its colour (main: BOSSES' ink), the rigid parts it may have,
+# the three yokai of its world it may be (two cells each) and the inks' rule there.
+RIDE = ('it rides a rail under the ceiling from wall to wall, stops at each end with a creak and tips rocks down, and lobs blobs at the hero below; '
+        "it can be hurt only from above, by dropping onto its top from the moss under the ceiling over the rail's ends.")
+DIVE = ('it hovers high in the middle of the shaft{how}, swaying, dropping goo and calling small crawlers; then it shakes over the hero, {drops} straight '
+        'down into the middle of the floor and lies there dazed a moment: a stomp from above hurts it then; then it {up}.')
+SLIDE = ('it slides to and fro over the floor flicking out little shells, backs off flashing and dashes from wall to wall, and its crash shakes {down} '
+         'down from the ceiling; its top is hard, a stomp only bounces off it. A shell kicked into it turns it onto its back: then a stomp on its belly hurts it.')
+ELEMENTS.update({
+    'boss-tram': dict(world='tokyo', kind='boss', what='the Tram, the boss of Tokyo (c1-10)', does=RIDE, size='about 4.4 tiles across, the car round it about 5.5 tiles long',
+                      place='under the ceiling: a rail across the shaft with small ties, a green moss ledge under the ceiling over each end of the rail, an overhead wire, '
+                      'the hero far below on the floor', main='green', parts='its wheels on the rail, the car or cart round it, a pantograph, horns or flames, as its yokai has them',
+                      yokai='A and B: Oboroguruma, a haunted ox-cart of misty nights with a huge grumpy face filling its front; C and D: Kasha, a fire-cat demon riding a '
+                      'burning cart; E and F: a tsukumogami tram, an old streetcar that came alive after a hundred years, its headlights its eyes.',
+                      rule='In this world purple is the town, blue marks moving platforms and grey blocks crumble: those only for small details; the boss is green all '
+                      'over, its flames orange, never red.'),
+    'boss-cork': dict(world='cave', kind='boss', what='the Cork, the boss of the Cave (c2-10)', does=DIVE.format(how='', drops='dives', up='rises again'), size='about 4.2 tiles across',
+                      place='hovering in the middle of the shaft, a thin plank below it at each side (none in the middle, where it dives), moss on the walls, the hero on '
+                      'the floor below', main='orange', parts='a thread it hangs from, a lantern frame, a few short legs, a tail or ears, as its yokai has them',
+                      yokai='A and B: Chochin-obake, a paper lantern ghost with one big eye and a long tongue; C and D: Tsuchigumo, the earth spider of caves, a round body '
+                      'on its thread with a few short legs; E and F: Nurikabe, a floating wall spirit that blocks the way, a soft slab with stubby arms.',
+                      rule='In this world green is moss you can hold on to and purple marks springs: those only for small details; the boss is orange all over.'),
+    'boss-puck': dict(world='fuji', kind='boss', what='the Puck, the boss of Mount Fuji (c3-10)', does=SLIDE.format(down='icicles'), size='about 4.8 tiles across and 3 tiles tall, low and wide',
+                      place='on a floor of ice along the bottom of the cell (white, a blue dither under it), icicles hanging from the ceiling, a little shell on the ice beside '
+                      'it, the hero on the ice near the other wall', main='grey', parts='a shell on its back, a dish on its head, short legs or flippers, a hood of ice, as its yokai has them',
+                      yokai='A and B: a Kappa on the frozen lake, a turtle shell on its back and the dish of water on its head; C and D: Umibozu, a huge round sea-monk head '
+                      'risen from the lake, sliding on the ice; E and F: Tsurara-onna, an icicle spirit in a round frozen hood, icicles hanging off its rim.',
+                      rule='In this world white is the ice you slip on and purple marks moving planks and springs: no white on the boss but tiny glints, purple only for small '
+                      'details; the boss is grey all over.'),
+    'boss-cart': dict(world='village', kind='boss', what='the Minecart, the boss of the Village (c4-10)', does=RIDE, size='about 4.4 tiles across, its cart in front of it',
+                      place='under the ceiling: a rail across the shaft with small ties, a green moss ledge under the ceiling over each end of the rail, the hero far below on the floor',
+                      main='blue', parts='its wheels on the rail, the cart or wheel it rides, flames or tails, as its yokai has them',
+                      yokai='A and B: Wanyudo, a burning ox-cart wheel with a big angry face in its hub; C and D: a Nogitsune, a wild fox spirit that tricks travellers (the bad '
+                      'cousin of the Inari shrine foxes), riding a little wooden cart, its tails swishing; E and F: a Bake-danuki, a shape-shifting raccoon-dog trickster in a '
+                      'rice cart, its round belly its body.',
+                      rule='In this world green is moss you can hold on to, purple marks springs and grey blocks crumble: those only for small details; blue marks moving '
+                      'planks, but the boss is blue all over and rides the rail; its flames orange, never red.'),
+    'boss-crane': dict(world='blocks', kind='boss', what='the Crane, the boss of the Tower Blocks (c5-10)', size='about 4.2 tiles across',
+                       does=DIVE.format(how=" on a crane's cable that goes up out of sight", drops='drops on its cable', up='is hauled back up'),
+                       place="hanging on its cable in the middle of the shaft, a thin balcony ledge below it at each side (none in the middle), the hero on the floor below",
+                       main='orange', parts='the cable and the hook it hangs from, a rope sling or a chain, arms or a bucket, as its yokai has them',
+                       yokai="A and B: Tsurube-otoshi, a giant grinning head that drops from above on passers-by, here off the crane's hook; C and D: Okubi, a huge floating "
+                       'head over the rooftops at night; E and F: Nuppeppo, a wobbly lump of a yokai with folds for a face, slung under the hook.',
+                       rule='In this world blue marks moving platforms and springs and green is moss you can hold on to: those only for small details; the boss is orange all over.'),
+    'boss-pigeon': dict(world='sky', kind='boss', what='the Pigeon, the boss of the Skyscraper (c6-10)', size='about 4.2 tiles across, its wings about as wide again',
+                        does=DIVE.format(how=', flapping', drops='dives', up='flies up again'),
+                        place='hovering in the middle of the shaft, a thin steel girder below it at each side (none in the middle), banks of cloud far off, the hero on the floor below',
+                        main='grey', parts='wings, a beak, a little hat or a fan, tail feathers, a few blue sparks, as its yokai has them',
+                        yokai='A and B: a Karasu-tengu, the crow goblin of high places, a beak and black-tipped wings; C and D: Ittan-momen, a long strip of flying cloth that '
+                        'wraps round its prey, its loose ends flapping like wings; E and F: Raiju, the thunder beast that falls from storm clouds, a round furry body crackling with blue sparks.',
+                        rule='In this world blue marks moving platforms and springs and white is the clouds that dissolve under you: blue only for small details (the sparks), '
+                        'white only for tiny glints; the boss is grey all over.'),
+    'boss-rat': dict(world='junk', kind='boss', what='the Rat King, the boss of the Junkyard (c7-10)', does=SLIDE.format(down='junk'), size='about 4.8 tiles across and 3 tiles tall, low and wide',
+                     place='on a floor of greasy steel along the bottom of the cell, junk hanging from the ceiling, a little shell beside it, the hero near the other wall',
+                     main='purple', parts='round ears, a long tail, a crown or a lid on its back, little feet, a handle, as its yokai has them',
+                     yokai='A and B: Tesso, the iron rat, a giant rat with an iron hide and a crown of scrap; C and D: Kasa-obake, an old paper umbrella come alive, one big '
+                     'eye and a long tongue, its canopy a hard dome; E and F: a tsukumogami heap, things thrown away (a kettle, a sandal, a lantern) come alive as one creature under a lid.',
+                     rule='In this world grey is greasy steel you slip on and chain-link you hold on to, blue marks moving platforms, black bags are springs and orange '
+                     'blocks crumble: those only for small details; the boss is purple all over.'),
+})
+
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
 {refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.
 In play: {does}. Material: {material}. Size: {size}; {grid}
@@ -248,6 +323,14 @@ Keep in every variant: the same size and place, a silhouette that reads at a gla
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
 {style} Any glow is a dither too. Use only these nine colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
+BOSS = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
+{refnote}The boss of the world "{world}" ({mood}), drawn as a Japanese yokai that belongs in this place. It is in the foreground, the play itself: full colour.
+Its fight: {does} Its size: {size}; {grid}
+Draw six variants in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner: three different yokai, two takes on each. {yokai} Each pair is a different creature, and none is a plain round blob: each reads at a glance as its yokai.
+Each cell is a scene from the fight: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place}, the boss in flat side view at game scale, and the hero for scale: a soft round white blob 2 tiles across with two small black eyes.
+Keep in every variant: the same size and the same fight, {main} as its main colour, a face that reads at a glance on a phone (big eyes, an angry brow, a mouth), and a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {parts}. Cute and a little spooky, never gory: the game is for everyone.
+Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
+{style} Use only these nine colours: {inks9}. The world's own colour is {ink}. {rule} White only for the hero, the edges you stand on and tiny glints; red only for danger: the boss flashes red when it is hit, so it is never red itself; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 # The camera's depth (owner 2026-10-19; the game's DEPTH): the play in full colour; the midground (props on or off the play) solid but with no white and no
 # yellow except a light's own core; the background (behind the shaft) at a quarter of one ink over the black, no white, the least detail.
 PLANES = {'mid': 'It is in the midground, standing on or hanging off the play: solid colours, but no white and no yellow except the core of a light (a lamp\'s glass, '
@@ -274,7 +357,7 @@ def prompt(el: str, ref: bool = False) -> str:
     slab = {'place': 'the element sticking out of that wall', 'main': ink.split()[0], 'vary': 'the silhouette and edge profile, how its free end is finished, how it is fixed '
             'to the wall, its surface pattern and joints, and the small details on it', 'rule': f'In this world {taken}, so use those only for small details.'}
     plane = PLANES[e.get('plane', 'mid')]
-    return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text, 'plane': plane,
+    return {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS}[e['kind']].format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
 
 
@@ -339,7 +422,7 @@ def main() -> None:
     if el not in ELEMENTS:
         sys.exit(f'no element {el!r}; see: python3 tools/variants.py list')
     out = os.path.join(ROOT, 'research', 'variants')
-    ref = None if a.no_ref else a.ref or os.path.join(out, f"ref-{ELEMENTS[el]['world']}.png")
+    ref = None if a.no_ref else a.ref or next((r for r in (os.path.join(out, f'ref-{el}.png'), os.path.join(out, f"ref-{ELEMENTS[el]['world']}.png")) if os.path.exists(r)), None)   # its own, else its world's
     if ref and not os.path.exists(ref):
         if a.ref:
             sys.exit(f'no reference at {ref}')

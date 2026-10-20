@@ -8,10 +8,13 @@
    (two moves deep), puts the state back and plays the first move of
    the best line. Math.random is seeded and saved with the state, so a
    tried move replays exactly. It reports how the climb went: time,
-   hearts lost, where it got stuck and in which chunk.
+   hearts lost, where it got stuck and in which chunk. A boss level
+   (no way out: its boss is the level) it plays to the end, won or
+   lost, or to BOSS_T, scored by the hearts its tries cost and deal
+   and by where the boss's way of being beaten wants the hero (bossScore).
    ───────────────────────────────────────────────────────────── */
 (() => {
-const g = __up.game, DT = 1 / 120, MOVE_T = 0.5, BEAM = 5, STUCK_T = 14, LIMIT_T = 300;
+const g = __up.game, DT = 1 / 120, MOVE_T = 0.5, BEAM = 5, STUCK_T = 14, LIMIT_T = 300, BOSS_T = 180;
 
 // moves: hold `dir`; maybe press jump at `jumpAt` for `hold` s, then hold nothing for
 // `wait` s and `dir2` after that; `down` presses down at the start
@@ -72,6 +75,7 @@ function snap() {
     folk: lv.folk.map((f) => ({ f, o: Object.assign({}, f), b: f.body && snapBody(f.body) })), pickups: lv.pickups.slice(), sold: lv.pickups.map((p) => p.sold),
     icicles: lv.icicles.map((c) => Object.assign({}, c)), arenas: lv.arenas.map((a) => ({ a, o: Object.assign({}, a, { foes: a.foes.slice() }) })),
     cross: lv.crossing && Object.assign({}, lv.crossing),   // the level crossing's clock and train (the tries ran it on)
+    boss: lv.boss && { f: Object.fromEntries(Object.entries(lv.boss).filter(([, v]) => typeof v !== 'object')), b: snapBody(lv.boss.body) }, crumble: [lv.crumbleTime, lv.crumbleBack],   // its hearts, turn and clocks; the Minecart's quicker bridges
   };
 }
 function restore(S) {
@@ -91,6 +95,12 @@ function restore(S) {
   lv.pickups = S.pickups.slice(); lv.pickups.forEach((p, i) => { p.sold = S.sold[i]; });
   lv.icicles = S.icicles.map((c) => Object.assign({}, c)); lv.arenas = S.arenas.map(({ a, o }) => Object.assign(a, o, { foes: o.foes.slice() }));
   if (lv.crossing) Object.assign(lv.crossing, S.cross);
+  if (lv.boss) {   // what a try first set goes again (the Minecart's `called`, else the real fight never calls its spitter)
+    const bs = lv.boss, o = S.boss.f;
+    for (const k of Object.keys(bs)) if (typeof bs[k] !== 'object' && !(k in o)) delete bs[k];
+    Object.assign(bs, o); restoreBody(bs.body, S.boss.b);
+  }
+  [lv.crumbleTime, lv.crumbleBack] = S.crumble;
 }
 
 // ── playing ──
@@ -102,6 +112,7 @@ function step() {
     if (target < lv.cam) lv.cam += (target - lv.cam) * (1 - Math.exp(-CAM.follow * DT));
     lv.cam = Math.max(lv.cam, lv.capY - CAM.top);
   }
+  if (g.winT > 0 && g.state === 'play' && (g.winT -= DT) <= 0) g.win();   // a beaten boss's win, as Game.frame counts it down (later than a try looks)
 }
 const tileOf = () => g.lv.tile;
 const heightOf = (y) => (g.lv.floor - y) / tileOf();
@@ -121,6 +132,7 @@ function play(p, st) {
 function score(base, st) {
   if (g.state === 'dead') return -1e9;
   if (g.state === 'clear') return 1e9;
+  if (g.lv.boss) return bossScore(base);
   const H = g.hero;
   let s = st.stand * 100 + heightOf(H.cy) * 15 - (base.hp - g.hp) * 5000 + (g.coins - base.coins) * 3 + (g.kills - base.kills) * 40;
   if (!g.contact() && H.rigVy > 500) s -= 40;   // ending the move in a fall
@@ -128,8 +140,35 @@ function score(base, st) {
   if (key) s -= 6 * Math.abs(H.cx - (key.x0 + key.x1) / 2) / tileOf();
   return s;
 }
+// A boss fight: a heart lost costs what it costs on a climb, a heart dealt pays a little less (no trading one for one), the boss
+// beaten is the level cleared. Between hits the hero is drawn to where the boss's way of being beaten wants it (BOSSES; Boss):
+//   dive (the Cork, the Crane, the Pigeon): up on a plank, never under it as it shakes over the hero and drops (the shaking and
+//     the drop outlast a try's second); at it while it lies dazed. Hovering, it can be stomped too: the tries find that.
+//   slide (the Puck, the Rat King): a rolling shell is a flip to come (it slides into its own shells: Game.rolling); behind a
+//     shell from it, to stomp it its way; at it while it lies belly up.
+//   ride (the Tram, the Minecart): up, as high as over it (open from above only), then over it.
+function bossScore(base) {
+  const lv = g.lv, bs = lv.boss, d = bs.def || {}, H = g.hero, b = bs.body, T = tileOf();
+  if (bs.dead) return 1e9;
+  let s = -(base.hp - g.hp) * 5000 + (base.bossHp - bs.hp) * 4000 + (g.coins - base.coins) * 3 + (g.kills - base.kills) * 40;
+  const dx = Math.abs(H.cx - b.cx) / T, h = heightOf(H.cy);
+  if (d.rail) s += h * 80 + (H.maxY < b.minY ? 800 - Math.min(dx, 6) * 120 : 0);
+  else if (d.slide) {
+    s += lv.enemies.filter((e) => e.state === 'shell').length * 2500;
+    if (bs.state === 'dazed') s += 3000 - dx * 400;
+    else {   // the nearest shell still walking: from its far side, a stomp rolls it at the boss (shellUp: away from the hero)
+      const sh = lv.enemies.filter((e) => e.type === 'shell' && e.state !== 'shell').sort((p, q) => Math.abs(p.body.cx - H.cx) - Math.abs(q.body.cx - H.cx))[0];
+      if (sh) s -= (Math.abs(H.cx - (sh.body.cx - Math.sign(b.cx - sh.body.cx) * (sh.body.R + H.R))) / T) * 150;
+    }
+  } else if (bs.state === 'dazed') s -= dx * 400;
+  else {
+    s += Math.min(h, 8) * 100;
+    if ((bs.state === 'warn' || bs.state === 'dive') && H.cy > b.cy && Math.abs(H.cx - b.cx) < b.R + H.R + 0.5 * T) s -= 4000;
+  }
+  return s;
+}
 function decide(best) {
-  const S = snap(), base = { hp: g.hp, coins: g.coins, kills: g.kills }, first = [];
+  const S = snap(), base = { hp: g.hp, coins: g.coins, kills: g.kills, bossHp: g.lv.boss ? g.lv.boss.hp : 0 }, first = [];
   for (const p of PLANS) {
     restore(S);
     const st = { stand: best };
@@ -152,13 +191,14 @@ function decide(best) {
   return { p: pick.p, safe: first.filter((c) => c.sc > -1e8 && c.sc >= first[0].sc - 300).length / first.length };
 }
 // What cost a heart and what got stomped, counted on the moves really played (not the tries).
-let live = false, cause = '', killed = {};
+let live = false, cause = '', causeAt = '', killed = {};
 for (const [k, what] of [['meet', (e) => (e === g.lv.boss ? 'boss' : e.type)], ['spikes', () => 'spikes'], ['fireTouch', () => 'fire'], ['shots', () => 'shot'], ['fall', () => 'fall'], ['crossStep', () => 'train']]) {
   const f = g[k];
-  g[k] = function (...a) { const hp = this.hp, r = f.apply(this, a); if (live && this.hp < hp) cause = what(...a); return r; };
+  g[k] = function (...a) { const hp = this.hp, r = f.apply(this, a); if (live && this.hp < hp) { cause = what(...a); causeAt = this.lv.boss ? this.lv.boss.state : ''; } return r; };   // (at a boss: what it was doing)
 }
-const kill = g.kill;
+const kill = g.kill, hitBoss = g.hitBoss;
 g.kill = function (e, byHero) { if (live && byHero && this.lv.enemies.includes(e)) killed[e.type] = (killed[e.type] || 0) + 1; return kill.call(this, e, byHero); };
+g.hitBoss = function () { if (live) run.out.boss.dealt.push([+(run.t + MOVE_T).toFixed(1), this.lv.boss.state]); return hitBoss.call(this); };   // when each of its hearts went, and what it was doing
 // The chunk at a height, for the report.
 const chunkAt = (y) => { const c = g.lv.placed.find((q) => y <= q.y1 && y > q.y0); return c ? c.id : '?'; };
 
@@ -177,28 +217,31 @@ function start(world, stage = 0, s = 1, opts = {}) {
   for (const b of lv.bubbles) b.cd = Infinity;
   for (const sp of lv.spots) sp.used = true;   // nor the flip side: it plays the climb
   if (opts.noFoes) lv.spawns.length = 0;   // the same level with nobody in it
+  const bs = lv.boss;
+  if (bs) bs.help = 1;   // met for the first time: no help for losses running (the tries' deaths count as losses, Game.die)
   killed = {};
   const spawned = {};
   for (const e of lv.spawns) spawned[e.type] = (spawned[e.type] || 0) + 1;
-  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: heightOf(lv.portal.y),
-    out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [] } };
+  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
+    out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [], boss: bs ? { name: bs.def ? bs.def.name.en : 'Lid', max: bs.max, dealt: [] } : null } };
   return { started: true, foes: run.foes };
 }
 function advance(ms = 30000) {
-  const quiet = mute(), t0 = performance.now(), lv = g.lv, R = run, out = R.out;
+  const quiet = mute(), t0 = performance.now(), lv = g.lv, R = run, out = R.out, bs = lv.boss, cap = R.opts.until || (bs ? BOSS_T : LIMIT_T);   // `until`: stop there and leave the state for a look
   if (g.state === 'pause') g.togglePause(false);   // the page paused itself while hidden
   try {
-    while (g.state === 'play' && R.t < (R.opts.until || LIMIT_T) && performance.now() - t0 < ms) {   // `until`: stop there and leave the state for a look
+    while (g.state === 'play' && R.t < cap && performance.now() - t0 < ms) {
       const d = decide(R.best);
       const st = { stand: R.best };
-      cause = ''; live = true;
+      cause = ''; causeAt = ''; live = true;
       play(d.p, st);
       live = false;
       R.t += MOVE_T; R.decisions++; R.safeSum += d.safe;
-      if (g.hp < R.hp) out.hits.push({ t: +R.t.toFixed(1), at: +heightOf(g.hero.cy).toFixed(1), chunk: chunkAt(g.hero.cy), by: cause });
+      if (g.hp < R.hp) out.hits.push({ t: +R.t.toFixed(1), at: +heightOf(g.hero.cy).toFixed(1), chunk: bs ? causeAt : chunkAt(g.hero.cy), by: cause });
       R.hp = g.hp;
+      if (R.opts.trace) (out.trace = out.trace || []).push([R.t, +((g.hero.cx - lv.l) / tileOf()).toFixed(1), +heightOf(g.hero.cy).toFixed(1), g.hp, PLANS.indexOf(d.p)].concat(bs ? [bs.state, bs.hp, +((bs.body.cx - lv.l) / tileOf()).toFixed(1), +heightOf(bs.body.cy).toFixed(1)] : []));
       if (st.stand > R.best + 0.5) { R.best = st.stand; R.bestT = R.t; }
-      if (R.t - R.bestT > STUCK_T) {   // no new height for a while: note it, then lift the bot onto the next ledge up
+      if (!bs && R.t - R.bestT > STUCK_T) {   // no new height for a while: note it, then lift the bot onto the next ledge up (a boss's arena has none to gain)
         const H = g.hero;
         out.stuck.push({ t: +R.t.toFixed(1), at: +R.best.toFixed(1), chunk: chunkAt(lv.floor - R.best * tileOf() - 1), next: chunkAt(lv.floor - (R.best + 4) * tileOf()),
           hero: { col: +((H.cx - lv.l) / tileOf()).toFixed(1), h: +heightOf(H.cy).toFixed(1), stuck: glueSide(H), mask: H.wallMask } });
@@ -209,11 +252,12 @@ function advance(ms = 30000) {
         R.best = heightOf(next.y0); R.bestT = R.t;
       }
     }
-    if (g.state === 'play' && R.t < (R.opts.until || LIMIT_T) && performance.now() - t0 >= ms) return { running: true, t: R.t, height: +R.best.toFixed(1), of: +R.top.toFixed(1) };
+    if (g.state === 'play' && R.t < cap && performance.now() - t0 >= ms) return { running: true, t: R.t, height: +R.best.toFixed(1), of: +R.top.toFixed(1), bossHp: bs ? bs.hp : null };
     if (!R.opts.until) input.clear();
     Object.assign(out, { result: g.state, time: +R.t.toFixed(1), decisions: R.decisions, heartsLost: R.startHp - g.hp, height: +R.best.toFixed(1), of: +R.top.toFixed(1),
       coins: R.coins0 - lv.coins.filter((c) => !c.drop).length, coinsPlaced: R.coins0, got: g.coins, foes: R.foes, kills: g.kills, spawned: R.spawned, killed, combo: g.bestCombo,
       tightness: +(1 - R.safeSum / Math.max(1, R.decisions)).toFixed(2) });
+    if (bs) Object.assign(out.boss, { hp: Math.max(0, bs.hp), beaten: bs.dead });   // result: 'won', 'dead', or 'play' at BOSS_T
     run = null;
     return out;
   } finally { live = false; quiet(); }

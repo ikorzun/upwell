@@ -1,5 +1,5 @@
 {
- "commit": "a199170",
+ "commit": "f96c7b4",
  "made": "2026-10-20",
  "levels": {
   "c1-1": {
@@ -416,7 +416,7 @@
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
-   "boss": "Tram",
+   "boss": "Tsukumo Tram",
    "dealt": "6/6"
   },
   "c6-1": {

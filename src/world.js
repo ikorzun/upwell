@@ -590,34 +590,35 @@ const BONUS = [
 // `ink` its colour (owner, 2026-10-20: each its own; never red, it flashes red when hit, nor yellow or white: what can be taken, the hero).
 // The Cork's dive went to the Village and the Minecart to the Cave (owner, 2026-10-20): the colours stayed with the worlds, the Village's boss blue, the Cave's orange.
 const BOSSES = {
-  probka: { name: { en: 'Cork', es: 'Tapón', pt: 'Rolha', ja: 'コルク' }, ink: 'blue', hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
-    intro: [{ en: "It's warm here. Why climb?", es: 'Aquí se está calentito. ¿Para qué subir?', pt: 'Aqui é quentinho. Pra que subir?', ja: 'ここは あったかい。なんで のぼるの？' },
-      { en: 'Shoo. This spot is mine.', es: 'Fuera. Este sitio es mío.', pt: 'Xô. Esse lugar é meu.', ja: 'しっしっ。ここは わたしの ばしょ。' },
-      { en: 'Nobody gets past the Cork.', es: 'Nadie pasa del Tapón.', pt: 'Ninguém passa da Rolha.', ja: 'コルクの さきへは いかせない。' }],
-    quip: [{ en: 'Told you. Stay down here.', es: 'Te lo dije. Quédate abajo.', pt: 'Eu avisei. Fica aqui embaixo.', ja: 'ほらね。ここに いなよ。' },
-      { en: 'Too slow, little drop.', es: 'Muy lento, gotita.', pt: 'Muito lento, gotinha.', ja: 'おそいよ、しずくちゃん。' }],
-    defeat: { en: 'Fine, fine… go on up.', es: 'Vale, vale… sube ya.', pt: 'Tá bom, tá bom… pode subir.', ja: 'わかったよ… のぼりな。' } },
-  // Fuji's: the Puck (the plan's §5.4): a dome over the ice, beaten by its own shells (PUCK, Boss.slide). The first three bosses'
-  // five hearts and the Cork's phases (owner, 2026-10-20: its round Tsurara-onna kept, the fight softened, worlds 1-3 not hard).
-  puck: { name: { en: 'Puck', es: 'Disco', pt: 'Disco', ja: 'パック' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
-    intro: [{ en: 'Slippery? Your feet are the problem.', es: '¿Resbala? El problema son tus pies.', pt: 'Escorrega? O problema são seus pés.', ja: 'すべる？ きみの あしが わるい。' },
-      { en: 'This ice is mine. So is the floor.', es: 'Este hielo es mío. Y el suelo.', pt: 'Este gelo é meu. E o chão.', ja: 'この こおりは わたしの もの。' },
-      { en: 'Nobody stops on my ice.', es: 'Nadie se para en mi hielo.', pt: 'Ninguém para no meu gelo.', ja: 'わたしの こおりで とまれない。' }],
-    quip: [{ en: 'Slid right off, did you?', es: 'Te resbalaste, ¿eh?', pt: 'Escorregou, né?', ja: 'すべって おちたね。' },
-      { en: 'Cold, is it? Stay down.', es: 'Hace frío, ¿no? Quédate abajo.', pt: 'Frio, né? Fica aí embaixo.', ja: 'さむいでしょ？ したに いな。' }],
-    defeat: { en: 'Oof. Flipped… fine, roll on.', es: 'Uf. Volteada… vale, sigue rodando.', pt: 'Ufa. Virada… tá, pode rolar.', ja: 'うわ、ひっくりかえった… いきな。' },
-    top: { en: 'Hard on top. Roll a shell at it!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
-    hint: { en: 'Flipped! Land on its belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
-    how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
-  // The Cave's: the Minecart (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
+  // The Village's: a Bake-danuki on the Cork's dive, its name and lines its own (owner, 2026-10-20: the yokai of its look).
+  probka: { name: { en: 'Bake-danuki', es: 'Bake-danuki', pt: 'Bake-danuki', ja: 'ばけだぬき' }, ink: 'blue', hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+    intro: [{ en: "One leaf, and I'm anyone.", es: 'Una hoja, y soy cualquiera.', pt: 'Uma folha, e sou qualquer um.', ja: 'はっぱ いちまいで なんにでも なれる。' },
+      { en: 'Pon-poko! Hear my belly drum?', es: '¡Pon-poko! ¿Oyes el tambor de mi panza?', pt: 'Pon-poko! Ouve o tambor da minha barriga?', ja: 'ポンポコ！ おなかの たいこ きこえる？' },
+      { en: 'This whole village is my trick.', es: 'Todo este pueblo es mi truco.', pt: 'Esta vila toda é um truque meu.', ja: 'この むら ぜんぶが わたしの いたずら。' }],
+    quip: [{ en: 'Fooled you! Pon-poko!', es: '¡Te engañé! ¡Pon-poko!', pt: 'Te enganei! Pon-poko!', ja: 'だまされた！ ポンポコ！' },
+      { en: 'A leaf beats a drop.', es: 'Una hoja gana a una gota.', pt: 'Folha vence gota.', ja: 'はっぱは しずくより つよい。' }],
+    defeat: { en: 'Fine… my leaf has wilted.', es: 'Vale… mi hoja se marchitó.', pt: 'Tá bom… minha folha murchou.', ja: 'まいった… はっぱが しおれた。' } },
+  // Fuji's: a Tsurara-onna on the Puck's slide (the plan's §5.4): over the ice, beaten by her own shells (PUCK, Boss.slide). The first three bosses'
+  // five hearts and the Cork's phases (owner, 2026-10-20: her round body kept, the fight softened, worlds 1-3 not hard).
+  puck: { name: { en: 'Tsurara-onna', es: 'Tsurara-onna', pt: 'Tsurara-onna', ja: 'つららおんな' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+    intro: [{ en: 'Cold hands. Colder heart.', es: 'Manos frías. Corazón más frío.', pt: 'Mãos frias. Coração mais frio.', ja: 'つめたい て。もっと つめたい こころ。' },
+      { en: 'Stay a while. Freeze with me.', es: 'Quédate un rato. Congélate conmigo.', pt: 'Fique um pouco. Congele comigo.', ja: 'ゆっくり していって。いっしょに こおろう。' },
+      { en: 'My icicles never melt.', es: 'Mis carámbanos nunca se derriten.', pt: 'Meus pingentes de gelo nunca derretem.', ja: 'わたしの つららは とけない。' }],
+    quip: [{ en: 'Frozen solid. How pretty.', es: 'Congelado del todo. Qué bonito.', pt: 'Congelado inteiro. Que lindo.', ja: 'カチコチ。きれいね。' },
+      { en: 'Shh. Winter is long here.', es: 'Shh. Aquí el invierno es largo.', pt: 'Psiu. Aqui o inverno é longo.', ja: 'しーっ。ここの ふゆは ながいの。' }],
+    defeat: { en: 'Melting… so spring has come.', es: 'Me derrito… llegó la primavera.', pt: 'Derretendo… a primavera chegou.', ja: 'とけていく… はるが きたのね。' },
+    top: { en: 'Hard on top. Roll a shell at her!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
+    hint: { en: 'Flipped! Land on her belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
+    how: { en: 'Roll a shell into her, then stomp her', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
+  // The Cave's: a Tsuchigumo on the Minecart's rail (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
   // The gentler of the two on a rail, as the earlier (owner, 2026-10-20: it and the Tram traded): the Cork's hits and phases, its passes and spits a quarter slower (slow).
-  cart: { name: { en: 'Minecart', es: 'Vagoneta', pt: 'Vagonete', ja: 'トロッコ' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
-    intro: [{ en: 'No outsiders in the pit!', es: '¡Prohibido entrar a la mina!', pt: 'Proibido entrar na mina!', ja: 'ぶがいしゃは たちいり きんし！' },
-      { en: "Mind the rocks. Or don't.", es: 'Cuidado con las rocas. O no.', pt: 'Cuidado com as pedras. Ou não.', ja: 'いわに きをつけな。' },
-      { en: 'My rail, my rules.', es: 'Mi riel, mis reglas.', pt: 'Meu trilho, minhas regras.', ja: 'わたしの レール、わたしの ルール。' }],
-    quip: [{ en: 'The shift is not over yet.', es: 'El turno aún no acaba.', pt: 'O turno ainda não acabou.', ja: 'シフトは まだ おわらない。' },
-      { en: 'Out of my pit, small fry.', es: 'Fuera de mi mina, pequeño.', pt: 'Fora da minha mina, pequeno.', ja: 'でていきな、ちびすけ。' }],
-    defeat: { en: 'Shift is over… go on, then.', es: 'Se acabó el turno… sigue, pues.', pt: 'O turno acabou… vai, então.', ja: 'シフト おわり… いきな。' },
+  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+    intro: [{ en: 'The dark down here is my web.', es: 'La oscuridad aquí es mi telaraña.', pt: 'O escuro aqui é minha teia.', ja: 'この くらやみは わたしの くものす。' },
+      { en: 'Eight legs, one rail, no way out.', es: 'Ocho patas, un riel, sin salida.', pt: 'Oito patas, um trilho, sem saída.', ja: 'あし はっぽん、レール いっぽん、にげみち なし。' },
+      { en: 'Nobody leaves my burrow.', es: 'Nadie sale de mi madriguera.', pt: 'Ninguém sai da minha toca.', ja: 'わたしの あなから だれも でられない。' }],
+    quip: [{ en: 'Stuck in my web!', es: '¡Atrapado en mi telaraña!', pt: 'Preso na minha teia!', ja: 'くものすに ひっかかった！' },
+      { en: 'Too slow for eight legs.', es: 'Muy lento para ocho patas.', pt: 'Lento demais para oito patas.', ja: 'はっぽんあしには おそすぎ。' }],
+    defeat: { en: 'Ugh… back into my hole.', es: 'Uf… de vuelta a mi agujero.', pt: 'Ai… de volta pro meu buraco.', ja: 'うう… あなに もどる。' },
     hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
     how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
   // World 7's: the Rat King (the Junkyard's): the Puck's slide over a greasy floor (its arena as the Puck's, rc.ice), round ears, a tail.
@@ -631,22 +632,22 @@ const BOSSES = {
     top: { en: 'Hard on top. Roll a shell at it!', es: 'Arriba es duro. ¡Lánzale un caparazón!', pt: 'Em cima é duro. Role um casco nele!', ja: 'うえは かたい。こうらを ころがせ！' },
     hint: { en: 'Flipped! Land on its belly!', es: '¡Volteado! ¡Salta en su panza!', pt: 'Virado! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },
     how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písalo', pt: 'Role um casco nele e depois pise', ja: 'こうらを ぶつけて、ふみつけろ' } },
-  // World 6's: the Pigeon (the Skyscraper's): the Cork's dive (hover, warn, dive, dazed, rise), flapping its grey wings.
-  pigeon: { name: { en: 'Pigeon', es: 'Paloma', pt: 'Pombo', ja: 'ハト' }, ink: 'gray', design: 'drop', pigeon: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
-    intro: [{ en: 'Coo. This ledge is taken.', es: 'Cu-cú. Esta cornisa es mía.', pt: 'Ru-ru. Essa beirada é minha.', ja: 'クルッ。ここは わたしの へり。' },
-      { en: 'Crumbs first. Then the sky.', es: 'Primero las migas. Luego el cielo.', pt: 'Primeiro as migalhas. Depois o céu.', ja: 'まず パンくず。そらは そのあと。' },
-      { en: 'Nobody flies higher than me.', es: 'Nadie vuela más alto que yo.', pt: 'Ninguém voa mais alto que eu.', ja: 'わたしより たかく とぶ ものは いない。' }],
-    quip: [{ en: 'Coo-coo. Too slow.', es: 'Cu-cú. Muy lento.', pt: 'Ru-ru. Muito lento.', ja: 'クルックー。おそい。' },
-      { en: 'Back to the pavement.', es: 'De vuelta a la acera.', pt: 'De volta para a calçada.', ja: 'ほどうに もどって。' }],
-    defeat: { en: 'Fine… the sky is big enough.', es: 'Vale… el cielo es grande.', pt: 'Tá bom… o céu é grande.', ja: 'わかった… そらは ひろいから。' } },
-  // World 5's: the Crane (the Tower Blocks'): the Cork's dive (hover, warn, dive, dazed, rise) as a load swinging on a crane's cable.
-  crane: { name: { en: 'Crane', es: 'Grúa', pt: 'Guindaste', ja: 'クレーン' }, ink: 'orange', design: 'loaf', crane: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
-    intro: [{ en: 'Hard hats only.', es: 'Solo con casco.', pt: 'Só de capacete.', ja: 'ヘルメット ちゃくよう！' },
-      { en: 'One more floor. Then another.', es: 'Un piso más. Y otro.', pt: 'Mais um andar. E outro.', ja: 'あと いっかい。それから もう いっかい。' },
-      { en: 'Stand clear of the load!', es: '¡Apártate de la carga!', pt: 'Afaste-se da carga!', ja: 'にもつの したに たつな！' }],
-    quip: [{ en: 'Flattened. Like a panel.', es: 'Aplastado. Como un panel.', pt: 'Achatado. Como um painel.', ja: 'ぺしゃんこ。パネルみたい。' },
-      { en: 'Back to the ground floor.', es: 'De vuelta a la planta baja.', pt: 'De volta ao térreo.', ja: 'いっかいに もどって。' }],
-    defeat: { en: 'Shift over… the roof is yours.', es: 'Fin del turno… el tejado es tuyo.', pt: 'Fim do turno… o telhado é seu.', ja: 'しごと おわり… やねは きみの もの。' } },
+  // The Sky's: a Karasu-tengu on the Cork's dive (hover, warn, dive, dazed, rise), flapping its wings.
+  pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', pigeon: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+    intro: [{ en: 'The sky has a guard. Me.', es: 'El cielo tiene un guardián. Yo.', pt: 'O céu tem um guardião. Eu.', ja: 'そらには ばんにんが いる。わたしだ。' },
+      { en: 'Caw! Climbers fall. Crows fly.', es: '¡Cra! Tú caes. Los cuervos vuelan.', pt: 'Cró! Você cai. Corvos voam.', ja: 'カァ！ のぼる ものは おちる。カラスは とぶ。' },
+      { en: 'Show me your wings, climber.', es: 'Enséñame tus alas, escalador.', pt: 'Mostre suas asas, escalador.', ja: 'つばさを みせてみな。' }],
+    quip: [{ en: 'Caw-caw! Back to earth.', es: '¡Cra-cra! De vuelta a tierra.', pt: 'Cró-cró! De volta ao chão.', ja: 'カァカァ！ じめんに おかえり。' },
+      { en: 'No wings, no sky.', es: 'Sin alas, no hay cielo.', pt: 'Sem asas, sem céu.', ja: 'つばさ なしに そら なし。' }],
+    defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' } },
+  // The Tower Blocks': a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
+  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', crane: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+    intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
+      { en: 'Who needs a face anyway?', es: '¿Quién necesita una cara?', pt: 'Quem precisa de rosto?', ja: 'かおなんて いる？' },
+      { en: 'Wobble, wobble… splat!', es: 'Tiembla, tiembla… ¡plaf!', pt: 'Treme, treme… plaft!', ja: 'ぷるぷる… べちゃっ！' }],
+    quip: [{ en: 'Splat. Flat as a panel.', es: 'Plaf. Plano como un panel.', pt: 'Plaft. Plano como um painel.', ja: 'べちゃっ。パネルみたいに ぺしゃんこ。' },
+      { en: "Sticky down there, isn't it?", es: 'Pegajoso ahí abajo, ¿eh?', pt: 'Grudento aí embaixo, né?', ja: 'したは ベタベタでしょ？' }],
+    defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' } },
   // Tokyo's: the Tram (its streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
   // its pantograph up to an overhead wire; the rail at full strength, as the later of the two (owner, 2026-10-20: the Minecart has its gentleness).
   tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),

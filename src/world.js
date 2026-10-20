@@ -255,6 +255,9 @@ const neonSign = (lv, k) => {
 const NEON_REACH = 3;   // in R: a sign lights with the hero this near it (as near as a crow lets it come, FOLK.flee)
 const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.5 * lv.tile;   // a sign the hero can get to: some of it between the level's floor and its cap
 const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
+// The Sea's variants while the owner picks (each of the six on its sheet, research/variants/sea-*-1-px.png, drawn by the game; window.__seaV for the gallery):
+// which variant of each element, A = 0 to F = 5
+const SEA_V = { slab: 0, plank: 0, boat: 0, raft: 0 };
 const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plank): its frame's height over its floor and its pulley's over that, in tiles (its cable runs there)
 // The kits' things on the ledges, one a ledge at most, the same for the game and the renderer (as neonSign is): the Village's (a sakura, a scarecrow, a
 // little shrine whose stone lantern the hero lights, koinobori), the Cave's (a stone lantern, a pair of jizo the hero leaves flowers at), Mount Fuji's bell
@@ -2958,6 +2961,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (th.village) for (const r of lv.rects) if (r.plank && r.move && seen(r.y0 - 4 * kitT, r.y0)) {   // a yaen's cable across the shaft at its pulley, behind (DEPTH)
     const cy = snap(r.y0 - snap(YAEN.frame * kitT) - YAEN.wheel * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.gray, DIM, 0, 10, 0);
   }
+  if (th.sea) for (const r of lv.rects) if (r.plank && r.move && seen(r.y0 - 2 * kitT, r.y1 + kitT)) {   // a Sea boat's rope across the shaft (A, B) or its stream (E, F), behind (DEPTH)
+    const k = (window.__seaV || SEA_V).boat;
+    if (k < 2) { const cy = snap(r.y0 - 1.7 * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.orange, DIM, 0, 10, 0); }
+    else if (k >= 4) { const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + ((T * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0); }   // (its ripples going by)
+  }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter
     // (DIM): the countryside far off (F), its forest of cedars and bamboo purple, a farmhouse, a torii and terraces orange, keeping its place low on the screen; a
@@ -3241,6 +3249,115 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     return true;
   };
+  // The Sea's ledges (the owner's sheets, research/variants/sea-*-1-px.png): while the owner picks, all six variants of each in the game's own code (SEA_V, or
+  // window.__seaV from the gallery harness). A block is sea-worn rock (slab), a plank a jetty (plank), a moving plank a ferry boat, a sea turtle or a raft on a
+  // stream (boat; the rope and the stream behind, see the back layer), a crumbling block a raft of driftwood (raft). The sheets' red and yellow are orange
+  // here (red is danger, yellow what you take), their white grey but for the edges you stand on. False for what keeps the common look.
+  const seaRect = (r) => {
+    const t = kitT, P = kitP, px = P / t, V = window.__seaV || SEA_V, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, hgt = r.y1 - r.y0, ht = hgt / t;
+    const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
+    const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
+    const barn = (x, y) => { box(x - P, y - P, x + 3 * P, y + 3 * P, PAL.gray, 1, 0, 10, 0); box(x, y, x + 2 * P, y + 2 * P, PAL.black, 1, 0, 10, 0); };   // a barnacle, a grey ring (the sheets' white)
+    const ring = (x, y) => { box(x - P, y - P, x + 2 * P, y + 2 * P, PAL.gray, 1, 0, 10, 0); box(x, y, x + P, y + P, PAL.black, 1, 0, 10, 0); };   // a rope's ring
+    const lantern = (x, y, lit) => {   // a paper lantern on a hook, ribbed, its caps orange (the sheets' yellow); lit, orange in a glow
+      if (lit) F(x, y, 0.6 * t, 0, 0, 0.6 * t, PAL.orange, 0.45, 1);
+      const c = lit ? PAL.orange : th.block, x0 = snap(x - 0.18 * t), x1 = snap(x + 0.18 * t) + P, y0 = snap(y - 0.26 * t), y1 = snap(y + 0.26 * t);
+      box(x0 + P, y0, x1 - P, y1, c, 1, 0, 10, 0); box(x0, y0 + 2 * P, x1, y1 - 2 * P, c, 1, 0, 10, 0);
+      for (const f of [0.33, 0.66]) box(x0, snap(y0 + f * (y1 - y0)), x1, snap(y0 + f * (y1 - y0)) + P, lit ? PAL.black : PAL.gray, 1, 0, 10, 0);
+      box(snap(x - 0.1 * t), y0 - 2 * P, snap(x + 0.1 * t) + P, y0, PAL.orange, 1, 0, 10, 0); box(snap(x - 0.1 * t), y1, snap(x + 0.1 * t) + P, y1 + 2 * P, PAL.orange, 1, 0, 10, 0);
+    };
+    if (r.crumble) {   // a raft of driftwood (raft): logs with rounded ends, each shaking its own way as it gives, lashed to the wall with orange rope
+      const k = V.raft, u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round(w / (1.3 * t))), pw = w / n;
+      for (let i = 0; i < n; i++) {
+        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * pw) + ox;
+        box(x0, r.y0 + 3 * P, x1, r.y1 - 3 * P, th.crumble, a, 0, 10, [2, 2, 2, 4, 0, 3][k]); box(x0 + P, r.y0 + P, x1 - P, r.y1 - P, th.crumble, a, 0, 10, [2, 2, 2, 4, 0, 3][k]); box(x0 + 3 * P, r.y0, x1 - 3 * P, r.y1, th.crumble, a, 0, 10, [2, 2, 2, 4, 0, 3][k]);   // a log, its ends round
+        box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y0 + 2.5, th.lip, a, 1.25);
+        if ((k === 2 || k === 5) && i) box(x0 - P, r.y0 - P, x0 + P, r.y1 + P, PAL.orange, a, 0, 10, 0);   // a band of rope between two logs (C, F)
+      }
+      if (on) { line(W(0.02), Y(0.1), W(0.32), Y(ht - 0.1), PAL.orange, a); line(W(0.02), Y(ht - 0.1), W(0.32), Y(0.1), PAL.orange, a); bw(0.06, 0, 0.06 + px, ht, PAL.orange, 0, a); }   // its lashing at the wall
+      if (k === 1 || k === 5) { const fx = E(0.3); box(fx, r.y1, fx + P, Y(ht + 0.3), PAL.gray, a, 0, 10, 0); disc(fx + P / 2, Y(ht + 0.48), 0.17 * t, PAL.orange, a); box(fx - snap(0.15 * t), Y(ht + 0.45), fx + snap(0.15 * t) + P, Y(ht + 0.45) + P, PAL.gray, a, 0, 10, 0); }   // a float off its free end (B, F; theirs red)
+      if (k === 2) { const sx = E(0.3), sy = Y(ht + 0.1); for (const [dx, dy] of [[0, -2], [0, 2], [-2, 0], [2, 0], [-1, -1], [1, 1], [-1, 1], [1, -1], [0, 0]]) box(sx + dx * P, sy + dy * P, sx + (dx + 1) * P, sy + (dy + 1) * P, PAL.orange, a, 0, 10, 0);   // a starfish (C)
+        if (on) { bw(0.18, ht, 0.18 + px, ht + 0.35, PAL.orange, 0, a); bw(0.18, ht + 0.35, 0.32, ht + 0.35 + px, PAL.orange, 0, a); bw(0.32 - px, ht + 0.25, 0.32, ht + 0.35, PAL.orange, 0, a); } }   // a hook off the lashing
+      if (k === 3) { if (on) { bw(0.18, ht, 0.18 + px, ht + 0.75, PAL.orange, 0, a); bw(0.06, ht + 0.55, 0.32, ht + 0.55 + px, PAL.orange, 0, a); bw(0.02, ht + 0.75, 0.36, ht + 0.75 + px, PAL.orange, 0, a); for (const u of [0.02, 0.36 - px]) bw(u, ht + 0.65, u + px, ht + 0.75, PAL.orange, 0, a); }   // a rope down to an anchor (D)
+        const fx = E(0.3); box(fx, r.y1, fx + P, Y(ht + 0.25), PAL.gray, a, 0, 10, 0); be(0.15, ht + 0.25, 0.45, ht + 0.45, PAL.purple, 0, a); be(0.22, ht + 0.45, 0.38, ht + 0.55, PAL.purple, 0, a); }   // a shell on a string
+      return true;
+    }
+    if (r.plank && r.move) {   // a boat (boat): A and B a ferry boat hung from a rope, C and D a sea turtle carrying you on its shell, E and F a raft riding a stream
+      const k = V.boat, cx = snap((r.x0 + r.x1) / 2), ahead = r.move.v < 0 ? -1 : 1, fr = ahead > 0 ? r.x1 : r.x0, bk = ahead > 0 ? r.x0 : r.x1, A = (u) => snap(fr - ahead * u * t), B = (u) => snap(bk + ahead * u * t);
+      if (k < 2) {
+        for (const [i0, v0, v1] of [[0, 0, 0.3], [0.12, 0.3, 0.52], [0.35, 0.52, 0.68]]) box(snap(r.x0 + i0 * t), Y(v0), snap(r.x1 - i0 * t), Y(v1), th.mover, 1, 0, 10, 0);   // its hull, narrowing to the keel, its planking
+        for (const v of [0.3, 0.52]) box(snap(r.x0 + 0.12 * t), Y(v), snap(r.x1 - 0.12 * t), Y(v) + P, PAL.black, 1, 0, 10, 0);
+        for (const x of [snap(r.x0 + 0.22 * t), snap(r.x1 - 0.22 * t)]) { box(x, Y(-1.7), x + P, r.y0, th.mover, 1, 0, 10, 0); box(x - P, r.y0 - P, x + 2 * P, r.y0 + 2 * P, th.mover, 1, 0, 10, 0); }   // the ropes it hangs by
+        if (k === 0) { const hx = A(0.4); box(hx, Y(0.62), hx + P, Y(0.85), PAL.gray, 1, 0, 10, 0); box(hx - P, Y(0.85), hx + 2 * P, Y(1.0), PAL.blue, 1, 0, 10, 0); box(hx, Y(1.0), hx + P, Y(1.05), PAL.gray, 1, 0, 10, 0); }   // a charm under it
+        else { const lx = B(0.35); box(lx, Y(-0.95), lx + P, r.y0, th.mover, 1, 0, 10, 0); box(lx, Y(-0.95), lx + snap(0.3 * t), Y(-0.9), th.mover, 1, 0, 10, 0); lantern(lx + snap(0.3 * t), Y(-0.68), true);   // a lantern on a pole, an oar
+          line(A(0.3), Y(0.1), A(-0.15), Y(0.95), th.mover, 1, 2); box(A(-0.25), Y(0.9), A(-0.05), Y(1.2), th.mover, 1, 0, 10, 0); }
+      } else if (k < 4) {
+        const s0 = snap(r.x0 + 0.1 * t), s1 = snap(r.x1 - 0.1 * t);
+        F(A(-0.45), Y(0.5), 0.36 * t, 0, 0, 0.3 * t, th.mover, 1, 0); box(A(-0.55), Y(0.4), A(-0.55) + 2 * P, Y(0.4) + 2 * P, PAL.black, 1, 0, 10, 0); box(A(-0.7), Y(0.62), A(-0.5), Y(0.62) + P, PAL.black, 1, 0, 10, 0);   // its head, an eye, a smile
+        line(A(0.15), Y(0.7), A(-0.45), Y(1.15), th.mover, 1, 5); line(B(0.6), Y(0.75), B(0.05), Y(1.1), th.mover, 1, 4);   // its flippers
+        line(B(-0.1), Y(0.55), B(-0.42), Y(0.7), th.mover, 1, 2);   // its tail
+        box(snap(r.x0 + 0.3 * t), Y(0.66), snap(r.x1 - 0.3 * t), Y(0.82), th.mover, 1, 0, 10, 0);   // its belly, under the shell
+        for (const [i0, v0, v1] of [[0, 0, 0.24], [-0.18, 0.24, 0.46], [-0.26, 0.46, 0.66]]) box(snap(r.x0 + i0 * t), Y(v0), snap(r.x1 - i0 * t), Y(v1), PAL.purple, 1, 0, 10, 0);   // the shell, a dome
+        for (const [v0, v1, o] of [[0.06, 0.24, 0], [0.24, 0.46, 0.3], [0.46, 0.66, 0]]) for (let x = r.x0 + (0.45 + o) * t; x < r.x1 - 0.2 * t; x += 0.6 * t) box(snap(x), Y(v0), snap(x) + P, Y(v1), PAL.black, 1, 0, 10, 0);   // its plates
+        for (const v of [0.24, 0.46]) box(snap(r.x0 - 0.1 * t), Y(v), snap(r.x1 + 0.1 * t), Y(v) + P, PAL.black, 1, 0, 10, 0);
+        box(snap(r.x0 - 0.26 * t), Y(0.64), snap(r.x1 + 0.26 * t), Y(0.66), th.mover, 1, 0, 10, 0);   // its rim
+        if (k === 3) { const fx = B(0.9); box(fx - snap(0.3 * t), Y(-0.36), fx + snap(0.3 * t), r.y0, th.mover, 1, 0, 10, 4); for (const dx of [-0.18, 0, 0.18]) disc(fx + dx * t, Y(-0.4), 0.1 * t, PAL.blue, 1);   // a basket of fish, a flag
+          const px0 = B(0.35); box(px0, Y(-1.0), px0 + P, r.y0, th.mover, 1, 0, 10, 0); box(px0 + P, Y(-1.0), px0 + snap(0.32 * t), Y(-0.8), PAL.orange, 1, 0, 10, 2); }
+      } else {
+        const n = 3, lw = w / n;
+        for (let i = 0; i < n; i++) { const x0 = snap(r.x0 + i * lw) + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * lw); box(x0, r.y0 + P, x1, Y(0.4), th.mover, 1, 0, 10, 2); box(x0 + P, r.y0, x1 - P, r.y0 + P, th.mover, 1, 0, 10, 0); }   // its logs
+        const lx = B(0.3); box(lx, Y(-1.0), lx + P, r.y0, th.mover, 1, 0, 10, 0); box(lx, Y(-1.0), lx + snap(0.25 * t), Y(-0.95), th.mover, 1, 0, 10, 0); lantern(lx + snap(0.25 * t), Y(-0.72), true);   // a lantern on a pole
+        const bx0 = A(k === 4 ? 0.9 : 0.6), bw0 = (k === 4 ? 0.34 : 0.24) * t;   // a basket of fish
+        box(snap(bx0 - bw0), Y(-0.34), snap(bx0 + bw0), r.y0, th.mover, 1, 0, 10, 4); for (const dx of k === 4 ? [-0.18, 0, 0.18] : [-0.1, 0.1]) disc(bx0 + dx * t, Y(-0.38), 0.09 * t, PAL.blue, 1);
+      }
+      lip(); return true;
+    }
+    if (r.plank) {   // a jetty (plank): boards on beams, posts down into the water, a bollard with its rope, a lantern, a bucket or a coil of rope
+      if (r.bouncy) return false;
+      const k = V.plank, segs = [3, 1, 5, 1, 3, 1][k], post = (u, fromWall, len, lash) => {   // a post down from under it, dotted, perhaps lashed
+        const x0 = fromWall ? W(u) : E(u), x1 = fromWall ? W(u + 0.3) : E(u + 0.3), a0 = Math.min(x0, x1), a1 = Math.max(x0, x1);
+        box(a0, r.y1, a1, Y(ht + len), th.plank, 1, 0, 10, 2);
+        if (lash) { line(a0 - P, Y(ht + 0.35), a1 + P, Y(ht + 0.6), PAL.gray); line(a0 - P, Y(ht + 0.6), a1 + P, Y(ht + 0.35), PAL.gray); }
+      }, brace = () => { if (on) line(W(0.08), Y(ht + 0.9), W(0.95), Y(ht), th.plank, 1, 3, 2); }, bollard = () => {   // a bollard on its free end, its rope wound round it and hanging to a ring
+        be(0.1, -0.36, 0.42, 0, th.plank); for (const v of [-0.27, -0.15]) be(0.1, v, 0.42, v + px, PAL.gray);
+        line(E(0.26), Y(-0.1), E(-0.12), Y(ht + 1.05), PAL.gray); ring(E(-0.14), Y(ht + 1.12));
+      };
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);   // its boards, a rough underside, the gaps between them
+      for (let i = 1; i < segs; i++) { const x = snap(r.x0 + (w * i) / segs); box(x, r.y0, x + P, r.y1, PAL.black, 1, 0, 10, 0); }
+      if (k === 0) { brace(); post(1.0, false, 1.8, false); bollard(); }
+      else if (k === 1) { brace(); const lx = E(0.18); box(lx, r.y1, lx + P, Y(ht + 0.35), PAL.gray, 1, 0, 10, 0); lantern(lx, Y(ht + 0.62), false); }
+      else if (k === 2) { post(0.6, true, 1.9, true); post(0.6, false, 1.9, true); be(0.1, -0.34, 0.46, 0, th.plank); be(0.08, -0.5, 0.48, -0.5 + px, PAL.orange); be(0.08, -0.5, 0.08 + px, -0.34, PAL.orange); be(0.48 - px, -0.5, 0.48, -0.34, PAL.orange); }   // a bucket, its handle orange (C's yellow)
+      else if (k === 3) { if (on) { post(0.08, true, 2.0, false); line(W(0.3), Y(ht + 1.0), W(1.1), Y(ht), th.plank, 1, 3, 2); } bollard(); }
+      else if (k === 4) { post(0.6, true, 1.9, true); post(0.9, false, 1.9, true); be(0.05, -0.3, 0.75, 0, PAL.gray); be(0.13, -0.24, 0.67, -0.06, PAL.black); be(0.2, -0.2, 0.6, -0.1, PAL.gray); be(0.3, -0.17, 0.5, -0.13, PAL.black); }   // a coil of rope, its rings
+      else { brace(); post(0.4, false, 1.9, true); bollard(); }
+      lip(); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
+    {   // sea-worn rock (slab): dotted, its underside worn, barnacles; a tide pool, a crab, stones, layers, a crack or a limpet by the variant
+      const k = V.slab, lump = (n0, depth) => {   // its underside worn lumpy: notches cut up into it
+        for (let x = r.x0 + snap(0.2 * t), i = 0; x < r.x1 - P; i++) { const ww = snap((0.2 + 0.4 * hsh(n0 + i)) * t), dd = snap(depth * (0.35 + 0.65 * hsh(n0 + 50 + i)) * Math.min(1, ht) * t); box(x, r.y1 - dd, Math.min(r.x1, x + ww), r.y1, PAL.black, 1, 0, 10, 0); x += ww + snap((0.5 + 0.7 * hsh(n0 + 90 + i)) * t); }
+      }, pool = (u0, u1) => { be(u1, 0.1, u0, 0.32, PAL.blue); be(u1, 0.26, u0, 0.32, PAL.blue, 4); be(u1 + 0.12, 0.08, u1, 0.34, PAL.gray); be(u0, 0.08, u0 - 0.12, 0.34, PAL.gray); };   // a tide pool under its edge, grey stone round it
+      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, k === 2 ? 0 : 2);
+      if (k === 0) { lump(1, 0.35); pool(1.0, 2.6); for (const [u, v] of [[0.55, 0.45], [0.75, 0.62], [0.42, 0.7]]) barn(E(u), Y(v));
+        const cx0 = E(0.2), cy0 = Y(0.5), C = (x0, y0, x1, y1, c = PAL.orange) => box(snap(cx0 + x0 * t), snap(cy0 + y0 * t), snap(cx0 + x1 * t), snap(cy0 + y1 * t), c, 1, 0, 10, 0);   // a crab (A's red), its claws up
+        C(-0.3, -0.02, 0.3, 0.24); C(-0.4, -0.26, -0.26, -0.02); C(0.26, -0.26, 0.4, -0.02); C(-0.45, -0.3, -0.33, -0.2); C(0.33, -0.3, 0.45, -0.2); for (const e of [-1, 1]) for (const f of [0.12, 0.26]) C(e * f - 0.04, 0.24, e * f + 0.04, 0.36);
+        C(-0.14, 0.04, -0.08, 0.1, PAL.black); C(0.08, 0.04, 0.14, 0.1, PAL.black); }
+      else if (k === 1) { const mid = Y(0.5 * ht); for (let x = r.x0 + 0.05 * t, i = 0; x < r.x1 - 0.3 * t; i++) { const sw = (0.75 + 0.35 * hsh(i)) * t; F(x + sw / 2, mid + 0.22 * t, sw / 2 + P, 0, 0, 0.27 * t + P, PAL.black, 1, 0); F(x + sw / 2, mid + 0.22 * t, sw / 2 - P, 0, 0, 0.27 * t - P, th.block, 1, 0); x += sw; }   // stones in its underside
+        for (const [u, v] of [[0.25, 0.3], [0.45, 0.45], [0.3, 0.6], [0.5, 0.72]]) barn(E(u), Y(v)); box(E(0.6), Y(ht + 0.15), E(0.6) + P, Y(ht + 0.15) + P, th.block, 1, 0, 10, 0); }
+      else if (k === 2) { for (const [v, n0] of [[0.38, 3], [0.6, 5], [0.8, 7]]) for (let x = r.x0, i = 0; x < r.x1; i++) { const sw = snap((0.6 + 0.9 * hsh(n0 + i)) * t); box(x, Y(v * ht), Math.min(r.x1, x + sw), Y(v * ht) + P, PAL.black, 1, 0, 10, 0); x += sw + 2 * P; }   // in layers
+        for (const [u, v] of [[0.6, 0.62], [0.35, 0.78], [0.8, 0.85]]) barn(E(u), Y(v)); }
+      else if (k === 3) { lump(7, 0.3); pool(0.55, 1.75); for (const u of [1.3, 2.4]) { const dx = W(u); box(dx, r.y1, dx + P, Y(ht + 0.35), th.block, 1, 0, 10, 0); box(dx - P, Y(ht + 0.35), dx + 2 * P, Y(ht + 0.45), th.block, 1, 0, 10, 0); }   // drips
+        be(0.8, -0.4, 1.55, 0, PAL.gray); be(0.9, -0.5, 1.45, -0.4, PAL.gray); for (const u of [1.0, 1.3]) be(u, -0.3, u + 0.07, -0.22, PAL.black); be(1.1, -0.14, 1.25, -0.14 + px, PAL.black);   // a grey stone sitting on it, eyes and a smile
+        for (const [u, v] of [[0.5, 0.5], [0.7, 0.62]]) barn(E(u), Y(v)); }
+      else if (k === 4) { for (let y = r.y0 + 2 * P, i = 0; y < r.y1 - P; y += 2 * P, i++) { const cx = E(0.9 + (i % 2 ? 0.04 : 0)); box(cx, y, cx + P, y + 2 * P, PAL.black, 1, 0, 10, 0); }   // a crack
+        for (const [u, v] of [[0.25, 0.55], [0.45, 0.7], [0.3, 0.85]]) barn(W(u), Y(v)); }
+      else { lump(13, 0.4); for (const [u, v] of [[0.3, 0.45], [0.55, 0.6], [0.35, 0.72]]) barn(E(u), Y(v)); be(0.08, -0.2, 0.68, 0, PAL.orange); be(0.16, -0.34, 0.6, -0.2, PAL.orange); be(0.26, -0.42, 0.5, -0.34, PAL.orange); for (const u of [0.24, 0.44]) be(u, -0.22, u + 0.07, -0.15, PAL.black); }   // a limpet on it (F)
+      lip(); return true;
+    }
+  };
   // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
   // beam, a block is a concrete slab cut square with its panels' seams, a striped cap on a free end, a knee brace under it at a wall
   // and windows in a thick one.
@@ -3438,7 +3555,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud || th.village) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
@@ -3454,7 +3571,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && th.village) {   // the Village's moss under it (F's): a strip and strands hanging off it, long and short (the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea)) {   // the Village's moss under it (F's): a strip and strands hanging off it, long and short (the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.1 * R; x < r.x1 - 0.15 * R; x += 0.28 * R) {
         const h = (((Math.round(x / kitP) * 2654435761) ^ (Math.round(r.y0 / kitP) * 40503)) >>> 0) / 4294967296, w = (h > 0.6 ? 3 : 2) * kitP;

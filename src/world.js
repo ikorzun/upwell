@@ -83,7 +83,11 @@ const GROW = { time: 9, size: 2, reach: 0.25, feet: 0.3, jolt: 0.5, grace: 2 };
 // The swarm (user): for its time the hero is 5-7 of its kind in the other colours round it, each wrecking what it touches
 // (enemies, and blocks over its feet); `size` theirs, R; `orbit` their ring's, R; `spin` its turn, rad/s; `back` the last s, home.
 const SWARM = { time: 7, n: [5, 7], size: 0.9, orbit: 2.9, spin: 3.2, back: 0.3, trail: 6 };   // 7 s, clones and their ring a fifth bigger (user), `trail` dots of each clone's colour behind it
-const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM };
+// The astro (owner, 2026-10-20: «астро это другой бонус – игрок пролетает 20% уровня, по пути автоматом собирая все монеты и задания»): in `p` of
+// the campaign's levels from the third (one at most, a level's own), at `at` of its height; taken, the hero flies up `lift` of the level at `v` of a
+// jump through all, as through a boost ring (RING), in the astronaut's helmet, every coin and task on its way its own (Game.ringStep)
+const ASTRO = { p: 0.35, at: [0.25, 0.6], lift: 0.2, v: 2.6, time: 30 };   // time: a bound only (the flight ends it)
+const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO };
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless; in Tokyo a crow
@@ -869,11 +873,10 @@ ICONS.taskLantern = '............/.....ss...../...ssssss.../..ssssssss../....soo
 ICONS.taskFlower = '............/....pppp..../...pppppp.../...ppoopp.../...ppoopp.../...pppppp.../....pppp..../.....gg...../..gg.gg...../...gggg...../.....gg...../............';   // flowers left at the Cave's jizo,
 ICONS.taskBell = '............/.....ss...../.....ss...../....oooo..../...oooooo.../...oooooo.../...oooooo.../..oooooooo../.oooooooooo./.....kk...../............/............';   // a bell rung on Mount Fuji
 ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
-// The smash's picture: its helmet (user: the rock candy's place), a moto one, red with a white stripe and blue-lensed goggles,
-// or (?helmet=astro, the user's other choice) an astronaut's, white with a blue visor in a black rim and a blue and orange neck ring.
-const HELMET = /[?&]helmet=astro\b/.test(location.search) ? 'astro' : 'moto';
-ICONS.smash = HELMET === 'astro' ? '...wwwwww.../..wwwwwwwss./.wwkkkkkkws./wwkbbbbbbkws/wwkbwbbbbkws/wwkbbbbbbkws/wwkbbbbbbkws/.wwkkkkkkws./.wwwwwwwwws./..bbbbbbbb../..oooooooo../............'
-  : '....rwsr..../..rrrwsrrr../.rwrrwsrrrr./.rrrrwsrrrr./rrrrrwsrrrrr/rrrrrwsrrrrr/rkkkkkkkkkkr/rkbbbkkbbbkr/rkkkkkkkkkkr/rr........rr/.rr......rr./..r......r..';
+// The smash's picture: its helmet (user: the rock candy's place), a moto one, red with a white stripe and blue-lensed goggles (owner,
+// 2026-10-20: the red one); the astro candy's an astronaut's, white with a blue visor in a black rim and a blue and orange neck ring.
+ICONS.smash = '....rwsr..../..rrrwsrrr../.rwrrwsrrrr./.rrrrwsrrrr./rrrrrwsrrrrr/rrrrrwsrrrrr/rkkkkkkkkkkr/rkbbbkkbbbkr/rkkkkkkkkkkr/rr........rr/.rr......rr./..r......r..';
+ICONS.astro = '...wwwwww.../..wwwwwwwss./.wwkkkkkkws./wwkbbbbbbkws/wwkbwbbbbkws/wwkbbbbbbkws/wwkbbbbbbkws/.wwkkkkkkws./.wwwwwwwwws./..bbbbbbbb../..oooooooo../............';
 ICONS.grow = 'ggg......ggg/gg........gg/g...wwww...g/...wwwwww.../..wwwwwwww../..wwkwwkww../..wwkwwkww../..wwwwwwww../...wwwwww.../g...wwww...g/gg........gg/ggg......ggg';   // the hero with arrows out of its corners: it grows
 ICONS.mark = '....yyyy..../....yyyy..../....yyyy..../....yyyy..../....yyyy..../yyyyyyyyyyyy/.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../....yyyy..../.....yy...../............';   // over a dazed boss: land here
 ICONS.ceiling = 'wwwwwwwwwwww/gggggggggggg/..g..g..g.../....wwww..../...wwwwww.../...wkwwkw.../...wwwwww.../....wwww..../............/............/............/............';
@@ -1592,7 +1595,12 @@ class Level {
       this.folkAt.sort((p, q) => q.y - p.y);   // the lower first
     }
     this.fizzAt = o.kind === 'well' && o.height ? GUN.at.slice(0, rc ? rc.candy.length : GUN.at.length).map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies (a recipe's, as many)
-    this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY));   // and which kinds, by a generator of their own: the shaft is laid as before
+    this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY).filter((k) => k !== 'astro'));   // and which kinds, by a generator of their own: the shaft is laid as before
+    const ar = mulberry32((o.seed ^ 0x3c6ef372) >>> 0);   // a level's astro (ASTRO), by a generator of its own
+    if (rc && rc.astro && o.height && ar() < ASTRO.p) {   // in its place among the level's candies, low to high
+      const y = this.floor - o.height * (ASTRO.at[0] + ar() * (ASTRO.at[1] - ASTRO.at[0])), k = this.fizzAt.filter((v) => v > y).length;
+      this.fizzAt.splice(k, 0, y); this.fizzKind = this.fizzKind.slice(); this.fizzKind.splice(k, 0, 'astro');
+    }
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
     this.coinTotal = 0; this.coinsTaken = 0; this.foeTotal = 0; this.foeKilled = 0;   // for the level's stars
@@ -2400,7 +2408,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   const frame = (ux, uy, ax, ay, bx, by) => { mapPoint(s, X, Y, cx, cy, ux, uy, P0); mapPoint(s, X, Y, cx, cy, ux + ax, uy + ay, P1); mapPoint(s, X, Y, cx, cy, ux + bx, uy + by, P2); };
   const put = (r, g, bl, type, p1, p2, p3) => this.feat(P0.x, P0.y, P1.x - P0.x, P1.y - P0.y, P2.x - P0.x, P2.y - P0.y, r, g, bl, 1, type, p1 || 0, p2 || 0, p3 || 0);
   const dot = (ux, uy, ax, ay, c) => { frame(ux, uy, ax, 0, 0, ay); put(c[0], c[1], c[2], 0); };   // an upright oval in one ink
-  // The hero's helmet while the smash is on (b.helmet, see HELMET; user: in place of its pips). An astro one goes under the face, which
+  // The hero's helmet (b.helmet): the moto one while the smash is on (user: in place of its pips), the astro one in an astro's flight. An astro one goes under the face, which
   // shows in its window: a white dome, grey on its right, the window's black rim, and in it the hero's own colour.
   if (b.helmet === 'astro') { dot(0.1, 0.05, 1.03, 1.02, PAL.gray); dot(-0.05, -0.04, 0.96, 0.97, PAL.white); dot(0.93, 0.1, 0.12, 0.22, PAL.gray); dot(0, 0.13, 0.68, 0.49, ink); dot(0, 0.13, 0.56, 0.38, b.color.base); }
   gumWriteFace.call(this, b, X, Y, cx, cy);

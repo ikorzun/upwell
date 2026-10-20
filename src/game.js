@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_flower: 'Flowers for every jizo!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_flower: 'Flowers for every jizo!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -28,7 +28,7 @@ const STR = {
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_flower: '¡Flores para cada jizo!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_flower: '¡Flores para cada jizo!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
@@ -45,7 +45,7 @@ const STR = {
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_flower: 'Flores para cada jizo!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_flower: 'Flores para cada jizo!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
@@ -62,7 +62,7 @@ const STR = {
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_flower: 'おじぞうさまに おはなを ぜんぶ！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_flower: 'おじぞうさまに おはなを ぜんぶ！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
@@ -812,12 +812,19 @@ class Game {
       }
       return;
     }
-    H.thread = true; H.gScale = 0; setVel(H, H.rigVx * 0.9, -RING.v * this.vjump); this.invuln = Math.max(this.invuln, 0.3);
+    H.thread = true; H.gScale = 0; setVel(H, H.rigVx * 0.9, -(this.rocket.astro ? ASTRO.v : RING.v) * this.vjump); this.invuln = Math.max(this.invuln, 0.3);
+    if (this.rocket.astro) {   // an astro's: every coin and task in the band it has flown up through since the last step its own, wall to wall
+      const y0 = H.minY - 3 * R, y1 = this.rocket.y, cs = lv.coins, inBand = (y) => y > y0 && y <= y1;
+      for (let i = cs.length - 1; i >= 0; i--) if (!cs[i].drop && inBand(cs[i].y)) this.takeCoin(i);
+      for (const f of lv.folk.slice()) if (inBand(f.y)) { if (f.kind === 'crow' && !f.fly) this.scare(f); else if (f.kind === 'cage' && !f.open) { if (!f.body) this.folkUp(f); this.free(f); } }
+      this.tend(y0, y1, () => true);
+      this.rocket.y = y0;
+    }
     for (const r of lv.near(H.minY, H.maxY)) if (!r.gone && r.x1 > H.minX && r.x0 < H.maxX && this.smashable(r)) this.smash(r);   // what breaks, broken
     for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > H.minX && q.minX < H.maxX && q.maxY > H.minY && q.minY < H.maxY) this.zap(e, [INK.coin, INK.white]); }
     sparkFx(H.cx, H.maxY, 3, Math.PI / 2, 0.5, [80, 200], [1.5, 3], [0.2, 0.4], [INK.coin, INK.white], 0.1);   // its trail
     const clear = !lv.near(H.minY - 2, H.maxY + 2).some((r) => !r.gone && r.x1 > H.minX - 2 && r.x0 < H.maxX + 2 && !r.plank);
-    if (H.cy <= this.rocket.to && clear) { this.rocket = null; H.thread = false; H.gScale = 1; setVel(H, H.rigVx, -0.7 * this.vjump); this.invuln = Math.max(this.invuln, 1); this.sinceContact = JUMP.coyote + 1; }
+    if (H.cy <= this.rocket.to && clear) { if (this.rocket.astro && this.pow === 'astro') this.powerEnd(); this.rocket = null; H.thread = false; H.gScale = 1; setVel(H, H.rigVx, -0.7 * this.vjump); this.invuln = Math.max(this.invuln, 1); this.sinceContact = JUMP.coyote + 1; }
   }
   // The level crossing (TRAIN): on screen it rests, then rings and flashes, then its train goes through left to right; a hero in its
   // band as it passes is hit (and knocked on along with it).
@@ -988,7 +995,7 @@ class Game {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
-        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); if (f.kind === 'crow') { this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id); } }
+        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
         if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
       } else if (f.kind === 'bug') {
         const r = f.rect;
@@ -998,21 +1005,28 @@ class Game {
         if (f.x < r.x0 + 0.2 * R || f.x > r.x1 - 0.2 * R) { if (f.run) { fx.dust(f.x, f.y, IMPACT.puffSpeed); lv.folk.splice(i, 1); continue; } f.dir = -f.dir; }   // at the end: turns round, or, running, is gone over it
       }
     }
-    if (lv.theme.town && lv.kind === 'well' && !this.well) {   // Tokyo's neon (neonSign): a sign the hero comes near lights, for good (lv.neonLit), a note higher each
-      const b = 11 * lv.tile, k0 = Math.floor(H.cy / b);
-      for (let k = k0 - 1; k <= k0 + 1; k++) {
-        const s = !lv.neonLit.has(k) && neonSign(lv, k);
-        if (!s || !neonIn(lv, s) || Math.hypot(Math.max(s.x0 - H.cx, 0, H.cx - s.x1), Math.max(s.y0 - H.cy, 0, H.cy - s.y1)) >= NEON_REACH * R) continue;
-        lv.neonLit.set(k, lv.t); sound.note(2 + (lv.neonLit.size % 8), 0.3); this.task('neon');
-      }
+    this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
+  }
+  scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
+    const H = this.hero, lv = this.lv;
+    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220);
+    if (f.kind === 'crow') { this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id); }
+  }
+  // Tokyo's neon (neonSign) and the kits' things (kitThing: a Village lantern lit, flowers left at a Cave jizo, a Fuji bell rung) between y0 and
+  // y1 that `near(x0, y0, x1, y1, reach)` lets the hero have: lit or tended for good (lv.neonLit, lv.tended), a note higher each (the hero coming
+  // near: NEON_REACH, KIT_REACH; an astro's flight: all of them)
+  tend(y0, y1, near) {
+    const lv = this.lv;
+    if (lv.kind !== 'well' || this.well) return;
+    if (lv.theme.town) for (let k = Math.floor(y0 / (11 * lv.tile)) - 1, k1 = Math.floor(y1 / (11 * lv.tile)); k <= k1; k++) {
+      const s = !lv.neonLit.has(k) && neonSign(lv, k);
+      if (!s || !neonIn(lv, s) || !near(s.x0, s.y0, s.x1, s.y1, NEON_REACH)) continue;
+      lv.neonLit.set(k, lv.t); sound.note(2 + (lv.neonLit.size % 8), 0.3); this.task('neon');
     }
-    if ((lv.theme.village || lv.theme.shrine || lv.theme.fuji) && lv.kind === 'well' && !this.well) {   // the kits' things (kitThing) the hero comes near: a Village lantern lit, flowers
-      // left at a Cave jizo, a Fuji bell rung; for good (lv.tended), a note higher each, as the neon
-      for (const r of lv.near(H.cy - 5 * R, H.cy + 5 * R)) {
-        const k = !lv.tended.has(r) && kitThing(lv, r), id = k && KIT_TEND[k.kind];
-        if (!id || !(k.y > lv.capY && k.y < lv.floor) || Math.hypot(k.x - H.cx, k.y - H.cy) >= KIT_REACH * R) continue;
-        lv.tended.set(r, lv.t); sound.note(2 + (lv.tended.size % 8), 0.3); this.task(id);
-      }
+    if (lv.theme.village || lv.theme.shrine || lv.theme.fuji) for (const r of lv.near(y0, y1)) {
+      const k = !lv.tended.has(r) && kitThing(lv, r), id = k && KIT_TEND[k.kind];
+      if (!id || !(k.y > lv.capY && k.y < lv.floor) || !near(k.x, k.y, k.x, k.y, KIT_REACH)) continue;
+      lv.tended.set(r, lv.t); sound.note(2 + (lv.tended.size % 8), 0.3); this.task(id);
     }
   }
   // The freed follow the hero to the level's end as if on a thread (user): each its own place back along the hero's way
@@ -1397,6 +1411,11 @@ class Game {
     if (kind === 'grow') { this.hero.growthTarget = GROW.size; fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('spring', 0.8, 0.6); shake.add(4); }
     if (kind === 'rainbow' || kind === 'swarm') this.invuln = 0;   // a hit's blink would let enemies through untouched
     if (kind === 'swarm') this.swarmUp();
+    if (kind === 'astro') {   // off up through a fifth of the level (ASTRO; on as a boost ring's flight, Game.ringStep)
+      const H = this.hero, lv = this.lv, R = this.R;
+      this.rocket = { to: H.cy - ASTRO.lift * Math.max(lv.floor - lv.endY, 10 * R), astro: true, y: H.maxY };
+      fx.ring(H.cx, H.cy, 2.4 * R, INK.white); fx.ring(H.cx, H.cy, 1.6 * R, PAL.blue); shake.add(6); haptics.buzz(30); sound.play('spring', 1, 0.6); sound.play('combo', 0.8, 1.4);
+    }
     ui.toast(tf('got_' + kind, { s: Math.round(this.gunT) }), 2200, kind);   // each time: its picture, what it does, for how long
   }
   powerEnd() {   // run out; after the rainbow a moment of the usual safety, so the crowd it was ploughing through does not hit at once
@@ -1457,9 +1476,12 @@ class Game {
         c.vx += ((dx / d) * sp - c.vx) * f; c.vy += ((dy / d) * sp - c.vy) * f;
       }
       if (c.moving) { if (!home) { c.vx *= k; c.vy *= k; } c.x += c.vx * dt; c.y += c.vy * dt; }
-      if (d < H.R * H.growth * 0.85 + (c.v > 1 ? 1.4 : 1) * cr && !(c.drop && c.t < COIN.home)) {   // a dropped one only once its burst is over: a combo's fountain is seen
-        cs.splice(i, 1); this.coins += c.v; if (!c.drop) { this.lv.coinsTaken++; if (this.lv.taken && c.id != null) this.lv.taken.push(c.id); } fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1); }
+      if (d < H.R * H.growth * 0.85 + (c.v > 1 ? 1.4 : 1) * cr && !(c.drop && c.t < COIN.home)) this.takeCoin(i);   // a dropped one only once its burst is over: a combo's fountain is seen
     }
+  }
+  takeCoin(i) {   // coin i of the level's into the purse (counted for the stars and kept for a level under way: Game.saveCur)
+    const cs = this.lv.coins, c = cs[i], cr = COIN.r * this.R;
+    cs.splice(i, 1); this.coins += c.v; if (!c.drop) { this.lv.coinsTaken++; if (this.lv.taken && c.id != null) this.lv.taken.push(c.id); } fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1);
   }
   payCombo() {
     const n = this.combo, s = this.mods.comboShift;
@@ -1679,7 +1701,7 @@ class Game {
   // A level of it (CAMPAIGN): from its recipe and seed (or `seed`: the bot's), with its world's upgrades so far (after the
   // colour's own), all the hearts and the purse. Dying costs that level only: Again starts it over (ui.campDead).
   playLevel(i, seed, order) {
-    const { w, s } = campAt(i), rc = campMerge(w, s, campAt(i).rc, order);
+    const { w, s } = campAt(i), merged = campMerge(w, s, campAt(i).rc, order), rc = (w > 0 || s >= 2) && !merged.boss && merged.bonus == null ? Object.assign({}, merged, { astro: true }) : merged;   // (an astro may come from the third level: ASTRO)
     delete save.cur;   // a level begun (Game.resume puts back the one it goes on with)
     this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
     for (const id of save.camp.builds[w] || []) { const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }
@@ -1786,7 +1808,7 @@ class Game {
     const lv = this.lv, b = this.hero;
     const rb = this.power('rainbow') && this.state !== 'dead', tl = this.tail, last = tl[tl.length - 1];   // frame runs on under the revive dialog, gun() does not
     b.color = this.state === 'dead' && this.dieT > 0 ? DIE.body[this.deathWhy()] : rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
-    b.helmet = this.power('smash') && this.state !== 'dead' && !(this.gunT < 1 && Math.floor(this.gunT * 6) % 2 === 0) ? HELMET : null;   // the smash's helmet (user: in place of its pips), blinking in its last second
+    b.helmet = this.rocket && this.rocket.astro ? 'astro' : this.power('smash') && this.state !== 'dead' && !(this.gunT < 1 && Math.floor(this.gunT * 6) % 2 === 0) ? 'moto' : null;   // the smash's helmet (user: in place of its pips), blinking in its last second
     if (last && Math.hypot(b.cx - last[0], b.cy - last[1]) > 4 * this.R) tl.length = 0;   // a respawn or a door: no streak across the screen
     else if (rb && (!last || Math.hypot(b.cx - last[0], b.cy - last[1]) > RAINBOW.gap * this.R)) tl.push([b.cx, b.cy]);
     while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after

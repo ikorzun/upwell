@@ -648,11 +648,11 @@ const BOSSES = {
     quip: [{ en: 'Splat. Flat as a panel.', es: 'Plaf. Plano como un panel.', pt: 'Plaft. Plano como um painel.', ja: 'べちゃっ。パネルみたいに ぺしゃんこ。' },
       { en: "Sticky down there, isn't it?", es: 'Pegajoso ahí abajo, ¿eh?', pt: 'Grudento aí embaixo, né?', ja: 'したは ベタベタでしょ？' }],
     defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' } },
-  // Tokyo's: the Tram (its streetcar): the Minecart's ride on a rail (CART, Boss.ride), a tram car in the town's blue round it,
-  // its pantograph up to an overhead wire; the rail at full strength, as the later of the two (owner, 2026-10-20: the Minecart has its gentleness).
-  tram: { name: { en: 'Tram', es: 'Tranvía', pt: 'Bonde', ja: 'とでん' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  // Tokyo's: the Tram, a tsukumogami now (a streetcar come alive after a hundred years: the owner's look and name, 2026-10-20): the Minecart's ride
+  // on a rail (CART, Boss.ride), its pantograph up to an overhead wire; the rail at full strength, as the later of the two (the Minecart has its gentleness).
+  tram: { name: { en: 'Tsukumo Tram', es: 'Tranvía Tsukumo', pt: 'Bonde Tsukumo', ja: 'つくもでんしゃ' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
     intro: [{ en: 'Next stop: nowhere.', es: 'Próxima parada: ninguna.', pt: 'Próxima parada: nenhuma.', ja: 'つぎは どこにも とまりません。' },
-      { en: 'Mind the gap. And me.', es: 'Cuidado con el hueco. Y conmigo.', pt: 'Cuidado com o vão. E comigo.', ja: 'すきまに ごちゅうい。わたしにも。' },
+      { en: 'A hundred years on this route.', es: 'Cien años en esta ruta.', pt: 'Cem anos nesta linha.', ja: 'この せんろで ひゃくねん。' },
       { en: 'No riding on the roof!', es: '¡Nada de subirse al techo!', pt: 'Nada de andar no teto!', ja: 'やねに のらないで ください！' }],
     quip: [{ en: 'Ding ding. You missed it.', es: 'Tilín tilín. Lo perdiste.', pt: 'Blim blim. Perdeu.', ja: 'チンチン。のりおくれ。' },
       { en: 'Please wait for the next one.', es: 'Espera al siguiente, por favor.', pt: 'Espere o próximo, por favor.', ja: 'つぎの でんしゃを おまちください。' }],

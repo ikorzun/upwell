@@ -1,5 +1,5 @@
 {
- "commit": "0dc864a",
+ "commit": "683db2f",
  "made": "2026-10-20",
  "levels": {
   "c1-1": {
@@ -243,15 +243,15 @@
   },
   "c3-10": {
    "result": "won",
-   "time": 61.5,
+   "time": 38.5,
    "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "shot@warn",
-    "shot@warn"
+    "boss@dive",
+    "shot@rise"
    ],
    "boss": "Puck",
-   "dealt": "6/6"
+   "dealt": "5/5"
   },
   "c4-1": {
    "result": "clear",
@@ -326,10 +326,11 @@
   },
   "c4-10": {
    "result": "won",
-   "time": 61.5,
-   "heartsLost": 2,
+   "time": 45,
+   "heartsLost": 3,
    "stuck": [],
    "hits": [
+    "shot@warn",
     "shot@warn",
     "shot@warn"
    ],
@@ -499,10 +500,12 @@
   },
   "c6-10": {
    "result": "won",
-   "time": 17.5,
-   "heartsLost": 0,
+   "time": 19,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "shot@hover"
+   ],
    "boss": "Crane",
    "dealt": "6/6"
   },
@@ -586,10 +589,12 @@
   },
   "c7-10": {
    "result": "won",
-   "time": 19.5,
-   "heartsLost": 0,
+   "time": 16,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "boss@hover"
+   ],
    "boss": "Pigeon",
    "dealt": "6/6"
   }

@@ -323,6 +323,19 @@ ELEMENTS = {
                        'huge moon, an owl, Baba Yaga flying across the moon in her mortar, mist over a swamp', plane='back', where='far behind everything, low and faint, so '
                        'the play reads over it', material='spruces, dead trees, the moon, mist', size='about 14 tiles wide and 6 tiles tall', inks='a faint grey dither on '
                        'the black, the moon a soft grey (no white)', scene=SKAZKA_AT + ' in front of it'),
+    # The Dark Forest's enemies (owner, 2026-10-20, through Worlds: «делай врагов кикимору и лешего в чате боссов»), six takes on each
+    'skazka-kikimora': dict(world='skazka', kind='foe', what='Kikimora, the swamp and house spirit of Russian tales: a small crooked hunched creature, '
+                            'a hag of the marsh with wild tangled hair like swamp weed, a long beak of a nose, long thin arms with long bony fingers',
+                            does='a climber: it clings to the shaft wall and creeps up and down it after the hero, and the hero stomps it from above.',
+                            size='about 2 tiles across', place='the creature clinging to that wall on all fours', main='grey #c8c8c8',
+                            parts='its tangled hair, its long arms and fingers, and maybe a spindle, a distaff or a cooking pot',
+                            vary='its hair and how it hangs, its face and nose, its rags or clothes, what it holds, how it clings to the wall'),
+    'skazka-leshy': dict(world='skazka', kind='foe', what='Leshy, the master of the forest in Russian tales who leads travellers astray: a shaggy figure '
+                         'of bark and moss, a long beard of grass and twigs, a head like an old stump with branches for horns',
+                         does='a circler: it floats round and round a ring in the air between the ledges, and the hero stomps it from above.',
+                         size='about 2 tiles across', place='the creature floating in the air between two ledges, a faint ring of its path behind it',
+                         main='grey #c8c8c8', parts='its branching horns, its beard of grass and twigs, its long arms like boughs',
+                         vary='its horns or antlers, its beard, its bark and moss, its face, its arms, what grows on it (mushrooms, leaves, a bird\'s nest)'),
     'skazka-kolobok': dict(world='skazka', kind='hero', what='Kolobok, the round bun of the Russian tale who ran away from the old man and the old woman',
                            size='2 tiles across', main='orange (a baked crust)', scene=SKAZKA_AT,
                            vary='the crust (its shading, a shine of glaze, cracks, a dusting of flour, a darker baked bottom) and the face (the eyes, the brows, a '
@@ -447,6 +460,14 @@ Keep in every variant: the round soft silhouette 2 tiles across, {main} as its m
 Vary between the variants: {vary}. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
 {style} Use only these colours: {inks9}. The world's own colour is {ink}. Red only for danger, so on the hero at most a tiny tongue; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+FOE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round hero climbs up a narrow shaft at night.
+{refnote}An enemy of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself.
+What it does in play: {does} Its size: {size}; {grid}
+Draw six different design variants of this same creature in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner. Vary between the variants: {vary}. Make the six clearly different from each other.
+Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place}, the enemy in flat side view at game scale, and the hero for scale: {hero_scale}.
+Keep in every variant: the same size and the same way of moving, {main} as its main colour, eyes that glow as two small lights in the dark (in this dark world they are what the eye finds first), and a body that is one soft shape (in the game it squashes and wobbles) with a few rigid parts round it: {parts}. Creepy and crooked, never gory: the game is for everyone.
+Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
+{style} Use only these colours: {inks9}. The world's own colour is {ink}. {rule} White only for the hero, the edges you stand on and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 # The hero as the sheets draw it, by world (the Dark Forest's a Kolobok, owner 2026-10-20): the opening line's, the scale figure's.
 HEROES = {'skazka': ('a small round hero (here Kolobok, the runaway bun of the Russian tale)', 'Kolobok, a soft round orange bun 2 tiles across with a white rim, '
                      'two small black eyes and a smile')}
@@ -480,7 +501,7 @@ def prompt(el: str, ref: bool = False) -> str:
             'to the wall, its surface pattern and joints, and the small details on it', 'rule': f'In this world {taken}, so use those only for small details.'}
     plane = PLANES[e.get('plane', 'mid')]
     hero_short, hero_scale = HEROES.get(e['world'], HERO_PLAIN)
-    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO}[e['kind']].format(**{**slab, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
+    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE}[e['kind']].format(**{**slab, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
     if e['world'] in SHAPES:   # a world drawn crooked (the Dark Forest): its shapes slanted and jagged, not built of tidy rectangles
         out = re.sub(r'Build every variant from flat rectangles and a few circles: big simple shapes[^.]*\.', SHAPES[e['world']], out)

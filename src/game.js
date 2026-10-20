@@ -771,7 +771,7 @@ class Game {
     r.gone = true; r.crack = false;
     crumbleFx(r, this.lv.theme.block, true); fx.ring((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, (r.key ? 2.4 : 1.4) * this.R, INK.coin);
     if (r.key) { crumbleFx(r, this.lv.theme.block, true); sound.play('bosshit', 0.8, 0.7); }   // a gate's keystone: heavier
-    sound.play('crumble', 1, 0.9); sound.play('coin', 0.6, 1.3); shake.add(r.key ? 7 : 3); haptics.buzz(r.key ? 35 : 20);
+    sound.play('crumble', 1, 0.9); sound.play('chime', 0.6, 1.3); shake.add(r.key ? 7 : 3); haptics.buzz(r.key ? 35 : 20);
   }
   gated() { const H = this.hero; return this.lv.near(H.cy - view.h, H.cy).some((r) => r.key); }   // a whole gate over the hero, within a screen (see GATE)
   // The boost ring (RING): through it the hero rockets up a quarter of the level through all, smashing what breaks and popping
@@ -797,8 +797,8 @@ class Game {
   crossStep(dt) {
     const cr = this.lv.crossing, lv = this.lv, H = this.hero;
     if (!cr || cr.y1 < lv.cam - view.h || cr.y0 > lv.cam + 2 * view.h) return;
-    if (cr.state === 'rest' && (cr.t -= dt) <= 0 && cr.y1 > lv.cam && cr.y0 < lv.cam + view.h) { cr.state = 'warn'; cr.t = TRAIN.warn; sound.play('coin', 0.5, 0.5); }
-    else if (cr.state === 'warn') { if (Math.floor((cr.t -= dt) * 4) !== Math.floor((cr.t + dt) * 4)) sound.play('coin', 0.45, 0.5); if (cr.t <= 0) { cr.state = 'pass'; cr.x = lv.l; shake.add(3); sound.play('crumble', 0.9, 0.4); } }
+    if (cr.state === 'rest' && (cr.t -= dt) <= 0 && cr.y1 > lv.cam && cr.y0 < lv.cam + view.h) { cr.state = 'warn'; cr.t = TRAIN.warn; sound.play('chime', 0.5, 0.5); }
+    else if (cr.state === 'warn') { if (Math.floor((cr.t -= dt) * 4) !== Math.floor((cr.t + dt) * 4)) sound.play('chime', 0.45, 0.5); if (cr.t <= 0) { cr.state = 'pass'; cr.x = lv.l; shake.add(3); sound.play('crumble', 0.9, 0.4); } }
     else if (cr.state === 'pass') {
       cr.x += TRAIN.v * view.w * dt; shake.add(0.6);
       if (H.maxY > cr.y0 && H.minY < cr.y1 && H.cx < cr.x && H.cx > cr.x - TRAIN.len * (lv.r - lv.l)) this.hurt(1, -0.3, 'train');
@@ -1913,7 +1913,7 @@ const ui = {
         const s = iconEl(k < st.n ? 'star' : 'starOff');
         s.classList.add(k < st.n ? 'won' : 'lost'); s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : '');
         row.append(s);
-        if (k < st.n) setTimeout(() => sound.play('coin', 0.8, 1 + 0.18 * k), 300 + 300 * k);
+        if (k < st.n) setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k);
       }
       const pay = px('+' + st.pay); pay.classList.add('pay'); row.append(pay);
       p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
@@ -2334,7 +2334,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // summit, quieter while paused or over (each fetched when first wanted, the last four kept: all of them decoded are ~170 MB). It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
-  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot'];
+  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
 const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
 const WORLD_MUSIC = { cave: 'climb', ice: 'ice', mine: 'mine', tokyo: 'tokyo', blocks: 'blocks', sky: 'sky', junk: 'junk' };   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {

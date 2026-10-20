@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.join(ROOT, 'assets/_raw')
 API = 'https://api.elevenlabs.io'
 RESERVE = 8000  # CriminalRussia's voice-over reserve (its sfx.py, agreed 2026-10-14)
-TAKES = 2
+TAKES = int(os.environ.get('TAKES', 2))   # (TAKES=4 python3 tools/audio.py sfx jump: four to choose from)
 
 
 def _tls() -> ssl.SSLContext:
@@ -90,12 +90,14 @@ def check() -> None:
 # ── Effects: name → (seconds, at least 0.5, prompt). One plain event each (the model keeps one event per prompt best). ──
 NO = ' No voices, no words, no music.'
 SFX = {
-    'jump': (0.5, 'A soft bouncy cartoon jump: a short squishy rubbery boing, a little jelly ball hopping up. Cute and light.' + NO),
+    # owner 2026-10-20: the squishy is half liquid, so its sounds are gooey and drawn out (the jump, a kill, a coin)
+    'jump': (0.6, 'A gooey stretchy slime jump: a wet viscous blob pulling itself off the ground with a sticky elastic stretch and a soft rising bloop. Cute cartoon, light.' + NO),
     'airjump': (0.5, 'A quick airy puff with a soft squishy pop, a little jelly blob bouncing off thin air in mid-jump. Cute and light.' + NO),
     'walljump': (0.5, 'A quick sticky peel and a springy boing: a gummy blob pushing off a stone wall. Cartoon, short.' + NO),
     'land': (0.5, 'A soft squishy splat: a small jelly ball landing on a stone floor. Short and gentle.' + NO),
-    'stomp': (0.6, 'A juicy squelch and a bright pop: a cute cartoon jelly creature squashed flat by a jump from above. Satisfying.' + NO),
-    'coin': (0.5, 'A bright short retro video game coin pickup chime: a quick high two-note sparkle.' + NO),
+    'stomp': (0.7, 'A thick wet viscous squelch: a soft slime blob landing on a jelly creature and squashing it flat, a stretchy gloopy splat that ends in a juicy goo pop. Cartoon, satisfying.' + NO),
+    'coin': (0.5, 'A soft slime blob swallowing a small coin: a short wet gloop with a bright little bell chime ringing inside the goo. Cute video game pickup.' + NO),
+    'chime': (0.5, 'A bright short retro video game coin pickup chime: a quick high two-note sparkle.' + NO),   # the old coin: crossing bells, the stars
     'hurt': (0.6, 'A cartoon hit: a soft thump and a short squeaky rubber squeal, a small jelly ball getting bumped and hurt.' + NO),
     'fall': (1.0, 'A short descending cartoon slide whistle falling down, ending in a soft pop.' + NO),
     'die': (1.4, 'A sad cartoon deflating squish: a jelly blob going splat and fizzling out with a sinking wobble.' + NO),

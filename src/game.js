@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_flower: 'Flowers for every jizo!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_flower: 'Flowers for every jizo!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -28,7 +28,7 @@ const STR = {
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_flower: '¡Flores para cada jizo!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_flower: '¡Flores para cada jizo!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
@@ -45,7 +45,7 @@ const STR = {
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_flower: 'Flores para cada jizo!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_flower: 'Flores para cada jizo!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
@@ -62,7 +62,7 @@ const STR = {
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_flower: 'おじぞうさまに おはなを ぜんぶ！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_flower: 'おじぞうさまに おはなを ぜんぶ！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
@@ -122,7 +122,13 @@ const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += day
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 1;
-const CAMP_LEN = CAMP_OPEN * 30, CAMP_END = CAMP_LEN - 2;   // CAMP_END: the last open world's boss
+// A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды»): open once the line's stars come to so many (60: Worlds'
+// proposal, the owner named no number), not by the boss before it; the line goes on past it, Continue keeps to the line.
+const CAMP_STARS = { skazka: 60 };
+const gated = (w) => w >= 0 && w < CAMPAIGN.length && !!CAMP_STARS[CAMPAIGN[w].world.id];
+const lineStars = () => save.camp.stars.reduce((n, s, i) => n + (s > 0 && !gated(Math.floor(i / 30)) ? s : 0), 0);   // the stars of the worlds on the line
+const lineBefore = (w) => { let p = w - 1; while (p >= 0 && gated(p)) p--; return p; };   // the world on the line before w (-1: none)
+const CAMP_LEN = CAMP_OPEN * 30, CAMP_END = (() => { let w = CAMP_OPEN - 1; while (w > 0 && gated(w)) w--; return w * 30 + 28; })();   // CAMP_END: the last open world's boss on the line
 const sides = new Map();
 const sideOf = (c, rc) => {   // a tier's recipe as its column plays it (SIDE)
   const k = SIDE[c];
@@ -147,7 +153,8 @@ const campHas = (i) => i % 3 === 1;
 const ups = () => [1];   // the columns a level leads up to
 const campOpen = (i) => {
   const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, below = (d) => w * 30 + (s - 1) * 3 + d;
-  if (i >= CAMP_LEN || !campHas(i) || (w > 0 && !(st[w * 30 - 2] > 0))) return false;   // (a world past the open ones: shut, whatever a save says)
+  if (i >= CAMP_LEN || !campHas(i)) return false;   // (a world past the open ones: shut, whatever a save says)
+  if (gated(w) ? lineStars() < CAMP_STARS[CAMPAIGN[w].world.id] : lineBefore(w) >= 0 && !(st[lineBefore(w) * 30 + 28] > 0)) return false;   // its stars, or the boss before it on the line
   return s === 0 || [0, 1, 2].some((d) => campHas(below(d)) && st[below(d)] > 0 && ups(s - 1, d).includes(c));
 };
 const campNextId = () => {   // where Continue goes: the last one played again if lost, else on up from it (its column, else the middle),
@@ -156,7 +163,7 @@ const campNextId = () => {   // where Continue goes: the last one played again i
   if (campHas(L) && campOpen(L) && !(st[L] > 0)) return L;
   if (a.s < 9) { const up = ups(a.s, a.c).map((c) => a.w * 30 + (a.s + 1) * 3 + c).filter((i) => campOpen(i) && !(st[i] > 0)).sort((i, j) => pref(campAt(i)) - pref(campAt(j))); if (up.length) return up[0]; }
   let best = null, id = CAMP_END;
-  for (let i = 0; i < CAMP_LEN; i++) if (campOpen(i) && !(st[i] > 0)) {
+  for (let i = 0; i < CAMP_LEN; i++) if (campOpen(i) && !(st[i] > 0) && !gated(Math.floor(i / 30))) {   // (on the line: a bonus world is gone into from its map)
     const x = campAt(i);
     if (!best || x.w > best.w || (x.w === best.w && (x.s > best.s || (x.s === best.s && pref(x) < pref(best))))) { best = x; id = i; }
   }
@@ -169,7 +176,7 @@ const campMerge = (w, s, rc, order) => {   // a tier's level: its calm, plain an
   const parts = order.map((c) => campAt(w * 30 + s * 3 + c).rc);
   return Object.assign({}, rc, { order, len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })) });
 };
-const campWorlds = () => { let n = 1; while (n < CAMP_OPEN && save.camp.stars[n * 30 - 2] > 0) n++; return n; };   // the worlds open
+const campWorlds = () => { const out = []; for (let w = 0; w < CAMP_OPEN; w++) if (gated(w) || campOpen(w * 30 + 1)) out.push(w); return out; };   // the worlds open (a bonus world always: its tab shows its stars)
 const opened = (u) => save.bank >= u.at;
 // The screen shake (Gum's) only when wanted: off by the player, or by the system's reduced motion until turned on (the digest §8).
 const shakeOn = () => (save.shake === undefined ? !matchMedia('(prefers-reduced-motion: reduce)').matches : save.shake);
@@ -2051,9 +2058,10 @@ const ui = {
     cloth.setAttribute('aria-hidden', 'true');
     p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => this.worldDone()), 'next'));
   },
-  worldDone() {   // its boss beaten, after its tapestry: on into the next world, or word of it coming
-    const p = this.panel('result'), n = game.world + 2, next = n <= CAMP_OPEN;
-    p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', tf(next ? 'worldNext' : 'soon', { n })));
+  worldDone() {   // its boss beaten, after its tapestry: on into the next world on the line, or word of it coming (a bonus world: back to its map)
+    let nw = game.world + 1; while (nw < CAMPAIGN.length && gated(nw)) nw++;
+    const p = this.panel('result'), n = nw + 1, next = !gated(game.world) && n <= CAMP_OPEN, on = CAMPAIGN.slice(0, nw).filter((_, k) => !gated(k)).length + 1;   // on: its number on the line
+    p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', tf(next ? 'worldNext' : 'soon', { n: on })));
     if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 30 + 1)), 'continue'));
     else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
   },
@@ -2086,7 +2094,12 @@ const ui = {
   map(w = campAt(campNextId()).w) {
     const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
     p.append(cap(el('div', 'head', tf('world', { n: w + 1 }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: w + 1 }));
-    if (worlds > 1) { const tabs = el('div', 'duo'); for (let k = 0; k < worlds; k++) tabs.append(button(String(k + 1), 'chip' + (k === w ? ' on' : ''), () => this.map(k))); p.append(tabs); }   // the worlds open so far, a tab each
+    if (worlds.length > 1) { const tabs = el('div', 'duo'); for (const k of worlds) {   // the worlds open so far, a tab each; a bonus world's shut one its stars so far
+      const shut = !campOpen(k * 30 + 1), need = CAMP_STARS[CAMPAIGN[k].world.id];
+      const b = button(shut ? '' : String(k + 1), 'chip' + (k === w ? ' on' : '') + (shut ? ' locked' : ''), () => { if (shut) ui.toast(tf('starsFor', { n: need - lineStars(), w: L2(CAMPAIGN[k].world.name) }), 2200, 'starOff'); else this.map(k); });
+      if (shut) b.append(iconEl('starOff'), px(lineStars() + '/' + need));   // (the pixel font has no star: its picture)
+      tabs.append(b);
+    } p.append(tabs); }
     if (CAMP_OPEN < CAMPAIGN.length) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet
     const tree = el('div', 'tree'), inner = el('div', 'in'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), X = (col) => 50 + col * 100, Y = (s) => 960 - s * 102;
     svg.setAttribute('viewBox', '0 0 300 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');

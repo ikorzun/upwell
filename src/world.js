@@ -802,7 +802,8 @@ const SYNERGIES = [
 // modern concrete, the sky, space, another planet, open space last and endless; no junkyard: it has no place in Japan), by world id.
 // A world goes into CAMPAIGN anywhere and its id here in its place (one not built yet waits here: only those in CAMPAIGN are played); a save
 // follows the worlds by id (loadSave), so this may change.
-const CAMP_ORDER = ['mine', 'cave', 'ice', 'sea', 'tokyo', 'blocks', 'sky'];   // (mine: the Village's id; blocks: the concrete's place for now)
+const CAMP_ORDER = ['mine', 'cave', 'ice', 'sea', 'tokyo', 'blocks', 'sky', 'skazka'];   // (mine: the Village's id; blocks: the concrete's place for now; skazka:
+// the Dark Forest, a bonus world opened by stars, off the line: Game's CAMP_STARS; kept last, so the line's worlds keep their numbers)
 CAMPAIGN.splice(0, CAMPAIGN.length, ...CAMP_ORDER.map((id) => CAMPAIGN.find((c) => c.world.id === id)).filter(Boolean));
 // In the campaign a card is offered only once what it is for has been met: after the level (its index) where that
 // came in: the shop and the candies at 1-1 (the tutorial), the spikes at 1-5 (the Village's peak).

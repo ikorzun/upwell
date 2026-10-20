@@ -122,9 +122,9 @@ const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += day
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 1;
-// A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды»): open once the line's stars come to so many (60: Worlds'
-// proposal, the owner named no number), not by the boss before it; the line goes on past it, Continue keeps to the line.
-const CAMP_STARS = { skazka: 60 };
+// A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
+// come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu.
+const CAMP_STARS = { skazka: 180 };
 const gated = (w) => w >= 0 && w < CAMPAIGN.length && !!CAMP_STARS[CAMPAIGN[w].world.id];
 const lineStars = () => save.camp.stars.reduce((n, s, i) => n + (s > 0 && !gated(Math.floor(i / 30)) ? s : 0), 0);   // the stars of the worlds on the line
 const lineBefore = (w) => { let p = w - 1; while (p >= 0 && gated(p)) p--; return p; };   // the world on the line before w (-1: none)
@@ -1991,6 +1991,13 @@ const ui = {
     if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
     if (begun) grid.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
     if (begun) grid.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => (r && r.daily === today && !r.world && r.bonus < 0 ? game.continueRun() : game.startRun(true))), 'daily'));   // the day's well (today's try kept: on with it), and its best
+    const bw = CAMPAIGN.findIndex((_, w) => gated(w));   // the bonus world (CAMP_STARS): its chip, the stars it wants while shut, its map once open
+    if (begun && bw >= 0 && bw < CAMP_OPEN) {
+      const need = CAMP_STARS[CAMPAIGN[bw].world.id], shut = !campOpen(bw * 30 + 1), name = L2(CAMPAIGN[bw].world.name);
+      const b = button(name, 'chip' + (shut ? ' locked' : ''), () => (shut ? ui.toast(tf('starsFor', { n: need - lineStars(), w: name }), 2200, 'starOff') : this.map(bw)));
+      if (shut) { const row = el('span', 'inl'); row.append(iconEl('starOff'), px(lineStars() + '/' + need)); b.append(row); }   // under its name, small as a caption: a star and the count
+      grid.append(b);
+    }
     if (r && r.daily == null && ALL) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one
     else if (begun && ALL) grid.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
     if (save.wins > 0 && ALL) {   // a run won: its hard mode's tier, and the endless climb

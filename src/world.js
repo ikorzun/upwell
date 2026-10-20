@@ -1826,9 +1826,10 @@ class Level {
   // None in the first few tiles over the floor; later levels now and then get two.
   populate(rects, top, bottom) {
     const wd = this.world, rnd = this.rng, t = this.tile;
-    const rc = this.rc, odds = rc ? rc.foes : wd.foes * (1 + 0.15 * this.stage);   // a recipe's own odds of one, and of two
+    const rc = this.rc, z = rc && rc.zones ? rc.zones[Math.min(2, Math.floor((3 * (this.floor - bottom)) / Math.max(1, this.floor - this.endY)))] : null;   // a tier's level: the part this chunk is in (Game: campMerge)
+    const odds = z ? z.foes : rc ? rc.foes : wd.foes * (1 + 0.15 * this.stage);   // a recipe's own odds of one, and of two
     if (!wd.enemies || (this.foeTypes && !this.foeTypes.length) || bottom > this.floor - 6 * t || !(rnd() < odds * this.k)) return;
-    const n = wd.pack || (rnd() < (rc ? rc.pair || 0 : 0.25 * this.stage) ? 2 : 1);
+    const n = wd.pack || (rnd() < (z ? z.pair : rc ? rc.pair || 0 : 0.25 * this.stage) ? 2 : 1);
     for (let i = 0; i < n; i++) {
       const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.filter((k) => wd.enemies[k]).map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
       const taken = (r) => this.spawns.some((q) => q.ledge === r || q.rect === r);   // one enemy to a ledge or block

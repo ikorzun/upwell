@@ -131,8 +131,10 @@ const campAt = (i) => {
     : { seed, foes: rc.foes * k.foes, fire: rc.fire * k.fire, pair: k.pair && (rc.pair || 0) + k.pair, stash: c === 2 ? Math.max(rc.stash || 0, 0.4) : rc.stash }));
   return { w, s, c, rc: sides.get(i) };
 };
-const campHas = (i) => { const s = Math.floor((i % 30) / 3); return s === 0 || s === 9 ? i % 3 === 1 : true; };
-const ups = (s, c) => (s >= 8 ? [1] : s === 0 || (s % 2 === 0 && c === 1) ? [0, 1, 2] : s % 2 && c !== 1 ? [c, 1] : [c]);   // the columns a level leads up to
+// One level a tier (owner, 2026-10-20: no map between levels, the sides in the middle one, three times as long): its middle id; the way up
+// is a line. The calm and fierce sides (SIDE) are parts of it now, in a new order each time (campMerge); the daily well still plays them alone.
+const campHas = (i) => i % 3 === 1;
+const ups = () => [1];   // the columns a level leads up to
 const campOpen = (i) => {
   const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, below = (d) => w * 30 + (s - 1) * 3 + d;
   if (i >= CAMP_LEN || !campHas(i) || (w > 0 && !(st[w * 30 - 2] > 0))) return false;   // (a world past the open ones: shut, whatever a save says)
@@ -149,6 +151,11 @@ const campNextId = () => {   // where Continue goes: the last one played again i
     if (!best || x.w > best.w || (x.w === best.w && (x.s > best.s || (x.s === best.s && pref(x) < pref(best))))) { best = x; id = i; }
   }
   return id;
+};
+const campMerge = (w, s, rc) => {   // a tier's level: its calm, plain and fierce versions one over another, in a new order each time, all as long
+  if (s === 0 || rc.boss || rc.bonus != null) return rc;   // (the first and the boss alone; a bonus race stays one race)
+  const parts = shuffled(Math.random, [0, 1, 2]).map((c) => campAt(w * 30 + s * 3 + c).rc);
+  return Object.assign({}, rc, { len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })) });
 };
 const campWorlds = () => { let n = 1; while (n < CAMP_OPEN && save.camp.stars[n * 30 - 2] > 0) n++; return n; };   // the worlds open
 const opened = (u) => save.bank >= u.at;
@@ -173,8 +180,14 @@ function loadSave(s) {
     c.builds.forEach((u, w) => { b[to[w] ?? w] = u; });
     c.fails = f; c.builds = b; c.runes = c.runes.map((w) => to[w] ?? w); if (c.last != null) c.last = at(c.last);
   }
+  if ((save.v | 0) < 5) {   // v4 to v5 (owner: one level a tier): a tier's best stars, its losses and the last level played onto its middle id
+    const mid = (i) => i - (i % 3) + 1, old = c.stars, f = {};
+    c.stars = []; old.forEach((n, i) => { if (n > 0) c.stars[mid(i)] = Math.max(c.stars[mid(i)] || 0, n); });
+    for (const k in c.fails) { const j = /^\d+$/.test(k) ? mid(+k) : k; f[j] = Math.max(f[j] || 0, c.fails[k]); }
+    c.fails = f; if (c.last != null) c.last = mid(c.last);
+  }
   delete c.open;   // what is open comes of the stars (campOpen)
-  save.v = 4; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
+  save.v = 5; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
 function persist() {
@@ -1491,7 +1504,7 @@ class Game {
     if (this.mode === 'camp') { const b = save.camp.builds; (b[this.world] = b[this.world] || []).push(u.id); persist(); }   // the world's build
     this.state = 'wait'; ui.hideAll();   // (an ad may come here: nothing goes on under it)
     ads.between(() => {
-      if (this.mode === 'camp') { ui.map(); return; }   // the map, to choose the way on
+      if (this.mode === 'camp') { this.playLevel(campNextId()); return; }   // on into the next level (owner: no map between them)
       this.state = 'play'; this.stateT = 0;
       if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
       if (++this.stage >= 3) { this.stage = 0; this.world++; }
@@ -1540,7 +1553,7 @@ class Game {
     ads.between(() => this.goOn());
   }
   goOn() {
-    if (this.mode === 'camp') { this.campKeep(); persist(); ui.map(); return; }   // (the doubled coins in the purse); the map, to choose the way on
+    if (this.mode === 'camp') { this.campKeep(); persist(); this.playLevel(campNextId()); return; }   // (the doubled coins in the purse); on into the next level
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
     this.buildLevel(false); this.saveRun();
     ui.hideAll(); ui.banner();
@@ -1569,7 +1582,7 @@ class Game {
   // A level of it (CAMPAIGN): from its recipe and seed (or `seed`: the bot's), with its world's upgrades so far (after the
   // colour's own), all the hearts and the purse. Dying costs that level only: Again starts it over (ui.campDead).
   playLevel(i, seed) {
-    const { w, s, rc } = campAt(i);
+    const { w, s } = campAt(i), rc = campMerge(w, s, campAt(i).rc);
     this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
     for (const id of save.camp.builds[w] || []) { const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }
     this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = ![0, 1, 2].some((d) => save.camp.stars[w * 30 + s * 3 + d] > 0);   // its tier's first clear (an upgrade then: one a tier, whichever way up)
@@ -1587,7 +1600,7 @@ class Game {
     c.stars[i] = Math.max(c.stars[i] || 0, n);
     this.campKeep(); persist();
   }
-  campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => ui.map()); }   // on from a level played again: the map, to choose the way on
+  campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(campNextId())); }   // on from a level played again: into the next one
   campAgain() { if (this.state !== 'dead') return; pmsg('level_failed', this.lvl()); this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci)); }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;

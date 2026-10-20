@@ -1,5 +1,5 @@
 {
- "commit": "7c34e17",
+ "commit": "efeffe2+ecd0002",
  "made": "2026-10-20",
  "levels": {
   "c1-1": {
@@ -20,7 +20,7 @@
   },
   "c1-3": {
    "result": "clear",
-   "time": 12,
+   "time": 20,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -101,16 +101,10 @@
   },
   "c2-2": {
    "result": "clear",
-   "time": 63.5,
-   "heartsLost": 1,
-   "stuck": [
-    "pillars@97",
-    "comb@147",
-    "comb@150"
-   ],
-   "hits": [
-    "fire@spring"
-   ]
+   "time": 17,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c2-3": {
    "result": "clear",
@@ -268,9 +262,12 @@
   },
   "c4-2": {
    "result": "clear",
-   "time": 26,
+   "time": 53.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "comb@187",
+    "comb@190"
+   ],
    "hits": []
   },
   "c4-3": {
@@ -354,14 +351,10 @@
   },
   "c5-3": {
    "result": "clear",
-   "time": 35.5,
-   "heartsLost": 1,
-   "stuck": [
-    "spring@129"
-   ],
-   "hits": [
-    "fire@chimney"
-   ]
+   "time": 22.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c5-4": {
    "result": "clear",
@@ -404,16 +397,19 @@
   },
   "c5-8": {
    "result": "clear",
-   "time": 33,
-   "heartsLost": 1,
-   "stuck": [],
+   "time": 36.5,
+   "heartsLost": 2,
+   "stuck": [
+    "spikes@82"
+   ],
    "hits": [
+    "spikes@stairs",
     "spikes@gate3"
    ]
   },
   "c5-9": {
    "result": "clear",
-   "time": 19.5,
+   "time": 13.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -429,10 +425,14 @@
   },
   "c6-1": {
    "result": "clear",
-   "time": 10,
-   "heartsLost": 0,
-   "stuck": [],
-   "hits": []
+   "time": 21,
+   "heartsLost": 1,
+   "stuck": [
+    "planks@19"
+   ],
+   "hits": [
+    "fire@shelves"
+   ]
   },
   "c6-2": {
    "result": "clear",
@@ -492,10 +492,14 @@
   },
   "c6-9": {
    "result": "clear",
-   "time": 13,
-   "heartsLost": 0,
-   "stuck": [],
-   "hits": []
+   "time": 33,
+   "heartsLost": 1,
+   "stuck": [
+    "pocket@93"
+   ],
+   "hits": [
+    "fire@shelves"
+   ]
   },
   "c6-10": {
    "result": "won",

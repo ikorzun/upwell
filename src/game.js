@@ -645,21 +645,43 @@ class Game {
     sound.play('buy');
     if (id !== 'cage') ui.toast(t('task_' + id), 2000, taskIcon(id));   // (a cage has its word: Game.free)
   }
-  // A new width remakes the level under way (the well is the view's width); the run goes on.
-  // A new width remakes the level (the well is the view's width): the same one (its seed), the hero back about as high up it as it
-  // was, on the highest steady ledge under that (Playgama's checklist: a turn of the phone must not lose progress). In a room, the shaft.
+  // A new width (the well is the view's width; owner: «поворот телефона не должен ничего обнулять, игра продолжается, уровень пропорционально
+  // растягивается»): the level under way as it is, all of it scaled by the new tile over the old about the left wall and the floor (Game.rescale),
+  // the run going on where it was. (A phone held sideways changes nothing: it waits under the 'turn it upright' screen, see layout.)
   resized() {
     if (this.state === 'menu' || this.state === 'boot') { this.toMenu(); return; }
-    const shaft = this.well || this.lv, h = shaft.kind === 'well' && this.hero ? (shaft.floor - (this.well ? this.door.y1 : this.hero.cy)) / this.R : 0;
-    nextSeed = this.seed; this.buildLevel(true);
-    const lv = this.lv, R = this.R;
-    if (lv.kind !== 'well' || h < 3) return;
-    lv.ensure(lv.floor - (h + 2 * view.h / R) * R);
-    const r = lv.rects.filter((q) => !q.cap && !q.plank && !q.crumble && !q.move && !q.spring && !q.crack && q.x1 - q.x0 > 2 * R && (lv.floor - q.y0) / R <= h + 0.5).sort((a, b) => a.y0 - b.y0)[0];
-    if (!r) return;
-    this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }];
-    lv.cam = this.hero.cy - CAM.anchor * view.h; lv.ensure(lv.cam - view.h * LEVEL.ahead);
-    if (lv.fire) lv.fire.y = Math.max(lv.fire.y, lv.cam + view.h * 1.2);
+    const k = (view.w - 2 * LEVEL.wall) / Math.max(1, this.builtW - 2 * LEVEL.wall);
+    this.builtW = view.w; this.rescale(k); this.applyMods();
+  }
+  rescale(k) {
+    const X = (x) => LEVEL.wall + (x - LEVEL.wall) * k, Y = (y) => y * k, num = (v) => Number.isFinite(v);
+    const xy = (o) => { if (num(o.x)) o.x = X(o.x); if (num(o.y)) o.y = Y(o.y); if (num(o.vx)) o.vx *= k; if (num(o.vy)) o.vy *= k; if (num(o.r)) o.r *= k; };
+    const box = (o) => { o.x0 = X(o.x0); o.x1 = X(o.x1); o.y0 = Y(o.y0); o.y1 = Y(o.y1); };
+    const body = (b) => { if (!b) return; const cx = X(b.cx), cy = Y(b.cy); b.R *= k; b.area *= k * k; b.targetArea *= k * k; b.place(cx, cy); };   // laid again, at rest, at its place
+    const done = new Set(), level = (lv) => {
+      if (!lv || done.has(lv)) return; done.add(lv);   // (a room is the shaft's door's too: once)
+      lv.r = X(lv.r); lv.R *= k; lv.tile *= k; for (const key of ['floor', 'top', 'endY', 'capY', 'cam']) lv[key] = Y(lv[key]);
+      for (const r of lv.rects) { box(r); if (r.move) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } }
+      for (const o of [...lv.spikes, ...lv.bubbles]) { box(o); xy(o); }
+      for (const c of lv.coats) { c.y0 = Y(c.y0); c.y1 = Y(c.y1); }
+      for (const o of [lv.coins, lv.shots, lv.bullets, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.spots, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
+      for (const s of lv.spawns) if (s.wall) { s.wall.y0 = Y(s.wall.y0); s.wall.y1 = Y(s.wall.y1); }
+      for (const e of lv.enemies) { body(e.body); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); }
+      for (const f of lv.folk) body(f.body);
+      if (lv.boss) body(lv.boss.body);
+      for (const o of [lv.crossing, lv.portal, lv.exit, lv.rail]) if (o) { xy(o); for (const key of ['x0', 'x1']) if (num(o[key])) o[key] = X(o[key]); for (const key of ['y0', 'y1']) if (num(o[key])) o[key] = Y(o[key]); }
+      if (lv.fire) { lv.fire.y = Y(lv.fire.y); lv.fire.v *= k; if (lv.fire.warn) xy(lv.fire.warn); }
+      for (const o of [...(lv.plan || []), ...(lv.folkAt || []), ...(lv.runeAt || [])]) o.y = Y(o.y);
+      lv.fizzAt = (lv.fizzAt || []).map(Y); for (const key of ['ringAt', 'spotAt', 'gateAt', 'setAt']) if (num(lv[key])) lv[key] = Y(lv[key]);
+      for (const b of lv.bubbles) if (b.room) level(b.room);   // a room built (its frame the same: the wall, the floor)
+    };
+    level(this.well || this.lv); level(this.lv);
+    this.R *= k; this.startY = Y(this.startY);
+    for (const b of [this.hero, ...this.followers.map((f) => f.body), ...this.swarm]) body(b);
+    this.trail = this.trail.map(([x, y]) => [X(x), Y(y)]); for (const s of this.safes) s.dx *= k;
+    if (this.rocket) { this.rocket.to = Y(this.rocket.to); if (num(this.rocket.y)) this.rocket.y = Y(this.rocket.y); }
+    for (const o of [this.heroLook, this.look]) if (o) xy(o);
+    fx.n = 0;   // the sparks in the air: gone
   }
   heal(n) { this.hp = Math.min(this.maxHp, this.hp + n); }
   offer(n = 3) {
@@ -2650,6 +2672,7 @@ const PIXELATED = !!(window.CSS && CSS.supports && CSS.supports('image-rendering
 function layout() {
   const vw = window.innerWidth, vh = window.innerHeight;
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
+  if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
   const W = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
   view.w = W; view.h = H; view.left = left; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
@@ -2661,7 +2684,6 @@ function layout() {
   game.applyMods();
   if (started && Math.abs(W - game.builtW) > 2) game.resized();
   else if (started && ui.open === 'menu') ui.menu();   // only taller or shorter: the menu's rows, and the hero over them, placed again
-  if (started && coarse && vw > vh) game.togglePause(true);   // held sideways: paused under the 'turn it upright' screen
 }
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
 // start of the next frame, right before drawing.

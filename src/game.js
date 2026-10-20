@@ -111,8 +111,9 @@ const MARKS = { at: [3, 5, 7], pay: [30, 60, 120] };
 const weekOf = (day) => Math.floor((day + 3) / 7);
 const weekCard = () => (save.marks && save.marks.week === weekOf(today) ? save.marks : { week: weekOf(today), days: [] });
 const daySeed = (day, w, s, b) => (Math.imul((day ^ 0x9e3779b9) >>> 0, 2654435761) ^ (w * 97 + s * 13 + (b ? 7 : 0))) >>> 0;
-const dayPlan = (day) => { const r = mulberry32(daySeed(day, 9, 9, true)); return DAY_TIERS.map(([a, b]) => (r() < 0.5 ? a : b) * 3 + ((r() * 3) | 0)); };   // the daily well's three levels of the map (see campAt)
-const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += campAt(i).rc.len)); };   // its medals: where each of them ends
+const DAY_W = CAMPAIGN.findIndex((c) => c.world === TOKYO);   // the daily well's world: Tokyo (owner), wherever it stands in the order
+const dayPlan = (day) => { const r = mulberry32(daySeed(day, 9, 9, true)); return DAY_TIERS.map(([a, b]) => DAY_W * 30 + (r() < 0.5 ? a : b) * 3 + ((r() * 3) | 0)); };   // the daily well's three levels of the map (see campAt)
+const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += dayAt(i).len)); };   // its medals: where each of them ends
 // The campaign's map (the user: each world a grid of 3 × 10, a route up it to choose, as in Slay the Spire): a world's first level
 // alone at its foot, eight tiers of three over it, then its boss. Level i is world w, tier s, column c (i = w·30 + s·3 + c; the first
 // and the boss in the middle). The middle one is the tier's recipe; the left the same calmer, the right richer and fiercer (SIDE:
@@ -123,14 +124,23 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 1;
 const CAMP_LEN = CAMP_OPEN * 30, CAMP_END = CAMP_LEN - 2;   // CAMP_END: the last open world's boss
 const sides = new Map();
-const campAt = (i) => {
-  const w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, rc = CAMPAIGN[w].levels[s], k = SIDE[c];
-  if (!k || rc.boss) return { w, s, c, rc };
+const sideOf = (c, rc) => {   // a tier's recipe as its column plays it (SIDE)
+  const k = SIDE[c];
+  if (!k || rc.boss) return rc;
   const seed = (rc.sides && rc.sides[c >> 1]) || rc.seed + k.seed;   // a recipe's `sides`: its two sides' own seeds, where the bot found the plain ones poor
-  if (!sides.has(i)) sides.set(i, Object.assign({}, rc, rc.bonus != null ? { seed, time: rc.time + k.time }
-    : { seed, foes: rc.foes * k.foes, fire: rc.fire * k.fire, pair: k.pair && (rc.pair || 0) + k.pair, stash: c === 2 ? Math.max(rc.stash || 0, 0.4) : rc.stash }));
+  return Object.assign({}, rc, rc.bonus != null ? { seed, time: rc.time + k.time }
+    : { seed, foes: rc.foes * k.foes, fire: rc.fire * k.fire, pair: k.pair && (rc.pair || 0) + k.pair, stash: c === 2 ? Math.max(rc.stash || 0, 0.4) : rc.stash });
+};
+const campAt = (i) => {
+  const w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3;
+  if (!sides.has(i)) sides.set(i, sideOf(c, CAMPAIGN[w].levels[s]));
   return { w, s, c, rc: sides.get(i) };
 };
+// The daily well's levels as they were when it began (owner: it stays, its records comparable), though Tokyo's tiers took the Village's
+// numbers when the Village became the first world: Tokyo's own of before, for the tiers it plays (DAY_TIERS)
+const DAY_NUMS = { 1: { len: 31, fire: 0.35, foes: 0.5, pair: 0, safe: true }, 2: { len: 28, fire: 0.35, foes: 0.45, pair: 0, safe: true }, 3: { len: 34, fire: 0.38, foes: 0.55, pair: 0.1, safe: false },
+  4: { len: 25, fire: 0.42, maxD: 2, foes: 0.75, pair: 0.3, safe: false }, 6: { len: 30, fire: 0.38, foes: 0.55, pair: 0.1, safe: false }, 7: { len: 30, fire: 0.42, maxD: 2, foes: 0.7, pair: 0.25, safe: false } };
+const dayAt = (i) => { const s = Math.floor((i % 30) / 3); return sideOf(i % 3, Object.assign({}, CAMPAIGN[DAY_W].levels[s], DAY_NUMS[s])); };
 // One level a tier (owner, 2026-10-20: no map between levels, the sides in the middle one, three times as long): its middle id; the way up
 // is a line. The calm and fierce sides (SIDE) are parts of it now, in a new order each time (campMerge); the daily well still plays them alone.
 const campHas = (i) => i % 3 === 1;
@@ -186,8 +196,18 @@ function loadSave(s) {
     for (const k in c.fails) { const j = /^\d+$/.test(k) ? mid(+k) : k; f[j] = Math.max(f[j] || 0, c.fails[k]); }
     c.fails = f; if (c.last != null) c.last = mid(c.last);
   }
+  const ids = CAMPAIGN.map((x) => x.world.id), from = (save.v | 0) < 6 ? ['tokyo', 'cave', 'ice', 'mine', 'blocks', 'sky', 'junk'] : c.order;   // v5's order
+  if (Array.isArray(from) && from.join() !== ids.join()) {   // v5 to v6 and on (owner: the worlds in a new order, the Junkyard gone): each world's stars, losses,
+    // upgrades, tapestry and last level go with it by its id; a world no longer played takes its own along
+    const to = (w) => ids.indexOf(from[w]), at = (i) => (to(Math.floor(i / 30)) < 0 ? -1 : to(Math.floor(i / 30)) * 30 + (i % 30)), old = c.stars, f = {}, b = [];
+    c.stars = []; old.forEach((n, i) => { if (n > 0 && at(i) >= 0) c.stars[at(i)] = n; });
+    for (const k in c.fails) { if (!/^\d+$/.test(k)) f[k] = c.fails[k]; else if (at(+k) >= 0) f[at(+k)] = c.fails[k]; }
+    c.builds.forEach((u, w) => { if (to(w) >= 0) b[to(w)] = u; });
+    c.fails = f; c.builds = b; c.runes = c.runes.map(to).filter((w) => w >= 0); c.last = c.last != null && at(c.last) >= 0 ? at(c.last) : 1;
+  }
+  c.order = ids;   // the worlds' order this save is in (the next change follows it)
   delete c.open;   // what is open comes of the stars (campOpen)
-  save.v = 5; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
+  save.v = 6; save.stick = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
 function persist() {
@@ -540,7 +560,7 @@ class Game {
     this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump;
   }
   get b() { return this.hero && Number.isFinite(this.hero.floorY) ? this.hero.floorY : this.lv.floor; }   // where Body.endStep puts landing dust
-  get wd() { return this.preview || (this.state === 'menu' && this.menuWd) || (this.mode === 'camp' || this.daily != null ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
+  get wd() { return this.preview || (this.state === 'menu' && this.menuWd) || (this.daily != null ? CAMPAIGN[DAY_W].world : this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
   bodyList() {
     const a = this.list, lv = this.lv;
     a.length = 0;
@@ -576,7 +596,7 @@ class Game {
     if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
   }
   buildLevel(newHero) {
-    const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = campAt(dayPlan(this.daily)[this.stage]).rc) : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
+    const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
     const seed = nextSeed != null ? nextSeed : this.daily != null ? daySeed(this.daily, this.world, this.stage, !!this.bonus) : (Math.random() * 4294967296) >>> 0;

@@ -1,5 +1,5 @@
 // The campaign's regression sweep: tools/botrun.mjs over every level on the campaign's map, on the recipes' own seeds (what
-// players get): ten a world, c1-1 … c7-10, 70 levels; a tier's level is its three versions one over another, in the order the
+// players get): ten a world, c1-1 … c6-10, 60 levels (the Village first: CAMP_ORDER; the Junkyard gone); a tier's level is its three versions one over another, in the order the
 // bot's seed picks (campMerge: players get a new one each time). It prints a table (result, time, hearts lost, stuck, hits; at a
 // boss, its hearts dealt) and the levels that came out otherwise than in a saved baseline, so a change to a world that breaks a
 // level shows at once. Needs the dev server (python3 tools/serve.py 8793, or PAGE for another port); each of its -j workers (4)
@@ -21,9 +21,9 @@ const SAVE = args.includes('--save'), BASE = opt('--base', join(here, 'sweep-bas
 if (SAVE) args.splice(args.indexOf('--save'), 1);
 
 const ALL = [];
-for (let w = 1; w <= 7; w++) for (let s = 1; s <= 10; s++) ALL.push(`c${w}-${s}`);   // one level a tier (campHas: the middle ids)
+for (let w = 1; w <= 6; w++) for (let s = 1; s <= 10; s++) ALL.push(`c${w}-${s}`);   // one level a tier (campHas: the middle ids)
 const unknown = args.filter((a) => !ALL.some((n) => n === a || n.startsWith(a + '-')));
-if (unknown.length) { console.error(`not on the map: ${unknown.join(' ')} (a world is c1…c7, a level c1-1 … c7-10)`); process.exit(2); }
+if (unknown.length) { console.error(`not on the map: ${unknown.join(' ')} (a world is c1…c6, a level c1-1 … c6-10)`); process.exit(2); }
 const levels = args.length ? ALL.filter((n) => args.some((a) => n === a || (/^c\d$/.test(a) && n.startsWith(a + '-')))) : ALL;
 
 // ── the run: botrun's lines as they come; a level that throws is an error, and its worker goes on with the rest ──

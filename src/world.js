@@ -650,21 +650,21 @@ const CAMPAIGN = [
 // the air conditioners come in from the fourth level (aircons: false before). Its runes: a lattice, a lantern, a lit window (some stopped climbing
 // and built a town; its lights hid the Light: the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'Some stopped climbing and built a town.\nIts lights hid the Light.', es: 'Algunos dejaron de subir y construyeron una ciudad.\nSus luces taparon la Luz.', pt: 'Alguns pararam de subir e ergueram uma cidade.\nSuas luzes esconderam a Luz.', ja: 'のぼるのを やめて まちを つくった ものも いた。\nまちの あかりが ひかりを かくした。' }, levels: [
-  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0, candy: [], safe: true, aircons: false, seed: 3111,
+  { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0.35, candy: [], safe: true, aircons: false, seed: 3111,
     news: { en: 'jumps and springs', es: 'saltos y resortes', pt: 'pulos e molas', ja: 'ジャンプと バネ' } },
-  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, aircons: false, seed: 2101,
+  { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], aircons: false, seed: 2101,
     news: { en: 'crawlers: land on them', es: 'reptadores: cae sobre ellos', pt: 'rastejantes: pule neles', ja: 'ハイハイ: うえから ふもう' } },
-  { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler'], foes: 0.45, candy: [], safe: true, aircons: false, seed: 5101,
+  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler'], foes: 0.55, candy: [], aircons: false, seed: 5101,
     news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
+  { role: 'apply', len: 46, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
     news: { en: 'the helmet', es: 'el casco', pt: 'o capacete', ja: 'ヘルメット' } },
-  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 5106 },
-  { role: 'twist', len: 30, fire: 0.38, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 5103,
+  { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
     news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' } },
-  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2 }, intro: [], enemies: ['crawler', 'climber'], foes: 0.7, pair: 0.25, candy: ['smash'], crossing: true, seed: 5102,
+  { role: 'peak', len: 37, gate: 'gate3', fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2 }, intro: [], enemies: ['crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], crossing: true, seed: 5102,
     news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
-  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
+  { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
 ] },
@@ -707,20 +707,20 @@ const CAMPAIGN = [
 // spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Minecart. Its runes: crossed picks, a block of
 // ore, a turn (those tired of climbing began to dig sideways). The worm stays in the random run (user).
 { world: WORLDS[2], runes: 'LnY', lore: { en: 'Those tired of climbing\nbegan to dig sideways.', es: 'Los cansados de subir\nempezaron a cavar de lado.', pt: 'Os cansados de subir\ncomeçaram a cavar de lado.', ja: 'のぼるのに つかれた ものは\nよこへ ほりはじめた。' }, levels: [
-  { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2, crumble: 3, bridge: 3, icewall: 1 }, intro: ['crumble', 'bridge'], enemies: ['climber'], foes: 0.35, candy: [], cage: true, safe: true, seed: 4102,
+  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2, crumble: 3, bridge: 3, icewall: 1 }, intro: ['crumble', 'bridge'], enemies: ['climber'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,
     news: { en: "crumbling blocks: don't stand still", es: 'bloques que se caen: no te quedes quieto', pt: 'blocos que desmoronam: não fique parado', ja: 'くずれる ブロック: とまるな' } },
-  { role: 'apply', len: 42, gate: 'gate', fire: 0.46, maxD: 2, chunks: MINE, intro: [], enemies: ['crawler', 'shell'], foes: 0.5, pair: 0.1, candy: ['fizz', 'fizz'], cage: true, seed: 4105,
+  { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['fizz', 'fizz'], cage: true, seed: 4105,
     news: { en: 'fizz candy', es: 'caramelo efervescente', pt: 'bala efervescente', ja: 'シュワシュワ キャンディ' } },
-  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler'], foes: 0.55, candy: ['fizz'], seed: 4106,
+  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler'], foes: 0.45, candy: ['fizz'], seed: 4106,
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
-  { role: 'apply', len: 46, gate: 'gate2', fire: 0.46, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.15, candy: ['fizz', 'smash'], shop: 0.4, seed: 4101,
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.1, candy: ['fizz', 'smash'], shop: 0.4, seed: 4101,
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
-  { role: 'peak', len: 33, sides: [0, 109814], fire: 0.5, maxD: 3, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4108 },
+  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
-  { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...MINE, lift: 3, rubberwall: 2 }, intro: ['lift'], enemies: ['spitter', 'crawler'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 4101,
+  { role: 'twist', len: 30, pair: 0.1, fire: 0.38, maxD: 2, chunks: { ...MINE, lift: 3, rubberwall: 2 }, intro: ['lift'], enemies: ['spitter', 'crawler'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 4101,
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
-  { role: 'peak', len: 37, gate: 'gate3', fire: 0.5, maxD: 3, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4102 },
-  { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
+  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['fizz'], seed: 4102 },
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'cart', rail: true },   // its rail under the ceiling, moss over its ends
 ] },
@@ -793,9 +793,14 @@ const SYNERGIES = [
   { id: 'meteor', of: ['dive', 'blast'], name: { en: ['Meteor', 'A dive stomp blasts a wide ring'], es: ['Meteorito', 'Un pisotón en picado barre un gran anillo'], pt: ['Meteoro', 'Um pisão em mergulho varre um grande anel'], ja: ['メテオ', 'ダイブで ふむと ひろく ふきとばす'] }, apply: (g) => { g.mods.meteor = true; } },
   { id: 'ember', of: ['cool', 'candle'], name: { en: ['Fire walker', "The fire's first touch a level is free"], es: ['Caminafuegos', 'El primer toque del fuego en cada nivel no cuenta'], pt: ['Anda-fogo', 'O primeiro toque do fogo na fase não conta'], ja: ['ひわたり', 'ほのおの さいしょの 1かいは ノーダメージ'] }, apply: (g) => { g.mods.fireFree++; } },
 ];
+// The worlds in the order they are played (owner, 2026-10-20: the Village, the Cave, the mountain, the rivers and the sea, Tokyo, the
+// modern concrete, the sky, space, another planet, open space last and endless; no junkyard: it has no place in Japan), by world id.
+// A world built goes into CAMPAIGN anywhere and its id here in its place; a save follows the worlds by id (loadSave), so this may change.
+const CAMP_ORDER = ['mine', 'cave', 'ice', 'tokyo', 'blocks', 'sky'];   // (mine: the Village's id; blocks: the concrete's place for now)
+CAMPAIGN.splice(0, CAMPAIGN.length, ...CAMP_ORDER.map((id) => CAMPAIGN.find((c) => c.world.id === id)));
 // In the campaign a card is offered only once what it is for has been met: after the level (its index) where that
-// came in: the shop at 1-9, the candies at 1-4, the spikes at 4-3 (the plan).
-const CARD_FROM = { member: 8, long: 3, iron: 32 };
+// came in: the shop at 1-9, the candies at 1-4, the spikes at 1-5 (the Village's peak).
+const CARD_FROM = { member: 8, long: 3, iron: 4 };
 // One of three is offered after every level. `stack`: can be taken again. `run`: the random run's only (its hearts carry
 // over); `camp`: the campaign's only (it starts each level with all of them).
 const UPGRADES = [

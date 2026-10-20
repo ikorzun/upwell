@@ -128,6 +128,7 @@ const CAMP_STARS = { skazka: 180 };
 const gated = (w) => w >= 0 && w < CAMPAIGN.length && !!CAMP_STARS[CAMPAIGN[w].world.id];
 const lineStars = () => save.camp.stars.reduce((n, s, i) => n + (s > 0 && !gated(Math.floor(i / 30)) ? s : 0), 0);   // the stars of the worlds on the line
 const lineBefore = (w) => { let p = w - 1; while (p >= 0 && gated(p)) p--; return p; };   // the world on the line before w (-1: none)
+const wNo = (w) => (gated(w) ? '★' : String(w + 1));   // a world's number on the screens: a bonus world's a star (Mario's World ★), never the line's next one
 const CAMP_LEN = CAMP_OPEN * 30, CAMP_END = (() => { let w = CAMP_OPEN - 1; while (w > 0 && gated(w)) w--; return w * 30 + 28; })();   // CAMP_END: the last open world's boss on the line
 const sides = new Map();
 const sideOf = (c, rc) => {   // a tier's recipe as its column plays it (SIDE)
@@ -1815,7 +1816,7 @@ class Game {
     this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp, why: this.deathWhy() };
   }
   where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + this.num; }
-  get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
+  get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.mode === 'camp' ? wNo(this.world) : this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
   togglePause(on) {
     if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); }
     else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); }
@@ -1897,6 +1898,7 @@ const FONT = {
   '▼': '...../#####/.###./.###./..#../..#../.....',
   '◀': '...#/..##/.###/####/.###/..##/...#',
   '▶': '#.../##../###./####/###./##../#...',
+  '★': '...#.../..###../#######/.#####./..###../.##.##./.#...#.',   // a bonus world's number (wNo)
   '\u{E000}': '...#.../..##.#./####..#/####..#/####..#/..##.#./...#...',
   '\u{E001}': '...#.../..##.../####.#./#####.#/####.#./..##.../...#...',   // the last two: sound on / off
 };
@@ -2011,10 +2013,10 @@ const ui = {
     if (begun) p.append(week);
     if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }   // a long one smaller, on one line
     const cur = save.cur && campOpen(save.cur.ci) ? save.cur : null, at = cur && campAt(cur.ci);   // a level under way (Game.saveCur): on with it first, from its height
-    if (cur) p.append(cap(button(t('continue') + ' · ' + (at.w + 1) + '-' + (at.s + 1) + ' · ' + Math.floor(cur.m) + ' ' + t('m'), 'big thumb', () => game.resume()), 'continue'));
+    if (cur) p.append(cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1) + ' · ' + Math.floor(cur.m) + ' ' + t('m'), 'big thumb', () => game.resume()), 'continue'));
     else if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
     else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(1)), 'play'));   // one tap to the first level (CrazyGames: one at most)
-    else p.append(cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));   // the width of the screen, 12 px in from its edges
+    else p.append(cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
@@ -2100,10 +2102,10 @@ const ui = {
   // by touch to the next one, and on to that one under the thumb.
   map(w = campAt(campNextId()).w) {
     const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
-    p.append(cap(el('div', 'head', tf('world', { n: w + 1 }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: w + 1 }));
+    p.append(cap(el('div', 'head', tf('world', { n: wNo(w) }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: wNo(w) }));
     if (worlds.length > 1) { const tabs = el('div', 'duo'); for (const k of worlds) {   // the worlds open so far, a tab each; a bonus world's shut one its stars so far
       const shut = !campOpen(k * 30 + 1), need = CAMP_STARS[CAMPAIGN[k].world.id];
-      const b = button(shut ? '' : String(k + 1), 'chip' + (k === w ? ' on' : '') + (shut ? ' locked' : ''), () => { if (shut) ui.toast(tf('starsFor', { n: need - lineStars(), w: L2(CAMPAIGN[k].world.name) }), 2200, 'starOff'); else this.map(k); });
+      const b = button(shut ? '' : wNo(k), 'chip' + (k === w ? ' on' : '') + (shut ? ' locked' : ''), () => { if (shut) ui.toast(tf('starsFor', { n: need - lineStars(), w: L2(CAMPAIGN[k].world.name) }), 2200, 'starOff'); else this.map(k); });
       if (shut) b.append(iconEl('starOff'), px(lineStars() + '/' + need));   // (the pixel font has no star: its picture)
       tabs.append(b);
     } p.append(tabs); }
@@ -2129,13 +2131,13 @@ const ui = {
       if (icon) b.append(iconEl(icon));
       if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
       b.style.left = (X(col) / 3) + '%'; b.style.top = (Y(s) / 10) + '%';
-      b.setAttribute('aria-label', (w + 1) + '-' + (s + 1) + ['L', '', 'R'][col]); inner.append(b);
+      b.setAttribute('aria-label', wNo(w) + '-' + (s + 1) + ['L', '', 'R'][col]); inner.append(b);
       if (i === ni) nextEl = b;
     }
     tree.append(inner); p.append(tree);
     if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
     if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni))), 'continue'));
+    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni))), 'continue'));
   },
   pause() {
     const p = this.panel('pause');
@@ -2208,7 +2210,7 @@ const ui = {
     if (bs && bs.def) { const n = save.camp.fails[game.failKey()] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? (bs.def.how ? L2(bs.def.how) : t('bossHow')) : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
     if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
     const intro = game.rc || (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');   // (a recipe's: the campaign's, the daily well's)
-    this.toast((game.daily != null ? t('daily') : tf('world', { n: game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
+    this.toast((game.daily != null ? t('daily') : tf('world', { n: game.mode === 'camp' ? wNo(game.world) : game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
   comboPop(n) { const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
   comboEnd() { $('combo').classList.remove('show'); },

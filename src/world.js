@@ -236,6 +236,21 @@ const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the
 // Tokyo's air conditioners (owner: not so often, and a ledge to stand on that gives way): one a wall every `beat` tiles, the walls `at` out of step,
 // `w` x `h` tiles on a brace `brace` tall; a plank on its top which, stood on, rattles and falls `time` s later, for good (Level.addAircons, Level.update)
 const AC = { beat: 24, at: [5, 17], w: 2.2, h: 1.4, brace: 0.9, time: 3, off: 0.25 };   // off: its gap from the wall, its pipes in it
+// Tokyo's neon signs (THEMES.tokyo), one on a beat of 11 tiles, two in every three, the walls and the words in turn: neonSign is where sign k
+// hangs (null: none, or a door in its way); the hero lights it by jumping close past it, and lit it stays, red or blue (owner: bright, glowing).
+const NEON_SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'], 'neonFish'], [['カ', 'ラ', 'オ', 'ケ'], 'neonMic']];
+const neonSign = (lv, k) => {
+  const mod = (a, n) => ((a % n) + n) % n;
+  if (mod(k, 3) === 2) return null;
+  const t = lv.tile, P = PIX.size, kk = Math.max(1, Math.round((0.9 * lv.R) / (16 * P))), gw = 16 * kk * P, sw = gw + 6 * P, [word, pic] = NEON_SIGNS[mod(k - Math.floor(k / 3), 3)];
+  const left = mod(k, 2) === 0, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
+  const ax0 = left ? lv.l : x0, ax1 = left ? x0 + sw : lv.r;
+  if (lv.bubbles.some((b) => b.x1 + t > ax0 && b.x0 - t < ax1 && b.y1 > y0 - 0.3 * t && b.y0 - t < y1 + 0.2 * t)) return null;   // nothing covers a door (owner)
+  return { k, word, pic, kk, gw, sw, left, x0, x1: x0 + sw, y0, y1, ink: Math.imul(k, 2654435761) >>> 31 ? PAL.red : PAL.blue };
+};
+const NEON_REACH = 3;   // in R: a sign lights with the hero this near it (as near as a crow lets it come, FOLK.flee)
+const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.5 * lv.tile;   // a sign the hero can get to: some of it between the level's floor and its cap
+const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
 const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
@@ -810,6 +825,9 @@ ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
 ICONS.fizz = '............/............/..........w./.yyyyyyyyy../.ywwyyyyyyw./.yyyyyyyyy../.yyyoo....../.yyyo.o...../.yyyooo...../.yyy......../.ooo......../............';   // what it does: a gun, shots flying
 ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.maxhp = ICONS.heart;
+ICONS.taskCrow = '............/............/.......sss../......sswsss/.....ssssss./..ssssssss../.ssssssssss./sssssssss.../..ssssss..../....s.s...../....s.s...../...ss.ss....';   // a level's tasks (Game.task): the crows,
+ICONS.taskNeon = '............/...rrrrrrrr./sssr......r./...r.rrrr.r./...r......r./...r.rrrr.r./...r....r.r./...r...r..r./sssr..r...r./...rrrrrrrr./............/............';   // the neon (ラ),
+ICONS.taskCage = '............/.....ss...../.ssssssssss./.s..s..s..s./.s..s..s..s./.s.gsggsg.s./.sgksggskgs./.sggsggsggs./.sggsggsggs./.ssssssssss./............/............';   // a friend in a cage
 ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 // The smash's picture: its helmet (user: the rock candy's place), a moto one, red with a white stripe and blue-lensed goggles,
 // or (?helmet=astro, the user's other choice) an astronaut's, white with a blue visor in a black rim and a blue and orange neck ring.
@@ -1433,7 +1451,7 @@ class Level {
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' && (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage)));
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
+    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
     const ru = this.runeRng = mulberry32((o.seed ^ 0x6d2b79f5) >>> 0), cw = CAMPAIGN.find((c) => c.world === o.world), n = !cw || o.kind !== 'well' || !o.height ? 0 : rc ? rc.runes || 0 : ru() < RUNE.p ? 1 : 0;   // its runes (RUNE), by their own generator too
@@ -2525,17 +2543,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, DIM, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
     }
-    const SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'], 'neonFish'], [['カ', 'ラ', 'オ', 'ケ'], 'neonMic']], kk = Math.max(1, Math.round((0.9 * R) / (16 * P))), gw = 16 * kk * P;
-    const best = g.startY - g.levelM * R_PER_M * R;   // the highest the hero has been in this level (Game.levelM)
     for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
       // (the owner's pick, research/variants/tokyo-neon-1.png B): tubes, its word and a picture of what is sold, framed on a dark box with grey caps
-      // over and under it; its tubes off and faint till the hero goes up past it, then lit red or blue, by the sign, in a glow (owner; and dark in
-      // the power cut: the dark's lights leave it out)
-      const [word, pic] = SIGNS[mod(k - Math.floor(k / 3), 3)], left = mod(k, 2) === 0, sw = gw + 6 * P, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, cx = x0 + sw / 2;
-      const y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
-      if (y1 + 0.3 * t < top || y0 - 0.4 * t > bot || atDoor(left ? lv.l : x0, y0 - 0.3 * t, left ? x0 + sw : lv.r, y1 + 0.2 * t)) continue;
-      const lit = (y0 + y1) / 2 > best, ink = !lit ? PAL.gray : Math.imul(k, 2654435761) >>> 31 ? PAL.red : PAL.blue, ia = lit ? LIT : DIM;   // behind, or a light (DEPTH)
-      if (lit) F(cx, (y0 + y1) / 2, 1.15 * sw, 0, 0, 0.7 * (y1 - y0), ink, DEPTH.lit, 1);
+      // over and under it; its tubes off and faint (behind, DEPTH) till the hero jumps close past it, then lit red or blue in full, glowing, and so
+      // for good (owner): lv.neonLit, the time each was lit (it flickers on); in the power cut too, a light of its own
+      const s = neonSign(lv, k);
+      if (!s || s.y1 + 0.3 * t < top || s.y0 - 0.4 * t > bot) continue;
+      const { word, pic, kk, gw, sw, left, x0, y0, y1 } = s, cx = x0 + sw / 2, on = lv.neonLit && lv.neonLit.get(k), lit = on != null && !((T - on) < 0.4 && Math.floor((T - on) * 20) % 3 === 1);
+      const ink = lit ? s.ink : PAL.gray, ia = lit ? 1 : DIM;
+      if (lit) { F(cx, (y0 + y1) / 2, 2.2 * sw, 0, 0, 0.62 * (y1 - y0) + 1.4 * sw, ink, 1.3, 1); F(cx, (y0 + y1) / 2, sw, 0, 0, 0.55 * (y1 - y0) + 0.5 * sw, ink, 2.4, 1); }   // its glow: a wide halo, and round the box a solid tone fading
       for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, DIM, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, DIM, 0, 10, 0); }   // the arms, bolted on
       box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, DIM, 0, 10, 0);
       box(x0, y0, x0 + sw, y1, PAL.black, 1, 0, 10, 0);
@@ -3401,6 +3417,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const s of lv.shots) light(s.x, s.y, 0.5, 1.4);   // blobs, the fire's and the spitters'
     for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);
     for (const p of lv.fizz) if (!p.taken) light(p.x, p.y, 0.8, 2);
+    if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) light((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 1.2, 3.4); }   // Tokyo's lit neon
     for (const sp of lv.spots) if (!sp.used) light(sp.x, sp.y, 1.4, 3.2);   // the flip side's pools glow (its way back out)
     if (th.pit && lv.kind === 'well') for (let k = Math.floor(top / MINE_CAP) - 1; k * MINE_CAP < bot; k++) for (const side of [-1, 1]) if (mineLamp(side, k)) light(side < 0 ? lv.l + 1.05 * kitT : lv.r - 1.05 * kitT, k * MINE_CAP + 0.85 * kitT, 0.9, 2.8);   // the Mine's lamps
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows

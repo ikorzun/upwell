@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', task_neon: 'All the neon is lit!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -28,7 +28,7 @@ const STR = {
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', news: 'Nuevo: {n}', dark: 'oscuridad',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', task_neon: '¡Todo el neón encendido!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
@@ -45,7 +45,7 @@ const STR = {
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', news: 'Novo: {n}', dark: 'escuridão',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', task_neon: 'Todo o neon aceso!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
@@ -62,7 +62,7 @@ const STR = {
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', news: 'NEW: {n}', dark: 'くらやみ',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', task_neon: 'ネオンが ぜんぶ ついた！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
@@ -600,6 +600,22 @@ class Game {
     this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
     this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
+    this.setTasks();
+  }
+  // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
+  // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
+  setTasks() {
+    const lv = this.lv, folk = (k) => lv.folk.filter((f) => f.kind === k).length;
+    lv.tasks = [];
+    if (lv.kind !== 'well' || !Number.isFinite(lv.endY) || this.bonus) return;
+    lv.ensure(-Infinity);
+    for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0]]) if (of) lv.tasks.push({ id, n: 0, of });
+  }
+  task(id) {   // one more of task `id` done (in the shaft only: the flip side's crows are not its); the last of it rings, and says so with its picture
+    const q = !this.well && this.lv.tasks && this.lv.tasks.find((o) => o.id === id);
+    if (!q || q.n >= q.of || ++q.n < q.of) return;
+    sound.play('buy');
+    if (id !== 'cage') ui.toast(t('task_' + id), 2000, taskIcon(id));   // (a cage has its word: Game.free)
   }
   // A new width remakes the level under way (the well is the view's width); the run goes on.
   // A new width remakes the level (the well is the view's width): the same one (its seed), the hero back about as high up it as it
@@ -944,7 +960,7 @@ class Game {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
-        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); }
+        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) { f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220); if (f.kind === 'crow') this.task('crow'); }
         if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
       } else if (f.kind === 'bug') {
         const r = f.rect;
@@ -952,6 +968,14 @@ class Game {
         if (!f.run && near(f.x, f.y, FOLK.flee * R)) { f.run = true; f.dir = f.x < H.cx ? -1 : 1; }
         f.x += f.dir * (f.run ? 3.5 : 0.5) * R * dt; f.t += dt;
         if (f.x < r.x0 + 0.2 * R || f.x > r.x1 - 0.2 * R) { if (f.run) { fx.dust(f.x, f.y, IMPACT.puffSpeed); lv.folk.splice(i, 1); continue; } f.dir = -f.dir; }   // at the end: turns round, or, running, is gone over it
+      }
+    }
+    if (lv.theme.town && lv.kind === 'well' && !this.well) {   // Tokyo's neon (neonSign): a sign the hero comes near lights, for good (lv.neonLit), a note higher each
+      const b = 11 * lv.tile, k0 = Math.floor(H.cy / b);
+      for (let k = k0 - 1; k <= k0 + 1; k++) {
+        const s = !lv.neonLit.has(k) && neonSign(lv, k);
+        if (!s || !neonIn(lv, s) || Math.hypot(Math.max(s.x0 - H.cx, 0, H.cx - s.x1), Math.max(s.y0 - H.cy, 0, H.cy - s.y1)) >= NEON_REACH * R) continue;
+        lv.neonLit.set(k, lv.t); sound.note(2 + (lv.neonLit.size % 8), 0.3); this.task('neon');
       }
     }
   }
@@ -1001,6 +1025,7 @@ class Game {
     const b = f.body, R = this.R, i = this.lv.folk.indexOf(f);
     f.open = true; b.face.frown = false; b.face.surprise = 1;
     if (i >= 0) this.lv.folk.splice(i, 1);
+    this.task('cage');
     b.thread = true; b.gScale = 0; this.followers.push(f);   // and off it goes after the hero (followStep)
     sparkFx(b.cx, b.maxY - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, INK.coin], 0.6); fx.ring(b.cx, b.cy, 1.6 * R, INK.white);
     sound.play('crumble', 0.7, 1.3); sound.play('bubble', 0.9, 1.2); haptics.buzz(16);
@@ -1020,6 +1045,7 @@ class Game {
     if (this.state !== 'play') return;   // the fire ended a bonus level
     this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt); this.followStep(); this.setStep(dt);
     for (const f of lv.folk) if (f.body && !f.open && f.y > lv.cam && f.y < lv.cam + view.h) this.hint(f.kind);   // a cage or a trader, told once
+    if (lv.tasks && lv.tasks.length) this.hint('tasks', 'seen_tasks', 'star');   // and what the third star is for
     if (!save.seen.crack) for (const r of lv.near(lv.cam + view.h * 0.2, lv.cam + view.h * 0.8)) if (r.crack) { this.hint('crack'); break; }
     if (this.combo > 0 && (H.wallMask & 8) && !H.springHit && !this.power('rainbow')) this.payCombo();   // only a floor ends a combo; a rainbow's runs on till it is over
     const near = (o, r) => Math.hypot(H.cx - o.x, H.cy - o.y) < r;
@@ -1388,7 +1414,7 @@ class Game {
     if (H.stuck && (glueSide(H) === 1 || glueSide(H) === 2)) this.hint('wall', 'seen_wall' + how);   // stuck to a wall the first time: how to let go
     if (how !== 'T' && (m & 8) && this.idleT > 4 && !this.learning()) this.hint('crouch', 'seen_crouch' + how);   // standing about: there is a high jump (no down on the touch keys)
   }
-  hint(kind, key = 'seen_' + kind) { if (save.seen[kind] || this.stateT < 3) return; save.seen[kind] = 1; persist(); ui.toast(t(key), 2400); }   // not over the level's banner
+  hint(kind, key = 'seen_' + kind, icon) { if (save.seen[kind] || this.stateT < 3) return; save.seen[kind] = 1; persist(); ui.toast(t(key), 2400, icon); }   // not over the level's banner
   spring(r) {
     const H = this.hero; this.hint('spring');
     setVel(H, H.rigVx, -(r.bouncy ? BOUNCY.v : SPRING.v) * this.vjump); unstick(H, 0.15); H.kickSquash(0, 1, -2.4); this.rising = false;   // (a bouncy plank: a softer throw)
@@ -1481,9 +1507,9 @@ class Game {
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
     if (this.combo > 0) this.payCombo();
     this.bankDrops();
-    const lv = this.lv, allCoins = lv.coinsTaken >= lv.coinTotal, half = lv.coinsTaken >= STARS.half * lv.coinTotal;   // the stars, paid at once (not for a bonus level)
-    if (!this.bonus) {
-      this.stars = { n: 1 + half + allCoins, coins: [lv.coinsTaken, lv.coinTotal] };
+    const lv = this.lv, tasks = lv.tasks || [], allCoins = lv.coinsTaken >= lv.coinTotal, half = lv.coinsTaken >= STARS.half * lv.coinTotal;   // the stars, paid at once (not for a bonus level):
+    if (!this.bonus) {   // the third for every coin and every task (owner)
+      this.stars = { n: 1 + half + (allCoins && tasks.every((q) => q.n >= q.of)), coins: [lv.coinsTaken, lv.coinTotal], tasks: tasks.map((q) => Object.assign({}, q)) };
       this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
     }
     this.climbed += this.daily != null ? this.rc.len : this.levelM; this.levelM = 0;   // (the daily's: its whole length, where its medal stands)
@@ -1801,6 +1827,8 @@ function pixelDisc(r, fill) {
     + '<path class="rim" fill-rule="evenodd" d="' + rows(q) + rows(q - 1) + '"/><path class="in" fill-opacity="' + fill + '" d="' + rows(q - 1) + '"/></svg>';
   return t.content.firstChild;
 }
+const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon
+function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 function button(text, cls, fn) {
   const b = el('button', cls, text);
@@ -1888,6 +1916,7 @@ const ui = {
       }
       const pay = px('+' + st.pay); pay.classList.add('pay'); row.append(pay);
       p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
+      if (st.tasks.length) { const tr = el('div', 'tasks'); tr.append(...st.tasks.map(taskEl)); p.append(tr); }   // and its tasks, done or not
     }
   },
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
@@ -2064,7 +2093,7 @@ const ui = {
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot';
     $('hud').classList.toggle('on', playing);
-    if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
+    if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children, $('tasks')].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner
     $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
@@ -2093,6 +2122,8 @@ const ui = {
     if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
     const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : g.num;   // a bonus level counts its seconds down
     if (st !== this.stage) { this.stage = st; $('stage').replaceChildren(px(st)); }
+    const tk = (playing && !g.well && g.lv.tasks) || [], tkey = tk.map((q) => q.id + q.n + '/' + q.of).join();   // the level's tasks, how far each
+    if (tkey !== this.tkey) { this.tkey = tkey; $('tasks').replaceChildren(...tk.map(taskEl)); view.hudB = 0; }   // (the HUD measured again)
     const c = $('combo');
     if (g.combo > 0 && g.hero) c.style.transform = 'translate(' + Math.round(g.hero.cx) + 'px,' + Math.round(g.hero.minY - g.lv.cam - 30) + 'px) translateX(-50%)';
     this.labels(g.lv.pickups.length ? g.lv : null);   // a room's things, or a trader's in the shaft

@@ -135,6 +135,11 @@
   #mid { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; }
   #height { --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); }
   #stage { color: var(--gray); filter: drop-shadow(0 2px 0 var(--ink)); }
+  .tasks { display: flex; justify-content: center; gap: 10px; --p: 2; color: var(--gray); }   /* a level's tasks: a picture and a count each (Game.setTasks) */
+  .tasks > span { display: flex; align-items: center; gap: 4px; }
+  .tasks > .done { color: var(--yellow); }
+  #tasks { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; margin-top: 6px; filter: drop-shadow(0 2px 0 var(--ink)); }   /* under the level's number, out of its column (that stays put) */
+  #tasks:empty { display: none; }
   #purse { display: flex; align-items: center; gap: 6px; --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); }
   #purse.bump { animation: bump 0.2s steps(2); }
   .coin { display: block; width: 15px; height: 15px; }
@@ -279,7 +284,7 @@
   <div id="hud">
     <div id="hearts" aria-label="Hearts"></div>
     <div id="gun" aria-hidden="true"><i></i></div>
-    <div id="mid"><div id="height"></div><div id="stage"></div></div>
+    <div id="mid"><div id="height"></div><div id="stage"></div><div id="tasks" class="tasks"></div></div>
     <div id="purse"><span id="coins"></span><svg class="coin" viewBox="0 0 5 5" aria-hidden="true" shape-rendering="crispEdges"><path fill="#faa23e" d="M1 0h3v1h1v3h-1v1h-3v-1h-1v-3h1z"/><path fill="#ffed57" d="M1 1h3v3h-3z"/><path fill="#f3f3f3" d="M1 1h1v1h-1z"/></svg></div>
     <button id="pauseBtn" aria-label="Pause"></button>
   </div>

@@ -75,6 +75,7 @@ function snap() {
     folk: lv.folk.map((f) => ({ f, o: Object.assign({}, f), b: f.body && snapBody(f.body) })), pickups: lv.pickups.slice(), sold: lv.pickups.map((p) => p.sold),
     icicles: lv.icicles.map((c) => Object.assign({}, c)), arenas: lv.arenas.map((a) => ({ a, o: Object.assign({}, a, { foes: a.foes.slice() }) })),
     cross: lv.crossing && Object.assign({}, lv.crossing),   // the level crossing's clock and train (the tries ran it on)
+    tasks: (lv.tasks || []).map((q) => q.n), neon: new Map(lv.neonLit),   // the level's tasks so far, the neon lit (a try lit it)
     boss: lv.boss && { f: Object.fromEntries(Object.entries(lv.boss).filter(([, v]) => typeof v !== 'object')), b: snapBody(lv.boss.body) }, crumble: [lv.crumbleTime, lv.crumbleBack],   // its hearts, turn and clocks; the Minecart's quicker bridges
   };
 }
@@ -95,6 +96,7 @@ function restore(S) {
   lv.pickups = S.pickups.slice(); lv.pickups.forEach((p, i) => { p.sold = S.sold[i]; });
   lv.icicles = S.icicles.map((c) => Object.assign({}, c)); lv.arenas = S.arenas.map(({ a, o }) => Object.assign(a, o, { foes: o.foes.slice() }));
   if (lv.crossing) Object.assign(lv.crossing, S.cross);
+  (lv.tasks || []).forEach((q, i) => { q.n = S.tasks[i]; }); lv.neonLit = new Map(S.neon);
   if (lv.boss) {   // what a try first set goes again (the Minecart's `called`, else the real fight never calls its spitter)
     const bs = lv.boss, o = S.boss.f;
     for (const k of Object.keys(bs)) if (typeof bs[k] !== 'object' && !(k in o)) delete bs[k];
@@ -256,7 +258,7 @@ function advance(ms = 30000) {
     if (!R.opts.until) input.clear();
     Object.assign(out, { result: g.state, time: +R.t.toFixed(1), decisions: R.decisions, heartsLost: R.startHp - g.hp, height: +R.best.toFixed(1), of: +R.top.toFixed(1),
       coins: R.coins0 - lv.coins.filter((c) => !c.drop).length, coinsPlaced: R.coins0, got: g.coins, foes: R.foes, kills: g.kills, spawned: R.spawned, killed, combo: g.bestCombo,
-      tightness: +(1 - R.safeSum / Math.max(1, R.decisions)).toFixed(2) });
+      tightness: +(1 - R.safeSum / Math.max(1, R.decisions)).toFixed(2), tasks: (lv.tasks || []).map((q) => q.id + ' ' + q.n + '/' + q.of).join(', ') });   // (the bot does not go for them: what a climb does by the way)
     if (bs) Object.assign(out.boss, { hp: Math.max(0, bs.hp), beaten: bs.dead });   // result: 'won', 'dead', or 'play' at BOSS_T
     run = null;
     return out;

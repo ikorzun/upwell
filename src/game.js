@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', task_neon: 'All the neon is lit!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_flower: 'Flowers for every jizo!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
@@ -28,7 +28,7 @@ const STR = {
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', task_neon: '¡Todo el neón encendido!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_flower: '¡Flores para cada jizo!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
@@ -45,7 +45,7 @@ const STR = {
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', task_neon: 'Todo o neon aceso!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_flower: 'Flores para cada jizo!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
@@ -62,7 +62,7 @@ const STR = {
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', task_neon: 'ネオンが ぜんぶ ついた！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_flower: 'おじぞうさまに おはなを ぜんぶ！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
@@ -610,7 +610,8 @@ class Game {
     lv.tasks = [];
     if (lv.kind !== 'well' || !Number.isFinite(lv.endY) || this.bonus) return;
     lv.ensure(-Infinity);
-    for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0]]) if (of) lv.tasks.push({ id, n: 0, of });
+    const kits = (kind) => lv.rects.filter((r) => { const k = kitThing(lv, r); return k && k.kind === kind && k.y > lv.capY && k.y < lv.floor; }).length;   // the kits' (kitThing): the ones the hero can get to
+    for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0], ['lantern', kits('lantern')], ['flower', kits('jizo')], ['bell', kits('bell')]]) if (of) lv.tasks.push({ id, n: 0, of });
   }
   task(id) {   // one more of task `id` done (in the shaft only: the flip side's crows are not its); the last of it rings, and says so with its picture
     const q = !this.well && this.lv.tasks && this.lv.tasks.find((o) => o.id === id);
@@ -977,6 +978,14 @@ class Game {
         const s = !lv.neonLit.has(k) && neonSign(lv, k);
         if (!s || !neonIn(lv, s) || Math.hypot(Math.max(s.x0 - H.cx, 0, H.cx - s.x1), Math.max(s.y0 - H.cy, 0, H.cy - s.y1)) >= NEON_REACH * R) continue;
         lv.neonLit.set(k, lv.t); sound.note(2 + (lv.neonLit.size % 8), 0.3); this.task('neon');
+      }
+    }
+    if ((lv.theme.village || lv.theme.shrine || lv.theme.fuji) && lv.kind === 'well' && !this.well) {   // the kits' things (kitThing) the hero comes near: a Village lantern lit, flowers
+      // left at a Cave jizo, a Fuji bell rung; for good (lv.tended), a note higher each, as the neon
+      for (const r of lv.near(H.cy - 5 * R, H.cy + 5 * R)) {
+        const k = !lv.tended.has(r) && kitThing(lv, r), id = k && KIT_TEND[k.kind];
+        if (!id || !(k.y > lv.capY && k.y < lv.floor) || Math.hypot(k.x - H.cx, k.y - H.cy) >= KIT_REACH * R) continue;
+        lv.tended.set(r, lv.t); sound.note(2 + (lv.tended.size % 8), 0.3); this.task(id);
       }
     }
   }
@@ -1828,7 +1837,7 @@ function pixelDisc(r, fill) {
     + '<path class="rim" fill-rule="evenodd" d="' + rows(q) + rows(q - 1) + '"/><path class="in" fill-opacity="' + fill + '" d="' + rows(q - 1) + '"/></svg>';
   return t.content.firstChild;
 }
-const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon
+const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon, taskLantern, taskFlower, taskBell
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 function button(text, cls, fn) {

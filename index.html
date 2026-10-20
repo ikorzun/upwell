@@ -64,10 +64,10 @@
   .title .cap, .head .cap { color: var(--purple); }
   .title .cap { margin-top: 10px; letter-spacing: 0.5em; padding-left: 0.5em; }
   .chip .cap { margin-top: 0; }
-  .big.capped { padding-top: 10px; padding-bottom: 14px; }   /* as tall as before, near enough, with the words under */
+  .big.capped { padding-top: 12px; padding-bottom: 12px; }   /* as tall as before, near enough, with the words under */
   .big, .chip, .head, .title, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
-  .langs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; max-width: 340px; }   /* two by two: four in a row would not fit a small phone */
-  .langs .chip { text-transform: none; }   /* each language's name as it is written */
+  .langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; max-width: 340px; }   /* in one row, by their short names (owner) */
+  .langs .chip { text-transform: none; }   /* 日本語 as it is written */
   #map { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
   .tree { align-self: stretch; flex: 1; min-height: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; scrollbar-width: none; margin: 8px 0; }   /* a world's map (ui.map): its tiers up, scrolled by touch */
   .tree::-webkit-scrollbar { display: none; }
@@ -212,23 +212,33 @@
     box-sizing: border-box; background: var(--dim); pointer-events: auto; text-align: center;
   }
   .panel.on { display: flex; }
+  /* Every menu and every screen between levels on liquid glass (owner; see src/glass.js): the level frozen and blurred
+     (#freeze) under one sheet of tinted glass over the whole column, the buttons and words lying on it in their own lines;
+     what lay over the level (HUD, hints, keys) goes under it with the level, as the 7/8 ink hid it */
+  #freeze, #glass { position: absolute; top: 0; left: 0; pointer-events: none; }
+  #glass { right: 0; bottom: 0; }
+  #glass i { position: absolute; display: block; z-index: 1; border-radius: 2px; }   /* the sheet's stand-in; z over the canvas (liquidGL bends only what is under it); 2 px corners: with square ones liquidGL draws the glass at half strength */
+  body.glassy :is(#menu, #pause, #result, #cards, #map) { background: none; }
+  body.glassy .panel :is(.big.alt, .chip, .card) { background: transparent; }
+  body.glassy .panel .head { filter: drop-shadow(0 3px 0 var(--ink)) drop-shadow(0 -2px 0 var(--ink)); }
+  body.glassy :is(#hud, #bossHp, #combo, #labels, #floorHint, #toast, #pad) { visibility: hidden; }
   #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
   #pause { justify-content: flex-end; }
   .summary { flex: 1; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
   .big.alt { --p: 3; background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as wide, a size smaller: not the main one (and "Controls: buttons" in one line) */
-  .big.alt:active { transform: translateY(4px); }
+  .big.alt:active { box-shadow: inset 0 0 0 2px var(--yellow); }   /* pressed: a yellow edge, nothing sinks (owner: no pseudo-volume) */
   .big.thumb { align-self: stretch; margin-top: 8px; }   /* the main button: the width of the screen, at its bottom */
   #menu { background: linear-gradient(transparent var(--split, 58%), var(--gray) var(--split, 58%), var(--gray) calc(var(--split, 58%) + 2px), var(--ink) calc(var(--split, 58%) + 2px)); justify-content: flex-end; }   /* the hero shows through the top (--split: set by ui.menu) */
   .title { margin: 0 0 auto; padding-top: 12%; --p: 6; filter: drop-shadow(0 6px 0 var(--ink)); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }
-  .big {
-    min-width: 200px; padding: 14px 28px 20px; border: 0; --p: 4;
-    background: var(--yellow); color: var(--ink); clip-path: var(--notch); box-shadow: inset 0 -6px 0 var(--orange);
+  .big {   /* flat (owner: no pseudo-volume, no orange band under it) */
+    min-width: 200px; padding: 17px 28px; border: 0; --p: 4;
+    background: var(--yellow); color: var(--ink); clip-path: var(--notch);
   }
-  .big:active { transform: translateY(4px); box-shadow: inset 0 -2px 0 var(--orange); }
+  .big:active { filter: brightness(0.88); }   /* pressed: a shade darker */
   .pickers { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 340px; }
   .chip {
     min-height: 34px; padding: 8px 10px; border: 0; box-sizing: border-box;
@@ -307,5 +317,7 @@
 <script src="src/gum.js"></script>
 <script src="src/world.js"></script>
 <script src="src/game.js"></script>
+<script src="src/vendor/liquidGL.js"></script>   <!-- liquidGL 3.0.0 (MIT, src/vendor/liquidGL-LICENSE.txt): the glass of the menus -->
+<script src="src/glass.js"></script>
 </body>
 </html>

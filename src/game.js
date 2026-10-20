@@ -81,7 +81,7 @@ let lang = 'en';
 const t = (k) => (STR[lang] && STR[lang][k]) || STR.en[k];
 const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (_, n) => o[n]);
 const L2 = (o) => o[lang] || o.en;
-const LANGS = [['en', 'English'], ['es', 'Español'], ['pt', 'Português'], ['ja', '日本語']];   // each by its own name
+const LANGS = [['en', 'EN'], ['es', 'ES'], ['pt', 'PT'], ['ja', '日本語']];   // short, in one row (owner); Japanese as it is written
 const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || navigator.language || 'en').slice(0, 2).toLowerCase(); return STR[l] ? l : 'en'; };   // the platform's (Playgama checklist), else the browser's; English by default
 
 // ── Save ─────────────────────────────────────────────────────
@@ -1923,7 +1923,7 @@ const ui = {
     const p = this.panel('result'), g = game, price = g.revivePrice(), boss = !!(g.rc && g.rc.boss), why = g.deathWhy();
     const def = g.lv.boss && g.lv.boss.def;
     p.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));   // a boss has a word of its own
-    if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'chip wide', () => g.revive()), 'revive'));
+    if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'big thumb alt', () => g.revive()), 'revive'));
     p.append(cap(button(t('menu'), 'big thumb alt', () => { pmsg('level_failed', g.lvl()); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
   },
   runes() {   // a world's boss beaten: its tapestry, three runes and what Aunt Moti reads in them (each its own ink); on at a tap
@@ -1935,8 +1935,8 @@ const ui = {
   worldDone() {   // its boss beaten, after its tapestry: on into the next world, or word of it coming
     const p = this.panel('result'), n = game.world + 2, next = n <= CAMP_OPEN;
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', tf(next ? 'worldNext' : 'soon', { n })));
-    if (next) p.append(cap(button(t('map'), 'chip wide', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 30 + 1)), 'continue'));
-    else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
+    if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 30 + 1)), 'continue'));
+    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
   },
   // The book of what has been met (the plan after the sandbox: an encyclopedia), one feed down under its headers (the user:
   // no tabs, bigger blocks, each in detail): upgrades and their pairs, candies, enemies, bosses, a card each with its picture,
@@ -1996,7 +1996,7 @@ const ui = {
     tree.append(inner); p.append(tree);
     if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
     if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'chip wide', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));
+    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + (next.w + 1) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));
   },
   pause() {
     const p = this.panel('pause');
@@ -2013,13 +2013,13 @@ const ui = {
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
     p.append(cap(el('div', 'head', t(why)), why), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
-    if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'chip wide', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
+    if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'big thumb alt', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
     else p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'));
   },
   revive(price, coins) {   // before the result: go on for coins, or end the run
     const p = this.panel('result');
     p.append(cap(el('div', 'head', t('reviveQ')), 'reviveQ'), el('div', 'label', tf('reviveCost', { n: price, c: coins })),
-      cap(button(t('giveUp'), 'chip wide', () => game.giveUp()), 'giveUp'), cap(button(t('revive'), 'big thumb', () => game.revive()), 'revive'));   // the main button last, under the thumb
+      cap(button(t('giveUp'), 'big thumb alt', () => game.giveUp()), 'giveUp'), cap(button(t('revive'), 'big thumb', () => game.revive()), 'revive'));   // the main button last, under the thumb; No, finish over it like Menu (owner)
   },
   result(r) {
     const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons

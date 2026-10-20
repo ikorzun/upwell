@@ -38,10 +38,17 @@ WORLDS = {
              'with snow, kamakura snow huts lit from inside, snow monkeys in a hot spring', 'blue #5bb8ff',
              'white is ice you slip on (a whole block or wall of it), grey blocks crumble, purple marks moving planks and springs, green is moss you can hold on to',
              'the black winter night, nothing far off'),
+    # (owner 2026-10-20: the Mine becomes the Japanese countryside in spring: forest, gardens, village, sakura)
+    'village': ('the Village', 'the Japanese countryside in spring, cosy and cute, kawaii: a village of thatched farmhouses among rice terraces, a forest of '
+                'bamboo and cedar, gardens with koi ponds and stone lanterns, sakura in full bloom', 'orange #faa23e',
+                'green is moss you can hold on to, purple marks springs and rubber walls, blue is ice and moving planks, grey blocks crumble',
+                'the black spring night, nothing far off'),
 }
 LEDGE_AT = 'a purple concrete ledge with a white top edge sticking out of the wall'
 CAVE_AT = 'a grey stone ledge with a white top edge sticking out of the wall'
 FUJI_AT = 'a blue rock ledge with a soft cap of snow and a white top edge sticking out of the wall'
+VILLAGE_AT = 'an orange earthen terrace ledge with a white top edge sticking out of the wall'
+SAKURA = 'sakura blossom in purple, the nearest the palette has to pink (never red, never white)'
 FUJI_RULE = ('In this world white is ice you slip on (a whole block or wall of white), grey blocks crumble and purple marks moving planks and springs: '
              'so the snow is only a cap on top, and its top is the white edge you stand on.')
 # A ledge: what it is, what it does in play, its material and size; where it is, its main colour, what its variants vary and the inks' rule,
@@ -152,6 +159,53 @@ ELEMENTS = {
                      where='far behind everything, filling the width of the shaft, low and faint, so the play reads over it', material='the mountain, snow, clouds', plane='back',
                      size='about 14 tiles wide and 6 tiles tall', inks='the mountain in a faint blue dither on the black, its snowy top grey with a few white glints, '
                      'the clouds a faint grey dither', scene=FUJI_AT + ' in front of it'),
+    'village-slab': dict(world='village', kind='ledge', what='the basic ledge, a terrace of earth held up by a dry-stone wall, like a rice terrace, sticking out of the shaft wall',
+                         does='solid on every side: you stand on it, cling to its sides and jump off it', material='earth with a thin fringe of grass and little flowers on top, '
+                         'its face of fitted stones', size='4 tiles long and 1 tile thick', main='orange (the earth)',
+                         rule='In this world green is moss you can hold on to (under a ledge or on a wall), so the grass on top is only a thin fringe; purple marks springs '
+                         'and rubber walls, blue is ice and moving planks, grey blocks crumble: those only for tiny details.'),
+    'village-plank': dict(world='village', kind='ledge', what='a little wooden footbridge plank: boards on two beams, perhaps a low rope rail',
+                          does='a thin platform: you jump up through it from below and stand on it', material='weathered wood, rope',
+                          size='4 tiles long and a third of a tile thick', place='the plank sticking out of that wall', main='orange (wood)',
+                          vary='the boards and the gaps between them, the beams under it, its rail (rope, bamboo or none), how it is fixed to the wall, and the small '
+                          'details on it (a hanging charm, a paper lantern)'),
+    'village-yaen': dict(world='village', kind='ledge', what='a yaen, a little hand-pulled wooden box riding a cable across a river, here a moving platform',
+                         does='a thin platform that rides sideways along its row, from wall to wall and back, carrying you; you jump up through its floor from below and stand on it',
+                         material='a wooden box or basket with a floor, hung from pulleys on a cable that runs off to both walls', size='3 tiles long, its floor a third of a tile thick',
+                         place='the yaen hanging from its cable in the middle of the shaft', main='blue', vary='the box (open, a basket, railed), how it hangs from the cable '
+                         '(pulleys, a frame, ropes), its ends, and the small details on it (a rope to pull, a bell, a little flag)',
+                         rule="Blue is this world's mark for what moves, so it is its main colour; the cable grey."),
+    'village-bridge': dict(world='village', kind='ledge', what='an old rickety wooden bridge whose planks give way under you', does='a row of planks you stand on, '
+                           'that crumble a moment after you touch them and come back a while later', material='old weathered planks, frayed ropes',
+                           size='5 tiles long, a third of a tile thick', place='the bridge strung between the two walls of the shaft', main='grey',
+                           vary='the planks and gaps, the ropes it hangs from, its sag, how it is tied to the walls, and the small details on it',
+                           rule="Grey is this world's mark for what crumbles, so it is its main colour."),
+    'village-sakura': dict(world='village', kind='prop', what='a sakura tree in full bloom, a few petals drifting down', where='on the top of a ledge at its wall end',
+                           material='a dark twisted trunk, clouds of blossom', size='about 4 tiles wide and 5 tiles tall',
+                           inks=SAKURA + ', a few grey petals among it, a black or orange trunk, falling petals single purple pixels', scene=VILLAGE_AT),
+    'village-koinobori': dict(world='village', kind='prop', what="koinobori, carp streamers flying on a pole for Children's Day: a black, an orange and a blue carp in the wind",
+                              where='on a tall pole standing on a ledge at its wall end', material='cloth carps with big round eyes, a pole with a little wheel on top',
+                              size='the pole about 5 tiles tall, each carp about 2 tiles long', inks='carps in black, orange and blue with scale patterns in grey or black, '
+                              'black eyes in grey rings (no white), a grey pole', scene=VILLAGE_AT),
+    'village-scarecrow': dict(world='village', kind='prop', what='a kakashi, a scarecrow in a straw hat standing in a little rice paddy', where='on the top of a ledge',
+                              material='straw, a cloth face, a hat, a pole, young rice', size='about 1.5 tiles wide and 2.5 tiles tall',
+                              inks='orange straw, a grey cloth face drawn simply in black, a blue or purple coat, green rice shoots', scene=VILLAGE_AT),
+    'village-kitsune': dict(world='village', kind='prop', what='a little Inari shrine: a small torii and two stone fox statues guarding a tiny shrine',
+                            where='on the top of a ledge at its wall end', material='stone foxes, a wooden torii, a tiny wooden shrine', size='about 3 tiles wide and 2.5 tiles tall',
+                            inks='grey stone foxes with orange bibs (no white), an orange torii (never red), a tiny grey shrine', scene=VILLAGE_AT),
+    'village-garden': dict(world='village', kind='prop', what='a little Japanese garden: a koi pond with two koi, stepping stones and a small stone lantern',
+                           where='on the top of a ledge, the pond set into it', material='water, stones, fish, a little moss', size='about 3 tiles wide and 1.5 tiles tall',
+                           inks='blue water, an orange koi and a grey koi (no white), grey stones, a green tuft or two', scene=VILLAGE_AT),
+    'village-house': dict(world='village', kind='prop', what='a little thatched farmhouse (gassho-zukuri) whose door is a way into a shop or a stash',
+                          where='built against the shaft wall at a ledge, its door open, a noren hanging in it', material='a steep thatched roof, wooden walls, a paper window, a noren',
+                          size='about 3.5 tiles wide and 3.5 tiles tall', inks='an orange thatch, grey or blue walls, a warm orange window glowing, the noren red or purple',
+                          scene=VILLAGE_AT),
+    'village-bamboo': dict(world='village', kind='prop', what='a bamboo forest: tall stalks in rows with their leaves, seen behind the shaft', plane='back',
+                           where='far behind the play, the stalks rising up the whole height of the shaft', material='bamboo stalks with their nodes, leaves at the top',
+                           size='stalks a third of a tile thick, many tiles tall', inks='green stalks and leaves, faint', scene=VILLAGE_AT + ' in front of it'),
+    'village-far': dict(world='village', kind='prop', what='the countryside far away: terraced hills, a village of thatched roofs and sakura, seen far behind the shaft',
+                        plane='back', where='far behind everything, low and faint, so the play reads over it', material='hills, terraces, roofs, trees',
+                        size='about 14 tiles wide and 6 tiles tall', inks='a faint orange and a faint purple dither on the black', scene=VILLAGE_AT + ' in front of it'),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',
@@ -222,6 +276,22 @@ def prompt(el: str, ref: bool = False) -> str:
     plane = PLANES[e.get('plane', 'mid')]
     return (LEDGE if e['kind'] == 'ledge' else PROP).format(**{**slab, **e, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': INKS9, 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
+
+
+def snap_back(src: str, dst: str, k: int = GRID) -> None:
+    """A background sheet onto the grid and the game's tones: each pixel to the nearest of the black, the eight inks and their dim tones (DEPTH.back: a
+    quarter of the way from the black), each k x k block to the tone most of its pixels took. The plain snap would put the dim plane all to the black;
+    the hero and the ledge keep their full inks."""
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(Image.open(src).convert('RGB'), dtype=np.float32)
+    h, w = a.shape[0] // k * k, a.shape[1] // k * k
+    a, black = a[:h, :w], np.array(PAL9[-1], dtype=np.float32)
+    pal = np.array(PAL9 + [black + 0.25 * (np.array(c, dtype=np.float32) - black) for c in PAL9[:-1]], dtype=np.float32)
+    near = sum((a[..., c, None] - pal[:, c]) ** 2 for c in range(3)).argmin(-1)
+    blocks = near.reshape(h // k, k, w // k, k).transpose(0, 2, 1, 3).reshape(h // k, w // k, k * k)
+    ink = np.stack([(blocks == i).sum(-1) for i in range(len(pal))], -1).argmax(-1)
+    Image.fromarray(pal[ink].astype(np.uint8).repeat(k, 0).repeat(k, 1)).save(dst)
 
 
 def snap(src: str, dst: str, k: int = GRID) -> None:
@@ -301,7 +371,7 @@ def main() -> None:
     if rc:
         sys.exit(rc)
     src, dst = os.path.join(out, f'{el}-{n}.png'), os.path.join(out, f'{el}-{n}-px.png')
-    snap(src, dst)
+    (snap_back if ELEMENTS[el].get('plane') == 'back' else snap)(src, dst)
     print(dst)
 
 

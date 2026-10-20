@@ -211,7 +211,7 @@ const chunkAt = (y) => { const c = g.lv.placed.find((q) => y <= q.y1 && y > q.y0
 // Bubbles are off (the bot does not shop).
 let run = null;
 function start(world, stage = 0, s = 1, opts = {}) {
-  seed = s;
+  seed = opts.order != null ? opts.order : s;   // (`order`: a seed of its own for the parts' order and the play's chances, the level still laid on `s`)
   const real = Math.random; Math.random = random;   // built on the bot's seed too: a tier's three parts in an order of their own (campMerge), a boss's arena
   try { if (opts.daily) __up.daily(s, stage); else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s); }   // a campaign level (its recipe; the map's column, see campAt) or a random run's
   finally { Math.random = real; }

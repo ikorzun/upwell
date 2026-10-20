@@ -2069,10 +2069,11 @@ const ui = {
   },
   worldDone() {   // its boss beaten, after its tapestry: on into the next world on the line, or word of it coming (a bonus world: back to its map)
     let nw = game.world + 1; while (nw < CAMPAIGN.length && gated(nw)) nw++;
-    const p = this.panel('result'), n = nw + 1, next = !gated(game.world) && n <= CAMP_OPEN, on = CAMPAIGN.slice(0, nw).filter((_, k) => !gated(k)).length + 1;   // on: its number on the line
-    p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'), el('div', 'label', tf(next ? 'worldNext' : 'soon', { n: on })));
+    const p = this.panel('result'), bonus = gated(game.world), n = nw + 1, next = !bonus && n <= CAMP_OPEN, on = CAMPAIGN.slice(0, nw).filter((_, k) => !gated(k)).length + 1;   // on: its number on the line
+    p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'));
+    if (!bonus) p.append(el('div', 'label', tf(next ? 'worldNext' : 'soon', { n: on })));   // (a bonus world's end says nothing of the line's next one)
     if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 30 + 1)), 'continue'));
-    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map()), 'map'));
+    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map(bonus ? game.world : undefined)), 'map'));
   },
   // The book of what has been met (the plan after the sandbox: an encyclopedia), one feed down under its headers (the user:
   // no tabs, bigger blocks, each in detail): upgrades and their pairs, candies, enemies, bosses, a card each with its picture,

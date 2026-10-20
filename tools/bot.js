@@ -140,6 +140,8 @@ function score(base, st) {
   if (!g.contact() && H.rigVy > 500) s -= 40;   // ending the move in a fall
   const key = g.lv.near(H.cy - 8 * tileOf(), H.cy).find((r) => r.key);   // a gate just over it (GATE): the way is under its keystone, as a player sees it glint
   if (key) s -= 6 * Math.abs(H.cx - (key.x0 + key.x1) / 2) / tileOf();
+  const helmet = (g.lv.fizz || []).find((p) => p.again && !p.taken && Math.abs(p.y - H.cy) < 8 * tileOf());   // the tutorial's helmet (CHUNKS.tutHelmet): the way on is through its blocks, as a player is told
+  if (helmet && !g.power(helmet.kind)) s -= 6 * Math.hypot(H.cx - helmet.x, H.cy - helmet.y) / tileOf();
   return s;
 }
 // A boss fight: a heart lost costs what it costs on a climb, a heart dealt pays a little less (no trading one for one), the boss

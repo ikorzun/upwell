@@ -707,10 +707,11 @@ const CAMPAIGN = [
 // spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Minecart. Its runes: crossed picks, a block of
 // ore, a turn (those tired of climbing began to dig sideways). The worm stays in the random run (user).
 { world: WORLDS[2], runes: 'LnY', lore: { en: 'Those tired of climbing\nbegan to dig sideways.', es: 'Los cansados de subir\nempezaron a cavar de lado.', pt: 'Os cansados de subir\ncomeçaram a cavar de lado.', ja: 'のぼるのに つかれた ものは\nよこへ ほりはじめた。' }, levels: [
-  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2, crumble: 3, bridge: 3, icewall: 1 }, intro: ['crumble', 'bridge'], enemies: ['climber'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,
+  { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutShop', 'tutEnemy', 'tutHelmet', 'tutMix', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
+    intro: [], enemies: ['crawler'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,   // the tutorial (owner): CHUNKS.tut*, in their order
+    news: { en: 'how to climb', es: 'cómo trepar', pt: 'como escalar', ja: 'のぼりかた' } },
+  { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: MINE, intro: ['crumble', 'bridge'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['fizz', 'fizz'], cage: true, seed: 4105,   // (1-1's surfaces first, it being the tutorial now)
     news: { en: "crumbling blocks: don't stand still", es: 'bloques que se caen: no te quedes quieto', pt: 'blocos que desmoronam: não fique parado', ja: 'くずれる ブロック: とまるな' } },
-  { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['fizz', 'fizz'], cage: true, seed: 4105,
-    news: { en: 'fizz candy', es: 'caramelo efervescente', pt: 'bala efervescente', ja: 'シュワシュワ キャンディ' } },
   { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler'], foes: 0.45, candy: ['fizz'], seed: 4106,
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.1, candy: ['fizz', 'smash'], shop: 0.4, seed: 4101,
@@ -799,8 +800,8 @@ const SYNERGIES = [
 const CAMP_ORDER = ['mine', 'cave', 'ice', 'tokyo', 'blocks', 'sky'];   // (mine: the Village's id; blocks: the concrete's place for now)
 CAMPAIGN.splice(0, CAMPAIGN.length, ...CAMP_ORDER.map((id) => CAMPAIGN.find((c) => c.world.id === id)));
 // In the campaign a card is offered only once what it is for has been met: after the level (its index) where that
-// came in: the shop at 1-9, the candies at 1-4, the spikes at 1-5 (the Village's peak).
-const CARD_FROM = { member: 8, long: 3, iron: 4 };
+// came in: the shop and the candies at 1-1 (the tutorial), the spikes at 1-5 (the Village's peak).
+const CARD_FROM = { member: 1, long: 1, iron: 4 };
 // One of three is offered after every level. `stack`: can be taken again. `run`: the random run's only (its hearts carry
 // over); `camp`: the campaign's only (it starts each level with all of them).
 const UPGRADES = [
@@ -1387,6 +1388,78 @@ const CHUNKS = {
     '...######...',
     '............',
     '............'] },
+  // The first level's lessons (owner, 2026-10-20: a jump, a double jump, the shop, the first enemy to jump on, the helmet that breaks blocks,
+  // one after another, simple to hard), laid in that order (a recipe's `script`); each asks for what it shows where it can (the digest §3:
+  // the board teaches, a word only at the moment of need): '1'-'3' its words (Game: the tutorial's hints), 'e' an enemy on the ledge under
+  // it, 'h' the helmet over the ledge under it (back while the hero is still under the blocks without it: no getting stuck)
+  tutJump: { d: 1, kind: 'tut', rows: [   // up by single jumps, coins to follow
+    '............',
+    '............',
+    '......====..',
+    '.......O....',
+    '............',
+    '..====......',
+    '...o........',
+    '............',
+    '............'] },
+  tutDouble: { d: 1, kind: 'tut', rows: [   // a plank too high for one jump straight over another, a line of coins up to it: a second jump in the air
+    '............',
+    '............',
+    '....====....',
+    '.....oo.....',
+    '............',
+    '.....OO.....',
+    '............',
+    '.....oo.....',
+    '............',
+    '.....1......',
+    '............',
+    '....====....',
+    '............',
+    '............'] },
+  tutShop: { d: 1, kind: 'tut', rows: [   // the shop's door on the way up, coins enough for its cheapest thing
+    '............',
+    '............',
+    'B..O........',
+    '#####.......',
+    '...2..o.....',
+    '............',
+    '.......####.'] },
+  tutEnemy: { d: 1, kind: 'tut', rows: [   // one crawler on the one wide ledge on the way
+    '............',
+    '............',
+    '.........###',
+    '............',
+    '............',
+    '.....e......',
+    '..########..',
+    '............',
+    '............'] },
+  tutHelmet: { d: 1, kind: 'tut', rows: [   // blocks wall to wall over a ledge with the helmet: no way on but through them
+    '............',
+    '############',
+    '............',
+    '............',
+    '............',
+    '.....h......',
+    '..3.####....',
+    '............',
+    '............'] },
+  tutMix: { d: 1, kind: 'tut', rows: [   // all of it at once: a double jump up onto a ledge with a crawler on it
+    '............',
+    '..o......o..',
+    '......e.....',
+    '...######...',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '============',
+    '............',
+    '............',
+    '............'] },
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
@@ -1400,7 +1473,7 @@ const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '('
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'h', '1', '2', '3']);
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -1506,7 +1579,7 @@ class Level {
     this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
-    this.fizz = []; this.bullets = [];
+    this.fizz = []; this.bullets = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
     if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows; a recipe's own)
       const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
       if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
@@ -1620,7 +1693,8 @@ class Level {
   addChunk() {
     const wd = this.world, rnd = this.rng, plan = this.last !== 'pocket' && this.plan.find((p) => !p.done && this.top < p.y);
     let id;
-    if (plan) { plan.done = true; if (this.top - this.endY > LEVEL.pocketEnd * this.tile) { id = 'pocket'; this.pocketKind = plan.kind; } }
+    if (this.script) { if (!this.script.length) { this.finish(); return; } id = this.script.shift(); }   // a level as written: its chunks in turn, then its end
+    if (!id && plan) { plan.done = true; if (this.top - this.endY > LEVEL.pocketEnd * this.tile) { id = 'pocket'; this.pocketKind = plan.kind; } }
     if (!id && this.intro.length && this.placed.length) id = this.intro.shift();   // after a first easy one, what the level is to show
     if (!id && this.gateAt != null && this.top < this.gateAt) { id = this.gateId; this.gateAt = null; }   // its gate (GATE), before a set piece due too: it must fit
     if (!id && this.setAt != null && this.top < this.setAt) { id = this.setId; this.setAt = null; }   // its set piece
@@ -1639,14 +1713,14 @@ class Level {
       id = pick(rnd, w);
     }
     const c = CHUNKS[id];
-    if (this.top - c.rows.length * this.tile < this.endY) { this.finish(); return; }
+    if (!this.script && this.top - c.rows.length * this.tile < this.endY) { this.finish(); return; }
     // the way round whose first foothold is the easier step up from the last one below
     const cost = (m) => (this.lastFeet ? stepCost(this.lastFeet, m ? flipRuns(c.first) : c.first) : 0), a = cost(false), b = cost(true);
     const mirror = a === b ? rnd() < 0.5 : b < a;
     this.lastFeet = mirror ? flipRuns(c.last) : c.last;
     // Laid right on the last one, a chunk may hang a solid ledge just over a ledge under it, with
     // no room to stand there and jump: then it goes a tile higher, up to three.
-    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles, this.arenas, this.icicles], lens = keep.map((a) => a.length);
+    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles, this.arenas, this.icicles, this.fizz, this.signs], lens = keep.map((a) => a.length);   // (a chunk laid again higher takes back all it laid)
     let lift = 0;
     for (;;) {
       this.place(c, this.top - lift * this.tile, mirror);
@@ -1809,6 +1883,11 @@ class Level {
       } else if (ch === 'S') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - 0.7 * R, Y(r) - 0.36 * R, cx + 0.7 * R, Y(r), { spring: true })); }
       else if (ch === 'o' || ch === 'O') this.coin(X(k) + t / 2, Y(r) - t / 2, ch === 'O' ? 5 : 1);
       else if (ch === 'Y') this.icicles.push({ x: X(k) + t / 2, y: Y(r + 1), state: 'hang', t: 0 });
+      else if (ch === 'e') {   // a crawler on the ledge under it (the tutorial's)
+        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
+        if (q) this.spawns.push({ type: 'crawler', x, y: q.y0 - 1.2 * R * ENEMY.crawler.size, ledge: q });
+      } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
+      else if (ch >= '1' && ch <= '9') this.signs.push({ id: +ch, x: X(k) + t / 2, y: Y(r) - t / 2 });   // a word of the tutorial's, said there
       else if (ch === 'A') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [] });
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
@@ -1821,7 +1900,7 @@ class Level {
     }
     // Some plain one-tile ledges are laid as planks to jump up through (not one with spikes on or
     // under it, or a spring on it; none in a pocket, by its door; none in a stash in the wall, a set piece, a gate or the last rest).
-    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set' && c.kind !== 'gate'; i++) {
+    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set' && c.kind !== 'gate' && c.kind !== 'tut'; i++) {
       const r = this.rects[i], over = (a) => a.x1 > r.x0 && a.x0 < r.x1;
       if (r.plank || r.spring || r.slick || r.crumble || r.crack || r.moss || r.stair || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
       if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;

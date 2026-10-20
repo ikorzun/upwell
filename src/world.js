@@ -255,6 +255,9 @@ const neonSign = (lv, k) => {
 const NEON_REACH = 3;   // in R: a sign lights with the hero this near it (as near as a crow lets it come, FOLK.flee)
 const neonIn = (lv, s) => s.y1 > lv.capY + 0.5 * lv.tile && s.y0 < lv.floor - 0.5 * lv.tile;   // a sign the hero can get to: some of it between the level's floor and its cap
 const neonSigns = (lv) => { const b = 11 * lv.tile, out = []; if (!Number.isFinite(lv.capY)) return out; for (let k = Math.floor(lv.capY / b) - 1; k * b < lv.floor; k++) { const s = neonSign(lv, k); if (s && neonIn(lv, s)) out.push(s); } return out; };   // (a level all laid: Game.buildLevel)
+// The Dark Forest's variants while the owner picks (each of the six on its sheet, research/variants/skazka-*-1-px.png, drawn by the game; window.__skV for the
+// gallery): which variant of each element, A = 0 to F = 5
+const SKAZKA_V = { slab: 0, plank: 0, mortar: 0, log: 0, fence: 0, izba: 0, stove: 0, far: 0, kolobok: 0 };
 const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plank): its frame's height over its floor and its pulley's over that, in tiles (its cable runs there)
 // The kits' things on the ledges, one a ledge at most, the same for the game and the renderer (as neonSign is): the Village's (a sakura, a scarecrow, a
 // little shrine whose stone lantern the hero lights, koinobori), the Cave's (a stone lantern, a pair of jizo the hero leaves flowers at), Mount Fuji's bell
@@ -406,6 +409,7 @@ const THEMES = {
 // Gum's looks in the same inks: the hero's colours (the first is the default) and the face.
 PALETTE.splice(0, PALETTE.length, ...['white', 'orange', 'blue', 'green', 'purple'].map((id) => ({ id, base: PAL[id], deep: PAL.black })));
 Object.assign(THEME, { ink: PAL.black, blush: PAL.red, rim: PAL.white });
+const KOLOBOK = { id: 'kolobok', base: PAL.orange, deep: PAL.black };   // the hero in the Dark Forest (owner): an orange bun, a white rim, his face by the variant
 
 // ── Content ──────────────────────────────────────────────────
 // Enemies are red squishies that crawl (none of them flies or jumps), each by its `move`: along
@@ -2401,11 +2405,11 @@ void main() {
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
 // black outline. Its patterns ride with the body (uOrigin is its centre in game pixels).
 const BODY_FS_PIX = GLSL + PIX_GLSL + `in vec3 vN; in float vAO; in float vA; in vec2 vUV; out vec4 o;
-uniform vec3 uBase, uDeep; uniform vec2 uOrigin;
+uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin;
 float sdRoundBox(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
 void main() {
   if (vA < 0.04) discard;
-  if (vA < 0.98) { o = vec4(PAL[0], 1.0); return; }   // the outline
+  if (vA < 0.98) { o = vec4(uLine, 1.0); return; }   // the outline (black; the Kolobok's white)
   ivec2 g = cell() - ivec2(uOrigin);
   vec3 n = normalize(vN);
   vec3 L = normalize(vec3(-0.42, -0.62, 0.66));
@@ -2428,6 +2432,20 @@ void main() { if (vSA * vSA * uShadowA <= bayer(cell())) discard; o = vec4(PAL[0
 // small glint low in each eye and a tongue in its smile.
 for (const d of DESIGNS) { d.face.eyeR = d.face.eyeR.map((v) => v * 1.45); d.face.mouthW *= 1.3; }
 const gumWriteFace = Renderer.prototype.writeFace;
+// The Kolobok's crust and face by the variant (the owner's sheet research/variants/skazka-kolobok-1-px.png; SKAZKA_V.kolobok while the owner picks): A flour
+// dusted on his top, B thick with flour, C a shine of glaze, D scared (brows up, his mouth an O), E rosy cheeks, F sly (lids half down, glazed). Over Gum's
+// face, in the hero's units (its radius 1, y down).
+const kolobokFace = (rd, b, dot, frame, put, f, fc) => {
+  const k = rd.kolobok, ink = THEME.ink, [ex, ey] = f.eye, [rx, ry] = f.eyeR, lx = fc.lx * 0.05, ly = fc.ly * 0.035, m = f.mouthW, base = KOLOBOK.base;
+  const speck = (n, r0, c) => { for (let i = 0; i < n; i++) { const a = -Math.PI * (0.2 + 0.6 * (((i * 0.6180339) % 1))), rr = r0 + (0.93 - r0) * (((i * 0.4142135) % 1)); dot(Math.cos(a) * rr, Math.sin(a) * rr, 0.055, 0.045, c); } };   // flour on his crown
+  if (k === 0) speck(10, 0.6, PAL.white);
+  if (k === 1) { speck(28, 0.5, PAL.white); speck(12, 0.62, PAL.gray); }
+  if (k === 2 || k === 5) { dot(-0.48, -0.5, 0.2, 0.11, PAL.white); dot(-0.62, -0.28, 0.07, 0.07, PAL.white); }   // a shine of glaze
+  if (k === 3) { for (let side = -1; side <= 1; side += 2) { const kk = 0.6 * side, w = rx * 1.4, h = ry * 0.45; frame(ex * side + lx + rx * 0.1 * side, ey + ly - ry * 2.3, w, w * kk, -h * kk, h); put(ink[0], ink[1], ink[2], 0); }   // brows up
+    dot(f.mouth[0], f.mouth[1] + m * 0.25, m * 0.75, m * 0.45, base); dot(f.mouth[0], f.mouth[1] + m * 0.3, m * 0.28, m * 0.34, ink); }   // his mouth an O
+  if (k === 4) for (let side = -1; side <= 1; side += 2) dot(side * (Math.abs(ex) + rx * 1.3), ey + ry * 1.9, 0.16, 0.11, PAL.red);   // rosy cheeks
+  if (k === 5) for (let side = -1; side <= 1; side += 2) { dot(ex * side + lx, ey + ly - ry * 0.55, rx * 1.25, ry * 0.62, base); dot(ex * side + lx, ey + ly - ry * 0.05, rx * 1.25, ry * 0.12, ink); }   // lids half down
+};
 Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   const s = b.s, f = s.face, fc = b.face, ink = THEME.ink, P0 = this.p0, P1 = this.p1, P2 = this.p2;
   const frame = (ux, uy, ax, ay, bx, by) => { mapPoint(s, X, Y, cx, cy, ux, uy, P0); mapPoint(s, X, Y, cx, cy, ux + ax, uy + ay, P1); mapPoint(s, X, Y, cx, cy, ux + bx, uy + by, P2); };
@@ -2453,6 +2471,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
     if (fc.surprise <= 0.35) { frame(f.mouth[0], f.mouth[1] + m * 0.42, m * 0.5, 0, 0, m * 0.36); put(THEME.blush[0], THEME.blush[1], THEME.blush[2], 0); }
   }
+  if (this.kolobok >= 0 && b === game.hero && b.color.id === save.color) kolobokFace(this, b, dot, frame, put, f, fc);   // (over Gum's face, under a helmet)
   if (b.helmet === 'moto') {   // a moto one over the face: a shell over the brow, red (white on a red hero), a stripe down its crown of
     // the other with a grey side, goggles across the eyes with blue lenses that look where the eyes look, a glint; the mouth shows under it
     const shell = b.color.base === PAL.red ? PAL.white : PAL.red, stripe = shell === PAL.red ? PAL.white : PAL.red;
@@ -3420,6 +3439,141 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const [u, v] of [[0.6, 0.62], [0.35, 0.78], [0.8, 0.85]]) barn(E(u), Y(v));
     lip(); return true;
   };
+  // The Dark Forest's ledges (the owner's sheets, research/variants/skazka-*-1-px.png): while the owner picks, all six variants of each in the game's own code
+  // (SKAZKA_V, or window.__skV from the gallery), the details at the sheets' size (64 sheet pixels a tile). A block is black forest earth held by roots (slab), a
+  // plank a gnarled dead branch (plank), a moving plank Baba Yaga's mortar (mortar), a crumbling block a rotten log (log). The sheets' red and yellow are purple
+  // or orange here (red is danger, yellow what you take), their white grey but for the edges you stand on; roots half dark (behind the ledge's face), a cobweb
+  // that is only decor dim (the grey one you hold is this world's moss). False for what keeps the common look.
+  const skazkaRect = (r) => {
+    const t = kitT, P = kitP, px = P / t, V = window.__skV || SKAZKA_V, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t;
+    const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
+    const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
+    const HALF = 1.5;   // roots: half of the way from the black (behind the ledge's face, DEPTH)
+    const root = (x, len, n, wd = 3, a = HALF) => {   // a root hanging from the underside at x, len tiles below it, winding, thinning, a side root off it
+      const k = Math.max(3, Math.round(len * 5)), ph = hsh(n) * 6.28, sw = (0.12 + 0.1 * hsh(n + 1)) * t;
+      let x0 = x, y0 = r.y1 - P;
+      for (let i = 1; i <= k; i++) { const q = i / k, x1 = snap(x + Math.sin(ph + q * 5.5) * sw * (0.4 + q)), y1 = snap(r.y1 + q * len * t); line(x0, y0, x1, y1, th.block, a, Math.max(1, Math.round(wd * (1 - 0.7 * q))));
+        if (i === Math.round(k * 0.45)) { const s = hsh(n + 2) < 0.5 ? -1 : 1; line(x1, y1, snap(x1 + s * 0.35 * t), snap(y1 + 0.3 * t), th.block, a, 1); line(snap(x1 + s * 0.35 * t), snap(y1 + 0.3 * t), snap(x1 + s * 0.45 * t), snap(y1 + 0.6 * t), th.block, a, 1); }
+        x0 = x1; y0 = y1; }
+    };
+    const grass = (x0, x1, n) => { for (let x = Math.min(x0, x1), i = 0; x < Math.max(x0, x1); x += snap((0.22 + 0.25 * hsh(n + i)) * t), i++) for (const [dx, h] of [[0, 0.2], [P, 0.12], [-P, 0.1]]) box(snap(x) + dx, r.y0 - snap((h + 0.08 * hsh(n + 20 + i)) * t), snap(x) + dx + P, r.y0, th.block, 1, 0, 10, 0); };   // tufts on its top
+    const toad = (x, s = 1, a = 1, y = r.y0) => {   // a toadstool: a grey stem, a purple cap (the sheets' red), grey spots; 0.55 tiles across, 0.6 tall
+      box(snap(x - 0.07 * t * s), snap(y - 0.36 * t * s), snap(x + 0.07 * t * s) + P, y, PAL.gray, a, 0, 10, 0);
+      box(snap(x - 0.28 * t * s), snap(y - 0.5 * t * s), snap(x + 0.28 * t * s), snap(y - 0.34 * t * s), PAL.purple, a, 0, 10, 0); box(snap(x - 0.2 * t * s), snap(y - 0.6 * t * s), snap(x + 0.2 * t * s), snap(y - 0.5 * t * s), PAL.purple, a, 0, 10, 0);
+      for (const [e, f] of [[-0.15, 0.45], [0.05, 0.52], [0.16, 0.42]]) box(snap(x + e * t * s), snap(y - f * t * s), snap(x + e * t * s) + P, snap(y - f * t * s) + P, PAL.gray, a, 0, 10, 0);
+    };
+    const bone = (x, y, ang = 0.35, s = 1) => {   // a grey bone 0.8 tiles long, its knobbed ends
+      const dx = Math.cos(ang) * 0.32 * t * s, dy = Math.sin(ang) * 0.32 * t * s; line(snap(x - dx), snap(y - dy), snap(x + dx), snap(y + dy), PAL.gray, 1, 3);
+      for (const e of [-1, 1]) for (const f of [-1, 1]) disc(snap(x + e * dx - f * dy * 0.3), snap(y + e * dy + f * dx * 0.3), 0.08 * t * s + P / 2, PAL.gray, 1);
+    };
+    const skull = (x, y, s = 1) => {   // a grey skull 0.95 tiles across, black sockets, a nose, teeth
+      disc(x, y, 0.42 * t * s, PAL.gray, 1); box(snap(x - 0.25 * t * s), snap(y + 0.18 * t * s), snap(x + 0.25 * t * s), snap(y + 0.46 * t * s), PAL.gray, 1, 0, 10, 0);
+      for (const e of [-1, 1]) disc(snap(x + e * 0.17 * t * s), snap(y + 0.04 * t * s), 0.12 * t * s, PAL.black, 1);
+      box(snap(x) - P, snap(y + 0.18 * t * s), snap(x) + P, snap(y + 0.26 * t * s), PAL.black, 1, 0, 10, 0); for (const e of [-0.13, 0, 0.13]) box(snap(x + e * t * s), snap(y + 0.34 * t * s), snap(x + e * t * s) + P, snap(y + 0.46 * t * s), PAL.black, 1, 0, 10, 0);
+    };
+    const web = (x, y, dx, s = 1) => {   // a cobweb in the corner under it, dim: three threads out of the corner, two sagging rings across them, a strand hanging
+      const L = 1.4 * t * s, at = (a, f) => [snap(x + dx * Math.cos(a) * L * f), snap(y + Math.sin(a) * L * f)];
+      for (const a of [0.12, 0.75, 1.4]) { const [ex, ey] = at(a, 1); line(x, y, ex, ey, PAL.gray, DIM); }
+      for (const f of [0.45, 0.85]) { const p0 = at(0.12, f), p1 = at(0.75, f * 0.86), p2 = at(1.4, f); line(p0[0], p0[1], p1[0], p1[1], PAL.gray, DIM); line(p1[0], p1[1], p2[0], p2[1], PAL.gray, DIM); }
+      const [hx, hy] = at(0.75, 0.86); line(hx, hy, hx, snap(hy + 0.5 * L), PAL.gray, DIM);
+    };
+    if (r.crumble) {   // a rotten log (log): orange wood, its bark in dark lines, its cut end in rings, holes, moss, toadstools; its pieces shake as it gives
+      const k = V.log, u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, cut = k === 3 || k === 5 ? 0.6 : k === 0 ? 0.66 : -1;   // where it is split, of its length from the wall
+      const parts = cut > 0 ? [[0, cut - 0.03], [cut + 0.03, 1]] : [[0, 1]];
+      parts.forEach(([q0, q1], i) => {
+        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(Math.min(W(q0 * w / t), W(q1 * w / t))) + ox, x1 = snap(Math.max(W(q0 * w / t), W(q1 * w / t))) + ox;
+        box(x0, r.y0 + 2 * P, x1, r.y1 - 2 * P, th.crumble, a, 0, 10, 0); box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y1, th.crumble, a, 0, 10, 0); box(x0 + P, r.y0 + P, x1 - P, r.y1 - P, th.crumble, a, 0, 10, 0);   // a piece, its ends round
+        box(x0 + 2 * P, Y(ht * 0.62), x1 - 2 * P, r.y1 - P, th.crumble, a, 0, 10, k === 4 ? 4 : 1);   // its underside darker
+        for (let x = x0 + snap(0.2 * t), j = 0; x < x1 - snap(0.3 * t); j++) { const ww = snap((0.25 + 0.4 * hsh(j + i * 50)) * t), yy = Y(ht * (0.3 + 0.35 * hsh(j + 9 + i * 50))); box(x, yy, Math.min(x1 - 2 * P, x + ww), yy + P, PAL.black, a, 0, 10, 0); x += ww + snap((0.3 + 0.4 * hsh(j + 21)) * t); }   // its bark
+        box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y0 + 2.5, th.lip, a, 1.25);
+        if (k === 5 && i === 0) for (let y = r.y0 + 2 * P, j = 0; y < r.y1 - P; y += 2 * P, j++) box(x1 - (j % 2 ? 3 : 1) * P, y, x1, y + 2 * P, PAL.black, a, 0, 10, 0);   // its jagged ends (F)
+      });
+      if (k !== 3 && k !== 5) { const ex = E(0.3), ey = Y(ht / 2); F(ex, ey, 0.32 * t, 0, 0, 0.42 * ht * t, PAL.orange, a, 0); F(ex, ey, 0.32 * t, 0, 0, 0.42 * ht * t, PAL.black, a, 4); F(ex, ey, 0.17 * t, 0, 0, 0.22 * ht * t, PAL.black, a, 4); }   // its cut end, its rings
+      if (k === 0) for (let y = r.y0 + 3 * P; y < r.y1 - P; y += 2 * P) { const cx = W(cut * w / t); box(cx - P, y, cx + P, y + P, PAL.black, a, 0, 10, 0); }   // a crack across it (A)
+      const holes = k === 1 ? 7 : k === 4 ? 0 : 3;
+      for (let i = 0; i < holes; i++) { const hx = r.x0 + (0.12 + 0.6 * hsh(i + 3)) * w, hy = r.y0 + (0.4 + 0.25 * hsh(i + 13)) * (r.y1 - r.y0); disc(snap(hx), snap(hy), (k === 1 ? 0.09 : 0.12) * t, PAL.black, a); }   // woodworm holes
+      const moss = (x, rw) => { F(x, r.y0 + P, rw * t, 0, 0, 0.18 * t, PAL.green, a, 0); for (const e of [-0.6, 0, 0.5]) box(snap(x + e * rw * t), r.y0, snap(x + e * rw * t) + P, r.y0 + snap((0.3 + 0.2 * hsh(Math.round(e * 9) + 60)) * t), PAL.green, a, 0, 10, 0); };   // moss, strands off it
+      if (k !== 1) moss(W(0.3), 0.4); if (k === 0 || k === 2 || k === 4) moss(E(0.7), 0.35); if (k === 1) moss(E(0.6), 0.35); if (k === 2) moss(W(1.6), 0.45);
+      if (k === 0) toad(W(0.35), 1, a); if (k === 2 || k === 3 || k === 5) { toad(W(0.38), 1.1, a); toad(W(0.85), 0.75, a); toad(W(0.1), 0.6, a); }
+      if (k === 1) { const bx0 = E(0.9), by0 = Y(0.5); for (const e of [-1, 0, 1]) line(snap(bx0 + e * 0.12 * t), by0, snap(bx0 + e * 0.17 * t), by0 + snap(0.2 * t), PAL.black, a, 1);   // a beetle on its face (B): its legs,
+        F(bx0, by0, 0.2 * t, 0, 0, 0.13 * t, PAL.blue, a, 0); box(bx0 - P / 2, by0 - snap(0.13 * t), bx0 + P / 2, by0 + snap(0.13 * t), PAL.black, a, 0, 10, 0); box(snap(bx0 - 0.1 * t), by0 - snap(0.07 * t), snap(bx0 - 0.1 * t) + P, by0 - snap(0.07 * t) + P, PAL.gray, a, 0, 10, 0); }   // its shell, a glint
+      if (k === 2) web(E(0), r.y1, -d, 0.75);   // a dim cobweb under its free end (C)
+      if (k === 3) for (let i = 0; i < 4; i++) { const fy = ((T * 0.6 + i / 4) % 1), cx = W(cut * w / t); box(snap(cx + (i - 1.5) * 0.14 * t), snap(r.y1 + fy * 1.6 * t), snap(cx + (i - 1.5) * 0.14 * t) + 2 * P, snap(r.y1 + fy * 1.6 * t) + 2 * P, th.crumble, a * (1 - 0.6 * fy), 0, 10, 0); }   // chips falling from the gap (D)
+      if (k === 4) { const sx = E(0.75), sy = r.y0; box(sx - snap(0.3 * t), sy - snap(0.12 * t), sx + snap(0.25 * t), sy, PAL.orange, a, 0, 10, 0); for (const e of [0.12, 0.22]) box(sx + snap(e * t), sy - snap(0.34 * t), sx + snap(e * t) + P, sy - snap(0.12 * t), PAL.orange, a, 0, 10, 0);   // a snail (E): its body, its horns,
+        disc(sx - snap(0.1 * t), sy - snap(0.3 * t), 0.24 * t, PAL.gray, a); F(sx - snap(0.1 * t), sy - snap(0.3 * t), 0.24 * t, 0, 0, 0.24 * t, PAL.black, a, 4); disc(sx - snap(0.1 * t), sy - snap(0.3 * t), 0.08 * t, PAL.black, a); }   // its shell
+      return true;
+    }
+    if (r.plank && r.move) {   // Baba Yaga's mortar (mortar), the rim you stand on: A and B a wide bowl with its pestle, C and D a tall tub sweeping a broom behind it, E and F one on a cloud of smoke
+      const k = V.mortar, ahead = r.move.v < 0 ? -1 : 1, fr = ahead > 0 ? r.x1 : r.x0, bk = ahead > 0 ? r.x0 : r.x1, A = (u) => snap(fr - ahead * u * t), B = (u) => snap(bk + ahead * u * t);
+      const cx = snap((r.x0 + r.x1) / 2), hw = w / 2 / t, c = th.mover, wide = k === 0 || k === 1 || k === 5;
+      const row = (v0, v1, i0, tn = 0) => box(snap(cx - (hw - i0) * t), Y(v0), snap(cx + (hw - i0) * t), Y(v1), c, 1, 0, 10, tn);   // a band of it, i0 in from each end
+      const shade = (v0, v1, i0) => box(snap(cx + (hw - i0) * t * 0.35), Y(v0), snap(cx + (hw - i0) * t), Y(v1), c, 1, 0, 10, 1);   // its right side in black dots
+      if (k >= 4) { F(cx, Y(2.0), (hw + 0.7) * t, 0, 0, 0.7 * t, PAL.gray, 0.6, 1); for (const [dx, dv, rr] of [[-hw - 0.4, 1.75, 0.35], [hw + 0.5, 1.85, 0.3], [-0.3, 2.5, 0.4]]) F(snap(cx + dx * t), Y(dv), rr * t, 0, 0, rr * 0.7 * t, PAL.gray, 0.45, 1); }   // the smoke it rides on (E, F)
+      const bands = wide ? [[0, 0.3, 0], [0.3, 1.0, 0.12], [1.0, 1.5, 0.45], [1.5, 1.8, 0.8]] : [[0, 0.28, 0], [0.28, 1.0, 0.22], [1.0, k === 3 ? 1.75 : 1.5, 0.32], [k === 3 ? 1.75 : 1.5, k === 3 ? 2.0 : 1.75, 0.5]];
+      for (const [v0, v1, i0] of bands) { row(v0, v1, i0); if (v0 > 0) shade(v0, v1, i0); }
+      for (const [v0] of bands.slice(1)) box(snap(cx - (hw - 0.1) * t), Y(v0), snap(cx + (hw - 0.1) * t), Y(v0) + P, PAL.black, 1, 0, 10, 0);   // its hoops
+      if (!wide) for (let x = cx - (hw - 0.6) * t; x < cx + (hw - 0.5) * t; x += 0.5 * t) box(snap(x), Y(0.3), snap(x) + P, Y(bands[2][1]), PAL.black, 1, 0, 10, 0);   // its staves
+      if (k === 1) for (const [u, v0] of [[0.7, 0.4], [2.0, 0.6]]) for (let i = 0; i < 5; i++) box(snap(r.x0 + (u + (i % 2) * 0.07) * t), Y(v0 + i * 0.12), snap(r.x0 + (u + (i % 2) * 0.07) * t) + P, Y(v0 + i * 0.12 + 0.12), PAL.black, 1, 0, 10, 0);   // its cracks (B)
+      if (k === 3) { const rx = cx, ry = Y(1.2); F(rx, ry, 0.28 * t, 0, 0, 0.28 * t, PAL.black, 1, 4); box(rx - P, ry - snap(0.3 * t), rx + P, ry + snap(0.3 * t), PAL.black, 1, 0, 10, 0); box(rx - snap(0.3 * t), ry - P, rx + snap(0.3 * t), ry + P, PAL.black, 1, 0, 10, 0); }   // a rune carved in it (D)
+      if (k === 0 || k === 1) { const tip = k === 1 ? -1.75 : -1.45; line(B(0.75), Y(0.2), B(0.35), Y(tip), c, 1, 5); disc(B(0.35), Y(tip), 0.16 * t, c, 1); }   // the pestle stuck in it, its round head
+      if (k === 2 || k === 3) {   // the broom behind it, bound in black, sparks off it
+        line(B(0.4), Y(0.6), B(-0.95), Y(0.5), c, 1, 3); box(Math.min(B(-0.85), B(-1.02)), Y(0.36), Math.max(B(-0.85), B(-1.02)), Y(0.64), PAL.black, 1, 0, 10, 0);
+        for (let i = 0; i < 7; i++) line(B(-1.0), Y(0.42 + 0.025 * i), B(-2.0 - 0.12 * (i % 2)), Y(0.02 + 0.16 * i), c, 1, i % 2 ? 1 : 2);
+        for (let i = 0; i < 7; i++) if (Math.sin(T * 7 + i * 1.7) > -0.3) { const sx = B(-1.2 - 0.3 * (i % 3)), sy = Y(0.9 + 0.2 * i); box(sx, sy, sx + 2 * P, sy + 2 * P, PAL.purple, 1, 0, 10, 0); }
+      }
+      if (k === 4 || k === 5) { const lx = B(0.4); F(lx, Y(-0.75), 0.45 * t, 0, 0, 0.45 * t, PAL.orange, 0.4, 1); box(lx - snap(0.09 * t), Y(-0.55), lx + snap(0.09 * t), r.y0, PAL.gray, 1, 0, 10, 0); box(lx - P, Y(-0.8), lx + P, Y(-0.55), PAL.orange, 1, 0, 10, 0); box(lx - P / 2, Y(-0.74), lx + P / 2, Y(-0.6), PAL.yellow, 1, 0, 10, 0); vlamps.push([lx, Y(-0.7)]); }   // a lit candle on its rim
+      if (k === 4) { const hx = B(0.95); box(hx, Y(0.3), hx + P, Y(0.6), PAL.gray, 1, 0, 10, 0); for (const [dx, cc] of [[-0.1, PAL.green], [-0.04, PAL.green], [0.03, PAL.orange], [0.09, PAL.green]]) box(hx + snap(dx * t), Y(0.6), hx + snap(dx * t) + P, Y(1.15), cc, 1, 0, 10, 0); box(hx - snap(0.12 * t), Y(0.6), hx + snap(0.12 * t), Y(0.66), PAL.gray, 1, 0, 10, 0); }   // herbs hung on it
+      if (k === 5) { const kx = A(0.2), ky = Y(-0.24);   // a black cat peeking over the rim, a grey rim of light round it so it reads on the night
+        disc(kx, ky, 0.3 * t, PAL.gray, 1); for (const e of [-1, 1]) F(snap(kx + e * 0.17 * t), ky - snap(0.3 * t), 0.11 * t, 0, 0, 0.13 * t, PAL.gray, 1, 6, 0.11 * t, 0.13 * t, 0.22 * t);
+        disc(kx, ky, 0.27 * t, PAL.black, 1); for (const e of [-1, 1]) F(snap(kx + e * 0.17 * t), ky - snap(0.28 * t), 0.08 * t, 0, 0, 0.1 * t, PAL.black, 1, 6, 0.08 * t, 0.1 * t, 0.16 * t);
+        for (const e of [-1, 1]) box(snap(kx + e * 0.1 * t) - P, ky - snap(0.05 * t), snap(kx + e * 0.1 * t) + P, ky, PAL.orange, 1, 0, 10, 0); }   // its eyes (the sheet's yellow)
+      lip(); return true;
+    }
+    if (r.plank) {   // a gnarled dead branch (plank): bark, its free end in twigs; a cobweb, a knot, herbs, a bast shoe, a bone on a ribbon by the variant
+      if (r.bouncy) return false;
+      const k = V.plank, c = th.plank;
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, r.y1 - 2 * P, r.x1, r.y1, c, 1, 0, 10, 4);   // its wood, its underside in shade
+      for (let x = r.x0 + snap(0.3 * t), j = 0; x < r.x1 - snap(0.4 * t); j++) { const ww = snap((0.2 + 0.3 * hsh(j)) * t); box(x, Y(ht * 0.45), x + ww, Y(ht * 0.45) + P, PAL.black, 1, 0, 10, 0); x += ww + snap((0.35 + 0.5 * hsh(j + 7)) * t); }   // its bark
+      be(0, ht * 0.55, 0.3, ht, PAL.black);   // its free end thinning
+      const twig = (u, v, du, dv, wd = 2) => line(E(u), Y(v), E(u + du), Y(v + dv), c, 1, wd);   // twigs off its free end
+      if (k !== 0) { twig(0.25, 0.05, -0.6, -0.8, 2); twig(-0.15, -0.55, -0.35, -0.3, 1); twig(-0.15, -0.55, 0.1, -0.4, 1); twig(0.55, 0, -0.15, -0.5, 1); }
+      if (k === 2) { twig(0.15, ht, -0.8, 0.25, 2); twig(-0.5, ht + 0.22, -0.3, -0.2, 1); for (const [u, v] of [[-0.42, -0.95], [-0.82, 0.05], [-0.62, ht + 0.3]]) F(E(u), Y(v), 0.1 * t, 0, 0, 0.16 * t, PAL.green, 1, 0); }   // a fork (C), its last leaves
+      if (k === 1 && on) { line(W(0), Y(ht + 1.1), W(1.0), Y(ht * 0.5), c, 1, 4); line(W(0.3), Y(ht + 0.75), W(0.15), Y(ht + 1.25), c, 1, 2); }   // it rises out of the wall (B)
+      if (k === 5 && on) { line(W(0.12), Y(-1.4), W(0.3), Y(ht * 0.5), c, 1, 4); line(W(0.12), Y(-1.4), W(0.4), Y(-1.75), c, 1, 2);   // it hooks up the wall (F), purple sparks over it
+        for (let i = 0; i < 5; i++) if (Math.sin(T * 5 + i * 2.1) > -0.2) { const sx = W(0.45 + 0.18 * i), sy = Y(-1.3 - 0.25 * (i % 3)); box(sx, sy, sx + 2 * P, sy + 2 * P, PAL.purple, 1, 0, 10, 0); } }
+      if (k === 0 || k === 3) web(W(0), r.y1, d, 1.0); if (k === 5) web(E(0.05), r.y1, -d, 0.8);   // dim cobwebs
+      if (k === 3) { const kx = W(0.5), ky = Y(ht / 2); disc(kx, ky, 0.36 * t, c, 1); F(kx, ky, 0.36 * t, 0, 0, 0.36 * t, PAL.black, 1, 4); F(kx, ky, 0.2 * t, 0, 0, 0.2 * t, PAL.black, 1, 4); disc(kx, ky, 0.06 * t, PAL.black, 1); }   // a knot in it (D), its rings
+      if (k === 0 || k === 4 || k === 5) for (const [u, v, rw] of [[0.3, 0.02, 0.22], [0.75, ht + 0.02, 0.18]]) { const fx = W(u), fy = Y(v); F(fx, fy, rw * t, 0, 0, 0.09 * t, PAL.orange, 1, 0); }   // fungus at its wall end
+      const hang = (u, len) => { const hx = E(u); box(hx, r.y1, hx + P, Y(ht + len), PAL.gray, 1, 0, 10, 0); return hx; };   // a string hanging off it
+      if (k === 2) { const hx = hang(0.65, 0.35); for (const [dx, cc] of [[-0.18, PAL.green], [-0.1, PAL.green], [-0.02, PAL.orange], [0.06, PAL.green], [0.14, PAL.green]]) box(hx + snap(dx * t), Y(ht + 0.4), hx + snap(dx * t) + P, Y(ht + 1.15 - 0.15 * Math.abs(dx) * 4), cc, 1, 0, 10, 0);   // a bundle of herbs
+        box(hx - snap(0.2 * t), Y(ht + 0.35), hx + snap(0.18 * t), Y(ht + 0.45), PAL.gray, 1, 0, 10, 0); for (const [dx, dy] of [[-0.14, 0.75], [0.1, 0.62], [-0.02, 0.95]]) box(hx + snap(dx * t), Y(ht + dy), hx + snap(dx * t) + 2 * P, Y(ht + dy) + 2 * P, PAL.orange, 1, 0, 10, 0); }   // its flowers (the sheet's yellow)
+      if (k === 3) { const hx = hang(0.35, 0.3); box(hx - snap(0.22 * t), Y(ht + 0.3), hx + snap(0.25 * t), Y(ht + 1.05), PAL.orange, 1, 0, 10, 4); box(hx - snap(0.22 * t), Y(ht + 0.3), hx + snap(0.25 * t), Y(ht + 0.4), PAL.orange, 1, 0, 10, 0); box(hx - snap(0.15 * t), Y(ht + 1.05), hx + snap(0.18 * t), Y(ht + 1.12), PAL.orange, 1, 0, 10, 0); }   // a bast shoe (lapot), woven
+      if (k === 4) { const hx = E(0.45); box(hx - P, r.y0 - P, hx + 3 * P, r.y1 + P, PAL.orange, 1, 0, 10, 0); box(hx, r.y1, hx + 2 * P, Y(ht + 0.5), PAL.orange, 1, 0, 10, 0); box(hx + 2 * P, r.y1, hx + 4 * P, Y(ht + 0.35), PAL.orange, 1, 0, 10, 0); bone(hx + P, Y(ht + 0.9), Math.PI / 2, 1); }   // a ribbon tied on, a bone hanging (E)
+      lip(); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
+    {   // black forest earth held by roots (slab): dotted, its underside in shade, roots hanging under it; a bone, a skull, a cobweb, toadstools, a crack and bracket fungus by the variant
+      const k = V.slab;
+      box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, k === 3 ? 1 : 2); box(r.x0, Y(Math.max(0.35, ht - 0.3)), r.x1, r.y1, th.block, 1, 0, 10, 4);
+      const roots = (us, len, wd) => us.forEach((u, i) => root(W(u), len * (0.65 + 0.5 * hsh(i + 70)), 100 + i * 17, wd));
+      if (k === 0) { roots([0.5, 1.3, 2.3, 3.3].filter((u) => u < w / t - 0.3), 1.6, 3); bone(W(1.5), Y(ht - 0.2)); toad(E(0.45)); grass(W(0.15), W(1.0), 1); grass(E(1.0), E(0.15), 2); }
+      else if (k === 1) { for (let x = r.x0 + snap(0.3 * t), i = 0; x < r.x1 - P; i++) { const ww = snap((0.25 + 0.3 * hsh(i)) * t); box(x, r.y1 - snap(0.18 * t), Math.min(r.x1, x + ww), r.y1, PAL.black, 1, 0, 10, 0); x += ww + snap((0.4 + 0.5 * hsh(i + 30)) * t); }   // its underside lumpy
+        if (on) for (const [dx, len] of [[0.1, 2.0], [0.3, 1.4]]) root(W(dx), len, 300 + Math.round(dx * 10), 2);   // a vine down the wall
+        web(W(0.45), r.y1, d, 1.0); skull(E(1.35), Y(ht + 0.05)); for (const u of [0.6, 2.2].filter((q) => q < w / t - 0.3)) root(E(u), 0.6, 400 + Math.round(u * 10), 2); }
+      else if (k === 2) { roots([0.25, 0.6, 1.0, 1.4, 1.85, 2.3, 2.75, 3.2, 3.6].filter((u) => u < w / t - 0.2), 0.9, 2); web(E(0), r.y1, -d, 0.75); toad(E(0.4)); grass(E(1.0), E(0.1), 3); }
+      else if (k === 3) { roots([0.4, 1.3, 2.4].filter((u) => u < w / t - 0.3), 2.2, 4); line(W(0.5), Y(ht + 0.45), W(2.3), Y(ht + 1.25), th.block, HALF, 3); line(W(2.6), Y(ht + 0.3), W(1.5), Y(ht + 1.4), th.block, HALF, 2); bone(W(1.6), Y(ht + 0.7), -0.6);
+        const fx = E(0.4); box(fx, r.y0 - snap(0.4 * t), fx + P, r.y0, PAL.green, 1, 0, 10, 0); F(fx + P / 2, r.y0 - snap(0.45 * t), 0.18 * t, 0, 0, 0.11 * t, PAL.orange, 1, 0); box(fx, r.y0 - snap(0.5 * t), fx + P, r.y0 - snap(0.42 * t), PAL.black, 1, 0, 10, 0); grass(W(0.2), W(1.1), 4); grass(E(1.2), E(0.7), 5); }   // a flower (the sheet's yellow)
+      else if (k === 4) { box(r.x0, Y(ht * 0.5), r.x1, Y(ht * 0.5) + P, PAL.black, 1, 0, 10, 0); roots([0.3, 0.85].filter((u) => u < w / t - 0.3), 1.6, 3); const mx = snap((r.x0 + r.x1) / 2); web(mx, r.y1, d, 0.6); root(mx, 1.0, 500, 1);
+        for (const [v, rw] of [[0.12, 0.42], [0.42, 0.34], [0.72, 0.26]]) F(E(0) + d * snap(0.05 * t), Y(v + 0.08), rw * t, 0, 0, 0.1 * t, PAL.orange, 1, 0);   // bracket fungus off its free end
+        for (let i = 0; i < 5; i++) { const q = (T * 0.4 + i / 5) % 1; box(snap(E(-0.15 - 0.12 * (i % 3))), snap(r.y1 + q * 1.8 * t), snap(E(-0.15 - 0.12 * (i % 3))) + P, snap(r.y1 + q * 1.8 * t) + P, PAL.orange, 1 - 0.7 * q, 0, 10, 0); } }   // its spores falling
+      else if (k === 5) { for (const u of [0.4, 1.0, 1.7, 2.6, 3.3].filter((q) => q < w / t - 0.2)) root(W(u), 0.45, 600 + Math.round(u * 10), 3);   // short roots like drips
+        be(0.15, ht - 0.1, 1.0, ht, PAL.blue); for (let i = 0; i < 3; i++) { const q = (T * 0.7 + i / 3) % 1, dx = E(0.3 + 0.25 * i); box(dx, snap(r.y1 + q * 1.2 * t), dx + P, snap(r.y1 + q * 1.2 * t) + 2 * P, PAL.blue, 1 - q, 0, 10, 0); }   // swamp water seeping out of it, dripping
+        bone(W(0.9), r.y0 - snap(0.1 * t), 0.15, 0.9); }   // a bone lying on it
+      lip(); return true;
+    }
+  };
   // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
   // beam, a block is a concrete slab cut square with its panels' seams, a striped cap on a free end, a knee brace under it at a wall
   // and windows in a thick one.
@@ -3617,7 +3771,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea || th.skazka) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
@@ -3752,6 +3906,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   let sig = '';
   for (const b of list) if (b !== hero || !heroOff) sig += b.id + ',';
   this.idxDirty = sig !== this.idxSig;
+  this.kolobok = th.skazka ? (window.__skV || SKAZKA_V).kolobok : -1;   // the Dark Forest's hero a Kolobok (see writeFace)
   for (const b of list) if (b !== hero || !heroOff) this.buildBody(b, alpha);
   const front = this.nf;
   fx.write(this);
@@ -3872,7 +4027,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const r of this.ranges) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
-    gl.uniform3fv(pb.u.uBase, r.b.color.base); gl.uniform3fv(pb.u.uDeep, r.b.color.deep); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P));
+    const kb = this.kolobok >= 0 && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
+    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P));
     {   // the target always has a stencil
       // Fill by winding number (as in Gum), so a crushed outline that turns back on
       // itself neither folds nor loses lobes.

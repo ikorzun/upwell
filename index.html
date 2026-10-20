@@ -212,16 +212,6 @@
     box-sizing: border-box; background: var(--dim); pointer-events: auto; text-align: center;
   }
   .panel.on { display: flex; }
-  /* Every menu and every screen between levels on liquid glass (owner; see src/glass.js): the level frozen and blurred
-     (#freeze) under one sheet of tinted glass over the whole column, the buttons and words lying on it in their own lines;
-     what lay over the level (HUD, hints, keys) goes under it with the level, as the 7/8 ink hid it */
-  #freeze, #glass { position: absolute; top: 0; left: 0; pointer-events: none; }
-  #glass { right: 0; bottom: 0; }
-  #glass i { position: absolute; display: block; z-index: 1; border-radius: 2px; }   /* the sheet's stand-in; z over the canvas (liquidGL bends only what is under it); 2 px corners: with square ones liquidGL draws the glass at half strength */
-  body.glassy :is(#menu, #pause, #result, #cards, #map) { background: none; }
-  body.glassy .panel :is(.big.alt, .chip, .card) { background: transparent; }
-  body.glassy .panel .head { filter: drop-shadow(0 3px 0 var(--ink)) drop-shadow(0 -2px 0 var(--ink)); }
-  body.glassy :is(#hud, #bossHp, #combo, #labels, #floorHint, #toast, #pad) { visibility: hidden; }
   #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
@@ -317,7 +307,5 @@
 <script src="src/gum.js"></script>
 <script src="src/world.js"></script>
 <script src="src/game.js"></script>
-<script src="src/vendor/liquidGL.js"></script>   <!-- liquidGL 3.0.0 (MIT, src/vendor/liquidGL-LICENSE.txt): the glass of the menus -->
-<script src="src/glass.js"></script>
 </body>
 </html>

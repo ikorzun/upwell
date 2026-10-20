@@ -291,6 +291,9 @@ const kitThing = (lv, r) => {
     else if (k === 2 && steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)) out = { kind: 'gull' };
     else if (k === 3 && steady(2.8) && room(0, 2.7, 2.6)) out = { kind: 'octopus' };
     else if (k === 4 && steady(3) && room(0, 3, 4.9)) out = { kind: 'flags' };
+  } else if (th.skazka) {   // the Dark Forest's: Baba Yaga's fence (its skulls' eyes the dark's lights) by a hash of its height, on two ledges in six with room
+    const k = Math.floor(((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) / 4294967296) * 6);
+    if ((k === 0 || k === 3) && steady(3.2) && room(0, 3.2, 3.5)) out = { kind: 'fence' };
   } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t) out = { kind: 'bell', x: wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t, y: r.y1 + 0.4 * t };
   return (r.kit = out);
 };
@@ -2547,6 +2550,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (th.fuji && kind !== 'exit') { hut(d, kind); return; }   // Mount Fuji's (see hut)
     if (th.village && kind !== 'exit') { farmhouse(d, kind); return; }   // the Village's (see farmhouse)
     if (th.sea && kind !== 'exit') { funaya(d, kind); return; }   // the Sea's (see funaya)
+    if (th.skazka && kind !== 'exit') { (kind === 'shop' ? izba : pech)(d); return; }   // the Dark Forest's (see izba, pech)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -2724,6 +2728,82 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = i & 1 ? INK.white : c;
       if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
     }
+  };
+  // The Dark Forest's doors (the owner's sheets research/variants/skazka-izba-1-px.png and skazka-stove-1-px.png; all six variants of each in the game's own
+  // code while the owner picks: SKAZKA_V.izba and SKAZKA_V.stove, or window.__skV): the shop is Baba Yaga's hut on chicken legs, its floor at the ledge, its legs
+  // down behind the ledge (half dark), a red cloth in its door; the stash a Russian stove, its mouth the door, glowing purple inside, embers. What is inside bobs
+  // in the doorway; sparks rise past it; a glow breathes round it. The sheets' white is grey here, their red orange but for the shop's own.
+  const skDoorAt = (d) => {   // the frame both draw in: tiles out from the wall, up from the ledge
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, y1 = d.y1;
+    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
+    const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
+    const ln = (u0, v0, u1, v1, ink, wp = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), ink, a, wp);
+    return { P, t, sn, X, Y, bx, ln, px: P / t, dir, y1 };
+  };
+  const skInside = (d, kind, c, dx, dw, top) => {   // what is inside, bobbing in the doorway; sparks rising past it
+    const { P, sn, Y, y1 } = skDoorAt(d), bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
+    if (kind === 'shop') { const ry = Y(0.8); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
+    else { const ry = Y(0.55); for (let i = 0; i < 3; i++) disc(dx + (i - 1) * rr * 0.5, ry - (i === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
+    for (let i = 0; i < 6; i++) {
+      const u = (T * 0.45 + i / 6) % 1, q = ((Math.sin(i * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + q * 2 * dw), spy = y1 - u * (top * lv.tile + 2.5 * R);
+      const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = i & 1 ? INK.white : c;
+      if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
+    }
+  };
+  const izba = (d) => {   // Baba Yaga's hut on chicken legs (the shop): A a skull on its ridge, B a horse-head ridge and a skull on the gable, C a chimney and an antler
+    // branch, D a horned skull over the gable and a lantern, E squat with a chimney, F leaning, a skull on a stick
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__skV || SKAZKA_V).izba, c = PAL.red, Wd = k === 4 ? 3.6 : 3.3, eave = k === 4 ? 2.2 : 2.5, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t), lean = k === 5 ? 0.35 : 0;
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    for (const [u, s] of [[0.9, 1], [2.5, -1]]) {   // its chicken legs, down behind the ledge (half dark): a thigh, a shin, three toes and a spur
+      const HALF = 1.5; ln(u, 0, u + 0.35 * s, -0.8, PAL.gray, 4, HALF); ln(u + 0.35 * s, -0.8, u + 0.1 * s, -1.6, PAL.gray, 3, HALF);
+      for (const e of [-0.4, 0, 0.4]) ln(u + 0.1 * s, -1.6, u + 0.1 * s + e, -1.85, PAL.gray, 2, HALF); ln(u + 0.1 * s, -1.6, u + 0.1 * s - 0.25 * s, -1.5, PAL.gray, 1, HALF);
+    }
+    for (let v = 0, i = 0; v < eave; v += 0.32, i++) { bx(0, v, Wd, Math.min(eave, v + 0.32), th.block, i % 2 ? 2 : 0); bx(0, v, Wd, v + px, PAL.black); }   // its log courses, a dark seam between
+    for (let v = 0.16; v < eave; v += 0.32) { F(X(Wd), Y(v), 0.17 * t, 0, 0, 0.15 * t, PAL.gray, 1, 0); F(X(Wd), Y(v), 0.07 * t, 0, 0, 0.06 * t, PAL.black, 1, 4); }   // their round ends at its corner, ringed
+    const gable = (u0, u1, v0, h, c0 = th.block) => { for (let i = 0, n = Math.max(4, Math.round((h * t) / (2 * PIX.size))); i < n; i++) { const q = i / n, s0 = lean * q; bx(u0 + (u1 - u0) * 0.5 * q + s0, v0 + h * q, u1 - (u1 - u0) * 0.5 * q + s0, v0 + h * (q + 1 / n), c0, i % 3 ? 4 : 2); } };   // a thatch of moss
+    const rh = k === 4 ? 1.2 : k === 1 ? 1.7 : 1.5; gable(-0.3, Wd + 0.35, eave, rh);
+    for (let u = -0.2, i = 0; u < Wd + 0.3; u += 0.32, i++) bx(u, eave - 0.15 - 0.25 * ((i * 7) % 3) / 2, u + px, eave, th.block);   // moss hanging off its eaves
+    const top = eave + rh, ru = (Wd + 0.05) / 2 + lean;
+    bx(0.5, 0, 2.0, dh, INK.dark); F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.4, 1);   // the doorway, dim inside
+    bx(0.5, dh - 0.8, 2.0, dh, c); for (const u of [0.95, 1.5]) bx(u, dh - 0.8, u + px, dh - 0.2, PAL.black); bx(0.42, dh, 2.08, dh + 0.12, PAL.gray);   // the red cloth hung in it, its lintel
+    { const u0 = 2.35, u1 = 3.05, v0 = 1.05, v1 = 1.8; F(X((u0 + u1) / 2), Y((v0 + v1) / 2), 0.7 * t, 0, 0, 0.6 * t, PAL.orange, 0.4, 1); bx(u0 - 0.1, v0 - 0.12, u1 + 0.1, v1 + 0.12, PAL.gray); bx(u0, v0, u1, v1, PAL.orange);   // a window lit dim, its carved frame
+      bx((u0 + u1) / 2 - px / 2, v0, (u0 + u1) / 2 + px / 2, v1, PAL.black); bx(u0, (v0 + v1) / 2, u1, (v0 + v1) / 2 + px, PAL.black); bx(u0 - 0.18, v1 + 0.12, u1 + 0.18, v1 + 0.2, PAL.gray); bx((u0 + u1) / 2 - 0.1, v1 + 0.2, (u0 + u1) / 2 + 0.1, v1 + 0.32, PAL.gray); }
+    const skull = (u, v, s = 1) => { F(X(u), Y(v), 0.26 * t * s, 0, 0, 0.24 * t * s, PAL.gray, 1, 0); bx(u - 0.14 * s, v - 0.3 * s, u + 0.14 * s, v - 0.14 * s, PAL.gray); for (const e of [-0.1, 0.1]) disc(X(u + e * s), Y(v), 0.07 * t * s, PAL.black, 1); for (const e of [-0.08, 0, 0.08]) bx(u + e * s, v - 0.3 * s, u + e * s + px, v - 0.2 * s, PAL.black); };
+    if (k === 0) { skull(ru, top + 0.15); for (const e of [-1, 1]) { ln(ru + e * 0.9, top - 0.3, ru + e * 1.3, top + 0.35, th.block, 2); ln(ru + e * 1.3, top + 0.35, ru + e * 1.15, top + 0.6, th.block, 1); } }   // a skull on its ridge, twigs
+    else if (k === 1) { for (const e of [-1, 1]) { ln(ru, top - 0.1, ru + e * 0.45, top + 0.45, PAL.gray, 3); disc(X(ru + e * 0.5), Y(top + 0.5), 0.12 * t, PAL.gray, 1); } skull(ru, top - 0.75, 0.9); }   // its ridge's crossed horse heads, a skull on the gable
+    else if (k === 2) { bx(Wd - 0.6, top - 0.6, Wd - 0.25, top + 0.5, PAL.gray); bx(Wd - 0.68, top + 0.5, Wd - 0.17, top + 0.62, PAL.gray); ln(0.6, top - 0.7, 0.2, top + 0.4, PAL.gray, 2); for (const [a, b2] of [[0.3, 0.1], [0.4, 0.35]]) ln(0.6 - a, top - 0.7 + 0.75 + b2 * 0.3, 0.6 - a - 0.3, top + 0.4 + b2, PAL.gray, 1); }   // a chimney, an antler branch
+    else if (k === 3) { const sv = top - 0.1; F(X(ru), Y(sv), 0.34 * t, 0, 0, 0.3 * t, PAL.gray, 1, 0); for (const e of [-1, 1]) { ln(ru + e * 0.28, sv + 0.15, ru + e * 0.75, sv + 0.55, PAL.gray, 3); ln(ru + e * 0.75, sv + 0.55, ru + e * 0.6, sv + 0.85, PAL.gray, 2); disc(X(ru + e * 0.13), Y(sv), 0.08 * t, PAL.black, 1); }   // a horned skull over the gable,
+      ln(-0.25, eave - 0.1, -0.25, eave - 0.55, PAL.gray); F(X(-0.25), Y(eave - 0.8), 0.4 * t, 0, 0, 0.4 * t, PAL.orange, 0.4, 1); bx(-0.4, eave - 1.05, -0.1, eave - 0.55, PAL.gray); bx(-0.33, eave - 0.98, -0.17, eave - 0.62, PAL.orange); bx(-0.27, eave - 0.9, -0.23, eave - 0.7, PAL.yellow); }   // a lantern lit by it
+    else if (k === 4) { bx(Wd - 0.75, top - 0.5, Wd - 0.4, top + 0.45, PAL.gray); bx(Wd - 0.82, top + 0.45, Wd - 0.33, top + 0.55, PAL.gray); for (let i = 0; i < 3; i++) F(X(Wd - 0.55 + 0.15 * Math.sin(T + i)), Y(top + 0.8 + 0.4 * i), (0.18 + 0.05 * i) * t, 0, 0, 0.12 * t, PAL.gray, DIM, 0); }   // a chimney, its smoke
+    else { ln(ru + 0.1, top - 0.1, ru + 0.25, top + 0.9, PAL.gray, 2); skull(ru + 0.27, top + 1.05, 0.85); }   // a skull on a stick at its peak
+    skInside(d, 'shop', c, dx, dw, top);
+  };
+  const pech = (d) => {   // a Russian stove (the stash), its mouth the door: A plain with pots and a poker, B rounded with a towel and herbs, C tall with a candle in a
+    // niche over its mouth and a band of ornament, D a cloth over its side and a big pot, E a bench step and a little window, F painted with blue flowers
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__skV || SKAZKA_V).stove, c = PAL.purple, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    const Wd = k === 4 ? 2.6 : 3.0, ht = k === 2 ? 2.9 : k === 4 ? 3.1 : 2.4;
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its mouth
+    bx(0, 0, Wd, ht, PAL.gray, 1); bx(0, 0, Wd, 0.25, PAL.gray, 2);   // its whitewash (grey), dotted, a plinth
+    if (k === 1 || k === 5) for (const e of [0, 1]) F(X(e ? Wd - 0.35 : 0.35), Y(ht), 0.35 * t, 0, 0, 0.35 * t, PAL.black, 1, 0);   // its shoulders rounded (B, F)
+    if (k === 4) { bx(Wd, 0, Wd + 0.9, 1.2, PAL.gray, 1); bx(Wd, 1.2, Wd + 0.9, 1.3, PAL.gray); bx(1.0, ht - 0.9, 1.5, ht - 0.45, PAL.black); bx(1.22, ht - 0.9, 1.28, ht - 0.45, PAL.gray); }   // the bench step off it, a little window (E)
+    const cu = k === 4 ? 1.2 : 1.9; bx(cu, ht, cu + 0.6, ht + 1.0, PAL.gray, 1); bx(cu - 0.08, ht + 1.0, cu + 0.68, ht + 1.14, PAL.gray, 4);   // its chimney, a cap
+    F(dx, Y(1.55), 0.86 * t, 0, 0, 0.62 * t, PAL.black, 1, 0); bx(0.38, 0, 2.12, 1.55, PAL.black);   // soot round its mouth
+    F(dx, Y(1.5), 0.7 * t, 0, 0, 0.5 * t, INK.dark, 1, 0); bx(0.55, 0, 1.95, 1.5, INK.dark);   // its mouth, dark
+    F(dx, Y(0.7), 0.65 * t, 0, 0, 0.75 * t, c, 0.55, 1);   // the purple glow in it
+    for (let i = 0; i < 5; i++) { const fl = Math.sin(T * 9 + i * 1.7) > 0 ? 1 : 0; bx(0.7 + 0.24 * i, 0.12, 0.7 + 0.24 * i + 2 * px, 0.2 + 0.08 * fl, PAL.orange); }   // embers flickering
+    const pot = (u, s = 1, pat = false) => { F(X(u), Y(0.3 * s), 0.3 * t * s, 0, 0, 0.3 * t * s, PAL.gray, 1, 0); bx(u - 0.18 * s, 0.5 * s, u + 0.18 * s, 0.62 * s, PAL.gray); F(X(u), Y(0.3 * s), 0.3 * t * s, 0, 0, 0.3 * t * s, PAL.black, 1, 4);
+      if (pat) for (const e of [-0.15, 0, 0.15]) bx(u + e * s, 0.3 * s, u + e * s + 2 * px, 0.36 * s, PAL.blue); };   // a clay pot
+    const poker = (u) => { ln(u, 0, u + 0.35, 2.0, PAL.gray, 2); ln(u + 0.35, 2.0, u + 0.2, 2.25, PAL.gray, 1); ln(u + 0.35, 2.0, u + 0.5, 2.25, PAL.gray, 1); };   // an oven fork leaning on it
+    const herbs = (u, v, cs) => { bx(u - 0.02, v, u + px - 0.02, v + 0.25, PAL.gray); cs.forEach((cc, i) => bx(u - 0.12 + 0.07 * i, v - 0.6 + 0.05 * (i % 2), u - 0.12 + 0.07 * i + px, v, cc)); };   // a bundle hung to dry
+    if (k === 0) { poker(Wd + 0.05); pot(Wd + 0.65, 0.9, false); pot(Wd + 1.05, 0.7, false); }
+    else if (k === 1) { bx(-0.05, 1.2, 0.3, 2.1, PAL.blue); for (let u = 0; u < 0.3; u += 0.1) bx(u - 0.05, 1.08, u - 0.05 + px, 1.2, PAL.blue); herbs(Wd - 0.25, ht - 0.3, [PAL.green, PAL.green, PAL.green, PAL.green]); poker(Wd + 0.1); pot(Wd + 0.85, 0.8); }   // a towel, herbs
+    else if (k === 2) { bx(0.9, 2.05, 1.6, 2.65, PAL.black); F(X(1.25), Y(2.65), 0.35 * t, 0, 0, 0.18 * t, PAL.black, 1, 0); bx(1.2, 2.05, 1.3, 2.3, PAL.gray); bx(1.21, 2.3, 1.29, 2.45, PAL.orange); bx(1.235, 2.34, 1.265, 2.42, PAL.yellow); vlamps.push([X(1.25), Y(2.4)]);   // a niche, a candle lit in it
+      for (let u = 0.05, i = 0; u < Wd - 0.1; u += 0.25, i++) bx(u, 1.72 + (i % 2) * 0.08, u + 0.16, 1.82 + (i % 2) * 0.08, PAL.orange); for (const [u, v] of [[0, 0], [0.32, 0], [0.16, 0.28], [0.48, 0.28], [0.32, 0.56]]) F(X(Wd + 0.3 + u), Y(0.16 + v), 0.15 * t, 0, 0, 0.14 * t, PAL.gray, 1, 4); }   // a band of ornament (the sheet's red), firewood stacked
+    else if (k === 3) { bx(-0.05, 0.9, 0.42, 2.2, PAL.purple, 4); bx(-0.05, 2.1, 0.5, 2.25, PAL.purple); for (let u = 0; u < 0.4; u += 0.12) bx(u, 0.78, u + px, 0.9, PAL.purple); pot(Wd + 0.6, 1.1); poker(Wd + 0.05); }   // a cloth over its side (the sheet's red: the stash's purple)
+    else if (k === 4) { herbs(Wd + 0.6, 2.1, [PAL.green, PAL.orange, PAL.green, PAL.orange]); pot(Wd + 0.45, 0.75); }
+    else { for (const [u, v] of [[1.3, 2.0], [2.4, 1.75]]) { for (const [du, dv] of [[0, 0.18], [0.16, 0], [0, -0.18], [-0.16, 0]]) F(X(u + du), Y(v + dv), 0.09 * t, 0, 0, 0.09 * t, PAL.blue, 1, 0); bx(u - px / 2, v - 0.45, u + px / 2, v - 0.1, PAL.blue); }   // blue flowers painted on it
+      ln(-0.15, ht - 0.2, -0.15, ht - 0.5, PAL.gray); for (let i = 0; i < 4; i++) F(X(-0.15 + (i % 2 ? 0.06 : -0.06)), Y(ht - 0.62 - 0.17 * i), 0.07 * t, 0, 0, 0.1 * t, PAL.orange, 1, 0); pot(Wd + 0.6, 0.9, true); }   // peppers drying (the sheet's red)
+    skInside(d, 'stash', c, dx, dw, ht);
   };
   // The Cave's door into a shop or a stash (the owner's pick, research/variants/cave-torii-1-px.png B: "the way into the cave or the shop; the shop's red"):
   // a torii framing the dark doorway, its top beam flared up at its ends, its tie beam through the posts, their feet dark, a shimenawa rope with paper
@@ -3100,6 +3180,68 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         [[PAL.green, 'fish'], [th.mover, 'dots'], [PAL.blue, 'check']].forEach(([c, pat], i) => flag(3.55 - 0.85 * i, c, pat));
         el(0.62, 4.5, 0.12, 0.12, PAL.gray);   // its top, a ball
       }
+    }
+  }
+  if (th.skazka && lv.kind === 'well') {   // the Dark Forest's props and its far layer (the owner's sheets research/variants/skazka-*-1-px.png; all six variants in
+    // the game's own code while the owner picks: SKAZKA_V, or window.__skV). Props in the midground: solid, no white, no yellow but a light's core.
+    const t = kitT, P = kitP, px = P / t, V = window.__skV || SKAZKA_V, hero = g.hero;
+    {   // the forest far off: screen-fixed, low on the screen and sinking a little as the climb goes on, as the Sea's; at a quarter (DIM), the moon brighter
+      // (a light: it shows through the dark, the treetops black against it), lit windows and eyes LIT
+      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t), f = V.far;
+      const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
+      const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
+      const fl = (u0, v0, u1, v1, c, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), c, a, wd);
+      const tri = (u, v0, hw, h, c, a = DIM) => { const hd = (h * t) / 2; F(U(u), Vv(v0) - hd, hw * t, 0, 0, hd, c, a, 6, hw * t, hd, 2 * hw * t); };
+      const spruce = (u, v, h, c = PAL.green, a = DIM) => { fb(u - 0.06, v, u + 0.06, v + 0.5, c, a); for (let i = 0; i < 4; i++) tri(u, v + 0.35 + i * h * 0.2, (0.62 - 0.12 * i) * h * 0.45, h * 0.32, c, a); };   // a spruce, its tiers
+      const line9 = (u0, u1, step, v, hs) => { for (let u = u0, i = 0; u < u1; u += step, i++) spruce(u, v, hs[i % hs.length]); };   // a row of them
+      const moon = (u, v, rr) => { fe(u, v, rr, rr, PAL.gray, LIT); vlamps.push([U(u), Vv(v), rr * 1.05, rr * 1.6]); };   // the moon, a light in the dark
+      const dead = (u, v, h, s) => { fl(u, v, u + 0.2 * s, v + h, PAL.gray, DIM, 3); for (const [q, du, dv] of [[0.45, -1.0, 0.7], [0.65, 0.9, 0.8], [0.85, -0.6, 0.5], [0.95, 0.5, 0.6]]) { const bu = u + 0.2 * s * q, bv = v + h * q; fl(bu, bv, bu + du * s, bv + dv * s, PAL.gray, DIM, 2); fl(bu + du * s, bv + dv * s, bu + du * s * 1.3, bv + dv * s * 1.5, PAL.gray, DIM, 1); } };   // a dead tree
+      const mist = (v0) => { for (let i = 0; i < 6; i++) { const v = v0 + 0.22 * i, u0 = -7.5 + ((i * 29) % 7) * 0.6; fb(u0, v, u0 + 2.4 + (i % 3) * 0.8, v + px, PAL.gray); fb(u0 + 4.2, v, u0 + 6.0, v + px, PAL.gray); } };   // mist over the swamp
+      const eyes = (u, v, c = PAL.orange) => { for (const e of [-0.12, 0.12]) fb(u + e, v, u + e + 2 * px, v + 2 * px, c, LIT); };   // a pair of eyes glowing
+      if (f === 0) { moon(3.4, 4.6, 1.6); line9(-7.4, 7.6, 1.15, 0.3, [3.2, 4.2, 2.8, 3.8, 4.6, 3.0]); mist(0.1);   // Baba Yaga across the moon (A): her mortar, her, her broom
+        fb(2.6, 4.3, 3.4, 4.75, PAL.black, 1); fe(3.2, 4.95, 0.22, 0.28, PAL.black, 1); fl(3.3, 5.15, 3.75, 4.95, PAL.black, 1, 3); fl(2.65, 4.5, 1.9, 4.2, PAL.black, 1, 2); for (let i = 0; i < 4; i++) fl(1.95, 4.22, 1.5, 3.9 + 0.12 * i, PAL.black, 1, 1); }
+      else if (f === 1) { moon(2.6, 4.9, 1.3); dead(-5.4, 0.3, 4.6, 1.1); fe(-4.6, 3.6, 0.32, 0.4, PAL.gray); eyes(-4.6, 3.75); line9(-3.2, 7.6, 1.3, 0.3, [3.0, 3.8, 2.6, 4.2]);   // a dead tree, an owl in it (B)
+        for (const u of [3.6, 4.0, 5.6, 6.1]) fl(u, 0.2, u + 0.1, 0.9 + (u % 1), PAL.green); mist(0.1); }   // reeds
+      else if (f === 2) { moon(4.6, 5.0, 1.3); line9(-7.4, -1.0, 1.1, 0.3, [3.4, 4.2, 3.0]); line9(6.2, 7.6, 1.1, 0.3, [3.6]);   // the hut on chicken legs behind its fence (C)
+        for (const e of [-0.4, 0.5]) { fl(1.4 + e, 0.6, 1.2 + e, 1.5, PAL.gray, DIM, 2); fl(1.2 + e, 0.6, 0.9 + e, 0.4, PAL.gray); fl(1.2 + e, 0.6, 1.5 + e, 0.4, PAL.gray); }
+        fb(0.4, 1.5, 2.5, 3.0, PAL.green); tri(1.45, 3.0, 1.3, 1.0, PAL.green); fb(1.2, 2.0, 1.7, 2.5, PAL.orange, LIT);
+        for (const u of [3.0, 3.6, 4.2, 4.8, 5.4]) { fb(u - 0.06, 0.3, u + 0.06, 1.5, PAL.gray); fe(u, 1.6, 0.18, 0.16, PAL.gray); eyes(u, 1.62, PAL.orange); } }
+      else if (f === 3) { moon(3.0, 4.4, 1.4); dead(-6.2, 0.3, 4.2, 1.0); for (const [a0, a1] of [[-5.9, -4.6], [-5.6, -4.9]]) fl(a0, 3.2, a1, 2.4, PAL.gray); line9(-3.6, 7.6, 1.0, 0.3, [3.6, 4.4, 3.0, 4.0]);   // a dead tree, a cobweb in it (D)
+        fe(0.4, 0.45, 0.3, 0.26, PAL.gray); for (const e of [-0.1, 0.1]) fb(0.4 + e - px, 0.45, 0.4 + e + px, 0.55, PAL.black, 1); mist(0.1); }   // a skull in the swamp
+      else if (f === 4) { moon(4.8, 4.8, 1.2); line9(-7.4, -2.6, 1.1, 0.3, [3.4, 4.0, 3.0]); line9(6.4, 7.6, 1.2, 0.3, [3.8]);   // a stove alone in a clearing, its fire, its smoke (E)
+        fb(0.2, 0.3, 2.4, 2.1, PAL.gray); fb(1.4, 2.1, 2.0, 3.2, PAL.gray); fe(1.0, 0.95, 0.42, 0.42, PAL.black, 1); fe(1.0, 0.8, 0.28, 0.22, PAL.orange, LIT);
+        for (let i = 0; i < 5; i++) fe(1.7 + 0.35 * Math.sin(i * 1.3 + T), 3.5 + 0.5 * i, 0.25 + 0.06 * i, 0.18, PAL.gray);
+        for (const u of [3.0, 3.5, 4.0]) fb(u - 0.06, 0.3, u + 0.06, 1.2, PAL.gray); fb(2.9, 0.8, 4.1, 0.9, PAL.gray); }
+      else { moon(3.8, 5.0, 1.5); dead(-1.4, 0.3, 5.2, 1.3); for (const [u, v, l] of [[-2.4, 4.0, 1.4], [-1.9, 4.4, 1.0], [-0.2, 4.6, 1.6], [0.4, 4.2, 0.9]]) fl(u, v, u, v - l, PAL.green);   // a great dead tree hung with moss (F)
+        line9(-7.4, -3.4, 1.2, 0.3, [3.0, 3.8, 3.2]); line9(2.0, 7.6, 1.2, 0.3, [2.8, 3.6, 3.0, 3.8, 3.4]); mist(0.1); }
+    }
+    for (const r of lv.rects) {   // Baba Yaga's fence on a ledge: sharpened stakes, a skull on each whose eye sockets glow the nearer the hero comes, the cores looking at him
+      const p = !r.gone && seen(r.y0 - 4 * t, r.y0) && kitThing(lv, r);
+      if (!p || p.kind !== 'fence') continue;
+      const k = V.fence, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, b = r.y0;
+      const X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, up from its top
+      const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
+      const ln = (u0, v0, u1, v1, c, wp = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wp);
+      const near = Math.max(0, Math.min(1, 1 - (Math.hypot(hero.cx - X(1.5), hero.cy - Y(2)) - 2.5 * R) / (5 * R)));   // 1 with the hero close, 0 from 7.5 R off
+      const stake = (u, h, wd = 0.3) => { bx(u - wd / 2, 0, u + wd / 2, h, PAL.gray, 2); const hd = 0.4 * t / 2; F(X(u), Y(h) - hd, (wd / 2) * t, 0, 0, hd, PAL.gray, 1, 6, (wd / 2) * t, hd, wd * t); };   // a stake, its point
+      const skull = (u, v, horns = false) => {   // impaled: its stake's point pokes out of its crown; its sockets glow
+        if (horns) for (const e of [-1, 1]) { ln(u + e * 0.22, v + 0.15, u + e * 0.5, v + 0.42, PAL.gray, 2); ln(u + e * 0.5, v + 0.42, u + e * 0.42, v + 0.62, PAL.gray, 2); }
+        F(X(u), Y(v), 0.3 * t, 0, 0, 0.28 * t, PAL.gray, 1, 0); bx(u - 0.17, v - 0.34, u + 0.17, v - 0.16, PAL.gray);
+        for (const e of [-0.12, 0, 0.12]) bx(u + e, v - 0.34, u + e + px, v - 0.22, PAL.black);   // its teeth
+        bx(u - px, v - 0.14, u + px, v - 0.08, PAL.black);   // its nose
+        for (const e of [-0.12, 0.12]) { const ex = X(u + e), ey = Y(v + 0.02); disc(ex, ey, 0.09 * t, near > 0.15 ? PAL.orange : PAL.black, near > 0.15 ? 1 : 1);   // a socket, lit as the hero comes
+          if (near > 0.15) { const lx = Math.sign(hero.cx - ex) * P, ly = Math.sign(hero.cy - ey) * P; box(snap(ex + lx) - P / 2, snap(ey + ly) - P / 2, snap(ex + lx) + P / 2, snap(ey + ly) + P / 2, PAL.yellow, 1, 0, 10, 0); }
+          else box(snap(ex) - P / 2, snap(ey) - P / 2, snap(ex) + P / 2, snap(ey) + P / 2, PAL.orange, DIM, 0, 10, 0); }
+      };
+      const web = (u0, u1, v) => { for (const f of [0.35, 0.7]) ln(u0, v - f * 0.5, u1, v - f * 0.5 - 0.1, PAL.gray, 1, DIM); for (const q of [0.25, 0.5, 0.75]) ln(u0 + (u1 - u0) * q, v, u0 + (u1 - u0) * q, v - 0.55, PAL.gray, 1, DIM); };   // a cobweb between two stakes, dim
+      if (k === 0) { for (const u of [0.5, 1.15, 1.8, 2.45]) { stake(u, 2.4); skull(u, 1.95); } for (const [u0, u1] of [[0.5, 1.15], [1.15, 1.8], [1.8, 2.45]]) { ln(u0, 0.75, u1, 1.05, PAL.gray, 1); ln(u0, 1.05, u1, 0.75, PAL.gray, 1); } }   // lashed with rope (A)
+      else if (k === 1) { const hs = [2.2, 2.9, 2.0]; [0.6, 1.5, 2.4].forEach((u, i) => { stake(u, hs[i], 0.34); skull(u, hs[i] - 0.45); }); web(0.6, 1.5, 1.4); }
+      else if (k === 2) { const hs = [2.6, 3.0, 2.6]; [0.6, 1.4, 2.2].forEach((u, i) => { stake(u, hs[i], 0.18); skull(u, hs[i] - 0.45); }); for (const u of [1.0, 1.8]) { ln(u, 2.3, u, 1.6, PAL.gray); ln(u - 0.18, 1.6, u + 0.18, 1.3, PAL.gray, 2); ln(u - 0.18, 1.3, u + 0.18, 1.6, PAL.gray, 2); } }   // crossed bones hung between (C)
+      else if (k === 3) { const hs = [2.1, 2.7, 2.1]; [0.6, 1.5, 2.4].forEach((u, i) => { stake(u, hs[i], 0.3); skull(u, hs[i] - 0.45, true); }); web(1.5, 2.4, 1.3); }   // horned skulls (D)
+      else if (k === 4) { const hs = [2.0, 2.6, 1.7, 2.9, 2.2, 1.9]; for (let i = 0; i < 6; i++) stake(0.4 + 0.5 * i, hs[i], 0.26); ln(0.3, 0.5, 3.0, 1.5, PAL.gray, 3); for (const i of [1, 3, 4]) skull(0.4 + 0.5 * i, hs[i] - 0.45); }   // a palisade, a brace across it (E)
+      else { const hs = [2.2, 2.8, 2.2]; [0.6, 1.5, 2.4].forEach((u, i) => { stake(u, hs[i], 0.26); skull(u, hs[i] - 0.45); });   // a raven on the middle skull (F), a grey rim of light round it
+        const ry = 2.8 - 0.45 + 0.42; F(X(1.5), Y(ry), 0.36 * t, 0, 0, 0.22 * t, PAL.gray, 1, 0); F(X(1.5), Y(ry), 0.32 * t, 0, 0, 0.18 * t, PAL.black, 1, 0); F(X(1.32), Y(ry + 0.2), 0.14 * t, 0, 0, 0.13 * t, PAL.black, 1, 0); bx(1.1, ry + 0.16, 1.22, ry + 0.22, PAL.gray); bx(1.3, ry + 0.24, 1.3 + 2 * px, ry + 0.24 + 2 * px, PAL.orange); }
+      vlamps.push([X(1.5), Y(2.0), 0.6 + 0.8 * near, 2.2 + 1.2 * near]);   // the fence's glow: it lights the dark round it, more as the hero comes
     }
   }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
@@ -4064,7 +4206,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const p of lv.fizz) if (!p.taken) light(p.x, p.y, 0.8, 2);
     if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) light((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 1.2, 3.4); }   // Tokyo's lit neon
     for (const sp of lv.spots) if (!sp.used) light(sp.x, sp.y, 1.4, 3.2);   // the flip side's pools glow (its way back out)
-    for (const [x, y] of vlamps) light(x, y, 0.9, 2.6);   // the Village's stone lanterns (see its kit)
+    for (const [x, y, r0 = 0.9, r1 = 2.6] of vlamps) light(x, y, r0, r1);   // the Village's stone lanterns, the Dark Forest's fences, candles and moon (see their kits)
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);

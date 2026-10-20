@@ -7,7 +7,7 @@
     const tst = document.getElementById('toast'); if (tst) tst.style.display = 'none';
     game.preview = SKAZKA; __up.go(1, 0, 3); g.state = 'play';
     const lv = g.lv, t = lv.tile, R = g.R, P = PIX.size, sn = (v) => Math.round(v / P) * P;
-    lv.fire && (lv.fire.y = lv.floor + 1e5); g.invuln = 1e9;
+    lv.fire && (lv.fire.y = lv.floor + 1e5); g.invuln = 0;
     lv.rects = lv.rects.filter((r) => r.cap);
     for (const a of ['coins', 'folk', 'spawns', 'spikes', 'icicles', 'bubbles', 'enemies', 'pickups', 'coats', 'runes', 'fizz', 'rings', 'spots', 'arenas']) if (Array.isArray(lv[a])) lv[a].length = 0;
     const y0 = sn(lv.floor - 30 * t), hl = lv.box(lv.l + 3.4 * t, y0, lv.l + 6 * t, y0 + t, {}); lv.rects.push(hl);

@@ -426,8 +426,8 @@ const ENEMY = {
   crawler: { design: 'loaf', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 3, speed: 60, step: 0.6, move: 'crawl' },
   climber: { design: 'mochi', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall' },
   circler: { design: 'cat', color: 'red', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },
-  kikimora: { design: 'mochi', color: 'gray', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall' },   // the Dark Forest's climber, a Kikimora (FOREST_V)
-  leshy: { design: 'cat', color: 'gray', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },   // the Dark Forest's circler, a Leshy (FOREST_V)
+  kikimora: { design: 'tengu', color: 'gray', size: 0.95, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall' },   // the Dark Forest's climber, a Kikimora (FOREST_V)
+  leshy: { design: 'slug', color: 'gray', size: 0.95, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },   // the Dark Forest's circler, a Leshy (FOREST_V)
   hedgehog: { design: 'star', color: 'red', size: 0.8, grav: 1, stomp: false, coins: 6, speed: 46, step: 0.7, move: 'crawl' },
   shell: { design: 'dome', color: 'red', size: 0.82, grav: 1, stomp: true, coins: 4, speed: 44, step: 0.8, move: 'crawl' },
   spitter: { design: 'drop', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 5, speed: 38, step: 0.7, move: 'crawl' },
@@ -4121,14 +4121,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (t === 'kikimora') {
       const ws = x < (lv.l + lv.r) / 2 ? -1 : 1, sway = Math.sin(T * 6 + b.id) * 0.08 * r;   // the wall it clings to; its creep
       if (!front) {
-        for (const k of [-1, 1]) for (const s2 of [0, 1]) { const ay = y + k * 0.45 * h, kx = x + ws * (0.95 + 0.25 * s2) * w, ky = ay - 0.35 * r + k * sway; line(x + ws * 0.6 * w, ay, kx, ky, c, 1, 2); line(kx, ky, x + ws * 1.3 * w, ay + 0.15 * r * k, c, 1, 2); }   // four long thin limbs to the wall
-        if (V === 'A' || V === 'E') for (let i = 0; i < 7; i++) spk(x + (i - 3) * 0.24 * w, b.minY + 0.15 * h, 0.22 * r, (0.45 + 0.15 * (i % 2)) * r, (i - 3) * 0.32, c);   // spiky hair (wild: E)
-        if (V === 'B') for (let i = 0; i < 6; i++) { const u = (i - 2.5) * 0.3 * w; line(x + u, b.minY + 0.1 * h, x + u + Math.sin(T * 2 + i) * 0.1 * r, b.maxY + 0.45 * r, c, 1, 2); }   // long stringy hair hanging
-        if (V === 'D') for (const s2 of [-1, 1]) twig(x + s2 * 0.3 * w, b.minY + 0.1 * h, s2 * 0.4, 0.3 * r, 3, c);   // hair grown into antlers
-        if (V === 'F') { F(x, b.minY + 0.35 * h, 1.05 * w, 0, 0, 0.75 * h, dk, 1, 0); spk(x - d * 0.5 * w, b.minY - 0.1 * h, 0.5 * r, 0.6 * r, -d * 0.6, dk); }   // a dark hood over its head
-        if (V === 'E') for (let i = 0; i < 5; i++) spk(x + (i - 2) * 0.4 * w, b.maxY + 0.05 * h, 0.3 * r, 0.45 * r, Math.PI + (i - 2) * 0.15, c);   // a ragged skirt
+        for (const k of [-1, 1]) for (const s2 of [0, 1]) { const ay = y + k * 0.45 * h, kx = x + ws * (0.95 + 0.25 * s2) * w, ky = ay - 0.35 * r + k * sway; line(x + ws * 0.6 * w, ay, kx, ky, c, 1, 3); line(kx, ky, x + ws * 1.35 * w, ay + 0.15 * r * k, c, 1, 3); }   // four long thin limbs to the wall
+        if (V === 'A' || V === 'E') for (let i = 0; i < 7; i++) spk(x + (i - 3) * 0.26 * w, b.minY + 0.2 * h, 0.3 * r, (0.7 + 0.25 * (i % 2)) * r, (i - 3) * 0.32, c);   // spiky hair (wild: E)
+        if (V === 'B') for (let i = 0; i < 6; i++) { const u = (i - 2.5) * 0.3 * w; line(x + u, b.minY + 0.05 * h, x + u + Math.sin(T * 2 + i) * 0.12 * r, b.maxY + 0.8 * r, c, 1, 3); }   // long stringy hair hanging
+        if (V === 'D') for (const s2 of [-1, 1]) twig(x + s2 * 0.3 * w, b.minY + 0.15 * h, s2 * 0.4, 0.45 * r, 3, c);   // hair grown into antlers
+        if (V === 'F') { F(x, b.minY + 0.45 * h, 1.2 * w, 0, 0, 0.8 * h, wh, 1, 0); spk(x - d * 0.55 * w, b.minY - 0.05 * h, 0.6 * r, 0.75 * r, -d * 0.6, wh); }   // a hood over its head, its rim pale
+        if (V === 'E') for (let i = 0; i < 5; i++) spk(x + (i - 2) * 0.42 * w, b.maxY + 0.02 * h, 0.4 * r, 0.65 * r, Math.PI + (i - 2) * 0.15, c);   // a ragged skirt
       } else {
-        spk(x + d * 0.85 * w, y - 0.05 * h, 0.24 * r, 0.6 * r, d * (Math.PI / 2 + 0.25), c);   // its long beak of a nose
+        spk(x + d * 0.9 * w, y - 0.15 * h, 0.32 * r, 0.85 * r, d * (Math.PI / 2 + 0.25), c);   // its long beak of a nose
         skEyes(x + d * 0.3 * w, y - 0.35 * h, 0.8, b.id);
         const hx = x - ws * 0.2 * w, hy = y + 0.6 * h;   // its free hand's
         if (V === 'A') for (const s2 of [-1, 0, 1]) spk(x + ws * 1.3 * w, y + s2 * 0.4 * h, 0.1 * r, 0.25 * r, ws * Math.PI / 2, wh);   // claws in the wall
@@ -4140,11 +4140,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     } else {   // a Leshy: bark and moss, a beard of grass and twigs, bough arms, horns (none, a bird's nest: C; huge: F)
       if (!front) {
         const big = V === 'F' ? 1.6 : V === 'D' ? 0.8 : 1;
-        if (V !== 'C') for (const s2 of [-1, 1]) twig(x + s2 * 0.35 * w, b.minY + 0.15 * h, s2 * 0.5, 0.32 * r * big, V === 'F' ? 4 : 3, c);   // its horns, branching
-        for (const s2 of [-1, 1]) { const ax = x + s2 * 0.85 * w, ay = y - 0.1 * h, sw2 = Math.sin(T * 2 + s2) * 0.15 * r; line(ax, ay, ax + s2 * 0.35 * r, y + 0.9 * h + sw2, c, 1, 2); for (let i = 0; i < 3; i++) line(ax + s2 * 0.35 * r, y + 0.9 * h + sw2, ax + s2 * (0.25 + 0.15 * i) * r, y + 1.25 * h + sw2, c, 1, 1); }   // its long bough arms, twig fingers
+        if (V !== 'C') for (const s2 of [-1, 1]) twig(x + s2 * 0.35 * w, b.minY + 0.15 * h, s2 * 0.5, 0.48 * r * big, V === 'F' ? 4 : 3, c);   // its horns, branching
+        for (const s2 of [-1, 1]) { const ax = x + s2 * 0.85 * w, ay = y - 0.1 * h, sw2 = Math.sin(T * 2 + s2) * 0.15 * r; line(ax, ay, ax + s2 * 0.45 * r, y + 1.0 * h + sw2, c, 1, 3); for (let i = 0; i < 3; i++) line(ax + s2 * 0.45 * r, y + 1.0 * h + sw2, ax + s2 * (0.3 + 0.2 * i) * r, y + 1.4 * h + sw2, c, 1, 2); }   // its long bough arms, twig fingers
       } else {
         for (let i = 0; i < 3; i++) line(x + (i - 1) * 0.4 * w, b.minY + 0.4 * h, x + (i - 1) * 0.45 * w, b.maxY - 0.1 * h, dk, 1, 1);   // bark
-        const nb = V === 'D' ? 3 : 5; for (let i = 0; i < nb; i++) spk(x + (i - (nb - 1) / 2) * 0.26 * w, y + 0.35 * h, 0.22 * r, (V === 'D' ? 0.7 : 0.55) * r, Math.PI + (i - (nb - 1) / 2) * 0.12, i % 2 ? wh : c);   // its beard of grass and twigs (long and thin: D)
+        const nb = V === 'D' ? 3 : 5; for (let i = 0; i < nb; i++) spk(x + (i - (nb - 1) / 2) * 0.28 * w, y + 0.3 * h, 0.3 * r, (V === 'D' ? 1.0 : 0.8) * r, Math.PI + (i - (nb - 1) / 2) * 0.12, i % 2 ? wh : c);   // its beard of grass and twigs (long and thin: D)
         skEyes(x, y - 0.25 * h, 0.85, b.id);
         if (V === 'D') for (const s2 of [-1, 1]) box(x + s2 * 0.42 * w - 0.05 * r, y - 0.05 * h, x + s2 * 0.42 * w + 0.05 * r, y + 0.25 * h, dk, 1, 0, 10, 0);   // hollow cheeks
         if (V === 'B') for (const [u, v] of [[-0.6, -0.75], [0.55, -0.85], [0.8, -0.3]]) { F(x + u * w, y + v * h, 0.22 * r, 0, 0, 0.12 * r, PAL.red, 1, 0); box(x + u * w - 0.04 * r, y + v * h, x + u * w + 0.04 * r, y + v * h + 0.15 * r, wh, 1, 0, 10, 0); disc(x + u * w - 0.08 * r, y + v * h - 0.04 * r, 0.03 * r, wh, 1); }   // fly agarics (red: a danger's)

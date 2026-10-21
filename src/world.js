@@ -779,8 +779,8 @@ const CAMPAIGN = [
 // World 4, the Sea (owner, 2026-10-20: rivers, the sea and an island between Fuji and Tokyo; its kit in the renderer, see THEMES.sea): where the
 // climb begins to get harder (the owner's 10-15 minute rule keeps worlds 1-3 gentle). One new thing a level: wet rock, rafts riding the streams,
 // circlers (new to the campaign), driftwood that gives way, a peak, the coin rain, a river of rafts, a peak, a cage. First numbers, for the sweep
-// to tune. Its boss for now the Junkyard's (the Junkyard is dropped): the Rat's slide on a slick floor, wet rock here, until the boss chat gives the
-// Sea its own look and name. Its runes: a whirl, a ship's wheel, a star (some put to sea to sail round the climb; the sea only goes round).
+// to tune. Its boss Onamazu, the earthquake catfish (the boss chat's, 2026-10-21), on the Junkyard's Rat slide (the Junkyard is dropped), its floor
+// wet rock. Its runes: a whirl, a ship's wheel, a star (some put to sea to sail round the climb; the sea only goes round).
 { world: SEA, runes: 'Z8k', lore: { en: 'Some put to sea to sail round the climb.\nThe sea only goes round.', es: 'Algunos se hicieron a la mar para rodear la subida.\nEl mar solo da vueltas.', pt: 'Alguns foram ao mar para contornar a subida.\nO mar só dá voltas.', ja: 'のぼる かわりに うみへ でた ものも いた。\nうみは ぐるぐる まわる だけ。' }, levels: [
   { role: 'teach', len: 30, fire: 0.38, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, iceblocks: 3, mosswall: 1 }, intro: ['iceblocks'], enemies: ['crawler'], foes: 0.4, candy: [], shop: 0.5, safe: true, seed: 6101,
     news: { en: 'wet rock: you slip', es: 'roca mojada: resbalas', pt: 'pedra molhada: você escorrega', ja: 'ぬれた いわ: すべる' } },

@@ -150,7 +150,7 @@ const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plan
 // little shrine whose stone lantern the hero lights, koinobori), the Mine's (a lamp on the wall the hero lights, a vein of ore, a cart, tools, a winch), Mount Fuji's bell
 // off a boardwalk's free end (the hero rings it). kitThing(lv, r) is { kind, x, y } (x, y: where the hero tends it) or null, worked out once from the level
 // as laid, on steady ledges' wall ends where nothing laid stands in front (what crumbles away for a while does not count: nothing comes and goes).
-const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps
+const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
@@ -177,7 +177,7 @@ const kitThing = (lv, r) => {
     else if (k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
   } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
     const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
-    if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse' };
+    if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse', x: X(2.3), y: b - 3.5 * t };   // (its lamp's place: the task's, see its drawing)
     else if (k === 1 && steady(4.2) && room(0, 4.3, 2.9)) out = { kind: 'net' };
     else if (k === 2 && steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)) out = { kind: 'gull' };
     else if (k === 3 && steady(2.8) && room(0, 2.7, 2.6)) out = { kind: 'octopus' };
@@ -389,7 +389,7 @@ const WORLDS = [
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { en: 'moss and springs', es: 'musgo y resortes', pt: 'musgo e molas', ja: 'コケと バネ' } },
       { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'fizz'], news: { en: 'crumbling blocks, rubber and climbers', es: 'bloques que se caen, goma y trepadores', pt: 'blocos que desmoronam, borracha e escaladores', ja: 'くずれる ブロック、ゴム、カベノボリ' } },
       { chunks: ['icewall', 'lift'], news: { en: 'ice, moving planks and hedgehogs', es: 'hielo, tablas móviles y erizos', pt: 'gelo, tábuas móveis e ouriços', ja: 'こおり、うごく いた、ハリネズミ' } }] },
-  { id: 'ice', name: { en: 'Glacier', es: 'Glaciar', pt: 'Geleira', ja: 'ひょうが' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
+  { id: 'ice', name: { en: 'Fuji', es: 'Fuji', pt: 'Fuji', ja: 'ふじ' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1, fork: 1, fork2: 1, vault: 1 },
     foes: 0.7, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 2 }, intro: [{ news: { en: 'ice blocks, circlers and shells', es: 'bloques de hielo, rondadores y caparazones', pt: 'blocos de gelo, rondadores e cascos', ja: 'こおり ブロック、グルグル、こうら' } }] },
   // The Mine became the Village (owner, 2026-10-20: the Japanese countryside in spring); its id stays 'mine' (the saves, its music).
@@ -897,6 +897,7 @@ ICONS.taskNeon = '............/...rrrrrrrr./sssr......r./...r.rrrr.r./...r......
 ICONS.taskCage = '............/.....ss...../.ssssssssss./.s..s..s..s./.s..s..s..s./.s.gsggsg.s./.sgksggskgs./.sggsggsggs./.sggsggsggs./.ssssssssss./............/............';   // a friend in a cage,
 ICONS.taskLantern = '............/.....ss...../...ssssss.../..ssssssss../....soos..../....soos..../....ssss..../.....ss...../.....ss...../....ssss..../...ssssss.../............';   // a Village shrine's lantern lit,
 ICONS.taskLamp = '............/.....ss...../....s..s..../...ssssss.../...soooos.../...soyyos.../...soyyos.../...soooos.../...ssssss.../....ssss..../............/............';   // the Mine's lamps (its task)
+ICONS.taskLighthouse = '............/.....ss...../....ssss..../....oyyo..../...ssssss.../.....ss...../.....ss...../....ssss..../....ssss..../...ssssss.../..ssssssss../............';   // the Sea's task: a lighthouse, its lamp lit
 ICONS.taskBell = '............/.....ss...../.....ss...../....oooo..../...oooooo.../...oooooo.../...oooooo.../..oooooooo../.oooooooooo./.....kk...../............/............';   // a bell rung on Mount Fuji
 ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 // The smash's picture: its helmet (user: the rock candy's place), a moto one, red with a white stripe and blue-lensed goggles (owner,
@@ -3203,12 +3204,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const bq = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(Q(u0), Q(u1)), Y(Math.max(v0, v1)), Math.max(Q(u0), Q(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
       const el = (u, v, ru, rv, c, a = 1) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0), ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);
       const float = (u, v, c) => { el(u, v, 0.2, 0.2, c); bx(u - 0.08, v + 0.05, u - 0.08 + 2 * px, v + 0.05 + 2 * px, PAL.gray); };   // a glass float, a grey glint (the sheets' white)
-      if (p.kind === 'lighthouse') {   // a little lighthouse on its ledge: a grey tower narrowing up, its door, its gallery, its lamp lit (a light's core yellow, its glow)
+      if (p.kind === 'lighthouse') {   // a little lighthouse on its ledge: a grey tower narrowing up, its door, its gallery, its lamp (a light's core yellow, its glow)
+        // (the Sea's task: its lamp dark till the hero comes near, then lit for good, flickering on, as the Village's lanterns)
+        const on = lv.tended.get(r), lit = on != null && !((T - on) < 0.4 && Math.floor((T - on) * 20) % 3 === 1);
         const cx = 2.3, lamp = () => {   // the gallery, the lamp room
           bx(cx - 0.8, 2.9, cx + 0.8, 3.18, th.block); for (let u = cx - 0.65; u < cx + 0.7; u += 0.26) bx(u, 2.97, u + 2 * px, 3.1, PAL.black);
-          F(X(cx), Y(3.5), 0.9 * t, 0, 0, 0.8 * t, PAL.orange, 0.45, 1); bx(cx - 0.42, 3.18, cx + 0.42, 3.82, th.block); bx(cx - 0.32, 3.24, cx + 0.32, 3.76, PAL.orange); bx(cx - 0.12, 3.34, cx + 0.12, 3.62, PAL.yellow);
+          if (lit) F(X(cx), Y(3.5), 0.9 * t, 0, 0, 0.8 * t, PAL.orange, 0.45, 1);
+          bx(cx - 0.42, 3.18, cx + 0.42, 3.82, th.block); bx(cx - 0.32, 3.24, cx + 0.32, 3.76, PAL.orange, 0, lit ? 1 : DIM); bx(cx - 0.12, 3.34, cx + 0.12, 3.62, PAL.yellow, 0, lit ? 1 : DIM);
           for (const u of [cx - 0.34, cx + 0.32]) bx(u, 3.18, u + 2 * px, 3.82, th.block);
-          vlamps.push([X(cx), Y(3.5)]);
+          if (lit) vlamps.push([X(cx), Y(3.5)]);
         }, cone = (w0, h0) => { for (let i = 0, n = 6; i < n; i++) { const q = i / n; bx(cx - w0 * (1 - q), 3.82 + h0 * q, cx + w0 * (1 - q), 3.82 + h0 * (q + 1 / n), th.block); } };
         for (let i = 0, n = 10; i < n; i++) { const v0 = (2.9 * i) / n, ww = 0.9 - 0.28 * (i / n); bx(cx - ww, v0, cx + ww, v0 + 2.9 / n, PAL.gray, 1); } bx(cx - 0.2, 0, cx + 0.2, 0.62, PAL.black); lamp();
         bx(cx - 0.85, 3.82, cx + 0.85, 3.95, th.block); for (const e of [-1, 1]) bx(cx + e * 0.85, 3.9, cx + e * 0.98, 4.02, th.block); cone(0.55, 0.42); el(cx, 4.32, 0.09, 0.09, th.block);   // its roof, a ball on it

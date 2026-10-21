@@ -3374,12 +3374,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const [u, h, l] of [[0.45, 0.7, -0.08], [0.62, 0.95, 0.05], [0.88, 0.6, 0.1], [1.12, 0.8, -0.05], [2.05, 0.75, 0.06], [2.75, 0.9, -0.06], [2.98, 0.65, 0.08], [3.25, 0.8, 0.03]]) ln(u, 0, u + l, h, PAL.green);
         ln(2.3, 0, 2.3, 0.85, PAL.green); bx(2.18, 0.85, 2.42, 1.09, PAL.purple); bx(2.29, 0.95, 2.29 + px, 0.95 + px, PAL.black);   // a flower (F's yellow: yellow is for what you take)
       } else if (p.kind === 'lantern') {   // a little Inari shrine (D): a stone lantern, a fox either side on its plinth, the shrine, a branch of sakura out of the wall
-        // (the task: its lantern dark till the hero comes near, then lit for good, flickering on, a ring of light going out from it, its glow as the neon's)
+        // (the task: its lantern dark till the hero comes near, then lit for good, flickering on, a ring of light going out from it, its glow as the neon's;
+        // its light red, Inari's vermilion: orange was lost on the Village's orange earth, owner: «зажигай святилище красным светом, иначе плохой контраст»)
         const on = lv.tended.get(r), lit = on != null && !((T - on) < 0.4 && Math.floor((T - on) * 20) % 3 === 1), lx = X(0.63), ly = Y(1.3);
-        if (lit) { F(lx, ly, 1.6 * t, 0, 0, 1.3 * t, PAL.orange, 1.3, 1); F(lx, ly, 0.55 * t, 0, 0, 0.5 * t, PAL.orange, 2.4, 1); vlamps.push([lx, ly]); }   // its glow under it: a wide halo, a solid tone round it
+        if (lit) { F(lx, ly, 1.6 * t, 0, 0, 1.3 * t, PAL.red, 1.3, 1); F(lx, ly, 0.55 * t, 0, 0, 0.5 * t, PAL.red, 2.4, 1); vlamps.push([lx, ly]); }   // its glow under it: a wide halo, a solid tone round it
         bx(0.3, 0, 0.96, 0.12, PAL.gray); bx(0.55, 0.12, 0.72, 1.05, PAL.gray); bx(0.38, 1.05, 0.88, 1.6, PAL.gray);
-        bx(0.5, 1.15, 0.76, 1.45, PAL.orange, 0, lit ? 1 : DIM);   // its window (D's yellow: orange, as the Cave's)
-        if (on != null && T - on < 0.7) { const q = (T - on) / 0.7; F(lx, ly, (0.3 + 1.7 * q) * t, 0, 0, (0.3 + 1.7 * q) * t, PAL.orange, 1 - q, 4); }
+        bx(0.5, 1.15, 0.76, 1.45, PAL.red, 0, lit ? 1 : DIM);   // its window
+        if (on != null && T - on < 0.7) { const q = (T - on) / 0.7; F(lx, ly, (0.3 + 1.7 * q) * t, 0, 0, (0.3 + 1.7 * q) * t, PAL.red, 1 - q, 4); }
         bx(0.25, 1.6, 1.01, 1.74, PAL.gray); bx(0.56, 1.74, 0.71, 1.94, PAL.gray);
         for (const [c, f] of [[1.4, 1], [3.45, -1]]) {   // a fox, facing the shrine: grey stone, its tail up behind it, an orange bib (D's collar red)
           bx(c - 0.4, 0, c + 0.4, 0.26, PAL.gray); bx(c - 0.4, 0.26, c + 0.4, 0.26 + px, PAL.black);
@@ -3533,6 +3534,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // hanging with a weight on it. False for what keeps the common look (ice, springs, magnets, bouncy planks, stairs).
   const villageRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
     if (r.crumble) {
       const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round((r.x1 - r.x0) / (1.1 * t))), pw = (r.x1 - r.x0) / n, ny = snap(r.y0 + 0.35 * Math.min(hgt, t));
       for (let i = 0; i < n; i++) {
@@ -3546,7 +3548,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           const ky = snap(r.y0 - 1.0 * t), kx = snap(wx + d * 0.17 * t);
           box(snap(Math.min(wx, wx + d * 0.32 * t)), ky, snap(Math.max(wx, wx + d * 0.32 * t)), ky + snap(0.28 * t), PAL.gray, a, 0, 10, 0); box(kx, ky + P, kx + P, ky + 2 * P, PAL.black, a, 0, 10, 0);
           line(wx + d * 0.3 * t, ky + 0.22 * t, wx + d * 0.85 * t, r.y0 + 2 * P, PAL.gray, a);
-        } else {
+        } else if (hang) {
           const hx = snap(ex + d * 0.22 * t), wy = snap(r.y1 + 0.75 * t);
           if (wl || wr) { box(hx, r.y1, hx + P, wy, PAL.gray, a, 0, 10, 0); box(hx - 2 * P, wy, hx + 3 * P, wy + 4 * P, PAL.gray, a, 0, 10, 0); box(hx, wy + P, hx + P, wy + 2 * P, PAL.black, a, 0, 10, 0); }   // its rope, a weight on it
           else box(hx, r.y1, hx + P, snap(r.y1 + 0.3 * t), PAL.gray, a, 0, 10, 0);   // a frayed end of rope
@@ -3580,7 +3582,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(ps[0] + pw, ry - P, ps[1], ry + P, th.plank, 1, 0, 10, 0);
         for (let x = ps[0] + 0.9 * t; x < ps[1] - 0.3 * t; x += 0.9 * t) box(snap(x), ry - P, snap(x) + P, ry + P, PAL.black, 1, 0, 10, 0);
       }
-      if (wl !== wr && r.x1 - r.x0 >= 3 * t) {   // a charm on a string off its free end: an orange bead, a grey paper omamori written on in purple
+      if (hang && wl !== wr && r.x1 - r.x0 >= 3 * t) {   // a charm on a string off its free end: an orange bead, a grey paper omamori written on in purple
         const cx = snap(wl ? r.x1 - 0.18 * t : r.x0 + 0.18 * t), by = snap(r.y1 + 0.55 * t), c0 = snap(cx - 0.13 * t), c1 = snap(cx + 0.13 * t) + P, cy0 = by + 3 * P, cy1 = snap(by + 0.62 * t);
         box(cx, r.y1, cx + P, by, PAL.gray, 1, 0, 10, 0); box(cx - P, by, cx + 2 * P, by + 2 * P, PAL.orange, 1, 0, 10, 0);
         box(c0, cy0, c1, cy1, PAL.gray, 1, 0, 10, 0); for (const k of [2, 5]) box(c0 + P, cy0 + k * P, c1 - P, cy0 + (k + 1) * P, PAL.purple, 1, 0, 10, 0);

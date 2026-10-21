@@ -64,10 +64,8 @@ const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the 
 // `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
 // testers found stomps too exact). `bounce` was 1.0, then 0.8: the user found the hop off a kill too high.
 const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
-// A fizz candy, found once or twice a level (at `at` of its height, from..to), makes the hero shoot by
-// itself for `time` s (+`plus` a Long charge): a bullet every `every` s at the nearest enemy or blob within
-// `range` R, flying `speed` R/s; it stops at a block and breaks a crumbling one.
-const GUN = { time: 8, plus: 2, every: 0.22, range: 5.5, speed: 32, r: 0.14, at: [[0.22, 0.4], [0.58, 0.78]] };
+// Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
+const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]] };   // plus: s a candy lasts longer with 'long'; at: the parts of a level's height its candies are laid in (the fizz gun gone, owner 2026-10-22: «удалим пистолет, он лишний как смысл»)
 // The helmet (once rock candy; user): for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
 // `maxH` tiles found `reach` R over the hero (`look` R off a ceiling) breaks before it is met, its enemies with it, `coins` once ever,
 // the hero kicked on up at `kick` of a jump; it is back `back` s later, or under a hero coming down onto it once `soon` s are out.
@@ -87,7 +85,7 @@ const SWARM = { time: 7, n: [5, 7], size: 0.9, orbit: 2.9, spin: 3.2, back: 0.3,
 // the campaign's levels from the third (one at most, a level's own), at `at` of its height; taken, the hero flies up `lift` of the level at `v` of a
 // jump through all, as through a boost ring (RING), in the astronaut's helmet, every coin and task on its way its own (Game.ringStep)
 const ASTRO = { p: 0.35, at: [0.25, 0.6], lift: 0.2, v: 2.6, time: 30 };   // time: a bound only (the flight ends it)
-const CANDY = { fizz: GUN, smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO };
+const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO };
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless; in Tokyo a crow
@@ -192,7 +190,7 @@ const kitThing = (lv, r) => {
   } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t) out = { kind: 'bell', x: wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t, y: r.y1 + 0.4 * t };
   return (r.kit = out);
 };
-const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ GUN.plus a Long charge; all 3 s longer than at first, user)
+const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ CANDIES.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
 const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, hp: 1 }];
 // A level's stars: one for getting out, the second for `half` its coins, the third for all of them (enemies do not
@@ -391,7 +389,7 @@ const WORLDS = [
     chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2, fork: 1, vault: 2 },
     foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { en: 'moss and springs', es: 'musgo y resortes', pt: 'musgo e molas', ja: 'コケと バネ' } },
-      { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'fizz'], news: { en: 'crumbling blocks, rubber and climbers', es: 'bloques que se caen, goma y trepadores', pt: 'blocos que desmoronam, borracha e escaladores', ja: 'くずれる ブロック、ゴム、カベノボリ' } },
+      { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'rainbow'], news: { en: 'crumbling blocks, rubber and climbers', es: 'bloques que se caen, goma y trepadores', pt: 'blocos que desmoronam, borracha e escaladores', ja: 'くずれる ブロック、ゴム、カベノボリ' } },
       { chunks: ['icewall', 'lift'], news: { en: 'ice, moving planks and hedgehogs', es: 'hielo, tablas móviles y erizos', pt: 'gelo, tábuas móveis e ouriços', ja: 'こおり、うごく いた、ハリネズミ' } }] },
   { id: 'ice', name: { en: 'Fuji', es: 'Fuji', pt: 'Fuji', ja: 'ふじ' }, theme: THEMES.ice, heights: [42, 50, 58], fire: 0.55, dark: [1],
     chunks: { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1, twinshaft: 1, rest: 1, fork: 1, fork2: 1, vault: 1 },
@@ -742,19 +740,19 @@ const CAMPAIGN = [
   { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutShop', 'tutEnemy', 'tutHelmet', 'tutMix', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
     intro: [], enemies: ['crawler'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,   // the tutorial (owner): CHUNKS.tut*, in their order
     news: { en: 'how to climb', es: 'cómo trepar', pt: 'como escalar', ja: 'のぼりかた' } },
-  { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: MINE, intro: ['crumble', 'bridge'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['fizz', 'fizz'], cage: true, seed: 4105,   // (1-1's surfaces first, it being the tutorial now)
+  { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: MINE, intro: ['crumble', 'bridge'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['rainbow', 'rainbow'], cage: true, seed: 4105,   // (1-1's surfaces first, it being the tutorial now)
     news: { en: "crumbling blocks: don't stand still", es: 'bloques que se caen: no te quedes quieto', pt: 'blocos que desmoronam: não fique parado', ja: 'くずれる ブロック: とまるな' } },
-  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler'], foes: 0.45, candy: ['fizz'], seed: 4106,
+  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler'], foes: 0.45, candy: ['rainbow'], seed: 4106,
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.1, candy: ['fizz', 'smash'], shop: 0.4, seed: 4101,
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.1, candy: ['rainbow', 'smash'], shop: 0.4, seed: 4101,
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
-  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4108 },
+  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { crumble: 3, bridge: 3, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
-    motif: ['ride', 'lift', 'ride2'], sparse: true, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['fizz'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+    motif: ['ride', 'lift', 'ride2'], sparse: true, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['rainbow'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
-  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['fizz'], seed: 4102 },
+  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['rainbow'], seed: 4102 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'probka', moss: true },   // the Cork's dive (owner, 2026-10-20: the first boss's fight); moss on its arena's walls: a place to sit its dive out
@@ -765,14 +763,14 @@ const CAMPAIGN = [
 { world: BLOCKS, runes: 'BMQ', lore: { en: 'They stacked floor on floor to reach the sky.\nThe top was only a roof.', es: 'Apilaron piso sobre piso para llegar al cielo.\nArriba solo había un tejado.', pt: 'Empilharam andar sobre andar para chegar ao céu.\nNo alto só havia um telhado.', ja: 'そらに とどこうと かいを かさねた。\nてっぺんは ただの やねだった。' }, levels: [
   { role: 'teach', len: 34, fire: 0.46, calm: 8, maxD: 2, chunks: PANEL, intro: ['flight'], enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 6101,
     news: { en: 'stairs: just walk up', es: 'escaleras: sube andando', pt: 'escadas: é só subir andando', ja: 'かいだん: あるいて のぼれる' } },
-  { role: 'teach', len: 38, fire: 0.48, maxD: 2, chunks: { ...PANEL, crumble: 3 }, intro: ['crumble'], enemies: ['crawler', 'climber'], foes: 0.5, candy: ['fizz'], gate: 'gate', seed: 6102,
+  { role: 'teach', len: 38, fire: 0.48, maxD: 2, chunks: { ...PANEL, crumble: 3 }, intro: ['crumble'], enemies: ['crawler', 'climber'], foes: 0.5, candy: ['rainbow'], gate: 'gate', seed: 6102,
     news: { en: 'old balconies give way', es: 'los balcones viejos ceden', pt: 'as sacadas velhas cedem', ja: 'ふるい ベランダは くずれる' } },
   { role: 'teach', len: 40, fire: 0.48, maxD: 2, chunks: { ...PANEL, spring: 3 }, intro: ['spring'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['smash'], sides: [15976, 0], seed: 6103,
     news: { en: 'old mattresses bounce', es: 'los colchones viejos rebotan', pt: 'colchões velhos quicam', ja: 'ふるい マットレスで はねる' } },
-  { role: 'apply', len: 46, fire: 0.5, maxD: 2, chunks: PANEL, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.6, pair: 0.15, candy: ['smash', 'fizz'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 6104 },
+  { role: 'apply', len: 46, fire: 0.5, maxD: 2, chunks: PANEL, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 6104 },
   { role: 'peak', len: 38, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6105 },
   { role: 'bonus', len: 46, bonus: 2, time: 50, seed: 6106 },
-  { role: 'twist', len: 40, fire: 0.5, maxD: 2, chunks: PANEL, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.55, candy: ['fizz'], stash: 0.3, sides: [0, 116698], seed: 6107,
+  { role: 'twist', len: 40, fire: 0.5, maxD: 2, chunks: PANEL, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.55, candy: ['rainbow'], stash: 0.3, sides: [0, 116698], seed: 6107,
     news: { en: 'winter: icicles fall off the roofs', es: 'invierno: caen carámbanos de los tejados', pt: 'inverno: pingentes caem dos telhados', ja: 'ふゆ: やねから つららが おちる' } },
   { role: 'peak', len: 42, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, spikes: 1, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [17935, 0], seed: 9039 },
   { role: 'rest', len: 30, fire: 0.42, maxD: 2, chunks: { flight: 3, stairs: 2, planks: 3, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, sides: [0, 113769], seed: 6109,
@@ -785,14 +783,14 @@ const CAMPAIGN = [
 { world: SKY, runes: 'OUd', lore: { en: 'At the top of the tallest tower\nwere only clouds.', es: 'En lo alto de la torre más alta\nsolo había nubes.', pt: 'No alto da torre mais alta\nsó havia nuvens.', ja: 'いちばん たかい とうの うえには\nくもしか なかった。' }, levels: [
   { role: 'teach', len: 36, fire: 0.5, calm: 8, maxD: 2, chunks: SKYP, intro: ['planks'], enemies: ['crawler', 'climber'], foes: 0.45, candy: [], safe: true, seed: 7101,
     news: { en: 'clouds dissolve under you', es: 'las nubes se deshacen bajo tus pies', pt: 'as nuvens se desfazem sob você', ja: 'くもは あしもとで きえる' } },
-  { role: 'teach', len: 40, fire: 0.52, maxD: 2, chunks: { ...SKYP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['fizz'], gate: 'gate', sides: [0, 112808], seed: 7102,
+  { role: 'teach', len: 40, fire: 0.52, maxD: 2, chunks: { ...SKYP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['rainbow'], gate: 'gate', sides: [0, 112808], seed: 7102,
     news: { en: 'window-cleaning gondolas', es: 'góndolas de limpiacristales', pt: 'gôndolas de limpar janelas', ja: 'まどふきの ゴンドラ' } },
   { role: 'teach', len: 42, fire: 0.52, maxD: 2, chunks: SKYP, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.5, candy: ['smash'], sides: [0, 113786], seed: 7103,
     news: { en: 'dropped bolts fall from above', es: 'caen tornillos desde arriba', pt: 'parafusos caem lá de cima', ja: 'うえから ボルトが おちる' } },
-  { role: 'apply', len: 48, fire: 0.54, maxD: 2, chunks: SKYP, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'fizz'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 7104 },
+  { role: 'apply', len: 48, fire: 0.54, maxD: 2, chunks: SKYP, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 7104 },
   { role: 'peak', len: 40, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], sides: [0, 112811], seed: 7105 },
   { role: 'bonus', len: 48, bonus: 0, time: 52, seed: 7106 },
-  { role: 'twist', len: 42, fire: 0.54, maxD: 2, chunks: SKYP, intro: [], dark: true, enemies: ['crawler', 'climber', 'shell'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 7107,
+  { role: 'twist', len: 42, fire: 0.54, maxD: 2, chunks: SKYP, intro: [], dark: true, enemies: ['crawler', 'climber', 'shell'], foes: 0.55, candy: ['rainbow'], stash: 0.3, seed: 7107,
     news: { en: 'night over the clouds', es: 'noche sobre las nubes', pt: 'noite sobre as nuvens', ja: 'くもの うえの よる' } },
   { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [0, 113791], seed: 7108 },
   { role: 'rest', len: 32, fire: 0.44, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
@@ -805,14 +803,14 @@ const CAMPAIGN = [
 { world: JUNK, runes: 'krw', lore: { en: 'What the climbers threw away\nthe ones below kept.', es: 'Lo que tiraban los que subían\nlo guardaban los de abajo.', pt: 'O que os que subiam jogavam fora\nos de baixo guardavam.', ja: 'のぼる ものが すてた ものを\nしたの ものが ひろった。' }, levels: [
   { role: 'teach', len: 38, fire: 0.52, calm: 8, maxD: 2, chunks: { ...JUNKP, spring: 4 }, intro: ['spring'], enemies: ['crawler', 'climber'], foes: 0.45, candy: [], safe: true, seed: 8101,
     news: { en: 'trash bags bounce', es: 'las bolsas de basura rebotan', pt: 'sacos de lixo quicam', ja: 'ゴミぶくろで はねる' } },
-  { role: 'teach', len: 42, fire: 0.54, maxD: 2, chunks: JUNKP, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['fizz'], crossing: true, gate: 'gate', seed: 8102,
+  { role: 'teach', len: 42, fire: 0.54, maxD: 2, chunks: JUNKP, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['rainbow'], crossing: true, gate: 'gate', seed: 8102,
     news: { en: 'garbage trucks: mind the street', es: 'camiones de basura: cuidado con la calle', pt: 'caminhões de lixo: cuidado com a rua', ja: 'ゴミしゅうしゅうしゃ: どうろに ちゅうい' } },
   { role: 'teach', len: 44, fire: 0.54, maxD: 2, chunks: { ...JUNKP, iceblocks: 3 }, intro: ['iceblocks'], enemies: ['crawler', 'shell', 'spitter'], foes: 0.5, candy: ['smash'], sides: [0, 113809], seed: 8103,
     news: { en: 'greasy steel: you slide', es: 'acero grasiento: resbalas', pt: 'aço engordurado: você escorrega', ja: 'あぶらの はがね: すべる' } },
-  { role: 'apply', len: 50, fire: 0.56, maxD: 2, chunks: { ...JUNKP, iceblocks: 1 }, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'fizz'], crossing: true, shop: 0.4, stash: 0.3, gate: 'gate2', seed: 8104 },
+  { role: 'apply', len: 50, fire: 0.56, maxD: 2, chunks: { ...JUNKP, iceblocks: 1 }, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], crossing: true, shop: 0.4, stash: 0.3, gate: 'gate2', seed: 8104 },
   { role: 'peak', len: 42, fire: 0.6, maxD: 3, chunks: { ...JUNKP, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], sides: [0, 113811], seed: 8105 },
   { role: 'bonus', len: 50, bonus: 1, time: 55, seed: 8106 },
-  { role: 'twist', len: 44, fire: 0.56, maxD: 2, chunks: JUNKP, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.55, candy: ['fizz'], stash: 0.3, crossing: true, sides: [18957, 114790], seed: 9084,
+  { role: 'twist', len: 44, fire: 0.56, maxD: 2, chunks: JUNKP, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.55, candy: ['rainbow'], stash: 0.3, crossing: true, sides: [18957, 114790], seed: 9084,
     news: { en: 'junk falls off the fire escapes', es: 'cae chatarra de las escaleras de incendios', pt: 'cai sucata das escadas de incêndio', ja: 'ひじょうかいだんから ガラクタが おちる' } },
   { role: 'peak', len: 46, fire: 0.6, maxD: 3, chunks: { ...JUNKP, comb: 3, spikes: 1, rubberwall: 2, iceblocks: 1 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', seed: 9085 },
   { role: 'rest', len: 34, fire: 0.46, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 8109,
@@ -856,7 +854,7 @@ const UPGRADES = [
   { id: 'legs', stack: true, name: { en: ['Strong legs', 'Jump higher'], es: ['Piernas fuertes', 'Saltas más alto'], pt: ['Pernas fortes', 'Pula mais alto'], ja: ['つよい あし', 'もっと たかく とべる'] }, apply: (g) => { g.mods.jump *= 1.08; } },
   { id: 'member', name: { en: ['Member card', '25% off in shops'], es: ['Tarjeta de socio', '25% menos en las tiendas'], pt: ['Cartão de sócio', '25% de desconto nas lojas'], ja: ['かいいんしょう', 'ショップで 25% びき'] }, apply: (g) => { g.mods.discount *= 0.75; } },
   { id: 'iron', name: { en: ['Iron soles', 'Floor spikes do not hurt'], es: ['Suelas de hierro', 'Los pinchos del suelo no dañan'], pt: ['Solas de ferro', 'Espinhos no chão não machucam'], ja: ['てつの くつぞこ', 'ゆかの トゲが いたくない'] }, apply: (g) => { g.mods.iron = true; } },
-  { id: 'long', stack: true, name: { en: ['Long charge', 'Candies last 2 s longer'], es: ['Carga larga', 'Los caramelos duran 2 s más'], pt: ['Carga longa', 'Doces duram 2 s a mais'], ja: ['ロング チャージ', 'キャンディが 2 びょう ながもち'] }, apply: (g) => { g.mods.gun += GUN.plus; } },
+  { id: 'long', stack: true, name: { en: ['Long charge', 'Candies last 2 s longer'], es: ['Carga larga', 'Los caramelos duran 2 s más'], pt: ['Carga longa', 'Doces duram 2 s a mais'], ja: ['ロング チャージ', 'キャンディが 2 びょう ながもち'] }, apply: (g) => { g.mods.gun += CANDIES.plus; } },
   { id: 'cool', name: { en: ['Fireproof', 'The fire rises slower and spits less'], es: ['Ignífugo', 'El fuego sube más lento y escupe menos'], pt: ['À prova de fogo', 'O fogo sobe devagar e cospe menos'], ja: ['たいか', 'ほのおが ゆっくり、あまり とばさない'] }, apply: (g) => { g.mods.fire *= 0.6; } },
   // Upgrades that change what the hero does, not a number (the plan after the sandbox: "+5%" is dull)
   { id: 'ceiling', name: { en: ['Sticky top', 'Any ceiling holds you'], es: ['Techo pegajoso', 'Cualquier techo te sujeta'], pt: ['Teto grudento', 'Qualquer teto segura você'], ja: ['ネバネバ てんじょう', 'どの てんじょうにも くっつく'] }, apply: (g) => { g.mods.ceil = true; } },
@@ -895,7 +893,6 @@ const ICONS = {
 };
 ICONS.star = '.....yy...../.....yy...../....yyyy..../yyyyyyyyyyoo/.yyyyyyyyoo./..yyyyyyoo../...yyyyoo.../..yyyyyyoo../..yyy..yoo../.yyy....ooo./.yy......oo./............';
 ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
-ICONS.fizz = '............/............/..........w./.yyyyyyyyy../.ywwyyyyyyw./.yyyyyyyyy../.yyyoo....../.yyyo.o...../.yyyooo...../.yyy......../.ooo......../............';   // what it does: a gun, shots flying
 ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.maxhp = ICONS.heart;
 ICONS.taskCrow = '............/............/.......sss../......sswsss/.....ssssss./..ssssssss../.ssssssssss./sssssssss.../..ssssss..../....s.s...../....s.s...../...ss.ss....';   // a level's tasks (Game.task): the crows,
@@ -1657,7 +1654,7 @@ class Level {
     this.rng = mulberry32(o.seed >>> 0); this.foeRng = mulberry32((o.seed ^ 0x85ebca6b) >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
-    this.fizz = []; this.bullets = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
+    this.fizz = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
     if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows; a recipe's own)
       const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
       if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
@@ -1669,7 +1666,7 @@ class Level {
       if (rc ? rc.trader : fr() < FOLK.traderP) this.folkAt.push({ kind: 'trader', y: at(FOLK.trader) });
       this.folkAt.sort((p, q) => q.y - p.y);   // the lower first
     }
-    this.fizzAt = o.kind === 'well' && o.height ? GUN.at.slice(0, rc ? rc.candy.length : GUN.at.length).map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies (a recipe's, as many)
+    this.fizzAt = o.kind === 'well' && o.height ? CANDIES.at.slice(0, rc ? rc.candy.length : CANDIES.at.length).map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies (a recipe's, as many)
     this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY).filter((k) => k !== 'astro'));   // and which kinds, by a generator of their own: the shaft is laid as before
     const ar = this.astroRng = mulberry32((o.seed ^ 0x3c6ef372) >>> 0);   // a level's astro (ASTRO), by a generator of its own (its ledge too: the level is laid as without it)
     if (rc && rc.astro && o.height && ar() < ASTRO.p) {   // in its place among the level's candies, low to high
@@ -4077,9 +4074,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
     const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
-    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); iconSpin(p.kind || 'fizz', p.x, y, 1, k, T * 2.2 + p.x * 0.05);
+    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
-  for (const b of lv.bullets) { const s = Math.max(2, Math.round((GUN.r * R) / PIX.size) * PIX.size); box(b.x - s, b.y - s, b.x + s, b.y + s, INK.white, 1, 0, 10, 0); }   // the hero's shots, white
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
     : (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
   for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);

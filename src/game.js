@@ -16,7 +16,7 @@ const STR = {
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
-    got_fizz: 'Fizz! You shoot by yourself · {s} s', got_smash: 'Helmet! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
+    got_smash: 'Helmet! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
@@ -33,7 +33,7 @@ const STR = {
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
     seen_splitter: 'El divisor se parte en dos', seen_chaser: 'El perseguidor te sigue por su pared',
-    got_fizz: '¡Burbujas! Disparas solo · {s} s', got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
+    got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
@@ -50,7 +50,7 @@ const STR = {
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
     seen_splitter: 'O divisor se parte em dois', seen_chaser: 'O perseguidor segue você pela parede',
-    got_fizz: 'Gasosa! Você atira sozinho · {s} s', got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
+    got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
@@ -67,7 +67,7 @@ const STR = {
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
     seen_splitter: 'ブンレツは ふたつに わかれる', seen_chaser: 'オイカケは かべを つたって おってくる',
-    got_fizz: 'シュワシュワ！ じどうで うつ · {s} びょう', got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
+    got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
@@ -688,7 +688,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -734,7 +734,7 @@ class Game {
       for (const r of lv.rects) { box(r); if (r.move) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
       for (const o of [...lv.spikes, ...lv.bubbles]) { box(o); xy(o); }
       for (const c of lv.coats) { c.y0 = Y(c.y0); c.y1 = Y(c.y1); }
-      for (const o of [lv.coins, lv.shots, lv.bullets, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
+      for (const o of [lv.coins, lv.shots, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
       for (const sp of lv.spots || []) { const r = sp.r; xy(sp); sp.r = r; }   // (a pit's size is in R: it grows with R)
       const walls = new Set(), wall = (w) => { if (!w || walls.has(w)) return; walls.add(w); w.y0 = Y(w.y0); w.y1 = Y(w.y1); };   // (a wall can be a spawn's and its climber's both)
       for (const s of lv.spawns) wall(s.wall);
@@ -1200,7 +1200,7 @@ class Game {
     if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
     this.spikes(); this.fireStep(dt); this.fireTouch();
     if (this.state !== 'play') return;   // the fire ended a bonus level
-    this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt); this.followStep(); this.setStep(dt);
+    this.shots(dt); this.collect(dt); this.candies(dt); this.folkStep(dt); this.followStep(); this.setStep(dt);
     for (const f of lv.folk) if (f.body && !f.open && f.y > lv.cam && f.y < lv.cam + view.h) this.hint(f.kind);   // a cage or a trader, told once
     if (lv.tasks && lv.tasks.length && !(lv.signs && lv.signs.length)) this.hint('tasks', 'seen_tasks', 'star');   // and what the third star is for (after the tutorial: one thing at a time)
     if (!save.seen.crack) for (const r of lv.near(lv.cam + view.h * 0.2, lv.cam + view.h * 0.8)) if (r.crack) { this.hint('crack'); break; }
@@ -1512,12 +1512,11 @@ class Game {
     splatFx(H.cx, f.y, this.R * 0.7, INK.flame, 6);
     f.y = Math.max(f.y, H.maxY + FIRE.back * view.h); f.warn = null;   // and sinks back: a throw into a ceiling must not land in it again
   }
-  // A fizz candy taken, the hero shoots by itself for a while: at the nearest enemy or blob in range.
   power(k) { return this.gunT > 0 && this.pow === k; }   // a candy at work
   take(kind) {   // one candy at a time: a new one takes over, the same one starts again
     if (this.gunT > 0 && this.pow !== kind) this.powerEnd();   // a rainbow or a giant cut short still ends safely
     met('candy', kind);
-    this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.gunCD = 0; this.ram = false;
+    this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.ram = false;
     if (kind === 'grow') { this.hero.growthTarget = GROW.size; fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('spring', 0.8, 0.6); shake.add(4); }
     if (kind === 'rainbow' || kind === 'swarm') this.invuln = 0;   // a hit's blink would let enemies through untouched
     if (kind === 'swarm') this.swarmUp();
@@ -1534,34 +1533,14 @@ class Game {
     if (this.pow === 'grow') { this.hero.growthTarget = 1; this.invuln = Math.max(this.invuln, GROW.grace); fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('bubble', 0.7, 0.7); }   // back to size, and a while blinking
     this.pow = null; this.ram = false;
   }
-  gun(dt) {
+  candies(dt) {   // a candy touched is taken (`take`), and runs out
     const lv = this.lv, H = this.hero, R = this.R;
     for (const p of lv.fizz || []) if (!p.taken && Math.hypot(H.cx - p.x, H.cy - p.y) < p.r + 0.8 * H.R * H.growth) {   // (a giant's reach is its size)
-      p.taken = true; this.take(p.kind || 'fizz');
+      p.taken = true; this.take(p.kind);
       fx.ring(p.x, p.y, 1.4 * R, INK.coin); sound.play('buy'); haptics.buzz(14);
     }
     if (this.gunT > 0 && (this.gunT -= dt) <= 0) this.powerEnd();
     for (const p of lv.fizz || []) if (p.again && p.taken && !this.power(p.kind) && H.cy > p.y - 6 * R) p.taken = false;   // the tutorial's helmet: back for a hero still under its blocks
-    if (this.power('fizz') && (this.gunCD -= dt) <= 0) {
-      let best = null, bd = GUN.range * R;
-      for (const e of lv.enemies) { const d = Math.hypot(e.body.cx - H.cx, e.body.cy - H.cy); if (d < bd) { bd = d; best = [e.body.cx, e.body.cy]; } }
-      for (const s of lv.shots) { const d = Math.hypot(s.x - H.cx, s.y - H.cy); if (d < bd) { bd = d; best = [s.x, s.y]; } }
-      if (best) {
-        const dx = (best[0] - H.cx) / bd, dy = (best[1] - H.cy) / bd;
-        lv.bullets.push({ x: H.cx + dx * H.R, y: H.cy + dy * H.R, vx: dx * GUN.speed * R, vy: dy * GUN.speed * R, t: 0 });
-        this.gunCD = GUN.every; sound.play('shot', 0.35, 0.9 + Math.random() * 0.2);
-      }
-    }
-    for (let i = lv.bullets.length - 1; i >= 0; i--) {   // a bullet: through the air until it meets an enemy, a blob or a block
-      const b = lv.bullets[i];
-      b.x += b.vx * dt; b.y += b.vy * dt; b.t += dt;
-      let gone = b.t > 1 || b.y < lv.cam - R || b.y > lv.cam + view.h + R;
-      for (const r of lv.near(b.y, b.y)) if (!r.plank && b.x > r.x0 && b.x < r.x1) { gone = true; if (r.crumble) r.hit = true; }
-      if (b.x < lv.l || b.x > lv.r) gone = true;
-      for (const e of lv.enemies.slice()) { const q = e.body; if (!gone && b.x > q.minX && b.x < q.maxX && b.y > q.minY && b.y < q.maxY) { this.kill(e, true); gone = true; } }
-      for (let k = lv.shots.length - 1; k >= 0 && !gone; k--) { const s = lv.shots[k]; if (Math.hypot(s.x - b.x, s.y - b.y) < s.r + GUN.r * R) { splatFx(s.x, s.y, s.r * 2, INK.spike, 4); lv.shots.splice(k, 1); gone = true; } }
-      if (gone) lv.bullets.splice(i, 1);
-    }
   }
   shots(dt) {
     const lv = this.lv, H = this.hero, sh = lv.shots;
@@ -2583,7 +2562,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // summit, quieter while paused or over (each fetched when first wanted, the last four kept: all of them decoded are ~170 MB). It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
-  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
+  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
 const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
 const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', junk: 'junk', skazka: 'skazka', sea: 'sea' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {

@@ -769,7 +769,9 @@ class Game {
     u.apply(this); this.taken.push(u.id); met('up', u.id);
     for (const sy of SYNERGIES) if (!this.syns.includes(sy.id) && sy.of.every((id) => this.taken.includes(id))) {   // a pair made whole: what it is, at once
       sy.apply(this); this.syns.push(sy.id); met('up', sy.id);
-      if (this.state === 'play' || this.state === 'clear') setTimeout(() => ui.toast(tf('synergy', { n: L2(sy.name)[0] }) + '\n' + L2(sy.name)[1], 2600), 400);
+      const say = tf('synergy', { n: L2(sy.name)[0] }) + '\n' + L2(sy.name)[1];
+      if (this.state === 'clear') this.synSay = say;   // a card picked at a clear: told after the next level's banner, not over it (ui.banner)
+      else if (this.state === 'play') setTimeout(() => ui.toast(say, 2600), 400);
     }
     this.applyMods();
   }
@@ -2283,6 +2285,7 @@ const ui = {
     if (ms) this.toastTimer = setTimeout(() => e.classList.remove('show'), ms);   // 0 keeps it up
   },
   banner() {
+    if (game.synSay) { const say = game.synSay; game.synSay = null; setTimeout(() => { if (game.state === 'play') ui.toast(say, 2600); }, 3000); }   // a pair made at the last clear: after this
     const bs = game.lv.boss;
     if (bs && bs.def) { const n = save.camp.fails[game.failKey()] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? (bs.def.how ? L2(bs.def.how) : t('bossHow')) : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
     if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }

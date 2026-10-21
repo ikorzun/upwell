@@ -1154,23 +1154,28 @@ class Game {
       if (a.done) continue;
       if (a.on && H.cy < a.y - view.h) { a.done = true; continue; }   // left behind (its waves pruned below): over, and nothing paid
       if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }
+      if (a.drops) { if ((a.dropT -= dt) <= 0) this.arenaDrop(a); continue; }
       if (a.foes.some((e) => lv.enemies.includes(e))) continue;
       if (a.wave < ARENA.waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
-      if (this.rc && this.rc.mini && !a.mini) {   // the last wave a mini-boss (MINI): a big spitter, dropping in
-        const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0], f = new Foe({ type: 'spitter', big: true, x: a.x, y: a.y - ARENA.drop * R, ledge: floor }, lv);
-        a.mini = true; a.foes = [f]; lv.enemies.push(f); lv.foeTotal++; fx.ring(f.body.cx, f.body.cy, 2 * R, INK.spike); ui.toast(t('miniSpit'), 1600); sound.play('bubble', 1, 0.5); continue;
+      if (this.rc && this.rc.mini && !a.mini) {   // the last wave a mini-boss (MINI): a big spitter, dropping in, shown first as the waves are
+        const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
+        a.mini = true; a.foes = []; a.drops = [{ type: 'spitter', big: true, x: a.x, y: a.y - ARENA.drop * R, ledge: floor }]; a.dropT = ARENA.warn; ui.toast(t('miniSpit'), 1600); sound.play('bubble', 1, 0.5); continue;
       }
       a.done = true; this.drop(a.x, a.y - R, ARENA.coins, 5); ui.toast(tf('arenaWon', { n: 5 * ARENA.coins }), 2000); sound.play('combo', 1, 1.1); shake.add(4);
     }
   }
-  arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped
+  arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped, each where it will come shown first (arenaDrop)
     const lv = this.lv, R = this.R, n = ARENA.waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini');
     const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
-    a.foes = [];
-    for (let k = 0; k < n; k++) {
-      const type = kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', f = new Foe({ type, x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor }, lv);
-      lv.enemies.push(f); lv.foeTotal++; a.foes.push(f); fx.ring(f.body.cx, f.body.cy, 1.2 * R, INK.spike);
-    }
+    a.foes = []; a.drops = []; a.dropT = ARENA.warn;
+    for (let k = 0; k < n; k++) a.drops.push({ type: kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor });
+  }
+  // A wave's enemies come ARENA.warn s after the places they come to are shown (the renderer's red rings), not out of the air on the hero
+  // (owner: «иногда враги появляются сверху из пустоты и это сложно. Нужно показывать на пару секунд, что в этом месте появится враг»)
+  arenaDrop(a) {
+    const lv = this.lv;
+    for (const s of a.drops) { const f = new Foe(s, lv); lv.enemies.push(f); lv.foeTotal++; a.foes.push(f); fx.ring(f.body.cx, f.body.cy, (s.big ? 2 : 1.2) * this.R, INK.spike); }
+    a.drops = null;
   }
   free(f) {
     const b = f.body, R = this.R, i = this.lv.folk.indexOf(f);

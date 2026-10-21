@@ -1513,7 +1513,7 @@ for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb',
   danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
-const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from
+const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from; warn: s a wave's places are shown before it comes
 const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
@@ -4069,6 +4069,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const r = RING.r * R * (1 + 0.04 * Math.sin(T * 5));
     F(rg.x, rg.y, r * 1.5, 0, 0, r * 1.5, INK.coin, 0.25, 1); F(rg.x, rg.y, r, 0, 0, r, INK.coin, 1, 4); F(rg.x, rg.y, r * 0.78, 0, 0, r * 0.78, PAL.white, 1, 4);
     for (let k = 0; k < 6; k++) { const a = T * 3 + (k * TAU) / 6; disc(rg.x + Math.cos(a) * r * 0.9, rg.y + Math.sin(a) * r * 0.9, 0.09 * R, k & 1 ? INK.white : INK.coinD, 1); }
+  }
+  for (const a of lv.arenas) if (a.drops) for (const s of a.drops) if (seen(s.y - 2 * R, s.y + 2 * R) && Math.floor(T * 5) % 2 === 0) {   // an arena's next enemy: where it will come (Game.arenaDrop), a red ring
+    const rr = ENEMY[s.type].size * R * (s.big ? MINI.size : 1), P = PIX.size, x = Math.round(s.x / P) * P;   // with a mark in it, blinking 2.5 times a second as a forest enemy warns (digest: 3 at most)
+    F(s.x, s.y, rr, 0, 0, rr, INK.spike, 1, 4);
+    box(x - P, s.y - 0.55 * rr, x + P, s.y + 0.1 * rr, INK.spike, 1, 0, 10, 0); box(x - P, s.y + 0.3 * rr, x + P, s.y + 0.3 * rr + 2 * P, INK.spike, 1, 0, 10, 0);
   }
   for (const sp of lv.spots) if (!sp.used && seen(sp.y - 2.5 * R, sp.y + 2.5 * R)) {   // the flip side's spots (a pool, at its floor)
     const r = sp.r * R, flat = sp.kind === 'out' ? 0.45 : 1, w = (k, a) => Math.sin(T * 2.1 + k * 1.9 + a) * 0.12 * r;

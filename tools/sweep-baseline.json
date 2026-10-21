@@ -1,5 +1,5 @@
 {
- "commit": "f96c7b4",
+ "commit": "961aa40",
  "made": "2026-10-20",
  "levels": {
   "c1-1": {
@@ -596,6 +596,88 @@
     "boss@hover"
    ],
    "boss": "Karasu-tengu",
+   "dealt": "6/6"
+  },
+  "c8-1": {
+   "result": "clear",
+   "time": 8.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c8-2": {
+   "result": "clear",
+   "time": 42,
+   "heartsLost": 0,
+   "stuck": [
+    "planks@103"
+   ],
+   "hits": []
+  },
+  "c8-3": {
+   "result": "clear",
+   "time": 26.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c8-4": {
+   "result": "clear",
+   "time": 28.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "crawler@mosswall"
+   ]
+  },
+  "c8-5": {
+   "result": "clear",
+   "time": 25,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c8-6": {
+   "result": "clear",
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c8-7": {
+   "result": "clear",
+   "time": 20.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
+  },
+  "c8-8": {
+   "result": "clear",
+   "time": 44.5,
+   "heartsLost": 0,
+   "stuck": [
+    "gate3@141"
+   ],
+   "hits": []
+  },
+  "c8-9": {
+   "result": "clear",
+   "time": 29.5,
+   "heartsLost": 1,
+   "stuck": [
+    "pocket@64"
+   ],
+   "hits": [
+    "fire@planks"
+   ]
+  },
+  "c8-10": {
+   "result": "won",
+   "time": 20.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": [],
+   "boss": "The Lid",
    "dealt": "6/6"
   }
  }

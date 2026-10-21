@@ -121,7 +121,7 @@ const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += day
 // tier by tier in turn, the middle one out to both sides or the sides in to the middle (ups). A world opens with the last one's boss.
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
-const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 1;
+const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
 // come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu.
 const CAMP_STARS = { skazka: 180 };
@@ -2675,13 +2675,14 @@ const ads = {
       const t0 = performance.now();
       const go = () => {
         if (!window.bridge) { if (performance.now() - t0 < BRIDGE_WAIT) setTimeout(go, 50); else done(false); return; }
-        const late = setTimeout(() => done(false), BRIDGE_WAIT);
+        const late = setTimeout(() => { this.late = true; done(false); }, BRIDGE_WAIT);
         bridge.initialize().then(() => {
           clearTimeout(late); this.ok = true;
           bridge.platform.on(bridge.EVENT_NAME.AUDIO_STATE_CHANGED, (on) => { this.off = !on; this.hush(); });
           bridge.platform.on(bridge.EVENT_NAME.PAUSE_STATE_CHANGED, (p) => { this.held = p; this.hush(); if (p) game.togglePause(true); });
           this.off = !bridge.platform.isAudioEnabled; this.hush();
           done(true);
+          if (this.late && started) bridge.platform.sendMessage('game_ready');   // (up after boot gave it up: the game playable already; without it no interstitial ever comes)
         }).catch(() => { clearTimeout(late); done(false); });
       };
       go();
@@ -2935,7 +2936,7 @@ async function boot() {
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen
   start();
   if (cloud && s && s !== b) persist();   // the browser's copy further on (a visit without the Bridge, or a save from before it): the Bridge's storage takes it
-  if (br) bridge.platform.sendMessage('game_ready');
+  if (br || ads.ok) bridge.platform.sendMessage('game_ready');   // (ads.ok: up late, while the type loaded)
 }
 // The words in another language: the page's (the type follows it, see .tx in index.html), and the HUD written again.
 function setLang(l) {

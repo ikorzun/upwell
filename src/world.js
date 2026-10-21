@@ -748,7 +748,7 @@ const CAMPAIGN = [
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
-  { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { crumble: 3, bridge: 3, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
+  { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney: 3, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
     motif: ['ride', 'lift', 'ride2'], sparse: true, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['rainbow'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
@@ -1178,6 +1178,26 @@ const CHUNKS = {
     '............',
     '.........###',
     '............'] },
+  towers: { d: 2, rows: [   // two towers at the walls, 15 tiles tall, a channel 6 tiles wide between them (widened) climbed by jumps off its sides, coins up it:
+    '............',   // the hero's walls the way up (owner, 2026-10-22: «платформ слишком много… герой может липнуть к стенам и использовать их как платформы»).
+    '............',   // A jump and the air jump reach about 14 tiles, so the towers are taller; a wall jump off one side meets the other some 6.6 tiles up
+    '####....####',   // (at 8 tiles wide, only about 4), the air jump back with each touch
+    '####....####',
+    '####.o..####',
+    '####....####',
+    '####....####',
+    '####..o.####',
+    '####....####',
+    '####....####',
+    '####.o..####',
+    '####....####',
+    '####....####',
+    '####..o.####',
+    '####....####',
+    '####....####',
+    '####....####',
+    '............',
+    '............'] },
   ride: { d: 1, rows: [   // a plank to ride across: from a wide ledge onto it, along a row of coins, off onto the other (a motif's easy one, see addChunk)
     '............',
     '............',
@@ -1537,7 +1557,7 @@ const CHUNKS = {
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
-  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney'], moving: ['movers', 'lift', 'ride', 'ride2'], crumbling: ['crumble', 'bridge'],
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2'], crumbling: ['crumble', 'bridge'],
   danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
@@ -1796,11 +1816,11 @@ class Level {
       if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k)) w[k] = pool[k];   // a small pool: kinds may run
       id = pick(rnd, w);
     }
-    const c = CHUNKS[id];
+    let c = CHUNKS[id];
     if (!this.script && this.top - c.rows.length * this.tile < this.endY) { this.finish(); return; }
     // the way round whose first foothold is the easier step up from the last one below
-    const cost = (m) => (this.lastFeet ? stepCost(this.lastFeet, m ? flipRuns(c.first) : c.first) : 0), a = cost(false), b = cost(true);
-    const mirror = a === b ? rnd() < 0.5 : b < a;
+    const feet0 = this.lastFeet, way = (ch) => { const cost = (m) => (feet0 ? stepCost(feet0, m ? flipRuns(ch.first) : ch.first) : 0), a = cost(false), b = cost(true); return a === b ? rnd() < 0.5 : b < a; };
+    let mirror = way(c);
     this.lastFeet = mirror ? flipRuns(c.last) : c.last;
     // Laid right on the last one, a chunk may hang a solid ledge just over a ledge under it, with
     // no room to stand there and jump: then it goes a tile higher, up to three.
@@ -1810,6 +1830,12 @@ class Level {
       this.place(c, this.top - lift * this.tile, mirror);
       if (lift >= 3 || !this.cramped(lens[0])) break;
       keep.forEach((a, i) => { a.length = lens[i]; }); lift++;
+    }
+    const restEnd = id !== 'rest' && !this.rested && !wd.bonus && !this.script && Number.isFinite(this.endY) && left >= 14 * this.tile && left - (lift + c.rows.length) * this.tile <= 4 * this.tile;
+    if (restEnd) {   // laid (a tile or three higher, too) it carried the shaft past the rest's window, as 2-3, 5-4, 7-4, 8-5 and 1-7's walls lost the rest under the way out:
+      // taken back, the rest in its place, and the way out right over it (Level.finish below; the level a few tiles shorter)
+      keep.forEach((q, i) => { q.length = lens[i]; }); id = 'rest'; c = CHUNKS.rest; lift = 0; this.rested = true;
+      mirror = way(c); this.lastFeet = mirror ? flipRuns(c.last) : c.last; this.place(c, this.top, mirror);
     }
     this.coinTotal += this.coins.length - lens[3]; this.foeTotal += this.spawns.length - lens[4];   // as laid at last
     if (c.kind === 'gate') for (const r of this.rects.slice(lens[0])) if (r.crack) r.key = true;   // a gate's keystone
@@ -1827,6 +1853,7 @@ class Level {
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
     this.top -= h;
+    if (restEnd) this.finish();
   }
   // The flip side's spot in the chunk just laid (from y0 up to y1): a free place in the open, clear of ledges, spikes and enemies.
   addSpot(y0, y1) {

@@ -60,7 +60,7 @@ try {
       : `__bot.level(${w - 1}, ${s - 1}, ${seed === 'r' ? 'null' : +seed}, { noFoes: ${process.env.NOFOES === '1'}, camp: ${camp}, col: ${col}, order: ${process.env.ORDER ? +process.env.ORDER : null} })`);
     const boss = a.boss && { boss: a.boss.name, dealt: `${a.boss.max - a.boss.hp}/${a.boss.max}`, blows: a.boss.dealt.map(([t, at]) => `${at}@${t}`) };
     console.log(JSON.stringify({ level: name, result: a.result === 'play' ? 'time' : a.result, time: a.time, heartsLost: a.heartsLost, hits: a.hits.map((h) => `${h.by}@${h.chunk}`), ...boss,
-      foes: a.spawned, stomped: a.killed, coins: `${a.coins}/${a.coinsPlaced}`, combo: a.combo, stuck: a.stuck.map((q) => `${q.chunk}@${q.at}`), tight: a.tightness, tasks: a.tasks, chunks: a.chunks }));
+      foes: a.spawned, stomped: a.killed, coins: `${a.coins}/${a.coinsPlaced}`, combo: a.combo, stuck: a.stuck.map((q) => `${q.chunk}@${q.at}`), tight: a.tightness, wall: a.wall, wallJumps: a.wallJumps, tasks: a.tasks, chunks: a.chunks }));
   }
 } catch (e) {
   console.error(e);

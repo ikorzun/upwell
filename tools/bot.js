@@ -131,8 +131,15 @@ function play(p, st) {
     input.set('jump', jumped && t < p.jumpAt + p.hold);
     step();
     if (g.state === 'play' && g.onFloor()) st.stand = Math.max(st.stand, heightOf(g.hero.floorY));
+    if (live && run) { run.frames++; if ((g.hero.wallMask & 3) && !(g.hero.wallMask & 8)) run.wallFrames++; }   // the moves really played: how much of it on a wall, off any floor
   }
 }
+// The jumps really played, and how many were off a wall (the hero's own surface: a climb that never needs one is a ladder)
+const jump0 = Game.prototype.jump;
+Game.prototype.jump = function (...a) {
+  if (live && run && this === g) { run.jumps++; if ((this.hero.wallMask & 3) && !(this.hero.wallMask & 8)) run.wallJumps++; }
+  return jump0.apply(this, a);
+};
 function score(base, st) {
   if (g.state === 'dead') return -1e9;
   if (g.state === 'clear') return 1e9;
@@ -230,7 +237,7 @@ function start(world, stage = 0, s = 1, opts = {}) {
   killed = {};
   const spawned = {};
   for (const e of lv.spawns) spawned[e.type] = (spawned[e.type] || 0) + 1;
-  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
+  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, frames: 0, wallFrames: 0, jumps: 0, wallJumps: 0, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
     out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [], boss: bs ? { name: bs.def ? bs.def.name.en : 'Lid', max: bs.max, dealt: [] } : null } };
   return { started: true, foes: run.foes };
 }
@@ -264,7 +271,7 @@ function advance(ms = 30000) {
     if (!R.opts.until) input.clear();
     Object.assign(out, { result: g.state, time: +R.t.toFixed(1), decisions: R.decisions, heartsLost: R.startHp - g.hp, height: +R.best.toFixed(1), of: +R.top.toFixed(1),
       coins: R.coins0 - lv.coins.filter((c) => !c.drop).length, coinsPlaced: R.coins0, got: g.coins, foes: R.foes, kills: g.kills, spawned: R.spawned, killed, combo: g.bestCombo,
-      tightness: +(1 - R.safeSum / Math.max(1, R.decisions)).toFixed(2), tasks: (lv.tasks || []).map((q) => q.id + ' ' + q.n + '/' + q.of).join(', ') });   // (the bot does not go for them: what a climb does by the way)
+      tightness: +(1 - R.safeSum / Math.max(1, R.decisions)).toFixed(2), wall: +(R.wallFrames / Math.max(1, R.frames)).toFixed(2), wallJumps: `${R.wallJumps}/${R.jumps}`, tasks: (lv.tasks || []).map((q) => q.id + ' ' + q.n + '/' + q.of).join(', ') });   // (the bot does not go for them: what a climb does by the way)
     if (bs) Object.assign(out.boss, { hp: Math.max(0, bs.hp), beaten: bs.dead });   // result: 'won', 'dead', or 'play' at BOSS_T
     run = null;
     return out;

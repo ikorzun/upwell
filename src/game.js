@@ -214,6 +214,7 @@ function loadSave(s) {
     for (const k in c.fails) { if (!/^\d+$/.test(k)) f[k] = c.fails[k]; else if (at(+k) >= 0) f[at(+k)] = c.fails[k]; }
     c.builds.forEach((u, w) => { if (to(w) >= 0) b[to(w)] = u; });
     c.fails = f; c.builds = b; c.runes = c.runes.map(to).filter((w) => w >= 0); c.last = c.last != null && at(c.last) >= 0 ? at(c.last) : 1;
+    if (save.cur) { if (at(save.cur.ci) >= 0) save.cur.ci = at(save.cur.ci); else delete save.cur; }   // a level under way goes with its world too
   }
   c.order = ids;   // the worlds' order this save is in (the next change follows it)
   delete c.open;   // what is open comes of the stars (campOpen)

@@ -24,6 +24,7 @@
   :root {
     --ink: #141414; --red: #f43e34; --blue: #5bb8ff; --yellow: #ffed57; --green: #339c39; --purple: #c996ff; --orange: #faa23e; --gray: #c8c8c8; --white: #f3f3f3;
     --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
+    --btnL: 64px; --btnS: 48px;   /* the two sizes of every button (owner: «все кнопки должны быть только 2 размеров»): a big one, the width of its panel, and a small one (48: a finger's)) */
     --dim: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' d='M0 0h2v2H0zM2 2h2v2H2z'/%3E%3C/svg%3E") 0 0 / 4px 4px;
     --dim2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' fill-rule='evenodd' d='M0 0h4v4H0zM1 1h1v1H1zM3 3h1v1H3z'/%3E%3C/svg%3E") 0 0 / 4px 4px;   /* seven eighths ink: the game shows through a pixel in eight */
     --p: 2;
@@ -64,7 +65,7 @@
   .title .cap, .head .cap { color: var(--purple); }
   .title .cap { margin-top: 10px; letter-spacing: 0.5em; padding-left: 0.5em; }
   .chip .cap { margin-top: 0; }
-  .big.capped { padding-top: 12px; padding-bottom: 12px; }   /* as tall as before, near enough, with the words under */
+  .big.capped { padding-top: 0; padding-bottom: 0; }   /* (its words and their caption inside its one height) */
   .big, .chip, .head, .title, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
   .langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; max-width: 340px; }   /* in one row, by their short names (owner) */
   .langs .chip { text-transform: none; }   /* 日本語 as it is written */
@@ -146,12 +147,12 @@
   #purse.bump { animation: bump 0.2s steps(2); }
   .coin { display: block; width: 15px; height: 15px; }
   #pauseBtn {
-    width: 32px; height: 32px; border: 0; padding: 0; position: relative; flex: none;
+    width: var(--btnS); height: var(--btnS); border: 0; padding: 0; position: relative; flex: none;
     background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
   }
-  #pauseBtn::before, #pauseBtn::after { content: ""; position: absolute; top: 10px; width: 4px; height: 12px; background: var(--white); }
-  #pauseBtn::before { left: 10px; }
-  #pauseBtn::after { right: 10px; }
+  #pauseBtn::before, #pauseBtn::after { content: ""; position: absolute; top: 16px; width: 5px; height: 16px; background: var(--white); }
+  #pauseBtn::before { left: 16px; }
+  #pauseBtn::after { right: 16px; }
 
   #bossHp { position: absolute; left: 50%; transform: translateX(-50%); display: none; gap: 4px; filter: drop-shadow(0 2px 0 var(--ink)); }
   #bossHp.on { display: flex; }
@@ -228,28 +229,29 @@
   .title { margin: 0 0 auto; padding-top: 12%; --p: 6; filter: drop-shadow(0 6px 0 var(--ink)); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }
-  .big {   /* flat (owner: no pseudo-volume, no orange band under it) */
-    min-width: 200px; padding: 17px 28px; border: 0; --p: 4;
+  .big {   /* flat (owner: no pseudo-volume, no orange band under it); one height, main or not */
+    min-width: 200px; height: var(--btnL); padding: 0 28px; border: 0; --p: 4; box-sizing: border-box;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     background: var(--yellow); color: var(--ink); clip-path: var(--notch);
   }
   .big:active { filter: brightness(0.88); }   /* pressed: a shade darker */
   .pickers { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 340px; }
   .chip {
-    min-height: 34px; padding: 8px 10px; border: 0; box-sizing: border-box;
+    min-height: var(--btnS); min-width: var(--btnS); padding: 4px 10px; border: 0; box-sizing: border-box;
     background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
-    display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   }
   .chip.on { box-shadow: inset 0 0 0 2px var(--yellow); color: var(--yellow); }
   .chip.locked { background: var(--dim); box-shadow: none; color: var(--gray); }
   .chip small { color: var(--gray); }
-  .chip.swatch { width: 44px; height: 36px; padding: 0; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+  .chip.swatch { width: var(--btnS); height: var(--btnS); padding: 0; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
   .chip.swatch.on { box-shadow: inset 0 0 0 2px var(--white), inset 0 0 0 4px var(--ink); }
   .chip.swatch small { color: var(--ink); }
   .chip.wide { min-width: 160px; }
   .perk { display: flex; align-items: center; gap: 8px; text-align: left; }
   .perk .ico { --p: 2; }
   .iconBtn {
-    position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; width: 32px; height: 32px; border: 0; padding: 0;
+    position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0;
     display: flex; align-items: center; justify-content: center; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
   }
   .card {

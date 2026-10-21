@@ -2201,7 +2201,7 @@ const ui = {
     if (worlds.length > 1) { const tabs = el('div', 'duo'); for (const k of worlds) {   // the worlds open so far, a tab each; a bonus world's shut one its stars so far
       const shut = !campOpen(k * 30 + 1), need = CAMP_STARS[CAMPAIGN[k].world.id];
       const b = button(shut ? '' : wNo(k), 'chip' + (k === w ? ' on' : '') + (shut ? ' locked' : ''), () => { if (shut) ui.toast(tf('starsFor', { n: need - lineStars(), w: L2(CAMPAIGN[k].world.name) }), 2200, 'starOff'); else this.map(k); });
-      if (shut) b.append(iconEl('starOff'), px(lineStars() + '/' + need));   // (the pixel font has no star: its picture)
+      if (shut) { const row = el('span', 'inl'); row.append(iconEl('starOff'), px(lineStars() + '/' + need)); b.append(row); }   // (one line: a small button's one height)   // (the pixel font has no star: its picture)
       tabs.append(b);
     } p.append(tabs); }
     if (CAMP_OPEN < CAMPAIGN.length) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet

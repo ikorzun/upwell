@@ -87,7 +87,7 @@ const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || na
 // ── Save ─────────────────────────────────────────────────────
 // What outlives a run: best climb, coins of all runs (they unlock colours),
 // wins (the first one opens hard mode) and the chosen look.
-const SAVE_KEY = 'upwell.save', LOCAL_KEY = 'upwell.local';   // (LOCAL_KEY: the browser's own copy, a key no Bridge storage takes over)
+const SAVE_KEY = 'upwell.save', LOCAL_KEY = 'upwell.local';   // (LOCAL_KEY: the browser's copy of a visit without the Bridge, a key no Bridge storage takes over)
 // Kept through the Playgama Bridge's storage (its checklist: never localStorage itself), the whole of it under one key in
 // one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
 const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: true, camp: null };   // seen: hints shown once; stick: touch by a stick, not the keys
@@ -226,11 +226,12 @@ let saveIn = false, cloud = false;   // the save loaded (boot): nothing is writt
 // never writes over the Bridge's copy with what this visit began from (the browser's copy, or nothing).
 function persist() {
   if (!saveIn) return;
-  save.at = Date.now();   // which copy is the newer one, at the next boot
+  save.at = Date.now();   // (which copy is the newer, of two as far on)
   const s = JSON.stringify(save);
-  try { localStorage.setItem(LOCAL_KEY, s); } catch (e) { /* private mode: this visit only */ }   // always: a visit without the Bridge goes on from it
-  if (cloud) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});
+  if (cloud) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});   // through the Bridge's Storage alone (Playgama's checklist: never localStorage)
+  else try { localStorage.setItem(LOCAL_KEY, s); } catch (e) { /* private mode: this visit only */ }   // no Bridge this visit (none, late, or its storage not answering): the browser keeps it
 }
+const progress = (x) => (x && x.camp && Array.isArray(x.camp.stars) ? x.camp.stars.reduce((n, v) => n + (v > 0 ? v : 0), 0) : 0) * 1e7 + (x && x.bank > 0 ? x.bank : 0);   // a save's stars, then its coins of all runs
 
 // ── Bodies ───────────────────────────────────────────────────
 // The rigid part of a body's motion becomes (vx, vy); the wobble on top of it stays.
@@ -2926,14 +2927,14 @@ async function boot() {
   let b = null, got = false, l = null;   // the Bridge's copy (got: its storage answered), the browser's
   if (br) try { const r = await Promise.race([bridge.storage.get([SAVE_KEY]), new Promise((ok) => setTimeout(() => ok(null), 2500))]); if (r) { b = parse(r[0]); got = true; } } catch (e) { b = null; }   // (no answer in 2.5 s: as a failed one)
   try { l = parse(localStorage.getItem(LOCAL_KEY)) || parse(localStorage.getItem(SAVE_KEY)); } catch (e) { l = null; }   // (SAVE_KEY: a save from before the Bridge, or the mock's)
-  const s = !b ? l : !l ? b : (l.at || 0) > (b.at || 0) ? l : b;   // the newer (unstamped saves of before: the Bridge's)
+  const s = !b ? l : !l ? b : progress(l) !== progress(b) ? (progress(l) > progress(b) ? l : b) : (l.at || 0) > (b.at || 0) ? l : b;   // the one further on (a visit without the Bridge may have begun from nothing), then the newer, then the Bridge's
   cloud = br && got;
   loadSave(s);
   if (br) bridge.platform.getServerTime().then((ms) => { today = Math.floor(ms / 86400000); }).catch(() => {});
   ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen
   start();
-  if (cloud && s && s !== b) persist();   // the browser's copy the newer one: the Bridge's storage takes it
+  if (cloud && s && s !== b) persist();   // the browser's copy further on (a visit without the Bridge, or a save from before it): the Bridge's storage takes it
   if (br) bridge.platform.sendMessage('game_ready');
 }
 // The words in another language: the page's (the type follows it, see .tx in index.html), and the HUD written again.

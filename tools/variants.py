@@ -433,6 +433,28 @@ ELEMENTS.update({
                      'pressed on its back; E and F: a Kappa of the river mouth, a river imp with a turtle shell on its back, the dish of water on its head, a beak and webbed hands.',
                      rule='In this world white is wet rock you slip on, green is seaweed you hold on to, purple marks springs and grey blocks crumble: those only for small '
                      'details; orange marks boats and moving planks, but the boss is orange all over; aqua is the world\'s own, the sea and its rocks, never the boss.'),
+    # (owner 2026-10-21: Koschei's fight «b»: he dives, falls apart into a heap of bones, rebuilds; the last heart the broken needle)
+    'boss-koschei': dict(world='skazka', kind='boss', what='Koschei the Deathless, the boss of the Dark Forest (c8-10)',
+                         as_what='Koschei the Deathless, the bony sorcerer-king of the Russian tales, whose death is hidden far away in a needle',
+                         does='he hovers high in the middle of the shaft, swaying in his tattered cloak, dropping bones and calling small skulls; then he shakes over the hero, '
+                         'dives straight down into the middle of the floor and falls apart into a heap of bones a moment: a stomp from above hurts him then; then his bones '
+                         'fly together again with a warning and he rises; his last heart is the needle his death is hidden in, and it breaks.',
+                         size='about 5 tiles across and 5 tiles tall: at least twice the hero both ways, his cloak spread and his arms out',
+                         place='hovering in the middle of the shaft, a bare crooked ledge below it at each side (none in the middle, where he dives), the hero on the floor below, '
+                         'and behind him only the plain black night: no trees, no branches, nothing in the background',
+                         main='grey', parts='a spiked iron crown, a long tattered cloak spread like wings, a sword, a staff or a spear, a long beard, bony hands with long fingers, as each take has them',
+                         takes='three different takes on him, two cells each',
+                         yokai='A and B: the bony king, a tall skeleton in a spiked iron crown and a long tattered black cloak spread wide like wings, a curved sword held out; '
+                         'C and D: the gaunt sorcerer, a withered old king with a long grey beard and sunken glowing eyes under a tall crown, his robe billowing, long clawed '
+                         'fingers spread; E and F: the deathless warrior, a skeleton in old chain armour and a spiked helmet-crown, a torn cape behind him, a long spear held out.',
+                         pairs='Each pair is a different take on him, and none is a plain round blob: each reads at a glance as Koschei, a deathless skeletal king.',
+                         face='a skull or a gaunt face whose eyes glow as two small orange lights (in this dark world they are what the eye finds first) under an angry brow',
+                         body='a body that can fall apart into a heap of bones and fly together again, drawn bold: thick bones, his cloak, robe and armour in flat grey #c8c8c8 '
+                         'shaded only with black in the game\'s dither patterns, never in dark greys, with a few rigid parts round it: a spiked iron crown, a long tattered '
+                         'cloak spread like wings, a sword, a staff or a spear, a long beard, bony hands with long fingers, as each take has them',
+                         tone='Creepy and crooked, never gory: the game is for everyone.',
+                         rule='In this world everything is black, white and grey but the hero, the lights, the coins and danger: his bones and clothes grey and black, white only '
+                         'for tiny glints; his eyes orange, as small lights; red only on what hurts, his blade and the spikes of his crown.'),
 })
 
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
@@ -454,12 +476,12 @@ Keep in every variant: the same size and place, a silhouette that reads at a gla
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
 {style} Any glow is a dither too. Use only these colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
-BOSS = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round white hero climbs up a narrow shaft at night.
-{refnote}The boss of the world "{world}" ({mood}), drawn as a Japanese yokai that belongs in this place. It is in the foreground, the play itself: full colour.
+BOSS = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
+{refnote}The boss of the world "{world}" ({mood}), drawn as {as_what}. It is in the foreground, the play itself: full colour.
 Its fight: {does} Its size: {size}; {grid}
-Draw six variants in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner: three different yokai, two takes on each. {yokai} Each pair is a different creature, and none is a plain round blob: each reads at a glance as its yokai.
-Each cell is a scene from the fight: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place}, the boss in flat side view at game scale, and the hero for scale: a soft round white blob 2 tiles across with two small black eyes.
-Keep in every variant: the same size and the same fight, {main} as its main colour, a face that reads at a glance on a phone (big eyes, an angry brow, a mouth), and a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {parts}. Cute and a little spooky, never gory: the game is for everyone.
+Draw six variants in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner: {takes}. {yokai} {pairs}
+Each cell is a scene from the fight: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place}, the boss in flat side view at game scale, and the hero for scale: {hero_scale}.
+Keep in every variant: the same size and the same fight, {main} as its main colour, {face}, and {body}. {tone}
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
 {style} Use only these colours: {inks9}. The world's own colour is {ink}. {rule} White only for the hero, the edges you stand on and tiny glints; red only for danger: the boss flashes red when it is hit, so it is never red itself; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 HERO = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a small round hero climbs up a narrow shaft at night.
@@ -512,7 +534,12 @@ def prompt(el: str, ref: bool = False) -> str:
             'to the wall, its surface pattern and joints, and the small details on it', 'rule': f'In this world {taken}, so use those only for small details.'}
     plane = PLANES[e.get('plane', 'mid')]
     hero_short, hero_scale = HEROES.get(e['world'], HERO_PLAIN)
-    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE}[e['kind']].format(**{**slab, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
+    boss = {'as_what': 'a Japanese yokai that belongs in this place', 'takes': 'three different yokai, two takes on each',
+            'pairs': 'Each pair is a different creature, and none is a plain round blob: each reads at a glance as its yokai.',
+            'face': 'a face that reads at a glance on a phone (big eyes, an angry brow, a mouth)',
+            'body': f"a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {e.get('parts', '')}",
+            'tone': 'Cute and a little spooky, never gory: the game is for everyone.'}   # a boss's defaults (Koschei has his own: not a yokai, the Kolobok)
+    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE}[e['kind']].format(**{**slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
     if e['world'] in SHAPES:   # a world drawn crooked (the Dark Forest): its shapes slanted and jagged, not built of tidy rectangles
         out = re.sub(r'Build every variant from flat rectangles and a few circles: big simple shapes[^.]*\.', SHAPES[e['world']], out)

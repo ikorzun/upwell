@@ -1,5 +1,5 @@
 {
- "commit": "564f2e8+changes",
+ "commit": "3c8fc31+changes",
  "made": "2026-10-21",
  "levels": {
   "c1-1": {
@@ -326,15 +326,13 @@
   },
   "c4-10": {
    "result": "won",
-   "time": 45,
-   "heartsLost": 3,
+   "time": 56.5,
+   "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "shot@warn",
-    "shot@warn",
     "shot@warn"
    ],
-   "boss": "Rat King",
+   "boss": "Onamazu",
    "dealt": "6/6"
   },
   "c5-1": {

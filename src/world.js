@@ -150,9 +150,6 @@ const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plan
 // little shrine whose stone lantern the hero lights, koinobori), the Mine's (a lamp on the wall the hero lights, a vein of ore, a cart, tools, a winch), Mount Fuji's bell
 // off a boardwalk's free end (the hero rings it). kitThing(lv, r) is { kind, x, y } (x, y: where the hero tends it) or null, worked out once from the level
 // as laid, on steady ledges' wall ends where nothing laid stands in front (what crumbles away for a while does not count: nothing comes and goes).
-// The Village's rickety bridge while the owner picks its wood (owner, 2026-10-21: «если это деревня, то серый блоки странно выглядят. Нужно заменить их на деревянные»):
-// six looks drawn by the game (villageRect), window.__vilV for the gallery. A old orange boards, B dark brown boards, C a rope bridge, D bamboo, E a rotten log, F grey cedar.
-const VILLAGE_V = { bridge: 2 };   // C till the owner picks (UPwell: the gaps say it gives way, and it is not the earth's orange block)
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
 const kitThing = (lv, r) => {
@@ -3532,49 +3529,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // and a flower (F's white and yellow: purple); F's long green strands hang only off moss (see the moss below: green is the moss you hold). A plank is a
   // footbridge (C): boards on a bracket at the wall, a rail of dried bamboo on two posts lashed at their tops (C's was green, the moss's colour), a charm on a
   // string off its free end (C's white and yellow: grey and orange). A moving plank is a yaen (C): a blue cable box, a railed basket under its floor, its frame
-  // up to a pulley on the cable across the shaft (the cable behind, see YAEN). A crumbling block is a rickety bridge (E): grey planks the block's own height (so
-  // nothing solid is out of sight) with gaps between, each shaking its own way as it gives, at a wall a peg and the rope down off it, at a free end a rope
-  // hanging with a weight on it. False for what keeps the common look (ice, springs, magnets, bouncy planks, stairs).
+  // up to a pulley on the cable across the shaft (the cable behind, see YAEN). A crumbling block is a rope bridge (the owner's C): slats the block's own height (so
+  // nothing solid is out of sight) wide apart on two ropes, each shaking its own way as it gives, at a wall a peg and the rope down off it, at a free end
+  // (one in three) a rope hanging with a weight on it. False for what keeps the common look (ice, springs, magnets, bouncy planks, stairs).
   const villageRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
     const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
-    if (r.crumble) {   // its wood while the owner picks (VILLAGE_V.bridge): each piece shaking its own way as it gives, the edge you stand on white
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, k = (window.__vilV || VILLAGE_V).bridge, w = r.x1 - r.x0, ny = snap(r.y0 + 0.35 * Math.min(hgt, t));
-      const n = Math.max(1, Math.round(w / ([1.1, 1.0, 0.55, 1.5, 2.2, 0.9][k] * t))), pw = w / n, gap = [P, P, 2 * P, P, 0, P][k], tone = (x) => 1 + x * a;   // (tone: a solid shade of an ink, darker as it gives)
-      const nails = (x0, x1, c) => { box(x0 + 2 * P, ny, x0 + 3 * P, ny + P, c, a, 0, 10, 0); box(x1 - 3 * P, ny, x1 - 2 * P, ny + P, c, a, 0, 10, 0); };
+    if (r.crumble) {   // a rope bridge (the owner's pick C, 2026-10-21, of six in wood: grey looked strange in a village): narrow slats wide apart, each shaking
+      // its own way as it gives, two grey ropes through them
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;
       for (let i = 0; i < n; i++) {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 ? gap : 0) + ox;
-        const hs = (((Math.round(x0 / P) * 2654435761) ^ (Math.round(r.y0 / P) * 40503)) >>> 0) / 4294967296, mx = snap((x0 + x1) / 2);
-        if (k === 0) {   // A: old boards in the Village's orange, gaps between, a corner broken off some, a knot, a nail at each end
-          box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - 2 * P, x1, r.y1, PAL.orange, a, 0, 10, 4);
-          if (hs < 0.35 && x1 - x0 > 6 * P) box(x1 - 3 * P, snap(r.y1 - 0.45 * hgt), x1, r.y1, PAL.black, a, 0, 10, 0);
-          if (hs > 0.6) box(mx, snap(r.y0 + 0.62 * hgt), mx + 2 * P, snap(r.y0 + 0.62 * hgt) + P, PAL.black, a, 0, 10, 0);
-          nails(x0, x1, PAL.black);
-        } else if (k === 1) {   // B: dark weathered boards, the orange's 60 % shade (brown), the grain in black, grey nails
-          box(x0, r.y0, x1, r.y1, PAL.orange, tone(0.6), 0, 10, 0);
-          for (const [v, s0, s1] of [[0.42, hs > 0.5 ? 2 : 5, hs > 0.5 ? 6 : 2], [0.72, 4, 3]]) { const y = snap(r.y0 + v * hgt); box(x0 + s0 * P, y, x1 - s1 * P, y + P, PAL.black, a, 0, 10, 0); }
-          nails(x0, x1, PAL.gray);
-        } else if (k === 2) {   // C: a rope bridge: narrow slats wide apart (drawn on the two ropes, below)
-          box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);
-        } else if (k === 3) {   // D: bamboo poles laid across it, seen end on: a row of orange rings, hollow, a band of grey rope round them
-          const d = Math.min(hgt, 0.7 * t), m = Math.max(1, Math.floor((x1 - x0) / d)), cy = (r.y0 + r.y1) / 2;
-          for (let j = 0; j < m; j++) { const cx = x0 + (j + 0.5) * ((x1 - x0) / m); disc(cx, cy, d / 2, PAL.orange, a); disc(cx, cy, d / 2 - 2 * P, PAL.black, a); }
-          box(x0, r.y1 - P, x1, r.y1, PAL.gray, a, 0, 10, 0);
-        } else if (k === 4) {   // E: a fallen log cracked in pieces: brown (the orange's 60 %) over a darker underside (round), its bark in black dashes, a crack between
-          // pieces, at a free end its cut face: an orange disc, a ring in it
-          box(x0, r.y0, x1, r.y1, PAL.orange, tone(0.6), 0, 10, 0); box(x0, snap(r.y1 - 0.3 * hgt), x1, r.y1, PAL.orange, tone(0.3), 0, 10, 0);
-          for (const [v, o] of [[0.3, 0], [0.55, 0.25]]) for (let x = x0 + (0.15 + o) * t; x < x1 - 0.3 * t; x += 0.5 * t) box(snap(x), snap(r.y0 + v * hgt), snap(x) + 2 * P, snap(r.y0 + v * hgt) + P, PAL.black, a, 0, 10, 0);
-          if (i < n - 1) for (let j = 0; j < 4; j++) box(x1 - (j & 1 ? 2 : 1) * P, snap(r.y0 + j * hgt / 4), x1 + (j & 1 ? 0 : P), snap(r.y0 + (j + 1) * hgt / 4), PAL.black, a, 0, 10, 0);
-          for (const [on, ex] of [[i === 0 && !wl, x0 + hgt / 2], [i === n - 1 && !wr, x1 - hgt / 2]]) if (on) { const cy = (r.y0 + r.y1) / 2; disc(ex, cy, hgt / 2, PAL.orange, a); disc(ex, cy, hgt / 2 - 2 * P, PAL.orange, tone(0.6)); disc(ex, cy, hgt / 2 - 4 * P, PAL.orange, a); disc(ex, cy, P, PAL.black, a); }   // (inside its end: nothing drawn past what holds)
-        } else {   // F: grey cedar, weathered: grey boards with a long broken grain and a knot in black, black nails (a colour of its own, as the rule wants)
-          box(x0, r.y0, x1, r.y1, PAL.gray, a, 0, 10, 0);
-          for (const [v, s0, s1] of [[0.38, 2, hs > 0.5 ? 5 : 2], [0.7, hs > 0.5 ? 2 : 6, 2]]) { const y = snap(r.y0 + v * hgt); box(x0 + s0 * P, y, x1 - s1 * P, y + P, PAL.black, a, 0, 10, 0); }
-          if (hs > 0.55) box(mx - P, snap(r.y0 + 0.52 * hgt), mx + 2 * P, snap(r.y0 + 0.52 * hgt) + P, PAL.black, a, 0, 10, 0);
-          nails(x0, x1, PAL.black);
-        }
+        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 ? 2 * P : 0) + ox;
+        box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);   // a slat, its underside in shade
         box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
       }
-      if (k === 2) for (const v of [0.3, 0.75]) { const y = snap(r.y0 + v * hgt); box(r.x0, y, r.x1, y + P, PAL.gray, a, 0, 10, 0); }   // C's two ropes through its slats
+      for (const v of [0.3, 0.75]) { const y = snap(r.y0 + v * hgt); box(r.x0, y, r.x1, y + P, PAL.gray, a, 0, 10, 0); }
       for (const [on, wx, d, ex] of [[wl, lv.l, 1, r.x0], [wr, lv.r, -1, r.x1]]) {
         if (on) {   // a peg in the wall over it, the rope down off it to its first plank
           const ky = snap(r.y0 - 1.0 * t), kx = snap(wx + d * 0.17 * t);

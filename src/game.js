@@ -730,12 +730,14 @@ class Game {
     const done = new Set(), level = (lv) => {
       if (!lv || done.has(lv)) return; done.add(lv);   // (a room is the shaft's door's too: once)
       lv.r = X(lv.r); lv.R *= k; lv.tile *= k; for (const key of ['floor', 'top', 'endY', 'capY', 'cam']) lv[key] = Y(lv[key]);
-      for (const r of lv.rects) { box(r); if (r.move) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } }
+      for (const r of lv.rects) { box(r); if (r.move) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
       for (const o of [...lv.spikes, ...lv.bubbles]) { box(o); xy(o); }
       for (const c of lv.coats) { c.y0 = Y(c.y0); c.y1 = Y(c.y1); }
-      for (const o of [lv.coins, lv.shots, lv.bullets, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.spots, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
-      for (const s of lv.spawns) if (s.wall) { s.wall.y0 = Y(s.wall.y0); s.wall.y1 = Y(s.wall.y1); }
-      for (const e of lv.enemies) { body(e.body); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); }
+      for (const o of [lv.coins, lv.shots, lv.bullets, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
+      for (const sp of lv.spots || []) { const r = sp.r; xy(sp); sp.r = r; }   // (a pit's size is in R: it grows with R)
+      const walls = new Set(), wall = (w) => { if (!w || walls.has(w)) return; walls.add(w); w.y0 = Y(w.y0); w.y1 = Y(w.y1); };   // (a wall can be a spawn's and its climber's both)
+      for (const s of lv.spawns) wall(s.wall);
+      for (const e of lv.enemies) { body(e.body); wall(e.wall); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); if (e.ax || e.ay) { e.ax = X(e.ax); e.ay = Y(e.ay); } }
       for (const f of lv.folk) body(f.body);
       if (lv.boss) body(lv.boss.body);
       for (const o of [lv.crossing, lv.portal, lv.exit, lv.rail]) if (o) { xy(o); for (const key of ['x0', 'x1']) if (num(o[key])) o[key] = X(o[key]); for (const key of ['y0', 'y1']) if (num(o[key])) o[key] = Y(o[key]); }
@@ -751,6 +753,10 @@ class Game {
     if (this.rocket) { this.rocket.to = Y(this.rocket.to); if (num(this.rocket.y)) this.rocket.y = Y(this.rocket.y); }
     for (const o of [this.heroLook, this.look]) if (o) xy(o);
     fx.n = 0;   // the sparks in the air: gone
+    const lv = this.lv, H = this.hero;   // the camera as a level, a room or a respawn sets it: the hero in sight where it was meant (a width alone changing, the view's height did not)
+    if (lv.kind !== 'well') lv.cam = Math.max(lv.floor + CAM.floorShow - view.h, lv.floor + this.room() - view.h);
+    else if (lv.under) lv.cam = clamp(H.cy - 0.35 * view.h, lv.capY - CAM.top, lv.floor + this.room() - view.h);
+    else if (this.state !== 'menu') lv.cam = Math.max(Math.min(H.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
   }
   heal(n) { this.hp = Math.min(this.maxHp, this.hp + n); }
   offer(n = 3) {
@@ -2908,6 +2914,7 @@ function start() {
   if (started) return;
   setLang(STR[save.lang] ? save.lang : detectLang());
   if (!renderer.ok) { ui.toast(t('nogl'), 0); return; }
+  $('pad').classList.toggle('stick', !!save.stick);   // (the round jump key: what layout measures the keys by)
   layout();
   started = true;
   game.toMenu();

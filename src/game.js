@@ -1726,11 +1726,18 @@ class Game {
     H.growthTarget = Math.max(0.04, 1 - this.stateT / PORTAL.shrink);
     for (const f of this.followers) f.body.growthTarget = H.growthTarget;   // the freed go in after it
   }
+  owed(then) {   // a first clear's cards left unpicked (the game shut on them): offered before the next level goes on (owner)
+    const o = save.camp.owe, list = o ? o.ids.map((id) => UPGRADES.find((u) => u.id === id)).filter(Boolean) : [];
+    if (!list.length) { delete save.camp.owe; return false; }
+    this.mode = 'camp'; this.world = o.w; this.state = 'clear'; this.stars = null; this.oweThen = then; ui.cards(list);
+    return true;
+  }
   pick(u) {
     if (this.state !== 'clear') return;   // a second tap
     this.takeUpgrade(u); track('upgrade_picked', { id: u.id, level_id: this.levelId() });
-    if (this.mode === 'camp') { const b = save.camp.builds; (b[this.world] = b[this.world] || []).push(u.id); persist(); }   // the world's build
+    if (this.mode === 'camp') { const b = save.camp.builds; (b[this.world] = b[this.world] || []).push(u.id); delete save.camp.owe; persist(); }   // the world's build
     this.state = 'wait'; ui.hideAll();   // (an ad may come here: nothing goes on under it)
+    if (this.oweThen) { const f = this.oweThen; this.oweThen = null; f(); return; }   // a card owed from a game shut on its pick: then on where the player was going
     ads.between(() => {
       if (this.mode === 'camp') { this.playLevel(campNextId()); return; }   // on into the next level (owner: no map between them)
       this.state = 'play'; this.stateT = 0;
@@ -1925,7 +1932,7 @@ class Game {
     while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after
     this.stateT += dt;
     if (this.dieT > 0 && (this.dieT -= dt) <= 0 && this.state === 'dead') this.pop();
-    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else if (this.daily != null && this.stage >= 2) { this.finish(true); ui.result(this.result); } else ui.cards(this.offer()); }   // (the daily's third: its top)   // an upgrade the first time a campaign level is cleared
+    if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else if (this.daily != null && this.stage >= 2) { this.finish(true); ui.result(this.result); } else { const list = this.offer(); if (this.mode === 'camp') { save.camp.owe = { w: this.world, ids: list.map((u) => u.id) }; persist(); } ui.cards(list); } }   // (the daily's third: its top)   // an upgrade the first time a campaign level is cleared
     if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
     if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.runes(); else ui.result(this.result); }
     if (this.winT > 0 && this.state === 'play' && (this.winT -= dt) <= 0) this.win();
@@ -2037,6 +2044,7 @@ function pixelDisc(r, fill) {
 const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon, taskLantern, taskFlower, taskBell
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
+const goOwed = (f) => { if (!game.owed(f)) f(); };   // into a campaign level: a card owed first (Game.owed)
 const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys');   // the first floor's words: how to run and jump
 function button(text, cls, fn) {
   const b = el('button', cls, text);
@@ -2095,10 +2103,10 @@ const ui = {
     if (begun) p.append(week);
     if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }   // a long one smaller, on one line
     const cur = save.cur && campOpen(save.cur.ci) ? save.cur : null, at = cur && campAt(cur.ci);   // a level under way (Game.saveCur): on with it first, from its height
-    if (cur) p.append(cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1) + ' · ' + Math.floor(cur.m) + ' ' + t('m'), 'big thumb', () => game.resume()), 'continue'));
+    if (cur) p.append(cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1) + ' · ' + Math.floor(cur.m) + ' ' + t('m'), 'big thumb', () => goOwed(() => game.resume())), 'continue'));
     else if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
     else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(1)), 'play'));   // one tap to the first level (CrazyGames: one at most)
-    else p.append(cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => game.playLevel(ni)), 'continue'));   // the width of the screen, 12 px in from its edges
+    else p.append(cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => game.playLevel(ni))), 'continue'));   // the width of the screen, 12 px in from its edges
     const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
     s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
     p.append(s);
@@ -2213,7 +2221,7 @@ const ui = {
       const i = w * 30 + s * 3 + col;
       if (!campHas(i)) continue;
       const { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, icon = rc.boss ? 'boss' : rc.bonus != null ? 'coin' : col === 0 ? 'heal1' : col === 2 ? 'foe_crawler' : null;
-      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === ni && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) game.playLevel(i); });
+      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === ni && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) goOwed(() => game.playLevel(i)); });
       if (icon) b.append(iconEl(icon));
       if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
       b.style.left = (X(col) / 3) + '%'; b.style.top = (Y(s) / 10) + '%';
@@ -2223,7 +2231,7 @@ const ui = {
     tree.append(inner); p.append(tree);
     if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
     if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni))), 'continue'));
+    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni)))), 'continue'));
   },
   pause() {
     const p = this.panel('pause');

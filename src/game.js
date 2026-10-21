@@ -456,7 +456,7 @@ class Boss {
     this.look = this.body.look = lk ? lk.id : null;   // drawn round it by the renderer (look), on it by writeFace (LOOK_FACE)
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
-    this.state = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false;
+    this.state = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // rattled: Koschei's bones have shaken to say he rises
   }
   open() { return (this.def && this.def.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(this.def && this.def.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
   to(s) { this.state = s; this.st = 0; }
@@ -465,6 +465,12 @@ class Boss {
     if (this.def && this.def.rail) { this.ride(dt, g); return; }
     const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
     this.t += dt * k; this.st += dt; b.wake();   // never asleep: lying dazed it would doze off, and then not get up
+    if (this.def && this.def.bones) {   // Koschei: a heap of bones while he lies dazed (the renderer's drawSprite), rebuilt as he rises
+      const end = BOSS.dazed * this.help;
+      b.heap = this.state === 'dazed' ? Math.min(1, this.st / 0.12) : this.state === 'rise' ? Math.max(0, 1 - this.st / 0.4) : 0;
+      b.rattle = this.state === 'dazed' && this.st > end - 0.5; b.heapT = this.t;
+      if (b.rattle && !this.rattled) { this.rattled = true; sound.play('crumble', 0.6, 1.5); }   // the warning: his bones rattle, then fly together
+    }
     if (this.state !== 'dazed') turnUp(b, 6, dt);   // upright in the air, as the crawlers on their walls
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
     if (this.state === 'warn' || this.state === 'dive' || this.state === 'dazed') {
@@ -497,15 +503,15 @@ class Boss {
     if (this.state !== 'hover') return;
     if (ph >= 1 && (this.drop -= dt * k) <= 0) {   // its goo, then its helpers; at phase 3 twice the goo
       this.drop = BOSS.dropEvery;
-      for (let i = -1; i <= 1; i += ph >= 3 ? 0.5 : 1) lv.shots.push({ x: b.cx + i * b.R * 0.5, y: b.maxY, vx: i * 120, vy: 60, r: 0.32 * lv.R });
+      for (let i = -1; i <= 1; i += ph >= 3 ? 0.5 : 1) lv.shots.push({ x: b.cx + i * b.R * 0.5, y: b.maxY, vx: i * 120, vy: 60, r: 0.32 * lv.R, bone: !!(this.def && this.def.bones) });
     }
     if (ph >= 2 && (this.call -= dt) <= 0) {
       this.call = BOSS.spawnEvery;
-      if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: 'crawler', x: b.cx, y: b.cy + b.R * 0.6 }, lv));   // it drops onto a plank or the floor
+      if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: (this.def && this.def.minion) || 'crawler', x: b.cx, y: b.cy + b.R * 0.6 }, lv));   // it drops onto a plank or the floor (Koschei's: skulls)
     }
   }
   rise() {
-    const b = this.body, slide = this.def && this.def.slide; this.to('rise'); b.gScale = slide ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2);
+    const b = this.body, slide = this.def && this.def.slide; this.to('rise'); b.gScale = slide ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); this.rattled = false;
     if (slide) { turnOver(b); b.up.fails = 0; setVel(b, 0, -3 * b.R); }   // the Puck: back on its feet with a hop
   }
   // The Puck (BOSSES.puck, PUCK): slides the ice to and fro flicking out shells, winds up (backing off, flat, flashing)
@@ -1300,6 +1306,7 @@ class Game {
     bs.dead = true; this.kills++; met('boss', this.rc && this.rc.boss ? this.rc.boss : 'lid'); delete save.camp.fails[this.failKey()];
     if (bs.def) ui.toast(L2(bs.def.defeat), 2200);
     splatFx(b.cx, b.cy, b.R * 1.4, bs.ink.base, 24); shake.add(9); haptics.buzz(60);
+    if (bs.def && bs.def.needle) for (const s of [-1, 1]) bits.push({ x: b.cx + s * 2, y: b.minY - 0.9 * this.lv.R, vx: s * 110, vy: -220, s: 3, c: PAL.gray, t: 0, life: 1.4, g: 1, drag: 0.4 });   // Koschei: the needle his death was in, snapped in two
     this.drop(b.cx, b.cy, BOSS.coins);
     for (const o of this.lv.enemies.slice()) this.kill(o, false);
     this.lv.shots.length = 0;

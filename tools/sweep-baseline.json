@@ -1,5 +1,5 @@
 {
- "commit": "3c8fc31+changes",
+ "commit": "a9eff4c+changes",
  "made": "2026-10-21",
  "levels": {
   "c1-1": {
@@ -669,11 +669,13 @@
   },
   "c8-10": {
    "result": "won",
-   "time": 20.5,
-   "heartsLost": 0,
+   "time": 23.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
-   "boss": "The Lid",
+   "hits": [
+    "boss@hover"
+   ],
+   "boss": "Koschei",
    "dealt": "6/6"
   }
  }

@@ -265,6 +265,7 @@ const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as
 // The Mine's kit while the owner picks (owner 2026-10-21: «Заменить всё» the cave shrine's things; research/variants/mine-*-1-px.png): all six variants
 // of each in the game's own code, MINE_V, or window.__mnV from the gallery
 const MINE_V = { slab: 0, plank: 0, mover: 0, crumble: 0, lamp: 0, ore: 0, cart: 0, tools: 0, winch: 0, bats: 0, far: 0, shop: 0, stash: 0 };
+const SKAZKA_V = { oak: 0 };   // Koschei's oak behind his arena while the owner picks (research/variants/skazka-oak-1-px.png; window.__skV from the gallery)
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
@@ -2712,6 +2713,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (th.village && kind !== 'exit') { farmhouse(d, kind); return; }   // the Village's (see farmhouse)
     if (th.sea && kind !== 'exit') { funaya(d, kind); return; }   // the Sea's (see funaya)
     if (th.skazka && kind !== 'exit') { (kind === 'shop' ? izba : pech)(d); return; }   // the Dark Forest's (see izba, pech)
+    if (th.mines && kind !== 'exit') { (kind === 'shop' ? mnShop : mnStash)(d); return; }   // the Mine's (see mnShop, mnStash)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -2944,6 +2946,42 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const e of [-0.1, 0.1]) disc(X(u + e * s), Y(v), 0.07 * t * s, K, 1); for (const e of [-0.08, 0, 0.08]) bx(u + e * s, v - 0.3 * s, u + e * s + px, v - 0.2 * s, K); }
     skInside(d, 'shop', c, dx, dw, top);
   };
+  // The Mine's doors while the owner picks (MINE_V.shop, MINE_V.stash, research/variants/mine-shop-1-px.png, mine-stash-1-px.png): the shop a miners' tool shed built
+  // into the tunnel wall, a red noren in its door (red the shop's mark), a lamp; the stash the sealed door of a silver vault in a frame of stone, its cracks glowing
+  // purple (the stash's mark). What is inside bobs in the doorway (skInside), a glow breathes round it.
+  const mnShop = (d) => {
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__mnV || MINE_V).shop, c = PAL.red, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    const lamp = (u, v, arm = 0) => mnLamp(X(u), Y(v), (window.__mnV || MINE_V).lamp, true, 0.85, arm);
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    bx(0.25, 0, 2.25, dh + 0.45, G, k === 2 || k === 5 ? 3 : 1); bx(0.5, 0, 2.0, dh, INK.dark);   // its wooden front, the doorway dim inside
+    for (const u of [0.3, 2.0]) bx(u, 0, u + 0.2, dh + 0.4, G, 3); bx(0.25, dh + 0.3, 2.25, dh + 0.45, G); bx(0.25, dh + 0.3, 2.25, dh + 0.3 + px, K);   // its posts, its lintel
+    bx(0.5, dh - 0.6, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.6, u + px, dh, K);   // its noren, in strips,
+    F(dx, Y(dh - 0.3), 0.17 * t, 0, 0, 0.17 * t, PAL.white, 1, 4); bx(1.25 - px, dh - 0.45, 1.25 + px, dh - 0.15, PAL.white); bx(1.1, dh - 0.31, 1.4, dh - 0.29, PAL.white);   // a mark on it
+    if (k === 0) { ln(0.05, dh + 0.45, 1.25, dh + 1.2, G, 4); ln(1.25, dh + 1.2, 2.45, dh + 0.45, G, 4); bx(1.15, dh + 1.15, 1.35, dh + 1.35, G); bx(0.0, 0.9, 0.22, 2.0, G, 1, 4); lamp(2.6, 2.4, 0); }   // A: a gable, a sign down its side, a lamp
+    else if (k === 1) { bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 1, 3); bx(2.3, 0.9, 2.75, 1.4, PAL.orange); for (const v of [1.15]) bx(2.3, v, 2.75, v + px, K); bx(2.52 - px / 2, 0.9, 2.52 + px / 2, 1.4, K); vlamps.push([X(2.52), Y(1.15), 0.4, 1.2]); lamp(3.0, 2.4, 0); }   // B: a flat roof, a lit window, a lamp
+    else if (k === 2) { ln(0.0, dh + 1.1, 2.6, dh + 0.5, G, 5); lamp(2.85, 2.3, -1 * (X(1) > X(0) ? -1 : 1)); }   // C: a lean-to roof off the rock, a lamp on an arm
+    else if (k === 3) { bx(0.15, dh + 0.45, 2.4, dh + 0.62, G, 1, 3); lamp(0.4, 1.9, 0); ln(2.6, dh + 0.3, 2.6, 1.6, G); ln(2.45, 1.45, 2.75, 1.7, G, 2); }   // D: a flat roof, a lamp at its post, a tool hung
+    else if (k === 4) { F(X(1.2), Y(dh + 0.75), 1.45 * t, 0, 0, 0.5 * t, G, DIM, 0); for (const [u, v] of [[0.4, dh + 0.7], [1.6, dh + 0.95], [2.1, dh + 0.6]]) bx(u, v, u + 0.35, v + 0.08, K); bx(2.35, 1.0, 2.75, 2.1, G, 1, 4); lamp(3.0, 2.2, 0); }   // E: the rock over it, a sign board, a lamp
+    else { bx(0.1, dh + 0.45, 2.4, dh + 0.62, G, 1, 3); for (const u of [0.7, 1.25, 1.8]) { ln(u, dh + 0.45, u, dh + 0.25, G, 1); } lamp(2.65, 2.3, 0); for (const rr of [0.22, 0.13]) F(X(2.7), Y(0.35), rr * t, 0, 0, rr * 1.1 * t, G, 1, 4); }   // F: things hung under its eave, a lamp, a coil
+    skInside(d, 'shop', c, dx, dw, dh + 1.2);
+  };
+  const mnStash = (d) => {
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__mnV || MINE_V).stash, c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
+    const stones = (arch) => { for (let i = 0; i < 9; i++) { const q = i / 8; let u, v; if (q < 0.3) { u = 0.32; v = (q / 0.3) * dh; } else if (q > 0.7) { u = 2.18; v = ((1 - q) / 0.3) * dh; } else { u = 0.32 + ((q - 0.3) / 0.4) * 1.86; v = dh + (arch ? 0.35 * Math.sin(((q - 0.3) / 0.4) * Math.PI) : 0); } if (k === 5 && (i === 3 || i === 6)) continue; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1.5, 1); } };   // its frame of stones (F's broken)
+    stones(k === 1 || k === 3);
+    bx(0.5, 0, 2.0, dh, G, 1.5, 3); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber, iron bands
+    for (const [u, v] of [[0.62, 0.3], [1.88, 0.3], [0.62, 1.6], [1.88, 1.6]]) bx(u, v, u + px, v + px, PAL.white);   // its studs
+    for (const [u0, v0, u1, v1] of [[0.8, 1.6, 0.95, 1.1], [0.95, 1.1, 0.85, 0.7], [1.6, 1.9, 1.5, 1.35], [1.5, 1.35, 1.65, 0.9], [1.2, 0.5, 1.3, 0.1]]) ln(u0, v0, u1, v1, c, 1);   // its cracks, glowing purple
+    if (k === 0 || k === 4) { bx(1.1, 0.8, 1.4, 1.15, G); bx(1.22, 0.86, 1.28, 1.05, K); }   // A, E: a lock, its keyhole
+    else F(dx, Y(0.95), 0.17 * t, 0, 0, 0.17 * t, G, 1, 4);   // a ring to pull
+    if (k === 1) mnLamp(X(2.65), Y(2.3), (window.__mnV || MINE_V).lamp, true, 0.85);   // B: a lamp by it
+    else if (k === 2) { for (const u of [0.15, 2.2]) bx(u, 0, u + 0.2, dh + 0.3, G, 1, 4); bx(2.5, 0.9, 2.62, 1.6, G); ln(2.56, 1.25, 2.85, 1.25, G, 2); ln(2.85, 1.25, 2.85, 1.0, G, 2); }   // C: pillars, a crank
+    else if (k === 3) { ln(2.5, 0, 2.75, 1.25, G, 2); ln(2.45, 1.18, 2.95, 1.25, G, 2); ln(0.0, dh + 0.5, 0.0, 0.9, G); bx(-0.15, 0.55, 0.18, 0.9, G, 1, 4); }   // D: a pickaxe leaning, a basket hung
+    else if (k === 4) { F(X(1.25), Y(dh + 0.42), 0.26 * t, 0, 0, 0.24 * t, G, 1, 0); F(X(1.25), Y(dh + 0.42), 0.15 * t, 0, 0, 0.13 * t, K, 1, 4); mnLamp(X(2.7), Y(2.2), (window.__mnV || MINE_V).lamp, true, 0.85); }   // E: a keystone with its mark, a lamp
+    else for (const [u, v] of [[2.45, 0.2], [2.3, 0.05]]) bx(u, v, u + 0.3, v + 0.2, G, 1, 2);   // F: its fallen stones
+    skInside(d, 'stash', c, dx, dw, dh);
+  };
   const pech = (d) => {   // a crooked Russian stove (the stash, E), tall and lumpy and cracked, its mouth the door, its chimney bent, a bench step off it with a shelf over it
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     const Wd = 2.6, ht = 3.0, bend = 0.5;   // its width, its height, its chimney's crook
@@ -3136,6 +3174,94 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else { gem(0.55, 0.5, 0.36, 1.1); gem(1.2, 0.35, 0.3, 0.8); lump(0.95, 0.25, 0.1); [[0.3, 1.45], [0.9, 1.25], [1.45, 1.2], [0.85, 0.5]].forEach(([u, v], i) => glint(u, v, i)); }   // F: two tall crystals
     vlamps.push([X(0.9), Y(0.9), 0.2, 0.8]);   // its faint glow
   };
+  const mnBatsAt = (r) => {   // under one ledge in five that has room under it: not a moving or crumbling one, nothing a tile and a half under it
+    if (r.bats != null) return r.bats;   // (the gallery's)
+    if (r.cap || r.move || r.crumble || r.spring || r.x1 - r.x0 < 2.4 * kitT) return false;
+    const h = (((Math.imul(Math.round(r.y0 / kitT) + 11, 0x9e3779b1) >>> 0) / 4294967296) * 5) | 0;
+    return h === 2 && !lv.rects.some((q) => q !== r && !q.cap && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 < r.y1 + 1.5 * kitT && q.y1 > r.y1);
+  };
+  const mnBats = (r, k) => {   // bats hanging asleep under a ledge, folded in their wings, one with an eye open (a tiny light)
+    const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, n = [2, 3, 2, 4, 2, 3][k], s = k === 4 ? 1.2 : 1, wl = r.x0 <= lv.l + 1, x0 = wl ? r.x0 + 1.95 * t : r.x1 - 1.95 * t - (n - 1) * 0.55 * t;   // (clear of a brace under it)
+    const bat = (x, i) => { const y = snap(r.y1 + (0.12 + 0.03 * Math.sin(T * 1.6 + i)) * t), hw = 0.17 * t * s, hh = 0.3 * t * s;
+      box(x - P, r.y1, x + P, y, G, 1, 0, 10, 0);   // its feet hooked on
+      F(x, snap(y + hh), hw + P, 0, 0, hh + P, G, 1, 0); F(x, snap(y + hh), hw, 0, 0, hh, K, 1, 0);   // folded in its wings: black, a grey edge
+      F(x, snap(y + 2 * hh), 0.05 * t * s, 0, 0, 0.06 * t * s, G, 1, 0);   // its wings' tip
+      const ey = snap(y + hh * 1.25); if (i === 1) { box(x - snap(0.08 * t * s), ey, x - snap(0.08 * t * s) + P, ey + P, PAL.orange, 1, 0, 10, 0); vlamps.push([x - snap(0.08 * t * s), ey, 0.12, 0.4]); }
+      else box(x - snap(0.1 * t * s), ey, x - snap(0.04 * t * s), ey + P, G, 1, 0, 10, 0);
+      box(x + snap(0.04 * t * s), ey, x + snap(0.1 * t * s), ey + P, G, 1, 0, 10, 0); };   // eyes shut (one open)
+    for (let i = 0; i < n; i++) bat(snap(x0 + i * 0.55 * t * s), i);
+    const ex = snap(x0 + n * 0.55 * t * s);
+    if (k === 2) { box(ex, r.y1, ex + P, snap(r.y1 + 0.5 * t), G, 1, 0, 10, 0); mnLamp(ex, snap(r.y1 + 0.5 * t), (window.__mnV || MINE_V).lamp, true, 0.7); }   // C: a lamp hung beside them
+    else if (k === 4) { box(ex, r.y1, ex + P, snap(r.y1 + 1.1 * t), G, 1, 0, 10, 0); F(ex, snap(r.y1 + 0.2 * t), 0.12 * t, 0, 0, 0.12 * t, G, 1, 4); }   // E: a rope off a pulley
+    else if (k === 5) for (const [dx, dy] of [[0.3, 0.5], [0.55, 0.8]]) { F(snap(ex + dx * t), snap(r.y1 + dy * t), 0.09 * t, 0, 0, 0.14 * t, G, 1.5, 0); box(snap(ex + dx * t) - P, snap(r.y1 + dy * t) - P, snap(ex + dx * t) + P, snap(r.y1 + dy * t), PAL.white, 1, 0, 10, 0); }   // F: crystals glinting
+  };
+  const mnThing = (kind, wx, b, d, V) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
+    const t = kitT, P = kitP, px = P / t, G = PAL.gray, K = PAL.black, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
+    const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const ln = (u0, v0, u1, v1, c = G, wd = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wd);
+    const pick = (u, v, lean = 0.35) => { ln(u, v, u + lean, v + 1.2, G, 2); ln(u + lean - 0.32, v + 1.08, u + lean - 0.08, v + 1.26, G, 2); ln(u + lean - 0.08, v + 1.26, u + lean + 0.12, v + 1.26, G, 3); ln(u + lean + 0.12, v + 1.26, u + lean + 0.36, v + 1.06, G, 2); };   // a pickaxe leaning
+    const shovel = (u, v) => { ln(u, v + 0.35, u + 0.3, v + 1.35, G, 2); bx(u - 0.12, v, u + 0.1, v + 0.38, G); };
+    const basket = (u, v, s = 1, ore = false) => { bx(u - 0.3 * s, v, u + 0.3 * s, v + 0.42 * s, G, 1, 4); bx(u - 0.34 * s, v + 0.42 * s, u + 0.34 * s, v + 0.48 * s, G); if (ore) for (const e of [-0.15, 0.05, 0.2]) disc(X(u + e * s), Y(v + 0.52 * s), 0.1 * s * t, G, 1.6); };   // a straw basket (zaru), ore in it
+    const mino = (u, v) => { bx(u - 0.03, v, u + 0.03, v + 0.12, G); for (let i = 0; i < 7; i++) ln(u, v, u - 0.35 + i * 0.12, v - 1.0 - (i % 2) * 0.08, G, 1); bx(u - 0.4, v - 1.08, u + 0.42, v - 1.0, G, DIM); };   // a straw raincoat on a peg
+    const ladder = (u0, v0, u1, v1) => { ln(u0, v0, u1, v1, G, 2); ln(u0 + 0.4, v0, u1 + 0.4, v1, G, 2); for (let q = 0.12; q < 1; q += 0.16) ln(u0 + (u1 - u0) * q, v0 + (v1 - v0) * q, u0 + 0.4 + (u1 - u0) * q, v0 + (v1 - v0) * q, G, 1); };
+    const lamp = (u, v, arm = true) => mnLamp(X(u), Y(v), V.lamp, true, 0.85, arm ? d : 0);
+    const bucket = (u, v, band) => { bx(u - 0.22, v - 0.42, u + 0.22, v, G, 1, 4); bx(u - 0.25, v - 0.08, u + 0.25, v, G); if (band) bx(u - 0.22, v - 0.24, u + 0.22, v - 0.16, PAL.orange); ln(u - 0.2, v, u, v + 0.18, G); ln(u, v + 0.18, u + 0.2, v, G); };   // a bucket on a rope
+    if (kind === 'cart') {   // a little mine cart (torokko) parked on its rails, heaped with ore glinting
+      const k = V.cart, round = k === 2 || k === 4;
+      bx(0.3, 0, 2.7, 0.06, G); for (let u = 0.35; u < 2.65; u += 0.4) bx(u, 0, u + 0.18, 0.1, G, 1.5);   // its rails, sleepers
+      bx(2.55, 0, 2.7, 0.5, k === 4 ? G : G, 1, k === 4 ? 4 : 0);   // a stop block
+      if (round) { bx(0.55, 0.55, 2.25, 1.05, G, 1, 2); F(X(1.4), Y(0.55), 0.85 * t, 0, 0, 0.25 * t, G, 1, 0); } else { bx(0.5, 0.35, 2.3, 1.05, G, 1, k === 3 ? 0 : 3); }   // its body: a tub (C, E) or a box
+      bx(0.45, 1.0, 2.35, 1.08, G);   // its rim
+      if (k === 0 || k === 5) for (let u = 0.75; u < 2.2; u += 0.3) bx(u, 0.4, u + px, 1.0, K);   // slats
+      if (k === 1) for (const v of [0.55, 0.8]) bx(0.5, v, 2.3, v + px, K);   // planks
+      if (k === 3) { ln(0.55, 0.4, 2.25, 1.0, K, 1); ln(0.55, 1.0, 2.25, 0.4, K, 1); }   // braced across
+      for (const u of [0.85, 1.95]) { F(X(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, K, 1, 0); F(X(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, G, 1, 4); disc(X(u), Y(0.22), 0.05 * t, G, 1); }   // its wheels
+      F(X(1.4), Y(1.08), 0.85 * t, 0, 0, 0.3 * t, G, 1.6, 0); for (const [u, v] of [[0.9, 1.2], [1.3, 1.3], [1.75, 1.22]]) bx(u, v, u + 2 * px, v + px, PAL.white, Math.sin(T * 2 + u * 3) > 0.2 ? 1 : DIM);   // its ore, glinting
+      if (k === 1 || k === 4) lamp(0.5, 2.1);   // B, E: a lamp on the wall over it
+      if (k === 2) for (let i = 0; i < 4; i++) { const q = (i + 0.5) / 4; F(X(0.05 + q * 0.5), Y(1.35 - q * 0.45), 0.07 * t, 0, 0, 0.05 * t, G, 1, 4); }   // C: chained to the wall
+      if (k === 3) { pick(2.75, 0, 0.2); basket(0.1, 0, 0.6, true); }   // D: a pickaxe leaning, a basket of ore
+      if (k === 5) { bx(0.05, 0, 0.17, 2.2, G, 1.5, 3); bx(0.05, 2.1, 0.75, 2.2, G, 1.5); ln(0.65, 2.1, 0.65, 1.55, G); basket(0.65, 1.15, 0.6); }   // F: a post, a basket hung off its arm
+    } else if (kind === 'tools') {   // the miners' tools by the wall: pickaxes and a shovel leaning, straw baskets, a straw raincoat on a peg
+      const k = V.tools;
+      if (k === 0) { pick(0.15, 0, 0.3); pick(0.45, 0, 0.22); shovel(0.8, 0); basket(1.35, 0); mino(1.95, 1.9); }   // A
+      else if (k === 1) { lamp(0.55, 2.1); pick(0.2, 0, 0.25); pick(0.5, 0, 0.2); basket(1.5, 0, 1.25); }   // B: a lamp over them, a big basket
+      else if (k === 2) { bx(0, 2.05, 2.1, 2.2, G, 1.5, 3); F(X(0.7), Y(1.95), 0.13 * t, 0, 0, 0.13 * t, G, 1, 4); ln(0.7, 1.85, 0.7, 1.15); basket(0.7, 0.75, 0.7); basket(1.4, 0); pick(1.85, 0, 0.15); }   // C: a beam, a pulley, a basket hung
+      else if (k === 3) { lamp(0.5, 2.1); mino(1.6, 1.85); basket(0.65, 0, 0.9); pick(0.1, 0, 0.25); }   // D: a lamp, a raincoat, a basket
+      else if (k === 4) { bx(0.05, 1.95, 2.05, 2.08, G, 1.5, 3); ln(0.55, 1.95, 0.55, 1.1, G, 2); bx(0.4, 1.0, 0.7, 1.15, G); ln(1.0, 1.95, 1.0, 1.15, G, 2); bx(0.95, 1.0, 1.2, 1.3, G); ln(1.55, 1.95, 1.55, 1.6); basket(1.55, 1.15, 0.6); basket(0.45, 0, 0.9); }   // E: a rack, a hammer, an axe, a basket hung
+      else { bx(1.25, 0, 1.4, 2.1, G, 1.5, 3); lamp(0.55, 2.1); for (let i = 0; i < 6; i++) ln(1.5, 1.8, 1.42 + i * 0.07, 0.85, G, 1); basket(0.95, 0, 0.7); pick(0.1, 0, 0.25); }   // F: a post, a coat on it, a lamp
+    } else if (kind === 'winch') {   // a hand winch over a pit: its drum on posts, a crank, its rope down past the ledge to a bucket, a ladder
+      const k = V.winch;
+      const drum = (u0, u1, v) => { for (const u of [u0, u1]) bx(u, 0, u + 0.16, v + 0.25, G, 1, 3); bx(u0 + 0.16, v - 0.2, u1, v + 0.2, G, 1, 3); for (let u = u0 + 0.3; u < u1 - 0.05; u += 0.14) bx(u, v - 0.2, u + px, v + 0.2, K); ln(u1 + 0.16, v, u1 + 0.4, v, G, 2); ln(u1 + 0.4, v, u1 + 0.4, v + 0.25, G, 2); };   // a drum wound with rope, a crank
+      const rope = (u, v) => { ln(u, v, u, -1.7); bucket(u, -1.7, k === 2); };
+      if (k === 0) { drum(0.5, 1.6, 1.15); rope(1.05, 0.95); ladder(2.0, 0, 2.35, 2.0); }   // A
+      else if (k === 1) { F(X(1.05), Y(1.3), 0.62 * t, 0, 0, 0.62 * t, G, 1, 4); for (let i = 0; i < 4; i++) { const a = (i * Math.PI) / 4 + T * 0.2; ln(1.05 + 0.55 * Math.cos(a), 1.3 + 0.55 * Math.sin(a), 1.05 - 0.55 * Math.cos(a), 1.3 - 0.55 * Math.sin(a), G, 1); } ln(0.45, 0, 1.05, 1.3, G, 2); ln(1.65, 0, 1.05, 1.3, G, 2); ln(1.05, 1.3, 1.7, 1.3, G, 2); rope(1.05, 0.68); ladder(2.0, 0, 2.35, 2.0); }   // B: a spoked wheel on an A-frame
+      else if (k === 2) { drum(0.4, 1.5, 1.1); bx(0.4, 2.55, 2.3, 2.7, G, 1, 3); bx(2.15, 0, 2.3, 2.7, G, 1, 3); lamp(2.0, 2.55, false); rope(0.95, 0.9); ladder(2.45, 0, 2.75, 1.6); }   // C: a gantry over it, a lamp hung off it, a bucket banded
+      else if (k === 3) { bx(0.3, 0, 0.45, 2.45, G, 1, 3); bx(1.85, 0, 2.0, 2.45, G, 1, 3); bx(0.3, 2.35, 2.0, 2.5, G, 1, 3); drum(0.45, 1.7, 1.55); lamp(2.45, 2.3); rope(1.05, 1.35); for (const u of [2.3, 2.6]) { bx(u, 0, u + 0.25, 0.22, G, 1, 4); bx(u + 0.08, 0.1, u + 0.08 + 2 * px, 0.1 + px, PAL.white); } }   // D: a gallows frame, a lamp, ore blocks
+      else if (k === 4) { drum(0.5, 1.6, 1.15); lamp(2.3, 2.2); rope(1.05, 0.95); ladder(2.1, 0, 2.4, 1.6); }   // E: a lamp on the wall by it
+      else { bx(0.9, 0, 1.05, 3.2, G, 1, 3); bx(2.1, 0, 2.25, 3.2, G, 1, 3); bx(0.9, 3.1, 2.25, 3.25, G, 1, 3); F(X(1.6), Y(2.85), 0.24 * t, 0, 0, 0.24 * t, G, 1, 4); ln(1.6, 2.6, 1.6, -1.7); bucket(1.6, -1.7); ladder(2.35, 0, 2.6, 2.6); bx(0.1, 0.25, 0.75, 0.6, G, 1, 3); disc(X(0.25), Y(0.15), 0.1 * t, K, 1); disc(X(0.6), Y(0.15), 0.1 * t, K, 1); }   // F: a headframe, its wheel, a small cart
+    }
+  };
+  const mnFar = (k) => {   // the mine far off (MINE_V.far): its tunnels going off into the dark, their frames smaller and smaller, rails running in, lamps glowing deep inside;
+    // screen-fixed, low, at a quarter (DIM), the lamps lights
+    const t = kitT, P = kitP, px = P / t, G = PAL.gray, cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+    const fb = (u0, v0, u1, v1, c = G, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
+    const fl = (u0, v0, u1, v1, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), G, a, wd);
+    const glow = (u, v) => { fb(u - 0.08, v - 0.1, u + 0.08, v + 0.1, PAL.orange, LIT); vlamps.push([U(u), Vv(v), 0.4, 1.4]); };   // (a light: it shows the frames round it)
+    const tunnel = (u, w, h, n = 4) => { for (let i = 0; i < n; i++) { const f = 1 - i * 0.2, hw = (w / 2) * f, hh = h * f, b = i * 0.15; fb(u - hw, b, u - hw + 0.22 * f, b + hh); fb(u + hw - 0.22 * f, b, u + hw, b + hh); fb(u - hw - 0.1 * f, b + hh, u + hw + 0.1 * f, b + hh + 0.2 * f); }
+      fl(u - w * 0.3, 0, u - w * 0.08, 0.5); fl(u + w * 0.3, 0, u + w * 0.08, 0.5); for (let q = 0.1; q < 0.5; q += 0.14) fl(u - w * (0.3 - q * 0.45), q, u + w * (0.3 - q * 0.45), q);   // rails running in, their sleepers
+      glow(u - w * 0.1, h * 0.35); glow(u + w * 0.06, h * 0.25); };
+    const frame = (u, w, h) => { fb(u - w / 2, 0, u - w / 2 + 0.25, h); fb(u + w / 2 - 0.25, 0, u + w / 2, h); fb(u - w / 2 - 0.15, h, u + w / 2 + 0.15, h + 0.25); fl(u - w / 2 + 0.25, h - 0.7, u - w / 2 + 0.8, h, DIM, 2); };
+    const lampAt = (u, v) => { fl(u, v + 0.6, u, v + 0.2); fb(u - 0.12, v - 0.2, u + 0.12, v + 0.2); glow(u, v); };
+    const crystals = (u, v) => { for (const [du, dv, s] of [[0, 0, 1], [0.35, -0.3, 0.7], [-0.3, -0.25, 0.6]]) F(U(u + du), Vv(v + dv), 0.12 * s * t, 0, 0, 0.22 * s * t, G, 1.6, 0); fb(u, v, u + 2 * px, v + px, PAL.white, 1); };
+    const cartFar = (u) => { fb(u - 0.7, 0.25, u + 0.7, 0.75); F(U(u), Vv(0.78), 0.7 * t, 0, 0, 0.2 * t, G, DIM, 0); for (const e of [-0.4, 0.4]) F(U(u + e), Vv(0.18), 0.14 * t, 0, 0, 0.14 * t, G, DIM, 4); };
+    const bat = (u, v) => { F(U(u), Vv(v), 0.14 * t, 0, 0, 0.24 * t, G, 1.5, 0); fl(u, v + 0.24, u, v + 0.5); };
+    if (k === 0) { tunnel(2.6, 5, 4.6); frame(-4.6, 0.01, 0.01); fb(-4.7, 0, -4.5, 3.6); fb(-4.7, 3.5, -3.8, 3.65); lampAt(-3.9, 3.0); }   // A: a tunnel, a lamp on a post
+    else if (k === 1) { frame(-4.2, 3.2, 4.6); lampAt(-3.6, 3.6); tunnel(3.2, 4, 3.8); cartFar(1.0); }   // B: a big frame, a lamp, a cart before the tunnel
+    else if (k === 2) { tunnel(3.4, 4, 4.2); crystals(-3.2, 3.6); crystals(-2.5, 2.4); bat(5.4, 5.2); fb(-4.8, 4.6, -1.8, 4.75); lampAt(-4.2, 3.8); }   // C: crystals, a bat, a lamp
+    else if (k === 3) { tunnel(4.0, 3.6, 3.4); fl(-3.8, 0, -3.8, 6.0, DIM, 2); fl(-3.3, 0, -3.3, 6.0, DIM, 2); for (let v = 0.3; v < 6; v += 0.5) fl(-3.8, v, -3.3, v); F(U(-1.2), Vv(5.4), 0.25 * t, 0, 0, 0.25 * t, G, DIM, 4); fl(-1.2, 5.2, -1.2, 2.6); fb(-1.6, 2.0, -0.8, 2.6); lampAt(-5.2, 3.2); }   // D: a tall ladder, a pulley and its basket
+    else if (k === 4) { frame(-2.8, 2.6, 4.2); lampAt(-2.3, 3.2); crystals(-5.4, 3.0); cartFar(0.6); tunnel(4.2, 3.8, 3.8); }   // E: a frame, crystals, a cart
+    else { frame(-4.0, 3.0, 3.8); lampAt(-3.4, 3.0); fb(-2.4, 0, -1.4, 0.7, G, DIM, 4); fl(-0.9, 0, -0.5, 1.2, DIM, 2); tunnel(3.8, 3.6, 3.6); bat(5.6, 5.4); }   // F: a frame, a basket of ore, a pickaxe, a bat
+  };
   if (th.mines && lv.kind === 'well') {   // the Mine's things on its ledges (kitThing): the lamps on the wall (lit for good once the hero comes: lv.tended), the ore; the
     // others to come (the owner's picks first)
     const V = window.__mnV || MINE_V;
@@ -3145,7 +3271,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1;
       if (p.kind === 'lamp') mnLamp(snap(p.x), snap(p.y), V.lamp, lv.tended.has(r), 1, d);
       else if (p.kind === 'ore') mnOre(wl ? lv.l : lv.r, r.y0, V.ore, d, Math.round(r.y0 / kitT));
+      else mnThing(p.kind, wl ? lv.l : lv.r, r.y0, d, V);
     }
+    for (const r of lv.rects) if (!r.gone && seen(r.y1 - kitT, r.y1 + 2 * kitT) && mnBatsAt(r)) mnBats(r, V.bats);   // bats asleep under some ledges
+    mnFar(V.far);
   }
   if (th.shrine && lv.kind === 'well') {   // the Cave's kit (THEMES.cave; the owner's picks, research/variants/cave-*-1-px.png, 2026-10-19: a cosy cave under a
     // mountain shrine): strings of festival lanterns across the shaft (C), stone lanterns grown over with moss on some ledges' wall ends (D), a pair of jizo on
@@ -3384,6 +3513,36 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
+  const skOak = (U, Vv, k) => {   // the old oak of the tale with Koschei's death in it (SKAZKA_V.oak while the owner picks): a huge gnarled dead oak on the left
+    // of his arena under its moon, a chest hanging on chains off its long branch into the moonlight (in it a hare or a duck), at a quarter (DIM); a hollow with eyes
+    // glowing in it (lights). Drawn as for the right side, mirrored (u: tiles from the middle, toward the wall it stands by)
+    const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, u0 = k === 4 ? 5.6 : 5.0, lean = k === 4 ? -0.9 : 0, curl = k === 1;
+    const limb = (x0, y0, x1, y1, wd, a = DIM) => line(U(-x0), Vv(y0), U(-x1), Vv(y1), G, a, wd);
+    const fe = (u, v, ru, rv, c, a = DIM) => F(U(-u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
+    const bm = (u0_, v0, u1, v1, c, a = DIM) => box(Math.min(U(-u0_), U(-u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(-u0_), U(-u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, 0);
+    for (const [du, w] of [[-1.6, 3], [-0.9, 4], [0.9, 4], [1.7, 3], [0.2, 3]]) { limb(u0 + du * 0.25, 0.4, u0 + du, 0, w); limb(u0 + du, 0, u0 + du * 1.3, -0.1, 2); }   // its roots clawing out
+    if (k === 3) { for (const e of [-0.25, 0.25]) for (let i = 0; i < 6; i++) limb(u0 + e * Math.cos(i * 1.2), i * 0.8, u0 + e * Math.cos((i + 1) * 1.2) + lean * 0.1, (i + 1) * 0.8, 6); }   // D: two strands twisted
+    else for (let i = 0; i < 6; i++) limb(u0 + lean * (i / 6) + 0.12 * Math.sin(i * 1.7), i * 0.8, u0 + lean * ((i + 1) / 6) + 0.12 * Math.sin((i + 1) * 1.7), (i + 1) * 0.8, Math.max(5, 11 - i));   // its trunk, crooked, thinning
+    const top = u0 + lean, fork = k === 5;
+    for (const [du, dv, l, n] of [[-0.2, 4.2, -2.6, 0], [0.1, 4.6, 1.6, 1], [-0.1, 4.8, -1.2, 2], [0.15, 4.0, 2.0, 3], [0, 5.2, 0.8, 4]]) {   // its branches clawing out and up, their twigs
+      const bu = top + du, bv = dv; limb(bu, bv, bu + l, bv + Math.abs(l) * 0.45, 4); const eu = bu + l, ev = bv + Math.abs(l) * 0.45;
+      if (curl) { for (let i = 0; i < 5; i++) { const a = i * 1.1, f0 = 1 - i * 0.15, f1 = 1 - (i + 1) * 0.15; limb(eu + 0.3 * Math.cos(a) * f0, ev + 0.3 * Math.sin(a) * f0, eu + 0.3 * Math.cos(a + 1.1) * f1, ev + 0.3 * Math.sin(a + 1.1) * f1, 2); } }   // B: curled
+      else { limb(eu, ev, eu + Math.sign(l) * 0.5, ev + 0.5, 2); limb(eu, ev, eu + Math.sign(l) * 0.2, ev + 0.7, 1); limb(eu, ev, eu + Math.sign(l) * 0.6, ev - 0.1, 1); }
+      if (k === 4 && n < 3) for (let i = 0; i < 3; i++) limb(eu - Math.sign(l) * 0.3 * i, ev - 0.1, eu - Math.sign(l) * 0.3 * i, ev - 0.8 - 0.2 * i, 1);   // E: strands hanging off it
+    }
+    if (fork) limb(top, 4.0, top + 0.9, 5.6, 6);   // F: forked
+    if (k !== 3) { const hu = u0 + lean * 0.4, hv = k === 4 ? 1.4 : 2.4; fe(hu, hv, 0.32, 0.5, K, 1); for (const e of [-0.1, 0.1]) bm(hu + e, hv + 0.05, hu + e + 0.09, hv + 0.02, PAL.orange, LIT); vlamps.push([U(-hu), Vv(hv), 0.5, 1.6]);   // a hollow, eyes glowing in it (they light the trunk round them)
+      if (fork) fe(hu + 0.2, 3.6, 0.22, 0.32, K, 1); }
+    if (k === 2) { for (let i = 0; i < 8; i++) limb(u0 - 3 + i * 0.75, 0.05, u0 - 2.6 + i * 0.75, 0.05, 1); for (const u of [u0 - 2.4, u0 + 2.2]) for (let i = 0; i < 4; i++) limb(u + i * 0.12, 0, u + i * 0.12 + 0.1 * (i - 1.5), 0.9 + 0.2 * (i % 2), 1); }   // C: the swamp's water, reeds
+    { const cu = top - 2.1, cv = 3.4, bv = 4.2 + (2.0 / 2.6) * 1.17;   // the chest hung on two chains off the long branch: iron-bound, its bars like a cage, a hare or a duck in it,
+      // the moonlight on it (a light without a colour: it shows the chest and the branch in the dark)
+      vlamps.push([U(-cu), Vv(cv + 0.6), 1.0, 2.6]);
+      for (const e of [-0.45, 0.45]) for (let i = 0; i < 6; i++) { const q = i / 6; fe(cu + e * (0.4 + 0.6 * q), bv - q * (bv - cv - 0.7), 0.06, 0.09, G); }
+      bm(cu - 0.65, cv + 0.7, cu + 0.65, cv - 0.25, G); bm(cu - 0.55, cv + 0.6, cu + 0.55, cv - 0.15, K, 1);   // its frame, dark inside
+      for (const e of [-0.3, 0, 0.3]) bm(cu + e, cv + 0.6, cu + e + P / t, cv - 0.15, G); bm(cu - 0.65, cv + 0.25, cu + 0.65, cv + 0.2, G);   // its bars, its iron band
+      if (k % 2 === 0) { fe(cu - 0.05, cv + 0.1, 0.18, 0.13, G); fe(cu + 0.12, cv + 0.25, 0.08, 0.08, G); for (const e of [0.08, 0.16]) bm(cu + e, cv + 0.5, cu + e + P / t, cv + 0.3, G); }   // a hare, its ears
+      else { fe(cu - 0.05, cv + 0.08, 0.2, 0.11, G); fe(cu + 0.15, cv + 0.22, 0.07, 0.07, G); bm(cu + 0.2, cv + 0.22, cu + 0.3, cv + 0.18, G); } }   // a duck, its bill
+  };
   if (th.skazka && (lv.kind === 'well' || lv.kind === 'boss')) {   // the Dark Forest's props and its far layer (the owner's picks, 2026-10-20, from research/variants/skazka-*-game.png,
     // black and white and crooked; Koschei's arena its far layer only). Props in the midground: grey, no white; colour only for lights (eyes), as the dark's.
     const t = kitT, P = kitP, px = P / t, hero = g.hero, G = PAL.gray, K = PAL.black;
@@ -3401,6 +3560,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const [q, du, dv] of [[0.4, -1.1, 0.6], [0.55, 1.0, 0.75], [0.75, -0.7, 0.55], [0.9, 0.6, 0.6]]) { const bu = u + 0.15 * s * Math.sin(q * 4 * 1.7 + n), bv = v + h * q;
           fl(bu, bv, bu + du * s, bv + dv * s, G, DIM, 2); fl(bu + du * s, bv + dv * s, bu + du * s * 1.35, bv + dv * s * 1.1, G, DIM, 1); fl(bu + du * s, bv + dv * s, bu + du * s * 1.1, bv + dv * s * 1.6, G, DIM, 1); } };
       const mu = ar ? -3.8 : 3.8, mv = ar ? (lv.floor - cam - 0.24 * H) / t : 5.0;   // (in the arena high on the left, over the planks)
+      if (ar) skOak(U, Vv, (window.__skV || SKAZKA_V).oak);   // Koschei's oak, under the moon on the left of his arena
       fe(mu, mv, 1.5, 1.5, G, LIT); vlamps.push([U(mu), Vv(mv), 1.5 * 1.05, 1.5 * 1.6]);   // the moon, a light in the dark
       row(-7.4, -3.0, 1.2, 0.3, [3.0, 3.8, 3.2]); dead(5.8, 0.3, 4.8, 1.0, 6); fe(5.9, 2.8, 0.32, 0.42, K, 1);   // a dead tree, a hollow in it,
       for (const e of [-0.12, 0.12]) fb(5.9 + e, 2.85, 5.9 + e + 2 * px, 2.85 + 2 * px, PAL.orange, LIT); vlamps.push([U(5.9), Vv(2.85), 0.15, 0.45]);   // eyes glowing in it

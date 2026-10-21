@@ -422,6 +422,17 @@ ELEMENTS.update({
                      'eye and a long tongue, its canopy a hard dome; E and F: a tsukumogami heap, things thrown away (a kettle, a sandal, a lantern) come alive as one creature under a lid.',
                      rule='In this world grey is greasy steel you slip on and chain-link you hold on to, blue marks moving platforms, black bags are springs and orange '
                      'blocks crumble: those only for small details; the boss is purple all over.'),
+    # (owner 2026-10-21: «начинай босса Моря»; the Rat King's slide holds its tier for now, and every boss is at least twice the hero: «минимум 2 к 1»)
+    'boss-sea': dict(world='sea', kind='boss', what='the boss of the Sea (c4-10), a yokai of the sea or the river', does=SLIDE.format(down='loose stones'),
+                     size='about 6 tiles across and 4 tiles tall, low and wide: three times the hero across and twice his height',
+                     place='on a floor of white wet rock along the bottom of the cell (an aqua dither under it), a few loose stones hanging from the ceiling, '
+                     'a little shell on the rock beside it, the hero near the other wall', main='orange',
+                     parts='claws and legs, whiskers and fins, the stone or the shell on its back, the dish of water on its head, as its yokai has them',
+                     yokai='A and B: a Heikegani, the Heike crab, a big crab whose shell bears the angry face of a samurai, scuttling sideways on its legs, its two big '
+                     'claws up; C and D: Onamazu, the giant catfish whose thrashing shakes the earth, long and low, long whiskers, the gods\' great stone (kaname-ishi) '
+                     'pressed on its back; E and F: a Kappa of the river mouth, a river imp with a turtle shell on its back, the dish of water on its head, a beak and webbed hands.',
+                     rule='In this world white is wet rock you slip on, green is seaweed you hold on to, purple marks springs and grey blocks crumble: those only for small '
+                     'details; orange marks boats and moving planks, but the boss is orange all over; aqua is the world\'s own, the sea and its rocks, never the boss.'),
 })
 
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.

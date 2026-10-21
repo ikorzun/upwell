@@ -666,7 +666,7 @@ class Game {
     save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
-    if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
+    if (save.runs <= 2 && daily) ui.toast(t(howTo()), 3500);   // (a run's first floor says it: the daily well's has no words on it)
   }
   buildLevel(newHero) {
     const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
@@ -1814,7 +1814,6 @@ class Game {
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
-    if (w === 0 && s === 0 && this.first) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);   // the very first level: how to play
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
@@ -2031,6 +2030,7 @@ function pixelDisc(r, fill) {
 const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon, taskLantern, taskFlower, taskBell
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
+const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys');   // the first floor's words: how to run and jump
 function button(text, cls, fn) {
   const b = el('button', cls, text);
   b.addEventListener('click', (e) => { e.stopPropagation(); if (performance.now() - ui.openT < 300) return; sound.unlock(); sound.play('click', 0.6); fn(); });   // (a double tap's second: not into the next screen)
@@ -2279,7 +2279,8 @@ const ui = {
   },
   toastTimer: 0,
   toast(text, ms = 1500, icon) {   // `icon`: an ICONS picture before the words
-    const e = $('toast');
+    const e = $('toast'), lv = game.lv, low = !!lv && lv.kind === 'boss' && game.state === 'play';   // at a boss: on the floor's band, under the fight (owner)
+    e.classList.toggle('low', low); e.style.top = low ? Math.round(lv.floor - lv.cam + (view.h - view.keep - (lv.floor - lv.cam)) / 2) + 'px' : '';
     e.replaceChildren(...(icon ? [iconEl(icon)] : []), px(text, Math.floor((view.w - (icon ? 110 : 64)) / 2))); e.classList.add('show');
     clearTimeout(this.toastTimer);
     if (ms) this.toastTimer = setTimeout(() => e.classList.remove('show'), ms);   // 0 keeps it up
@@ -2322,7 +2323,7 @@ const ui = {
     const onFloor = g.state === 'play' && lv.kind === 'well' && g.world === 0 && g.stage === 0 && !g.bonus && g.daily == null && fy < view.h - view.keep;
     fh.classList.toggle('on', onFloor);
     if (onFloor) {
-      if (!fh.firstChild) fh.append(px(t(coarse ? 'tapJump' : 'keyJump')));
+      if (!fh.firstChild) fh.append(px(t(howTo()).replace(' · ', '\n'), Math.floor((view.w - 48) / 3)));   // how to run and jump, once, on the floor (owner: not in a toast as well), a line each
       fh.style.transform = 'translate(' + Math.round(view.w / 2) + 'px,' + Math.round(fy + (view.h - view.keep - fy) / 2) + 'px) translate(-50%, -50%)';
     }
     if (g.hp !== this.hp || g.maxHp !== this.max) {

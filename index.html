@@ -167,6 +167,8 @@
     opacity: 0; transition: opacity 0.2s steps(2), transform 0.2s steps(2);
   }
   #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #toast.low { transform: translate(-50%, calc(-50% - 6px)); }   /* at a boss: centred on the floor's band */
+  #toast.low.show { transform: translate(-50%, -50%); }
   #toast .ico { --p: 3; margin-right: 10px; }   /* a candy's picture before its note */
   #labels .tag { position: absolute; left: 0; top: 0; padding: 4px 6px; background: var(--ink); clip-path: var(--notch); }
   #labels .tag.dim { color: var(--gray); }

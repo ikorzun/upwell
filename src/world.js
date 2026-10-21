@@ -152,6 +152,9 @@ const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plan
 // as laid, on steady ledges' wall ends where nothing laid stands in front (what crumbles away for a while does not count: nothing comes and goes).
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
+// The Danchi's kit while the owner picks (owner 2026-10-21: world 6 Japanese, «Данчи»; research/variants/danchi-*-1-px.png): all six variants of each in the game's
+// own code, DANCHI_V, or window.__dcV from the gallery
+const DANCHI_V = { slab: 0, balcony: 0, pole: 0, stairs: 0, boxes: 0, spring: 0, bikes: 0, plants: 0, mail: 0, cat: 0, wall: 0, far: 0, shop: 0, stash: 0 };
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
@@ -175,6 +178,12 @@ const kitThing = (lv, r) => {
     else if (k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
     else if (k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
     else if (k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
+  } else if (th.danchi) {   // the Danchi's by a hash of its height: bicycles, a balcony garden, a stray cat on the ledge, the block's mailboxes on the wall over it
+    const k = Math.floor(((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) * 6);
+    if (k === 0 && steady(3.0) && room(0, 2.8, 1.6)) out = { kind: 'bikes' };
+    else if (k === 2 && steady(2.4) && room(0, 2.3, 2.0)) out = { kind: 'plants' };
+    else if (k === 3 && steady(2.0) && room(0, 2.1, 2.6)) out = { kind: 'mail' };
+    else if (k === 5 && steady(1.6) && room(0, 1.4, 1.2)) out = { kind: 'cat' };
   } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
     const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
     if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse' };
@@ -295,7 +304,7 @@ const THEMES = {
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
   tokyo: Object.assign(theme(PAL.purple, { ice: PAL.white, crumble: PAL.gray, mover: PAL.blue }), { dots: PAL.black, town: true }),   // Tokyo's town at night (see TOKYO), purple (owner: blue went with Fuji's;
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
-  blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { win: 'grid', panels: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
+  blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { danchi: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
   sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
   skazka: Object.assign(theme(PAL.gray, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
   // crumbles or flies tells itself by its shape (a rotten log, Baba Yaga's mortar); colour only for the hero, lights, coins, danger and the doors' marks
@@ -2594,6 +2603,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (th.sea && kind !== 'exit') { funaya(d, kind); return; }   // the Sea's (see funaya)
     if (th.skazka && kind !== 'exit') { (kind === 'shop' ? izba : pech)(d); return; }   // the Dark Forest's (see izba, pech)
     if (th.mines && kind !== 'exit') { (kind === 'shop' ? mnShop : mnStash)(d); return; }   // the Mine's (see mnShop, mnStash)
+    if (th.danchi && kind !== 'exit') { (kind === 'shop' ? dcShop : dcStash)(d); return; }   // the Danchi's (see dcShop, dcStash)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -2852,6 +2862,39 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     bx(1.1, 0.8, 1.4, 1.15, G); bx(1.22, 0.86, 1.28, 1.05, K);   // its lock, its keyhole
     F(X(1.25), Y(dh + 0.42), 0.26 * t, 0, 0, 0.24 * t, G, 1, 0); F(X(1.25), Y(dh + 0.42), 0.15 * t, 0, 0, 0.13 * t, K, 1, 4);   // a keystone with its mark
     mnLamp(X(2.7), Y(2.2), true, 0.85);   // a lamp
+    skInside(d, 'stash', c, dx, dw, dh);
+  };
+  // The Danchi's doors while the owner picks (DANCHI_V.shop, DANCHI_V.stash, research/variants/danchi-shop-1-px.png, danchi-stash-1-px.png): the shop a tiny
+  // dagashiya on the block's ground floor, its shutter half up, a red noren (the shop's mark), a lit window; the stash an apartment's steel door, its gaps glowing
+  // purple (the stash's mark). What is inside bobs in the doorway (skInside), a glow breathes round it.
+  const dcShop = (d) => {
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__dcV || DANCHI_V).shop, c = PAL.red, G = PAL.gray, K = PAL.black, MUTE = 1.6, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);
+    bx(0.25, 0, 2.25, dh + 0.5, G, 1); bx(0.5, 0, 2.0, dh, INK.dark);   // its front, the doorway dim inside
+    for (let v = dh + 0.05; v < dh + 0.45; v += 0.1) bx(0.45, v, 2.05, v + px, K);   // its shutter, half up
+    bx(0.5, dh - 0.55, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.55, u + px, dh, K);   // its noren
+    const gacha = (u) => { bx(u, 0, u + 0.35, 0.9, PAL.red, MUTE); bx(u + 0.04, 0.45, u + 0.31, 0.85, PAL.white, 1.3); for (const [e, f, cc] of [[0.1, 0.6, PAL.blue], [0.2, 0.7, PAL.orange], [0.15, 0.52, PAL.purple]]) disc(X(u + e), Y(f), 0.04 * t, cc, MUTE); };   // a gacha machine
+    if (k === 0) { bx(0.2, dh + 0.55, 2.3, dh + 1.0, PAL.purple, MUTE); gacha(2.35); }   // A: a purple sign board, a gacha
+    else if (k === 1) { bx(0.2, dh + 0.55, 2.3, dh + 0.95, PAL.blue, MUTE); for (let u = 0.3; u < 2.3; u += 0.3) bx(u, dh + 0.45, u + 0.15, dh + 0.55, G); gacha(2.35); }   // B: a blue sign over a striped awning
+    else if (k === 2) { bx(0.15, dh + 0.5, 2.35, dh + 0.65, G, 1, 3); F(X(1.25), Y(dh - 0.3), 0.14 * t, 0, 0, 0.14 * t, PAL.white, 1, 4); mnLampSafe(X(2.6), Y(2.3)); gacha(2.35); }   // C: a mon on its noren, a paper lantern
+    else if (k === 3) { ln(0.0, dh + 0.5, 1.25, dh + 1.1, G, 4); ln(1.25, dh + 1.1, 2.5, dh + 0.5, G, 4); bx(0.3, 0.9, 0.48, 1.4, PAL.orange); vlamps.push([X(0.39), Y(1.15), 0.3, 1.0]); gacha(2.35); }   // D: a tiled roof, a lit window
+    else if (k === 4) { for (let u = 0.2; u < 2.3; u += 0.3) { F(X(u + 0.15), Y(dh + 0.55), 0.16 * t, 0, 0, 0.12 * t, PAL.purple, MUTE, 0); } bx(2.4, 0.9, 2.8, 1.6, PAL.white, 1.3); bx(2.48, 1.0, 2.72, 1.45, PAL.red, MUTE); }   // E: a scalloped awning, an ice flag (kakigori)
+    else { bx(0.15, dh + 0.5, 2.35, dh + 0.68, G, 1, 3); bx(1.6, dh + 0.7, 2.1, dh + 1.1, G, 1, 4); gacha(2.35); }   // F: a flat roof, a sign box on it
+    skInside(d, 'shop', c, dx, dw, dh + 1.1);
+  };
+  const dcStash = (d) => {
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__dcV || DANCHI_V).stash, c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);
+    bx(0.4, 0, 2.1, dh + 0.15, G, 1.5); bx(0.5, 0, 2.0, dh, G, 1, k === 2 ? 3 : 1);   // its frame, its steel door
+    if (k === 2) for (let v = 0.2; v < dh - 0.1; v += 0.16) bx(0.55, v, 1.95, v + px, K);   // C: louvres
+    if (k === 4) for (const u of [0.9, 1.35, 1.75]) bx(u, 0.1, u + px, dh - 0.1, K);   // E: its panels
+    bx(0.5, 0, 2.0, 0.08, c); bx(1.9, 0.9, 1.97, 1.1, K); bx(1.15, 1.55, 1.35, 1.65, K);   // the gap under it glowing, its handle, its peephole
+    bx(1.0, dh - 0.35, 1.5, dh - 0.2, PAL.white, 1.3);   // its nameplate
+    if (k === 0 || k === 2) { bx(-0.05, 1.0, 0.32, 1.45, c, 1.6); bx(0.05, 1.18, 0.22, 1.24, K); }   // A, C: a milk box
+    if (k === 0) bx(1.0, 0.6, 1.5, 0.7, K);   // A: a mail slot
+    if (k === 1 || k === 3) { ln(0.15, dh + 0.4, 0.15, 1.6, G); bx(0.0, 1.0, 0.3, 1.6, c, 1.6); }   // B, D: a lamp on a hook, purple
+    if (k === 4) { ln(0.15, dh + 0.4, 0.15, 1.3, G); F(X(0.15), Y(1.1), 0.16 * t, 0, 0, 0.2 * t, c, 1.6, 0); }   // E: a lantern
+    if (k === 5) { bx(-0.02, 0.0, 0.3, 0.7, G, 1.5); bx(0.05, 0.7, 0.23, 0.85, G); }   // F: a fire extinguisher box
     skInside(d, 'stash', c, dx, dw, dh);
   };
   const pech = (d) => {   // a crooked Russian stove (the stash, E), tall and lumpy and cracked, its mouth the door, its chimney bent, a bench step off it with a shelf over it
@@ -3405,6 +3448,92 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
+  const mnLampSafe = (x, y) => { box(x - kitP, y, x + kitP, snap(y + 0.12 * kitT), PAL.gray, 1, 0, 10, 0); F(x, snap(y + 0.3 * kitT), 0.16 * kitT, 0, 0, 0.14 * kitT, PAL.gray, 1, 0); box(x - snap(0.08 * kitT), snap(y + 0.3 * kitT), x + snap(0.08 * kitT), snap(y + 0.42 * kitT), PAL.orange, 1, 0, 10, 0); vlamps.push([x, snap(y + 0.36 * kitT), 0.3, 1.0]); };   // a little lamp under a shade, lit
+  const dcFar = (k) => {   // the estate far off (DANCHI_V.far): rows of blocks, their windows lit here and there, their numbers on their end walls, water tanks on their roofs;
+    // screen-fixed, low, at a quarter (DIM), the lit windows lights of a sort (LIT, no light cast)
+    const t = kitT, P = kitP, G = PAL.gray, cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+    const fb = (u0, v0, u1, v1, c = G, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
+    const block = (u0, u1, v0, v1, n, num) => { fb(u0, v0, u1, v1); fb(u0, v0, u0 + 0.9, v1, G, 1.4); for (let v = v0 + 0.35; v < v1 - 0.3; v += 0.55) for (let u = u0 + 1.1; u < u1 - 0.3; u += 0.5) { const on = ((Math.round(u * 7) * 13 + Math.round(v * 11) * 7 + n) % 5) === 0; fb(u, v, u + 0.22, v + 0.25, on ? PAL.orange : PAL.black, on ? LIT : 1); }
+      for (let v = v0 + 0.3; v < v1; v += 0.55) fb(u0 + 0.9, v, u1, v + P / t, PAL.black, 1);
+      if (num != null) { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0]][num % 8], a = u0 + 0.25, b = v1 - 1.4;
+        [[0, 0.9, 0.4, 1.0], [0, 0.5, 0.08, 0.95], [0.32, 0.5, 0.4, 0.95], [0, 0.45, 0.4, 0.55], [0, 0.05, 0.08, 0.5], [0.32, 0.05, 0.4, 0.5], [0, 0, 0.4, 0.1]].forEach(([e0, f0, e1, f1], i) => { if (seg[i]) fb(a + e0, b + f0, a + e1, b + f1, PAL.black, 1); }); } };   // its number, painted big   // its walls, its end wall, its windows, its balconies' lines, its number
+    const tank = (u, v) => { fb(u - 0.3, v, u + 0.3, v + 0.55); fb(u - 0.35, v + 0.55, u + 0.35, v + 0.65); for (const e of [-0.25, 0.25]) fb(u + e - 0.03, v - 0.3, u + e + 0.03, v); };   // a water tank on its legs
+    const pylon = (u, v0, h) => { for (const e of [-1, 1]) line(U(u + e * 0.4), Vv(v0), U(u + e * 0.08), Vv(v0 + h), G, DIM, 1); for (let q = 0.25; q < 1; q += 0.25) fb(u - 0.4 * (1 - q) - 0.15, v0 + h * q, u + 0.4 * (1 - q) + 0.15, v0 + h * q + 0.05); };
+    const moon = (u, v) => { F(U(u), Vv(v), 0.6 * t, 0, 0, 0.6 * t, G, 1.4, 0); };
+    if (k === 0) { block(-2, 6.5, 0, 2.6, 1, 1); moon(5.6, 5.2); pylon(3.0, 2.6, 2.0); tank(-0.5, 2.6); }   // A
+    else if (k === 1) { block(-0.5, 6.0, 0, 2.8, 2, 2); tank(2.5, 2.8); for (let i = 0; i < 5; i++) fb(5.6 + 0.1 * (i % 2), 0.3 + i * 0.5, 5.8, 0.6 + i * 0.5, PAL.green, DIM); }   // B: ivy up its end
+    else if (k === 2) { block(-1.0, 7.0, 0, 2.6, 3, 3); tank(2.5, 2.6); moon(5.5, 5.4); for (let u = 1.2; u < 6.5; u += 1.5) fb(u, 1.0, u + 0.25, 1.3, PAL.purple, DIM); }   // C: laundry on its balconies
+    else if (k === 3) { block(-2.0, 4.0, 0, 2.8, 4, 4); tank(-0.5, 2.8); tank(1.5, 2.8); pylon(5.0, 1.0, 4.0); }   // D: two tanks, a pylon
+    else if (k === 4) { block(-1.0, 6.5, 0.6, 3.0, 5, 5); fb(-0.2, 0, 0.8, 0.5, G, DIM, 4); for (const u of [2.0, 3.4]) { fb(u, 0, u + 0.06, 1.0); } fb(2.0, 1.0, 3.46, 1.06); F(U(-0.6), Vv(0.3), 0.3 * t, 0, 0, 0.3 * t, G, DIM, 0); }   // E: a playground before it
+    else { block(-3.0, 1.5, 0, 3.4, 6, 6); fb(1.5, 0, 2.6, 3.0, G, DIM, 3); block(2.6, 7.0, 0, 2.2, 7, null); fb(-2.6, 0, -1.2, 0.6, G, DIM, 4); tank(-1.0, 3.4); }   // F: a stair tower, a bicycle shed
+  };
+  if (th.danchi && lv.kind === 'well') {   // the Danchi's (DANCHI_V while the owner picks): what runs up its walls behind the play, its things on the ledges, the estate far off
+    const t = kitT, P = kitP, px = P / t, V = window.__dcV || DANCHI_V, G = PAL.gray, K = PAL.black, MUTE = 1.6;   // (laundry and the like in their colours, but muted: their inks mean things here)
+    for (const side of [-1, 1]) {   // up the walls, behind (DIM): drainpipes, air conditioners, meters, a box every few tiles
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), wb = (d0, y0, d1, y1, c = G, a = DIM, tn = 0) => box(snap(Math.min(at(d0 * t), at(d1 * t))), snap(y0), snap(Math.max(at(d0 * t), at(d1 * t))), snap(y1), c, a, 0, 10, tn), k = V.wall;
+      const pipe = (d) => { wb(d, top, d + 0.22, bot); for (let y = Math.floor(top / (2.5 * t)) * 2.5 * t; y < bot; y += 2.5 * t) wb(d - 0.08, y, d + 0.3, y + 0.12 * t); };   // a drainpipe, its brackets
+      const ac = (d, y) => { wb(d, y, d + 1.1, y + 0.75 * t, G, DIM, 4); F(snap(at((d + 0.4) * t)), snap(y + 0.38 * t), 0.26 * t, 0, 0, 0.26 * t, K, 1, 4); wb(d, y + 0.75 * t, d + 0.2, y + 1.1 * t); };   // an AC unit, its fan, its stand
+      const beat = (n) => { const out = []; for (let j = Math.floor(top / (n * t)) - 1; j * n * t < bot + n * t; j++) out.push(j * n * t + (side < 0 ? 0 : n * 0.5 * t)); return out; };
+      if (k === 0) pipe(0.35);
+      else if (k === 1) { pipe(0.25); for (const y of beat(9)) ac(0.5, y); }
+      else if (k === 2) { pipe(0.3); for (const y of beat(8)) { wb(0.55, y, 0.95, y + 0.6 * t); wb(0.65, y + 0.1 * t, 0.85, y + 0.2 * t, K, 1); } }   // C: gas meters
+      else if (k === 3) { pipe(0.2); for (const y of beat(10)) { ac(0.4, y); ac(0.4, y + 1.0 * t); } }   // D: two units stacked
+      else if (k === 4) { pipe(0.3); for (const y of beat(9)) { wb(0.6, y, 1.0, y + 0.8 * t); wb(0.72, y + 0.8 * t, 0.8, y + 1.6 * t); } }   // E: an electric box, its conduit
+      else { pipe(0.3); for (const y of beat(11)) { wb(0.5, y, 0.85, y + 0.25 * t, PAL.purple, DIM); wb(0.55, y - 0.35 * t, 0.62, y, PAL.green, DIM); wb(0.7, y - 0.3 * t, 0.77, y, PAL.green, DIM); } }   // F: a plant hung on the pipe
+    }
+    for (const r of lv.rects) {   // its things on some ledges (kitThing)
+      const p = !r.gone && seen(r.y0 - 3 * t, r.y0 + t) && kitThing(lv, r);
+      if (!p) continue;
+      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
+      const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+      const ln = (u0, v0, u1, v1, c = G, wd = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wd);
+      const ring = (u, v, rr, c = G) => { F(X(u), Y(v), rr * t, 0, 0, rr * t, c, 1, 4); };
+      const pot = (u, w, h, c = G) => { bx(u - w / 2, 0, u + w / 2, h, c, 1, 4); bx(u - w / 2 - 0.04, h - 0.06, u + w / 2 + 0.04, h, c); };
+      const leaves = (u, v, n, s = 1) => { for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.5; ln(u, v, u + Math.cos(a) * 0.3 * s, v - Math.sin(a) * 0.35 * s, i % 3 === 1 ? PAL.green : G, 2); } };
+      if (p.kind === 'bikes') {   // mamachari bicycles parked by the wall
+        const k = V.bikes, bike = (u, s, extra) => { for (const e of [0, 1.15]) { ring(u + e * s, 0.38 * s, 0.36 * s); disc(X(u + e * s), Y(0.38 * s), 0.04 * t, G, 1); }
+          ln(u, 0.38 * s, u + 0.55 * s, 0.38 * s); ln(u + 0.55 * s, 0.38 * s, u + 0.9 * s, 0.8 * s); ln(u + 0.35 * s, 0.82 * s, u + 0.55 * s, 0.38 * s); ln(u + 0.35 * s, 0.82 * s, u + 0.9 * s, 0.8 * s); ln(u + 0.9 * s, 0.8 * s, u + 1.15 * s, 0.38 * s);   // its frame
+          ln(u + 0.95 * s, 0.8 * s, u + 1.02 * s, 1.0 * s, G, 2); ln(u + 0.9 * s, 1.0 * s, u + 1.15 * s, 1.02 * s); bx(u + 0.28 * s, 0.85 * s, u + 0.45 * s, 0.9 * s, K);   // its handlebar, its saddle
+          if (extra === 'basket') bx(u + 1.1 * s, 0.75 * s, u + 1.45 * s, 1.0 * s, G, 1, 4); if (extra === 'seat') { bx(u - 0.25 * s, 0.85 * s, u + 0.1 * s, 1.25 * s, PAL.blue, MUTE); } if (extra === 'plants') { bx(u + 1.1 * s, 0.75 * s, u + 1.45 * s, 1.0 * s, G, 1, 4); leaves(u + 1.27 * s, 1.0 * s, 3, 0.6); } };
+        if (k === 0) { bike(0.35, 1, 'seat'); bike(0.35, 1, 'basket'); }   // A: a child seat at the back, a basket at the front
+        else if (k === 1) { bike(0.3, 1, 'basket'); bx(1.42, 0.75, 1.75, 1.0, PAL.purple, MUTE, 4); }   // B: a purple basket
+        else if (k === 2) bike(0.3, 1, 'basket');   // C: plain, a wire basket
+        else if (k === 3) { bike(0.35, 1, 'basket'); bx(0.1, 0.85, 0.45, 1.3, G, 1, 0); }   // D: a grey child seat
+        else if (k === 4) { bike(0.3, 1, 'basket'); bike(1.55, 0.8, null); }   // E: two, a small one
+        else bike(0.4, 1, 'plants');   // F: herbs in its basket
+      } else if (p.kind === 'plants') {   // a little balcony garden
+        const k = V.plants;
+        if (k === 0) { pot(0.5, 0.35, 0.45); leaves(0.5, 0.45, 5); bx(0.9, 0, 1.9, 0.35, G, 1, 1); for (const u of [1.05, 1.35, 1.65]) leaves(u, 0.35, 3, 0.6); ln(1.45, 0.35, 1.45, 1.9); for (const v of [0.9, 1.3, 1.7]) disc(X(1.45 + 0.08), Y(v), 0.08 * t, PAL.purple, MUTE); bx(2.0, 0, 2.3, 0.25, PAL.blue, MUTE); }   // A: a box of greens, a morning glory, a watering can
+        else if (k === 1) { ln(0.2, 1.8, 2.1, 1.8); for (const [u, c] of [[0.7, PAL.blue], [1.1, PAL.purple], [1.5, G]]) bx(u, 1.15, u + 0.32, 1.8, c, MUTE); pot(0.6, 0.3, 0.4); leaves(0.6, 0.4, 4); pot(1.2, 0.25, 0.3); leaves(1.2, 0.3, 3, 0.7); bx(1.5, 0, 2.1, 0.35, G, 1, 1); leaves(1.8, 0.35, 4, 0.7); }   // B: laundry over its pots
+        else if (k === 2) { ln(0.1, 1.9, 1.6, 1.9, G, 2); mnLampSafe(X(1.5), Y(1.9)); ln(0.25, 0, 0.25, 1.9); for (const v of [1.0, 1.4]) disc(X(0.33), Y(v), 0.08 * t, PAL.purple, MUTE); pot(0.9, 0.35, 0.4); leaves(0.9, 0.4, 5); bx(1.3, 0, 2.0, 0.3, G, 1, 1); leaves(1.6, 0.3, 4, 0.6); }   // C: a lamp on a bracket, a morning glory up the post
+        else if (k === 3) { bx(0.15, 0, 1.8, 1.55, G, DIM, 1); pot(0.4, 0.3, 0.35); leaves(0.4, 0.35, 3); bx(0.8, 0, 1.6, 0.35, G, 1, 1); leaves(1.2, 0.35, 5, 0.7); ln(1.85, 0, 1.85, 1.6, G, 3); for (const v of [1.0, 1.35]) disc(X(1.92), Y(v), 0.08 * t, PAL.purple, MUTE); }   // D: a trellis behind, a tall pot
+        else if (k === 4) { ln(0.1, 0, 0.1, 2.0); ln(0.1, 1.85, 0.4, 1.85, PAL.blue, 1, MUTE); pot(0.6, 0.35, 0.5); leaves(0.6, 0.5, 6, 1.1); bx(1.0, 0, 1.7, 0.3, G, 1, 1); leaves(1.35, 0.3, 4, 0.6); bx(1.75, 0, 2.2, 0.45, G, 1, 3); }   // E: a tall plant, a crate
+        else { pot(0.5, 0.3, 0.35); leaves(0.5, 0.35, 4); ring(1.2, 0.3, 0.28); ring(1.75, 0.3, 0.28); ln(1.2, 0.3, 1.75, 0.3); bx(2.0, 0, 2.3, 0.3, G, 1, 4); ln(2.15, 0.3, 2.15, 1.8); for (const v of [1.0, 1.4, 1.7]) disc(X(2.23), Y(v), 0.08 * t, PAL.purple, MUTE); }   // F: a kid's bike, a morning glory
+      } else if (p.kind === 'mail') {   // the block's mailboxes on the wall over the ledge, its number painted big over them
+        const k = V.mail, num = [32, 47, 51, 26, 13, 64][k], mb = (u0, v0, cols, rows) => { for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) { bx(u0 + i * 0.36, v0 + j * 0.3, u0 + i * 0.36 + 0.32, v0 + j * 0.3 + 0.26, G, 1, 0); bx(u0 + i * 0.36 + 0.06, v0 + j * 0.3 + 0.14, u0 + i * 0.36 + 0.26, v0 + j * 0.3 + 0.17, K); } };
+        { const nl = Math.min(X(0.25), X(1.0)), nt = Y(2.15), digit = (x, n) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
+          [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * P, nt + b0 * P, x + a1 * P, nt + b1 * P, G, 1, 0, 10, 0); }); };   // a digit five pixels by nine, read the same on either wall
+          digit(nl, Math.floor(num / 10)); digit(nl + 7 * P, num % 10); }   // its number, painted grey on the wall
+        mb(0.15, 0.2, 2, 4);
+        if (k === 0 || k === 3) { bx(1.05, 0.5, 1.75, 1.2, G, 1.5, 1); for (const v of [0.65, 0.8, 0.95]) bx(1.12, v, 1.65, v + 0.05, K); }   // A, D: a notice board
+        if (k === 1) { bx(0.0, 2.45, 1.4, 2.55, G); for (const u of [0.05, 1.3]) bx(u, 1.2, u + 0.06, 2.45, G); }   // B: a canopy over them
+        if (k === 2) mnLampSafe(X(0.6), Y(2.6));   // C: a lamp over them
+        if (k === 3) { pot(1.3, 0.3, 0.35); leaves(1.3, 0.35, 4); }   // D: a plant
+        if (k === 4) { bx(1.0, 0.2, 1.4, 1.3, G, 1, 4); bx(1.1, 0.9, 1.3, 1.1, K); bx(1.45, 0, 2.0, 0.35, G, 1, 1); leaves(1.7, 0.35, 4, 0.6); }   // E: an intercom panel, a box of greens
+        if (k === 5) { ln(1.2, 2.6, 1.2, 0.0, G, 3); ln(1.2, 0.9, 1.5, 0.9, G, 3); bx(1.4, 0.4, 1.6, 0.9, G, 1, 4); }   // F: a pipe down past them, a valve box
+      } else if (p.kind === 'cat') {   // a stray cat
+        const k = V.cat, cat = (u, sleep, c = G) => { if (sleep) { F(X(u), Y(0.22), 0.36 * t, 0, 0, 0.2 * t, c, 1, 0); F(X(u + 0.28 * d * d), Y(0.3), 0.15 * t, 0, 0, 0.13 * t, c, 1, 0); for (const e of [0.2, 0.36]) bx(u + e, 0.38, u + e + 0.06, 0.48, c); bx(u + 0.24, 0.3, u + 0.34, 0.31, K); }
+          else { F(X(u), Y(0.3), 0.22 * t, 0, 0, 0.3 * t, c, 1, 0); F(X(u + 0.05), Y(0.72), 0.16 * t, 0, 0, 0.14 * t, c, 1, 0); for (const e of [-0.08, 0.12]) bx(u + e, 0.82, u + e + 0.07, 0.95, c); for (const e of [-0.02, 0.1]) bx(u + e, 0.72, u + e + 0.03, 0.75, K); ln(u - 0.2, 0.05, u - 0.45, 0.35, c, 2); } };
+        if (k === 0) { bx(0.3, 0, 1.3, 0.14, PAL.purple, MUTE); cat(0.75, true); }   // A: asleep on a cushion
+        else if (k === 1) { cat(0.8, false); bx(1.25, 0, 1.6, 0.1, G); }   // B: sitting by its bowl
+        else if (k === 2) { bx(0.35, 0, 1.25, 0.6, G, 1, 0); bx(0.6, 0, 1.0, 0.4, K); ln(0.25, 0.6, 0.8, 0.95, G, 3); ln(0.8, 0.95, 1.35, 0.6, G, 3); cat(0.8, true); }   // C: on its little house
+        else if (k === 3) { ln(0.2, 0, 0.2, 1.6); ln(0.2, 1.5, 1.4, 1.5); bx(0.6, 0.85, 0.95, 1.5, PAL.blue, MUTE); bx(1.0, 0.9, 1.25, 1.5, G, 1, 4); cat(0.9, true, K); }   // D: a black cat under the laundry
+        else if (k === 4) { F(X(0.8), Y(0.2), 0.42 * t, 0, 0, 0.16 * t, G, 1, 0); F(X(1.2), Y(0.32), 0.14 * t, 0, 0, 0.12 * t, G, 1, 0); for (const e of [1.12, 1.24]) bx(e, 0.4, e + 0.06, 0.5, G); ln(0.4, 0.2, 0.2, 0.5, G, 2); bx(1.4, 0, 1.7, 0.1, G); }   // E: stretching by its bowl
+        else { bx(0.25, 0, 1.25, 0.14, PAL.blue, MUTE); cat(0.7, true); pot(1.5, 0.3, 0.3); leaves(1.5, 0.3, 4, 0.7); }   // F: on a blue cushion, a pot
+      }
+    }
+    dcFar(V.far);
+  }
   if (th.panels && lv.kind === 'well') {   // the Tower Blocks' kit (THEMES.blocks; see the parts catalog): a riser pipe up each wall on a bracket every
     // 4 tiles, satellite dishes on the walls, an entrance (a blue door, its canopy and lamp, a bench) at the wall end of some wide ledges.
     const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
@@ -3498,6 +3627,97 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (hgt <= t + 1) for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) for (let i = 0; i <= 6; i++) { const u = i / 6, x = snap(wx + d * 1.1 * t * u), y = snap(r.y1 + 1.1 * t * (1 - u)); box(x - P / 2, y - P / 2, x + P / 2, y + P / 2, PAL.gray, 1, 0, 10, 0); }
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+  };
+  // The Danchi's ledges (owner 2026-10-21, research/variants/danchi-*-1-px.png): while the owner picks, all six variants of each in the game's own code (DANCHI_V,
+  // or window.__dcV from the gallery). A block is raw concrete (slab), a plank off a wall a balcony (balcony), a free plank a laundry pole (pole), a step a flight of
+  // its outdoor stairwell (stairs), a crumbling block cardboard moving boxes (boxes, orange). Laundry and the like muted (their inks mean things here). False for
+  // what keeps the common look.
+  const danchiRect = (r) => {
+    const t = kitT, P = kitP, px = P / t, V = window.__dcV || DANCHI_V, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);
+    const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
+    const G = PAL.gray, K = PAL.black, MUTE = 1.6;
+    const cloth = (x, y, wd, h, c, a = MUTE) => { box(snap(x - wd / 2 * t), snap(y), snap(x + wd / 2 * t), snap(y + h * t), c, a, 0, 10, 0); };   // a hung thing, muted
+    const shirt = (x, y, c) => { box(snap(x - 0.2 * t), snap(y + 0.05 * t), snap(x + 0.2 * t), snap(y + 0.45 * t), c, MUTE, 0, 10, 0); box(snap(x - 0.3 * t), snap(y + 0.05 * t), snap(x + 0.3 * t), snap(y + 0.17 * t), c, MUTE, 0, 10, 0); line(x, y - 0.12 * t, x, y + 0.05 * t, G, 1, 1); };   // a shirt on a hanger
+    const sock = (x, y, c) => { line(x, y - 0.08 * t, x, y, PAL.orange, 1, 1); box(snap(x - 0.05 * t), snap(y), snap(x + 0.05 * t), snap(y + 0.3 * t), c, MUTE, 0, 10, 0); box(snap(x - 0.05 * t), snap(y + 0.22 * t), snap(x + 0.12 * t), snap(y + 0.3 * t), c, MUTE, 0, 10, 0); };   // a sock on a peg
+    if (r.stair) {   // a step of the outdoor stairwell: its tread, its nosing, a handrail post at its middle and the rail on up to the next step
+      const k = V.stairs, c = th.block;
+      if (r.dcUp === undefined) { const up = (dx) => lv.rects.some((q) => q !== r && q.stair && Math.abs(q.y1 - r.y0) < 2 && (dx > 0 ? Math.abs(q.x0 - r.x1) < 2 : Math.abs(q.x1 - r.x0) < 2)); r.dcUp = up(1) ? 1 : up(-1) ? -1 : 0; }   // (once: which way the flight climbs)
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, k === 3 || k === 4 ? 2 : 1); box(r.x0, r.y0 + 2 * P, r.x1, r.y0 + 3 * P, K, 1, 0, 10, 0);   // its tread and riser, its nosing
+      if (k === 1 || k === 5) box(r.x0, r.y0 + 3 * P, r.x1, r.y0 + 4 * P, G, 1, 0, 10, 4);   // a non-slip strip
+      const mx = snap((r.x0 + r.x1) / 2), rh = (k === 5 ? 1.2 : 0.9) * t, py = r.y0 - rh, dir = r.dcUp || 1, nx = snap(mx + dir * t), ny = py - 1.0 * t * (r.dcUp ? 1 : 0), rc = G;
+      box(mx - P / 2, py, mx + P / 2, r.y0, rc, 1, 0, 10, 0); line(mx, py, nx, ny, rc, 1, k === 1 ? 2 : 1);   // its post, its rail to the next
+      if (k === 0) disc(mx, py, 0.08 * t, rc, 1);   // A: a ball on its post
+      if (k === 2) for (let i = 0; i < 3; i++) box(snap(mx + (hsh(i) - 0.5) * 0.6 * t), snap(py + hsh(i + 5) * rh), snap(mx + (hsh(i) - 0.5) * 0.6 * t) + P, snap(py + hsh(i + 5) * rh) + P, PAL.orange, 1, 0, 10, 0);   // C: rust on it
+      if (k === 3) for (let e = -0.4; e <= 0.41; e += 0.2) box(snap(mx + e * t), snap(py + (0.2 - e * dir * 0.5) * t), snap(mx + e * t) + P, r.y0, G, 1.4, 0, 10, 0);   // D: a mesh of bars under its rail
+      if (k === 4 && Math.round(r.y0 / t) % 3 === 0) { box(snap(mx + 0.15 * t), snap(r.y0 - 0.35 * t), snap(mx + 0.4 * t), r.y0, G, 1, 0, 10, 4); line(snap(mx + 0.27 * t), snap(r.y0 - 0.35 * t), snap(mx + 0.27 * t), snap(r.y0 - 0.65 * t), PAL.green, 1, 2); }   // E: a pot on a step
+      if (k === 5 && Math.round(r.y0 / t) % 4 === 0) { F(snap(mx + 0.3 * t), snap(r.y0 - 0.18 * t), 0.2 * t, 0, 0, 0.16 * t, G, 1, 0); for (const e of [0.22, 0.36]) box(snap(mx + e * t), snap(r.y0 - 0.42 * t), snap(mx + e * t) + P, snap(r.y0 - 0.3 * t), G, 1, 0, 10, 0); }   // F: a cat on a step
+      lip(); return true;
+    }
+    if (r.crumble) {   // cardboard moving boxes stacked out from the wall, their tape, their marks; shaking as they give
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, c = th.crumble, k = V.boxes, n = Math.max(1, Math.round(wt / (k === 3 ? 0.9 : 1.1))), bw0 = w / n;
+      for (let i = 0; i < n; i++) {
+        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * bw0) + ox, x1 = snap(r.x0 + (i + 1) * bw0) - P + ox, ym = snap((r.y0 + r.y1) / 2), xm = snap((x0 + x1) / 2);
+        box(x0, r.y0, x1, r.y1, c, a, 0, 10, k === 4 && i % 2 ? 1 : 0); box(x0, r.y1 - 2 * P, x1, r.y1, c, a, 0, 10, 4);   // a box, its shade
+        if (k === 3) box(x0, ym, x1, ym + P, K, a, 0, 10, 0);   // D: two layers
+        if (k === 0 || k === 2) { box(xm - P, r.y0, xm + P, r.y1, PAL.white, a * 0.85, 0, 10, 0); }   // its tape down the middle
+        if (k === 1 || k === 4) line(x0 + P, r.y1 - 2 * P, x1 - P, r.y0 + 2 * P, PAL.white, a, 1);   // a tape across
+        const mk = (i + k) % 3;   // its mark
+        if (mk === 0) { for (const e of [-0.12, 0.12]) { box(snap(xm + e * t) - P / 2, snap(ym - 0.18 * t), snap(xm + e * t) + P / 2, snap(ym + 0.12 * t), K, a, 0, 10, 0); box(snap(xm + e * t) - P * 1.5, snap(ym - 0.12 * t), snap(xm + e * t) + P * 1.5, snap(ym - 0.08 * t), K, a, 0, 10, 0); } }   // two arrows up
+        else if (mk === 1 && k !== 2) { box(snap(xm - 0.1 * t), snap(ym - 0.15 * t), snap(xm + 0.1 * t), snap(ym), K, a, 0, 10, 0); box(xm - P / 2, snap(ym), xm + P / 2, snap(ym + 0.15 * t), K, a, 0, 10, 0); }   // a fragile cup
+        else if (k === 2) { F(xm, ym, 0.16 * t, 0, 0, 0.12 * t, K, a, 0); for (const e of [-1, 1]) box(snap(xm + e * 0.12 * t) - P, snap(ym - 0.2 * t), snap(xm + e * 0.12 * t) + P, snap(ym - 0.1 * t), K, a, 0, 10, 0); }   // C: a cat's face
+        if (k === 5 && i === n - 1) line(x1, r.y0, snap(x1 + 0.2 * t), snap(r.y0 - 0.25 * t), c, a, 2);   // F: a flap up
+        box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
+      }
+      if (on && k !== 3) for (let i = 0; i < 2; i++) { const q = (T * 0.5 + i / 2) % 1; box(snap(E(0.3) + i * P * 2), snap(r.y1 + q * 1.2 * t), snap(E(0.3) + i * P * 2) + P, snap(r.y1 + q * 1.2 * t) + P, c, 1 - q, 0, 10, 0); }   // bits falling off it
+      return true;
+    }
+    if (r.plank && r.move) return false;
+    if (r.plank && on) {   // a balcony off the wall: its slab, its railing half a tile over it, what hangs over its rail
+      if (r.bouncy) return false;
+      const k = V.balcony, c = th.plank, rail = 0.55;
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 1); box(r.x0, r.y1 - P, r.x1, r.y1, K, 1, 0, 10, 0);
+      if (k === 1 || k === 4) bw(0.1, -rail, wt * 0.55, 0, G, 0, 1);   // B, E: a solid parapet at its wall half
+      if (k === 2 || k === 5) bw(0.1, -rail, wt - 0.1, 0, G, 4, DIM);   // C, F: a mesh
+      if (k === 0 || k === 3) for (let u = 0.15; u < wt - 0.05; u += 0.22) bw(u, -rail, u + px, 0, G);   // A, D: bars
+      bw(0, -rail, wt, -rail + 2 * px, G);   // its top rail
+      if (k === 0) { cloth(E(1.3), Y(-rail), 1.2, 0.95, PAL.purple); for (let i = 0; i < 4; i++) box(E(0.8 + 0.3 * i), Y(-rail + 0.2), E(0.8 + 0.3 * i) + P, Y(0.3), K, 1, 0, 10, 0); }   // A: a futon over its rail
+      else if (k === 1) { const x = E(0.4); line(E(1.6), Y(-rail - 0.1), x, Y(-rail - 0.1), G, 1, 1); shirt(E(1.3), Y(-rail - 0.1), PAL.blue); shirt(E(0.7), Y(-rail - 0.1), G); bw(0.4, -0.5, 1.2, -0.05, G, 4); }   // B: shirts on a pole past its parapet, an AC unit behind it
+      else if (k === 2) { line(E(1.0), Y(-rail), E(0.6), Y(-rail - 0.25), PAL.blue, MUTE, 1); for (const e of [0.6, 0.8, 1.0]) sock(E(e), Y(-rail + 0.05), G); box(W(0.4), Y(-0.1), W(0.7), r.y0, PAL.orange, 1, 0, 10, 0); }   // C: socks on a peg hanger, a sandal
+      else if (k === 3) { cloth(E(1.2), Y(-rail), 1.0, 0.8, PAL.aqua); box(W(0.3), Y(-0.2), W(0.5), r.y0, G, 1, 0, 10, 0); if (r.mnRoomD === undefined) r.mnRoomD = !lv.rects.some((q) => q !== r && !q.cap && q.x1 > Math.min(W(0), W(1.2)) && q.x0 < Math.max(W(0), W(1.2)) && q.y0 < r.y1 + 1.2 * t && q.y1 > r.y1); if (r.mnRoomD) line(W(0.05), Y(ht + 1.0), W(1.0), r.y1, G, 1.5, 3); }   // D: a towel over it, a sandal, a brace
+      else if (k === 4) { shirt(E(0.9), Y(-rail - 0.1), PAL.orange); bw(0.4, ht, 1.3, ht + 0.6, G, 4, 1); F(W(0.85), Y(ht + 0.3), 0.2 * t, 0, 0, 0.2 * t, K, 1, 4); }   // E: an orange shirt, an AC unit hung under it
+      else { cloth(E(1.1), Y(-rail), 1.0, 0.9, PAL.purple); F(W(0.6), Y(-0.2), 0.18 * t, 0, 0, 0.12 * t, G, 1, 0); }   // F: a futon, a cat by it
+      lip(); return true;
+    }
+    if (r.plank) {   // a laundry pole hung across the shaft: aluminium, hung from above at its ends, pegs and hangers on it
+      if (r.bouncy) return false;
+      const k = V.pole, c = th.plank, l = r.x0, rr = r.x1, mid = snap((l + rr) / 2);
+      box(l, r.y0, rr, r.y1, c, 1, 0, 10, 0); box(l, r.y1 - P, rr, r.y1, K, 1, 0, 10, 0);
+      const hang = (x, kind) => { if (kind === 'wire') line(x, r.y0, x, snap(r.y0 - 3.5 * t), G, 1, 1); else if (kind === 'chain') for (let y = r.y0 - P; y > r.y0 - 3.5 * t; y -= 3 * P) box(x - P / 2, y - 2 * P, x + P / 2, y, G, 1, 0, 10, 0); else if (kind === 'ring') { line(x, snap(r.y0 - 0.4 * t), x, snap(r.y0 - 3.5 * t), G, 1, 1); F(x, snap(r.y0 - 0.25 * t), 0.13 * t, 0, 0, 0.13 * t, G, 1, 4); } };
+      if (k === 0) { hang(snap(l + 0.3 * t), 'ring'); hang(snap(rr - 0.3 * t), 'ring'); sock(snap(l + 0.6 * t), r.y1, PAL.blue); sock(snap(l + 0.85 * t), r.y1, G); shirt(snap(rr - 0.9 * t), r.y1 + 0.12 * t, PAL.blue); }   // A: ringed hooks, socks, a shirt
+      else if (k === 1) { line(snap(l + 0.1 * t), r.y0, lv.l, snap(r.y0 - 1.8 * t), G, 1, 1); line(snap(rr - 0.1 * t), r.y0, lv.r, snap(r.y0 - 1.8 * t), G, 1, 1); cloth(snap(l + 0.9 * t), r.y1, 0.6, 0.9, PAL.purple); shirt(mid + 0.3 * t, r.y1 + 0.12 * t, G); }   // B: wires out to the walls, a towel
+      else if (k === 2) { for (const [x, e] of [[l, -1], [rr, 1]]) { box(snap(x + e * 0.05 * t), snap(r.y0 - 0.5 * t), snap(x + e * 0.15 * t), r.y1, G, 1, 0, 10, 0); } sock(snap(l + 0.6 * t), r.y1, G); cloth(mid + 0.2 * t, r.y1, 0.7, 0.8, G, 1.3); }   // C: on brackets, a towel
+      else if (k === 3) { hang(snap(l + 0.25 * t), 'chain'); hang(snap(rr - 0.25 * t), 'chain'); for (const x of [l, rr - 0.25 * t]) box(snap(x), r.y0, snap(x + 0.25 * t), r.y1, PAL.blue, MUTE, 0, 10, 0); shirt(snap(l + 1.0 * t), r.y1 + 0.12 * t, G); sock(snap(rr - 0.9 * t), r.y1, PAL.blue); }   // D: chains, end caps
+      else if (k === 4) { hang(snap(l + 0.4 * t), 'wire'); hang(snap(rr - 0.4 * t), 'wire'); shirt(mid, r.y1 + 0.12 * t, PAL.purple); sock(snap(rr - 0.7 * t), r.y1, PAL.blue); }   // E: two wires, a shirt
+      else { line(l, r.y0, l, snap(r.y0 - 1.6 * t), G, 1, 2); line(rr, r.y0, rr, snap(r.y0 - 1.6 * t), G, 1, 2); cloth(snap(l + 0.8 * t), r.y1, 0.6, 0.9, PAL.blue); shirt(mid + 0.4 * t, r.y1 + 0.12 * t, G); }   // F: a bent pole up at its ends, a towel, a shirt
+      lip(); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.slick) return false;
+    {   // raw danchi concrete: grey, its panels' seams, stains, the small things on it
+      const k = V.slab, c = th.block;
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, k === 0 ? 0 : 1); box(r.x0, Y(Math.max(0.3, ht - 0.2)), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside
+      for (let u = 1.4; u < wt - 0.3; u += 1.5) bw(u, 0.1, u + px, ht, K);   // its seams
+      for (let u = 0.4; u < wt - 0.2; u += 1.5) for (const v of [0.25, Math.min(ht - 0.25, 0.7)]) bw(u, v, u + px, v + px, K);   // its tie holes
+      if (k === 1 || k === 4) for (let u = 0.9; u < wt - 0.2; u += 1.5) { bw(u, 0.12, u + 2 * px, ht * 0.8, PAL.orange, 0, MUTE); }   // B, E: rust run down it
+      if (k === 1 && on) { bw(0.1, 0.15, 0.4, 0.75, G, 4); bw(0.18, 0.3, 0.32, 0.4, K); }   // B: a meter box
+      if (k === 2) { for (let i = 0; i < 3; i++) { const x = snap(r.x0 + (0.2 + 0.3 * i) * w); line(x, r.y1, x + snap(0.05 * t), snap(r.y1 + (0.25 + 0.1 * i) * t), G, 1, 1); } const sx = E(0.4); box(sx, r.y1, sx + snap(0.12 * t), snap(r.y1 + 0.25 * t), G, 1, 0, 10, 0); for (let i = 0; i < 3; i++) { const q = (T * 0.6 + i / 3) % 1; box(sx + P, snap(r.y1 + (0.3 + q * 1.2) * t), sx + 2 * P, snap(r.y1 + (0.3 + q * 1.2) * t) + 2 * P, G, 1 - q, 0, 10, 0); } }   // C: weeds under it, a drain spout dripping
+      if (k === 3) { if (wt > 2.2) { const u = 0.5, ds = [[0.05, 0.05, 0.25, 0.1], [0.2, 0.05, 0.25, 0.45], [0.05, 0.4, 0.25, 0.45], [0.05, 0.4, 0.1, 0.8], [0.05, 0.75, 0.25, 0.8]]; for (const [a0, b0, a1, b1] of ds) bw(u + a0, b0 + 0.05, u + a1, b1 + 0.05, G, 0, 1.4); } bw(wt - 1.4, 0.2, wt - 0.6, ht - 0.2, K); for (let v = 0.3; v < ht - 0.25; v += 0.12) bw(wt - 1.35, v, wt - 0.65, v + px, G); }   // D: a number painted on it, a vent
+      if (k === 4) { line(E(1.6), r.y0 + 2 * P, E(1.2), Y(ht * 0.5), K, 1, 1); line(E(1.2), Y(ht * 0.5), E(1.35), r.y1, K, 1, 1); line(E(0.3), r.y0, E(0.25), Y(-0.25), PAL.green, 1, 2); }   // E: a crack, a weed on it
+      if (k === 5) { for (let i = 0; i < 3; i++) line(E(0.15 + i * 0.25), r.y1, E(0.4 + i * 0.25), r.y0 + 2 * P, K, 1, 2); if (on) { box(W(0.1), r.y1, W(0.3), snap(r.y1 + 0.35 * t), G, 1, 0, 10, 0); } }   // F: hazard stripes at its end, a pipe under it
+      lip(); return true;
+    }
   };
   // The Tower Blocks' ledges: a step is a concrete step with a handrail post, a plank off a wall a balcony behind its bars, a free plank a
   // heating pipe in white lagging bands, a block a concrete panel cut square with seams every 2 tiles and window slits in a thick one.
@@ -3955,6 +4175,20 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(cx - 0.08 * R, y0 - 0.15 * R, cx + 0.08 * R, y0, PAL.gray, 1, 0, 10, 0); disc(cx - 0.3 * R, y0 + 0.12 * R, 0.07 * R, PAL.white, 1);
         continue;
       }
+      if (th.danchi) {   // the Danchi's: a playground spring rider, an animal on its coil in the spring's blue, its back the seat, squashing as it throws (DANCHI_V.spring while the owner picks)
+        const k = (window.__dcV || DANCHI_V).spring, c = th.spring, cx = snap((r.x0 + r.x1) / 2), w2 = (r.x1 - r.x0) / 2, s = r.y1 - hh, top = snap(s - 0.3 * R), bt = snap(s + 0.12 * R), Q = 1.35 * R, K = PAL.black, G = PAL.gray, L = 1.6;
+        for (let i = 0, n = 3; i < n; i++) { const y = snap(bt + (i + 0.5) * (r.y1 - bt) / n); box(snap(cx - 0.32 * w2), y - kitP, snap(cx + 0.32 * w2), y + kitP, c, 1, 0, 10, 0); } box(snap(cx - 0.6 * w2), r.y1 - 2 * kitP, snap(cx + 0.6 * w2), r.y1, c, 1, 0, 10, 0);   // its coil, its base
+        F(snap(cx + 0.1 * w2), snap((top + bt) / 2), 0.9 * w2, 0, 0, (bt - top) / 2 + 0.03 * R, c, 1, 0); box(snap(cx + 0.92 * w2), snap(top + 0.02 * R), snap(cx + 1.05 * w2), snap(top + 0.14 * R), c, 1, 0, 10, 0);   // its body, its tail
+        const hx = snap(cx - 0.6 * w2), hy = snap(top - 0.15 * R), e = (u, v, rr, cc = K) => disc(snap(hx + u * Q), snap(hy + v * Q), rr * Q, cc, 1), o = (u, v, ax, ay, cc = c, a = 1) => F(snap(hx + u * Q), snap(hy + v * Q), ax * Q, 0, 0, ay * Q, cc, a, 0);   // (its head a third over life size, Q)
+        if (k === 0) { for (const u of [-0.24, 0.24]) { e(u, -0.3, 0.13, c); e(u, -0.3, 0.06); } o(0, 0, 0.33, 0.3); e(-0.14, 0, 0.065); e(0.13, 0, 0.065); e(0, 0.13, 0.035); }   // A: a panda, its round ears, its black eye patches
+        else if (k === 1) { for (const u of [-0.1, 0.08]) { o(u, -0.5, 0.07, 0.24); o(u, -0.48, 0.03, 0.16, c, L); } o(0, 0, 0.28, 0.26); e(-0.12, -0.03, 0.05); e(-0.26, 0.08, 0.03); }   // B: a rabbit, its long ears
+        else if (k === 2) { o(0, 0.06, 0.36, 0.22); for (const u of [-0.17, 0.15]) { e(u, -0.17, 0.12, c); e(u, -0.18, 0.05); } box(snap(hx - 0.22 * Q), snap(hy + 0.12 * Q), snap(hx + 0.18 * Q), snap(hy + 0.12 * Q) + kitP, K, 1, 0, 10, 0); }   // C: a frog, its eyes on top, its wide mouth
+        else if (k === 3) { o(0.16, 0, 0.18, 0.26, c, L); o(0, 0, 0.29, 0.27); box(snap(hx - 0.34 * Q), hy, snap(hx - 0.2 * Q), snap(hy + 0.38 * Q), c, 1, 0, 10, 0); box(snap(hx - 0.44 * Q), snap(hy + 0.28 * Q), snap(hx - 0.3 * Q), snap(hy + 0.38 * Q), c, 1, 0, 10, 0); e(-0.1, -0.08, 0.045); }   // D: an elephant, its big ear, its trunk curled
+        else if (k === 4) { o(0.02, -0.06, 0.2, 0.3); o(-0.16, 0.14, 0.17, 0.12); for (const u of [-0.06, 0.08]) box(snap(hx + u * Q), snap(hy - 0.44 * Q), snap(hx + u * Q) + 2 * kitP, snap(hy - 0.3 * Q), c, 1, 0, 10, 0); for (let i = 0; i < 4; i++) box(snap(hx + 0.18 * Q), snap(hy + (-0.3 + i * 0.13) * Q), snap(hx + 0.27 * Q), snap(hy + (-0.22 + i * 0.13) * Q), K, 1, 0, 10, 0); e(-0.06, -0.1, 0.045); e(-0.27, 0.15, 0.03); }   // E: a horse, its long face, its ears, its black mane
+        else { o(0, 0, 0.27, 0.25); o(-0.24, 0.08, 0.15, 0.11); o(0.12, 0.04, 0.09, 0.2, c, L); e(-0.37, 0.04, 0.045); e(-0.08, -0.07, 0.045); }   // F: a dog, its snout, its floppy ear
+        const hb = snap(hx + 0.38 * Q); box(hb - kitP, snap(top - 0.25 * R), hb + kitP, top, G, 1, 0, 10, 0); box(snap(hb - 0.12 * R), snap(top - 0.27 * R), snap(hb + 0.12 * R), snap(top - 0.21 * R), G, 1, 0, 10, 0);   // its handles
+        continue;
+      }
       if (th.panels) {   // the Tower Blocks': an old mattress thrown out, blue and white stripes, flattening as it throws
         const y0 = r.y1 - hh - 0.2 * R; box(r.x0, y0, r.x1, r.y1, PAL.white, 1, 0, 10, 0);
         for (let x = r.x0 + 2 * kitP; x < r.x1 - kitP; x += 4 * kitP) box(x, y0, x + 2 * kitP, r.y1, th.spring, 1, 0, 10, 0);
@@ -3967,7 +4201,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);

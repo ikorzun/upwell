@@ -755,7 +755,8 @@ class Game {
     for (const o of [this.heroLook, this.look]) if (o) xy(o);
     fx.n = 0;   // the sparks in the air: gone
     const lv = this.lv, H = this.hero;   // the camera as a level, a room or a respawn sets it: the hero in sight where it was meant (a width alone changing, the view's height did not)
-    if (lv.kind !== 'well') lv.cam = Math.max(lv.floor + CAM.floorShow - view.h, lv.floor + this.room() - view.h);
+    if (lv.exit) lv.cam = lv.floor + this.roomFloor() - view.h;   // a room's (enterRoom)
+    else if (lv.kind !== 'well') lv.cam = Math.max(lv.floor + CAM.floorShow - view.h, lv.floor + this.room() - view.h);
     else if (lv.under) lv.cam = clamp(H.cy - 0.35 * view.h, lv.capY - CAM.top, lv.floor + this.room() - view.h);
     else if (this.state !== 'menu') lv.cam = Math.max(Math.min(H.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
   }
@@ -1212,7 +1213,7 @@ class Game {
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
     if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (!this.gated()) this.idleT += dt; }   // no new height: the fire speeds up
-    if (H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys
+    if (!lv.exit && H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {
@@ -1376,6 +1377,7 @@ class Game {
     this.hp--; return true;
   }
   room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
+  roomFloor() { return Math.max(CAM.floorShow, view.keep + this.R); }   // a shop's or a stash's floor over the screen's bottom: over the touch keys, as the well's camera keeps the hero (step)
   // The last few ledges the hero stood on (null: the floor), with where on them. Crumbling
   // ones and springs do not count, nor a spot beside spikes; a ledge kept here is never
   // pruned, so a fall after a long wall climb still finds it.
@@ -1634,12 +1636,12 @@ class Game {
   enterRoom(bub) {
     if (!bub.room) {
       const room = new Level();
-      room.reset({ kind: bub.kind, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' ? THEMES.stash : THEMES.room, hard: this.hard });
+      room.reset({ kind: bub.kind, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor() });
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
     this.bankDrops();   // in the purse at once: they are for the shop in there
-    this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false;
+    this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false; this.lv.cam = this.lv.floor + this.roomFloor() - view.h;   // (as it was built, the view as it is now)
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
     aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);

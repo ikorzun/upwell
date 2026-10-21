@@ -1666,6 +1666,7 @@ class Level {
   build(o) {
     const R = this.R, W = this.r - this.l, cx = (this.l + this.r) / 2, rnd = this.rng;
     this.top = -Infinity;
+    if (o.kind !== 'boss') this.cam = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h;   // a room: its floor over the touch keys (Game.roomFloor), all of it in sight under the HUD
     this.capY = this.cam + CAM.top;
     this.rects.push(this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true }));
     const at = (f) => this.floor + (this.capY - this.floor) * f;

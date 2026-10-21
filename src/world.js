@@ -167,6 +167,10 @@ const kitThing = (lv, r) => {
     else if (k === 1 && steady(3) && room(0, 3.5, 3.8)) out = { kind: 'scarecrow' };
     else if (k === 2 && steady(4) && room(0, 4, 4.4)) out = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t };
     else if (k === 4 && steady(2.2) && room(0, 4.4, 5.3)) out = { kind: 'koinobori' };
+    if (out && out.kind !== 'lantern' && lv.rc && lv.rc.sparse) {   // a `sparse` level's: one a band of about two screens (the shrines, the task, aside)
+      const band = Math.floor((lv.floor - b) / (50 * t)), used = (lv.propBands = lv.propBands || new Set());
+      if (used.has(band)) out = null; else used.add(band);
+    }
   } else if (th.mines) {   // the Mine's by a hash of its height: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore
     // in the wall behind it, a cart on its rails, the miners' tools, a winch
     const k = Math.floor(((Math.imul(Math.round(b / t) + 3, 0x9e3779b1) >>> 0) / 4294967296) * 6);
@@ -746,7 +750,9 @@ const CAMPAIGN = [
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['fizz'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
-  { role: 'twist', len: 30, pair: 0.1, fire: 0.38, maxD: 2, chunks: { ...MINE, lift: 3, rubberwall: 2 }, intro: ['lift'], enemies: ['spitter', 'crawler'], foes: 0.55, candy: ['fizz'], stash: 0.3, seed: 4101,
+  { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { crumble: 3, bridge: 3, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 2, mosswall: 1 },
+    motif: ['ride', 'lift', 'ride2'], sparse: true, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['fizz'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+    // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['fizz'], seed: 4102 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
@@ -1028,7 +1034,7 @@ const UNLOCKS = [
 // any one can follow any other within a jump (the bottom rises about 6.3 tiles). `d`: difficulty 1–3. Which way
 // round a chunk goes is picked from its footholds (see stepCost).
 //   #  block        I  ice block (nothing sticks)   C  crumbles (and comes back)
-//   =  plank (one-way, at the top of its tile)      M  plank sliding along its row
+//   =  plank (one-way, at the top of its tile)      M  plank sliding along its row   W  one sliding 3 tiles past its ends and back
 //   S  spring on the block below    ^  spikes on the block below   v  spikes under the block above
 //   >  spikes on the left wall      <  on the right    [  ice on the left wall   ]  on the right
 //   {  moss on the left wall (holds)   }  on the right    (  rubber on the left wall (throws back)   )  on the right
@@ -1174,6 +1180,31 @@ const CHUNKS = {
     '............',
     '............',
     '.........###',
+    '............'] },
+  ride: { d: 1, rows: [   // a plank to ride across: from a wide ledge onto it, along a row of coins, off onto the other (a motif's easy one, see addChunk)
+    '............',
+    '............',
+    '#####.......',
+    '............',
+    '...o..o..o..',
+    '....WWWW....',
+    '............',
+    '............',
+    '.......#####',
+    '............'] },
+  ride2: { d: 2, rows: [   // two planks to ride, one over the other, each its own way and pace: the lower one's way over the low ledge's end, the upper's over
+    '............',   // the high one's, the two ways crossing (planks are boarded from under them): none waits long for either (the bot did, at 1-7's first)
+    '............',
+    '####........',
+    '............',
+    '..o.o.......',
+    '...WWW......',
+    '............',
+    '............',
+    '......WWW...',
+    '............',
+    '............',
+    '........####',
     '............'] },
   icewall: { d: 2, rows: [
     '[..........]',
@@ -1509,7 +1540,7 @@ const CHUNKS = {
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
-  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney'], moving: ['movers', 'lift'], crumbling: ['crumble', 'bridge'],
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney'], moving: ['movers', 'lift', 'ride', 'ride2'], crumbling: ['crumble', 'bridge'],
   danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
@@ -1530,7 +1561,7 @@ for (const id in CHUNKS) {
 const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk)
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
-const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X', 'T', 'H', 'Z']);
+const STAND = new Set(['#', 'I', 'C', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
@@ -1551,7 +1582,7 @@ function stepCost(lower, upper) {
   let best = Infinity;
   for (const [a0, a1, ta] of lower) for (const [b0, b1, tb] of upper) {
     let c;
-    if (tb === '=' || tb === 'M' || ta === 'M') c = 0;
+    if (tb === '=' || tb === 'M' || ta === 'M' || tb === 'W' || ta === 'W') c = 0;
     else if (b0 <= a1 && a0 <= b1) c = 100;
     else { const gap = b0 > a1 ? b0 - a1 - 1 : a0 - b1 - 1; c = gap < 1 ? 30 : gap > 3 ? 10 * (gap - 3) : gap - 1; }
     best = Math.min(best, c);
@@ -1762,7 +1793,8 @@ class Level {
       if (p < 0.2) maxD = Math.min(maxD, 1);
       const lastKind = this.last && CHUNKS[this.last].kind, mid = p > 0.35 && p < 0.75;
       const once = (k) => k === 'rest' || (k === 'vault' && this.placed.some((q) => q.id === k));   // the rest only under the way out; one stash in the wall a level
-      const pool = this.rc ? this.rc.chunks : wd.chunks;
+      const mo = this.rc && this.rc.motif, pool = mo && !mo.includes(this.last) && mo.some((k) => CHUNKS[k].d <= maxD) ? Object.fromEntries(mo.map((k) => [k, 1])) : this.rc ? this.rc.chunks : wd.chunks;   // a recipe's
+      // `motif`: one of its chunks every other chunk, from the first (owner, 2026-10-22: «A», one idea a level, its own thing on every screen)
       for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k)) w[k] = pool[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
       if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k)) w[k] = pool[k];   // a small pool: kinds may run
       id = pick(rnd, w);
@@ -1928,9 +1960,11 @@ class Level {
         while (r1 + 1 < H && same(r1 + 1)) r1++;
         for (let rr = r; rr <= r1; rr++) for (let q = k; q <= k1; q++) used.add(key(rr, q));
         this.rects.push(this.box(X(k), Y(r1 + 1), X(k1 + 1), Y(r), SOLID[ch]));
-      } else if ((ch === '=' || ch === 'M') && first) {
+      } else if ((ch === '=' || ch === 'M' || ch === 'W') && first) {
         const k1 = runEnd(r, k, ch), b = this.box(X(k), Y(r + 1), X(k1 + 1), Y(r + 1) + LEVEL.plank * R, { plank: true });
         if (ch === 'M') b.move = { a: l, b: this.r - (b.x1 - b.x0), v: (this.rng() < 0.5 ? -1 : 1) * R * (1.6 + this.rng() * 1.2) };
+        else if (ch === 'W') b.move = { a: X(Math.max(0, k - 3)), b: X(Math.min(COLS, k1 + 4)) - (b.x1 - b.x0), v: (this.rng() < 0.5 ? -1 : 1) * R * (1.6 + this.rng() * 1.2) };   // a short way to and fro,
+        // 3 tiles past each end of its run: a motif's ride comes back within seconds (the bot waited on wall-to-wall ones at 1-7, the fire caught it)
         this.rects.push(b);
       } else if ((ch === '^' || ch === 'v') && first) {
         const k1 = runEnd(r, k, ch);
@@ -3324,12 +3358,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     // ends by turns of height: a sakura in bloom (C), a scarecrow in young rice (F, its coat indigo for F's red: red is danger), a little Inari shrine, its foxes,
     // a stone lantern and a branch of sakura out of the wall (D), koinobori flying off a pole (D). Nothing covers a door.
     const t = kitT, P = kitP, px = P / t, mod = (k, n) => ((k % n) + n) % n;
+    const sp = lv.rc && lv.rc.sparse, few = (list, keep) => (sp ? list.filter((q, i) => keep.includes(i)) : list);   // a `sparse` level's: less of it (owner: «E»)
     {   // the countryside far off (F), low on the screen and sinking a little as the climb goes on
       const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, tn = 0) => box(U(u0), V(v1), U(u1), V(v0), c, DIM, 0, 10, tn);
-      for (const [u0, u1, v] of [[-2.6, 7.9, 0.3], [-1.8, 7.2, 0.85], [-1.0, 6.4, 1.4], [-0.2, 5.4, 1.95]]) fb(u0, v, u1, v + px, PAL.orange);   // terraces
-      for (const [u, h] of [[-7.55, 6.2], [-7.15, 5.4], [-6.6, 6.6], [-6.2, 4.9]]) fb(u, 0, u + px, h, PAL.purple);   // bamboo
-      for (const [u, h] of [[-5.3, 4.6], [-4.3, 3.6], [-3.2, 4.2], [1.4, 3.9], [2.6, 4.8], [5.9, 4.4], [7.0, 3.5]]) {   // cedars: a trunk, three tiers
+      for (const [u0, u1, v] of few([[-2.6, 7.9, 0.3], [-1.8, 7.2, 0.85], [-1.0, 6.4, 1.4], [-0.2, 5.4, 1.95]], [0, 1])) fb(u0, v, u1, v + px, PAL.orange);   // terraces
+      for (const [u, h] of few([[-7.55, 6.2], [-7.15, 5.4], [-6.6, 6.6], [-6.2, 4.9]], [])) fb(u, 0, u + px, h, PAL.purple);   // bamboo
+      for (const [u, h] of few([[-5.3, 4.6], [-4.3, 3.6], [-3.2, 4.2], [1.4, 3.9], [2.6, 4.8], [5.9, 4.4], [7.0, 3.5]], [1, 4, 6])) {   // cedars: a trunk, three tiers
         fb(u - px / 2, 0, u + px / 2, 0.4 * h, PAL.purple);
         for (const [b0, h0, hw] of [[0.25, 0.4, 0.6], [0.45, 0.35, 0.47], [0.65, 0.35, 0.33]]) { const hd = (h0 * h * t) / 2; F(U(u), V(b0 * h) - hd, hw * t, 0, 0, hd, PAL.purple, DIM, 6, hw * t, hd, 2 * hw * t); }
       }
@@ -3340,12 +3375,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     for (const side of [-1, 1]) {   // a bamboo grove up each wall (E): two stalks in segments, a node between, sprays of three leaves off the inner one
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), seg = 2.2 * t;
-      for (const [d, w, ph] of [[0.3, 3, 0], [1.15, 2, 0.8]]) {
+      for (const [d, w, ph] of few([[0.3, 3, 0], [1.15, 2, 0.8]], [0])) {
         const x0 = snap(Math.min(at(d * t), at(d * t + w * P)));
         for (let k = Math.floor((top - ph * t) / seg) - 1; k * seg + ph * t < bot; k++) { const y0 = snap(k * seg + ph * t); box(x0, y0, x0 + w * P, snap(y0 + seg) - P, PAL.green, DIM, 0, 10, 0); }
       }
-      for (let k = Math.floor(top / (5 * t)) - 1; k * 5 * t < bot + t; k++) {   // now off toward the shaft, now toward the wall
-        const y = (k * 5 + (side < 0 ? 1.1 : 3.6)) * t, x = at(1.15 * t + P), e = mod(k, 2) ? -side : side;
+      for (let k = Math.floor(top / (5 * t)) - 1; k * 5 * t < bot + t; k++) {   // now off toward the shaft, now toward the wall (a sparse level's: half as many, off its one stalk)
+        if (sp && mod(k, 2)) continue;
+        const y = (k * 5 + (side < 0 ? 1.1 : 3.6)) * t, x = at(sp ? 0.3 * t + 3 * P : 1.15 * t + P), e = mod(sp ? k >> 1 : k, 2) ? -side : side;
         for (const [ang, len] of [[0.45, 0.6], [0.85, 0.65], [1.25, 0.5]]) { const h = 0.5 * len * t, ax = Math.cos(ang) * h * e, ay = Math.sin(ang) * h; F(x + ax, y + ay, ax, ay, (-ay / h) * 0.08 * t, (ax / h) * 0.08 * t, PAL.green, DIM, 0); }
       }
     }
@@ -3593,7 +3629,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
     const g0 = snap(r.y0 + 2.5), g1 = g0 + 2 * P;
     box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 1);   // the earth, sparse dots in it, a fringe of grass under its edge (ragged), its underside ragged
-    box(r.x0, g0, r.x1, g1, PAL.green, 1, 0, 10, 0); box(r.x0, g1, r.x1, g1 + P, PAL.green, 1, 0, 10, 4);
+    const fringe = !(lv.rc && lv.rc.sparse) ? [[r.x0, r.x1]] : [...(wl ? [] : [[r.x0, Math.min(r.x1, r.x0 + 1.5 * t)]]), ...(wr ? [] : [[Math.max(r.x0, r.x1 - 1.5 * t), r.x1]])];   // (a `sparse` level's: by a free end only)
+    for (const [x0, x1] of fringe) { box(x0, g0, x1, g1, PAL.green, 1, 0, 10, 0); box(x0, g1, x1, g1 + P, PAL.green, 1, 0, 10, 4); }
     box(r.x0, r.y1 - P, r.x1, r.y1, th.block, 1, 0, 10, 4);
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
     if (r.x1 - r.x0 >= 2 * t) for (const [on, ex, d] of [[wl, r.x0, 1], [wr, r.x1, -1]]) if (!on) {   // a free end: its edge curled over it, blades of grass, a flower

@@ -260,8 +260,11 @@ const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plan
 // little shrine whose stone lantern the hero lights, koinobori), the Cave's (a stone lantern, a pair of jizo the hero leaves flowers at), Mount Fuji's bell
 // off a boardwalk's free end (the hero rings it). kitThing(lv, r) is { kind, x, y } (x, y: where the hero tends it) or null, worked out once from the level
 // as laid, on steady ledges' wall ends where nothing laid stands in front (what crumbles away for a while does not count: nothing comes and goes).
-const KIT_TEND = { lantern: 'lantern', jizo: 'flower', bell: 'bell' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, flowers, bells
+const KIT_TEND = { lantern: 'lantern', jizo: 'flower', bell: 'bell', lamp: 'lamp' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, flowers, bells
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
+// The Mine's kit while the owner picks (owner 2026-10-21: «Заменить всё» the cave shrine's things; research/variants/mine-*-1-px.png): all six variants
+// of each in the game's own code, MINE_V, or window.__mnV from the gallery
+const MINE_V = { slab: 0, plank: 0, mover: 0, crumble: 0, lamp: 0, ore: 0, cart: 0, tools: 0, winch: 0, bats: 0, far: 0, shop: 0, stash: 0 };
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
@@ -281,6 +284,14 @@ const kitThing = (lv, r) => {
     const k = ((Math.round(b / t) % 3) + 3) % 3;
     if (k === 0 && steady(2.6) && room(0.1, 2.5, 3.8)) out = { kind: 'toro' };
     else if (k === 1 && steady(2.6) && room(0, 3, 2.6)) out = { kind: 'jizo', x: X(1.55), y: b - 1.0 * t };
+  } else if (th.mines) {   // the Mine's by a hash of its height: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore
+    // in the wall behind it, a cart on its rails, the miners' tools, a winch
+    const k = Math.floor(((Math.imul(Math.round(b / t) + 3, 0x9e3779b1) >>> 0) / 4294967296) * 6);
+    if ((k === 0 || k === 3) && steady(1.8) && room(0, 1.6, 2.6)) out = { kind: 'lamp', x: X(0.5), y: b - 2.0 * t };
+    else if (k === 1 && steady(2.6) && room(0, 2.6, 2.0)) out = { kind: 'cart' };
+    else if (k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
+    else if (k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
+    else if (k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
   } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
     const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
     if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse' };
@@ -395,7 +406,7 @@ const FOE_COLOR = {
 const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
   slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: Object.assign(theme(PAL.gray), { shrine: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { village: true }),   // the Village's kit (see villageRect; the Mine's world, its id kept)
+  cave: Object.assign(theme(PAL.gray), { mines: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { village: true }),   // the Village's kit (see villageRect; the Mine's world, its id kept)
  
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
@@ -1003,6 +1014,7 @@ ICONS.taskNeon = '............/...rrrrrrrr./sssr......r./...r.rrrr.r./...r......
 ICONS.taskCage = '............/.....ss...../.ssssssssss./.s..s..s..s./.s..s..s..s./.s.gsggsg.s./.sgksggskgs./.sggsggsggs./.sggsggsggs./.ssssssssss./............/............';   // a friend in a cage,
 ICONS.taskLantern = '............/.....ss...../...ssssss.../..ssssssss../....soos..../....soos..../....ssss..../.....ss...../.....ss...../....ssss..../...ssssss.../............';   // a Village shrine's lantern lit,
 ICONS.taskFlower = '............/....pppp..../...pppppp.../...ppoopp.../...ppoopp.../...pppppp.../....pppp..../.....gg...../..gg.gg...../...gggg...../.....gg...../............';   // flowers left at the Cave's jizo,
+ICONS.taskLamp = '............/.....ss...../....s..s..../...ssssss.../...soooos.../...soyyos.../...soyyos.../...soooos.../...ssssss.../....ssss..../............/............';   // the Mine's lamps (its task)
 ICONS.taskBell = '............/.....ss...../.....ss...../....oooo..../...oooooo.../...oooooo.../...oooooo.../..oooooooo../.oooooooooo./.....kk...../............/............';   // a bell rung on Mount Fuji
 ICONS.gift = ICONS.heal1;   // the stash's gift is a heart, and looks it
 // The smash's picture: its helmet (user: the rock candy's place), a moto one, red with a white stripe and blue-lensed goggles (owner,
@@ -3088,6 +3100,53 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
   }
   const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon
+  // The Mine's shared pieces (its kit while the owner picks: MINE_V, or window.__mnV): its lamps, a kantera hung at (x, y), k its look (lit: a glow round it and
+  // a light of the dark; the wall ones the hero lights, a task), and its ore glinting in the wall over a ledge
+  const mnLamp = (x, y, k, lit, s = 1, arm = 0) => {   // arm: the side its wall is on (its bracket from there), 0 off a hook
+    const t = kitT, G = PAL.gray, K = PAL.black, O = PAL.orange, U = (u) => snap(x + u * s * t), V = (v) => snap(y + v * s * t);
+    const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(V(v0), V(v1)), Math.max(U(u0), U(u1)), Math.max(V(v0), V(v1)), c, a, 0, 10, tn);
+    const gl = lit ? O : K, cy = V(0.6);
+    if (arm) { bx(-arm * 0.55, -0.16, -arm * 0.47, 0.16, G); bx(-arm * 0.55, -0.05, 0.02 * arm, 0.03, G); if (k === 4) line(U(-arm * 0.5), V(0.14), U(-arm * 0.12), V(-0.02), G, 1, 1); }   // its bracket off the wall (E's braced)
+    bx(-0.03, 0.03, 0.03, 0.22, G);   // its hook and link
+    if (lit) { F(U(0), cy, 0.8 * s * t, 0, 0, 0.8 * s * t, O, 0.3 + 0.06 * Math.sin(T * 5 + x * 0.1), 1); vlamps.push([U(0), cy, 0.6 * s, 1.8 * s]); }   // its glow, breathing (a light)
+    if (k === 0) { F(U(0), V(0.3), 0.17 * s * t, 0, 0, 0.1 * s * t, G, 1, 0); bx(-0.2, 0.28, 0.2, 0.36, G); bx(-0.22, 0.36, 0.22, 0.88, G, 1, 4); bx(-0.14, 0.42, 0.14, 0.82, gl); bx(-0.2, 0.88, 0.2, 0.96, G);   // A: a dome, a caged body
+      for (const v of [0.55, 0.69]) bx(-0.14, v, 0.14, v + 0.03, G); }
+    else if (k === 1) { bx(-0.08, 0.22, 0.08, 0.32, G); bx(-0.16, 0.32, 0.16, 0.38, G); F(U(0), V(0.62), 0.2 * s * t, 0, 0, 0.22 * s * t, gl, 1, 0); for (const e of [-1, 1]) bx(e * 0.2, 0.36, e * 0.24, 0.88, G);   // B: a hurricane lamp, its globe
+      bx(-0.2, 0.86, 0.2, 0.96, G); }
+    else if (k === 2) { F(U(0), V(0.26), 0.14 * s * t, 0, 0, 0.08 * s * t, G, 1, 0); bx(-0.21, 0.3, 0.21, 0.98, G); for (const [u0, u1] of [[-0.15, -0.03], [0.03, 0.15]]) for (const v of [0.36, 0.56, 0.76]) bx(u0, v, u1, v + 0.15, gl);   // C: tall, six panes
+      bx(-0.06, 0.98, 0.06, 1.06, G); }
+    else if (k === 3) { bx(-0.18, 0.26, 0.18, 0.34, G); bx(-0.2, 0.34, 0.2, 0.9, gl); for (const u of [-0.2, -0.07, 0.06]) bx(u, 0.34, u + 0.06, 0.9, G); bx(0.16, 0.34, 0.2, 0.9, G); bx(-0.2, 0.9, 0.2, 0.98, G); }   // D: a cylinder of bars
+    else if (k === 4) { bx(-0.16, 0.24, 0.16, 0.32, G); bx(-0.23, 0.32, 0.23, 0.9, G); bx(-0.16, 0.39, 0.16, 0.83, gl); line(U(-0.16), V(0.39), U(0.15), V(0.82), G, 1, 1); line(U(0.15), V(0.39), U(-0.16), V(0.82), G, 1, 1);   // E: square, a cross on its glass
+      bx(-0.2, 0.9, 0.2, 0.97, G); }
+    else { F(U(0), V(0.62), 0.27 * s * t, 0, 0, 0.3 * s * t, G, 1, 0); F(U(0), V(0.62), 0.16 * s * t, 0, 0, 0.14 * s * t, gl, 1, 0); bx(-0.27, 0.6, 0.27, 0.64, G);   // F: an onion, a band round it,
+      F(U(0), V(0.25), 0.06 * s * t, 0, 0, 0.1 * s * t, G, 1, 0); F(U(0), V(0.98), 0.05 * s * t, 0, 0, 0.08 * s * t, G, 1, 0); }   // a knob, a drop
+    if (lit) bx(-0.04, 0.54, 0.04, 0.68, PAL.yellow);   // its flame
+  };
+  const mnOre = (wx, b, k, d, n) => {   // a vein of silver ore in the wall over a ledge, behind (DIM), glinting: white glints that twinkle; a faint light
+    const t = kitT, P = kitP, G = PAL.gray, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t), V = window.__mnV || MINE_V;
+    const bx = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const glint = (u, v, i) => { const on = Math.sin(T * 2.2 + i * 2.1 + n) > 0.45, x = X(u), y = Y(v); box(x - P, y, x + 2 * P, y + P, PAL.white, on ? 1 : DIM, 0, 10, 0); if (on) box(x, y - P, x + P, y + 2 * P, PAL.white, 1, 0, 10, 0); };
+    const gem = (u, v, w, h, a = 1.5) => { F(X(u), Y(v + h * 0.5), w * 0.5 * t, 0, 0, h * 0.5 * t, G, a, 0); bx(u - w * 0.08, v + h * 0.1, u + w * 0.12, v + h * 0.85, PAL.white, a); };   // a crystal, a facet lit on it
+    const lump = (u, v, r) => { disc(X(u), Y(v), r * t, G, 1.5); disc(X(u) - P, Y(v) - P, r * 0.45 * t, PAL.white, DIM); };   // a nugget, its glint side
+    if (k === 0) { gem(0.65, 0.75, 0.42, 0.95); lump(1.15, 1.0, 0.12); lump(0.4, 0.45, 0.1); lump(1.3, 0.45, 0.08); [[0.3, 1.5], [1.0, 1.4], [1.45, 0.8], [0.85, 0.35]].forEach(([u, v], i) => glint(u, v, i)); }   // A: a crystal, nuggets
+    else if (k === 1) { line(X(0.3), Y(1.7), X(1.45), Y(0.25), G, DIM, 6); for (let i = 0; i < 5; i++) { const q = i / 4; F(X(0.35 + 1.05 * q), Y(1.6 - 1.25 * q), 0.1 * t, 0, 0, 0.14 * t, G, 1.6, 0); } [[0.2, 1.3], [0.75, 1.25], [1.0, 0.65], [1.55, 0.5], [0.6, 0.7]].forEach(([u, v], i) => glint(u, v, i)); }   // B: a seam of it slanting down the wall
+    else if (k === 2) { bx(0.05, 1.95, 1.9, 2.12, G, 1.5, 3); line(X(0.1), Y(1.25), X(0.75), Y(1.95), G, 1.5, 3); bx(0.05, 0, 0.2, 2.1, G, 1.5, 3); mnLamp(X(1.45), Y(1.95), V.lamp, true, 0.8); gem(0.5, 0.35, 0.22, 0.45); [[0.45, 1.0], [0.9, 0.55], [0.3, 0.75]].forEach(([u, v], i) => glint(u, v, i)); }   // C: a frame's corner, a lamp off it, a little ore
+    else if (k === 3) { F(X(0.85), Y(0.05), 0.85 * t, 0, 0, 0.5 * t, G, DIM, 0); for (const [u, v, r] of [[0.45, 0.25, 0.14], [0.85, 0.38, 0.16], [1.25, 0.22, 0.13], [0.65, 0.5, 0.1]]) disc(X(u), Y(v), r * t, G, 1.6); [[0.6, 0.6], [1.05, 0.5], [0.4, 1.2], [1.2, 1.3]].forEach(([u, v], i) => glint(u, v, i)); }   // D: a heap of it against the wall
+    else if (k === 4) { bx(0.05, 0, 0.2, 2.05, G, 1.5, 3); bx(0.05, 1.9, 1.5, 2.05, G, 1.5, 3); line(X(1.35), Y(1.9), X(1.35), Y(1.15), G, 1.5, 1); bx(1.15, 0.95, 1.55, 1.15, G, 1.5, 4); for (const [u, v, r] of [[0.55, 1.3, 0.1], [0.8, 0.7, 0.13], [0.45, 0.4, 0.09]]) lump(u, v, r); [[0.6, 1.0], [0.95, 0.45], [0.35, 1.55]].forEach(([u, v], i) => glint(u, v, i)); }   // E: a frame, a basket hung off it, lumps
+    else { gem(0.55, 0.5, 0.36, 1.1); gem(1.2, 0.35, 0.3, 0.8); lump(0.95, 0.25, 0.1); [[0.3, 1.45], [0.9, 1.25], [1.45, 1.2], [0.85, 0.5]].forEach(([u, v], i) => glint(u, v, i)); }   // F: two tall crystals
+    vlamps.push([X(0.9), Y(0.9), 0.2, 0.8]);   // its faint glow
+  };
+  if (th.mines && lv.kind === 'well') {   // the Mine's things on its ledges (kitThing): the lamps on the wall (lit for good once the hero comes: lv.tended), the ore; the
+    // others to come (the owner's picks first)
+    const V = window.__mnV || MINE_V;
+    for (const r of lv.rects) {
+      const p = !r.gone && seen(r.y0 - 3 * kitT, r.y0 + kitT) && kitThing(lv, r);
+      if (!p) continue;
+      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1;
+      if (p.kind === 'lamp') mnLamp(snap(p.x), snap(p.y), V.lamp, lv.tended.has(r), 1, d);
+      else if (p.kind === 'ore') mnOre(wl ? lv.l : lv.r, r.y0, V.ore, d, Math.round(r.y0 / kitT));
+    }
+  }
   if (th.shrine && lv.kind === 'well') {   // the Cave's kit (THEMES.cave; the owner's picks, research/variants/cave-*-1-px.png, 2026-10-19: a cosy cave under a
     // mountain shrine): strings of festival lanterns across the shaft (C), stone lanterns grown over with moss on some ledges' wall ends (D), a pair of jizo on
     // others (C); the owner's Buddha seated on the floor of the level that has it (a recipe's buddha). Nothing covers a door.
@@ -3810,6 +3869,92 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       lip(); return true;
     }
   };
+  // The Mine's ledges (owner 2026-10-21, research/variants/mine-*-1-px.png): while the owner picks, all six variants of each in the game's own code (MINE_V,
+  // or window.__mnV from the gallery). A block is rough rock shored up with old timber (slab), a plank a scaffold board (plank), a moving plank an ore bucket on a
+  // cable, a cart on a rail or a cage on a rope (mover, blue), a crumbling block loose rubble on rotten boards (crumble, orange). Timber under a ledge half dark
+  // (behind its face, DEPTH); its lamps lit (lights, mnLamp). False for what keeps the common look.
+  const mineRect = (r) => {
+    const t = kitT, P = kitP, px = P / t, V = window.__mnV || MINE_V, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
+    const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
+    const G = PAL.gray, K = PAL.black, HALF = 1.5;   // grey, black; timber under a ledge half of the way from the black (DEPTH)
+    const brace = (u, h, c = G, a = HALF) => { if (on) line(W(u), r.y1, W(0.14), Y(ht + h), c, a, 4); };   // a knee brace from under it, u out, down to the wall h under it
+    const post = (u, v0, v1, c = G, a = HALF) => bw(u, v0, u + 0.2, v1, c, 3, a);   // a timber post, its grain in lines
+    const nails = (us, v) => { for (const u of us) bw(u, v, u + px, v + px, K); };
+    const coil = (x, y, s = 1) => { for (const rr of [0.27, 0.19, 0.11]) F(x, snap(y + 0.3 * t * s), rr * t * s, 0, 0, rr * 1.2 * t * s, G, 1, 4); line(x, snap(y + 0.6 * t * s), snap(x + 0.06 * t), snap(y + 0.95 * t * s), G, 1, 1); box(x, y, x + P, snap(y + 0.05 * t), G, 1, 0, 10, 0); };   // a coil of rope hung, its end
+    const pick = (x, y, dir, s = 1, up = true) => {   // a pickaxe: its handle, its head across it (stuck in a top, or hung off its head)
+      const hx = snap(x + dir * 0.3 * t * s), hy = snap(y + (up ? -0.75 : 0.75) * t * s), o = up ? 1 : -1, Q = (u, v) => [snap(hx + dir * u * t * s), snap(hy + o * v * t * s)];
+      line(x, y, hx, hy, G, 1, 2);   // its handle
+      const [ax, ay] = Q(-0.4, 0.2), [bx0, by0] = Q(-0.15, -0.04), [cx0, cy0] = Q(0.15, -0.04), [ex, ey] = Q(0.42, 0.22);
+      line(ax, ay, bx0, by0, G, 1, 2); line(bx0, by0, cx0, cy0, G, 1, 3); line(cx0, cy0, ex, ey, G, 1, 2);   // its head, curved, a point each end
+    };
+    const basket = (x, y, s = 1, c = G) => { box(snap(x - 0.2 * t * s), y, snap(x + 0.2 * t * s), snap(y + 0.32 * t * s), c, 1, 0, 10, 4); box(snap(x - 0.23 * t * s), y, snap(x + 0.23 * t * s), y + P, c, 1, 0, 10, 0); line(snap(x - 0.18 * t * s), y, x, snap(y - 0.2 * t * s), c, 1, 1); line(x, snap(y - 0.2 * t * s), snap(x + 0.18 * t * s), y, c, 1, 1); };   // a straw basket, its handle
+    const dust = (x, y, c = G, n = 3) => { for (let i = 0; i < n; i++) { const q = (T * 0.55 + i / n + hsh(i + 40)) % 1, dx = snap(Math.sin(i * 2.1) * 0.12 * t); box(x + dx, snap(y + q * 1.7 * t), x + dx + P + (i % 2) * P, snap(y + q * 1.7 * t) + P + (i % 2) * P, c, 1 - q, 0, 10, 0); } };   // grit trickling off it, fading
+    if (r.crumble) {   // loose rubble and broken ore held up by rotten boards: rounded stones with black gaps, shaking as it gives, grit falling
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, c = th.crumble, k = V.crumble;
+      const shake = (i) => (u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0);
+      const stones = (q0, q1, rows) => { const n = Math.max(1, Math.round(((q1 - q0) * wt) / 0.55)); for (let j = 0; j < rows; j++) for (let i = 0; i < n; i++) { const q = q0 + ((i + 0.5 + (j % 2) * 0.35) / n) * (q1 - q0); if (q > q1) continue; const rr = (0.24 + 0.08 * hsh(i * 7 + j)) * t, x = W(q * wt) + shake(i + j * 9), y = snap(r.y0 + ((j + 0.5) / rows) * (r.y1 - r.y0) + 0.04 * t); F(x, y, rr, 0, 0, rr * 0.85, c, a, 0); F(x - snap(0.06 * t), y - snap(0.06 * t), rr * 0.45, 0, 0, rr * 0.35, c, a * 1.6, 0); } };
+      const boards = (q0, q1) => { bw(q0 * wt, 0, q1 * wt, ht * 0.5, c, 3, a); bw(q0 * wt, ht * 0.5, q1 * wt, ht * 0.5 + px, K, 0, a); bw(q0 * wt, ht * 0.5 + px, q1 * wt, ht, c, 3, a); };   // two rotten boards
+      box(r.x0, r.y0 + 2 * P, r.x1, r.y1, K, a, 0, 10, 0);   // the dark between its stones
+      if (k === 0) { stones(0, 1, 2); post(0.02, ht, ht + 1.2, c); bw(wt - 0.6, ht, wt - 0.4, ht + 0.5, c, 3, HALF); dust(E(0.4), r.y1, c); }   // A: stones fitted in two rows, a post at the wall and one short at its end
+      else if (k === 1) { stones(0, 1, 2); brace(Math.min(2.2, wt - 0.6), 1.4, c); for (const [e, v, rr] of [[0.15, 0.95, 0.2], [0.05, 1.3, 0.14]]) disc(E(e), Y(v), rr * t, c, a); dust(E(0.2), Y(1.45), c); }   // B: on a brace, stones bulging off its end
+      else if (k === 2) { boards(0, 0.55); stones(0.55, 1, 2); brace(1.4, 1.2, c); dust(E(0.3), r.y1, c); }   // C: boards at the wall, the rubble at its end
+      else if (k === 3) { stones(0, 1, 1); bw(0, ht * 0.55, wt - 0.15, ht, c, 3, a); for (const q of [0.4, wt - 0.9]) bw(q, ht, q + 0.2, ht + 0.45, c, 3, HALF); dust(E(0.25), r.y1, c, 4); }   // D: a beam under one row of stones, two short legs
+      else if (k === 4) { stones(0, 1, 2); disc(E(0.25), Y(ht + 0.25), 0.34 * t, c, a); for (const [e, v] of [[0.45, 1.6], [0.2, 2.1]]) { const q = (T * 0.8 + e) % 1; disc(E(e), snap(r.y1 + (v - ht + q * 0.8) * t), 0.12 * t, c, 1 - q); } if (on) post(0.1, ht, ht + 1.5, c); }   // E: a boulder hanging off its end, stones dropping
+      else { stones(0, 1, 2); brace(1.6, 1.3, c); line(E(1.0), r.y1, E(1.0), Y(ht + 0.9), G, 1, 1); basket(E(1.0), Y(ht + 0.9), 1, c); dust(E(0.3), r.y1, c); }   // F: a brace, a basket hung under it
+      for (let i = 0, n = Math.max(1, Math.round(wt)); i < n; i++) { const x0 = snap(r.x0 + (i * w) / n) + shake(i), x1 = snap(r.x0 + ((i + 1) * w) / n) + shake(i); box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25); }   // its edge, in pieces
+      return true;
+    }
+    if (r.plank && r.move) {   // a moving plank, blue, the top you stand on its rim: an ore bucket on a cable (A, B), a cart on a rail across the shaft (C, D), a cage on a rope (E, F)
+      const k = V.mover, c = th.mover, cx = snap((r.x0 + r.x1) / 2), hw = w / 2 / t, X = (u) => snap(cx + u * t);
+      const bx = (u0, v0, u1, v1, cc, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), cc, a, 0, 10, tn);
+      const cable = (v) => { line(lv.l, Y(v), lv.r, Y(v), G, DIM, 1); F(cx, Y(v), 0.22 * t, 0, 0, 0.22 * t, G, 1, 4); disc(cx, Y(v), 0.07 * t, G, 1); };   // its cable across the shaft (behind), its pulley on it
+      const rail = (v) => { line(lv.l, Y(v), lv.r, Y(v), G, DIM, 2); for (let x = lv.l + 0.3 * t; x < lv.r; x += 0.7 * t) box(snap(x), Y(v) + P, snap(x + 0.3 * t), Y(v) + 3 * P, G, DIM, 0, 10, 0); };   // a rail across the shaft, its sleepers
+      const wheel = (u, v) => { F(X(u), Y(v), 0.17 * t, 0, 0, 0.17 * t, c, 1, 4); disc(X(u), Y(v), 0.06 * t, c, 1); };
+      bx(-hw, 0, hw, ht, c, 0);   // its rim
+      if (k === 0) { for (let j = 0; j < 4; j++) bx(-(hw - 0.12 - 0.12 * j), ht + 0.2 * j, hw - 0.12 - 0.12 * j, ht + 0.2 * (j + 1), c, 2); bx(-(hw - 0.6), ht + 0.8, hw - 0.6, ht + 0.8 + px, K);   // A: a bucket narrowing,
+        line(X(-hw + 0.1), r.y0, cx, Y(-1.4), G, 1, 1); line(X(hw - 0.1), r.y0, cx, Y(-1.4), G, 1, 1); bx(-0.08, -1.5, 0.08, -1.35, G); line(cx, Y(-1.5), cx, Y(-2.1), G, 1, 1); cable(-2.1); }   // its two ropes to a hanger, the cable's pulley
+      else if (k === 1) { bx(-hw + 0.1, ht, hw - 0.1, ht + 0.9, c, 0); for (let u = -hw + 0.55; u < hw - 0.3; u += 0.5) bx(u, ht, u + px, ht + 0.9, K); for (const u of [-hw + 0.25, hw - 0.3]) for (const v of [ht + 0.15, ht + 0.7]) bx(u, v, u + px, v + px, PAL.white);   // B: a riveted box,
+        for (const [u, rr] of [[hw - 0.45, 0.14], [hw - 0.75, 0.11]]) disc(X(u), Y(-0.08), rr * t, G, 1); bx(-0.06, -0.45, 0.06, 0, c); F(cx, Y(-0.5), 0.1 * t, 0, 0, 0.1 * t, c, 1, 4); line(cx, Y(-0.6), cx, Y(-2.1), G, 1, 1); cable(-2.1); }   // ore on its rim, its hook up to the pulley
+      else if (k === 2) { for (let j = 0; j < 3; j++) bx(-(hw - 0.1 * j), ht + 0.22 * j, hw - 0.1 * j, ht + 0.22 * (j + 1), c, 2); bx(-hw + 0.3, ht + 0.66, hw - 0.3, ht + 0.72, c); wheel(-hw + 0.55, ht + 0.85); wheel(hw - 0.55, ht + 0.85); rail(ht + 1.03); }   // C: a cart, its wheels on a rail
+      else if (k === 3) { bx(-hw + 0.05, ht, hw - 0.05, ht + 0.55, c, 4); for (const u of [-hw + 0.45, hw - 0.6]) bx(u, ht, u + 0.15, ht + 0.55, c); bx(-hw + 0.05, ht + 0.27, hw - 0.05, ht + 0.27 + px, K); wheel(-hw + 0.5, ht + 0.7); wheel(hw - 0.5, ht + 0.7); rail(ht + 0.88); }   // D: a flat wooden cart, iron bands
+      else if (k === 4) { for (const u of [-hw, hw - 0.15]) bx(u, ht, u + 0.15, ht + 1.75, c); bx(-hw, ht + 1.6, hw, ht + 1.75, c); bx(-hw, ht + 0.8, hw, ht + 0.8 + px, c); mnLamp(X(hw - 0.55), r.y1, V.lamp, true, 0.8);   // E: a cage, its roof the rim,
+        F(cx, Y(-0.18), 0.12 * t, 0, 0, 0.12 * t, c, 1, 4); line(cx, Y(-0.3), cx, Y(-3), G, 1, 1); }   // a ring on its roof, its rope up
+      else { for (const u of [-hw, -0.07, hw - 0.15]) bx(u, ht, u + 0.15, ht + 1.85, c); bx(-hw, ht + 1.7, hw, ht + 1.85, c); line(X(-hw + 0.15), Y(ht), X(-0.07), Y(ht + 1.7), c, 1, 2); line(X(-0.07), Y(ht), X(-hw + 0.15), Y(ht + 1.7), c, 1, 2);   // F: a big cage braced across,
+        mnLamp(X(hw * 0.55), r.y1, V.lamp, true, 0.75); basket(X(hw * 0.55), Y(ht + 1.38), 0.9); for (const u of [-0.4, 0.4]) { F(X(u), Y(-0.3), 0.17 * t, 0, 0, 0.17 * t, c, 1, 4); line(X(u), Y(-0.45), X(u), Y(-3), G, 1, 1); } }   // a lamp, a basket in it, two pulleys up
+      lip(); return true;
+    }
+    if (r.plank) {   // a scaffold board: weathered grey planks, their grain in lines, nails, the beams and braces under it half dark
+      if (r.bouncy) return false;
+      const k = V.plank, c = th.plank;
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 3); box(r.x0, r.y1 - P, r.x1, r.y1, K, 1, 0, 10, 0);   // its boards, their lower edge
+      const joints = (n) => { for (let i = 1; i < n; i++) bw((i * wt) / n, 0, (i * wt) / n + px, ht, K); };
+      if (k === 0) { nails([0.15, wt - 0.25], ht * 0.4); brace(1.5, 1.1); }   // A: one board, nailed, braced
+      else if (k === 1) { joints(2); bw(0.1, ht, wt - 0.1, ht + 0.22, c, 3, HALF); for (const q of [0.5, wt - 0.9]) bw(q, ht + 0.22, q + 0.2, ht + 0.6, c, 3, HALF); line(E(0.25), r.y1, E(0.25), Y(ht + 0.45), G, 1, 1); basket(E(0.25), Y(ht + 0.45)); }   // B: two boards on a beam, its legs, a basket off its end
+      else if (k === 2) { nails([0.15, wt - 0.25], ht * 0.4); if (on) { bw(-0.02, -2.25, 0.18, -2.05, G); line(W(0.1), Y(-2.1), E(0.3), r.y0, G, 1, 1); } coil(E(0.22), r.y1); }   // C: hung on a rope from the wall over it, a coil off its end
+      else if (k === 3) { joints(3); nails([0.12, wt - 0.2], ht * 0.4); brace(1.6, 1.2); mnLamp(E(0.25), r.y1, V.lamp, true, 0.85); }   // D: three boards, braced, a lamp off its end
+      else if (k === 4) { nails([0.15], ht * 0.4); brace(1.4, 1.0); if (on) bw(0, ht, 0.35, ht + 0.25, G, 4); for (const rr of [0.34, 0.24]) F(E(0.35), Y(ht + 0.15), rr * t, 0, 0, rr * 1.2 * t, G, 1, 4); line(E(0.3), Y(ht + 0.5), E(0.25), Y(ht + 0.95), G, 1, 1); }   // E: a big coil of rope looped over its end
+      else { if (on) bw(0, -1.3, 0.22, ht + 1.0, G, 3, HALF); if (on) for (let i = 0; i < 6; i++) { const q = (i + 0.5) / 6; box(snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))), snap(Y(-1.2) + q * (r.y0 - Y(-1.2))), snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))) + 2 * P, snap(Y(-1.2) + q * (r.y0 - Y(-1.2))) + P, G, 1, 0, 10, 0); }   // F: on a post up the wall, a chain to it,
+        line(E(0.2), r.y1, E(0.2), Y(ht + 0.3), G, 1, 1); pick(E(0.2), Y(ht + 0.3), -d, 0.9, false); }   // a pickaxe hung off its end
+      lip(); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
+    {   // rough rock shored up with old timber: dotted grey, its underside shaded, the timber under it half dark
+      const k = V.slab, c = th.block;
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, k === 5 ? 0 : k === 2 || k === 4 ? 2 : 1); box(r.x0, Y(Math.max(0.3, ht - 0.28)), r.x1, r.y1, c, 1, 0, 10, k === 5 ? 3 : 4);   // its rock, its underside darker
+      if (k === 0) { brace(1.7, 1.3); if (on) post(0.02, ht, ht + 1.3); }   // A: a knee brace, a post at the wall
+      else if (k === 1) { const u1 = Math.min(wt - 0.7, 2.8); bw(0.12, 0.22, u1, 0.72, G, 3); for (const u of [0.12, u1 - 0.14]) bw(u, 0.22, u + 0.14, 0.72, G, 4); bw(0.12, 0.72 - px, u1, 0.72, K); brace(1.4, 1.2); mnLamp(E(0.25), r.y1, V.lamp, true, 0.9); }   // B: a beam set in its face, banded, a lamp off its end
+      else if (k === 2) { for (let x = r.x0 + snap(0.1 * t), i = 0; x < r.x1 - snap(0.2 * t); i++) { const ww = snap((0.25 + 0.25 * hsh(i + 300)) * t), dd = snap((0.2 + 0.35 * hsh(i + 330)) * t); F(snap(x + ww / 2), r.y1 + dd / 2, ww / 2, 0, 0, -dd / 2, c, 1, 6, ww / 2, dd / 2, ww); x += ww + snap((0.2 + 0.3 * hsh(i + 360)) * t); }   // C: its underside jagged,
+        pick(E(0.7), r.y0, -d); dust(E(0.45), r.y1); }   // a pickaxe stuck in its top, grit trickling
+      else if (k === 3) { bw(0, ht, Math.min(wt - 0.4, 3.2), ht + 0.3, G, 3, HALF); post(0.55, ht + 0.3, ht + 1.9); bw(0.45, ht + 1.9, 0.85, ht + 2.08, G, 4, HALF); coil(E(0.2), r.y1); }   // D: a beam under it, a post down to a footing, a coil of rope
+      else if (k === 4) { F(snap((r.x0 + r.x1) / 2), r.y1, w * 0.36, 0, 0, 0.4 * t, c, 1.6, 0); F(snap((r.x0 + r.x1) / 2), r.y1 - P, w * 0.3, 0, 0, 0.28 * t, c, 1.35, 0); for (const [q, h] of [[0.3, 0.45], [0.5, 0.65], [0.68, 0.4]]) { const x = snap(r.x0 + q * w); F(x, Y(ht + 0.25 + h / 2), 0.08 * t, 0, 0, -h / 2 * t, c, 1, 6, 0.08 * t, h / 2 * t, 0.16 * t); } if (on) bw(0, 0, 0.3, ht, G, 3); }   // E: bulging under, drips of rock, the timber set in at the wall
+      else { if (on) bw(0, -1.6, 0.22, ht + 1.2, G, 3, HALF); line(E(0.5), r.y1, E(0.15), Y(ht + 0.1), G, 1, 2); mnLamp(E(0.15), Y(ht + 0.1), V.lamp, true, 0.85); }   // F: smooth, an upright at the wall, a lamp on a bracket under its end
+      lip(); return true;
+    }
+  };
   // Tokyo's ledges (see the parts catalog), by what they do: a gondola moves, an awning off a wall bounces, a free plank is a steel
   // beam, a block is a concrete slab cut square with its panels' seams, a striped cap on a free end, a knee brace under it at a wall
   // and windows in a thick one.
@@ -4007,7 +4152,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea || th.skazka) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.shrine && caveRect(r)) || (th.mines && mineRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);

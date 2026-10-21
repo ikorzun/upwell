@@ -2371,8 +2371,10 @@ const input = {
 const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', Space: 'jump' };
 document.addEventListener('keydown', (e) => {
   const k = KEYS[e.code];
-  if (!k || game.state !== 'play') return;
+  if (!k) return;
+  if (game.state !== 'play') { const f = document.activeElement; if (!f || f.tagName !== 'BUTTON') e.preventDefault(); return; }   // (off play: not the portal page's scroll; Space still presses a button in focus)
   e.preventDefault();
+  if (e.repeat && k !== 'jump' && !input[k]) input.set(k, true);   // a side key held from a panel on: taken by its repeats
   if (!e.repeat) {
     input.set(k, true);
     if (k === 'left' || k === 'right') { const d = k === 'right' ? 1 : -1; if (lastTap.d === d && e.timeStamp - lastTap.t < 280) game.dash(d); lastTap = { d, t: e.timeStamp }; }   // a double tap: a dash
@@ -2381,8 +2383,10 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => { const k = KEYS[e.code]; if (k) input.set(k, false); });
 // A part of the pad follows the finger that pressed it until that finger lets go.
 let padUsed = 0;   // when a touch key was last pressed: unused for a while, the keys fade (see ui.frame)
+const padLets = [];   // each pad part's letting go, for a finger lost (iOS) or a pause
 function padPart(part, onTouch) {
   let id = -1;
+  padLets.push(() => { if (id !== -1) { id = -1; onTouch(null); } });
   part.addEventListener('pointerdown', (e) => {
     padUsed = performance.now();
     if (id !== -1) return;
@@ -2539,7 +2543,7 @@ function joyEnd() {
 }
 for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, (e) => {   // iOS can lose a finger's pointerup (off the top of the screen, say): no finger on the glass, nothing held
   if (e.touches.length) return;
-  joyEnd();
+  joyEnd(); for (const f of padLets) f();   // (a key's finger lost too: the key would stay deaf to the next one)
   if (gest) { if (gest.dir) { input.swipe = false; input.set('left', false); input.set('right', false); } if (gest.flick === 'up') input.set('jump', false); }
   gest = null; tap2 = null;
 }, { passive: true });

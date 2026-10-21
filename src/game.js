@@ -718,7 +718,7 @@ class Game {
   // растягивается»): the level under way as it is, all of it scaled by the new tile over the old about the left wall and the floor (Game.rescale),
   // the run going on where it was. (A phone held sideways changes nothing: it waits under the 'turn it upright' screen, see layout.)
   resized() {
-    if (this.state === 'menu' || this.state === 'boot') { this.toMenu(); return; }
+    if (this.state === 'menu' || this.state === 'boot') { const o = ui.open === 'map' ? ui.mapAt : null; this.toMenu(); if (o === 'book') ui.book(); else if (o != null) ui.map(o); return; }   // (the map or the book stays open)
     const k = (view.w - 2 * LEVEL.wall) / Math.max(1, this.builtW - 2 * LEVEL.wall);
     this.builtW = view.w; this.rescale(k); this.applyMods();
   }
@@ -1315,6 +1315,7 @@ class Game {
     for (const o of this.lv.enemies.slice()) this.kill(o, false);
     this.lv.shots.length = 0;
     this.invuln = BOSS.winDelay + 1; this.winT = BOSS.winDelay;
+    if (this.mode === 'camp') this.campWin();
   }
   drop(x, y, n, v = 1) {
     for (let k = 0; k < n; k++) {
@@ -1807,6 +1808,7 @@ class Game {
     if (w === 0 && s === 0 && this.first) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);   // the very first level: how to play
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
+  campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
   campKeep() { const d = this.coins - this.kept; if (d > 0) save.bank += d; this.kept = this.coins; save.camp.wallet = this.coins; }
   // A level cleared: its best stars, the next one open, the purse; kept at once (a reload loses none of it).
   campDone(n) {
@@ -1852,7 +1854,7 @@ class Game {
   win() {
     if (this.mode === 'run' && this.endless) { pmsg('level_completed', this.lvl()); this.loopOn(); return; }   // the endless climb goes round again
     pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8);
-    if (this.mode === 'camp') { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); this.result = null; return; }   // a boss's stars: by the hearts it cost
+    if (this.mode === 'camp') { this.campWin(); this.result = null; return; }
     this.finish(true);
   }
   loopOn() {   // past the summit: the worlds again from the first, a tier harder each time round
@@ -2022,7 +2024,7 @@ function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 function button(text, cls, fn) {
   const b = el('button', cls, text);
-  b.addEventListener('click', (e) => { e.stopPropagation(); sound.unlock(); sound.play('click', 0.6); fn(); });
+  b.addEventListener('click', (e) => { e.stopPropagation(); if (performance.now() - ui.openT < 300) return; sound.unlock(); sound.play('click', 0.6); fn(); });   // (a double tap's second: not into the next screen)
   if (/\bbig\b/.test(cls)) queueMicrotask(() => fitBig(b));   // once it is in its panel
   return b;
 }
@@ -2033,8 +2035,8 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
   for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > min;) { p -= 0.5; b.style.setProperty('--p', p); }
 }
 const ui = {
-  open: null, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
-  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; return p; },
+  open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
+  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
   hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map']) $(id).classList.remove('on'); this.open = null; },
   menu() {
     const p = this.panel('menu');
@@ -2136,13 +2138,15 @@ const ui = {
     const p = this.panel('result'), bonus = gated(game.world), n = nw + 1, next = !bonus && n <= CAMP_OPEN, on = CAMPAIGN.slice(0, nw).filter((_, k) => !gated(k)).length + 1;   // on: its number on the line
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'));
     if (!bonus) p.append(el('div', 'label', tf(next ? 'worldNext' : 'soon', { n: on })));   // (a bonus world's end says nothing of the line's next one)
-    if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(n - 1)), 'map'), cap(button(t('continue') + ' · ' + n + '-1', 'big thumb', () => game.playLevel((n - 1) * 30 + 1)), 'continue'));
+    const go = save.camp.stars[(n - 1) * 30 + 1] > 0 ? campNextId() : (n - 1) * 30 + 1, at = campAt(go);   // (a boss beaten again: on where Continue goes, not back)
+    if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(at.w)), 'map'), cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1), 'big thumb', () => game.playLevel(go)), 'continue'));
     else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map(bonus ? game.world : undefined)), 'map'));
   },
   // The book of what has been met (the plan after the sandbox: an encyclopedia), one feed down under its headers (the user:
   // no tabs, bigger blocks, each in detail): upgrades and their pairs, candies, enemies, bosses, a card each with its picture,
   // its name and what it does or says; what is not met yet a dim '?'. The feed scrolls by touch (it alone: see the touch guard).
   book() {
+    this.mapAt = 'book';
     const p = this.panel('map'), bk = save.book || {}, has = (k, id) => !!(bk[k] && bk[k][id]), feed = el('div', 'feed');
     const got = (k) => t('got_' + k).split(/[!！]/), sections = [
       ['up', 'bookUp', UPGRADES.map((u) => [u.id, u.id, ...L2(u.name)]).concat(SYNERGIES.map((sy) => [sy.id, sy.of[0], ...L2(sy.name)]))],
@@ -2167,6 +2171,7 @@ const ui = {
   // by touch to the next one, and on to that one under the thumb.
   map(w = campAt(campNextId()).w) {
     const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
+    this.mapAt = w;
     p.append(cap(el('div', 'head', tf('world', { n: wNo(w) }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: wNo(w) }));
     if (worlds.length > 1) { const tabs = el('div', 'duo'); for (const k of worlds) {   // the worlds open so far, a tab each; a bonus world's shut one its stars so far
       const shut = !campOpen(k * 30 + 1), need = CAMP_STARS[CAMPAIGN[k].world.id];

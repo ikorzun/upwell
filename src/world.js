@@ -796,7 +796,7 @@ const CAMPAIGN = [
   { role: 'apply', len: 36, gate: 'gate', fire: 0.42, maxD: 2, chunks: FOREST, intro: [], dark: true, enemies: ['skull', 'crawler'], foes: 0.5, pair: 0.1, candy: ['smash', 'smash'], seed: 7108,
     news: { en: 'skulls: they lunge up close', es: 'calaveras: se lanzan de cerca', pt: 'caveiras: atacam de perto', ja: 'ドクロ: ちかいと とびかかる' } },
   { role: 'teach', len: 33, fire: 0.42, maxD: 2, chunks: FOREST, intro: [], dark: true, enemies: ['kikimora', 'crawler'], foes: 0.55, candy: ['smash'], seed: 7105,
-    news: { en: 'the kikimora creeps on the walls', es: 'la kikimora trepa por las paredes', pt: 'a kikimora rasteja nas paredes', ja: 'キキモラが かべを はう' } },
+    news: { en: 'the kikimora leaps off the walls', es: 'la kikimora salta desde las paredes', pt: 'a kikimora salta das paredes', ja: 'キキモラが かべから とびかかる' } },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.44, maxD: 2, chunks: { ...FOREST, lift: 3 }, intro: ['lift'], dark: true, enemies: ['kikimora', 'skull', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 7103,
     news: { en: "Baba Yaga's mortars fly", es: 'los morteros de Baba Yaga vuelan', pt: 'os pilões da Baba Yaga voam', ja: 'ババヤガの うすが とぶ' } },
   { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...FOREST, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], dark: true, enemies: ['kikimora', 'skull', 'spitter', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7102 },

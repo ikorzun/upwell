@@ -120,7 +120,8 @@
     padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 0;
   }
   #hud.on { display: flex; }
-  #hearts { display: flex; gap: 3px; flex: 1; --p: 3; }
+  #hearts { display: flex; flex-wrap: wrap; gap: 2px 3px; flex: 1; min-width: 0; max-width: calc(50% - 52px); --p: 3; }   /* many hearts (a world's shop buys them for good): rows of them, in their corner, clear of the middle */
+  #hearts.many { --p: 2; }
   #rotate { display: none; position: fixed; inset: 0; z-index: 50; background: var(--ink); align-items: center; justify-content: center; --p: 3; color: var(--white); }
   @media (pointer: coarse) and (orientation: landscape) { #rotate { display: flex; } }   /* Playgama's checklist: the layout holds in the orientation it supports */
   #hearts i { display: block; filter: drop-shadow(0 3px 0 var(--ink)); }
@@ -141,7 +142,7 @@
   .tasks > .done { color: var(--yellow); }
   #tasks { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; margin-top: 6px; filter: drop-shadow(0 2px 0 var(--ink)); }   /* under the level's number, out of its column (that stays put) */
   #tasks:empty { display: none; }
-  #purse { display: flex; align-items: center; gap: 6px; --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); }
+  #purse { display: flex; align-items: center; gap: 6px; --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); margin-left: auto; }   /* (to the right however wide the hearts are) */
   #purse.bump { animation: bump 0.2s steps(2); }
   .coin { display: block; width: 15px; height: 15px; }
   #pauseBtn {

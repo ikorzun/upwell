@@ -1685,7 +1685,14 @@ class Game {
     const price = this.priceOf(p);
     if (p.item.can && !p.item.can(this)) { ui.toast(t('noNeed'), 1200); sound.play('deny', 0.7); return; }
     if (this.coins < price) { ui.toast(tf('poor', { n: price - this.coins }), 1200); haptics.buzz(8); sound.play('deny', 0.7); return; }
+    const had = this.taken.length;
     this.coins -= price; p.sold = true; p.item.apply(this); sound.play('buy');
+    if (this.mode === 'camp' && (p.item.id === 'maxhp' || this.taken.length > had)) {   // a shop's max heart and upgrade kept for the whole world, as its cards are (owner: «на весь мир»)
+      const b = save.camp.builds, mine = (b[this.world] = b[this.world] || []);
+      if (p.item.id === 'maxhp') mine.push('maxhp');
+      for (const id of this.taken.slice(had)) mine.push(id);
+      persist();
+    }
     track('item_bought', { id: p.item.id, price, from: p.trader ? 'trader' : this.lv.kind, level_id: this.levelId() });
     if (p.trader && p.trader.body) { const b = p.trader.body; b.face.surprise = 1; setVel(b, 0, -0.5 * this.vjump); }   // the trader hops: a sale
     splatFx(p.x, p.y, p.r * 2, p.item.color, 8); haptics.buzz(16);
@@ -1808,7 +1815,7 @@ class Game {
     const { w, s } = campAt(i), merged = campMerge(w, s, campAt(i).rc, order), rc = (w > 0 || s >= 2) && !merged.boss && merged.bonus == null ? Object.assign({}, merged, { astro: true }) : merged;   // (an astro may come from the third level: ASTRO)
     delete save.cur;   // a level begun (Game.resume puts back the one it goes on with)
     this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
-    for (const id of save.camp.builds[w] || []) { const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }
+    for (const id of save.camp.builds[w] || []) { if (id === 'maxhp') { this.maxHp++; continue; } const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }   // (maxhp: a heart bought in its shops)
     this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = ![0, 1, 2].some((d) => save.camp.stars[w * 30 + s * 3 + d] > 0);   // its tier's first clear (an upgrade then: one a tier, whichever way up)
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
@@ -2329,7 +2336,7 @@ const ui = {
     if (g.hp !== this.hp || g.maxHp !== this.max) {
       this.hp = g.hp; this.max = g.maxHp;
       const h = $('hearts');
-      h.replaceChildren();
+      h.replaceChildren(); h.classList.toggle('many', g.maxHp > 6);
       for (let i = 0; i < g.maxHp; i++) { const k = i < g.hp ? 'full' : 'empty', s = el('i', k); s.innerHTML = pxSvg(7, 6, `<path fill="currentColor" d="${inkPath(HEART[k], 0, 0)}"/>`); h.append(s); }
     }
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }

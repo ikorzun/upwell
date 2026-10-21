@@ -1,6 +1,6 @@
 {
- "commit": "961aa40",
- "made": "2026-10-20",
+ "commit": "c06d63c+changes",
+ "made": "2026-10-21",
  "levels": {
   "c1-1": {
    "result": "clear",
@@ -623,7 +623,7 @@
   },
   "c8-4": {
    "result": "clear",
-   "time": 28.5,
+   "time": 34.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
@@ -632,7 +632,7 @@
   },
   "c8-5": {
    "result": "clear",
-   "time": 25,
+   "time": 26,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -646,7 +646,7 @@
   },
   "c8-7": {
    "result": "clear",
-   "time": 20.5,
+   "time": 16.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []

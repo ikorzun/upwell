@@ -270,6 +270,7 @@ class Foe {
     this.dir = s.dir || (Math.random() < 0.5 ? -1 : 1); this.t = 0; this.stall = 0; this.ph = Math.random(); this.lastPh = this.ph;
     this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
     this.s = this.rect ? (this.rect.x1 - this.rect.x0) / 2 + 1.05 * this.body.R : 0;   // a circler starts on top, in the middle
+    this.atk = ''; this.atkT = 0; this.atkCool = 0; this.lap = 0; this.ax = 0; this.ay = 0;   // a Kikimora's leap, a Leshy's whirl (leap, whirl): its stage, time in it, rest after
   }
   // Soft bodies moving as the hero does, by pushes and their own give rather than gliding on rails: each one inches
   // along in pulses (every `step` s), stretching along its way at each push and settling in between, and keeps upright.
@@ -302,18 +303,66 @@ class Foe {
       steer(hold ? 0 : this.dir * def.speed * pulse * (rush ? SKULL.k : 1), 0, 6, true);
     } else if (def.move === 'wall') {   // up and down its stretch of wall, pressed to it (a chaser toward the hero's height)
       const w = this.wall, tx = w.side === 1 ? lv.l + b.R : lv.r - b.R;
+      if (def.leap && this.leap(dt, g, tx, steer)) return;   // a Kikimora off her wall at the hero (KIKI)
       if (def.chase) { const ty = clamp(g.hero.cy, w.y0, w.y1); this.dir = Math.abs(ty - b.cy) < 0.3 * b.R ? 0 : Math.sign(ty - b.cy); }
       else if (b.cy < w.y0) this.dir = 1; else if (b.cy > w.y1) this.dir = -1;
       if (push) b.kickSquash(0, 1, -0.9);
       steer((tx - b.cx) * 6, this.dir * def.speed * pulse, 6);
     } else {   // round its block: along the top, down a side, along the bottom, up the other side
       const r = this.rect, e = 1.05 * b.R, w = r.x1 - r.x0 + 2 * e, h = r.y1 - r.y0 + 2 * e, P = 2 * (w + h);
-      this.s = (((this.s + this.dir * def.speed * pulse * dt) % P) + P) % P;
+      const [v, jx] = def.lap ? this.whirl(dt, g, P, pulse) : [pulse, 0];   // a Leshy's pace: still and shaking to warn, then a fast lap (LESHY)
+      this.s = (((this.s + this.dir * def.speed * v * dt) % P) + P) % P;
       const s = this.s, x0 = r.x0 - e, y0 = r.y0 - e, side = s < w || (s >= w + h && s < 2 * w + h);
       if (push) b.kickSquash(side ? 1 : 0, side ? 0 : 1, -0.9);
       const p = s < w ? [x0 + s, y0] : s < w + h ? [x0 + w, y0 + s - w] : s < 2 * w + h ? [x0 + w - (s - w - h), y0 + h] : [x0, y0 + h - (s - 2 * w - h)];
-      steer((p[0] - b.cx) * 8, (p[1] - b.cy) * 8, 10);
+      steer((p[0] + jx - b.cx) * 8, (p[1] - b.cy) * 8, 10);
     }
+  }
+  // A Kikimora (KIKI): the hero near and level with her, she shivers on her wall, flashing red (b.warn), leaps out at him with her broom
+  // and crawls back. True while she does.
+  leap(dt, g, tx, steer) {
+    const b = this.body, H = g.hero, R = g.R, lv = g.lv, side = this.wall.side === 1 ? 1 : -1;   // (side: the way off her wall)
+    b.warn = false;
+    if (!this.atk) {
+      if ((this.atkCool = Math.max(0, this.atkCool - dt)) > 0 || b.cy < lv.cam || b.cy > lv.cam + view.h) return false;
+      if (Math.abs(H.cy - b.cy) > KIKI.level * R || Math.abs(H.cx - b.cx) > KIKI.reach * R) return false;
+      this.atk = 'ready'; this.atkT = 0; this.ax = tx + side * KIKI.out * lv.tile; this.ay = H.cy; sound.play('crumble', 0.5, 0.8);
+    }
+    this.atkT += dt;
+    if (this.atk === 'ready') {   // pressed to her wall, shivering
+      b.warn = Math.floor(this.atkT * 5) % 2 === 0;
+      if (Math.floor(this.atkT * 12) % 2) b.kickSquash(1, 0, 0.12);
+      steer((tx - b.cx) * 6, 0, 6);
+      if (this.atkT > KIKI.ready) { this.atk = 'leap'; this.atkT = 0; b.kickSquash(side, 0, -1.4); sound.play('airjump', 0.7, 1.3); }
+      return true;
+    }
+    if (this.atk === 'leap') {   // out at him, to where he was: `out` tiles off her wall, at his height
+      const left = Math.max(0.05, KIKI.leap - this.atkT); steer((this.ax - b.cx) / left, (this.ay - b.cy) / left, 20);
+      if (this.atkT > KIKI.leap) { this.atk = 'back'; this.atkT = 0; }
+      return true;
+    }
+    steer((tx - b.cx) * 6, 0, 6);   // back to her wall
+    if (Math.abs(tx - b.cx) < 0.2 * b.R || this.atkT > 1.2) { this.atk = ''; this.atkCool = KIKI.every; }
+    return true;
+  }
+  // A Leshy (LESHY): the hero near his block, he stops and shakes, flashing red (b.warn), then whirls once round it. [his pace, a shake across]
+  whirl(dt, g, P, pulse) {
+    const b = this.body, H = g.hero, R = g.R, lv = g.lv, r = this.rect;
+    b.warn = false;
+    if (!this.atk) {
+      if ((this.atkCool = Math.max(0, this.atkCool - dt)) > 0 || b.cy < lv.cam || b.cy > lv.cam + view.h) return [pulse, 0];
+      if (Math.hypot(Math.max(r.x0 - H.cx, 0, H.cx - r.x1), Math.max(r.y0 - H.cy, 0, H.cy - r.y1)) > LESHY.near * R) return [pulse, 0];
+      this.atk = 'ready'; this.atkT = 0; sound.play('crumble', 0.5, 0.6);
+    }
+    this.atkT += dt;
+    if (this.atk === 'ready') {
+      b.warn = Math.floor(this.atkT * 5) % 2 === 0;
+      if (this.atkT > LESHY.ready) { this.atk = 'whirl'; this.atkT = 0; this.lap = 0; sound.play('airjump', 0.6, 0.9); }
+      return [0, Math.sin(this.atkT * 75) * 0.12 * b.R];
+    }
+    this.lap += LESHY.k * this.def.speed * dt;
+    if (this.lap >= P) { this.atk = ''; this.atkCool = LESHY.every; }
+    return [LESHY.k, 0];
   }
   // A worm (WORM): sits on its ledge; now and then, on screen, reaches a tube out to a ledge near by (the warning), then
   // pours itself along it, through anything, and lands there. Its state drives its body: flowing, it floats and touches nothing.

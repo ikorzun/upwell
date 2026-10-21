@@ -1632,6 +1632,7 @@ for (const id in CHUNKS) {
     return k < 6 ? ch + copy : copy + ch;   // the copy on the inner side
   }).join(''));
 }
+const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk)
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
 const STAND = new Set(['#', 'I', 'C', '=', 'M', 'S', 'X', 'T', 'H', 'Z']);
@@ -1727,7 +1728,7 @@ class Level {
     this.gateId = o.kind !== 'well' || !o.height || o.world.bonus ? null : rc ? rc.gate || null : this.stage === 1 ? GATE.run[Math.min(gw, 3)] : null;
     this.gateAt = this.gateId ? this.floor - o.height * (GATE.at[0] + gr() * (GATE.at[1] - GATE.at[0])) : null;
     this.flavRng = mulberry32((o.seed ^ 0x2c1b3c6d) >>> 0);   // which ledges bounce or pull (flavour), by their own generator
-    this.rng = mulberry32(o.seed >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
+    this.rng = mulberry32(o.seed >>> 0); this.foeRng = mulberry32((o.seed ^ 0x85ebca6b) >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
     this.fizz = []; this.bullets = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
@@ -1847,10 +1848,12 @@ class Level {
   // under the way out is reached through it), otherwise one of the world's, as hard as
   // this level allows, not the same twice running.
   addChunk() {
-    const wd = this.world, rnd = this.rng, plan = this.last !== 'pocket' && this.plan.find((p) => !p.done && this.top < p.y);
+    const wd = this.world, rnd = this.rng, G = LEVEL.pocketEnd * this.tile;
+    const plan = this.last !== 'pocket' && this.plan.find((p) => !p.done && (this.top < p.y || (p.y - this.endY > G && this.top - this.endY - CHUNK_TALL * this.tile <= G)));   // (one the next chunk
+    // could carry into the end's margin goes in now, a little under its height: else a short level's lost it, as Fuji's and the Sea's first did their shops)
     let id;
     if (this.script) { if (!this.script.length) { this.finish(); return; } id = this.script.shift(); }   // a level as written: its chunks in turn, then its end
-    if (!id && plan) { plan.done = true; if (this.top - this.endY > LEVEL.pocketEnd * this.tile) { id = 'pocket'; this.pocketKind = plan.kind; } }
+    if (!id && plan) { plan.done = true; if (this.top - this.endY > G) { id = 'pocket'; this.pocketKind = plan.kind; } }
     if (!id && this.intro.length && this.placed.length) id = this.intro.shift();   // after a first easy one, what the level is to show
     if (!id && this.gateAt != null && this.top < this.gateAt) { id = this.gateId; this.gateAt = null; }   // its gate (GATE), before a set piece due too: it must fit
     if (!id && this.setAt != null && this.top < this.setAt) { id = this.setId; this.setAt = null; }   // its set piece
@@ -2116,8 +2119,9 @@ class Level {
   // Enemies for a chunk just laid, on what it is made of: a crawler along a clear ledge, a
   // climber up and down the longest stretch of bare wall, a circler round a free block.
   // None in the first few tiles over the floor; later levels now and then get two.
-  populate(rects, top, bottom) {
-    const wd = this.world, rnd = this.rng, t = this.tile;
+  populate(rects, top, bottom) {   // (a tier's merged level, its parts in a new order each play: its enemies by a generator of their own, so the order
+    // changes them, not its lay; the others as before)
+    const wd = this.world, rnd = this.rc && this.rc.zones ? this.foeRng : this.rng, t = this.tile;
     const rc = this.rc, z = rc && rc.zones ? rc.zones[Math.min(2, Math.floor((3 * (this.floor - bottom)) / Math.max(1, this.floor - this.endY)))] : null;   // a tier's level: the part this chunk is in (Game: campMerge)
     const odds = z ? z.foes : rc ? rc.foes : wd.foes * (1 + 0.15 * this.stage);   // a recipe's own odds of one, and of two
     if (!wd.enemies || (this.foeTypes && !this.foeTypes.length) || bottom > this.floor - 6 * t || !(rnd() < odds * this.k)) return;

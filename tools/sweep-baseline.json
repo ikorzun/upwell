@@ -1,5 +1,5 @@
 {
- "commit": "232b707+changes",
+ "commit": "232b707+changes+gen",
  "made": "2026-10-21",
  "levels": {
   "c1-1": {
@@ -11,36 +11,38 @@
   },
   "c1-2": {
    "result": "clear",
-   "time": 42,
-   "heartsLost": 0,
-   "stuck": [
-    "chimney@127"
-   ],
-   "hits": []
-  },
-  "c1-3": {
-   "result": "clear",
-   "time": 20,
+   "time": 27,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
-  "c1-4": {
+  "c1-3": {
    "result": "clear",
-   "time": 57.5,
-   "heartsLost": 0,
+   "time": 24.5,
+   "heartsLost": 2,
    "stuck": [
-    "arena@132",
-    "chimney@145"
+    "rubberwall@50"
    ],
-   "hits": []
+   "hits": [
+    "shot@stairs",
+    "fire@pocket"
+   ]
   },
-  "c1-5": {
+  "c1-4": {
    "result": "clear",
    "time": 25.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
+  },
+  "c1-5": {
+   "result": "clear",
+   "time": 27,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "shot@icicles"
+   ]
   },
   "c1-6": {
    "result": "clear",
@@ -51,34 +53,23 @@
   },
   "c1-7": {
    "result": "clear",
-   "time": 69,
-   "heartsLost": 1,
-   "stuck": [
-    "comb@55",
-    "comb@58",
-    "rubberwall@167"
-   ],
-   "hits": [
-    "crawler@planks"
-   ]
+   "time": 25.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c1-8": {
    "result": "clear",
-   "time": 78.5,
+   "time": 26,
    "heartsLost": 1,
-   "stuck": [
-    "gate3@123",
-    "gate3@128",
-    "comb@134",
-    "spring@154"
-   ],
+   "stuck": [],
    "hits": [
-    "shot@crumble"
+    "spitter@crumble"
    ]
   },
   "c1-9": {
    "result": "clear",
-   "time": 14.5,
+   "time": 15.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -101,28 +92,30 @@
   },
   "c2-2": {
    "result": "clear",
-   "time": 17,
+   "time": 14.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-3": {
    "result": "clear",
-   "time": 19.5,
+   "time": 23.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-4": {
    "result": "clear",
-   "time": 26,
+   "time": 36,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "gate2@154"
+   ],
    "hits": []
   },
   "c2-5": {
    "result": "clear",
-   "time": 19,
+   "time": 18,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -136,24 +129,26 @@
   },
   "c2-7": {
    "result": "clear",
-   "time": 52,
+   "time": 47.5,
    "heartsLost": 0,
    "stuck": [
-    "rubberwall@59",
-    "pillars@74"
+    "rubberwall@17",
+    "rubberwall@111"
    ],
    "hits": []
   },
   "c2-8": {
    "result": "clear",
-   "time": 31,
+   "time": 37.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "overhang@127"
+   ],
    "hits": []
   },
   "c2-9": {
    "result": "clear",
-   "time": 16.5,
+   "time": 15.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -169,42 +164,41 @@
   },
   "c3-1": {
    "result": "clear",
-   "time": 8,
+   "time": 8.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c3-2": {
    "result": "clear",
-   "time": 45,
+   "time": 39.5,
    "heartsLost": 0,
-   "stuck": [
-    "rubberwall@180"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c3-3": {
    "result": "clear",
-   "time": 25,
+   "time": 37.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "overhang@136"
+   ],
    "hits": []
   },
   "c3-4": {
    "result": "clear",
    "time": 33.5,
-   "heartsLost": 0,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": []
+   "hits": [
+    "shell@iceblocks"
+   ]
   },
   "c3-5": {
    "result": "clear",
-   "time": 48.5,
+   "time": 22,
    "heartsLost": 0,
-   "stuck": [
-    "comb@87",
-    "overhang@129"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c3-6": {
@@ -216,27 +210,25 @@
   },
   "c3-7": {
    "result": "clear",
-   "time": 24.5,
-   "heartsLost": 1,
+   "time": 30,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "crawler@spring"
-   ]
+   "hits": []
   },
   "c3-8": {
    "result": "clear",
-   "time": 43.5,
+   "time": 48,
    "heartsLost": 1,
    "stuck": [
-    "spring@200"
+    "icicles@110"
    ],
    "hits": [
-    "shot@icicles"
+    "spikes@gate3"
    ]
   },
   "c3-9": {
    "result": "clear",
-   "time": 16.5,
+   "time": 20,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -255,39 +247,39 @@
   },
   "c4-1": {
    "result": "clear",
-   "time": 8.5,
+   "time": 9,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-2": {
    "result": "clear",
-   "time": 35,
+   "time": 31,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-3": {
    "result": "clear",
-   "time": 24.5,
+   "time": 39.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "mosswall@89"
+   ],
    "hits": []
   },
   "c4-4": {
    "result": "clear",
-   "time": 25,
+   "time": 33,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-5": {
    "result": "clear",
-   "time": 36.5,
+   "time": 29,
    "heartsLost": 0,
-   "stuck": [
-    "movers@156"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c4-6": {
@@ -299,30 +291,28 @@
   },
   "c4-7": {
    "result": "clear",
-   "time": 38.5,
-   "heartsLost": 1,
-   "stuck": [
-    "crumble@126"
-   ],
-   "hits": [
-    "fire@shelves"
-   ]
+   "time": 18.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c4-8": {
    "result": "clear",
-   "time": 48,
+   "time": 37,
    "heartsLost": 0,
-   "stuck": [
-    "spring@113"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c4-9": {
    "result": "clear",
-   "time": 17.5,
-   "heartsLost": 0,
-   "stuck": [],
-   "hits": []
+   "time": 29.5,
+   "heartsLost": 1,
+   "stuck": [
+    "stairs@53"
+   ],
+   "hits": [
+    "fire@stairs"
+   ]
   },
   "c4-10": {
    "result": "won",
@@ -344,38 +334,39 @@
   },
   "c5-2": {
    "result": "clear",
-   "time": 53.5,
+   "time": 33,
    "heartsLost": 0,
    "stuck": [
-    "comb@187",
-    "comb@190"
+    "stairs@102"
    ],
    "hits": []
   },
   "c5-3": {
    "result": "clear",
-   "time": 26.5,
+   "time": 42,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "overhang@206"
+   ],
    "hits": []
   },
   "c5-4": {
    "result": "clear",
-   "time": 48,
+   "time": 37.5,
    "heartsLost": 0,
-   "stuck": [
-    "spring@121"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c5-5": {
    "result": "clear",
-   "time": 35.5,
-   "heartsLost": 0,
+   "time": 38.5,
+   "heartsLost": 1,
    "stuck": [
-    "stairs@31"
+    "spring@67"
    ],
-   "hits": []
+   "hits": [
+    "crawler@overhang"
+   ]
   },
   "c5-6": {
    "result": "clear",
@@ -386,24 +377,25 @@
   },
   "c5-7": {
    "result": "clear",
-   "time": 61,
-   "heartsLost": 0,
-   "stuck": [
-    "overhang@55",
-    "comb@143"
-   ],
-   "hits": []
+   "time": 29.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "crawler@pillars"
+   ]
   },
   "c5-8": {
    "result": "clear",
-   "time": 28.5,
+   "time": 40.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "spring@187"
+   ],
    "hits": []
   },
   "c5-9": {
    "result": "clear",
-   "time": 18,
+   "time": 12,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -426,34 +418,37 @@
   },
   "c6-2": {
    "result": "clear",
-   "time": 41.5,
+   "time": 35.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c6-3": {
    "result": "clear",
-   "time": 22.5,
+   "time": 38.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "flight@56"
+   ],
    "hits": []
   },
   "c6-4": {
    "result": "clear",
-   "time": 73.5,
+   "time": 81,
    "heartsLost": 0,
    "stuck": [
-    "pillars@195",
-    "flight@248"
+    "flight@57",
+    "shelves@145",
+    "gate2@186"
    ],
    "hits": []
   },
   "c6-5": {
    "result": "clear",
-   "time": 57.5,
+   "time": 51,
    "heartsLost": 0,
    "stuck": [
-    "chimney@223"
+    "flight@206"
    ],
    "hits": []
   },
@@ -468,32 +463,32 @@
   },
   "c6-7": {
    "result": "clear",
-   "time": 49.5,
-   "heartsLost": 1,
+   "time": 65.5,
+   "heartsLost": 0,
    "stuck": [
-    "icicles@123"
+    "crumble@118",
+    "icicles@125"
    ],
-   "hits": [
-    "shot@icicles"
-   ]
+   "hits": []
   },
   "c6-8": {
    "result": "clear",
-   "time": 36.5,
-   "heartsLost": 2,
+   "time": 48.5,
+   "heartsLost": 1,
    "stuck": [
-    "spikes@82"
+    "comb@98"
    ],
    "hits": [
-    "spikes@stairs",
-    "spikes@gate3"
+    "fire@icicles"
    ]
   },
   "c6-9": {
    "result": "clear",
-   "time": 13.5,
+   "time": 41.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "shelves@85"
+   ],
    "hits": []
   },
   "c6-10": {
@@ -525,28 +520,28 @@
   },
   "c7-3": {
    "result": "clear",
-   "time": 24,
+   "time": 46,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "icicles@125"
+   ],
    "hits": []
   },
   "c7-4": {
    "result": "clear",
-   "time": 51.5,
+   "time": 34,
    "heartsLost": 0,
-   "stuck": [
-    "comb@215"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c7-5": {
    "result": "clear",
-   "time": 30,
-   "heartsLost": 1,
-   "stuck": [],
-   "hits": [
-    "fall@planks"
-   ]
+   "time": 48,
+   "heartsLost": 0,
+   "stuck": [
+    "arena@147"
+   ],
+   "hits": []
   },
   "c7-6": {
    "result": "clear",
@@ -557,7 +552,7 @@
   },
   "c7-7": {
    "result": "clear",
-   "time": 32,
+   "time": 27,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -565,23 +560,18 @@
   "c7-8": {
    "result": "clear",
    "time": 41.5,
-   "heartsLost": 2,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "crawler@gate3",
-    "crawler@gate3"
-   ]
+   "hits": []
   },
   "c7-9": {
    "result": "clear",
-   "time": 33,
-   "heartsLost": 1,
+   "time": 30,
+   "heartsLost": 0,
    "stuck": [
-    "pocket@93"
+    "shelves@57"
    ],
-   "hits": [
-    "fire@shelves"
-   ]
+   "hits": []
   },
   "c7-10": {
    "result": "won",
@@ -596,42 +586,40 @@
   },
   "c8-1": {
    "result": "clear",
-   "time": 8.5,
+   "time": 9.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-2": {
    "result": "clear",
-   "time": 42,
+   "time": 27,
    "heartsLost": 0,
-   "stuck": [
-    "planks@103"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c8-3": {
    "result": "clear",
-   "time": 26.5,
+   "time": 25,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-4": {
    "result": "clear",
-   "time": 34.5,
-   "heartsLost": 1,
-   "stuck": [],
-   "hits": [
-    "crawler@mosswall"
-   ]
-  },
-  "c8-5": {
-   "result": "clear",
-   "time": 26,
+   "time": 18.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
+  },
+  "c8-5": {
+   "result": "clear",
+   "time": 26.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "crawler@crumble"
+   ]
   },
   "c8-6": {
    "result": "clear",
@@ -642,30 +630,26 @@
   },
   "c8-7": {
    "result": "clear",
-   "time": 16.5,
+   "time": 30,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-8": {
    "result": "clear",
-   "time": 44.5,
-   "heartsLost": 0,
-   "stuck": [
-    "gate3@141"
-   ],
-   "hits": []
+   "time": 31.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "crawler@gate3"
+   ]
   },
   "c8-9": {
    "result": "clear",
-   "time": 29.5,
-   "heartsLost": 1,
-   "stuck": [
-    "pocket@64"
-   ],
-   "hits": [
-    "fire@planks"
-   ]
+   "time": 10.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c8-10": {
    "result": "won",

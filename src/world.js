@@ -558,7 +558,7 @@ const SEA = Object.assign({}, WORLDS[1], { id: 'sea', name: { en: 'Sea', es: 'Ma
   enemies: { crawler: 3, climber: 2, circler: 2, shell: 2 }, intro: [{}, {}, {}] });
 // The Dark Forest (owner, 2026-10-20: a bonus world of scary Russian fairy tales, a dark forest with skulls, Baba Yaga, Kikimora, Koschei, Leshy, the stove;
 // very gloomy, very scary, very dark; on its levels the hero is a Kolobok): dark on every level, its kit to the owner's picks (research/variants/skazka-*).
-// Not in the game yet: ?play=skazka to look at it.
+// It opens at 180 stars (CAMP_STARS), off the line; ?play=skazka to look at it.
 const SKAZKA = Object.assign({}, WORLDS[1], { id: 'skazka', name: { en: 'Dark Forest', es: 'Bosque oscuro', pt: 'Floresta sombria', ja: 'くらい もり' }, theme: THEMES.skazka, dark: [0, 1, 2], maxD: 2,
   chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 1, movers: 2, crumble: 2, mosswall: 2, rest: 1, vault: 1 },
   enemies: { skull: 3, crawler: 2, kikimora: 1, spitter: 1, leshy: 1 }, intro: [{}, {}, {}] });   // its climber a Kikimora, its circler a Leshy (owner, 2026-10-20)
@@ -810,10 +810,10 @@ const CAMPAIGN = [
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
   { role: 'boss', boss: 'namazu', ice: true },   // Onamazu (the boss chat, 2026-10-21): the Rat's slide (the Junkyard's, which is dropped), its floor wet rock
 ] },
-// The Dark Forest (the owner's bonus world, 2026-10-20: scary Russian fairy tales; its kit in the renderer, see THEMES.skazka; where it opens is the owner's to
-// say; not in CAMP_ORDER yet): every level dark, the hero a Kolobok. One new thing a level: the dark itself, skulls that lunge, the Kikimora on the walls, Baba Yaga's mortars, a
-// peak, a bonus, the Leshy who leads you round, a peak, a cage. First numbers, for the sweep to tune, about Tokyo's with the dark on top. Its boss for now the
-// random run's Lid, until the boss chat brings Koschei. Its runes: a skull, a tree, crossed bones (some took the forest path round the climb; the forest
+// The Dark Forest (the owner's bonus world, 2026-10-20: scary Russian fairy tales; its kit in the renderer, see THEMES.skazka; last in CAMP_ORDER, it
+// opens at 180 stars, off the line): every level dark, the hero a Kolobok. One new thing a level: the dark itself, skulls that lunge, the Kikimora on the walls, Baba Yaga's mortars, a
+// peak, a bonus, the Leshy who leads you round, a peak, a cage. First numbers, for the sweep to tune, about Tokyo's with the dark on top. Its boss Koschei
+// the Deathless (the boss chat's, 2026-10-21). Its runes: a skull, a tree, crossed bones (some took the forest path round the climb; the forest
 // never let them go).
 { world: SKAZKA, runes: 'wgL', lore: { en: 'Some took the forest path round the climb.\nThe forest never let them go.', es: 'Algunos tomaron el camino del bosque para rodear la subida.\nEl bosque nunca los dejó ir.', pt: 'Alguns pegaram a trilha da floresta para contornar a subida.\nA floresta nunca os deixou sair.', ja: 'のぼらずに もりの みちを えらんだ ものも いた。\nもりは かれらを はなさなかった。' }, levels: [
   { role: 'teach', len: 30, fire: 0.38, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.35, candy: [], shop: 0.5, safe: true, seed: 7101,

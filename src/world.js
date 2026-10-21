@@ -2578,12 +2578,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
   };
   const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
-    // cosine (past a quarter turn its back, mirrored), and the thickness of its edge in grey beside it as it turns
-    const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c = Math.cos(th), sn = Math.sin(th), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
+    // cosine (past a quarter turn its back, mirrored); no grey edge beside it (owner: «убери серый псевдообъем у бонусов»)
+    const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c = Math.cos(th), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
     rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), y0 + j * s, Math.max(u, v), y0 + (j + 1) * s, PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
-    const rim = Math.round((Math.abs(sn) * 2 * k)) * P, ex = x0 + Math.sign(sn) * Math.round(((w / 2) * s * Math.abs(c)) / P) * P;
-    if (rim > 0) box(Math.min(ex, ex + Math.sign(sn) * rim), y0 + 0.2 * rows.length * s, Math.max(ex, ex + Math.sign(sn) * rim), y0 + 0.8 * rows.length * s, PAL.gray, a, 0, 10, 0);
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
   // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is
@@ -3987,12 +3985,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea)) {   // the Village's moss under it (F's): a strip and strands hanging off it, long and short (the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
-      for (let x = r.x0 + 0.1 * R; x < r.x1 - 0.15 * R; x += 0.28 * R) {
-        const h = (((Math.round(x / kitP) * 2654435761) ^ (Math.round(r.y0 / kitP) * 40503)) >>> 0) / 4294967296, w = (h > 0.6 ? 3 : 2) * kitP;
-        box(snap(x) + ox, r.y1 + 2 * kitP, snap(x) + w + ox, snap(r.y1 + 2 * kitP + (0.2 + 0.95 * h) * R), th.moss, a, 0, 10, 0);
-      }
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);

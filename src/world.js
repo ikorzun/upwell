@@ -655,7 +655,7 @@ const BOSSES = {
     hint: { en: 'Flipped! Land on its belly!', es: '¡Volteado! ¡Salta en su panza!', pt: 'Virado! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },
     how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písalo', pt: 'Role um casco nele e depois pise', ja: 'こうらを ぶつけて、ふみつけろ' } },
   // The Sky's: a Karasu-tengu on the Cork's dive (hover, warn, dive, dazed, rise), flapping its wings.
-  pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', pigeon: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', pigeon: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
     intro: [{ en: 'The sky has a guard. Me.', es: 'El cielo tiene un guardián. Yo.', pt: 'O céu tem um guardião. Eu.', ja: 'そらには ばんにんが いる。わたしだ。' },
       { en: 'Caw! Climbers fall. Crows fly.', es: '¡Cra! Tú caes. Los cuervos vuelan.', pt: 'Cró! Você cai. Corvos voam.', ja: 'カァ！ のぼる ものは おちる。カラスは とぶ。' },
       { en: 'Show me your wings, climber.', es: 'Enséñame tus alas, escalador.', pt: 'Mostre suas asas, escalador.', ja: 'つばさを みせてみな。' }],
@@ -663,7 +663,7 @@ const BOSSES = {
       { en: 'No wings, no sky.', es: 'Sin alas, no hay cielo.', pt: 'Sem asas, sem céu.', ja: 'つばさ なしに そら なし。' }],
     defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' } },
   // The Tower Blocks': a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
-  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', crane: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', crane: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
     intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
       { en: 'Who needs a face anyway?', es: '¿Quién necesita una cara?', pt: 'Quem precisa de rosto?', ja: 'かおなんて いる？' },
       { en: 'Wobble, wobble… splat!', es: 'Tiembla, tiembla… ¡plaf!', pt: 'Treme, treme… plaft!', ja: 'ぷるぷる… べちゃっ！' }],
@@ -672,7 +672,7 @@ const BOSSES = {
     defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' } },
   // Tokyo's: the Tram, a tsukumogami now (a streetcar come alive after a hundred years: the owner's look and name, 2026-10-20): the Minecart's ride
   // on a rail (CART, Boss.ride), its pantograph up to an overhead wire; the rail at full strength, as the later of the two (the Minecart has its gentleness).
-  tram: { name: { en: 'Tsukumo Tram', es: 'Tranvía Tsukumo', pt: 'Bonde Tsukumo', ja: 'つくもでんしゃ' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  tram: { name: { en: 'Tsukumo Tram', es: 'Tranvía Tsukumo', pt: 'Bonde Tsukumo', ja: 'つくもでんしゃ' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, slow: 0.8, hp: 8, phase: (hp) => (hp >= 7 ? 0 : hp >= 4 ? 1 : 2),
     intro: [{ en: 'Next stop: nowhere.', es: 'Próxima parada: ninguna.', pt: 'Próxima parada: nenhuma.', ja: 'つぎは どこにも とまりません。' },
       { en: 'A hundred years on this route.', es: 'Cien años en esta ruta.', pt: 'Cem anos nesta linha.', ja: 'この せんろで ひゃくねん。' },
       { en: 'No riding on the roof!', es: '¡Nada de subirse al techo!', pt: 'Nada de andar no teto!', ja: 'やねに のらないで ください！' }],

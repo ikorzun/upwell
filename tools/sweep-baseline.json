@@ -1,5 +1,5 @@
 {
- "commit": "a9eff4c+changes",
+ "commit": "232b707+changes",
  "made": "2026-10-21",
  "levels": {
   "c1-1": {
@@ -415,7 +415,7 @@
    "stuck": [],
    "hits": [],
    "boss": "Tsukumo Tram",
-   "dealt": "6/6"
+   "dealt": "8/8"
   },
   "c6-1": {
    "result": "clear",
@@ -498,12 +498,12 @@
   },
   "c6-10": {
    "result": "won",
-   "time": 18.5,
+   "time": 24.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
    "boss": "Nuppeppo",
-   "dealt": "6/6"
+   "dealt": "8/8"
   },
   "c7-1": {
    "result": "clear",
@@ -585,14 +585,14 @@
   },
   "c7-10": {
    "result": "won",
-   "time": 16,
+   "time": 22,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "boss@hover"
+    "shot@hover"
    ],
    "boss": "Karasu-tengu",
-   "dealt": "6/6"
+   "dealt": "8/8"
   },
   "c8-1": {
    "result": "clear",

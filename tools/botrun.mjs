@@ -7,7 +7,8 @@
 // c1-10 is world 1's boss: its line has the boss, the hearts dealt of its hearts, and when each went and what it was doing then;
 // its hits say what the boss was doing (boss@warn). result: clear (out by the hole), won (the boss beaten), dead, or time (still
 // going at the bot's cap). ORDER=k: a campaign tier's three parts in another order (and the play's other chances), from a seed
-// of their own, the level still on its seed (with r: its recipe's), as a player gets a new order each time (campMerge).
+// of their own, as a player gets a new order each time (campMerge). The level's seed is the same, but its chunks come out
+// otherwise too: the parts' odds of enemies draw on the same generator as its chunks.
 import { spawn } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';

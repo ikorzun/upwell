@@ -87,7 +87,7 @@ const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || na
 // ── Save ─────────────────────────────────────────────────────
 // What outlives a run: best climb, coins of all runs (they unlock colours),
 // wins (the first one opens hard mode) and the chosen look.
-const SAVE_KEY = 'upwell.save';
+const SAVE_KEY = 'upwell.save', LOCAL_KEY = 'upwell.local';   // (LOCAL_KEY: the browser's own copy, a key no Bridge storage takes over)
 // Kept through the Playgama Bridge's storage (its checklist: never localStorage itself), the whole of it under one key in
 // one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
 const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: true, camp: null };   // seen: hints shown once; stick: touch by a stick, not the keys
@@ -221,12 +221,15 @@ function loadSave(s) {
   save.v = 6; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
-let saveIn = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
+let saveIn = false, cloud = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
+// cloud: this visit writes the Bridge's storage too, decided once at boot: a Bridge up late, or a storage that did not answer,
+// never writes over the Bridge's copy with what this visit began from (the browser's copy, or nothing).
 function persist() {
   if (!saveIn) return;
+  save.at = Date.now();   // which copy is the newer one, at the next boot
   const s = JSON.stringify(save);
-  if (ads.ok) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});
-  else try { localStorage.setItem(SAVE_KEY, s); } catch (e) { /* private mode: this visit only */ }
+  try { localStorage.setItem(LOCAL_KEY, s); } catch (e) { /* private mode: this visit only */ }   // always: a visit without the Bridge goes on from it
+  if (cloud) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});
 }
 
 // ── Bodies ───────────────────────────────────────────────────
@@ -659,7 +662,8 @@ class Game {
     ui.hideAll(); ui.menu();   // (which sets the camera on the hero)
   }
   startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round
-    this.newRun(); if (daily) { this.daily = today; this.tier = 0; this.hard = false; } this.endless = !!endless;   // (the daily well the same for all: no hard mode) save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
+    this.newRun(); if (daily) { this.daily = today; this.tier = 0; this.hard = false; } this.endless = !!endless;   // (the daily well the same for all: no hard mode)
+    save.runs++; persist(); padUsed = performance.now();   // the keys show in full as a run starts
     this.state = 'play'; this.stateT = 0; this.buildLevel(true); this.saveRun();
     ui.hideAll(); ui.banner();
     if (save.runs <= 2) ui.toast(t(coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys'), 3500);
@@ -1402,7 +1406,8 @@ class Game {
     for (const r of lv.rects) if (tended.has(r.id)) lv.tended.set(r, -10);
     lv.tasks.forEach((q, i) => { q.n = cur.tasks[i] || 0; });
     const y = lv.floor - cur.y * tl, r = lv.rects.filter((q) => !q.cap && !q.plank && !q.crumble && !q.move && !q.spring && !q.crack && q.x1 - q.x0 > 2 * R && q.y0 >= y - 0.5 * tl).sort((a, b) => a.y0 - b.y0)[0];
-    if (r) { this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }]; r.safe = true; }
+    if (r) { this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }]; r.safe = true; lv.spawns = lv.spawns.filter((q) => q.ledge !== r); }   // (its enemy is laid on its middle too: not on the hero)
+    this.invuln = HEALTH.invuln;   // a moment to look round
     lv.cam = Math.max(this.hero.cy - CAM.anchor * view.h, lv.capY - CAM.top);
     if (lv.fire) lv.fire.y = this.hero.maxY + Math.max(cur.fire == null ? 0 : cur.fire * tl, 0.6 * view.h);   // as far under it as it was, a breath at least
     this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t;   // (this.kept: the purse at its start, so its coins count once)
@@ -1426,7 +1431,7 @@ class Game {
   levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
-  learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
+  learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
   fall() {
     if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
@@ -1769,7 +1774,7 @@ class Game {
   // players of the climbing games hate most), dropped once the run ends. Quitting to the menu keeps it, for Continue.
   saveRun() {
     if (this.mode === 'run') save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
-      bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice(), daily: this.daily, tier: this.tier, endless: this.endless, loop: this.loop };
+      bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice(), syns: this.syns.slice(), daily: this.daily, tier: this.tier, endless: this.endless, loop: this.loop };
     persist();
     pmsg('level_started', this.lvl());
   }
@@ -1780,6 +1785,7 @@ class Game {
     for (const k of ['world', 'stage', 'hp', 'maxHp', 'coins', 'kills', 'bestCombo', 'climbed', 'revives', 'freed', 'hard']) this[k] = r[k];
     this.daily = r.daily != null ? r.daily : null; this.tier = r.tier || 0; this.endless = !!r.endless; this.loop = r.loop || 0;
     this.mods = Object.assign(MODS(), r.mods); this.taken = r.taken.slice();
+    this.syns = r.syns ? r.syns.slice() : SYNERGIES.filter((sy) => sy.of.every((id) => this.taken.includes(id))).map((sy) => sy.id);   // its pairs in its mods already: not paid again
     this.state = 'play'; this.stateT = 0; nextSeed = r.seed;
     if (r.bonus >= 0) { this.startBonus(BONUS[r.bonus]); return; }
     this.buildLevel(true); this.saveRun();
@@ -1863,13 +1869,13 @@ class Game {
     delete save.run;   // over: nothing to continue
     if (!won) pmsg('level_failed', this.lvl());   // only now: a death with a revive after it is the same go at the level
     track('run_over', { won, level_id: this.levelId(), height: total, coins: this.coins, kills: this.kills, revives: this.revives });
-    persist();
     let daily = null;
     if (this.daily != null) {   // the day's best kept, its score to the leaderboard where there is one
       const d = save.days = save.days || {};
       d[this.daily] = Math.max(d[this.daily] || 0, total); daily = { best: d[this.daily], day: this.daily };
       if (ads.ok && bridge.leaderboards && bridge.leaderboards.type !== 'not_available') bridge.leaderboards.setScore('daily_height', this.daily * BOARD + d[this.daily]).catch(() => {});   // the day's best, whether the board keeps the best or the last
     }
+    persist();   // (after the day's best: a game shut on its result keeps it)
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
     this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp, why: this.deathWhy() };
   }
@@ -2298,7 +2304,7 @@ const ui = {
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner
     $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
     const fh = $('floorHint'), lv = g.lv, fy = lv.floor - lv.cam;   // how to jump, written on the first level's floor, in the band over the keys
-    const onFloor = g.state === 'play' && lv.kind === 'well' && g.world === 0 && g.stage === 0 && !g.bonus && fy < view.h - view.keep;
+    const onFloor = g.state === 'play' && lv.kind === 'well' && g.world === 0 && g.stage === 0 && !g.bonus && g.daily == null && fy < view.h - view.keep;
     fh.classList.toggle('on', onFloor);
     if (onFloor) {
       if (!fh.firstChild) fh.append(px(t(coarse ? 'tapJump' : 'keyJump')));
@@ -2873,16 +2879,19 @@ function runFrame(now, fixedDt) {
 // the browser, is taken over once), then the menu, then game_ready — the game playable.
 async function boot() {
   const br = await ads.init();
-  let s = null;
-  if (br) try { const [v] = await bridge.storage.get([SAVE_KEY]); s = v ? (typeof v === 'string' ? JSON.parse(v) : v) : null; } catch (e) { s = null; }
-  const old = !s;
-  if (old) try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { s = null; }
+  const parse = (v) => (v ? (typeof v === 'string' ? JSON.parse(v) : v) : null);
+  let b = null, got = false, l = null;   // the Bridge's copy (got: its storage answered), the browser's
+  if (br) try { const r = await Promise.race([bridge.storage.get([SAVE_KEY]), new Promise((ok) => setTimeout(() => ok(null), 2500))]); if (r) { b = parse(r[0]); got = true; } } catch (e) { b = null; }   // (no answer in 2.5 s: as a failed one)
+  try { l = parse(localStorage.getItem(LOCAL_KEY)) || parse(localStorage.getItem(SAVE_KEY)); } catch (e) { l = null; }   // (SAVE_KEY: a save from before the Bridge, or the mock's)
+  const s = !b ? l : !l ? b : (l.at || 0) > (b.at || 0) ? l : b;   // the newer (unstamped saves of before: the Bridge's)
+  cloud = br && got;
   loadSave(s);
   if (br) bridge.platform.getServerTime().then((ms) => { today = Math.floor(ms / 86400000); }).catch(() => {});
   ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen
   start();
-  if (br) { if (old && s) persist(); bridge.platform.sendMessage('game_ready'); }
+  if (cloud && s && s !== b) persist();   // the browser's copy the newer one: the Bridge's storage takes it
+  if (br) bridge.platform.sendMessage('game_ready');
 }
 // The words in another language: the page's (the type follows it, see .tx in index.html), and the HUD written again.
 function setLang(l) {

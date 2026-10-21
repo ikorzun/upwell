@@ -1764,7 +1764,8 @@ class Game {
   doubleBonus() {   // only once the ad was watched to its end
     if (this.adBusy || this.state !== 'reward') return;
     this.adBusy = true;
-    ads.reward((ok) => { this.adBusy = false; if (!ok || this.state !== 'reward') return; this.coins += this.bonusGot; sound.play('buy'); haptics.buzz(16); ui.bonusEnd(this.bonusWhy, this.bonusGot, true); });
+    const got = this.bonusGot;
+    ads.reward((ok) => { this.adBusy = false; if (!ok) return; this.coins += got; sound.play('buy'); haptics.buzz(16); if (this.state === 'reward') ui.bonusEnd(this.bonusWhy, got, true); else if (this.mode === 'camp') this.campKeep(); });   // watched to its end: paid, even after Next went on
   }
   nextWorld() {
     if (this.state !== 'reward') return;
@@ -2563,14 +2564,17 @@ const sound = {
     this.out = c.createGain(); this.out.gain.value = save.sound === false ? 0 : 1; this.out.connect(c.destination);
     this.fx = c.createGain(); this.fx.gain.value = FX_VOL; this.fx.connect(this.out);
     this.mus = c.createGain(); this.mus.gain.value = MUSIC_VOL; this.mus.connect(this.out);
+    if (ads.quiet || document.hidden) c.suspend();   // the platform's sound off from the start: asleep till it says on (ads.hush)
     for (const n of SOUNDS) this.load(n, 'assets/sfx/' + n + '.mp3');
     for (const n of ['calm', WORLD_MUSIC[game.wd.id] || 'climb']) this.fetchMusic(n);   // the menu's, and its world's climb
   },
-  load(name, path) { return fetch(path).then((r) => r.arrayBuffer()).then((a) => this.ctx.decodeAudioData(a)).then((b) => { this.bufs[name] = b; }).catch(() => {}); },
+  load(name, path) { return fetch(path).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then((a) => this.ctx.decodeAudioData(a)).then((b) => { this.bufs[name] = b; return true; }).catch(() => false); },
   fetchMusic(name) {
-    if (this.asked[name]) return;
+    const a = this.asked[name];
+    if (a === true || (a && performance.now() < a)) return;   // in hand or on its way (a failed one: again in a while)
     this.asked[name] = true;
-    this.load('m:' + name, 'assets/music/' + name + '.mp3').then(() => {   // over four kept: the longest unplayed one goes (fetched again if wanted)
+    this.load('m:' + name, 'assets/music/' + name + '.mp3').then((ok) => {   // over four kept: the longest unplayed one goes (fetched again if wanted)
+      if (!ok) { this.asked[name] = performance.now() + 15000; return; }   // (cut off, by the network or the page going to the back: tried again)
       const kept = Object.keys(this.bufs).filter((k) => k.startsWith('m:')).map((k) => k.slice(2));
       if (kept.length <= 4) return;
       const old = kept.filter((n) => n !== this.track && n !== name).sort((a, b) => this.used.indexOf(a) - this.used.indexOf(b))[0];
@@ -2664,8 +2668,9 @@ const ads = {
     const EV = bridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
     let over = false, timer = 0;
     const end = () => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(); };
-    const on = (s) => { if (s === 'opened') { clearTimeout(timer); this.lastAd = performance.now(); } else if (s === 'closed' || s === 'failed') end(); };
-    bridge.advertisement.on(EV, on); timer = setTimeout(end, 3000);   // none opened in time: on without it
+    const on = (s) => { if (s === 'loading') { clearTimeout(timer); timer = setTimeout(end, 10000); } else if (s === 'opened') { clearTimeout(timer); this.lastAd = performance.now(); } else if (s === 'closed' || s === 'failed') end(); };
+    bridge.advertisement.on(EV, on); timer = setTimeout(end, 3000);   // none heard of in time: on without it (one loading: up to 10 s)
+    this.lastAd = performance.now();   // (the gap from asking: one opening late is no reason for the next one sooner)
     bridge.advertisement.showInterstitial();
   },
   hush() { this.quiet = this.off || this.held; sound.sleep(this.quiet || document.hidden); },
@@ -2673,12 +2678,15 @@ const ads = {
   get canReward() { return this.ok && (this.mock || bridge.advertisement.isRewardedSupported); },
   reward(done) {   // done(true) once it was watched to its end; done(false) if it was closed early or failed
     if (this.mock) { done(true); return; }
-    let got = false;
+    const EV = bridge.EVENT_NAME.REWARDED_STATE_CHANGED;
+    let got = false, over = false, timer = 0;
+    const end = (ok) => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(ok); };
     const on = (s) => {
       if (s === 'rewarded') got = true;
-      if (s === 'closed' || s === 'failed') { bridge.advertisement.off(bridge.EVENT_NAME.REWARDED_STATE_CHANGED, on); done(got); }
+      if (s === 'loading') { clearTimeout(timer); timer = setTimeout(() => end(false), 15000); } else if (s === 'opened') clearTimeout(timer);
+      if (s === 'closed' || s === 'failed') end(got);
     };
-    bridge.advertisement.on(bridge.EVENT_NAME.REWARDED_STATE_CHANGED, on);
+    bridge.advertisement.on(EV, on); timer = setTimeout(() => end(false), 5000);   // nothing heard of: none (a listener left on would pay the next one twice)
     bridge.advertisement.showRewarded();
   },
 };

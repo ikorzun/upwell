@@ -1897,7 +1897,8 @@ class Game {
     if (this.daily != null) {   // the day's best kept, its score to the leaderboard where there is one
       const d = save.days = save.days || {};
       d[this.daily] = Math.max(d[this.daily] || 0, total); daily = { best: d[this.daily], day: this.daily };
-      if (ads.ok && bridge.leaderboards && bridge.leaderboards.type !== 'not_available') bridge.leaderboards.setScore('daily_height', this.daily * BOARD + d[this.daily]).catch(() => {});   // the day's best, whether the board keeps the best or the last
+      const lt = ads.ok && bridge.leaderboards ? bridge.leaderboards.type : 'not_available';   // (a board the platform draws itself, native: the metres alone, not the day's number with them)
+      if (lt !== 'not_available') bridge.leaderboards.setScore('daily_height', (lt === 'in_game' ? this.daily * BOARD : 0) + d[this.daily]).catch(() => {});   // the day's best, whether the board keeps the best or the last
     }
     persist();   // (after the day's best: a game shut on its result keeps it)
     const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
@@ -1906,8 +1907,8 @@ class Game {
   where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + this.num; }
   get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.mode === 'camp' ? wNo(this.world) : this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
   togglePause(on) {
-    if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); }
-    else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); }
+    if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); pmsg('level_paused', this.lvl()); }   // (the platform told: no play while paused, nor in the menu after)
+    else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); pmsg('level_resumed', this.lvl()); }
   }
 
   // ── Once per drawn frame ──

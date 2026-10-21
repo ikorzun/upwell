@@ -3705,17 +3705,61 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.slick) return false;
-    {   // raw danchi concrete: grey, its panels' seams, stains, the small things on it
-      const k = V.slab, c = th.block;
-      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, k === 0 ? 0 : 1); box(r.x0, Y(Math.max(0.3, ht - 0.2)), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside
-      for (let u = 1.4; u < wt - 0.3; u += 1.5) bw(u, 0.1, u + px, ht, K);   // its seams
-      for (let u = 0.4; u < wt - 0.2; u += 1.5) for (const v of [0.25, Math.min(ht - 0.25, 0.7)]) bw(u, v, u + px, v + px, K);   // its tie holes
-      if (k === 1 || k === 4) for (let u = 0.9; u < wt - 0.2; u += 1.5) { bw(u, 0.12, u + 2 * px, ht * 0.8, PAL.orange, 0, MUTE); }   // B, E: rust run down it
-      if (k === 1 && on) { bw(0.1, 0.15, 0.4, 0.75, G, 4); bw(0.18, 0.3, 0.32, 0.4, K); }   // B: a meter box
-      if (k === 2) { for (let i = 0; i < 3; i++) { const x = snap(r.x0 + (0.2 + 0.3 * i) * w); line(x, r.y1, x + snap(0.05 * t), snap(r.y1 + (0.25 + 0.1 * i) * t), G, 1, 1); } const sx = E(0.4); box(sx, r.y1, sx + snap(0.12 * t), snap(r.y1 + 0.25 * t), G, 1, 0, 10, 0); for (let i = 0; i < 3; i++) { const q = (T * 0.6 + i / 3) % 1; box(sx + P, snap(r.y1 + (0.3 + q * 1.2) * t), sx + 2 * P, snap(r.y1 + (0.3 + q * 1.2) * t) + 2 * P, G, 1 - q, 0, 10, 0); } }   // C: weeds under it, a drain spout dripping
-      if (k === 3) { if (wt > 2.2) { const u = 0.5, ds = [[0.05, 0.05, 0.25, 0.1], [0.2, 0.05, 0.25, 0.45], [0.05, 0.4, 0.25, 0.45], [0.05, 0.4, 0.1, 0.8], [0.05, 0.75, 0.25, 0.8]]; for (const [a0, b0, a1, b1] of ds) bw(u + a0, b0 + 0.05, u + a1, b1 + 0.05, G, 0, 1.4); } bw(wt - 1.4, 0.2, wt - 0.6, ht - 0.2, K); for (let v = 0.3; v < ht - 0.25; v += 0.12) bw(wt - 1.35, v, wt - 0.65, v + px, G); }   // D: a number painted on it, a vent
-      if (k === 4) { line(E(1.6), r.y0 + 2 * P, E(1.2), Y(ht * 0.5), K, 1, 1); line(E(1.2), Y(ht * 0.5), E(1.35), r.y1, K, 1, 1); line(E(0.3), r.y0, E(0.25), Y(-0.25), PAL.green, 1, 2); }   // E: a crack, a weed on it
-      if (k === 5) { for (let i = 0; i < 3; i++) line(E(0.15 + i * 0.25), r.y1, E(0.4 + i * 0.25), r.y0 + 2 * P, K, 1, 2); if (on) { box(W(0.1), r.y1, W(0.3), snap(r.y1 + 0.35 * t), G, 1, 0, 10, 0); } }   // F: hazard stripes at its end, a pipe under it
+    {   // danchi concrete (DANCHI_V.slab, research/variants/danchi-slab-2-px.png): A exposed (its formwork's joints, tie holes), B an old balcony's front (its cap,
+      // rain streaks, a drip groove, a drain spout dripping), C painted in two tones (paint flaking, a rust streak under a bolt), D precast panels (sealed joints, a
+      // number painted on one, a meter box), E old and repaired (a crack, an old one sealed, a patch, a spalled corner's rebar, a weed), F service concrete (a pipe
+      // on brackets, a vent, hazard stripes, a lamp under its end). A tall block is an end wall, the block's number painted big on it. What is where on it by a
+      // hash of the rect (hsh), so no two alike.
+      const k = V.slab, c = th.block, tall = ht > 1.4, sh = Math.min(0.18, ht * 0.18), SH = 1.6, DK = 1.4, one = (n) => window.__dcAll || hsh(n) < 0.34;   // SH, DK: concrete in shade, darker still; one(n): on one slab in three (owner: small hanging things not on every ledge; the gallery shows all)
+      const bl = (u0, v0, u1, v1, cc, wd = 1, a = 1) => line(W(u0), Y(v0), W(u1), Y(v1), cc, a, wd);
+      const glyph = (x, y, n, sz) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
+        [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * sz, y + b0 * sz, x + a1 * sz, y + b1 * sz, K, 1, 0, 10, 0); }); };   // a digit 5 by 9 of sz, black paint
+      const num = (x, y, n, sz) => { if (n > 9) { glyph(x, y, Math.floor(n / 10) % 10, sz); glyph(x + 7 * sz, y, n % 10, sz); } else glyph(x, y, n, sz); };   // (x its left edge, on either wall)
+      const bold = (x, y, n, sz) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
+        [[0, 0, 6, 2], [0, 0, 2, 6], [4, 0, 6, 6], [0, 4, 6, 6], [0, 4, 2, 10], [4, 4, 6, 10], [0, 8, 6, 10]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * sz, y + b0 * sz, x + a1 * sz, y + b1 * sz, K, 1, 0, 10, 0); }); };   // a bold digit 6 by 10 of sz, its strokes 2 thick
+      const big = tall && wt >= 2.4 && ht >= 2.4 ? (() => { const n = 1 + Math.floor(hsh(26) * 24), sz = Math.max(P, snap(Math.min(wt * 0.8 / (n > 9 ? 14 : 6), ht * 0.45 / 10) * t)), y = Y(Math.min(0.6, ht * 0.15));
+        return { n, sz, y, v0: (y - r.y0) / t, v1: (y + 10 * sz - r.y0) / t, x: snap((r.x0 + r.x1) / 2 - ((n > 9 ? 14 : 6) * sz) / 2) }; })() : null;   // an end wall's number, painted big: where
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, k === 4 ? 1 : 0); box(r.x0, Y(ht - sh), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside in shade
+      if (on) bw(0.1, 0.12, 0.1 + px, ht - sh, K);   // the seam where it goes into the wall
+      if (k === 0) {   // A: exposed concrete
+        for (let u = 1.8; u < wt - 0.3; u += 1.8) bw(u, 0.12, u + px, ht - sh, G, 3);   // its formwork's joints, dashed
+        if (tall) for (let v = 0.9; v < ht - 0.3; v += 0.9) bw(0.12, v, wt, v + px, G, 3);
+        for (let p0 = 0; p0 < wt - 0.2; p0 += 1.8) for (const u of [p0 + 0.3, p0 + 1.5]) if (u < wt - 0.15) for (let v = Math.min(0.3, ht / 3); v < ht - sh - 0.1; v += tall ? 0.45 : 0.4) bw(u, v, u + 2 * px, v + 2 * px, G, 0, DK);   // its tie holes, in pairs by its joints
+      } else if (k === 1) {   // B: an old balcony's front
+        bw(0, 0.04, wt, 0.2, G, 2); bw(0, 0.2, wt, 0.2 + px, K);   // its cap, the line under it
+        for (let u = 0.25, i = 0; u < wt - 0.15; u += 0.35 + hsh(i) * 0.5, i++) { const l = (0.3 + hsh(i + 7) * 0.6) * (ht - 0.4), wd = hsh(i + 3) < 0.6 ? 1 : 2; bw(u, 0.22, u + wd * px, 0.22 + l * 0.45, G, 0, SH); bw(u, 0.22 + l * 0.45, u + wd * px, 0.22 + l, G, 2); }   // rain streaks down from it, thin, dark at the top, fading
+        bw(0, ht - sh - 0.1, wt, ht - sh - 0.1 + px, K);   // its drip groove
+        if (wt >= 2 && one(31)) for (let u = wt - 0.6; u > 0.8; u -= 4) { const x = W(u);   // a drain spout, its drops
+          box(x, r.y1, x + 2 * P, snap(r.y1 + 0.22 * t), G, 1, 0, 10, 0); box(x - P, r.y1, x + 3 * P, r.y1 + P, G, 1, 0, 10, 0);
+          for (let i = 0; i < 2; i++) { const q = (T * 0.7 + i / 2 + hsh(30 + Math.round(u))) % 1; box(x + P / 2, snap(r.y1 + (0.3 + q * 1.4) * t), x + 1.5 * P, snap(r.y1 + (0.3 + q * 1.4) * t) + 2 * P, G, 1 - q, 0, 10, 0); } }
+      } else if (k === 2) {   // C: painted in two tones
+        const bv = tall ? ht - 0.7 : 0.55;
+        bw(0, bv, wt, ht - sh, G, 4); bw(0, bv, wt, bv + px, K);   // its lower band, dithered darker, the line over it
+        for (let i = 0; i < 4; i++) { const u = i < 2 ? 0.25 + hsh(i) * 0.6 : wt - 0.35 - hsh(i) * 0.6, v = 0.22 + hsh(i + 4) * Math.max(0.05, bv - 0.35), z = 0.08 + hsh(i + 8) * 0.1; bw(u, v, u + z, v + z * 0.7, G, 0, SH); }   // its paint flaking off
+        const bu = 0.8 + hsh(12) * Math.max(0, wt - 1.6); bw(bu, bv + 0.08, bu + 2 * px, bv + 0.08 + 2 * px, K); bw(bu, bv + 0.08 + 2 * px, bu + 2 * px, Math.min(ht - sh, bv + 0.45), PAL.orange, 0, MUTE);   // a bolt, rust run down from it
+      } else if (k === 3) {   // D: precast panels
+        const n = Math.max(1, Math.round(wt / (tall ? 1.35 : 2))), q = wt / n, jo = (u, v0, v1) => { if (v1 > v0) { bw(u, v0, u + px, v1, K); bw(u + px, v0, u + 2 * px, v1, G, 0, SH); } };
+        for (let i = 1; i < n; i += 2) bw(i * q, 0.12, (i + 1) * q, ht - sh, c, 1);   // every other panel a touch rougher
+        for (let i = 1; i < n; i++) { if (big) { jo(i * q, 0.1, big.v0 - 0.15); jo(i * q, big.v1 + 0.15, ht - sh); } else jo(i * q, 0.1, ht - sh); }   // its joints, sealed (round the number)
+        if (tall) for (let v = 1.5; v < ht - 0.5; v += 1.5) if (!big || v < big.v0 - 0.15 || v > big.v1 + 0.15) { bw(0.1, v, wt, v + px, K); bw(0.1, v + px, wt, v + 2 * px, G, 0, SH); }
+        const meter = on && one(17);
+        if (!tall && wt >= 2.6 && (window.__dcAll || hsh(14) < 0.4)) { const i = Math.max(meter ? 1 : 0, Math.floor(hsh(15) * n)), m = Math.min(i, n - 1) * q + q / 2 + (meter && n === 1 ? 0.5 : 0); num(Math.min(W(m - 6 * px), W(m + 6 * px)), Y(0.2), 10 + Math.floor(hsh(16) * 30), P); }   // a number painted on a panel (not the meter box's)
+        if (meter) { bw(0.23, 0.18, 0.67, 0.72, K); bw(0.25, 0.2, 0.65, 0.7, G); bw(0.32, 0.3, 0.58, 0.48, K); bw(0.38, 0.36, 0.48, 0.42, G, 0, SH); }   // a meter box, its window, its dial
+      } else if (k === 4) {   // E: old and repaired
+        const zig = (u, cc, wd, a) => { let u0 = u, v0 = 0.1; for (let i = 1; i <= 3; i++) { const u1 = u + (hsh(i + 20) - 0.5) * 0.35, v1 = (i / 3) * (ht - sh); bl(u0, v0, u1, v1, cc, i === 1 ? wd + 1 : wd, a); u0 = u1; v0 = v1; } };
+        const cu = 0.6 + hsh(18) * Math.max(0, wt - 1.2); zig(cu, K, 1, 1);   // a crack
+        const su = cu > wt / 2 ? cu - 1.1 : cu + 1.1; if (su > 0.3 && su < wt - 0.3) zig(su, G, 2, SH);   // an old crack, sealed
+        if (wt > 2.2) { const pu = 0.3 + hsh(19) * (wt - 1.4); bw(pu, 0.22, pu + 0.9, Math.min(ht - sh, 0.7), G, 4); }   // a patch of newer concrete, dithered
+        bw(wt - 0.3, ht - 0.32, wt, ht, K); for (const v of [ht - 0.22, ht - 0.12]) bw(wt - 0.3, v, wt - 0.05, v + px, PAL.orange, 0, MUTE);   // its spalled corner, rebar in it
+        if (one(22)) { bl(wt - 0.2, 0, wt - 0.28, -0.14, PAL.green, 1); bl(wt - 0.2, 0, wt - 0.12, -0.12, PAL.green, 1); }   // a weed at its end
+      } else {   // F: service concrete
+        const pv = tall ? 0.5 : 0.42; bw(0, pv, wt - 0.75, pv + 2 * px, G, 0, SH); for (let u = 0.5; u < wt - 0.8; u += 1.2) bw(u, pv - px, u + px, pv + 3 * px, K);   // a pipe along it, its brackets
+        if (wt >= 3) { const vu = 1.0 + hsh(24) * (wt - 2.6); bw(vu, 0.16, vu + 0.55, 0.34, K); for (const v of [0.2, 0.27]) bw(vu + 0.04, v, vu + 0.51, v + px, G, 0, SH); }   // a vent
+        { const u0 = wt - 0.6, v0 = tall ? ht - sh - 0.9 : 0.12, v1 = ht - sh; bw(u0, v0, u0 + px, v1, K); for (let o = -(v1 - v0); o < wt - u0; o += 0.3) { const a0 = Math.max(0, -o), a1 = Math.min(v1 - v0, wt - u0 - o); if (a1 > a0 + 0.02) bl(u0 + o + a0, v1 - a0, u0 + o + a1, v1 - a1, K, 2); } }   // a band of hazard stripes at its end, at 45 degrees
+        if (one(25)) { const x = E(0.35); box(x - 2 * P, r.y1, x + 2 * P, r.y1 + P, G, 1, 0, 10, 0); box(x - 1.5 * P, r.y1 + P, x + 1.5 * P, snap(r.y1 + 0.2 * t), G, 1, 0, 10, 0);
+          box(x - P, r.y1 + 2 * P, x + P, snap(r.y1 + 0.17 * t), PAL.orange, LIT, 0, 10, 0); vlamps.push([x, snap(r.y1 + 0.12 * t), 0.3, 1.0]); }   // a lamp under its end, lit
+      }
+      if (big) { if (big.n > 9) { bold(big.x, big.y, Math.floor(big.n / 10), big.sz); bold(big.x + 8 * big.sz, big.y, big.n % 10, big.sz); } else bold(big.x, big.y, big.n, big.sz); }   // an end wall: its number painted big
       lip(); return true;
     }
   };

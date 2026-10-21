@@ -10,7 +10,8 @@
     lv.fire && (lv.fire.y = lv.floor + 1e5); g.invuln = 0;
     lv.rects = lv.rects.filter((r) => r.cap);
     for (const a of ['coins', 'folk', 'spawns', 'spikes', 'icicles', 'bubbles', 'enemies', 'pickups', 'coats', 'runes', 'fizz', 'rings', 'spots', 'arenas']) if (Array.isArray(lv[a])) lv[a].length = 0;
-    const y0 = sn(lv.floor - 30 * t), pl = LEVEL.plank * R;
+    const y0 = sn(lv.floor - 30 * t); window.__dcAll = el === 'slab';   // (the concrete's one-in-three things all shown)
+    const pl = LEVEL.plank * R;
     if (el === 'far' || el === 'wall') {   // (the walls on the whole screen)
       const r = lv.box(lv.l, y0, lv.l + 3 * t, y0 + t, {}); r.kit = null; lv.rects.push(r); g.placeHero(lv.l + 1.4 * t, y0 - R);
       const cam = g.hero.cy - CAM.anchor * view.h; lv.cam = cam; __up.tick(2); lv.cam = cam; __up.tick(1); lv.cam = cam; await wait(200);
@@ -21,6 +22,7 @@
     else if (el === 'pole') r = lv.box(lv.l + 1.5 * t, y0, lv.l + 5.5 * t, y0 + pl, { plank: true });
     else if (el === 'boxes') { r = lv.box(lv.l, y0, lv.l + 3.4 * t, y0 + t, { crumble: true }); const q = lv.box(lv.l + 3.4 * t, y0, lv.l + 6.2 * t, y0 + t, {}); q.kit = null; lv.rects.push(q); hx = lv.l + 5.0 * t; }
     else if (el === 'stairs') { for (let i = 0; i < 4; i++) lv.rects.push(lv.box(lv.l + (1 + i) * t, y0 - i * t, lv.l + (i === 3 ? 6.6 : 2 + i) * t, y0 - i * t + t, { stair: true })); r = lv.box(lv.l, y0 + t, lv.l + 1 * t, y0 + 2 * t, {}); hx = lv.l + 5.6 * t; }
+    else if (el === 'slab') { r = lv.box(lv.l, y0, lv.l + 3.6 * t, y0 + t, {}); const q = lv.box(lv.l + 3.9 * t, y0 - 1.0 * t, lv.l + 6.6 * t, y0 + 2.4 * t, {}); q.kit = null; lv.rects.push(q); hx = lv.l + 1.8 * t; }   // a slab off the wall, an end wall by it
     else r = lv.box(lv.l, y0, lv.l + 5.2 * t, y0 + t, {});
     r.kit = null; lv.rects.push(r);
     if (el === 'spring') { const cx = lv.l + 4.0 * t; lv.rects.push(lv.box(cx - 0.7 * R, y0 - 0.36 * R, cx + 0.7 * R, y0, { spring: true })); hx = lv.l + 1.6 * t; }

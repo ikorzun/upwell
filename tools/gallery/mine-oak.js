@@ -1,5 +1,7 @@
 // Koschei's oak (tools/gallery): his arena (c8-10) in its dark, each variant of the oak under the moon behind it (SKAZKA_V.oak, window.__skV), the bot
 // playing up to a moment, then a look. The shots are whole screens (compose them as a grid).
+// (The owner picked Koschei's oak on 2026-10-21 and SKAZKA_V went with the variants, so this no longer runs as it is: it is a template for the next world's
+// gallery, as the Dark Forest's and the Sea's are.)
 (() => {
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const load = () => new Promise((ok) => { if (window.__bot) return ok(); const s = document.createElement('script'); s.src = 'tools/bot.js?' + Date.now(); s.onload = ok; document.body.append(s); });

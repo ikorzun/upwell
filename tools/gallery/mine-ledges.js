@@ -1,5 +1,7 @@
 // The Mine's gallery (tools/gallery, see compose.py): each variant of its ledges, lamps and ore drawn by the game in one scene, a step each, in its dark (the
 // hero's light and the lamps show them). window.__galEls picks the elements: slab, plank, mover, crumble, lamp (unlit at the wall, lit on a ledge), ore.
+// (The owner picked the Mine's on 2026-10-21 and MINE_V went with the variants, so this no longer runs as it is: it is a template for the next world's
+// gallery, as the Dark Forest's and the Sea's are.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), els = window.__galEls || ['slab', 'plank', 'mover', 'crumble', 'lamp', 'ore'];
   const scene = async (el, k) => {

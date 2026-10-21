@@ -1,5 +1,7 @@
 // The Mine's gallery, batch two (tools/gallery, see compose.py): each variant of its things on a ledge at the wall (cart, tools, winch), its bats under a
 // ledge, its far layer, its doors (the shop, the stash), in its dark, a step each. window.__galEls picks the elements.
+// (The owner picked the Mine's on 2026-10-21 and MINE_V went with the variants, so this no longer runs as it is: it is a template for the next world's
+// gallery, as the Dark Forest's and the Sea's are.)
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), els = window.__galEls || ['cart', 'tools', 'winch', 'bats', 'far', 'shop', 'stash'];
   const scene = async (el, k) => {

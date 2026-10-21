@@ -489,7 +489,7 @@ const MINI = { size: 1.6, hp: 3 };
 // level by level, the chunks it must have (laid first, so the first minutes show the surfaces),
 // the enemies allowed (all if not given) and what is new, for the level's banner.
 const WORLDS = [
-  { id: 'cave', name: { en: 'Cave', es: 'Cueva', pt: 'Caverna', ja: 'どうくつ' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4, bouncy: 0.2,
+  { id: 'cave', name: { en: 'Mine', es: 'Mina', pt: 'Mina', ja: 'こうざん' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4, bouncy: 0.2,   // the Mine since 2026-10-21 (owner: «мир темной пещеры, рудников японии»; the Cave before)
     chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2, fork: 1, vault: 2 },
     foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { en: 'moss and springs', es: 'musgo y resortes', pt: 'musgo e molas', ja: 'コケと バネ' } },
@@ -752,19 +752,22 @@ const CAMPAIGN = [
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
 ] },
-// World 2, the Cave (at first world 1): its moss, rubber walls; the Minecart. The basics are Tokyo's to teach now: its levels do not teach them again.
-{ world: WORLDS[0], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
-  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: [], foes: 0, candy: [], safe: true, seed: 3111 },
-  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
-  { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
+// World 2, the Mine (the Cave until 2026-10-21; at first world 1; owner: «мир темной пещеры, рудников японии», and its dark the real one, «Настоящая тьма»):
+// every level but its bonus and its boss dark, lit by the hero, its lanterns and what glows; its moss, rubber walls; the Minecart. The basics are the
+// Village's to teach: its levels do not teach them again. Its runes the old Mine's: crossed picks, a block of ore, a turn (those tired of climbing
+// began to dig sideways). Its kit for now the cave shrine's, until the owner's picks of the mine's.
+{ world: WORLDS[0], runes: 'LnY', lore: { en: 'Those tired of climbing\nbegan to dig sideways.', es: 'Los cansados de subir\nempezaron a cavar de lado.', pt: 'Os cansados de subir\ncomeçaram a cavar de lado.', ja: 'のぼるのに つかれた ものは\nよこへ ほりはじめた。' }, levels: [
+  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], dark: true, enemies: [], foes: 0, candy: [], safe: true, seed: 3111 },
+  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], dark: true, enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
+  { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
     news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' } },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
-  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
+  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
-  { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
+  { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
-  { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
-  { role: 'rest', len: 20, fire: 0.3, maxD: 1, buddha: true, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
+  { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, buddha: true, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
   { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
@@ -833,10 +836,11 @@ const CAMPAIGN = [
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
   { role: 'boss', boss: 'koschei', dark: true },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
 ] },
-// World 4, the Mine (at first world 3): crumbling blocks and bridges, the Fizz, spitters, the pit's waves and a fat
-// spitter, a peak, the combo ladder, moving planks, a peak, Moti's shop; the Cork's dive. Its runes: crossed picks, a block of
-// ore, a turn (those tired of climbing began to dig sideways). The worm stays in the random run (user).
-{ world: WORLDS[2], runes: 'LnY', lore: { en: 'Those tired of climbing\nbegan to dig sideways.', es: 'Los cansados de subir\nempezaron a cavar de lado.', pt: 'Os cansados de subir\ncomeçaram a cavar de lado.', ja: 'のぼるのに つかれた ものは\nよこへ ほりはじめた。' }, levels: [
+// World 1, the Village (the Mine's world until 4084599; at first world 3): how to climb, crumbling blocks, spitters, the pit's waves and a fat
+// spitter, a peak, the bonus, moving planks, a peak, Moti's shop; the Cork's dive. Its runes the story's first (since 2026-10-21, when the old
+// Mine's went to the Mine): the Heat, a drop like the hero, the Light (we all came from the Heat; we all climb to the Light). The worm stays in
+// the random run (user).
+{ world: WORLDS[2], runes: 'VhS', lore: { en: 'We all came from the Heat.\nWe all climb to the Light.', es: 'Todos venimos del Calor.\nTodos subimos hacia la Luz.', pt: 'Todos viemos do Calor.\nTodos subimos para a Luz.', ja: 'みんな ねつから うまれた。\nみんな ひかりへ のぼる。' }, levels: [
   { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutShop', 'tutEnemy', 'tutHelmet', 'tutMix', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
     intro: [], enemies: ['crawler'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,   // the tutorial (owner): CHUNKS.tut*, in their order
     news: { en: 'how to climb', es: 'cómo trepar', pt: 'como escalar', ja: 'のぼりかた' } },
@@ -3079,6 +3083,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
+  const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon
   if (th.shrine && lv.kind === 'well') {   // the Cave's kit (THEMES.cave; the owner's picks, research/variants/cave-*-1-px.png, 2026-10-19: a cosy cave under a
     // mountain shrine): strings of festival lanterns across the shaft (C), stone lanterns grown over with moss on some ledges' wall ends (D), a pair of jizo on
     // others (C); the owner's Buddha seated on the floor of the level that has it (a recipe's buddha). Nothing covers a door.
@@ -3095,7 +3100,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let i = 0; i < 6; i++) {   // a round lantern (C): grey caps, a black mark on it (C's were red: red is danger), a warm glow
         const u = (i + 0.5) / 6, lx = snap(x0 + (x1 - x0) * u), rl = 0.26 * t, ly = ry(u) + snap(0.3 * t + rl);
         box(lx, ry(u), lx + P, ly - rl, PAL.gray, 1, 0, 10, 0);
-        F(lx, ly, 2.2 * rl, 0, 0, 2.2 * rl, PAL.orange, 0.4, 1);
+        F(lx, ly, 2.2 * rl, 0, 0, 2.2 * rl, PAL.orange, 0.4, 1); vlamps.push([lx, ly, 0.35, 1.1]);   // (a light in the Mine's dark)
         disc(lx, ly, rl, PAL.orange, 1);
         for (const e of [-1, 1]) box(snap(lx - 0.6 * rl), snap(ly + e * rl) - P, snap(lx + 0.6 * rl), snap(ly + e * rl) + P, PAL.gray, 1, 0, 10, 0);
         for (const [dx, dy] of [[0, -0.42], [-0.38, 0.22], [0.38, 0.22]]) box(snap(lx + dx * rl) - P, snap(ly + dy * rl) - P, snap(lx + dx * rl) + P, snap(ly + dy * rl) + P, PAL.black, 1, 0, 10, 0);
@@ -3108,7 +3113,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(X(-0.42), Y(0.14), X(0.42), b, PAL.gray, 1, 0, 10, 0); box(X(-0.3), Y(0.24), X(0.3), Y(0.14), PAL.gray, 1, 0, 10, 0);
       box(X(-0.13), Y(0.85), X(0.13), Y(0.24), PAL.gray, 1, 0, 10, 0);
       box(X(-0.36), Y(0.92), X(0.36), Y(0.85), PAL.gray, 1, 0, 10, 0);
-      F(cx, Y(1.15), 0.9 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
+      F(cx, Y(1.15), 0.9 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1); vlamps.push([cx, Y(1.15), 0.7, 2.2]);   // (a light in the Mine's dark)
       box(X(-0.32), Y(1.37), X(0.32), Y(0.92), PAL.gray, 1, 0, 10, 0); box(X(-0.2), Y(1.29), X(0.2), Y(0.99), PAL.orange, 1, 0, 10, 0);
       box(X(-0.52), Y(1.55), X(0.52), Y(1.37), PAL.gray, 1, 0, 10, 0);
       for (const e of [-1, 1]) box(Math.min(X(e * 0.52), X(e * 0.62)), Y(1.5), Math.max(X(e * 0.52), X(e * 0.62)), Y(1.42), PAL.gray, 1, 0, 10, 0);
@@ -3239,7 +3244,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
     }
   }
-  const vlamps = [];   // the Village's stone lanterns lit on this screen (the dark's lights)
   if (th.village) for (const r of lv.rects) if (r.plank && r.move && seen(r.y0 - 4 * kitT, r.y0)) {   // a yaen's cable across the shaft at its pulley, behind (DEPTH)
     const cy = snap(r.y0 - snap(YAEN.frame * kitT) - YAEN.wheel * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.gray, DIM, 0, 10, 0);
   }
@@ -3823,7 +3827,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const [u, len] of [[0.04, 0.45], [0.13, 0.28], [0.22, 0.55]]) { const sx = snap(wx + d * u * t); box(sx, r.y1, sx + P, snap(r.y1 + len * t), PAL.green, 1, 0, 10, 0); }
         if (r.x1 - r.x0 >= 3 * t) {   // a paper lantern off its free end: grey caps, an orange body ribbed in black, a glow
           const lx = snap(wl ? r.x1 - 0.22 * t : r.x0 + 0.22 * t), rl = 0.18 * t, ly = snap(r.y1 + 0.35 * t + rl);
-          box(lx, r.y1, lx + P, ly - rl, PAL.gray, 1, 0, 10, 0); F(lx, ly, 2.2 * rl, 0, 0, 2.2 * rl, PAL.orange, 0.4, 1);
+          box(lx, r.y1, lx + P, ly - rl, PAL.gray, 1, 0, 10, 0); F(lx, ly, 2.2 * rl, 0, 0, 2.2 * rl, PAL.orange, 0.4, 1); vlamps.push([lx, ly, 0.3, 1.0]);   // (a light in the Mine's dark)
           box(snap(lx - rl), snap(ly - rl), snap(lx + rl), snap(ly + rl), PAL.orange, 1, 0, 10, 0);
           for (const e of [-1, 1]) box(snap(lx - 0.6 * rl), snap(ly + e * rl) - P, snap(lx + 0.6 * rl), snap(ly + e * rl) + P, PAL.gray, 1, 0, 10, 0);
           for (const f of [-0.35, 0.35]) box(snap(lx - rl), snap(ly + f * rl), snap(lx + rl), snap(ly + f * rl) + P, PAL.black, 1, 0, 10, 0);
@@ -4303,7 +4307,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (lv.dark) {   // the lights, nearest the hero first, at most 32
     const L = this.darkBuf, Rp = R / P;
     let n = 0;
-    const light = (x, y, r0, r1) => { if (n < 32 && y > top - r1 * P && y < bot + r1 * P) { L.set([x / P, y / P, r0 * Rp, r1 * Rp], n * 4); n++; } };
+    const light = (x, y, r0, r1) => { if (n < 32 && y > top - r1 * R && y < bot + r1 * R) { L.set([x / P, y / P, r0 * Rp, r1 * Rp], n * 4); n++; } };   // (r0, r1 in R: one off the screen whose glow reaches in counts)
     const breath = 1 + 0.03 * Math.sin(T * 2.2);
     light(hero.cx, hero.cy, 4.5 * breath, 7.5 * breath);
     if (lv.boss && !lv.boss.dead) { const b = lv.boss.body, s = ((lv.boss.state === 'warn' ? 1.3 : 1) * b.R) / R; light(b.cx, b.cy, 0.85 * s, 1.7 * s); }   // a boss in the dark (Koschei's arena) by its own glow, his whole drawing; more as it warns

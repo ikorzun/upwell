@@ -874,7 +874,11 @@ const CAMPAIGN = [
     motif: ['ambush', 'ambush2'], every: 3, steps: true, sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
     // (round 2): its one idea the pit's waves: a small ambush every other chunk, on a floor mid-shaft, then between two towers; the arena and its fat spitter midway
     news: { en: 'waves of enemies', es: 'oleadas enemigas', pt: 'ondas de inimigos', ja: 'てきの ウェーブ' } },   // (short: one line at 320 px; the arena says the rest)
-  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler', 'nurikabe'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
+  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 2, shelves: 1, crumble: 1, spikes: 1 }, intro: [], motif: ['iciclerun', 'nuricross', 'icebridge'],
+    steps: true, sparse: true, enemies: ['spitter', 'climber', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4108,   // by the practice (round 2): its one idea
+    // what falls from above: icicles over the way, the nurikabe over a ledge (n), 1-2's bridge under icicles; the walls in the pool. No comb, nor the icicles' set
+    // piece (its icicles are the motif's now): under their ceilings the bot clung to the walls in 4 of 5 orders
+    news: { en: 'look up!', es: '¡mira arriba!', pt: 'olhe para cima!', ja: 'うえに ちゅうい！' } },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
     motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], trial: { at: 0.7, goal: 'coins' }, enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101, par: 75,   // the pilot, its par the owner's 75 s (owner, 2026-10-22: «A, D, E на 1-7»):
@@ -1174,7 +1178,7 @@ const UNLOCKS = [
 //   o  coin   O  big coin   B  bubble in the wall (a shop or a stash)
 //   X  cracked block: a head-butt from below (or a smash) breaks it for good — the way into a stash in the wall
 //   Y  a stalactite under the block above: it falls on a hero passing under it   A  an arena's middle (waves of enemies)   a  an ambush's (AMBUSH)
-//   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   r  the crow in the red cord on the ledge under it (RIBBON)
+//   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   n  a nurikabe over it   r  the crow in the red cord on it (RIBBON)
 const CHUNKS = {
   stairs: { d: 1, rows: [
     '............',
@@ -1374,6 +1378,46 @@ const CHUNKS = {
     '............',   // (four rows under the towers: from a ledge at a wall under one, out to the middle and up through the plank)
     '............',
     '............',
+    '............'] },
+  iciclerun: { d: 1, rows: [   // a ledge on under a ceiling of icicles (Y): each shakes as the hero comes under it and falls a moment on, behind a hero who keeps on
+    '............',   // (1-5's own, my r6: «что падает сверху: сосульки и нурикабэ»); come up at the left, out at the right: no way round under them
+    '............',
+    '............',
+    '............',
+    '.........###',
+    '..#######...',
+    '...Y.Y.Y....',
+    '............',
+    '............',
+    '............',
+    '..#########.',
+    '............'] },
+  nuricross: { d: 2, rows: [   // a ledge across under a nurikabe hanging over it (n): under it, it shakes, then drops; on past it, or stomp it once it lands
+    '............',   // (the ledge's ends clear of the step under it and the way out over it: from each, straight up past the other)
+    '............',
+    '##..........',
+    '............',
+    '............',
+    '............',
+    '.......n....',
+    '..######....',
+    '............',
+    '....o..o....',
+    '............',
+    '.........###',
+    '............'] },
+  icebridge: { d: 2, rows: [   // 1-2's bridge of boards under a ceiling of icicles: its boards fall behind, and its icicles; out past the ceiling's end
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '...######.##',
+    '...Y.Y..Y...',
+    '............',
+    '..o..o..o...',
+    '............',
+    '###DDDDDD...',
     '............'] },
   spitstair: { d: 1, rows: [   // steps up by turns to a spitter on the ledge at their top (p): it swells and lobs a blob where the hero is, so climb on, then stomp it
     '............',   // (1-3's own, my r6: «лестницы под плевками плевунов»)
@@ -1906,7 +1950,7 @@ const CHUNKS = {
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
   walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
-  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], pit: ['ambush', 'ambush2'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
+  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], pit: ['ambush', 'ambush2'], falling: ['iciclerun', 'nuricross', 'icebridge'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
 const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from; warn: s a wave's places are shown before it comes
@@ -1918,7 +1962,7 @@ const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '('
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -2437,8 +2481,8 @@ class Level {
         let post = null; for (let q = 0; q < H && !post; q++) for (let kk = 0; kk < COLS; kk++) if (at(q, kk) === 'P') { post = { x: X(kk) + t / 2, foot: Y(q) }; break; }
         if (rr >= 0 && post) this.kines.push({ x: (X(k) + X(runEnd(r, k, ch) + 1)) / 2, yUp: Y(r), yHit: Y(rr + 1), px: post.x, foot: post.foot, y0: Y(r + 1) - 2 * t, y1: Y(rr + 1) });
       }
-      else if (ch === 'e' || ch === 'p') {   // a crawler on the ledge under it (the tutorial's), a spitter (1-3's: the stairs under its blobs)
-        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = ch === 'e' ? 'crawler' : 'spitter';
+      else if (FOE_LETTER[ch]) {   // an enemy on the ledge under it (FOE_LETTER): a crawler (the tutorial's), a spitter (1-3's), a nurikabe over it (1-5's)
+        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = FOE_LETTER[ch];
         if (q) this.spawns.push({ type, x, y: q.y0 - 1.2 * R * ENEMY[type].size, ledge: q });
       } else if (ch === 'r') {   // the crow in the red cord on the ledge under it (RIBBON), facing into the shaft
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);

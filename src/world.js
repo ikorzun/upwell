@@ -2684,7 +2684,7 @@ class Level {
         }
       }
       if (r.flash > 0) r.flash -= dt;
-      if (r.spring && r.t > 0) r.t = Math.max(0, r.t - dt);
+      if ((r.spring || (r.bouncy && !r.crumbling)) && r.t > 0) r.t = Math.max(0, r.t - dt);   // a spring's throw, a bouncy plank's sag (it stayed sagged after its first throw)
     }
     const f = this.fire;
     if (f && g.state === 'play' && !(f.calm > 0 && (f.calm -= dt) > 0)) {   // faster while the hero gains no height (not in a calm start)

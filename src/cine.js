@@ -18,8 +18,8 @@ const CINE_ON = (() => {
 // The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
 let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
-const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || !!th.town || /[?&]cine\b/.test(location.search));   // the worlds done: the Village, the Mine,
-// Fuji, the Sea, Tokyo
+const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || !!th.town || !!th.skazka || /[?&]cine\b/.test(location.search));   // the worlds done: the Village,
+// the Mine, Fuji, the Sea, Tokyo, the Dark Forest
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
   : th.town ? { fog: [0.2, 0.08, 0.24], shade: [0.03, 0.01, 0.04], amb: 0.48, moon: null, motes: { dust: 12, rain: 34 }, planes: 'city' }
@@ -27,6 +27,8 @@ const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012,
   : th.fuji ? { fog: [0.1, 0.12, 0.2], shade: [0.01, 0.015, 0.04], amb: 0.55, moon: null, motes: { snow: 18, ember: 4 }, planes: null }   // (snow, a few embers: the mountain's fire)
   : th.sea ? { fog: [0.08, 0.14, 0.18], shade: [0.01, 0.02, 0.03], amb: 0.55, moon: null, motes: { dust: 10, spray: 10 }, planes: null }   // (spray blown aside; no embers: orange is
   // the rafts' and the ropes'; no planes: the sea far off keeps its place on the screen, the owner's pick)
+  : th.skazka ? { fog: [0.1, 0.1, 0.12], shade: [0.012, 0.012, 0.02], amb: 0.5, moon: null, motes: { dust: 8 }, planes: null }   // (grey dust, a little; no embers: the Dark
+  // Forest's colour is its eyes and flames)
   : { fog: [0.12, 0.12, 0.17], shade: [0.015, 0.015, 0.03], amb: 0.55, moon: null, motes: { dust: 16, ember: 6 }, planes: null };
 
 const CINE_COPY_FS = GLSL + `in vec2 vUv; out vec4 o; uniform sampler2D uTex; void main() { o = texture(uTex, vUv); }`;
@@ -352,8 +354,10 @@ const POKE = { reach: 0.5, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(
   kinds: { sakura: { sway: 0.06, shed: 'petal', n: 8 }, scarecrow: { sway: 0.09, bird: true }, koinobori: { sway: 0.05 }, bonsai: { sway: 0.08, shed: 'needle', n: 5 },
     bats: { sway: 0, bats: true }, cart: { sway: 0.06, clunk: true },   // (the Mine's: sleeping bats wake and fly off, a cart rocks on its rails)
     bell: { sway: 0.05, ding: true }, pine: { sway: 0.06, shed: 'snow', n: 6 }, snowman: { sway: 0.07 },   // (Fuji's: a rung bell nudged dings low, a pine sheds snow, a
-    gull: { sway: 0, bird: true, grey: true }, flags: { sway: 0.05 }, raft: { sway: 0, splash: true } } };   // (the Sea's: a gull flies off its post, the big-catch flags
+    gull: { sway: 0, bird: true, grey: true }, flags: { sway: 0.05 }, raft: { sway: 0, splash: true },   // (the Sea's: a gull flies off its post, the big-catch flags
     // flutter, a raft landed on splashes)
+    fence: { sway: 0.07, bird: true, grey: true }, branch: { sway: 0.15, shed: 'bark', n: 4, under: true }, hollow: { sway: 0, shut: 3.5 } } };   // (the Dark Forest's:
+    // Baba Yaga's fence sways, the raven off its skull; a dead branch gives under the hero and sheds bark; eyes in a hollow shut a while, their light out)
     // snowman's bucket wobbles)
 function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
   const k = POKE.kinds[kind];
@@ -363,11 +367,12 @@ function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
   if (inside && !P.was && T - P.t > POKE.cool) {
     P.t = T; P.s = Math.min(1, 0.4 + (CINE.hv || 0) / (10 * lv.R)); P.d = H.cx < (x0 + x1) / 2 ? 1 : -1;
     if (k.shed) for (let i = 0, n = Math.max(1, Math.round(k.n * P.s * (POKE.still ? 0.4 : 1))); i < n; i++)
-      CINE.fx.push({ k: k.shed, x: x0 + Math.random() * (x1 - x0), y: y0 + Math.random() * (y1 - y0) * 0.5, vx: P.d * (15 + Math.random() * 35), vy: 5 + Math.random() * 20, ph: Math.random() * 6.28, on: r, life: 0 });
+      CINE.fx.push({ k: k.shed, x: x0 + Math.random() * (x1 - x0), y: k.under ? y1 : y0 + Math.random() * (y1 - y0) * 0.5, vx: P.d * (15 + Math.random() * 35), vy: 5 + Math.random() * 20, ph: Math.random() * 6.28, on: r, life: 0 });
     if (k.bird && perch && P.back <= T) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0, ink: k.grey ? PAL.gray : null }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }
+    if (k.shut && P.back <= T) P.back = T + k.shut;   // (eyes: shut, see cinePerched)
     if (k.splash) for (let i = 0; i < 6; i++) CINE.fx.push({ k: 'drop', x: i % 2 ? x0 : x1, y: y1, vx: (i % 2 ? -1 : 1) * (25 + Math.random() * 35), vy: -(70 + Math.random() * 60), life: 0 });   // (off its ends)
     if (k.bats && perch && P.back <= T) { perch.forEach(([x, y], i) => CINE.fx.push({ k: 'bat', x, y, vx: P.d * (50 + Math.random() * 70) * (i % 2 ? 1 : -0.6), vy: -(60 + Math.random() * 90), life: -0.12 * i })); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.2, 2.4); }   // (one after another)
-    if (typeof sound !== 'undefined') { if (k.clunk) sound.play('land', 0.25, 0.6); else if (k.splash) sound.play('bubble', 0.18, 0.7); else if (k.ding) sound.note(0, 0.12); else if (!k.bats && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s); }   // (a ding
+    if (typeof sound !== 'undefined') { if (k.clunk) sound.play('land', 0.25, 0.6); else if (k.splash) sound.play('bubble', 0.18, 0.7); else if (k.ding) sound.note(0, 0.12); else if (!k.bats && !k.shut && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s); }   // (a ding
     // lower and quieter than the task's ring)
   }
   P.was = inside;
@@ -375,9 +380,11 @@ function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
   return POKE.still || e > 2.2 ? 0 : k.sway * P.s * P.d * Math.exp(-e * POKE.decay) * Math.sin(e * POKE.freq);
 }
 const cinePerched = (r, T) => !r.poke || r.poke.back <= T;   // a scarecrow's crow on its hand (back from its flight)
-function cineSpr(box, rows, x, y, ink) {   // a CRITTER picture a game pixel a dot, centred on x, its foot at y (as the renderer's spr)
+function cineSpr(box, rows, x, y, ink) {   // a CRITTER picture a game pixel a dot, centred on x, its foot at y (as the renderer's spr); a run of one ink in a row one box
+  // (a crow 54 of them, not 150)
   const s = PIX.size, x0 = Math.round(x / s) * s - (rows[0].length * s) / 2, y0 = Math.round(y / s) * s - rows.length * s;
-  rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); });
+  rows.forEach((row, j) => { for (let i = 0, k; i < row.length; i = k) { for (k = i + 1; k < row.length && row[k] === row[i]; k++);
+    if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + k * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); } });
 }
 // What the pokes shed and send off, each frame (in front, flat): petals and needles falling, lying on their ledge a while, fading; a crow flying off.
 function cineFx(g, lv, cam, H, box, dt) {
@@ -393,6 +400,11 @@ function cineFx(g, lv, cam, H, box, dt) {
       f.x += f.vx * dt; f.vy += 420 * dt; f.y += f.vy * dt;
       if (f.life > 1.2 || f.y > cam + H + 30) { F.splice(i, 1); continue; }
       const x = snap(f.x), y = snap(f.y); box(x, y, x + P, y + P, PAL.blue, 1, 0, 10, 0); continue;
+    }
+    if (f.k === 'bark') {   // a bit of bark off a dead branch: it drops
+      f.x += f.vx * 0.3 * dt; f.vy += 300 * dt; f.y += f.vy * dt;
+      if (f.life > 1.4 || f.y > cam + H + 30) { F.splice(i, 1); continue; }
+      const x = snap(f.x), y = snap(f.y); box(x, y, x + P, y + P, PAL.gray, 1, 0, 10, 0); continue;
     }
     if (f.k === 'bat') {   // a bat woken: it drops, then flaps off up, zigzagging (life < 0: still waiting its turn, hanging)
       if (f.life < 0) continue;

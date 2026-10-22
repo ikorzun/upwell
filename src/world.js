@@ -2973,7 +2973,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (th.village && kind !== 'exit') { farmhouse(d, kind); return; }   // the Village's (see farmhouse)
     if (th.sea && kind !== 'exit') { const rt = this.route; if (CINE) this.route = 5; funaya(d, kind); this.route = rt; return; }   // the Sea's (see funaya; 2.5D: its boat bay
     // behind, the rest flat)
-    if (th.skazka && kind !== 'exit') { (kind === 'shop' ? izba : pech)(d); return; }   // the Dark Forest's (see izba, pech)
+    if (th.skazka && kind !== 'exit') { const rt = this.route; if (CINE) this.route = 5; (kind === 'shop' ? izba : pech)(d); this.route = rt; return; }   // the Dark Forest's (see izba,
+    // pech; 2.5D: the hut's legs and its smoke behind, the rest flat)
     if (th.mines && kind !== 'exit') { (kind === 'shop' ? mnShop : mnStash)(d); return; }   // the Mine's (see mnShop, mnStash)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
@@ -3188,10 +3189,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const Wd = 3.3, eave = 2.5, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t), lean = 0.5;   // tiles its top leans out
     const sk = (v) => (lean * v) / eave;   // how far a height leans
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    const rt = this.route; if (CINE) this.route = 3;   // (the cinematic fork: its legs behind the ledge)
     for (const [u, s] of [[0.9, 1], [2.5, -1]]) {   // its gnarled chicken legs, down behind the ledge: a scaly thigh, a shin bent back, three long claws and a spur
       ln(u, 0, u + 0.4 * s, -0.75, G, 5, HALF); for (let i = 0; i < 3; i++) ln(u + 0.4 * s * (0.2 + 0.3 * i), -0.15 - 0.22 * i, u + 0.4 * s * (0.2 + 0.3 * i) + 0.12, -0.2 - 0.22 * i, K, 1);
       ln(u + 0.4 * s, -0.75, u + 0.1 * s, -1.6, G, 3, HALF); for (const e of [-0.5, 0, 0.45]) { ln(u + 0.1 * s, -1.6, u + 0.1 * s + e, -1.85, G, 2, HALF); ln(u + 0.1 * s + e, -1.85, u + 0.1 * s + e * 1.25, -1.8, G, 1, HALF); } ln(u + 0.1 * s, -1.55, u + 0.1 * s - 0.3 * s, -1.42, G, 1, HALF);
     }
+    this.route = rt;
     for (let v = 0, i = 0; v < eave - 0.01; v += 0.31, i++) { const v1 = Math.min(eave, v + 0.31); bx(sk(v), v, Wd + sk(v), v1, G, i % 2 ? 1 : 4); bx(sk(v), v, Wd + sk(v), v + px, K); F(X(Wd + sk(v) + 0.05), Y(v + 0.15), 0.16 * t, 0, 0, 0.14 * t, G, 1, 0); }   // its crooked log courses, their ends out at its corner
     const top = eave + 1.5, ru = Wd / 2 + lean * 1.4;   // its roof: a sagging thatch of sticks and moss, hanging off its eaves
     for (let i = 0, n = 10; i < n; i++) { const q = i / n, sg = 0.3 * Math.sin(q * Math.PI); bx(-0.35 + lean + (Wd + 0.7) * 0.5 * q + lean * 0.4 * q, eave + 1.5 * q - sg, Wd + 0.35 + lean - (Wd + 0.7) * 0.5 * q + lean * 0.4 * q, eave + 1.5 * (q + 1 / n) - sg, G, i % 3 ? 5 : 4); }
@@ -3709,6 +3712,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (th.skazka && (lv.kind === 'well' || lv.kind === 'boss')) {   // the Dark Forest's props and its far layer (the owner's picks, 2026-10-20, from research/variants/skazka-*-game.png,
     // black and white and crooked; Koschei's arena its far layer only). Props in the midground: grey, no white; colour only for lights (eyes), as the dark's.
     const t = kitT, P = kitP, px = P / t, hero = g.hero, G = PAL.gray, K = PAL.black;
+    const rt0 = this.route;   // (the cinematic fork, the rule book: the forest far off behind, all of it, the moon, its eyes, Koschei's oak and chest; the fence small, its
+    // skulls' eyes flat)
+    if (CINE) this.route = 3;
     {   // the forest far off (F): spruces, a dead tree with eyes in it, the moon, mist; screen-fixed, low on the screen and sinking a little as the climb goes on;
       // at a quarter (DIM), the moon brighter (a light: it shows through the dark, the crooked treetops black against it), the eyes LIT
       const ar = lv.kind === 'boss', cx = (lv.l + lv.r) / 2, foot = snap(ar ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);   // (Koschei's arena: on its floor)
@@ -3735,8 +3741,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const p = !r.gone && seen(r.y0 - 4 * t, r.y0) && kitThing(lv, r);
       if (!p || p.kind !== 'fence') continue;
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, b = r.y0;
-      const X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, up from its top
-      const ln = (u0, v0, u1, v1, c, wp = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wp);
+      if (CINE) this.route = 4;
+      const sw = CINE ? cinePoke(g, lv, r, 'fence', Math.min(wx + d * 0.2 * t, wx + d * 3.2 * t), b - 3 * t, Math.max(wx + d * 0.2 * t, wx + d * 3.2 * t), b, [snap(wx + d * 2.8 * t), snap(b - 2.63 * t)]) : 0;
+      const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its pole the most; a raven off its skull, back later)
+      const X = (u, v = 0) => snap(wx + d * u * t) + SW(v), Y = (v) => snap(b - v * t);   // tiles out from its wall end, up from its top
+      const ln = (u0, v0, u1, v1, c, wp = 1, a = 1) => line(X(u0, v0), Y(v0), X(u1, v1), Y(v1), c, a, wp);
       const near = Math.max(0, Math.min(1, 1 - (Math.hypot(hero.cx - X(2.8), hero.cy - Y(2.35)) - 2.5 * R) / (5 * R)));   // 1 with the hero close to its skull, 0 from 7.5 R off
       const stake = (u, h, lean, wd = 5, broken = false) => {   // a stake from the ledge at u, h tall, leaning (tiles over at its top), sharpened or broken off; returns its top
         const tu = u + lean; ln(u, 0, tu, h, G, wd); ln(u + 0.05, 0.1, tu + 0.05, h - 0.1, K, 1);   // its grain
@@ -3745,16 +3754,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         return tu;
       };
       const skull = (u, v) => {   // impaled: its stake's point pokes out of its crown; its sockets glow
-        F(X(u), Y(v), 0.3 * t, 0, 0, 0.28 * t, G, 1, 0); box(Math.min(X(u - 0.17), X(u + 0.17)), Y(v - 0.16), Math.max(X(u - 0.17), X(u + 0.17)), Y(v - 0.34), G, 1, 0, 10, 0);
-        for (const e of [-0.12, 0, 0.12]) box(X(u + e), Y(v - 0.22), X(u + e) + P, Y(v - 0.34), K, 1, 0, 10, 0);
-        box(X(u) - P, Y(v - 0.08), X(u) + P, Y(v - 0.14), K, 1, 0, 10, 0);
-        for (const e of [-0.12, 0.12]) { const ex = X(u + e), ey = Y(v + 0.02); disc(ex, ey, 0.09 * t, near > 0.15 ? PAL.orange : K, 1);
+        F(X(u, v), Y(v), 0.3 * t, 0, 0, 0.28 * t, G, 1, 0); box(Math.min(X(u - 0.17, v), X(u + 0.17, v)), Y(v - 0.16), Math.max(X(u - 0.17, v), X(u + 0.17, v)), Y(v - 0.34), G, 1, 0, 10, 0);
+        for (const e of [-0.12, 0, 0.12]) box(X(u + e, v), Y(v - 0.22), X(u + e, v) + P, Y(v - 0.34), K, 1, 0, 10, 0);
+        box(X(u, v) - P, Y(v - 0.08), X(u, v) + P, Y(v - 0.14), K, 1, 0, 10, 0);
+        if (CINE) this.route = 0;   // (its eyes flat: the world's one colour)
+        for (const e of [-0.12, 0.12]) { const ex = X(u + e, v), ey = Y(v + 0.02); disc(ex, ey, 0.09 * t, near > 0.15 ? PAL.orange : K, 1);
           if (near > 0.15) { const lx = Math.sign(hero.cx - ex) * P, ly = Math.sign(hero.cy - ey) * P; box(snap(ex + lx) - P / 2, snap(ey + ly) - P / 2, snap(ex + lx) + P / 2, snap(ey + ly) + P / 2, PAL.yellow, 1, 0, 10, 0); }
           else box(snap(ex) - P / 2, snap(ey) - P / 2, snap(ex) + P / 2, snap(ey) + P / 2, PAL.orange, DIM, 0, 10, 0); }
+        if (CINE) this.route = 4;
       };
       stake(0.4, 1.4, 0.05, 5, true); stake(1.0, 1.8, -0.1); ln(0.2, 0.3, 2.6, 0.9, G, 4); const tu = stake(1.6, 2.6, 1.1, 4); skull(tu + 0.1, 2.35); stake(2.5, 1.3, 0.1, 5, true);
+      if (CINE && CINE.on('poke') && cinePerched(r, lv.t)) { this.route = 0; cineSpr(box, CRITTER[d > 0 ? 'crow' : 'crowL'], X(2.8, 2.63), Y(2.63), G); }   // (the cinematic
+      // fork: a raven on the skull, seen in its light; off when the hero comes, back later)
       vlamps.push([X(2.6), Y(2.2), 0.6 + 0.8 * near, 2.2 + 1.2 * near]);   // the skull's glow: it lights the dark round it, more as the hero comes
     }
+    this.route = rt0;
   }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter
@@ -4180,7 +4194,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (let j = 0; j < 3; j++) { const x1 = snap(x0 + Math.cos(ang) * len / 3 * (d > 0 ? 1 : -1) * (i === 1 ? 0.6 : 1) + d * (i - 1) * 0.04 * t), y1 = snap(y0 + Math.sin(ang) * len / 3); line(x0, y0, x1, y1, G, 1, j < 1 ? 2 : 1); x0 = x1; y0 = y1; ang += 0.42 * (i === 0 ? -1 : 1); } }
     };
     if (r.crumble) {   // a rotten log broken in two: grey in black rot, its grain split, holes, a spiral knot, grey toadstools, a snail; its pieces shake as it gives
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, cut = 0.58;
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, cut = 0.58;   // (2.5D: no fading, a dither in depth reads as a sieve: it shakes)
       [[0, cut - 0.03], [cut + 0.03, 1]].forEach(([q0, q1], i) => {
         const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(Math.min(W(q0 * wt), W(q1 * wt))) + ox, x1 = snap(Math.max(W(q0 * wt), W(q1 * wt))) + ox;
         box(x0, r.y0 + 2 * P, x1, r.y1 - 2 * P, th.crumble, a, 0, 10, 1); box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y1, th.crumble, a, 0, 10, 1);   // a piece, its ends round, its rot speckled
@@ -4190,46 +4204,57 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       });
       for (let i = 0; i < 2; i++) { const hx = snap(r.x0 + (0.2 + 0.55 * hsh(i + 3)) * w), hy = snap(r.y0 + (0.45 + 0.2 * hsh(i + 13)) * (r.y1 - r.y0)); F(hx, hy, 0.13 * t, 0, 0, 0.1 * t, K, a, 0); }   // woodworm holes
       { const kx = W(cut * wt * 0.5), ky = Y(ht * 0.55); for (const rr of [0.32, 0.22, 0.12]) F(kx, ky, rr * t, 0, 0, rr * 0.8 * t, K, a, 4); }   // a spiral knot
+      if (CINE) this.route = 4;   // (the cinematic fork: its toadstools and its snail small)
       toad(W(0.35), 1, a); toad(W(0.75), 0.7, a);
       { const sx = E(0.8), sy = r.y0; box(sx - snap(0.32 * t), sy - snap(0.12 * t), sx + snap(0.22 * t), sy, G, a, 0, 10, 0); for (const e of [0.1, 0.2]) box(sx + snap(e * t), sy - snap(0.32 * t), sx + snap(e * t) + P, sy - snap(0.12 * t), G, a, 0, 10, 0);   // a snail: its body, its horns,
         disc(sx - snap(0.12 * t), sy - snap(0.3 * t), 0.24 * t, G, a); for (const rr of [0.16, 0.08]) F(sx - snap(0.12 * t), sy - snap(0.3 * t), rr * t, 0, 0, rr * t, K, a, 4); }   // its shell in rings
-      return true;
+      if (CINE) this.route = 2; return true;
     }
     if (r.plank && r.move) {   // Baba Yaga's mortar, crooked and cracked, riding curls of smoke, the rim you stand on: its pestle, a candle lit on its rim, a black cat's eyes over it
       const ahead = r.move.v < 0 ? -1 : 1, bk = ahead > 0 ? r.x0 : r.x1, B = (u) => snap(bk + ahead * u * t);
       const cx = snap((r.x0 + r.x1) / 2), hw = w / 2 / t, c = th.mover, lean = ahead * 0.12;   // how much it leans, a row at a time
       const row = (v0, v1, i0, j, tn = 0) => box(snap(cx - (hw - i0 - lean * j) * t), Y(v0), snap(cx + (hw - i0 + lean * j) * t), Y(v1), c, 1, 0, 10, tn);   // a band of it, i0 in from each end, leaning
+      if (CINE) this.route = 3;   // (the cinematic fork: its smoke behind, its pestle and candle small, the flame and the cat's eyes flat)
       F(cx, Y(2.05), (hw + 0.6) * t, 0, 0, 0.6 * t, G, 0.6, 1); for (const [dx, dv, rr] of [[-hw - 0.5, 1.8, 0.32], [hw + 0.55, 1.9, 0.28], [-0.4, 2.5, 0.36], [0.6, 2.45, 0.3]]) { F(snap(cx + dx * t), Y(dv), rr * t, 0, 0, rr * t, G, 0.5, 1); F(snap(cx + dx * t), Y(dv), rr * 0.6 * t, 0, 0, rr * 0.6 * t, G, DIM, 4); }   // the smoke it rides, curling
+      if (CINE) this.route = 2;
       const bands = [[0, 0.3, 0], [0.3, 1.0, 0.12], [1.0, 1.5, 0.45], [1.5, 1.8, 0.8]];   // a wide bowl
       bands.forEach(([v0, v1, i0], j) => { row(v0, v1, i0, j, j ? 1 : 0); if (j) box(snap(cx + (hw - i0 + lean * j) * t * 0.35), Y(v0), snap(cx + (hw - i0 + lean * j) * t), Y(v1), c, 1, 0, 10, 4); });   // its staves, its far side in shade
       bands.slice(1).forEach(([v0, , i0], j) => box(snap(cx - (hw - i0 - lean * (j + 1)) * t), Y(v0), snap(cx + (hw - i0 + lean * (j + 1)) * t), Y(v0) + P, K, 1, 0, 10, 0));   // its iron hoops
       for (const [u, v0, n] of [[0.25, 0.35, 4], [0.65, 0.5, 5], [0.45, 1.05, 3]]) for (let i = 0; i < n; i++) box(snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2), Y(v0 + i * 0.12), snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2) + P, Y(v0 + i * 0.12 + 0.12), K, 1, 0, 10, 0);   // its cracks
+      if (CINE) this.route = 4;
       { const tip = -1.45; line(B(0.75), Y(0.2), B(0.3), Y(tip), c, 1, 5); disc(B(0.3), Y(tip), 0.18 * t, c, 1); box(B(0.3) - P, Y(tip) - P, B(0.3) + P, Y(tip) + P, K, 1, 0, 10, 0); }   // the pestle stuck in it
-      { const lx = B(1.1); box(lx - snap(0.08 * t), Y(-0.5), lx + snap(0.08 * t), r.y0, G, 1, 0, 10, 0); box(lx - P, Y(-0.75), lx + P, Y(-0.5), PAL.orange, 1, 0, 10, 0); box(lx - P / 2, Y(-0.7), lx + P / 2, Y(-0.56), PAL.yellow, 1, 0, 10, 0); vlamps.push([lx, Y(-0.62), 0.5, 1.6]); }   // a candle lit on its rim (a light)
+      { const lx = B(1.1); box(lx - snap(0.08 * t), Y(-0.5), lx + snap(0.08 * t), r.y0, G, 1, 0, 10, 0); if (CINE) this.route = 0; box(lx - P, Y(-0.75), lx + P, Y(-0.5), PAL.orange, 1, 0, 10, 0); box(lx - P / 2, Y(-0.7), lx + P / 2, Y(-0.56), PAL.yellow, 1, 0, 10, 0); vlamps.push([lx, Y(-0.62), 0.5, 1.6]); }   // a candle lit on its rim (a light)
       skEyes(B(0.3), Y(-0.15), 0.7, 1300);   // a black cat's eyes over its rim, glowing
-      lip(); return true;
+      if (CINE) this.route = 2; lip(); return true;
     }
     if (r.plank) {   // a gnarled dead branch off a trunk that climbs the wall: thick at the wall, bark split, its free end in twigs like a clawing hand, thorns and a dim cobweb under it
       if (r.bouncy) return false;
-      const c = th.plank;
-      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, r.y1 - 2 * P, r.x1, r.y1, c, 1, 0, 10, 4);   // its wood, its underside in shade
+      const c = th.plank, sw = CINE ? cinePoke(g, lv, r, 'branch', r.x0, r.y0, r.x1, r.y1) : 0, dip = sw ? snap(sw * r.poke.d * t) : 0, xe = E(0.7);   // (the cinematic
+      // fork: under the hero its free end gives a little and springs back, bark falling, its cobweb swaying)
+      const spans = dip ? (d > 0 ? [[r.x0, xe, 0], [xe, r.x1, dip]] : [[xe, r.x1, 0], [r.x0, xe, dip]]) : [[r.x0, r.x1, 0]];
+      for (const [x0, x1, o] of spans) { box(x0, r.y0 + o, x1, r.y1 + o, c, 1, 0, 10, 0); box(x0, r.y1 - 2 * P + o, x1, r.y1 + o, c, 1, 0, 10, 4); }   // its wood, its underside in shade
       for (let x = r.x0 + snap(0.3 * t), j = 0; x < r.x1 - snap(0.4 * t); j++) { const ww = snap((0.2 + 0.3 * hsh(j)) * t); box(x, Y(ht * 0.45), x + ww, Y(ht * 0.45) + P, K, 1, 0, 10, 0); x += ww + snap((0.35 + 0.5 * hsh(j + 7)) * t); }   // its bark split
       if (on) line(W(0), Y(ht + 0.45), W(1.3), Y(ht * 0.6), c, 1, 4, 2);   // thick where it grows out of the wall
-      be(0, ht * 0.55, 0.3, ht, K);   // its free end thinning
-      claws(E(0.15), r.y0, 1.9, 1405);   // twigs like a clawing hand
+      be(0, ht * 0.55 + dip / t, 0.3, ht + dip / t, K);   // its free end thinning
+      if (CINE) this.route = 0;   // (its twigs, thorns and trunk flat, its cobweb behind)
+      claws(E(0.15), r.y0 + dip, 1.9, 1405);   // twigs like a clawing hand
       for (const [u, ln0] of [[0.9, 0.35], [1.7, 0.25]].filter(([q]) => q < wt - 0.5)) line(W(u), r.y1, snap(W(u) + d * 0.1 * t), Y(ht + ln0), c, 1, 1);   // thorns under it
-      web(snap((r.x0 + r.x1) / 2), r.y1, d, 0.7);   // a dim cobweb
+      if (CINE) this.route = 3; if (hsh(1500) < 1 / 3) web(snap((r.x0 + r.x1) / 2) + snap(sw * 2 * t), r.y1, d, 0.7); if (CINE) this.route = 0;   // a dim cobweb (under one
+      // branch in three: under each, too many, the rule book)
       if (on) { line(W(0.15), Y(ht + 1.6), W(0.25), Y(-2.0), c, 1, 6, 2); for (const [v, s] of [[-1.2, 1], [-1.7, -1]]) claws(W(0.25), Y(v), 0.9, 1700 + Math.round(v * 10), s > 0 ? -1 : 1); }   // the trunk it grows off, up the wall, its own twigs
-      lip(); return true;
+      if (CINE) this.route = 2; for (const [x0, x1, o] of spans) box(x0, r.y0 + o, x1, r.y0 + o + 2.5, th.lip, 1, 1.25); return true;   // its edge (lip)
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
     {   // earth clawed together by roots: dotted grey, its underside jagged and dark, roots like fingers, hollows in them, a skull in one, eyes glowing in the other
       const c = th.block;
       box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 1); box(r.x0, Y(Math.max(0.35, ht - 0.3)), r.x1, r.y1, c, 1, 0, 10, 4);
       for (let x = r.x0 + snap(0.15 * t), i = 0; x < r.x1 - snap(0.2 * t); i++) { const ww = snap((0.2 + 0.25 * hsh(i + 300)) * t), dd = snap((0.15 + 0.3 * hsh(i + 330)) * t); F(snap(x + ww / 2), r.y1 + dd / 2, ww / 2, 0, 0, -dd / 2, c, 1, 6, ww / 2, dd / 2, ww); x += ww + snap((0.45 + 0.5 * hsh(i + 360)) * t); }   // earth hanging off its underside in teeth
+      if (CINE) this.route = 0;   // (the cinematic fork: its roots, its hollows and what is in them flat)
       [0.4, 1.9, 3.4].filter((u) => u < wt - 0.25).forEach((u, i) => root(W(u), 1.7 * (0.65 + 0.5 * hsh(i + 70)), 100 + i * 17, 3));
-      hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); if (wt > 3) hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, hsh(2020) < 0.34);   // eyes in one in three (the owner's rule on detail: a screen of eyes is noise)
-      lip(); return true;
+      if (hsh(2030) < 1 / 3) { hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); }   // a skull in a hollow under one ledge in three (the rule book: under each, too many)
+      if (wt > 3) { let eyes = hsh(2020) < 0.34; if (eyes && CINE) { const hx = W(2.5), hy = Y(ht + 0.45), E2 = r.eyesP || (r.eyesP = {}); cinePoke(g, lv, E2, 'hollow', hx - 1.2 * t, hy - 1.2 * t, hx + 1.2 * t, hy + 1.2 * t); eyes = cinePerched(E2, lv.t); }   // (2.5D:
+        hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, eyes); }   // eyes in one in three (the owner's rule on detail: a screen of eyes is noise); shut, their light out, while the hero is by
+      if (CINE) this.route = 2; lip(); return true;
     }
   };
   // The Mine's ledges (the owner's picks, 2026-10-21, research/variants/mine-*-game.png): a block is rough rock on a timber beam, a post under it down to its
@@ -4420,8 +4445,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   if (CINE) { cineFaces(this, lv, cam, H, box); this.route = 0; }   // (the cinematic fork: the walls' faces over every far thing; the doors flat, the ledges deep)
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);   // the ways into a shop or a stash, over the worlds' back layers: nothing covers them (owner)
-  if (CINE) this.route = 2;
+  if (CINE) this.route = th.skazka ? 0 : 2;   // (the Dark Forest's floor flat: its top face a wide light strip in the dark, the rule book)
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
+  if (CINE) this.route = 2;
   const vaultSpan = (r) => {   // a vault's cracked floor from cage wall to cage wall: the slot rule (Level.place) cut it back from a wall its cage stands
     // at, so it is drawn across the gap it left (too narrow for the hero to pass)
     let a = -Infinity, b = Infinity;
@@ -4483,7 +4509,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea || th.mines || th.fuji)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);

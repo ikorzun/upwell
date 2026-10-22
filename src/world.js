@@ -2971,7 +2971,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const door = (d, kind) => {
     if (th.fuji && kind !== 'exit') { hut(d, kind); return; }   // Mount Fuji's (see hut)
     if (th.village && kind !== 'exit') { farmhouse(d, kind); return; }   // the Village's (see farmhouse)
-    if (th.sea && kind !== 'exit') { funaya(d, kind); return; }   // the Sea's (see funaya)
+    if (th.sea && kind !== 'exit') { const rt = this.route; if (CINE) this.route = 5; funaya(d, kind); this.route = rt; return; }   // the Sea's (see funaya; 2.5D: its boat bay
+    // behind, the rest flat)
     if (th.skazka && kind !== 'exit') { (kind === 'shop' ? izba : pech)(d); return; }   // the Dark Forest's (see izba, pech)
     if (th.mines && kind !== 'exit') { (kind === 'shop' ? mnShop : mnStash)(d); return; }   // the Mine's (see mnShop, mnStash)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
@@ -3601,7 +3602,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (th.sea && lv.kind === 'well') {   // the Sea's props (the owner's picks, research/variants/sea-*-game.png, 2026-10-20): on ledges, by kitThing, a lighthouse
     // (E), nets drying with glass floats (A), a gull crying out on a mooring post (D), octopus pots wrapped in a net (C), the big-catch flags (E). In the
     // midground: solid, no white (the sheets' white is grey here), no yellow but a lamp's core, no red (orange).
-    const t = kitT, P = kitP, px = P / t, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'];
+    const t = kitT, P = kitP, px = P / t, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'], rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic
+    // fork, the rule book: the sea far off behind; the props small, their thin parts flat)
+    L(3);
     {   // the sea far off (the owner's picks, the wave sheet's B and the far sheet's F, a level each in turn): screen-fixed, low on the screen and sinking a
       // little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
       const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
@@ -3624,8 +3627,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
       if (!p || !PROPS.includes(p.kind)) continue;
+      L(4); let sx = 0;   // (sx: a flag shifted, fluttering)
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, fx = d > 0 ? r.x1 : r.x0, b = r.y0;
-      const X = (u) => snap(wx + d * u * t), Q = (u) => snap(fx - d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, in from its free end, up from its top
+      const X = (u) => snap(wx + d * u * t) + sx, Q = (u) => snap(fx - d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, in from its free end, up from its top
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
       const bq = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(Q(u0), Q(u1)), Y(Math.max(v0, v1)), Math.max(Q(u0), Q(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
       const el = (u, v, ru, rv, c, a = 1) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0), ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);
@@ -3644,16 +3648,18 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         bx(cx - 0.85, 3.82, cx + 0.85, 3.95, th.block); for (const e of [-1, 1]) bx(cx + e * 0.85, 3.9, cx + e * 0.98, 4.02, th.block); cone(0.55, 0.42); el(cx, 4.32, 0.09, 0.09, th.block);   // its roof, a ball on it
       } else if (p.kind === 'net') {   // fishing nets drying, sagging between two poles, round glass floats in them
         const pole = (u, h) => bx(u, 0, u + 0.14, h, PAL.orange, 2), sag = (u0, u1, v, s) => { for (let i = 0; i < 12; i++) { const q0 = i / 12, q1 = (i + 1) / 12; ln(u0 + (u1 - u0) * q0, v - s * 4 * q0 * (1 - q0), u0 + (u1 - u0) * q1, v - s * 4 * q1 * (1 - q1), PAL.orange); } };
-        pole(1.3, 2.2); pole(3.6, 2.2); sag(1.4, 3.65, 2.15, 0.3); for (let i = 0; i < 8; i++) { const q = (i + 0.5) / 8, u = 1.45 + 2.15 * q, top = 2.1 - 0.3 * 4 * q * (1 - q); bx(u - 0.14, top - 0.9 - 0.25 * Math.sin(q * Math.PI), u + 0.14, top, PAL.gray, 4); }   // the net, its mesh
-        float(1.9, 1.6, PAL.blue); float(2.5, 1.15, PAL.green); float(3.15, 1.6, PAL.purple);
+        pole(1.3, 2.2); pole(3.6, 2.2); L(0); sag(1.4, 3.65, 2.15, 0.3); for (let i = 0; i < 8; i++) { const q = (i + 0.5) / 8, u = 1.45 + 2.15 * q, top = 2.1 - 0.3 * 4 * q * (1 - q); bx(u - 0.14, top - 0.9 - 0.25 * Math.sin(q * Math.PI), u + 0.14, top, PAL.gray, 4); }   // the net, its mesh
+        L(4); float(1.9, 1.6, PAL.blue); float(2.5, 1.15, PAL.green); float(3.15, 1.6, PAL.purple);
       } else if (p.kind === 'gull') {   // a seagull crying out on a mooring post at the ledge's free end, its beak and feet orange, its wing tips black (the sheets' white is grey)
         const ph = 1.3, gu = 0.3, gv = ph + 0.32;   // the post's height; the gull's middle, in from the free end
         bq(0.1, 0, 0.5, ph, PAL.orange, 2);
+        if (CINE) { cinePoke(g, lv, r, 'gull', Math.min(Q(0.9), Q(0)), Y(ph + 0.8), Math.max(Q(0.9), Q(0)), b, [Q(gu), Y(gv)]); if (!cinePerched(r, lv.t)) continue; }   // (the cinematic
+        // fork: come near, it flies off; back later)
         for (const e of [-0.07, 0.07]) bq(gu + e, ph, gu + e + px, ph + 0.14, PAL.orange);   // its legs
         F(Q(gu), Y(gv), 0.36 * t, 0, 0, 0.2 * t, PAL.gray, 1, 0); F(Q(gu + 0.28), Y(gv - 0.04), 0.14 * t, 0, 0, 0.08 * t, PAL.gray, 1, 0);   // its body, its tail
         F(Q(gu - 0.2), Y(gv + 0.24), 0.15 * t, 0, 0, 0.15 * t, PAL.gray, 1, 0); bq(gu - 0.24, gv + 0.26, gu - 0.24 + px, gv + 0.26 + px, PAL.black);   // its head, an eye
         bq(gu + 0.05, gv - 0.02, gu + 0.4, gv + 0.06, PAL.black);   // its wing's black tip
-        bq(gu - 0.34, gv + 0.24, gu - 0.52, gv + 0.24 + px, PAL.orange); bq(gu - 0.34, gv + 0.2, gu - 0.5, gv + 0.2 + px, PAL.orange); for (const [u0, v0] of [[-0.62, 0.36], [-0.68, 0.24], [-0.62, 0.12]]) bq(gu + u0, gv + v0, gu + u0 - 0.1, gv + v0 + px, PAL.gray);   // its beak open, crying out
+        bq(gu - 0.34, gv + 0.24, gu - 0.52, gv + 0.24 + px, PAL.orange); bq(gu - 0.34, gv + 0.2, gu - 0.5, gv + 0.2 + px, PAL.orange); L(0); for (const [u0, v0] of [[-0.62, 0.36], [-0.68, 0.24], [-0.62, 0.12]]) bq(gu + u0, gv + v0, gu + u0 - 0.1, gv + v0 + px, PAL.gray);   // its beak open, crying out
       } else if (p.kind === 'octopus') {   // a clay octopus pot (takotsubo) at the wall end wrapped in a net, a little purple octopus peeking out of it
         const pot = (u0, u1, v0, v1) => { bx(u0 + 2 * px, v0, u1 - 2 * px, v1, PAL.orange); bx(u0, v0 + 2 * px, u1, v1 - 2 * px, PAL.orange); for (const f of [0.35, 0.7]) bx(u0, v0 + (v1 - v0) * f, u1, v0 + (v1 - v0) * f + px, PAL.black); };
         const neck = (u0, u1, v0) => { bx(u0, v0, u1, v0 + 0.18, PAL.orange); bx(u0 - 0.06, v0 + 0.18, u1 + 0.06, v0 + 0.26, PAL.orange); };
@@ -3666,11 +3672,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           else if (pat === 'check') bx(u0 + 0.05, v0 + 0.08, u1 - 0.15, v1 - 0.08, PAL.blue, 4);
           else bx(u0 + 0.1, v0 + 0.12, u1 - 0.2, v1 - 0.12, PAL.gray, 1);   // dots
         };
-        bx(0.6, 0, 0.6 + 2 * px, 4.4, PAL.gray);   // the pole
-        [[PAL.green, 'fish'], [th.mover, 'dots'], [PAL.blue, 'check']].forEach(([c, pat], i) => flag(3.55 - 0.85 * i, c, pat));
+        L(0); bx(0.6, 0, 0.6 + 2 * px, 4.4, PAL.gray); L(4);   // the pole
+        const fl = CINE ? cinePoke(g, lv, r, 'flags', Math.min(X(0.6), X(2.8)), Y(4.4), Math.max(X(0.6), X(2.8)), b) : 0;   // (poked, they flutter, the top one the most)
+        [[PAL.green, 'fish'], [th.mover, 'dots'], [PAL.blue, 'check']].forEach(([c, pat], i) => { sx = fl ? snap(fl * (3.9 - 0.85 * i) * t) : 0; flag(3.55 - 0.85 * i, c, pat); sx = 0; });
         el(0.62, 4.5, 0.12, 0.12, PAL.gray);   // its top, a ball
       }
     }
+    this.route = rt0;
   }
   const skOak = (U, Vv) => {   // the old oak of the tale with Koschei's death in it (the owner's pick, 2026-10-21, research/variants/skazka-oak-lit-game.png C): a huge
     // gnarled dead oak in a swamp on the left of his arena under its moon, reeds and water round its roots, a chest hanging on chains off its long branch (a hare in
@@ -4082,33 +4090,38 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(snap(x - 0.1 * t), y0 - 2 * P, snap(x + 0.1 * t) + P, y0, PAL.orange, 1, 0, 10, 0); box(snap(x - 0.1 * t), y1, snap(x + 0.1 * t) + P, y1 + 2 * P, PAL.orange, 1, 0, 10, 0);
     };
     if (r.crumble) {   // a raft of driftwood: logs with rounded ends, each shaking its own way as it gives, bands of orange rope between them, lashed to the wall with it
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round(w / (1.3 * t))), pw = w / n;
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, n = Math.max(1, Math.round(w / (1.3 * t))), pw = w / n;   // (2.5D: it shakes, no fading)
       for (let i = 0; i < n; i++) {
         const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * pw) + ox;
         box(x0, r.y0 + 3 * P, x1, r.y1 - 3 * P, th.crumble, a, 0, 10, 2); box(x0 + P, r.y0 + P, x1 - P, r.y1 - P, th.crumble, a, 0, 10, 2); box(x0 + 3 * P, r.y0, x1 - 3 * P, r.y1, th.crumble, a, 0, 10, 2);   // a log, its ends round
         box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y0 + 2.5, th.lip, a, 1.25);
         if (i) box(x0 - P, r.y0 - P, x0 + P, r.y1 + P, PAL.orange, a, 0, 10, 0);   // a band of rope between two logs
       }
+      if (CINE) this.route = 0;   // (the cinematic fork: its lashing, its starfish and its hook flat, thin things; the starfish and the hook on one in three)
       if (on) { line(W(0.02), Y(0.1), W(0.32), Y(ht - 0.1), PAL.orange, a); line(W(0.02), Y(ht - 0.1), W(0.32), Y(0.1), PAL.orange, a); bw(0.06, 0, 0.06 + px, ht, PAL.orange, 0, a); }   // its lashing at the wall
+      if (hsh(41) < 1 / 3) {
       const sx = E(0.3), sy = Y(ht + 0.1); for (const [dx, dy] of [[0, -2], [0, 2], [-2, 0], [2, 0], [-1, -1], [1, 1], [-1, 1], [1, -1], [0, 0]]) box(sx + dx * P, sy + dy * P, sx + (dx + 1) * P, sy + (dy + 1) * P, PAL.orange, a, 0, 10, 0);   // a starfish
       if (on) { bw(0.18, ht, 0.18 + px, ht + 0.35, PAL.orange, 0, a); bw(0.18, ht + 0.35, 0.32, ht + 0.35 + px, PAL.orange, 0, a); bw(0.32 - px, ht + 0.25, 0.32, ht + 0.35, PAL.orange, 0, a); }   // a hook off the lashing
-      return true;
+      }
+      if (CINE) this.route = 2; return true;
     }
     if (r.plank && r.move) {   // a raft riding a stream: three logs, a lantern on a pole at its back, a basket of fish at its front
       const ahead = r.move.v < 0 ? -1 : 1, fr = ahead > 0 ? r.x1 : r.x0, bk = ahead > 0 ? r.x0 : r.x1, A = (u) => snap(fr - ahead * u * t), B = (u) => snap(bk + ahead * u * t);
       const n = 3, lw = w / n;
       for (let i = 0; i < n; i++) { const x0 = snap(r.x0 + i * lw) + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * lw); box(x0, r.y0 + P, x1, Y(0.4), th.mover, 1, 0, 10, 2); box(x0 + P, r.y0, x1 - P, r.y0 + P, th.mover, 1, 0, 10, 0); }   // its logs
+      if (CINE) { cinePoke(g, lv, r, 'raft', r.x0, r.y0 - 0.6 * t, r.x1, r.y0); this.route = 4; }   // (2.5D: landed on, it splashes; its pole, lantern and basket small)
       const lx = B(0.3); box(lx, Y(-1.0), lx + P, r.y0, th.mover, 1, 0, 10, 0); box(lx, Y(-1.0), lx + snap(0.25 * t), Y(-0.95), th.mover, 1, 0, 10, 0); lantern(lx + snap(0.25 * t), Y(-0.72), true);   // a lantern on a pole
       const bx0 = A(0.6), bw0 = 0.24 * t;   // a basket of fish
       box(snap(bx0 - bw0), Y(-0.34), snap(bx0 + bw0), r.y0, th.mover, 1, 0, 10, 4); for (const dx of [-0.1, 0.1]) disc(bx0 + dx * t, Y(-0.38), 0.09 * t, PAL.blue, 1);
-      lip(); return true;
+      if (CINE) this.route = 2; lip(); return true;
     }
     if (r.plank) {   // a jetty: boards on a brace at the wall, an unlit lantern hung under its free end
       if (r.bouncy) return false;
       box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);   // its boards, a rough underside
-      if (on) line(W(0.08), Y(ht + 0.9), W(0.95), Y(ht), th.plank, 1, 3, 2);   // its brace
-      const lx = E(0.18); box(lx, r.y1, lx + P, Y(ht + 0.35), PAL.gray, 1, 0, 10, 0); lantern(lx, Y(ht + 0.62), false);
-      lip(); return true;
+      if (CINE) this.route = 0; if (on) line(W(0.08), Y(ht + 0.9), W(0.95), Y(ht), th.plank, 1, 3, 2);   // its brace (flat, a thin thing)
+      if (hsh(42) < 1 / 3) { const lx = E(0.18); box(lx, r.y1, lx + P, Y(ht + 0.35), PAL.gray, 1, 0, 10, 0); if (CINE) this.route = 4; lantern(lx, Y(ht + 0.62), false); }   // its lantern
+      // (under one jetty in three, the rule book's; small, its string flat)
+      if (CINE) this.route = 2; lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
     box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0);   // sea-worn rock: in layers, barnacles on it

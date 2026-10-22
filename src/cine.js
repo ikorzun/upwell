@@ -18,12 +18,14 @@ const CINE_ON = (() => {
 // The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
 let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
-const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || /[?&]cine\b/.test(location.search));   // the worlds done: the Village, the Mine, Fuji
+const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || /[?&]cine\b/.test(location.search));   // the worlds done: the Village, the Mine, Fuji, the Sea
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
   : th.town ? { fog: [0.2, 0.08, 0.24], shade: [0.03, 0.01, 0.04], amb: 0.48, moon: null, motes: { dust: 12, rain: 34 }, planes: 'city' }
   : th.mines ? { fog: [0.1, 0.1, 0.12], shade: [0.012, 0.012, 0.02], amb: 0.5, moon: null, motes: { dust: 14 }, planes: null }   // (no embers: orange is a lamp lit)
   : th.fuji ? { fog: [0.1, 0.12, 0.2], shade: [0.01, 0.015, 0.04], amb: 0.55, moon: null, motes: { snow: 18, ember: 4 }, planes: null }   // (snow, a few embers: the mountain's fire)
+  : th.sea ? { fog: [0.08, 0.14, 0.18], shade: [0.01, 0.02, 0.03], amb: 0.55, moon: null, motes: { dust: 10, spray: 10 }, planes: null }   // (spray blown aside; no embers: orange is
+  // the rafts' and the ropes'; no planes: the sea far off keeps its place on the screen, the owner's pick)
   : { fog: [0.12, 0.12, 0.17], shade: [0.015, 0.015, 0.03], amb: 0.55, moon: null, motes: { dust: 16, ember: 6 }, planes: null };
 
 const CINE_COPY_FS = GLSL + `in vec2 vUv; out vec4 o; uniform sampler2D uTex; void main() { o = texture(uTex, vUv); }`;
@@ -275,7 +277,7 @@ function cineMotes(rd, g, lv, cam, H, box, disc, T) {
   const want = []; for (const [k, n] of Object.entries(look.motes)) for (let i = 0; i < n; i++) want.push(k);
   if (M.length !== want.length || M.theme !== lv.theme) { M.length = 0; M.theme = lv.theme; for (const k of want) M.push({ k, x: 0, y: 1e9, ph: Math.random() * 6.28 }); }
   const spawn = (m, any) => { m.x = lv.l + Math.random() * (lv.r - lv.l); m.y = any ? cam + Math.random() * H : cam - 10 - Math.random() * 40; m.ph = Math.random() * 6.28;
-    m.vx = m.k === 'rain' ? -60 : (Math.random() - 0.5) * 12; m.vy = m.k === 'rain' ? 520 + Math.random() * 120 : m.k === 'petal' ? 22 + Math.random() * 18 : m.k === 'snow' ? 16 + Math.random() * 14 : m.k === 'ember' ? -26 - Math.random() * 20 : (Math.random() - 0.5) * 8; };
+    m.vx = m.k === 'rain' ? -60 : m.k === 'spray' ? (Math.random() < 0.5 ? -1 : 1) * (28 + Math.random() * 30) : (Math.random() - 0.5) * 12; m.vy = m.k === 'rain' ? 520 + Math.random() * 120 : m.k === 'petal' ? 22 + Math.random() * 18 : m.k === 'snow' ? 16 + Math.random() * 14 : m.k === 'ember' ? -26 - Math.random() * 20 : (Math.random() - 0.5) * 8; };
   for (const m of M) {
     if (m.y > cam + H + 30 || m.y < cam - 60 || m.x < lv.l - 10 || m.x > lv.r + 10) spawn(m, m.y === 1e9 || m.k !== 'rain' && m.k !== 'petal' && m.k !== 'snow');
     m.ph += dt;
@@ -286,6 +288,7 @@ function cineMotes(rd, g, lv, cam, H, box, disc, T) {
     else if (m.k === 'rain') box(x, y, x + P, y + 3 * P, PAL.gray, 1.4, 0, 10, 0);
     else if (m.k === 'ember') box(x, y, x + P, y + P, PAL.orange, 1, 0, 10, 0);
     else if (m.k === 'snow') box(x, y, x + P, y + P, PAL.white, 1.45, 0, 10, 0);
+    else if (m.k === 'spray') box(x, y, x + 2 * P, y + P, PAL.gray, 1.5, 0, 10, 0);
     else if (m.k === 'fly') { const on = 0.5 + 0.5 * Math.sin(m.ph * 2.4); if (on > 0.25) box(x, y, x + P, y + P, PAL.white, 1, 0, 10, 0); rd.cineL.push([m.x, m.y, 1.0 * t, 0.45 * on, [0.62, 1.0, 0.42]]); }
   }
 }
@@ -352,7 +355,9 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
 const POKE = { reach: 0.5, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
   kinds: { sakura: { sway: 0.06, shed: 'petal', n: 8 }, scarecrow: { sway: 0.09, bird: true }, koinobori: { sway: 0.05 }, bonsai: { sway: 0.08, shed: 'needle', n: 5 },
     bats: { sway: 0, bats: true }, cart: { sway: 0.06, clunk: true },   // (the Mine's: sleeping bats wake and fly off, a cart rocks on its rails)
-    bell: { sway: 0.05, ding: true }, pine: { sway: 0.06, shed: 'snow', n: 6 }, snowman: { sway: 0.07 } } };   // (Fuji's: a rung bell nudged dings low, a pine sheds snow, a
+    bell: { sway: 0.05, ding: true }, pine: { sway: 0.06, shed: 'snow', n: 6 }, snowman: { sway: 0.07 },   // (Fuji's: a rung bell nudged dings low, a pine sheds snow, a
+    gull: { sway: 0, bird: true, grey: true }, flags: { sway: 0.05 }, raft: { sway: 0, splash: true } } };   // (the Sea's: a gull flies off its post, the big-catch flags
+    // flutter, a raft landed on splashes)
     // snowman's bucket wobbles)
 function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
   const k = POKE.kinds[kind];
@@ -363,9 +368,10 @@ function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
     P.t = T; P.s = Math.min(1, 0.4 + (CINE.hv || 0) / (10 * lv.R)); P.d = H.cx < (x0 + x1) / 2 ? 1 : -1;
     if (k.shed) for (let i = 0, n = Math.max(1, Math.round(k.n * P.s * (POKE.still ? 0.4 : 1))); i < n; i++)
       CINE.fx.push({ k: k.shed, x: x0 + Math.random() * (x1 - x0), y: y0 + Math.random() * (y1 - y0) * 0.5, vx: P.d * (15 + Math.random() * 35), vy: 5 + Math.random() * 20, ph: Math.random() * 6.28, on: r, life: 0 });
-    if (k.bird && perch && P.back <= T) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0 }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }
+    if (k.bird && perch && P.back <= T) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0, ink: k.grey ? PAL.gray : null }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }
+    if (k.splash) for (let i = 0; i < 6; i++) CINE.fx.push({ k: 'drop', x: i % 2 ? x0 : x1, y: y1, vx: (i % 2 ? -1 : 1) * (25 + Math.random() * 35), vy: -(70 + Math.random() * 60), life: 0 });   // (off its ends)
     if (k.bats && perch && P.back <= T) { perch.forEach(([x, y], i) => CINE.fx.push({ k: 'bat', x, y, vx: P.d * (50 + Math.random() * 70) * (i % 2 ? 1 : -0.6), vy: -(60 + Math.random() * 90), life: -0.12 * i })); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.2, 2.4); }   // (one after another)
-    if (typeof sound !== 'undefined') { if (k.clunk) sound.play('land', 0.25, 0.6); else if (k.ding) sound.note(0, 0.12); else if (!k.bats && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s); }   // (a ding
+    if (typeof sound !== 'undefined') { if (k.clunk) sound.play('land', 0.25, 0.6); else if (k.splash) sound.play('bubble', 0.18, 0.7); else if (k.ding) sound.note(0, 0.12); else if (!k.bats && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s); }   // (a ding
     // lower and quieter than the task's ring)
   }
   P.was = inside;
@@ -385,7 +391,12 @@ function cineFx(g, lv, cam, H, box, dt) {
     if (f.k === 'bird') {
       f.x += f.vx * dt; f.y += f.vy * dt; f.vy -= 40 * dt;
       if (f.y < cam - 60 || f.x < lv.l - 40 || f.x > lv.r + 40) { F.splice(i, 1); continue; }
-      cineSpr(box, CRITTER[(Math.floor(f.life * 9) % 2 ? 'crowUp' : 'crowDown') + (f.vx > 0 ? '' : 'L')], f.x, f.y, ink); continue;
+      cineSpr(box, CRITTER[(Math.floor(f.life * 9) % 2 ? 'crowUp' : 'crowDown') + (f.vx > 0 ? '' : 'L')], f.x, f.y, f.ink || ink); continue;
+    }
+    if (f.k === 'drop') {   // a drop of water off a raft: up, then down into the water
+      f.x += f.vx * dt; f.vy += 420 * dt; f.y += f.vy * dt;
+      if (f.life > 1.2 || f.y > cam + H + 30) { F.splice(i, 1); continue; }
+      const x = snap(f.x), y = snap(f.y); box(x, y, x + P, y + P, PAL.blue, 1, 0, 10, 0); continue;
     }
     if (f.k === 'bat') {   // a bat woken: it drops, then flaps off up, zigzagging (life < 0: still waiting its turn, hanging)
       if (f.life < 0) continue;

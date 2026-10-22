@@ -672,7 +672,7 @@ class Game {
     this.tier = save.wins > 0 ? Math.min(save.tier || (save.hard ? 1 : 0), save.tierMax || 1) : 0; this.hard = this.tier > 0;   // the hard mode's tier (an old save's hard mode: tier 1)
     this.endless = false; this.loop = 0;
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0; this.syns = [];
-    this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0;
+    this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0; this.cardDue = null;
     this.mode = 'run'; this.rc = null; this.ci = -1; this.lastBy = null; this.daily = null;   // the random run; playLevel makes it a campaign level
     const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
@@ -1162,11 +1162,17 @@ class Game {
   // keeps over its head; critters keep clear of the hero.
   folkStep(dt) {
     const lv = this.lv, H = this.hero, R = this.R, near = (x, y, d) => Math.hypot(H.cx - x, H.cy - y) < d;
+    if (this.cardDue && (this.cardDue.t -= dt) <= 0) { const id = this.cardDue.id; this.cardDue = null; this.story(id); }   // a story card due a moment after its moment (RIBBON)
     for (let i = lv.folk.length - 1; i >= 0; i--) {
       const f = lv.folk[i], b = f.body;
       if (f.kind === 'cage' && b) {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
+      else if (f.kind === 'ribbon') {   // the crow in the red cord (RIBBON): a touch frees it; then off it flies
+        f.t += dt;
+        if (!f.fly && Math.abs(H.cx - f.x) < RIBBON.reach * R && H.maxY > f.y - 2 * R && H.minY < f.y) this.untangle(f);
+        if (f.fly) { f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R) lv.folk.splice(i, 1); }
+      }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
         if (!f.fly && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
         if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
@@ -1179,6 +1185,15 @@ class Game {
       }
     }
     this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
+  }
+  untangle(f) {   // the crow in the red cord set free (RIBBON): sparks, its thanks and coins, off up it flies with the cord on it, and the story's card II
+    const R = this.R, lv = this.lv;   // a moment after (behind ?story till the owner's «да», as card I)
+    f.fly = true; f.t = 0; f.vx = f.dir * 70; f.vy = -190;
+    if (lv.gone && !this.well) lv.gone.push(f.id);
+    sparkFx(f.x, f.y - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red], 0.6); fx.ring(f.x, f.y - R, 1.6 * R, INK.white);
+    sound.play('bubble', 0.9, 1.4); sound.play('buy', 0.6, 1.2); haptics.buzz(16);
+    this.drop(f.x, f.y - 2 * R, FOLK.coins); ui.toast(L2(RIBBON.thanks) + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400);
+    if (STORY_LIVE) this.cardDue = { id: 'village_crow', t: RIBBON.card };
   }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
     const H = this.hero, lv = this.lv;

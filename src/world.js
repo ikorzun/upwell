@@ -184,7 +184,15 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
 // Fuji's cranes (the owner's pick, research/variants/fuji-cranes-1-px.png A): a crane flying, its neck out, its legs trailing, wings up and down
 CRITTER.craneUp = ['........#####...................', '.........######.................', '.....###########................', '.......#########................', '........#########...............', '......###########...............', '........#########........#####..', '.........#########.##########.##', '.........##############.........', '......#############.............', '.######...#######...............', '................................', '................................', '................................', '................................', '................................', '................................', '................................'];
 CRITTER.craneDown = ['................................', '................................', '................................', '................................', '................................', '................................', '.........................#####..', '...........#######.##########.##', '.........##############.........', '......#############.............', '.######..#########..............', '........#########...............', '......###########...............', '........#########...............', '.......#########................', '.....###########................', '.........######.................', '........#####...................'];
-for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// The crow in the red cord (RIBBON): the cord over a crow sitting (CRITTER.crow's 24 x 16), wound across its body, an end hanging off it
+CRITTER.cord = ['........................', '........................', '........................', '........................', '.........##......##.....',
+  '..........##....##......', '...........##..##.......', '............####........', '.............##.........', '............####........', '...........##..##.......',
+  '..........##....###.....', '.........##.......##....', '..................##....', '...................##...', '....................##..'];   // (two pixels thick: read from afar)
+for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'cord']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// The crow in the red cord (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
+// (the chunk 'ribbon', 1-3's set piece), flapping in the cord now and then; a touch frees it, coins and its thanks, off it flies with the cord on it,
+// and `card` s later the card (STORY village_crow, behind ?story till the owner's «да»)
+const RIBBON = { card: 0.9, reach: 1.3, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the shaft (DEPTH), the beams' and gondolas' cables too
@@ -220,7 +228,7 @@ const kitThing = (lv, r) => {
   const clear = (x0, y0, x1, y1) => !lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1) && !lv.rects.some((q) => !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
   const steady = (min) => !(r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.crack || r.cage || r.slick || r.magnet) && (wl || wr) && !(wl && wr) && w >= min * t   // (a row across the shaft is a way through: the tutorial's helmet breaks one)
-    && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+    && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
   let out = null;
   if (th.village) {   // by a hash of its height, so that two ledges a beat apart are not alike
     const k = Math.floor(((Math.imul(Math.round(b / t), 0x9e3779b1) >>> 0) / 4294967296) * 6);
@@ -739,8 +747,8 @@ const CAMPAIGN = [
 // World 1, Tokyo (the owner's first world now, at first a world 4; its kit in the renderer, see THEMES.tokyo): the first steps, in the town at night,
 // one new thing a level (the digest §3): jumps and springs, crawlers and the first gate, shop awnings that bounce, the helmet, a peak, the bonus,
 // gondolas, the level crossing, Aunt Moti's shop; the Tram (BOSSES.tram). STREET is its pool before the awnings, and
-// the air conditioners come in from the fourth level (aircons: false before). Its runes: a lattice, a lantern, a lit window (some stopped climbing
-// and built a town; its lights hid the Light: the tapestries go with their worlds, owner).
+// the air conditioners come in from the fourth level (aircons: false before). Its runes: a lattice, a lantern, a lit window (the city's lights hid
+// the Moon, a friend helped find it: Mochi's story since fedc427; the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'The city\'s lights hid the Moon.\nA friend helped find it again.', es: 'Las luces de la ciudad ocultaron la Luna.\nUn amigo ayudó a encontrarla.', pt: 'As luzes da cidade esconderam a Lua.\nUm amigo ajudou a encontrá-la.', ja: 'まちの あかりが つきを かくした。\nともだちが また みつけて くれた。' }, levels: [
   { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0.35, candy: [], safe: true, aircons: false, seed: 3111,
     news: { en: 'jumps and springs', es: 'saltos y resortes', pt: 'pulos e molas', ja: 'ジャンプと バネ' } },
@@ -846,8 +854,8 @@ const CAMPAIGN = [
 ] },
 // World 1, the Village (the Mine's world until 4084599; at first world 3): how to climb, crumbling blocks, spitters, the pit's waves and a fat
 // spitter, a peak, the bonus, moving planks, a peak, Moti's shop; the Cork's dive. Its runes the story's first (since 2026-10-21, when the old
-// Mine's went to the Mine): the Heat, a drop like the hero, the Light (we all came from the Heat; we all climb to the Light). The worm stays in
-// the random run (user).
+// Mine's went to the Mine): the Heat, a drop like the hero, the Light (since fedc427 Mochi's story: it fell from the Moon's light, kindness its first
+// step back). The worm stays in the random run (user).
 { world: WORLDS[2], runes: 'VhS', lore: { en: 'Mochi fell from the Moon\'s light.\nKindness was the first step back.', es: 'Mochi cayó de la luz de la Luna.\nLa bondad fue el primer paso de vuelta.', pt: 'Mochi caiu da luz da Lua.\nA bondade foi o primeiro passo de volta.', ja: 'モチは つきの ひかりから おちた。\nやさしさが かえりみちの いっぽめ。' }, levels: [
   { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutShop', 'tutEnemy', 'tutHelmet', 'tutMix', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
     intro: [], enemies: ['crawler'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,   // the tutorial (owner): CHUNKS.tut*, in their order
@@ -857,7 +865,10 @@ const CAMPAIGN = [
     // round 2: «Начинай все по списку»): its one idea bridges of boards falling behind the hero, met (a crumbling block), applied (a bridge across), varied (bridges by
     // turns up the shaft), with the walls (the towers' channel); enemies more and in pairs, decor less; the walls in the pool (moss, chimneys)
     news: { en: 'falling bridges', es: 'puentes que caen', pt: 'pontes que caem', ja: 'おちる はし' } },   // (short: one line at 320 px; «keep moving» is the crumble hint's)
-  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler', 'tumbler'], foes: 0.45, candy: ['bubble'], seed: 4106,
+  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: { mosswall: 2, chimney: 1, stairs: 2, shelves: 1, planks: 1, rubberwall: 1, crumble: 1 }, intro: [],   // by the
+    motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler', 'tumbler'], foes: 0.4, pair: 0.15, candy: ['bubble'], seed: 4106,   // practice
+    // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow in
+    // the red cord midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers and tumblers
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.55, pair: 0.1, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
@@ -1161,6 +1172,7 @@ const UNLOCKS = [
 //   o  coin   O  big coin   B  bubble in the wall (a shop or a stash)
 //   X  cracked block: a head-butt from below (or a smash) breaks it for good — the way into a stash in the wall
 //   Y  a stalactite under the block above: it falls on a hero passing under it   A  an arena's middle (waves of enemies)
+//   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   r  the crow in the red cord on the ledge under it (RIBBON)
 const CHUNKS = {
   stairs: { d: 1, rows: [
     '............',
@@ -1333,6 +1345,53 @@ const CHUNKS = {
     '####....####',
     '####....####',
     '............',
+    '............'] },
+  spitstair: { d: 1, rows: [   // steps up by turns to a spitter on the ledge at their top (p): it swells and lobs a blob where the hero is, so climb on, then stomp it
+    '............',   // (1-3's own, my r6: «лестницы под плевками плевунов»)
+    '.p..........',
+    '####........',
+    '......o.....',
+    '............',
+    '.....###....',
+    '............',
+    '..........o.',
+    '.........###',
+    '............',
+    '............',
+    '....###.....',
+    '............'] },
+  spitwall: { d: 2, rows: [   // a chimney by moss on the shaft's wall, a spitter on its block's top: up the moss under its blobs, then stomp it (the hero's
+    '............',   // own surfaces the way up, owner: «платформ слишком много… герой может липнуть к стенам»). A plank over the channel, level with the
+    '..........p.',   // block's top: up through it, out onto a floor across the shaft whatever the next chunk has over the channel (the next one's block
+    '{====#######',   // over it, the bot clung to the moss under it); the channel 7 tiles
+    '{....#######',
+    '{..o.#######',
+    '{....#######',
+    '{....#######',
+    '{..o.#######',
+    '{....#######',
+    '{....~~~~~~~',
+    '............'] },
+  spitbridge: { d: 2, rows: [   // 1-2's bridge of boards to a spitter's ledge up at the far wall: its boards fall behind, its blobs come, then stomp it
+    '............',
+    '..........p.',
+    '..........##',
+    '............',
+    '............',
+    '...o.o.o.o..',
+    '............',
+    '###DDDDDD...',
+    '............'] },
+  ribbon: { d: 1, rows: [   // the crow in the red cord (RIBBON, r) on a quiet ledge mid-shaft, short of both walls (come to from either side, the way on at
+    '............',   // either wall), coins under it; no enemy in the chunk (Level.place). (At a wall it was over the ledge under it: the bot stuck)
+    '............',
+    '###......###',
+    '............',
+    '............',
+    '.....r......',
+    '....####....',
+    '............',
+    '....o..o....',
     '............'] },
   lift: { d: 2, rows: [
     '............',
@@ -1818,7 +1877,7 @@ const CHUNKS = {
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
   walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
-  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
+  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
 const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from; warn: s a wave's places are shown before it comes
@@ -1827,7 +1886,7 @@ const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '('
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'h', '1', '2', '3', 'P', 'Q', 'V']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'p', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']);
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -2344,9 +2403,12 @@ class Level {
         let post = null; for (let q = 0; q < H && !post; q++) for (let kk = 0; kk < COLS; kk++) if (at(q, kk) === 'P') { post = { x: X(kk) + t / 2, foot: Y(q) }; break; }
         if (rr >= 0 && post) this.kines.push({ x: (X(k) + X(runEnd(r, k, ch) + 1)) / 2, yUp: Y(r), yHit: Y(rr + 1), px: post.x, foot: post.foot, y0: Y(r + 1) - 2 * t, y1: Y(rr + 1) });
       }
-      else if (ch === 'e') {   // a crawler on the ledge under it (the tutorial's)
+      else if (ch === 'e' || ch === 'p') {   // a crawler on the ledge under it (the tutorial's), a spitter (1-3's: the stairs under its blobs)
+        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = ch === 'e' ? 'crawler' : 'spitter';
+        if (q) this.spawns.push({ type, x, y: q.y0 - 1.2 * R * ENEMY[type].size, ledge: q });
+      } else if (ch === 'r') {   // the crow in the red cord on the ledge under it (RIBBON), facing into the shaft
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
-        if (q) this.spawns.push({ type: 'crawler', x, y: q.y0 - 1.2 * R * ENEMY.crawler.size, ledge: q });
+        if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
       else if (ch >= '1' && ch <= '9') this.signs.push({ id: +ch, x: X(k) + t / 2, y: Y(r) - t / 2 });   // a word of the tutorial's, said there
       else if (ch === 'A') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [] });
@@ -2416,7 +2478,7 @@ class Level {
       const k = 1 + ((this.rng() * (COLS - 2)) | 0);
       if (at(r, k) === '.' && at(r - 1, k) === '.') this.coin(X(k) + t / 2, Y(r) - t / 2, this.rng() < 0.12 ? 5 : 1);
     }
-    if (c !== CHUNKS.pocket) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at
+    if (c !== CHUNKS.pocket && c !== CHUNKS.ribbon) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at, and the crow's (RIBBON)
   }
   // Enemies for a chunk just laid, on what it is made of: a crawler along a clear ledge, a
   // climber up and down the longest stretch of bare wall, a circler round a free block.
@@ -3416,7 +3478,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       // a shallow grey pot, an orange trunk in an S and its branches, pads of green needles shaded down to the right; not under an air conditioner, nor by a cage or Moti
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
-        || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'))) continue;
+        || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))) continue;
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
       if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
       const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
@@ -3546,7 +3608,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork, the rule book: far off behind, the kamakura flat, the props small with
     // their thin parts and steam flat)
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
-      && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+      && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
     {   // Fuji far off (A): a cone of blue, its flat top and its snow grey down its ridges, two clouds; low on the screen, sinking a little as the climb goes on
       const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
@@ -4614,6 +4676,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
     else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: about a tile and a half long
+    else if (f.kind === 'ribbon') {   // the crow in the red cord (RIBBON): a flap in it now and then; free, its wings going and the cord's end streaming
+      const L = f.dir > 0 ? '' : 'L', P = PIX.size;
+      if (!f.fly) { spr(CRITTER[(f.t % 1.6 < 0.24 ? 'crowUp' : 'crow') + L], f.x, f.y, th.wall, 1, false); spr(CRITTER['cord' + L], f.x, f.y, PAL.red, 1, false); }
+      else {
+        spr(CRITTER[(Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') + L], f.x, f.y, th.wall, 1, false);
+        for (let i = 1; i <= 4; i++) box(f.x - f.dir * (4 + 2 * i) * P, f.y - (6 + Math.round(Math.sin(T * 14 + i) * 1.2)) * P, f.x - f.dir * (4 + 2 * i) * P + 2 * P, f.y - (5 + Math.round(Math.sin(T * 14 + i) * 1.2)) * P, PAL.red, 1, 0, 10, 0);
+      }
+    }
   }
   if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow

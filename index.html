@@ -223,9 +223,10 @@
   #pause { justify-content: flex-end; }
   #story { background: rgba(11, 7, 22, 0.92); justify-content: flex-end; padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* a story card over the game held under it (STORY) */
   .scard { position: relative; flex: none; margin-bottom: 14px; }   /* its size by ui.story: whole pixels, from the view */
-  .scard .sart { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; background: #0b0716; }   /* the art whole under the frame, its edge under the frame's (the pack: a few pixels) */
+  .scard .sart, .scard .slive { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }   /* the art whole under the frame, its edge under the frame's (the pack: a few pixels); the game's own motion over it (cardLive) */
+  .scard .sart { background: var(--sbg); }
   .scard .sframe { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .scard .snum { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 50%); --p: 2; color: #f7f3ee; background: #201638; box-shadow: 0 0 0 2px #ab80e5; padding: 2px 10px 4px; }
+  .scard .snum { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 50%); --p: 2; color: var(--sW); background: var(--sI); box-shadow: 0 0 0 2px var(--sL); padding: 2px 10px 4px; }   /* in the card's world's colours (STORY_INK) */
   .stitle { --p: 3; color: var(--white); filter: drop-shadow(0 3px 0 var(--ink)); }
   .summary { flex: 1; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
   .big.alt { --p: 3; background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as wide, a size smaller: not the main one (and "Controls: buttons" in one line) */

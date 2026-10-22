@@ -2180,27 +2180,73 @@ function px(text, max = Infinity, left = false) {
   }
   return e;
 }
-// Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once, new art from the pack's
-// prompts): `n` the numeral on the frame, `still` the approved art, `title` under the card. Game.story shows one, the game held under it till Next.
+// Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once; round 5: one
+// to each world, with the story's start and end, К5–К8 «А»): `n` the numeral on the frame (in the story's order; the bonus world a star like
+// its number; the end none till the last worlds are built), `still` the art, `cells` its own pixel grid (each card cut on the grid its art
+// was drawn on, К7), `ink` its world's colours for the frame (К6), `boss` the world whose boss beaten brings it (II and VI come after their own
+// episodes: the crow in 1-3, the treat in Tokyo), `title` under the card. Game.story shows one, the game held under it till Next.
 const STORY = {
-  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
-  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
-  city_friendship: { n: 'III', still: 'assets/cards/03_city_friendship.png', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [168, 252], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
+  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', cells: [192, 288], ink: 'village', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
+  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [159, 239], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
+  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [136, 203], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
+  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [162, 243], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
+  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [171, 256], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [167, 251], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
+  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [143, 214], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
+  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [192, 288], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
+  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
 };
+for (const k in STORY) STORY[k].id = k;
 const STORY_LIVE = /[?&]story\b/.test(location.search);   // (till the owner's «да» to the cards' art they come by themselves only with ?story,
 let storyLook = STORY_LIVE;   // which shows card I before the first level played, seen or not: a save well under way shows it too)
-// The cards' one frame, drawn here in its own pixels (the pack: «draw the thin frame procedurally… more reliable and always aligned»): indigo round a 2:3
-// window, an ivory keyline, lavender stepped corners, a crescent moon at its top with a vermilion knot either side, gold specks at its tips.
-function storyFrame() {
-  const I = '#201638', W = '#f7f3ee', L = '#ab80e5', R = '#f34545', G = '#ffb642', r = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
-  let s = `<path fill="${I}" fill-rule="evenodd" d="M0 0H128V192H0Z M4 6V186H124V6Z"/>` + r(3, 5, 122, 1, W) + r(3, 186, 122, 1, W) + r(3, 5, 1, 182, W) + r(124, 5, 1, 182, W);
+// A card's colours (К6): its world's ink over black as the game draws the world (DEPTH: the frame's band a quarter of the way from black to
+// the ink, the corners the ink), white, red and yellow as everywhere; the Moon's cards in the pack's own lavender; the Dark Forest grey.
+const STORY_INK = { moon: { I: '#201638', W: '#f7f3ee', L: '#ab80e5', R: '#f34545', G: '#ffb642', bg: '#0b0716' } };
+for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8ff'], ['sea', '#6fe0ee'], ['tokyo', '#c996ff'], ['blocks', '#c8c8c8'], ['sky', '#c996ff'], ['skazka', '#c8c8c8']]) {
+  const a = [1, 3, 5].map((i) => parseInt(ink.slice(i, i + 2), 16)), I = '#' + a.map((v) => Math.round(20 + (v - 20) * 0.25).toString(16).padStart(2, '0')).join('');
+  STORY_INK[k] = { I, W: '#f3f3f3', L: ink, R: '#f43e34', G: '#ffed57', bg: '#141414' };
+}
+STORY_INK.village = STORY_INK.mine;   // (the Village's world id is 'mine')
+// The cards' one frame, drawn here on the card's own grid (the pack: «draw the thin frame procedurally… more reliable and always aligned»;
+// the owner's К7: one pixel size in a card, the frame's too): its band round a 2:3 window, a white keyline, stepped corners in the ink, a
+// crescent moon at its top with a red knot either side, a yellow speck at each tip. Sizes in the pack's frame of 128 across (`u` cells to one).
+function storyFrame(f, w, h) {
+  const u = w / 128, q = (v) => Math.max(1, Math.round(v * u)), r = (x, y, ww, hh, c) => `<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${c}"/>`;
+  const B = q(4), T = q(6), cx = Math.round(w / 2);
+  let s = `<path fill="${f.I}" fill-rule="evenodd" d="M0 0H${w}V${h}H0Z M${B} ${T}V${h - T}H${w - B}V${T}Z"/>` + r(B - 1, T - 1, w - 2 * B + 2, 1, f.W) + r(B - 1, h - T, w - 2 * B + 2, 1, f.W) + r(B - 1, T - 1, 1, h - 2 * T + 2, f.W) + r(w - B, T - 1, 1, h - 2 * T + 2, f.W);
   for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {   // a corner: an L along each edge and a step inside it
-    const X = (x, w) => (sx > 0 ? x : 128 - x - w), Y = (y, h) => (sy > 0 ? y : 192 - y - h);
-    s += r(X(0, 12), Y(0, 2), 12, 2, L) + r(X(0, 2), Y(0, 14), 2, 14, L) + r(X(5, 3), Y(8, 3), 3, 3, L) + r(X(0, 1), Y(0, 1), 1, 1, G);
+    const X = (x, ww) => (sx > 0 ? x : w - x - ww), Y = (y, hh) => (sy > 0 ? y : h - y - hh);
+    s += r(X(0, q(12)), Y(0, q(2)), q(12), q(2), f.L) + r(X(0, q(2)), Y(0, q(14)), q(2), q(14), f.L) + r(X(q(5), q(3)), Y(q(8), q(3)), q(3), q(3), f.L) + r(X(0, q(1)), Y(0, q(1)), q(1), q(1), f.G);
   }
-  s += `<circle cx="64" cy="4" r="7" fill="${I}"/><circle cx="64" cy="4" r="6" fill="none" stroke="${L}" stroke-width="1"/><circle cx="63" cy="4" r="3.5" fill="${W}"/><circle cx="65" cy="3" r="3" fill="${I}"/>`;
-  s += r(53, 2, 3, 3, R) + r(72, 2, 3, 3, R);
-  return `<svg class="sframe" viewBox="0 0 128 192" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
+  s += `<circle cx="${cx}" cy="${q(4)}" r="${q(7)}" fill="${f.I}"/><circle cx="${cx}" cy="${q(4)}" r="${q(6)}" fill="none" stroke="${f.L}" stroke-width="${q(1)}"/><circle cx="${cx - q(1)}" cy="${q(4)}" r="${3.5 * u}" fill="${f.W}"/><circle cx="${cx + q(1)}" cy="${q(3)}" r="${3 * u}" fill="${f.I}"/>`;
+  s += r(cx - q(11), q(2), q(3), q(3), f.R) + r(cx + q(8), q(2), q(3), q(3), f.R);
+  return `<svg class="sframe" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
+}
+// A card comes alive by the game itself (owner, К4 «А»: as the preview), on a canvas of its cells over the art: the eyes shut for two steps of
+// eight a second every 3.5 s, small specks dim to the mid tone in turn, the three biggest lights' edges dip to the ink now and then; all
+// from assets/cards/live.json (scratchpad cards3/live.py over the art). Still for those who ask the system for less motion.
+const LIVE = { step: 125, blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
+let liveData = null;
+function cardLive(c, card) {
+  const [w, h] = c.cells, cv = document.createElement('canvas'), g = cv.getContext('2d');
+  cv.className = 'slive'; cv.width = w; cv.height = h; card.insertBefore(cv, card.querySelector('.sframe'));
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return { stop() {} };
+  let f = 0, L = null;
+  (liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))).then((j) => { L = j[c.id] || null; });
+  const fill = (cells, col) => { g.fillStyle = col; for (const [x, y] of cells) g.fillRect(x, y, 1, 1); };
+  const timer = setInterval(() => {
+    if (!L) return;
+    f++; g.clearRect(0, 0, w, h);
+    if (LIVE.blink.includes(f % LIVE.every)) for (const e of L.eyes) {   // a blink: the eye white, a lid across it, its ends a cell up
+      const [x, y, ew, eh] = e.box, ly = y + Math.floor(eh * 0.6);
+      fill(e.cells, L.pal[4]); g.fillStyle = L.pal[0];
+      for (let i = 0; i < ew; i++) g.fillRect(x + i, ly - (ew >= 4 && (i === 0 || i === ew - 1) ? 1 : 0), 1, 1);
+    }
+    L.twinkle.forEach((t, i) => { if ((f + i * 5) % 12 < 3) fill(t, L.pal[2]); });
+    L.lights.forEach((l, i) => { if (!LIVE.flick[(f + i * 4) % LIVE.flick.length]) fill(l, L.pal[3]); });
+  }, LIVE.step);
+  return { stop() { clearInterval(timer); } };
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
@@ -2354,7 +2400,7 @@ const ui = {
     const p = this.panel('result'), cw = CAMPAIGN[game.world], cloth = el('div', 'cloth');
     for (const [k, ch] of [...cw.runes].entries()) { const r = document.createElement('span'); r.className = 'rune r' + k; r.textContent = ch; cloth.append(r); }
     cloth.setAttribute('aria-hidden', 'true');
-    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => this.worldDone()), 'next'));
+    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => game.story(STORY_LIVE && (Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
   },
   worldDone() {   // its boss beaten, after its tapestry: on into the next world on the line, or word of it coming (a bonus world: back to its map)
     let nw = game.world + 1; while (nw < CAMPAIGN.length && gated(nw)) nw++;
@@ -2446,13 +2492,15 @@ const ui = {
     p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, ...(d25 ? [d25] : []), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
-    const p = this.panel('story'), card = el('div', 'scard'), art = new Image();
-    const fit = Math.min((view.w - 16) / 256, (view.h - 180) / 384), d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // the pack's
-    card.style.width = 256 * k + 'px'; card.style.height = 384 * k + 'px';   // whole pixels: a whole number of the screen's to each of the art's, the most that fits the view as layout
-    // measured it (a CSS 100vh is taller than the page under iOS Safari's bar), unless that loses over 30% of it (a small screen: then as it fits)
+    const p = this.panel('story'), card = el('div', 'scard'), art = new Image(), [w, h] = c.cells, f = STORY_INK[c.ink];
+    const box = Math.min(view.w - 16, (view.h - 180) * 2 / 3), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // (the view as
+    card.style.width = w * k + 'px'; card.style.height = h * k + 'px';   // layout measured it: a CSS 100vh is taller than the page under iOS Safari's bar) whole pixels: a whole number of the
+    // screen's to each of the art's cells, the most that fits a 2:3 box (cards drawn on finer grids a little smaller), unless that loses over 30% of it (then as it fits)
+    for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
     art.className = 'sart'; art.alt = L2(c.title); art.decoding = 'async'; art.src = c.still;
-    card.innerHTML = storyFrame(); card.prepend(art); card.append(el('div', 'snum', c.n));
-    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', done), 'next'));
+    card.innerHTML = storyFrame(f, w, h); card.prepend(art); if (c.n) card.append(el('div', 'snum', c.n));
+    const live = cardLive(c, card);
+    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', () => { live.stop(); done(); }), 'next'));
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');

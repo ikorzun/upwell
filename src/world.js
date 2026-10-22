@@ -2377,11 +2377,14 @@ class Level {
   flavour(from) {
     const w = this.world;
     if (w.clouds) { for (const r of this.rects.slice(from)) if (r.plank && !r.move && !(r.x0 <= this.l + 1 || r.x1 >= this.r - 1)) { r.crumble = true; r.cloud = true; } return; }   // the Skyscraper: a free plank is a cloud and gives way (its kit: a cloud always dissolves, a catwalk off a wall holds)
-    if (w.awnings) {   // Tokyo: a plank off a wall is a shop's awning, and an awning always bounces (its kit); but none within a throw's reach of another over or under
-      // it (owner: «эти платформы не должны быть расположены так близко, иначе сильно колбасит героя между ними»): that one is a steel beam
-      const reach = BOUNCY.v ** 2 * JUMP.height * this.R + this.tile, t = this.tile, aw = this.rects.filter((q) => q.bouncy);
-      for (const r of this.rects.slice(from).sort((a, b) => b.y0 - a.y0)) if (r.plank && !r.move && (r.x0 <= this.l + 1 || r.x1 >= this.r - 1)
-        && !aw.some((q) => q.x1 > r.x0 - t / 2 && q.x0 < r.x1 + t / 2 && Math.abs(q.y0 - r.y0) < reach)) { r.bouncy = true; aw.push(r); }
+    if (w.awnings) {   // Tokyo: a plank off a wall is a shop's awning, and an awning bounces (its kit); but of two awnings a jump apart, one over the other, only
+      // the upper (owner: «эти платформы не должны быть расположены так близко, иначе сильно колбасит героя между ними»): the lower is a steel beam, a jump
+      // under it, and the upper keeps its throw where the level wants it (c796bcc kept the lower, and 5-7's way up at 145 m was lost: its throw went past a
+      // block). Two a jump and more apart both bounce: the upper is out of a jump's reach. All of them laid over again with each chunk, from the top down
+      const t = this.tile, near = JUMP.height * this.R - t / 2, aw = [];
+      for (const r of this.rects.filter((q) => q.plank && !q.move && (q.x0 <= this.l + 1 || q.x1 >= this.r - 1)).sort((a, b) => a.y0 - b.y0)) {
+        r.bouncy = !aw.some((q) => q.x1 > r.x0 - t / 2 && q.x0 < r.x1 + t / 2 && r.y0 - q.y0 <= near); if (r.bouncy) aw.push(r);
+      }
       return;
     }
     if (this.rc || !(w.bouncy || w.magnet)) return;

@@ -20,7 +20,7 @@ const STR = {
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
-    noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
+    noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
     random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', bookTap: 'Tap one to read it', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
@@ -37,7 +37,7 @@ const STR = {
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
-    noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
+    noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
     random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', bookTap: 'Toca uno para leerlo', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
@@ -54,7 +54,7 @@ const STR = {
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
-    noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
+    noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
     random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', bookTap: 'Toque em um para ler', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
@@ -71,7 +71,7 @@ const STR = {
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
-    noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
+    noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
     random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', bookTap: 'さわって よもう', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
@@ -94,7 +94,7 @@ const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, h
 // The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
 // purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
 // run's progress stays in save.run, for the random run.
-const campFresh = () => ({ last: 1, stars: [], wallet: 0, builds: [], fails: {}, runes: [] });   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level   // last: the level played last
+const campFresh = () => ({ last: 1, stars: [], wallet: 0, builds: [], fails: {}, runes: [], medals: {} });   // medals: a level's mastery medals won (MEDAL), bits: 1 its time, 2 no heart lost   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level   // last: the level played last
 const met = (kind, id) => { const b = save.book = save.book || {}; const k = b[kind] = b[kind] || {}; if (!k[id]) { k[id] = 1; persist(); } };   // into the book
 // The daily well (owner, 2026-10-20: the day's three Tokyo recipes): three levels of the Tokyo map in a row, one from its tiers 2-3,
 // one from 4-5, one from 7-8, each on a column the day picks, laid on the day's seeds: the same for everyone (the day by the platform's
@@ -186,7 +186,7 @@ shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
-  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = [];
+  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = []; if (!c.medals || typeof c.medals !== 'object') c.medals = {};   // (v6 to v7: the medals, MEDAL)
   if ((save.v | 0) < 3) {   // v2 to v3: a world's ten levels in a row onto its map, each the middle of its tier (a boss's losses with it)
     const at = (i) => Math.floor(i / 10) * 30 + (i % 10) * 3 + 1, old = c.stars, f = {};
     c.stars = []; old.forEach((n, i) => { if (n > 0) c.stars[at(i)] = n; });
@@ -214,11 +214,12 @@ function loadSave(s) {
     for (const k in c.fails) { if (!/^\d+$/.test(k)) f[k] = c.fails[k]; else if (at(+k) >= 0) f[at(+k)] = c.fails[k]; }
     c.builds.forEach((u, w) => { if (to(w) >= 0) b[to(w)] = u; });
     c.fails = f; c.builds = b; c.runes = c.runes.map(to).filter((w) => w >= 0); c.last = c.last != null && at(c.last) >= 0 ? at(c.last) : 1;
+    const md = {}; for (const k in c.medals) if (/^\d+$/.test(k) && at(+k) >= 0) md[at(+k)] = c.medals[k]; c.medals = md;   // and its medals
     if (save.cur) { if (at(save.cur.ci) >= 0) save.cur.ci = at(save.cur.ci); else delete save.cur; }   // a level under way goes with its world too
   }
   c.order = ids;   // the worlds' order this save is in (the next change follows it)
   delete c.open;   // what is open comes of the stars (campOpen)
-  save.v = 6; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
+  save.v = 7; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
 let saveIn = false, cloud = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
@@ -564,7 +565,7 @@ class Boss {
     this.st += dt;
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
     if (ph >= 1 && !lv.crumbleTime) { lv.crumbleTime = CART.crumble[0]; lv.crumbleBack = CART.crumble[1]; }
-    if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
+    if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move && r.move.v) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
     let vx = 0;
     if (this.state === 'hover') {
       vx = (this.dir * (rail.x1 - rail.x0) / CART.pass[ph]) * k;
@@ -688,7 +689,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -731,10 +732,12 @@ class Game {
     const done = new Set(), level = (lv) => {
       if (!lv || done.has(lv)) return; done.add(lv);   // (a room is the shaft's door's too: once)
       lv.r = X(lv.r); lv.R *= k; lv.tile *= k; for (const key of ['floor', 'top', 'endY', 'capY', 'cam']) lv[key] = Y(lv[key]);
-      for (const r of lv.rects) { box(r); if (r.move) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
+      for (const r of lv.rects) { box(r); if (r.move && !r.move.wheel && !r.move.seesaw) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
       for (const o of [...lv.spikes, ...lv.bubbles]) { box(o); xy(o); }
       for (const c of [...lv.coats, ...(lv.winds || [])]) { c.y0 = Y(c.y0); c.y1 = Y(c.y1); }
       for (const w of lv.winds || []) { w.px = X(w.px); w.py = Y(w.py); }   // (a koinobori's pole)
+      for (const sw of lv.seesaws || []) { sw.px = X(sw.px); for (const key of ['py', 'foot', 'y0', 'y1']) sw[key] = Y(sw[key]); sw.L *= k; }   // (a seesaw, SEESAW)
+      for (const wh of lv.wheels || []) { wh.cx = X(wh.cx); for (const key of ['cy', 'y0', 'y1']) wh[key] = Y(wh[key]); wh.rad *= k; wh.hang *= k; }   // (a mill, MILL: its boards are boxes, above)
       for (const kn of lv.kines || []) { kn.x = X(kn.x); kn.px = X(kn.px); for (const key of ['yUp', 'yHit', 'foot', 'y0', 'y1']) kn[key] = Y(kn[key]); }   // (a pestle, MOCHI)
       for (const o of [lv.coins, lv.shots, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
       for (const sp of lv.spots || []) { const r = sp.r; xy(sp); sp.r = r; }   // (a pit's size is in R: it grows with R)
@@ -814,12 +817,13 @@ class Game {
     if (reb) { this.landUsed = true; this.missed = 0; H.face.surprise = Math.max(H.face.surprise, 0.7); if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
-    if (flat && !aimed && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
       if (input.dir) { vx = input.dir * JUMP.dash * this.R; vy = JUMP.dashDown * v; this.dashT = 0.15; fx.dust(H.cx - input.dir * H.R, H.minY, IMPACT.puffSpeed + 600); }   // the ceiling's friction off for a moment, or it drags the dash
       else { vx = 0; vy = JUMP.ceil * v; }
       rise = false;
     }
+    if (flat && !aimed && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
+    { const fr = H.floorRect; if (!inAir && !aimed && side === 0 && fr && fr.move && (fr.move.wheel || fr.move.seesaw) && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board or a seat: its way along with it (it carried the hero, with no pace of its own)
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
     if (reb) {   // a rebound: the squash let go, a white ring as big as the leap, sparks up
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 700); fx.ring(H.cx, foot, (1 + 0.8 * q) * R, INK.white); fx.ring(H.cx, foot, 0.7 * R, hc);
@@ -1030,6 +1034,7 @@ class Game {
     if (this.hitstop > 0) { this.hitstop -= dt; return; }
     const lv = this.lv, hero = this.hero, playing = st === 'play', h = dt / PHYS.substeps, sk2 = 2 * WORLD.skin;
     lv.update(dt, this);
+    { const r = hero.floorRect; if (r && r.move && (r.move.wheel || r.move.seesaw) && (hero.wallMask & 8)) hero.translate(r.dx, r.dy); }   // a mill's board or a seesaw's seat carries the hero standing on it, up and down too (MILL, SEESAW)
     if (st === 'clear' && lv.portal) { this.suck(dt); this.followStep(); }
     if (playing) {
       this.activate();
@@ -1238,6 +1243,7 @@ class Game {
     if (lv.boss && !lv.boss.dead && lv.boss.body.touchHero) this.meet(lv.boss);
     if (this.state !== 'play') return;
     if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
+    if (this.lv.trial) this.trialStep(dt);
     this.spikes(); this.fireStep(dt); this.fireTouch();
     if (this.state !== 'play') return;   // the fire ended a bonus level
     this.shots(dt); this.collect(dt); this.candies(dt); this.folkStep(dt); this.followStep(); this.setStep(dt);
@@ -1416,11 +1422,15 @@ class Game {
   }
   // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; a learning level never
   // takes the last (the digest §3: no losing while learning). False: none was lost.
+  parOf() {   // a campaign level's par for its time medal (MEDAL)
+    const lv = this.lv, m = lv.portal ? (lv.floor - lv.portal.y) / (R_PER_M * this.R) : 0;
+    return (this.rc && this.rc.par) || Math.max(MEDAL.min, MEDAL.step * Math.ceil((m * MEDAL.perM) / MEDAL.step));
+  }
   loseHeart() {
     if (this.bonus) return false;
     if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
     if (this.rc && this.rc.safe && this.hp <= 1) return false;
-    this.hp--; return true;
+    this.hp--; this.harmed = true; return true;   // (a heart lost: no clean medal this time, MEDAL; not `hurt`, the method that loses it)
   }
   room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
   roomFloor() { return Math.max(CAM.floorShow, view.keep + this.R); }   // a shop's or a stash's floor over the screen's bottom: over the touch keys, as the well's camera keeps the hero (step)
@@ -1429,7 +1439,7 @@ class Game {
   // pruned, so a fall after a long wall climb still finds it.
   markSafe(r) {
     const H = this.hero, x = H.cx;
-    if (r && (r.crumble || r.spring || r.cap || r.gone)) return;
+    if (r && (r.crumble || r.spring || r.cap || r.gone || (r.move && (r.move.wheel || r.move.seesaw)))) return;   // (nor a mill's board nor a seesaw's seat: they may be anywhere then)
     if (r) for (const s of this.lv.spikes) if (s.dir === 0 && Math.abs(s.y1 - r.y0) < 1 && s.x1 > x - H.R && s.x0 < x + H.R) return;
     const last = this.safes[this.safes.length - 1], dx = r ? x - r.x0 : x;
     if (last && last.r === r) { last.dx = dx; return; }
@@ -1447,7 +1457,7 @@ class Game {
     this.curAt = t0; const tl = lv.tile;
     save.cur = { ci: this.ci, seed: this.seed, order: this.rc.order || null, sig: lv.sig, y: (lv.floor - H.maxY) / tl, fire: lv.fire ? (lv.fire.y - H.maxY) / tl : null, hp: this.hp,
       coins: this.coins, got: lv.coinsTaken, kills: this.kills, m: this.levelM, t: lv.t, taken: lv.taken.slice(), gone: lv.gone.slice(), neon: [...lv.neonLit.keys()],
-      tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n) };
+      tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n), harmed: this.harmed };
     persist();
   }
   // Continue into the level under way (saveCur): the level laid again, what was taken and done off it, the hero on the highest steady ledge
@@ -1468,7 +1478,7 @@ class Game {
     this.invuln = HEALTH.invuln;   // a moment to look round
     lv.cam = Math.max(this.hero.cy - CAM.anchor * view.h, lv.capY - CAM.top);
     if (lv.fire) lv.fire.y = this.hero.maxY + Math.max(cur.fire == null ? 0 : cur.fire * tl, 0.6 * view.h);   // as far under it as it was, a breath at least
-    this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t;   // (this.kept: the purse at its start, so its coins count once)
+    this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t; this.harmed = !!cur.harmed;   // (this.kept: the purse at its start, so its coins count once)
     save.cur = cur; ui.toast(t('resumed'), 1800);
   }
   // Where a fall comes back to: the newest of those ledges still there, a little above it.
@@ -1674,7 +1684,7 @@ class Game {
   enterRoom(bub) {
     if (!bub.room) {
       const room = new Level();
-      room.reset({ kind: bub.kind, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor() });
+      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor() });
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
@@ -1682,7 +1692,7 @@ class Game {
     this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false; this.lv.cam = this.lv.floor + this.roomFloor() - view.h;   // (as it was built, the view as it is now)
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
-    aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
+    aimCancel(); ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
   }
   // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in the dark, with coins as rain and no
   // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).
@@ -1712,12 +1722,26 @@ class Game {
     well.cam = Math.max(this.hero.cy - CAM.anchor * view.h, well.capY - CAM.top); well.ensure(well.cam - view.h * LEVEL.ahead);
     this.regroup(); aimCancel(); ui.flash(); ui.toast(t('back'), 1400); sound.play('portal', 0.8, 1.2); haptics.buzz(20);
   }
+  trialStep(dt) {   // a trial room's clock and goal (TRIAL): on a moment after coming in; done in time, its pay dropped in; out of time, its coins go
+    const lv = this.lv, tr = lv.trial, R = this.R;
+    if (tr.state === 'ready') { if ((tr.t += dt) >= TRIAL.start) { tr.state = 'on'; tr.t = 0; } return; }   // (coins count from the way in: the throw in may take one or two)
+    if (tr.state !== 'on') return;
+    tr.t += dt; tr.got = lv.coinsTaken - tr.c0;
+    if (tr.got >= tr.n) {
+      tr.state = 'won'; this.drop((lv.l + lv.r) / 2, lv.capY + 3 * R, TRIAL.pay / 5, 5);
+      fx.ring(this.hero.cx, this.hero.cy, 2.4 * R, INK.coin); sound.play('combo', 1, 1.2); this.chime(); shake.add(3); ui.toast(tf('trialWon', { n: TRIAL.pay }), 2200);
+    } else if (tr.t >= tr.time) {
+      tr.state = 'lost';
+      for (const c of lv.coins) sparkFx(c.x, c.y, 5, -Math.PI / 2, Math.PI, [60, 160], [1, 2], [0.2, 0.4], [INK.coin, INK.white], 0.4);
+      lv.coins.length = 0; sound.play('deny', 0.9); ui.toast(t('timeUp'), 1600);
+    }
+  }
   leaveRoom() {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
     this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R); this.regroup();   // beside the door, on its ledge
     bub.cd = 1.2; aimCancel(); ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
-    if (bub.kind === 'treasure' && !room.coins.length) {   // a stash with all its coins taken: its way in closes behind the hero
+    if ((bub.kind === 'treasure' && !room.coins.length) || bub.kind === 'trial') {   // a stash with all its coins taken, or a trial (TRIAL: one try, left halfway or not): its way in closes behind the hero
       this.lv.bubbles.splice(this.lv.bubbles.indexOf(bub), 1);
       sparkFx(bub.x, bub.y, 14, -Math.PI / 2, Math.PI, [80, 240], [1.5, 3], [0.3, 0.6], [this.lv.theme.wall, INK.white], 0.6); fx.dust(bub.x, bub.y1, IMPACT.puffSpeed + 500);
     }
@@ -1754,6 +1778,11 @@ class Game {
     if (!this.bonus) {   // the third for every coin and every task (owner)
       this.stars = { n: 1 + half + (allCoins && tasks.every((q) => q.n >= q.of)), coins: [lv.coinsTaken, lv.coinTotal], tasks: tasks.map((q) => Object.assign({}, q)) };
       this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
+    }
+    this.medals = null;
+    if (!this.bonus && this.mode === 'camp' && this.daily == null) {   // the mastery medals (MEDAL): its time (the shaft's clock: a room's time is the room's), no heart lost
+      const c = save.camp, par = this.parOf(), got = (lv.t <= par ? 1 : 0) | (this.harmed ? 0 : 2), had = c.medals[this.ci] | 0;
+      c.medals[this.ci] = had | got; this.medals = { par, t: lv.t, got, had }; persist();
     }
     this.climbed += this.daily != null ? this.rc.len : this.levelM; this.levelM = 0;   // (the daily's: its whole length, where its medal stands)
     if (this.mode === 'camp' && !this.bonus) this.campDone(this.stars.n);
@@ -2190,6 +2219,16 @@ const ui = {
       p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
       if (st.tasks.length) { const tr = el('div', 'tasks'); tr.append(...st.tasks.map(taskEl)); p.append(tr); }   // and its tasks, done or not
     }
+    const md = game.medals;
+    if (md) {   // its mastery medals (MEDAL): the time (the par, and the time it took when missed) and no heart lost; one won now pops in after the stars
+      const row = el('div', 'mastery');
+      for (const [bit, on, off, text] of [[1, 'clock', 'clockOff', tf('medalTime', { p: md.par }) + (md.got & 1 ? '' : ' · ' + Math.ceil(md.t))], [2, 'heart', 'heartOff', t('medalClean')]]) {
+        const fresh = md.got & bit && !(md.had & bit), chip = el('div', 'mast' + (fresh ? ' new' : (md.got | md.had) & bit ? ' won' : ''));
+        chip.append(iconEl((md.got | md.had) & bit ? on : off), px(text)); row.append(chip);
+        if (fresh) setTimeout(() => sound.play('chime', 0.9, bit === 1 ? 1.5 : 1.7), 1500 + 200 * bit);
+      }
+      p.append(row);
+    }
   },
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
     const p = this.panel('result'), g = game, price = g.revivePrice(), boss = !!(g.rc && g.rc.boss), why = g.deathWhy();
@@ -2404,7 +2443,7 @@ const ui = {
     if (left) { gun.dataset.k = g.pow; gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
     const m = Math.floor(g.climbed + g.levelM);
     if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
-    const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : g.num;   // a bonus level counts its seconds down
+    const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.trial ? (g.lv.trial.state === 'on' ? `${g.lv.trial.got}/${g.lv.trial.n} · ${Math.max(0, Math.ceil(g.lv.trial.time - g.lv.trial.t))}` : t('trial')) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : g.num;   // a bonus level counts its seconds down
     if (st !== this.stage) { this.stage = st; $('stage').replaceChildren(px(st)); }
     const tk = (playing && !g.well && g.lv.tasks) || [], tkey = tk.map((q) => q.id + q.n + '/' + q.of).join();   // the level's tasks, how far each
     if (tkey !== this.tkey) { this.tkey = tkey; $('tasks').replaceChildren(...tk.map(taskEl)); view.hudB = 0; }   // (the HUD measured again)
@@ -2702,7 +2741,7 @@ const sound = {
   frame(g) {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const kind = g.lv.kind;
-    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
+    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' || kind === 'trial' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
     const duck = g.state === 'play' || g.state === 'menu' ? 1 : 0.35;
     if (duck !== this.duck) { this.duck = duck; this.mus.gain.setTargetAtTime(MUSIC_VOL * duck, this.ctx.currentTime, 0.2); }
   },

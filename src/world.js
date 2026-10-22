@@ -191,8 +191,8 @@ CRITTER.cord = ['........................', '........................', '.......
 for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'cord']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
 // The crow in the red cord (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
 // (the chunk 'ribbon', 1-3's set piece), flapping in the cord now and then; a touch frees it, coins and its thanks, off it flies with the cord on it,
-// and `card` s later the card (STORY village_crow, behind ?story till the owner's «да»)
-const RIBBON = { card: 0.9, reach: 1.3, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
+// and `card` s later the card (STORY village_crow, behind ?story till the owner's «да»), its thanks read first (a card's panel clears a toast)
+const RIBBON = { card: 2.4, reach: 1.3, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the shaft (DEPTH), the beams' and gondolas' cables too
@@ -870,8 +870,10 @@ const CAMPAIGN = [
     // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow in
     // the red cord midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers and tumblers
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.55, pair: 0.1, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,
-    news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1, spring: 1 }, intro: [],   // by the
+    motif: ['ambush', 'ambush2'], every: 3, steps: true, sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
+    // (round 2): its one idea the pit's waves: a small ambush every other chunk, on a floor mid-shaft, then between two towers; the arena and its fat spitter midway
+    news: { en: 'waves of enemies', es: 'oleadas enemigas', pt: 'ondas de inimigos', ja: 'てきの ウェーブ' } },   // (short: one line at 320 px; the arena says the rest)
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler', 'nurikabe'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
@@ -1171,7 +1173,7 @@ const UNLOCKS = [
 //   ~  moss under the block above (the only ceiling the hero hangs from, see CEIL)
 //   o  coin   O  big coin   B  bubble in the wall (a shop or a stash)
 //   X  cracked block: a head-butt from below (or a smash) breaks it for good — the way into a stash in the wall
-//   Y  a stalactite under the block above: it falls on a hero passing under it   A  an arena's middle (waves of enemies)
+//   Y  a stalactite under the block above: it falls on a hero passing under it   A  an arena's middle (waves of enemies)   a  an ambush's (AMBUSH)
 //   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   r  the crow in the red cord on the ledge under it (RIBBON)
 const CHUNKS = {
   stairs: { d: 1, rows: [
@@ -1344,6 +1346,33 @@ const CHUNKS = {
     '####.o..####',
     '####....####',
     '####....####',
+    '............',
+    '............'] },
+  ambush: { d: 1, rows: [   // a pit floor across the shaft, short of both walls, its ambush over it (AMBUSH, a): stood on, a wave of two drops in, its places shown
+    '............',   // by red rings first; the way on at either wall. The floor a plank, come up through from under
+    '............',
+    '###......###',
+    '............',
+    '..o......o..',
+    '............',
+    '.....a......',
+    '............',
+    '...======...',
+    '............',
+    '............'] },
+  ambush2: { d: 2, rows: [   // the pit between two towers (AMBUSH, a): its wave drops in; out by the towers' walls or up onto a tower's top (four rows over them:
+    '............',   // what the next chunk has over the pit is jumped round)
+    '............',
+    '............',
+    '............',
+    '###......###',
+    '###.o..o.###',
+    '###......###',
+    '###..a...###',
+    '###......###',
+    '###======###',
+    '............',   // (four rows under the towers: from a ledge at a wall under one, out to the middle and up through the plank)
+    '............',
     '............',
     '............'] },
   spitstair: { d: 1, rows: [   // steps up by turns to a spitter on the ledge at their top (p): it swells and lobs a blob where the hero is, so climb on, then stomp it
@@ -1877,16 +1906,19 @@ const CHUNKS = {
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
   walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
-  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
+  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], pit: ['ambush', 'ambush2'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
 const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from; warn: s a wave's places are shown before it comes
+// An ambush (owner, round 2: «Начинай все по списку»; my r6: 1-4, «яма с волнами врагов»): a small arena (a), stood on its floor its one wave of `waves`
+// dropping in, shown first as an arena's (ARENA.warn), no mini, `coins` big ones for it; left behind, nothing (1-4's motif)
+const AMBUSH = { waves: [2], coins: 2 };
 const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'p', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']);
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -2161,8 +2193,10 @@ class Level {
       if (p < 0.2) maxD = Math.min(maxD, 1);
       const lastKind = this.last && CHUNKS[this.last].kind, mid = p > 0.35 && p < 0.75;
       const once = (k) => k === 'rest' || (k === 'vault' && this.placed.some((q) => q.id === k));   // the rest only under the way out; one stash in the wall a level
-      const mo = this.rc && this.rc.motif, pool = mo && !mo.includes(this.last) && mo.some((k) => CHUNKS[k].d <= maxD) ? Object.fromEntries(mo.map((k) => [k, 1])) : this.rc ? this.rc.chunks : wd.chunks;   // a recipe's
-      // `motif`: one of its chunks every other chunk, from the first (owner, 2026-10-22: «A», one idea a level, its own thing on every screen)
+      const mo = this.rc && this.rc.motif, every = this.rc && this.rc.every, apart = mo && (every ? !this.placed.slice(1 - every).some((q) => mo.includes(q.id)) : !mo.includes(this.last));
+      const pool = apart && mo.some((k) => CHUNKS[k].d <= maxD) ? Object.fromEntries(mo.map((k) => [k, 1])) : this.rc ? this.rc.chunks : wd.chunks;   // a recipe's
+      // `motif`: one of its chunks every other chunk, from the first (owner, 2026-10-22: «A», one idea a level, its own thing on every screen); every
+      // `every`th one, a recipe's (1-4's ambushes, every third: one every other chunk held the hero too long)
       const fits = (k) => !mo || this.top - CHUNKS[k].rows.length * this.tile >= this.endY;   // a motif's level fills its height: none too tall for what is left (its chunks are)
       for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k) && fits(k)) w[k] = pool[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
       if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k) && fits(k)) w[k] = pool[k];   // a small pool: kinds may run
@@ -2411,7 +2445,7 @@ class Level {
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
       else if (ch >= '1' && ch <= '9') this.signs.push({ id: +ch, x: X(k) + t / 2, y: Y(r) - t / 2 });   // a word of the tutorial's, said there
-      else if (ch === 'A') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [] });
+      else if (ch === 'A' || ch === 'a') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a' });   // (a: AMBUSH)
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, goal: this.pocketKind === 'trial' ? this.pocketGoal : undefined, side, cd: 0, room: null });
@@ -2428,6 +2462,7 @@ class Level {
       if (r.plank || r.spring || r.slick || r.crumble || r.crack || r.moss || r.stair || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
       if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;
       if (this.rects.slice(from).some((q) => q.spring && over(q) && Math.abs(q.y1 - r.y0) < 1) || !(this.rng() < LEVEL.toPlank)) continue;
+      if (this.spawns.some((q) => q.ledge === r)) continue;   // nor one a chunk puts an enemy on (p, e): the hero would jump up through it into the enemy
       r.plank = true; r.y1 = r.y0 + LEVEL.plank * R;
     }
     // A ledge that stops short of a wall by less than the hero is wide leaves a slot nothing fits

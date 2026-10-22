@@ -1269,19 +1269,19 @@ class Game {
     for (const a of lv.arenas) {
       if (a.done) continue;
       if (a.on && H.cy < a.y - view.h) { a.done = true; continue; }   // left behind (its waves pruned below): over, and nothing paid
-      if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }
+      if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; if (!a.small) ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }   // (an ambush: its rings and the sound)
       if (a.drops) { if ((a.dropT -= dt) <= 0) this.arenaDrop(a); continue; }
       if (a.foes.some((e) => lv.enemies.includes(e))) continue;
-      if (a.wave < ARENA.waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
-      if (this.rc && this.rc.mini && !a.mini) {   // the last wave a mini-boss (MINI): a big spitter, dropping in, shown first as the waves are
+      if (a.wave < (a.small ? AMBUSH : ARENA).waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
+      if (this.rc && this.rc.mini && !a.mini && !a.small) {   // the last wave a mini-boss (MINI): a big spitter, dropping in, shown first as the waves are
         const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
         a.mini = true; a.foes = []; a.drops = [{ type: 'spitter', big: true, x: a.x, y: a.y - ARENA.drop * R, ledge: floor }]; a.dropT = ARENA.warn; ui.toast(t('miniSpit'), 1600); sound.play('bubble', 1, 0.5); continue;
       }
-      a.done = true; this.drop(a.x, a.y - R, ARENA.coins, 5); ui.toast(tf('arenaWon', { n: 5 * ARENA.coins }), 2000); sound.play('combo', 1, 1.1); shake.add(4);
+      const n = (a.small ? AMBUSH : ARENA).coins; a.done = true; this.drop(a.x, a.y - R, n, 5); ui.toast(tf('arenaWon', { n: 5 * n }), 2000); sound.play('combo', 1, 1.1); if (!a.small) shake.add(4);
     }
   }
   arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped, each where it will come shown first (arenaDrop)
-    const lv = this.lv, R = this.R, n = ARENA.waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini' && k !== 'tofu' && k !== 'tofuMini');   // (not a tofu: its four each would crowd the arena)
+    const lv = this.lv, R = this.R, n = (a.small ? AMBUSH : ARENA).waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini' && k !== 'tofu' && k !== 'tofuMini');   // (not a tofu: its four each would crowd the arena)
     const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
     a.foes = []; a.drops = []; a.dropT = ARENA.warn;
     for (let k = 0; k < n; k++) a.drops.push({ type: kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor });

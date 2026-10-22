@@ -14,7 +14,7 @@ const STR = {
     tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
-    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
+    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_rebound: 'Jump as you land: bounce higher!', rebound_ok: 'Boing! Right on the beat', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
     seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
     got_smash: 'Helmet! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
@@ -31,7 +31,7 @@ const STR = {
     tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
-    seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
+    seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_rebound: '¡Salta al aterrizar: rebotas más alto!', rebound_ok: '¡Boing! Justo a tiempo', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
     seen_splitter: 'El divisor se parte en dos', seen_chaser: 'El perseguidor te sigue por su pared',
     got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
@@ -48,7 +48,7 @@ const STR = {
     tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
-    seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
+    seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_rebound: 'Pule ao pousar: quica mais alto!', rebound_ok: 'Boing! Bem na hora', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
     seen_splitter: 'O divisor se parte em dois', seen_chaser: 'O perseguidor segue você pela parede',
     got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
@@ -65,7 +65,7 @@ const STR = {
     tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
-    seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
+    seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_rebound: 'ちゃくちの しゅんかんに ジャンプ: たかく はねる！', rebound_ok: 'ボヨン！ ぴったり', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
     seen_splitter: 'ブンレツは ふたつに わかれる', seen_chaser: 'オイカケは かべを つたって おってくる',
     got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
@@ -688,7 +688,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -804,7 +804,10 @@ class Game {
   jump(inAir, aimed) {
     const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || (!aimed && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
     const sup = !inAir && !aimed && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it
-    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : 1), rise = !aimed && !sup;
+    const reb = !inAir && !aimed && !sup && side === 0 && !ram && this.landT <= REBOUND.after && this.landV >= REBOUND.min * v, q = reb ? clamp(this.landV / v, 0, 1) : 0;   // in the beat of a hard landing
+    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : reb ? Math.sqrt(1 + REBOUND.k * q) : 1), rise = !aimed && !sup;
+    this.rebounded = reb;
+    if (reb) { this.landUsed = true; this.missed = 0; if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
@@ -813,12 +816,15 @@ class Game {
       rise = false;
     }
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
-    if (inAir || ram || sup) {
+    if (reb) {   // a rebound: the squash let go, a white ring as big as the leap, sparks up
+      fx.dust(H.cx, foot, IMPACT.puffSpeed + 700); fx.ring(H.cx, foot, (1 + 0.8 * q) * R, INK.white); fx.ring(H.cx, foot, 0.7 * R, hc);
+      sparkFx(H.cx, foot, 12, -Math.PI / 2, 1.2, [260, 620], [1.5, 3], [0.3, 0.55], [INK.white, hc], 0.3);
+    } else if (inAir || ram || sup) {
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 900); fx.ring(H.cx, foot, 0.8 * R, hc); fx.ring(H.cx, foot, 1.3 * R, INK.white);
       sparkFx(H.cx, foot, 16, Math.PI / 2, 1.0, [220, 560], [1.5, 3.2], [0.3, 0.6], [INK.white, hc, INK.white], 0.25);
     } else if (side === 1 || side === 2) sparkFx(side === 1 ? H.minX : H.maxX, H.cy, 9, side === 1 ? Math.PI : 0, 0.8, [120, 340], [1.2, 2.6], [0.25, 0.45], [INK.white, hc], 0.3);
     else if (side !== 4) sparkFx(H.cx, foot, 8, Math.PI / 2, 1.45, [90, 260], [1.2, 2.4], [0.2, 0.4], [INK.white, PAL.gray], 0.15);
-    sound.play(inAir || ram || sup ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8, ram ? 0.8 : sup ? 0.85 : 1);
+    if (reb) sound.play('spring', 0.75, 0.95 + 0.25 * q); else sound.play(inAir || ram || sup ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8, ram ? 0.8 : sup ? 0.85 : 1);
     setVel(H, vx, vy);
     unstick(H, JUMP.stickAfter);
     const sp = Math.hypot(vx, vy) || 1;
@@ -1059,8 +1065,13 @@ class Game {
     if (this.contact()) {   // what a jump would push off
       const m = hero.wallMask;
       this.touch = m & 8 ? 0 : glueSide(hero) || (m & 1 ? 1 : m & 2 ? 2 : m & 4 ? 4 : 0);
+      if (m & 8) {   // on a floor: a landing just now (how hard: the fastest of the fall, REBOUND), or how long since
+        if (this.sinceContact > 0) { this.landV = this.fallV; this.landT = 0; this.landUsed = false; } else this.landT += dt;
+        if (!this.landUsed && this.landT > REBOUND.after) { this.landUsed = true; if (this.landV >= REBOUND.min * this.vjump && ++this.missed >= REBOUND.hint) this.hint('rebound'); }   // a hard one let go by
+      }
+      this.fallV = 0;
       this.sinceContact = 0; this.air = this.mods.airJumps; this.airDash = 0; this.diving = false;
-    } else this.sinceContact += dt;
+    } else { this.sinceContact += dt; this.fallV = Math.max(this.fallV, hero.rigVy); }
     if (this.queueT > 0) { this.queueT -= dt; if (this.sinceContact === 0) this.jump(false, this.queued); }
     if (hero.springHit && hero.rigVy > -0.5 * SPRING.v * this.vjump) this.spring(hero.springHit);
     if (playing && hero.rubber && !(hero.wallMask & 8)) this.rubberHit(hero.rubber);   // standing, rubber is just a wall
@@ -1460,7 +1471,7 @@ class Game {
     const lv = this.lv, sp = this.safeSpot();
     this.combo = 0; ui.comboEnd(); this.rising = false;
     this.placeHero(sp.x, sp.y); this.regroup();
-    this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1;
+    this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1; this.fallV = 0; this.landT = Infinity; this.landUsed = true;
     lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
     if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; }
     this.idleT = 0;

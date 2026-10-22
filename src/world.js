@@ -39,6 +39,10 @@ const JUMP = { height: 7.4, cut: 0.45, wallX: 10, wallUp: 0.95, ceil: 0.6, dash:
 // Down held on a floor (↓, or the stick pulled down): the hero squashes; a jump from there goes `height` times as high, and
 // the air jump is still there after it (user).
 const CROUCH = { squeeze: 1, height: 2 };
+// The rebound (owner, 2026-10-22: «отскок в такт»): a jump off a floor pressed as the hero lands (the jump buffer before it, `after` s after it) off a fall
+// as fast as `min` of a jump or more goes up to `1 + k` times as high (a fall from a jump's top: 1.5), the faster the fall the higher; `hint`: hard
+// landings without one before the hint says how
+const REBOUND = { min: 0.6, after: 0.08, k: 0.5, hint: 3 };
 // Thicknesses in R; a shaft is made `ahead` views above the camera and dropped `behind`
 // views below it; `room` (R) is the least space under a solid ledge over another one;
 // `toPlank` of the plain one-tile ledges are laid as planks, to jump up through.

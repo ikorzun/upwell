@@ -884,7 +884,10 @@ const CAMPAIGN = [
     motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], trial: { at: 0.7, goal: 'coins' }, enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101, par: 75,   // the pilot, its par the owner's 75 s (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'the mill, the seesaw and the pestle', es: 'el molino, el balancín y el mazo', pt: 'o moinho, a gangorra e o pilão', ja: 'すいしゃ、シーソー、きね' } },
-  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['bubble'], seed: 4102 },
+  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1 }, intro: [], motif: ['iceride', 'icewall'], steps: true,
+    sparse: true, set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4102,   // by the practice (round 2): its one idea the walls of
+    // ice, 1-7's walls that held turned slick: a yaen across between them, then the zigzag up between them; the arena midway; moss in the pool, the walls that hold
+    news: { en: 'icy walls', es: 'paredes de hielo', pt: 'paredes de gelo', ja: 'こおりの かべ' } },   // (short: one line at 320 px)
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'probka', moss: true },   // the Cork's dive (owner, 2026-10-20: the first boss's fight); moss on its arena's walls: a place to sit its dive out
@@ -1379,6 +1382,18 @@ const CHUNKS = {
     '............',
     '............',
     '............'] },
+  iceride: { d: 1, rows: [   // a yaen (W) to ride across between walls of ice (they hold nothing): from the ledge onto it, off its far end up to the ledge over it
+    '[..........]',   // (1-8's own, my r6: «лифты и скользкие стены»: the walls that held in 1-7, slick now)
+    '[..........]',
+    '[.......###.',
+    '[..........]',
+    '[..o..o....]',
+    '[..........]',
+    '[.WWW......]',
+    '[..........]',
+    '[..........]',
+    '###........]',
+    '...........]'] },
   iciclerun: { d: 1, rows: [   // a ledge on under a ceiling of icicles (Y): each shakes as the hero comes under it and falls a moment on, behind a hero who keeps on
     '............',   // (1-5's own, my r6: «что падает сверху: сосульки и нурикабэ»); come up at the left, out at the right: no way round under them
     '............',
@@ -1949,7 +1964,7 @@ const CHUNKS = {
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
-  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw', 'iceride'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
   danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], pit: ['ambush', 'ambush2'], falling: ['iciclerun', 'nuricross', 'icebridge'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];

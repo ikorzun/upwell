@@ -2098,6 +2098,7 @@ class Game {
       const fb = e.body, over = e.def && e.canStomp() && e !== lv.boss && b.cy < fb.cy - STOMP.above * (b.R + fb.R) && Math.abs(b.cx - fb.cx) < STOMP.look * this.R && fb.cy - b.cy < 2 * STOMP.look * this.R;
       e.over = over && e.state !== 'shell';   // (and a chevron over it: the renderer)
       if (e.state !== 'shell') { fb.face.frown = !over; if (over) { fb.face.wide = Math.max(fb.face.wide, 0.5); fb.face.surprise = Math.max(fb.face.surprise, 0.7); } }   // (scared: wide eyes, its mouth open)
+      if (e.def && e.def.color === 'red' && e !== lv.boss) fb.paint = foePaint(e, b);   // its paint (FOE_PAINT)
       fb.face.update(dt, fb, this.look, now);
     }
     for (const f of lv.folk || []) if (f.body) f.body.face.update(dt, f.body, this.look, now);

@@ -352,6 +352,20 @@ const FOE_COLOR = {
   goo: { id: 'goo', base: PAL.black, deep: PAL.gray },   // a skull's black goo (the user's picture)
   gray: { id: 'gray', base: PAL.gray, deep: PAL.black },   // the Dark Forest's enemies (black and white, their eyes lit)
 };
+// The red enemies' paint, five ways till the owner picks one (owner, 2026-10-22: «Не обязательно всех врагов красить в красный полностью. Они могут быть
+// частично окрашены случайно или быть белыми и иметь красную текстуру тени (сейчас черная) поверх… враги могут краснеть при приближении героя»), `?paint=`:
+// A red, shaded black (as they were); B white, shaded red; C B with red patches of its own, as a kohaku carp's (its face left white the longest); D B
+// going red as the hero comes from `far` to `near` R of it, patches growing over it till it is all A's; E C going red so. A patch is where its field
+// (paintField, the body shader's: three waves of its own phases over the body, riding with it) is over a level: `spots` for C's, `none` none, `all` all.
+const FOE_PAINT = { v: ((/[?&]paint=([a-e])\b/i.exec(location.search) || [])[1] || 'a').toUpperCase(), far: 7, near: 2, spots: 0.6, none: 3.5, all: -5.5 };
+const PAINT_ALL = new Float32Array([-99, 0, 0]);   // (any other body: its colour all over, as before)
+const paintField = (x, y, p) => { const v = y - 0.05; return Math.sin(x * 3.3 + p[1]) + Math.sin(y * 2.9 + p[2]) + Math.sin((x - y) * 2.1 + 1.7 * p[1]) - 2.4 * Math.exp(-5 * (x * x + v * v)); };
+const foePaint = (e, H) => {   // uPaint: the level, the field's two phases
+  const P = FOE_PAINT, v = P.v, p = e.paint || (e.paint = new Float32Array([0, Math.random() * TAU, Math.random() * TAU])), b = e.body;
+  const near = v === 'D' || v === 'E' ? clamp((P.far - (Math.hypot(b.cx - H.cx, b.cy - H.cy) - H.R - b.R) / H.R) / (P.far - P.near), 0, 1) : 0, from = v === 'C' || v === 'E' ? P.spots : P.none;
+  p[0] = v === 'A' ? -99 : from + (P.all - from) * near;
+  return p;
+};
 // A world in one ink over black for its walls, ledges and far dots, with white for the edge you
 // stand on; the surfaces that behave differently in colours of their own (`o` picks others where
 // the usual one is the world's ink): ice, moss, rubber, crumbling blocks, movers, springs.
@@ -2749,7 +2763,7 @@ void main() {
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
 // black outline. Its patterns ride with the body (uOrigin is its centre in game pixels).
 const BODY_FS_PIX = GLSL + PIX_GLSL + `in vec3 vN; in float vAO; in float vA; in vec2 vUV; out vec4 o;
-uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin;
+uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin; uniform vec3 uPaint;
 float sdRoundBox(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
 void main() {
   if (vA < 0.04) discard;
@@ -2759,7 +2773,10 @@ void main() {
   vec3 L = normalize(vec3(-0.42, -0.62, 0.66));
   float wrap = clamp((dot(n, L) + 0.45) / 1.45, 0.0, 1.0) * mix(1.0, vAO, 0.85);
   int k = wrap > 0.58 ? 0 : wrap > 0.46 ? 2 : wrap > 0.34 ? 3 : 4;
-  vec3 col = tone(k, g) > 0.5 ? uDeep : uBase;
+  // its colour shaded deep on its patches, white shaded in its colour elsewhere (FOE_PAINT: paintField over uPaint.x; -99 all of it, as any body but an enemy)
+  vec2 u = vUV - vec2(0.0, 0.05);
+  bool hot = sin(vUV.x * 3.3 + uPaint.y) + sin(vUV.y * 2.9 + uPaint.z) + sin((vUV.x - vUV.y) * 2.1 + 1.7 * uPaint.y) - 2.4 * exp(-5.0 * dot(u, u)) > uPaint.x;
+  vec3 col = tone(k, g) > 0.5 ? (hot ? uDeep : uBase) : (hot ? uBase : PAL[8]);
   vec3 R = reflect(vec3(0.0, 0.0, -1.0), n);
   if (sdRoundBox(R.xy - vec2(-0.36, -0.5), vec2(0.17, 0.1), 0.07) < 0.0) col = PAL[8];
   o = vec4(col, 1.0);
@@ -2838,7 +2855,8 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     if (!closed && fc.surprise <= 0.35) {   // tips down (the spikes' tips point to −B)
       frame(f.mouth[0], f.mouth[1] + m * 0.3, m * 0.8, 0, 0, -m * 0.6);
       const la = Math.hypot(P1.x - P0.x, P1.y - P0.y), lb = Math.hypot(P2.x - P0.x, P2.y - P0.y);
-      put(1, 1, 1, 6, la, lb, la);
+      const c = b.paint && paintField(f.mouth[0], f.mouth[1], b.paint) <= b.paint[0] ? PAL.red : [1, 1, 1];   // (red where its mouth is white: FOE_PAINT)
+      put(c[0], c[1], c[2], 6, la, lb, la);
     }
   } else if (!closed) {
     if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
@@ -4688,7 +4706,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
     const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
-    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P));
+    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
     if (!BOSS_FIT[r.b.look]) {   // the target always has a stencil (a boss its sheet's drawing: only that on its body, the body unseen)
       // Fill by winding number (as in Gum), so a crushed outline that turns back on
       // itself neither folds nor loses lobes.

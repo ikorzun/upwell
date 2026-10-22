@@ -3271,11 +3271,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     // box off the wall on two pipes clamped grey (E's were purple), a black fan behind eight grey spokes, a black seam, the side panel's green light and black louvers,
     // on a grey knee brace bolted white
     const t = kitT, P = kitP, wl = r.x0 + r.x1 < lv.l + lv.r, w = r.x1 - r.x0, h = AC.h * t, x0 = r.x0 + ox, y = r.y0 + oy, f = (u) => (wl ? x0 + u * w : x0 + w - u * w), wx = (wl ? lv.l : lv.r) + ox, d = wl ? 1 : -1;
-    for (const v of [0.42, 0.62]) { const py = snap(y + v * h), cx = snap((wx + f(0)) / 2); box(Math.min(wx, f(0)), py, Math.max(wx, f(0)), py + 2 * P, PAL.gray, 1, 0, 10, 0); box(cx - P, py - P, cx + 2 * P, py + 3 * P, PAL.gray, 1, 0, 10, 0); }
-    box(x0, y, x0 + w, y + h, PAL.gray, 1, 0, 10, 0);
-    const fx = f(0.37), fy = y + 0.53 * h, fr = 0.36 * h;
+    const rt = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork: its grey box in depth, clean, so its top face reads as the top it is; all
+    // on it flat; its pipes and its brace, thin, flat)
+    L(0); for (const v of [0.42, 0.62]) { const py = snap(y + v * h), cx = snap((wx + f(0)) / 2); box(Math.min(wx, f(0)), py, Math.max(wx, f(0)), py + 2 * P, PAL.gray, 1, 0, 10, 0); box(cx - P, py - P, cx + 2 * P, py + 3 * P, PAL.gray, 1, 0, 10, 0); }
+    L(rt); box(x0, y, x0 + w, y + h, PAL.gray, 1, 0, 10, 0); L(0);
+    const fx = f(0.37), fy = y + 0.53 * h, fr = 0.36 * h, spin = CINE && !POKE.still ? T * (r.crumbling ? 2 + 14 * Math.min(1, r.t / AC.time) : 0.6) : 0;   // (2.5D: its fan
+    // turning slowly, faster and faster as it gives way: a warning too)
     disc(fx, fy, fr, PAL.black, 1);
-    for (let k = 0; k < 8; k++) { const a = ((k + 0.5) * Math.PI) / 4; rod(fx + Math.cos(a) * 0.25 * fr, fy + Math.sin(a) * 0.25 * fr, fx + Math.cos(a) * 0.88 * fr, fy + Math.sin(a) * 0.88 * fr, PAL.gray); }
+    for (let k = 0; k < 8; k++) { const a = ((k + 0.5) * Math.PI) / 4 + spin; rod(fx + Math.cos(a) * 0.25 * fr, fy + Math.sin(a) * 0.25 * fr, fx + Math.cos(a) * 0.88 * fr, fy + Math.sin(a) * 0.88 * fr, PAL.gray); }
     disc(fx, fy, 0.24 * fr, PAL.gray, 1);
     const sx = snap(f(0.74)), p0 = snap(Math.min(f(0.79), f(0.95))), p1 = snap(Math.max(f(0.79), f(0.95)));
     box(sx, y + 2 * P, sx + P, y + h - 2 * P, PAL.black, 1, 0, 10, 0);
@@ -3284,6 +3287,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const by = snap(y + h) + P, bh = snap(AC.brace * t);
     brace(wx, d, by, bh, 2 * P, PAL.gray);
     for (const [u, v] of [[2 * P, 0], [bh - P, 0], [2 * P, bh - 2 * P]]) { const bx = snap(wx + d * u); box(Math.min(bx, bx + d * P), by + v, Math.max(bx, bx + d * P), by + v + P, PAL.white, 1, 0, 10, 0); }
+    this.route = rt;
   };
   const rod = (x0, y0, x1, y1, c) => {   // a line a game pixel thick (an awning's rods, a bucket's handle)
     const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / kitP));
@@ -3312,10 +3316,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         const y = k * arm, [a0, a1] = span(0.1 * t, 1.05 * t);
         box(a0, y, a1, y + 0.16 * t, PAL.gray, DIM, 0, 10, 0);   // its crossarm
         { const x = at(WIRE.inset * t); box(x - P, y - 2 * P, x + P, y, PAL.gray, DIM, 0, 10, 0); }   // the wire's insulator
-        if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, DIM, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
+        if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, DIM, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, DIM, 0, 10, 0); }   // a transformer can
       }
     }
-    const tfN = this.route; if (CINE) this.route = 0;   // (the cinematic fork: a sign is flat, whole, its tubes off or lit)
+    const tfN = this.route; if (CINE) this.route = 3;   // (the cinematic fork: a sign is flat, whole, its tubes off or lit, and behind the ledges as in 2D, its halo too)
     for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
       // (the owner's pick, research/variants/tokyo-neon-1.png B): tubes, its word and a picture of what is sold, framed on a dark box with grey caps
       // over and under it; its tubes off and faint (behind, DEPTH) till the hero jumps close past it, then lit red or blue in full, glowing, and so
@@ -3358,8 +3362,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
         || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'))) continue;
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
-      const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
       if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
+      const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
       for (const [hw, a0, a1] of [[0.5, 0, 0.07], [0.45, 0.07, 0.17], [0.38, 0.17, 0.25]]) box(snap(cx - hw * t), snap(by + a0 * t), snap(cx + hw * t), snap(by + a1 * t), PAL.gray, 1, 0, 10, 0);
       for (const f of [-0.27, 0.27]) box(snap(cx + f * t) - P, snap(by + 0.25 * t), snap(cx + f * t) + P, r.y0, PAL.gray, 1, 0, 10, 0);
       const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03) + SB(0.95 * q), Y(0.95 * q)];
@@ -4351,13 +4355,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const yb = snap(r.y0 + 0.62 * t), pt = r.y0 - 0.12 * t;
       box(r.x0, r.y0, r.x1, yb, th.mover, 1, 0, 10, 0); box(r.x0, yb - P, r.x1, yb, PAL.black, 1, 0, 10, 0);
       for (let x = r.x0 + 0.75 * t; x < r.x1 - 0.4 * t; x += 0.75 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, yb - P, PAL.black, 1, 0, 10, 0);   // its panels' seams
-      for (const x of [r.x0, r.x1 - 2 * P]) { box(x, pt, x + 2 * P, yb, th.mover, 1, 0, 10, 0); box(x + P / 2, top, x + 1.5 * P, pt - 0.16 * t, PAL.gray, DIM, 0, 10, 0); box(x - P, pt - 0.16 * t, x + 3 * P, pt, PAL.gray, 1, 0, 10, 0); }   // posts, cables, clamps
+      for (const x of [r.x0, r.x1 - 2 * P]) { if (CINE) this.route = 0; box(x, pt, x + 2 * P, yb, th.mover, 1, 0, 10, 0); if (CINE) this.route = 3; box(x + P / 2, top, x + 1.5 * P, pt - 0.16 * t, PAL.gray, DIM, 0, 10, 0); if (CINE) this.route = 0; box(x - P, pt - 0.16 * t, x + 3 * P, pt, PAL.gray, 1, 0, 10, 0); }   // (2.5D: its posts and clamps flat, thin; its cables behind)
+      if (CINE) this.route = 4;   // (its bucket and squeegee small)   // posts, cables, clamps
       const bx = r.x0 - 0.25 * t, hy = r.y0 + 0.24 * t;   // the bucket, on its handle off the post
       rod(r.x0 - P, r.y0 + 0.04 * t, bx - 0.13 * t, hy, PAL.gray); rod(r.x0 - P, r.y0 + 0.04 * t, bx + 0.13 * t, hy, PAL.gray);
       box(snap(bx - 0.16 * t), snap(hy), snap(bx + 0.16 * t), snap(hy) + 2 * P, PAL.gray, 1, 0, 10, 0); box(snap(bx - 0.13 * t), snap(hy) + 2 * P, snap(bx + 0.13 * t), snap(hy + 0.26 * t), PAL.gray, 1, 0, 10, 2);
       const sx = r.x1 + 0.32 * t, sy = snap(r.y0 + 0.06 * t);   // the squeegee, its blade over its handle
       box(snap(sx - 0.22 * t), sy, snap(sx + 0.22 * t), sy + 2 * P, PAL.gray, 1, 0, 10, 0); box(snap(sx) - P / 2, sy + 2 * P, snap(sx) + P / 2, snap(r.y0 + 0.6 * t), PAL.gray, 1, 0, 10, 0);
       box(r.x1, sy + P, snap(sx - 0.22 * t), sy + 2 * P, PAL.gray, 1, 0, 10, 0);
+      if (CINE) this.route = 2;
     } else if (r.plank && r.bouncy) {   // a shop's awning off a wall, which always bounces (the owner's pick, research/variants/tokyo-awning-1.png D): blue and white
       // checks in two rows, its belly and scalloped hem hanging lower in the middle, two rods to bolts in the wall, a paper lantern off its free end, orange (D's was red:
       // red is danger); landed on, it sags in a curve, its top edge with it (at rest straight, where it is stood on)
@@ -4367,15 +4373,20 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(x0, y, x1, y + rh, i % 2 ? PAL.white : th.block, 1, 0, 10, 0); box(x0, y + rh, x1, yh, lo, 1, 0, 10, 0); disc((x0 + x1) / 2, yh, (x1 - x0) / 2, lo, 1);
         box(x0, y, x1, y + 2.5, th.lip, 1, 0, 10, 0);
       }
-      for (const [by, cy] of [[r.y0 - 0.45 * t, r.y0 + 0.08 * t], [r.y0 + 0.75 * t, r.y0 + 0.3 * t]]) { rod(wx + d * 0.12 * t, by, wx + d * 0.32 * t, cy, PAL.gray); disc(wx + d * 0.1 * t, by, 0.09 * t, PAL.gray, 1); }
-      if (w >= 3 * t) {   // the lantern: grey caps, an orange body ribbed in black, on a hook
-        const lx = snap(wl ? r.x1 - 0.25 * t : r.x0 + 0.25 * t), ly = r.y0 + 2 * rh + 0.2 * t;
-        box(lx - P / 2, r.y0 + 2 * rh, lx + P / 2, ly, PAL.gray, 1, 0, 10, 0); box(snap(lx - 0.12 * t), ly, snap(lx + 0.12 * t), ly + 2 * P, PAL.gray, 1, 0, 10, 0);
+      if (CINE) this.route = 0; for (const [by, cy] of [[r.y0 - 0.45 * t, r.y0 + 0.08 * t], [r.y0 + 0.75 * t, r.y0 + 0.3 * t]]) { rod(wx + d * 0.12 * t, by, wx + d * 0.32 * t, cy, PAL.gray); disc(wx + d * 0.1 * t, by, 0.09 * t, PAL.gray, 1); }   // (2.5D:
+      // its rods flat, thin)
+      const hl = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) / 4294967296 < 1 / 3;   // (its lantern under one awning in three: the rule book's)
+      if (w >= 3 * t && hl) {   // the lantern: grey caps, an orange body ribbed in black, on a hook
+        const ly = r.y0 + 2 * rh + 0.2 * t, e = SPRING.anim - r.t, lsw = CINE && !POKE.still && r.t > 0 ? snap(Math.sin(e * 14) * 0.1 * t * (r.t / SPRING.anim)) : 0;   // (2.5D: it swings
+        // as the awning bounces; its hook still)
+        const lh = snap(wl ? r.x1 - 0.25 * t : r.x0 + 0.25 * t), lx = lh + lsw;
+        box(lh - P / 2, r.y0 + 2 * rh, lh + P / 2, ly, PAL.gray, 1, 0, 10, 0); if (CINE) this.route = 4; box(snap(lx - 0.12 * t), ly, snap(lx + 0.12 * t), ly + 2 * P, PAL.gray, 1, 0, 10, 0);
         const l0 = ly + 2 * P, l1 = snap(ly + 0.66 * t);
         box(snap(lx - 0.22 * t), l0, snap(lx + 0.22 * t), l1, PAL.orange, 1, 0, 10, 0); if (CINE && this.cineL) this.cineL.push([lx, (l0 + l1) / 2, 1.7 * lv.R, 0.6, [1.0, 0.6, 0.25]]);   // (the cinematic fork: it glows)
         for (const f of [0.36, 0.68]) { const ry = snap(l0 + f * (l1 - l0)); box(snap(lx - 0.22 * t), ry, snap(lx + 0.22 * t), ry + P, PAL.black, 1, 0, 10, 0); }
         box(snap(lx - 0.12 * t), l1, snap(lx + 0.12 * t), l1 + 2 * P, PAL.gray, 1, 0, 10, 0);
       }
+      if (CINE) this.route = 2;
       return true;
     } else if (r.plank) {   // a steel beam (the owner's pick, research/variants/tokyo-beam-1.png F): a flat grey bar, a bolt at each end, hung on two cables up to
       // the underside of what is over it (or out of sight), shackled grey (F's shackles were yellow: yellow is for what you take)
@@ -4384,8 +4395,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const x of [r.x0 + 0.34 * t, r.x1 - 0.34 * t]) {
         let up = top; for (const q of lv.rects) if (q !== r && !q.gone && !q.move && q.x0 <= x && q.x1 >= x && q.y1 <= r.y0 && q.y1 > up) up = q.y1;
         const cx = snap(x), sy = r.y0 - 0.2 * t;
-        box(cx, up, cx + P, sy, PAL.gray, DIM, 0, 10, 0); box(cx - P, sy, cx + 2 * P, sy + 0.1 * t, PAL.gray, 1, 0, 10, 0);   // the cable, its shackle
+        if (CINE) this.route = 3; box(cx, up, cx + P, sy, PAL.gray, DIM, 0, 10, 0); if (CINE) this.route = 0; box(cx - P, sy, cx + 2 * P, sy + 0.1 * t, PAL.gray, 1, 0, 10, 0);   // the cable
+        // (behind in 2.5D), its shackle (flat)
         for (const ax of [cx - P, cx + P]) box(ax, sy + 0.1 * t, ax + P, r.y0, PAL.gray, 1, 0, 10, 0);   // the clamp's arms
+        if (CINE) this.route = 2;
       }
     } else if (r.move || r.spring || r.magnet || r.bouncy) return false;
     else {   // a concrete slab (the owner's pick, research/variants/tokyo-slab-1.png: B with F's end): its panels' seams, a free end capped
@@ -4399,7 +4412,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
       if (!thin) for (let y = r.y0 + 0.6 * t; y < r.y1 - 0.8 * t; y += 1.2 * t) for (let x = r.x0 + 0.4 * t; x < r.x1 - 0.7 * t; x += 1.1 * t) {
         const lit = ((Math.round(x / t) * 7 + Math.round(y / t) * 3) % 5) === 0; box(snap(x), snap(y), snap(x + 0.45 * t), snap(y + 0.55 * t), lit ? PAL.gray : th.wallD, 1, 0, 10, 0);
-      } else for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) brace(wx, d, snap(r.y1) + P, snap(1.3 * t), 3 * P, th.block);   // a pixel clear of the slab
+      } else for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) { if (CINE) this.route = 0; brace(wx, d, snap(r.y1) + P, snap(1.3 * t), 3 * P, th.block); if (CINE) this.route = 2; }   // a pixel
+      // clear of the slab (flat in 2.5D: thin)
       // (nothing in Tokyo's campaign levels, its boss's arena aside, stands within 1.5 tiles under a wall's slab)
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;

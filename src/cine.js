@@ -18,7 +18,8 @@ const CINE_ON = (() => {
 // The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
 let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
-const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || /[?&]cine\b/.test(location.search));   // the worlds done: the Village, the Mine, Fuji, the Sea
+const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || !!th.town || /[?&]cine\b/.test(location.search));   // the worlds done: the Village, the Mine,
+// Fuji, the Sea, Tokyo
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
   : th.town ? { fog: [0.2, 0.08, 0.24], shade: [0.03, 0.01, 0.04], amb: 0.48, moon: null, motes: { dust: 12, rain: 34 }, planes: 'city' }
@@ -225,7 +226,6 @@ function cineBack(rd, lv, cam, H, box, F, T) {
   rd.cineL = [];
   if (!CINE.on('depth') || !look.planes || lv.kind !== 'well') return;
   const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
-  const ln = (x0, y0, x1, y1, c, a) => { const ax = (x1 - x0) / 2, ay = (y1 - y0) / 2, l = Math.hypot(ax, ay) || 1, hw = 0.55 * P; F((x0 + x1) / 2, (y0 + y1) / 2, ax, ay, (-ay / l) * hw, (ax / l) * hw, c, a, 10, l, hw, 0); };   // a thin line (as the renderer's line())
   const wy = (f, ys) => ys + cam * (1 - f);   // a plane's own y to the world's
   if (look.planes === 'bamboo') {
     for (const [f, gap, wd, c, a, s0] of [[0.32, 3.6, 0.9, PAL.purple, 1.1, 1], [0.58, 2.3, 0.36, PAL.green, 1.18, 2]]) {
@@ -243,25 +243,21 @@ function cineBack(rd, lv, cam, H, box, F, T) {
       }
     }
   } else if (look.planes === 'city') {
-    for (let i = 0; i < 6; i++) {   // flats far off (f 0.28): tall blocks, rows of windows, a few lit
+    for (let i = 0; i < 6; i++) {   // flats far off (f 0.28): tall blocks, dark, a few windows lit (the rule book: the city quieter, as the owner cut Tokyo's dots and
+      // wires; no grid of dark windows)
       const f = 0.28, x0 = snap(lv.l + (i * 3.1 + 0.4 * hash(i)) * t), x1 = snap(x0 + (1.8 + 0.8 * hash(i + 9)) * t);
       if (x0 > lv.r) break;
       box(x0, top, Math.min(x1, lv.r), bot, PAL.purple, 1.08, 0, 10, 0);
       const step = 0.9 * t, k0 = Math.floor((top - cam * (1 - f)) / step) - 1;
-      for (let k = k0; wy(f, k * step) < bot; k++) { const y = snap(wy(f, k * step)); for (let x = x0 + 0.3 * t; x < Math.min(x1, lv.r) - 0.35 * t; x += 0.55 * t) { const on = hash(i * 131 + k * 17 + Math.round(x)) < 0.12; box(snap(x), y, snap(x + 0.25 * t), y + snap(0.4 * t), on ? PAL.orange : PAL.black, on ? 1.3 : 1.2, 0, 10, 0); } }
+      for (let k = k0; wy(f, k * step) < bot; k++) { const y = snap(wy(f, k * step)); for (let x = x0 + 0.3 * t; x < Math.min(x1, lv.r) - 0.35 * t; x += 0.55 * t) { const on = hash(i * 131 + k * 17 + Math.round(x)) < 0.12; if (on) box(snap(x), y, snap(x + 0.25 * t), y + snap(0.4 * t), PAL.orange, 1.3, 0, 10, 0); } }
     }
-    for (let i = 0; i < 3; i++) {   // lattice masts and pipes nearer (f 0.55), their red lights blinking
+    for (let i = 0; i < 3; i++) {   // masts and pipes nearer (f 0.55), plain: two posts and a rung now and then, one ink (no lattice, and no red lights: red is danger)
       const f = 0.55, x = snap(lv.l + (2.2 + i * 5.4 + 0.8 * hash(i + 40)) * t), w = snap(0.9 * t);
       if (x + w > lv.r) break;
       box(x, top, x + P, bot, PAL.purple, 1.2, 0, 10, 0); box(x + w, top, x + w + P, bot, PAL.purple, 1.2, 0, 10, 0);
-      const step = 1.2 * t, k0 = Math.floor((top - cam * (1 - f)) / step) - 1;
-      for (let k = k0; wy(f, k * step) < bot; k++) {
-        const y = snap(wy(f, k * step)), cy = y + step / 2;
-        box(x, y, x + w + P, y + P, PAL.purple, 1.2, 0, 10, 0);
-        ln(x, y, x + w, y + step, PAL.purple, 1.2); ln(x + w, y, x, y + step, PAL.purple, 1.2);   // its braces
-        if (hash(i * 13 + k) < 0.12) { const on = Math.floor(T * 1.4 + i + k * 0.3) % 2 === 0; box(x - P, cy, x + P, cy + 2 * P, PAL.red, on ? 1.35 : 1.15, 0, 10, 0); if (on) rd.cineL.push([x, cy, 1.1 * t, 0.35, [1.0, 0.25, 0.2]]); }   // a red light
-      }
-      const px = snap(x + w + 0.9 * t); box(px, top, px + 2 * P, bot, PAL.gray, 1.12, 0, 10, 0);   // a pipe beside it
+      const step = 2.4 * t, k0 = Math.floor((top - cam * (1 - f)) / step) - 1;
+      for (let k = k0; wy(f, k * step) < bot; k++) { const y = snap(wy(f, k * step)); box(x, y, x + w + P, y + P, PAL.purple, 1.2, 0, 10, 0); }   // a rung
+      const px = snap(x + w + 0.9 * t); box(px, top, px + 2 * P, bot, PAL.purple, 1.12, 0, 10, 0);   // a pipe beside it
     }
   }
 }
@@ -274,7 +270,7 @@ function cineMotes(rd, g, lv, cam, H, box, disc, T) {
   if (!CINE.on('motes')) return;
   const look = CINE_LOOK(lv.theme), t = lv.tile, P = PIX.size, snap = (v) => Math.round(v / P) * P, M = CINE.motes;
   const dt = CINE.lastT == null ? 0 : Math.max(0, Math.min(0.05, T - CINE.lastT)); CINE.lastT = T;
-  const want = []; for (const [k, n] of Object.entries(look.motes)) for (let i = 0; i < n; i++) want.push(k);
+  const want = []; for (const [k, n] of Object.entries(look.motes)) for (let i = 0; i < (POKE.still ? Math.ceil(n / 3) : n); i++) want.push(k);   // (less motion asked for: a third)
   if (M.length !== want.length || M.theme !== lv.theme) { M.length = 0; M.theme = lv.theme; for (const k of want) M.push({ k, x: 0, y: 1e9, ph: Math.random() * 6.28 }); }
   const spawn = (m, any) => { m.x = lv.l + Math.random() * (lv.r - lv.l); m.y = any ? cam + Math.random() * H : cam - 10 - Math.random() * 40; m.ph = Math.random() * 6.28;
     m.vx = m.k === 'rain' ? -60 : m.k === 'spray' ? (Math.random() < 0.5 ? -1 : 1) * (28 + Math.random() * 30) : (Math.random() - 0.5) * 12; m.vy = m.k === 'rain' ? 520 + Math.random() * 120 : m.k === 'petal' ? 22 + Math.random() * 18 : m.k === 'snow' ? 16 + Math.random() * 14 : m.k === 'ember' ? -26 - Math.random() * 20 : (Math.random() - 0.5) * 8; };

@@ -2391,7 +2391,7 @@ const ui = {
     const p = this.panel('pause');
     const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); }), 'sound');
     const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); }), 'shake');
-    const d25 = CINE_ON ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); this.pause(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; in a world not done yet it is 2D either way)
+    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); this.pause(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
     const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
     langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
     for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); this.pause(); }); b.lang = k; langs.append(b); }

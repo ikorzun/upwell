@@ -2757,7 +2757,7 @@ Renderer.prototype.makeTarget = function () {
 Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
-  this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.toFar = false;   // (nFar, toFar: the cinematic fork's, see cine.js)
+  this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.route = 0;   // (nFar, nSt, route: the cinematic fork's, see cine.js)
   const lv = g.lv, th = lv.theme, W = this.w, H = this.h, cam = lv.cam, top = cam - 80, bot = cam + H + 80, R = lv.R, T = lv.t;
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
@@ -3066,7 +3066,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }
-  if (CINE) { this.toFar = true; cineBack(this, lv, cam, H, box, F, T); }   // (the cinematic fork: what the kits draw DIM from here goes behind, see cine.js)
+  if (CINE) { this.route = 1; cineBack(this, lv, cam, H, box, F, T); }   // (the cinematic fork: from here what the kits draw DIM goes behind, the rest is a structure; see cine.js)
   const kitT = lv.tile, kitP = PIX.size, snap = (v) => Math.round(v / kitP) * kitP;
   const brace = (wx, d, y0, h, s, c) => {   // a knee brace off the wall at wx out toward d, from y0 down h, a pixel clear of the wall: a leg down
     // the wall, a bar along its top and a strut s wide between their ends (Tokyo's slabs, its air conditioners)
@@ -3122,7 +3122,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, DIM, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
     }
-    const tfN = this.toFar; this.toFar = false;   // (the cinematic fork: a sign stays whole in the play, its tubes off or lit)
+    const tfN = this.route; if (CINE) this.route = 2;   // (the cinematic fork: a sign is a structure, whole, its tubes off or lit)
     for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
       // (the owner's pick, research/variants/tokyo-neon-1.png B): tubes, its word and a picture of what is sold, framed on a dark box with grey caps
       // over and under it; its tubes off and faint (behind, DEPTH) till the hero jumps close past it, then lit red or blue in full, glowing, and so
@@ -3139,7 +3139,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, ia, kk, ink));
       icon(pic, cx, y1 - 3 * P - 0.45 * gw, ia, kk, ink);
     }
-    this.toFar = tfN;
+    this.route = tfN;
     for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges (the owner's pick, research/variants/tokyo-vending-1.png
       // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is
       // for what you take), the slot under the front
@@ -4132,7 +4132,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
-  this.toFar = false;
+  if (CINE) this.route = 2;   // (the cinematic fork: the doors and the ledges are structures)
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);   // the ways into a shop or a stash, over the worlds' back layers: nothing covers them (owner)
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
   const vaultSpan = (r) => {   // a vault's cracked floor from cage wall to cage wall: the slot rule (Level.place) cut it back from a wall its cage stands
@@ -4143,7 +4143,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
-    if (CINE) cineVol(this, lv, r, box, F, cam, H);   // (the cinematic fork: its depth, see cine.js)
     if (r.cage) {   // a vault's cage (the owner's pick, research/variants/tokyo-vault-1-px.png F; Level.place makes it this thin): blue posts, a white roof bar dotted
       // grey under it, and its floor: a plate dotted black, its top edge white, a notch in it where it is cracked (a glint of gold there now and then), rubble in
       // its corners, and three thin bars from it up to the roof, behind the coins
@@ -4211,6 +4210,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
+  this.route = 0;   // (the cinematic fork: the play again)
   for (const s of lv.spikes) {
     if (!seen(s.y0, s.y1)) continue;
     const vert = s.dir < 2, len = vert ? s.x1 - s.x0 : s.y1 - s.y0, dep = vert ? s.y1 - s.y0 : s.x1 - s.x0;
@@ -4498,7 +4498,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
-  if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, then the play on nothing)
+  if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
   this.drawFeat(0, back);
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);

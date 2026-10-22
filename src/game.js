@@ -1168,7 +1168,7 @@ class Game {
       if (f.kind === 'cage' && b) {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
-      else if (f.kind === 'ribbon') {   // the crow in the red cord (RIBBON): a touch frees it; then off it flies
+      else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a touch frees it; then off it flies
         f.t += dt;
         if (!f.fly && Math.abs(H.cx - f.x) < RIBBON.reach * R && H.maxY > f.y - 2 * R && H.minY < f.y) this.untangle(f);
         if (f.fly) { f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R) lv.folk.splice(i, 1); }
@@ -1186,7 +1186,7 @@ class Game {
     }
     this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
   }
-  untangle(f) {   // the crow in the red cord set free (RIBBON): sparks, its thanks and coins, off up it flies with the cord on it, and the story's card II
+  untangle(f) {   // the crow with the red ring set free (RIBBON): sparks, its thanks and coins, off up it flies with the ring on it, and the story's card II
     const R = this.R, lv = this.lv;   // a moment after (behind ?story till the owner's «да», as card I)
     f.fly = true; f.t = 0; f.vx = f.dir * 70; f.vy = -190;
     if (lv.gone && !this.well) lv.gone.push(f.id);

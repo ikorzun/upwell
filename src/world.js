@@ -184,13 +184,13 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
 // Fuji's cranes (the owner's pick, research/variants/fuji-cranes-1-px.png A): a crane flying, its neck out, its legs trailing, wings up and down
 CRITTER.craneUp = ['........#####...................', '.........######.................', '.....###########................', '.......#########................', '........#########...............', '......###########...............', '........#########........#####..', '.........#########.##########.##', '.........##############.........', '......#############.............', '.######...#######...............', '................................', '................................', '................................', '................................', '................................', '................................', '................................'];
 CRITTER.craneDown = ['................................', '................................', '................................', '................................', '................................', '................................', '.........................#####..', '...........#######.##########.##', '.........##############.........', '......#############.............', '.######..#########..............', '........#########...............', '......###########...............', '........#########...............', '.......#########................', '.....###########................', '.........######.................', '........#####...................'];
-// The crow in the red cord (RIBBON): the cord over a crow sitting (CRITTER.crow's 24 x 16), wound across its body, an end hanging off it
-CRITTER.cord = ['........................', '........................', '........................', '........................', '.........##......##.....',
-  '..........##....##......', '...........##..##.......', '............####........', '.............##.........', '............####........', '...........##..##.......',
-  '..........##....###.....', '.........##.......##....', '..................##....', '...................##...', '....................##..'];   // (two pixels thick: read from afar)
-for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'cord']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
-// The crow in the red cord (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
-// (the chunk 'ribbon', 1-3's set piece), flapping in the cord now and then; a touch frees it, coins and its thanks, off it flies with the cord on it,
+// The crow's red ring (RIBBON): round its neck, 2 x 3 pixels over CRITTER.crow's (ring) and over its wings' (ringFly), which hold the head lower
+// (owner, on the questions page, П2: «Нить не похожа на нить, сделай просто красным кольцом вокруг шеи ворона»)
+const ringAt = (k, r0) => Array.from({ length: 16 }, (_, j) => (j >= r0 && j < r0 + 3 ? '.'.repeat(k) + '##' + '.'.repeat(22 - k) : '.'.repeat(24)));
+CRITTER.ring = ringAt(14, 4); CRITTER.ringFly = ringAt(16, 5);
+for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'ring', 'ringFly']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// The crow with the red ring (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
+// (the chunk 'ribbon', 1-3's set piece), flapping there now and then; a touch frees it, coins and its thanks, off it flies with the ring on it,
 // and `card` s later the card (STORY village_crow, behind ?story till the owner's «да»), its thanks read first (a card's panel clears a toast)
 const RIBBON = { card: 2.4, reach: 1.3, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
@@ -877,21 +877,30 @@ const CAMPAIGN = [
     news: { en: 'falling bridges', es: 'puentes que caen', pt: 'pontes que caem', ja: 'おちる はし' } },   // (short: one line at 320 px; «keep moving» is the crumble hint's)
   { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: { mosswall: 2, chimney: 1, stairs: 2, shelves: 1, planks: 1, rubberwall: 1, crumble: 1 }, intro: [],   // by the
     motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler', 'tumbler'], foes: 0.4, pair: 0.15, candy: ['bubble'], seed: 4106,   // practice
-    // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow in
-    // the red cord midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers and tumblers
+    // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow with
+    // the red ring midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers and tumblers
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1, spring: 1 }, intro: [],   // by the
     motif: ['ambush', 'ambush2'], every: 3, steps: true, sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
     // (round 2): its one idea the pit's waves: a small ambush every other chunk, on a floor mid-shaft, then between two towers; the arena and its fat spitter midway
     news: { en: 'waves of enemies', es: 'oleadas enemigas', pt: 'ondas de inimigos', ja: 'てきの ウェーブ' } },   // (short: one line at 320 px; the arena says the rest)
-  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler', 'nurikabe'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
+  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 2, shelves: 1, crumble: 1, spikes: 1 }, intro: [], motif: ['iciclerun', 'nuricross', 'icebridge'],
+    steps: true, sparse: true, enemies: ['spitter', 'climber', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4108,   // by the practice (round 2): its one idea
+    // what falls from above: icicles over the way, the nurikabe over a ledge (n), 1-2's bridge under icicles; the walls in the pool. No comb, nor the icicles' set
+    // piece (its icicles are the motif's now): under their ceilings the bot clung to the walls in 4 of 5 orders
+    news: { en: 'look up!', es: '¡mira arriba!', pt: 'olhe para cima!', ja: 'うえに ちゅうい！' } },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
     motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], trial: { at: 0.7, goal: 'coins' }, enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101, par: 75,   // the pilot, its par the owner's 75 s (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'the mill, the seesaw and the pestle', es: 'el molino, el balancín y el mazo', pt: 'o moinho, a gangorra e o pilão', ja: 'すいしゃ、シーソー、きね' } },
-  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['bubble'], seed: 4102 },
-  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, lift: 1, bridge: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,
+  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1 }, intro: [], motif: ['iceride', 'icewall'], steps: true,
+    sparse: true, set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4102,   // by the practice (round 2): its one idea the walls of
+    // ice, 1-7's walls that held turned slick: a yaen across between them, then the zigzag up between them; the arena midway; moss in the pool, the walls that hold
+    news: { en: 'icy walls', es: 'paredes de hielo', pt: 'paredes de gelo', ja: 'こおりの かべ' } },   // (short: one line at 320 px)
+  { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 2, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], motif: ['coinarc', 'garden'], steps: true, sparse: true,   // by the
+    enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,   // practice (round 2): the calm before the boss, its one idea the coins: rows along a jump's arc, the
+    // moss garden to rest in (the digest §5: a breather after the peak, not an empty one); few enemies
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'probka', moss: true },   // the Cork's dive (owner, 2026-10-20: the first boss's fight); moss on its arena's walls: a place to sit its dive out
 ] },
@@ -1184,7 +1193,7 @@ const UNLOCKS = [
 //   o  coin   O  big coin   B  bubble in the wall (a shop or a stash)
 //   X  cracked block: a head-butt from below (or a smash) breaks it for good — the way into a stash in the wall
 //   Y  a stalactite under the block above: it falls on a hero passing under it   A  an arena's middle (waves of enemies)   a  an ambush's (AMBUSH)
-//   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   r  the crow in the red cord on the ledge under it (RIBBON)
+//   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   n  a nurikabe over it   r  the crow with the red ring on it (RIBBON)
 const CHUNKS = {
   stairs: { d: 1, rows: [
     '............',
@@ -1385,6 +1394,69 @@ const CHUNKS = {
     '............',
     '............',
     '............'] },
+  coinarc: { d: 1, rows: [   // coins along the arc of a jump from a ledge to the one up across: a calm reward on the way (1-9's, my r6: «спокойный сад перед
+    '............',   // боссом: ряды монет, мало врагов»)
+    '............',
+    '........####',
+    '............',
+    '.....o.o....',
+    '....o...o...',
+    '...o........',
+    '..o.........',
+    '####........',
+    '............'] },
+  iceride: { d: 1, rows: [   // a yaen (W) to ride across between walls of ice (they hold nothing): from the ledge onto it, off its far end up to the ledge over it
+    '[..........]',   // (1-8's own, my r6: «лифты и скользкие стены»: the walls that held in 1-7, slick now)
+    '[..........]',
+    '[.......###.',
+    '[..........]',
+    '[..o..o....]',
+    '[..........]',
+    '[.WWW......]',
+    '[..........]',
+    '[..........]',
+    '###........]',
+    '...........]'] },
+  iciclerun: { d: 1, rows: [   // a ledge on under a ceiling of icicles (Y): each shakes as the hero comes under it and falls a moment on, behind a hero who keeps on
+    '............',   // (1-5's own, my r6: «что падает сверху: сосульки и нурикабэ»); come up at the left, out at the right: no way round under them
+    '............',
+    '............',
+    '............',
+    '.........###',
+    '..#######...',
+    '...Y.Y.Y....',
+    '............',
+    '............',
+    '............',
+    '..#########.',
+    '............'] },
+  nuricross: { d: 2, rows: [   // a ledge across under a nurikabe hanging over it (n): under it, it shakes, then drops; on past it, or stomp it once it lands
+    '............',   // (the ledge's ends clear of the step under it and the way out over it: from each, straight up past the other)
+    '............',
+    '##..........',
+    '............',
+    '............',
+    '............',
+    '.......n....',
+    '..######....',
+    '............',
+    '....o..o....',
+    '............',
+    '.........###',
+    '............'] },
+  icebridge: { d: 2, rows: [   // 1-2's bridge of boards under a ceiling of icicles: its boards fall behind, and its icicles; out past the ceiling's end
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '...######.##',
+    '...Y.Y..Y...',
+    '............',
+    '..o..o..o...',
+    '............',
+    '###DDDDDD...',
+    '............'] },
   spitstair: { d: 1, rows: [   // steps up by turns to a spitter on the ledge at their top (p): it swells and lobs a blob where the hero is, so climb on, then stomp it
     '............',   // (1-3's own, my r6: «лестницы под плевками плевунов»)
     '.p..........',
@@ -1421,7 +1493,7 @@ const CHUNKS = {
     '............',
     '###DDDDDD...',
     '............'] },
-  ribbon: { d: 1, rows: [   // the crow in the red cord (RIBBON, r) on a quiet ledge mid-shaft, short of both walls (come to from either side, the way on at
+  ribbon: { d: 1, rows: [   // the crow with the red ring (RIBBON, r) on a quiet ledge mid-shaft, short of both walls (come to from either side, the way on at
     '............',   // either wall), coins under it; no enemy in the chunk (Level.place). (At a wall it was over the ledge under it: the bot stuck)
     '............',
     '###......###',
@@ -1915,8 +1987,8 @@ const CHUNKS = {
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
-  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
-  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], pit: ['ambush', 'ambush2'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw', 'iceride'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
+  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi', 'ribbon'], spitting: ['spitstair', 'spitwall', 'spitbridge'], pit: ['ambush', 'ambush2'], falling: ['iciclerun', 'nuricross', 'icebridge'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
 const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from; warn: s a wave's places are shown before it comes
@@ -1928,7 +2000,7 @@ const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '('
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -2447,10 +2519,10 @@ class Level {
         let post = null; for (let q = 0; q < H && !post; q++) for (let kk = 0; kk < COLS; kk++) if (at(q, kk) === 'P') { post = { x: X(kk) + t / 2, foot: Y(q) }; break; }
         if (rr >= 0 && post) this.kines.push({ x: (X(k) + X(runEnd(r, k, ch) + 1)) / 2, yUp: Y(r), yHit: Y(rr + 1), px: post.x, foot: post.foot, y0: Y(r + 1) - 2 * t, y1: Y(rr + 1) });
       }
-      else if (ch === 'e' || ch === 'p') {   // a crawler on the ledge under it (the tutorial's), a spitter (1-3's: the stairs under its blobs)
-        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = ch === 'e' ? 'crawler' : 'spitter';
+      else if (FOE_LETTER[ch]) {   // an enemy on the ledge under it (FOE_LETTER): a crawler (the tutorial's), a spitter (1-3's), a nurikabe over it (1-5's)
+        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = FOE_LETTER[ch];
         if (q) this.spawns.push({ type, x, y: q.y0 - 1.2 * R * ENEMY[type].size, ledge: q });
-      } else if (ch === 'r') {   // the crow in the red cord on the ledge under it (RIBBON), facing into the shaft
+      } else if (ch === 'r') {   // the crow with the red ring on the ledge under it (RIBBON), facing into the shaft
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
@@ -4322,7 +4394,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
     if (r.crumble) {   // a rope bridge (the owner's pick C, 2026-10-21, of six in wood: grey looked strange in a village): narrow slats wide apart, each shaking
       // its own way as it gives, two grey ropes through them
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = r.board ? 1 : Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;   // (a board: one slat, the one that goes)
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, n = r.board ? 1 : Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;   // (a board: one slat, the one that goes; 2.5D: no fading, a dither in depth reads as a sieve: it shakes)
       for (let i = 0; i < n; i++) {
         const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 || r.board ? 2 * P : 0) + ox;   // (a board's last too: the next board's comes on)
         box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);   // a slat, its underside in shade
@@ -4893,13 +4965,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
     else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: about a tile and a half long
-    else if (f.kind === 'ribbon') {   // the crow in the red cord (RIBBON): a flap in it now and then; free, its wings going and the cord's end streaming
-      const L = f.dir > 0 ? '' : 'L', P = PIX.size;
-      if (!f.fly) { spr(CRITTER[(f.t % 1.6 < 0.24 ? 'crowUp' : 'crow') + L], f.x, f.y, th.wall, 1, false); spr(CRITTER['cord' + L], f.x, f.y, PAL.red, 1, false); }
-      else {
-        spr(CRITTER[(Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') + L], f.x, f.y, th.wall, 1, false);
-        for (let i = 1; i <= 4; i++) box(f.x - f.dir * (4 + 2 * i) * P, f.y - (6 + Math.round(Math.sin(T * 14 + i) * 1.2)) * P, f.x - f.dir * (4 + 2 * i) * P + 2 * P, f.y - (5 + Math.round(Math.sin(T * 14 + i) * 1.2)) * P, PAL.red, 1, 0, 10, 0);
-      }
+    else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
+      const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : f.t % 1.6 < 0.24 ? 'crowUp' : 'crow';
+      spr(CRITTER[wing + L], f.x, f.y, th.wall, 1, false); spr(CRITTER[(wing === 'crow' ? 'ring' : 'ringFly') + L], f.x, f.y, PAL.red, 1, false);
     }
   }
   if (CINE) this.route = bonusEye ? 4 : 0;

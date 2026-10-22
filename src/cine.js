@@ -222,7 +222,7 @@ function cineFaces(rd, lv, cam, H, box) {
   }
 }
 // The world's own far shapes in planes, each sliding by its depth f of the climb (a shape's world y is its own plus (1 - f) of the camera's), drawn DIM into
-// the far target: the Village a grove (cedars far, bamboo nearer), Tokyo a city (towers of flats far, lattice masts and pipes nearer, their small red lights).
+// the far target: the Village a grove (cedars far, bamboo nearer), Tokyo a city (flats far off side by side, a few windows lit).
 function cineBack(rd, lv, cam, H, box, F, T) {
   const look = CINE_LOOK(lv.theme), t = lv.tile, P = PIX.size, snap = (v) => Math.round(v / P) * P, top = cam - 60, bot = cam + H + 60;
   rd.cineL = [];
@@ -244,22 +244,14 @@ function cineBack(rd, lv, cam, H, box, F, T) {
         }
       }
     }
-  } else if (look.planes === 'city') {
-    for (let i = 0; i < 6; i++) {   // flats far off (f 0.28): tall blocks, dark, a few windows lit (the rule book: the city quieter, as the owner cut Tokyo's dots and
-      // wires; no grid of dark windows)
-      const f = 0.28, x0 = snap(lv.l + (i * 3.1 + 0.4 * hash(i)) * t), x1 = snap(x0 + (1.8 + 0.8 * hash(i + 9)) * t);
-      if (x0 > lv.r) break;
-      box(x0, top, Math.min(x1, lv.r), bot, PAL.purple, 1.08, 0, 10, 0);
-      const step = 0.9 * t, k0 = Math.floor((top - cam * (1 - f)) / step) - 1;
-      for (let k = k0; wy(f, k * step) < bot; k++) { const y = snap(wy(f, k * step)); for (let x = x0 + 0.3 * t; x < Math.min(x1, lv.r) - 0.35 * t; x += 0.55 * t) { const on = hash(i * 131 + k * 17 + Math.round(x)) < 0.12; if (on) box(snap(x), y, snap(x + 0.25 * t), y + snap(0.4 * t), PAL.orange, 1.3, 0, 10, 0); } }
-    }
-    for (let i = 0; i < 3; i++) {   // masts and pipes nearer (f 0.55), plain: two posts and a rung now and then, one ink (no lattice, and no red lights: red is danger)
-      const f = 0.55, x = snap(lv.l + (2.2 + i * 5.4 + 0.8 * hash(i + 40)) * t), w = snap(0.9 * t);
-      if (x + w > lv.r) break;
-      box(x, top, x + P, bot, PAL.purple, 1.2, 0, 10, 0); box(x + w, top, x + w + P, bot, PAL.purple, 1.2, 0, 10, 0);
-      const step = 2.4 * t, k0 = Math.floor((top - cam * (1 - f)) / step) - 1;
-      for (let k = k0; wy(f, k * step) < bot; k++) { const y = snap(wy(f, k * step)); box(x, y, x + w + P, y + P, PAL.purple, 1.2, 0, 10, 0); }   // a rung
-      const px = snap(x + w + 0.9 * t); box(px, top, px + 2 * P, bot, PAL.purple, 1.12, 0, 10, 0);   // a pipe beside it
+  } else if (look.planes === 'city') {   // flats far off (f 0.28) side by side, one even dark tone with hairline gaps, a lit window here and there; no masts, no pipes
+    // (owner, on Tokyo 5-4 in 2.5D: «упростить детали фона, меньше окон, более равномерный фон»)
+    for (let i = 0, f = 0.28; ; i++) {
+      const x0 = snap(lv.l + i * 2.9 * t), x1 = Math.min(snap(x0 + 2.75 * t), lv.r);
+      if (x0 >= lv.r) break;
+      box(x0, top, x1, bot, PAL.purple, 1.08, 0, 10, 0);
+      const step = 1.8 * t, k0 = Math.floor((top - cam * (1 - f)) / step) - 1;
+      for (let k = k0; wy(f, k * step) < bot; k++) { const y = snap(wy(f, k * step)); for (let x = x0 + 0.35 * t; x < x1 - 0.4 * t; x += 0.75 * t) if (hash(i * 131 + k * 17 + Math.round(x)) < 0.1) box(snap(x), y, snap(x + 0.25 * t), y + snap(0.4 * t), PAL.orange, 1.3, 0, 10, 0); }
     }
   }
 }

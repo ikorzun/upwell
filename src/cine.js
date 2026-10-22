@@ -178,6 +178,16 @@ if (CINE_ON) {
 // The 2.5D on or off as the game runs (owner: «сделай в настройках переключатель на 2d, как в примере… с деревней»): the targets and the canvas made
 // again on the next frame (layout); 2D is the game as it is without the fork, but for the bonuses' look (CINE_ON.bonus)
 function cineUse(on) { CINE = on && CINE_ON ? CINE_ON : null; queueLayout(); }
+// A bonus under the eye rides its ledge's top face (the owner's pick of four ways, «2», for his rule «монеты и другие бонусы не должны соприкасаться с
+// платформами… на минимальном расстоянии, не соприкасаясь даже под углом»): drawn as much higher as a ledge's top face would be at its foot, so it hovers the
+// same small gap over the face at any angle, and never into what is over it. How many px to lift a thing of radius r at (x, y): 0 over the eye
+function cineRide(lv, x, y, r, cam, H) {
+  const under = y + r - (cam + H / 2);
+  if (!CINE.on('vol') || under <= 0) return 0;
+  let lift = Math.min(under * CINE.K, CINE.DEEP * lv.tile);
+  for (const q of lv.rects) if (!q.gone && q.y1 <= y - r && q.y1 > y - r - lift - 3 * PIX.size && q.x1 > x - r && q.x0 < x + r) lift = Math.min(lift, Math.max(0, y - r - q.y1 - 2 * PIX.size));
+  return Math.round(lift / PIX.size) * PIX.size;
+}
 
 // The world's own far shapes in planes, each sliding by its depth f of the climb (a shape's world y is its own plus (1 - f) of the camera's), drawn DIM into
 // the far target: the Village a grove (cedars far, bamboo nearer), Tokyo a city (towers of flats far, lattice masts and pipes nearer, their small red lights).

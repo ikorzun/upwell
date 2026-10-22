@@ -4384,8 +4384,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (c.y < top || c.y > bot) continue;
     // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded
     const r = c.v > 1 ? cr * 1.4 : cr, a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
-    const coin = (ox, oy, k) => { F(c.x + edge + ox, c.y + oy, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, k, 9, 0); F(c.x + ox, c.y + oy, r * s, 0, 0, r, INK.coinD, k, 9, 0);
-      if (k === 1) { F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6); F(c.x - r * s * 0.3, c.y - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0); } };
+    const cy = c.y - (CINE ? cineRide(lv, c.x, c.y, r, cam, H) : 0);   // (the cinematic fork: riding its ledge's top face, see cineRide)
+    const coin = (ox, oy, k) => { F(c.x + edge + ox, cy + oy, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, k, 9, 0); F(c.x + ox, cy + oy, r * s, 0, 0, r, INK.coinD, k, 9, 0);
+      if (k === 1) { F(c.x - r * s * 0.04, cy - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6); F(c.x - r * s * 0.3, cy - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0); } };
     if (bonusStack) for (let q = 3; q >= 1; q--) coin(q * 0.7 * PIX.size, q * PIX.size, 1.62 - 0.07 * q);   // (C: a token's thickness, down and to the right)
     coin(0, 0, 1);
   }
@@ -4402,13 +4403,13 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
-    const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face)
     if (bonusEye) this.route = 3; F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1); if (bonusEye) this.route = 4;   // (B, D: its glow behind it, not dotted over it)
     if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4, T * 1.8 + p.x * 0.05);   // (C: its thickness)
     iconSpin(p.item.id, p.x, y, a, 2.4, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
-    const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;   // (the fork: riding its ledge's face)
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
     if (bonusEye) this.route = 3; F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); if (bonusEye) this.route = 4; if (bonusStack) for (let q = 3; q >= 1; q--) iconSpin(p.kind, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, k, T * 2.2 + p.x * 0.05); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
@@ -4740,7 +4741,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const [x, y, r0 = 0.9, r1 = 2.6] of vlamps) light(x, y, r0, r1);   // the Village's stone lanterns, the Dark Forest's fences, candles and moon (see their kits)
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
-    for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);
+    for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y - (CINE ? cineRide(lv, c.x, c.y, COIN.r * R, cam, H) : 0), 0.5, 1.3);   // (the fork: where it is drawn)
     const pd = this.pDark;
     gl.useProgram(pd.p); grid(pd.u);
     gl.uniform4fv(pd.u['uLights[0]'], L); gl.uniform1i(pd.u.uN, n); gl.uniform2f(pd.u.uFire, lv.fire ? lv.fire.y / P : 1e9, (3 * R) / P);

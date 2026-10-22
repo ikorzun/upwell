@@ -898,7 +898,8 @@ class Game {
     const lv = this.lv, on = (q) => q.x1 > r.x0 && q.x0 < r.x1;
     return lv.kind === 'well' && !r.cap && !r.spring && r.y1 - r.y0 <= SMASH.maxH * lv.tile &&
       !lv.spikes.some((s) => s.dir < 2 && on(s) && Math.abs(s.dir ? s.y0 - r.y1 : s.y1 - r.y0) < 1) &&   // red stays danger
-      !lv.rects.some((q) => q.spring && on(q) && Math.abs(q.y1 - r.y0) < 1) && !lv.bubbles.some((b) => on(b) && Math.abs(b.y1 - r.y0) < 1);
+      !lv.rects.some((q) => q.spring && on(q) && Math.abs(q.y1 - r.y0) < 1) && !lv.bubbles.some((b) => on(b) && Math.abs(b.y1 - r.y0) < 1) &&
+      !(kitThing(lv, r) && KIT_TEND[kitThing(lv, r).kind]);   // nor a task's thing on it (a shrine, a lamp, a bell): it would go with it
   }
   ramUp() {   // each step of a ram on its way up: what is just overhead goes before the hero meets it, or the ram stops on what does not break
     const H = this.hero, vy = H.vy.reduce((s, v) => s + v, 0) / H.n;   // the rigid part, as setVel set it (rigVy lags a jump by a step)
@@ -1679,7 +1680,7 @@ class Game {
         c.vx += ((dx / d) * sp - c.vx) * f; c.vy += ((dy / d) * sp - c.vy) * f;
       }
       if (c.moving) { if (!home) { c.vx *= k; c.vy *= k; } c.x += c.vx * dt; c.y += c.vy * dt; }
-      if (d < H.R * H.growth * 0.85 + (c.v > 1 ? 1.4 : 1) * cr && !(c.drop && c.t < COIN.home)) this.takeCoin(i);   // a dropped one only once its burst is over: a combo's fountain is seen
+      if (d < H.R * H.growth * 0.85 + cr && !(c.drop && c.t < COIN.home)) this.takeCoin(i);   // a dropped one only once its burst is over: a combo's fountain is seen
     }
   }
   takeCoin(i) {   // coin i of the level's into the purse (counted for the stars and kept for a level under way: Game.saveCur)

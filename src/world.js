@@ -3705,59 +3705,62 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.slick) return false;
-    {   // danchi concrete (DANCHI_V.slab, research/variants/danchi-slab-2-px.png): A exposed (its formwork's joints, tie holes), B an old balcony's front (its cap,
-      // rain streaks, a drip groove, a drain spout dripping), C painted in two tones (paint flaking, a rust streak under a bolt), D precast panels (sealed joints, a
-      // number painted on one, a meter box), E old and repaired (a crack, an old one sealed, a patch, a spalled corner's rebar, a weed), F service concrete (a pipe
-      // on brackets, a vent, hazard stripes, a lamp under its end). A tall block is an end wall, the block's number painted big on it. What is where on it by a
-      // hash of the rect (hsh), so no two alike.
-      const k = V.slab, c = th.block, tall = ht > 1.4, sh = Math.min(0.18, ht * 0.18), SH = 1.6, DK = 1.4, one = (n) => window.__dcAll || hsh(n) < 0.34;   // SH, DK: concrete in shade, darker still; one(n): on one slab in three (owner: small hanging things not on every ledge; the gallery shows all)
-      const bl = (u0, v0, u1, v1, cc, wd = 1, a = 1) => line(W(u0), Y(v0), W(u1), Y(v1), cc, a, wd);
-      const glyph = (x, y, n, sz) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
-        [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * sz, y + b0 * sz, x + a1 * sz, y + b1 * sz, K, 1, 0, 10, 0); }); };   // a digit 5 by 9 of sz, black paint
-      const num = (x, y, n, sz) => { if (n > 9) { glyph(x, y, Math.floor(n / 10) % 10, sz); glyph(x + 7 * sz, y, n % 10, sz); } else glyph(x, y, n, sz); };   // (x its left edge, on either wall)
+    {   // danchi concrete after Japanese modernism (DANCHI_V.slab, research/variants/danchi-slab-modern-1-px.png; owner: «К бетону нужен подход через модернизм и
+      // знаковые бетонные здания и музеи Японии»), each after one building: A Tadao Ando's fair-faced concrete (panels of tatami proportion, six tie holes each), B
+      // Kenzo Tange's Kagawa Prefectural Office (its face marked by its formwork's boards, beam ends under it like a temple's eave brackets), C Le Corbusier's
+      // National Museum of Western Art (panels of pebbled concrete, a piloti under it), D Kisho Kurokawa's Nakagin (its free end a capsule, a round window, four
+      // bolts), E Arata Isozaki's Oita library (a hollow beam, its cut end open), F Kunio Maekawa's Fukuoka Art Museum (tiles cast into the concrete under a
+      // plain band). The band under its white edge plain on each (the 2.5D rule book: its top face takes its colour from there). A tall block an end wall, the
+      // block's number painted big on it (not on Nakagin's capsules). What is where by a hash of the rect (hsh), so no two alike.
+      const k = V.slab, c = th.block, tall = ht > 1.4, sh = Math.min(0.18, ht * 0.18), SH = 1.6, DK = 1.4, lo = ht - sh, one = (n) => window.__dcAll || hsh(n) < 0.34;   // SH, DK: concrete
+      // in shade, darker still; lo: where its shaded underside starts; one(n): on one slab in three (owner: not on every ledge)
+      const up0 = 0.16, up1 = 0.36, cl = Math.min(0.56, ht * 0.6);   // its upper band (under the white edge) and where its lower one starts: between them the row 2.5D takes its
+      // top face's colour from (7 game pixels down), kept plain
       const bold = (x, y, n, sz) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
         [[0, 0, 6, 2], [0, 0, 2, 6], [4, 0, 6, 6], [0, 4, 6, 6], [0, 4, 2, 10], [4, 4, 6, 10], [0, 8, 6, 10]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * sz, y + b0 * sz, x + a1 * sz, y + b1 * sz, K, 1, 0, 10, 0); }); };   // a bold digit 6 by 10 of sz, its strokes 2 thick
-      const big = tall && wt >= 2.4 && ht >= 2.4 ? (() => { const n = 1 + Math.floor(hsh(26) * 24), sz = Math.max(P, snap(Math.min(wt * 0.8 / (n > 9 ? 14 : 6), ht * 0.45 / 10) * t)), y = Y(Math.min(0.6, ht * 0.15));
+      const big = tall && wt >= 2.4 && ht >= 2.4 && k !== 3 ? (() => { const n = 1 + Math.floor(hsh(26) * 24), sz = Math.max(P, snap(Math.min(wt * 0.8 / (n > 9 ? 14 : 6), ht * 0.45 / 10) * t)), y = Y(Math.max(cl + 0.1, Math.min(0.6, ht * 0.15)));
         return { n, sz, y, v0: (y - r.y0) / t, v1: (y + 10 * sz - r.y0) / t, x: snap((r.x0 + r.x1) / 2 - ((n > 9 ? 14 : 6) * sz) / 2) }; })() : null;   // an end wall's number, painted big: where
-      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, k === 4 ? 1 : 0); box(r.x0, Y(ht - sh), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside in shade
-      if (on) bw(0.1, 0.12, 0.1 + px, ht - sh, K);   // the seam where it goes into the wall
-      if (k === 0) {   // A: exposed concrete
-        for (let u = 1.8; u < wt - 0.3; u += 1.8) bw(u, 0.12, u + px, ht - sh, G, 3);   // its formwork's joints, dashed
-        if (tall) for (let v = 0.9; v < ht - 0.3; v += 0.9) bw(0.12, v, wt, v + px, G, 3);
-        for (let p0 = 0; p0 < wt - 0.2; p0 += 1.8) for (const u of [p0 + 0.3, p0 + 1.5]) if (u < wt - 0.15) for (let v = Math.min(0.3, ht / 3); v < ht - sh - 0.1; v += tall ? 0.45 : 0.4) bw(u, v, u + 2 * px, v + 2 * px, G, 0, DK);   // its tie holes, in pairs by its joints
-      } else if (k === 1) {   // B: an old balcony's front
-        bw(0, 0.04, wt, 0.2, G, 2); bw(0, 0.2, wt, 0.2 + px, K);   // its cap, the line under it
-        for (let u = 0.25, i = 0; u < wt - 0.15; u += 0.35 + hsh(i) * 0.5, i++) { const l = (0.3 + hsh(i + 7) * 0.6) * (ht - 0.4), wd = hsh(i + 3) < 0.6 ? 1 : 2; bw(u, 0.22, u + wd * px, 0.22 + l * 0.45, G, 0, SH); bw(u, 0.22 + l * 0.45, u + wd * px, 0.22 + l, G, 2); }   // rain streaks down from it, thin, dark at the top, fading
-        bw(0, ht - sh - 0.1, wt, ht - sh - 0.1 + px, K);   // its drip groove
-        if (wt >= 2 && one(31)) for (let u = wt - 0.6; u > 0.8; u -= 4) { const x = W(u);   // a drain spout, its drops
-          box(x, r.y1, x + 2 * P, snap(r.y1 + 0.22 * t), G, 1, 0, 10, 0); box(x - P, r.y1, x + 3 * P, r.y1 + P, G, 1, 0, 10, 0);
-          for (let i = 0; i < 2; i++) { const q = (T * 0.7 + i / 2 + hsh(30 + Math.round(u))) % 1; box(x + P / 2, snap(r.y1 + (0.3 + q * 1.4) * t), x + 1.5 * P, snap(r.y1 + (0.3 + q * 1.4) * t) + 2 * P, G, 1 - q, 0, 10, 0); } }
-      } else if (k === 2) {   // C: painted in two tones
-        const bv = tall ? ht - 0.7 : 0.55;
-        bw(0, bv, wt, ht - sh, G, 4); bw(0, bv, wt, bv + px, K);   // its lower band, dithered darker, the line over it
-        for (let i = 0; i < 4; i++) { const u = i < 2 ? 0.25 + hsh(i) * 0.6 : wt - 0.35 - hsh(i) * 0.6, v = 0.22 + hsh(i + 4) * Math.max(0.05, bv - 0.35), z = 0.08 + hsh(i + 8) * 0.1; bw(u, v, u + z, v + z * 0.7, G, 0, SH); }   // its paint flaking off
-        const bu = 0.8 + hsh(12) * Math.max(0, wt - 1.6); bw(bu, bv + 0.08, bu + 2 * px, bv + 0.08 + 2 * px, K); bw(bu, bv + 0.08 + 2 * px, bu + 2 * px, Math.min(ht - sh, bv + 0.45), PAL.orange, 0, MUTE);   // a bolt, rust run down from it
-      } else if (k === 3) {   // D: precast panels
-        const n = Math.max(1, Math.round(wt / (tall ? 1.35 : 2))), q = wt / n, jo = (u, v0, v1) => { if (v1 > v0) { bw(u, v0, u + px, v1, K); bw(u + px, v0, u + 2 * px, v1, G, 0, SH); } };
-        for (let i = 1; i < n; i += 2) bw(i * q, 0.12, (i + 1) * q, ht - sh, c, 1);   // every other panel a touch rougher
-        for (let i = 1; i < n; i++) { if (big) { jo(i * q, 0.1, big.v0 - 0.15); jo(i * q, big.v1 + 0.15, ht - sh); } else jo(i * q, 0.1, ht - sh); }   // its joints, sealed (round the number)
-        if (tall) for (let v = 1.5; v < ht - 0.5; v += 1.5) if (!big || v < big.v0 - 0.15 || v > big.v1 + 0.15) { bw(0.1, v, wt, v + px, K); bw(0.1, v + px, wt, v + 2 * px, G, 0, SH); }
-        const meter = on && one(17);
-        if (!tall && wt >= 2.6 && (window.__dcAll || hsh(14) < 0.4)) { const i = Math.max(meter ? 1 : 0, Math.floor(hsh(15) * n)), m = Math.min(i, n - 1) * q + q / 2 + (meter && n === 1 ? 0.5 : 0); num(Math.min(W(m - 6 * px), W(m + 6 * px)), Y(0.2), 10 + Math.floor(hsh(16) * 30), P); }   // a number painted on a panel (not the meter box's)
-        if (meter) { bw(0.23, 0.18, 0.67, 0.72, K); bw(0.25, 0.2, 0.65, 0.7, G); bw(0.32, 0.3, 0.58, 0.48, K); bw(0.38, 0.36, 0.48, 0.42, G, 0, SH); }   // a meter box, its window, its dial
-      } else if (k === 4) {   // E: old and repaired
-        const zig = (u, cc, wd, a) => { let u0 = u, v0 = 0.1; for (let i = 1; i <= 3; i++) { const u1 = u + (hsh(i + 20) - 0.5) * 0.35, v1 = (i / 3) * (ht - sh); bl(u0, v0, u1, v1, cc, i === 1 ? wd + 1 : wd, a); u0 = u1; v0 = v1; } };
-        const cu = 0.6 + hsh(18) * Math.max(0, wt - 1.2); zig(cu, K, 1, 1);   // a crack
-        const su = cu > wt / 2 ? cu - 1.1 : cu + 1.1; if (su > 0.3 && su < wt - 0.3) zig(su, G, 2, SH);   // an old crack, sealed
-        if (wt > 2.2) { const pu = 0.3 + hsh(19) * (wt - 1.4); bw(pu, 0.22, pu + 0.9, Math.min(ht - sh, 0.7), G, 4); }   // a patch of newer concrete, dithered
-        bw(wt - 0.3, ht - 0.32, wt, ht, K); for (const v of [ht - 0.22, ht - 0.12]) bw(wt - 0.3, v, wt - 0.05, v + px, PAL.orange, 0, MUTE);   // its spalled corner, rebar in it
-        if (one(22)) { bl(wt - 0.2, 0, wt - 0.28, -0.14, PAL.green, 1); bl(wt - 0.2, 0, wt - 0.12, -0.12, PAL.green, 1); }   // a weed at its end
-      } else {   // F: service concrete
-        const pv = tall ? 0.5 : 0.42; bw(0, pv, wt - 0.75, pv + 2 * px, G, 0, SH); for (let u = 0.5; u < wt - 0.8; u += 1.2) bw(u, pv - px, u + px, pv + 3 * px, K);   // a pipe along it, its brackets
-        if (wt >= 3) { const vu = 1.0 + hsh(24) * (wt - 2.6); bw(vu, 0.16, vu + 0.55, 0.34, K); for (const v of [0.2, 0.27]) bw(vu + 0.04, v, vu + 0.51, v + px, G, 0, SH); }   // a vent
-        { const u0 = wt - 0.6, v0 = tall ? ht - sh - 0.9 : 0.12, v1 = ht - sh; bw(u0, v0, u0 + px, v1, K); for (let o = -(v1 - v0); o < wt - u0; o += 0.3) { const a0 = Math.max(0, -o), a1 = Math.min(v1 - v0, wt - u0 - o); if (a1 > a0 + 0.02) bl(u0 + o + a0, v1 - a0, u0 + o + a1, v1 - a1, K, 2); } }   // a band of hazard stripes at its end, at 45 degrees
-        if (one(25)) { const x = E(0.35); box(x - 2 * P, r.y1, x + 2 * P, r.y1 + P, G, 1, 0, 10, 0); box(x - 1.5 * P, r.y1 + P, x + 1.5 * P, snap(r.y1 + 0.2 * t), G, 1, 0, 10, 0);
-          box(x - P, r.y1 + 2 * P, x + P, snap(r.y1 + 0.17 * t), PAL.orange, LIT, 0, 10, 0); vlamps.push([x, snap(r.y1 + 0.12 * t), 0.3, 1.0]); }   // a lamp under its end, lit
+      const off = (u, v) => big && v > big.v0 - 0.1 && v < big.v1 + 0.1 && W(u) > big.x - P && W(u) < big.x + (big.n > 9 ? 14 : 6) * big.sz + P;   // (kept clear of the number)
+      const joint = (u, cc, a) => { bw(u, up0, u + px, up1, cc, 0, a); bw(u, cl, u + px, lo, cc, 0, a); };   // a joint down its face, but for the plain row
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, Y(lo), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside in shade
+      if (on) joint(0.1, K, 1);   // the seam where it goes into the wall
+      if (k === 0) {   // A: Ando's fair-faced concrete: panels 1 by 2 (a tatami's), thin joints, six tie holes a panel in two rows of three
+        const ph = tall ? 0.9 : ht, pw = 2 * Math.min(ph, 1);
+        for (let u = pw; u < wt - 0.3; u += pw) joint(u, G, SH);   // its joints
+        if (tall) for (let v = ph; v < lo - 0.2; v += ph) if (v > cl) bw(0.12, v, wt, v + px, G, 0, SH);
+        for (let p0 = 0; p0 < wt - 0.4; p0 += pw) for (let v0 = 0; v0 < lo - 0.1; v0 += ph) for (const fv of [0, 1]) for (const fu of [1 / 6, 1 / 2, 5 / 6]) {
+          const u = p0 + fu * pw, v = tall ? v0 + (fv ? 0.68 : 0.28) * ph : fv ? Math.min(lo - 2 * px, cl + 0.12) : (up0 + up1) / 2;
+          if (u < wt - 0.15 && (v < up1 || v > cl) && v < lo - px && !off(u, v)) bw(u, v, u + px, v + px, G, 0, DK); }   // its tie holes
+      } else if (k === 1) {   // B: Tange's Kagawa: the boards of its formwork printed on its face, beam ends out under it like a temple's eave brackets
+        const rows = [0.22, 0.31]; for (let v = cl + 0.06; v < lo - px; v += 3 * px) rows.push(v);
+        rows.forEach((v, i) => { for (let u = 0, j = 0; u < wt - 0.05; u += 0.9 + hsh(i * 7 + j) * 0.8, j++) { const u1 = Math.min(wt, u + 0.6 + hsh(i * 5 + j + 40) * 0.9); if (!off(u, v)) bw(u, v, u1, v + px, G, 0, SH); } });   // board marks
+        for (let u = 0.3; u < wt - 0.2; u += 0.55) { bw(u, ht, u + 0.24, ht + 0.22, c); bw(u, ht + 0.22 - px, u + 0.24, ht + 0.22, G, 0, SH); bw(u + 0.24 - px, ht, u + 0.24, ht + 0.22, G, 0, DK); }   // its beam ends, their shade
+      } else if (k === 2) {   // C: Le Corbusier's museum: precast panels of pebbled concrete, a round piloti under it at the wall
+        const pw = tall ? 1.2 : 1.33;
+        for (const [va, vb] of [[up0, up1], [cl, lo]]) bw(0.04, va, wt - 0.04, vb, G, 1);   // its pebbled face: a speckle (one feature a band)
+        for (let u = pw; u < wt - 0.3; u += pw) joint(u, G, DK);   // its panels' joints
+        if (tall) for (let v = 1.2; v < lo - 0.2; v += 1.2) bw(0.12, v, wt, v + px, G, 0, DK);
+        for (let i = 0, n = Math.round(wt * 1.6); i < n; i++) { const u = 0.15 + hsh(i + 100) * (wt - 0.3), v = hsh(i + 400) < 0.4 ? up0 + hsh(i + 500) * (up1 - up0 - 2 * px) : cl + hsh(i + 500) * (lo - cl - 2 * px); if (!off(u, v)) bw(u, v, u + 2 * px, v + px, G, 0, SH); }   // and its bigger pebbles
+        if (on && !tall && one(41)) { if (r.dcPil === undefined) r.dcPil = !lv.rects.some((q) => q !== r && !q.cap && q.x1 > Math.min(W(0.3), W(1.0)) && q.x0 < Math.max(W(0.3), W(1.0)) && q.y0 < r.y1 + 2.2 * t && q.y1 > r.y1);
+          if (r.dcPil) { bw(0.45, ht, 0.85, ht + 1.5, c); bw(0.65, ht, 0.85, ht + 1.5, G, 4); bw(0.45, ht + 1.5, 0.85, ht + 2.0, G, 4, DIM); } }   // a piloti, round (a side in shade), into the dark
+      } else if (k === 3) {   // D: Kurokawa's Nakagin: its free end a capsule held by four bolts, a round window in it; a tall block a wall of capsules
+        if (tall) for (let u = 0.2; u < wt - 1.9; u += 1.5) for (let v = Math.max(cl + 0.1, 0.6); v < lo - 0.9; v += 1.2) { bw(u, v, u + 1.3, v + 1.0, K); bw(u + px, v + px, u + 1.3 - px, v + 1.0 - px, c); F(W(u + 0.65), Y(v + 0.5), 0.28 * t, 0, 0, 0.28 * t, K, 1, 0); F(W(u + 0.65), Y(v + 0.5), 0.2 * t, 0, 0, 0.2 * t, G, 1, 0); F(W(u + 0.65), Y(v + 0.5), 0.14 * t, 0, 0, 0.14 * t, K, 1, 0); }   // a wall of capsules
+        const cu = Math.min(1.7, wt * 0.45), cb = ht + (tall ? 0 : 0.2), rr = snap(0.22 * t), fe = E(0), ie = E(cu), x0 = Math.min(fe, ie), x1 = Math.max(fe, ie), yb = Y(cb);   // its length, its bottom (a little below the slab), its corner's round
+        box(x0, r.y0, x1, yb, K, 1, 0, 10, 0);   // its joint round it
+        const b0 = d > 0 ? x0 + P : x0, b1 = d > 0 ? x1 : x1 - P, c0 = d > 0 ? b0 : b0 + rr, c1 = d > 0 ? b1 - rr : b1;   // inside its joint with the slab; short of its round corner
+        box(b0, r.y0, b1, yb - P - rr, c, 1, 0, 10, 0); box(c0, yb - P - rr, c1, yb - P, c, 1, 0, 10, 0); F(d > 0 ? b1 - rr : b0 + rr, yb - P - rr, rr, 0, 0, rr, c, 1, 0);   // its body, its free end's lower corner round
+        if (!tall) box(d > 0 ? x0 : x1 - P, Y(up1), d > 0 ? x0 + P : x1, Y(cl), c, 1, 0, 10, 0);   // (its joint plain at the row 2.5D takes)
+        box(c0, yb - P - snap(0.08 * t), c1, yb - P, c, 1, 0, 10, 4);   // its underside in shade
+        for (const v of [(up0 + up1) / 2, cb - 0.16]) { const bx0 = d > 0 ? x0 + 2 * P : x1 - 3 * P; box(bx0, Y(v), bx0 + P, Y(v) + P, K, 1, 0, 10, 0); }   // two of its four bolts (two more round the far side)
+        const wr = Math.max(0.12, Math.min(0.2, (cb - cl) / 2 - 0.04)), wx = E(cu * 0.45), wy = Y(cl + 0.02 + wr); F(wx, wy, (wr + 0.05) * t, 0, 0, (wr + 0.05) * t, K, 1, 0); F(wx, wy, wr * t, 0, 0, wr * t, G, 1, 0); F(wx, wy, (wr - 0.06) * t, 0, 0, (wr - 0.06) * t, K, 1, 0); box(wx - 2 * P, wy - 2 * P, wx - P, wy - P, G, 1, 0, 10, 0);   // its round window, a glint
+      } else if (k === 4) {   // E: Isozaki's Oita: a hollow beam, its cut free end open; a tall block the ends of its beams in rows
+        if (tall) for (let v = Math.max(cl + 0.15, 0.7); v < lo - 0.6; v += 1.1) for (let u = 0.35; u < wt - 0.5; u += 1.2) if (!off(u, v) && !off(u + 0.5, v + 0.5)) { bw(u, v, u + 0.55, v + 0.55, G, 0, SH); bw(u + 0.1, v + 0.1, u + 0.45, v + 0.45, K); }   // its beams' open ends
+        if (!tall) { bw(wt - 0.62, cl, wt - 0.1, lo + 0.06, G, 0, SH); bw(wt - 0.52, cl + 2 * px, wt - 0.2, lo - 0.04, K); }   // the open end: its frame in shade, the dark inside
+        bw(0.1, cl + 2 * px, wt - 0.75, cl + 3 * px, G, 0, SH); bw(0.1, up1 - px, wt - 0.1, up1, G, 0, SH);   // the hollow's lines along it, under and over
+      } else {   // F: Maekawa's Fukuoka: a plain band like an eave over tiles cast into the concrete
+        bw(0, cl, wt, cl + px, K);   // the band's shadow line
+        const tw = 0.27, tr = tall ? 0.2 : Math.max(0.12, (lo - cl - px) / 2);
+        for (let v = cl + px, i = 0; v < lo - 0.04; v += tr, i++) { bw(0, Math.min(lo, v + tr) - px, wt, Math.min(lo, v + tr), G, 0, SH); for (let u = (i % 2) * tw / 2; u < wt; u += tw) if (u > 0.02 && !off(u, v + tr / 2)) bw(u, v, u + px, Math.min(lo, v + tr), G, 0, SH); }   // its tiles' joints, each row offset
       }
       if (big) { if (big.n > 9) { bold(big.x, big.y, Math.floor(big.n / 10), big.sz); bold(big.x + 8 * big.sz, big.y, big.n % 10, big.sz); } else bold(big.x, big.y, big.n, big.sz); }   // an end wall: its number painted big
       lip(); return true;

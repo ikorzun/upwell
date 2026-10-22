@@ -2095,7 +2095,7 @@ class Game {
     this.look.x = b.cx; this.look.y = b.cy; this.look.t = now;
     for (const e of lv.enemies) {   // an enemy that can be stomped looks scared with the hero over it (its whole top half: stompable), cross with the hero anywhere else (tester:
       // «теряю сердца по причине «задел врага»… вот этой границы хитбокса врагов я до конца понять не смог»)
-      const fb = e.body, over = e.def && e.canStomp() && e !== lv.boss && b.cy < fb.cy - STOMP.above * (b.R + fb.R) && Math.abs(b.cx - fb.cx) < STOMP.look * this.R && fb.cy - b.cy < 2 * STOMP.look * this.R;
+      const fb = e.body, over = e.def && e.canStomp() && e !== lv.boss && overFoe(b, fb) && Math.abs(b.cx - fb.cx) < STOMP.look * this.R && fb.cy - b.cy < 2 * STOMP.look * this.R;
       e.over = over && e.state !== 'shell';   // (and a chevron over it: the renderer)
       if (e.state !== 'shell') { fb.face.frown = !over; if (over) { fb.face.wide = Math.max(fb.face.wide, 0.5); fb.face.surprise = Math.max(fb.face.surprise, 0.7); } }   // (scared: wide eyes, its mouth open)
       if (e.def && e.def.color === 'red' && e !== lv.boss) fb.paint = foePaint(e, b);   // its paint (FOE_PAINT)

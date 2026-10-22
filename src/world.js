@@ -67,15 +67,15 @@ const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09 }
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
 const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the hearts back (user)
-// A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. It counts
-// when the hero meets an enemy from over it: its middle `above` of their radii over the enemy's and at least
-// `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
-// testers found stomps too exact). `bounce` was 1.0, then 0.8: the user found the hop off a kill too high.
-// A stomp: the hero's middle over the enemy's by `above` of the two radii (all its top half, the tester could not tell the old cone's edge), not going up
-// into it faster than `rel` px/s, or falling onto it while it is over its middle at all; else a touch hurts. An enemy that can be stomped looks scared with the
-// hero over it within `look` R (Game.frame), and cross otherwise
-const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, rel: -350, look: 3 };
-const stompable = (H, b, rel) => { const dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (dy > STOMP.above * S && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * S); };
+// A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. `bounce` was 1.0, then 0.8: the user found the hop off
+// a kill too high.
+// A stomp: the hero's feet over the enemy's middle (overFoe: all its top half, the tester could not tell the old cone's edge), not going up into it faster
+// than `rel` px/s, or falling onto it while over its middle at all; else a touch hurts. On level ground the feet are at the floor, under any enemy's middle,
+// so a touch from the side always hurts (742dd52 weighed the two middles: a squat one's side, a crawler's as it pulsed, came and went as a stomp). An enemy
+// that can be stomped looks scared with the hero over it within `look` R (Game.frame), and cross otherwise.
+const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350, look: 3 };
+const overFoe = (H, b) => H.maxY < b.cy;
+const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
 const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]] };   // plus: s a candy lasts longer with 'long'; at: the parts of a level's height its candies are laid in (the fizz gun gone, owner 2026-10-22: «удалим пистолет, он лишний как смысл»)
 // The helmet (once rock candy; user): for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than

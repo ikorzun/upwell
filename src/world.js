@@ -748,8 +748,8 @@ const CAMPAIGN = [
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
-  { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney: 3, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
-    motif: ['ride', 'lift', 'ride2'], sparse: true, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['rainbow'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+  { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
+    motif: ['ride', 'ride2'], sparse: true, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['rainbow'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['rainbow'], seed: 4102 },
@@ -1178,7 +1178,27 @@ const CHUNKS = {
     '............',
     '.........###',
     '............'] },
-  towers: { d: 2, rows: [   // two towers at the walls, 15 tiles tall, a channel 6 tiles wide between them (widened) climbed by jumps off its sides, coins up it:
+  chimney2: { d: 2, tall: true, rows: [   // a chimney 15 tiles tall (owner: «стены высокие как башни»): a channel 7 tiles wide between the shaft's wall and a block, up by jumps
+    '............',   // off its sides, moss under the block to hang from at its foot
+    '............',
+    '.....#######',
+    '.....#######',
+    '..o..#######',
+    '.....#######',
+    '.....#######',
+    '...o.#######',
+    '.....#######',
+    '.....#######',
+    '..o..#######',
+    '.....#######',
+    '.....#######',
+    '...o.#######',
+    '.....#######',
+    '.....#######',
+    '.....#######',
+    '.....~~~~~~~',
+    '............'] },
+  towers: { d: 2, tall: true, rows: [   // two towers at the walls, 15 tiles tall, a channel 6 tiles wide between them (widened) climbed by jumps off its sides, coins up it:
     '............',   // the hero's walls the way up (owner, 2026-10-22: «платформ слишком много… герой может липнуть к стенам и использовать их как платформы»).
     '............',   // A jump and the air jump reach about 14 tiles, so the towers are taller; a wall jump off one side meets the other some 6.6 tiles up
     '####....####',   // (at 8 tiles wide, only about 4), the air jump back with each touch
@@ -1198,30 +1218,58 @@ const CHUNKS = {
     '####....####',
     '............',
     '............'] },
-  ride: { d: 1, rows: [   // a plank to ride across: from a wide ledge onto it, along a row of coins, off onto the other (a motif's easy one, see addChunk)
+  ride: { d: 1, tall: true, rows: [   // a plank to ride to a wall (owner, 2026-10-22: «кабинка до стены»): from a ledge onto it, under a cliff 14 tiles tall, to the mouth
+    '............',   // of a channel 5 tiles wide between the cliff and the shaft's wall, coins at its mouth; up the channel by jumps off its sides (a jump
+    '............',   // and the air jump fall short of its top). A long jump under the cliff can skip the plank: the risky way
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '....########',
+    '............',
+    '.o..o.......',
+    '............',
+    '..WWWW......',   // (its way: its left end from the shaft's wall to 1 tile short of the ledge: at that end the plank is right under the channel)
     '............',
     '............',
-    '#####.......',
-    '............',
-    '...o..o..o..',
-    '....WWWW....',
-    '............',
-    '............',
-    '.......#####',
+    '........####',
     '............'] },
-  ride2: { d: 2, rows: [   // two planks to ride, one over the other, each its own way and pace: the lower one's way over the low ledge's end, the upper's over
-    '............',   // the high one's, the two ways crossing (planks are boarded from under them): none waits long for either (the bot did, at 1-7's first)
+  ride2: { d: 2, tall: true, rows: [   // two planks to ride, one over the other, each its own way and pace (each way over a ledge's end or the other's: planks are boarded from
+    '............',   // under them), the upper one to the mouth of a channel 5 tiles wide by a cliff 14 tiles tall, up it by jumps off its sides
     '............',
-    '####........',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
+    '########....',
     '............',
-    '..o.o.......',
-    '...WWW......',
-    '............',
+    '........o.o.',
     '............',
     '......WWW...',
     '............',
     '............',
-    '........####',
+    '..WWW.......',
+    '............',
+    '............',
+    '####........',
     '............'] },
   icewall: { d: 2, rows: [
     '[..........]',
@@ -1557,7 +1605,7 @@ const CHUNKS = {
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
-  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2'], crumbling: ['crumble', 'bridge'],
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2'], crumbling: ['crumble', 'bridge'],
   danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
@@ -1575,7 +1623,8 @@ for (const id in CHUNKS) {
     return k < 6 ? ch + copy : copy + ch;   // the copy on the inner side
   }).join(''));
 }
-const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk)
+const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).filter((id) => !CHUNKS[id].tall).map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk);
+// (`tall` ones left out: they are a motif level's, which fills its height by `fits`, and the other levels' rooms stay planned as they were)
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
 const STAND = new Set(['#', 'I', 'C', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z']);
@@ -1812,9 +1861,13 @@ class Level {
       const once = (k) => k === 'rest' || (k === 'vault' && this.placed.some((q) => q.id === k));   // the rest only under the way out; one stash in the wall a level
       const mo = this.rc && this.rc.motif, pool = mo && !mo.includes(this.last) && mo.some((k) => CHUNKS[k].d <= maxD) ? Object.fromEntries(mo.map((k) => [k, 1])) : this.rc ? this.rc.chunks : wd.chunks;   // a recipe's
       // `motif`: one of its chunks every other chunk, from the first (owner, 2026-10-22: «A», one idea a level, its own thing on every screen)
-      for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k)) w[k] = pool[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
-      if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k)) w[k] = pool[k];   // a small pool: kinds may run
-      id = pick(rnd, w);
+      const fits = (k) => !mo || this.top - CHUNKS[k].rows.length * this.tile >= this.endY;   // a motif's level fills its height: none too tall for what is left (its chunks are)
+      for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k) && fits(k)) w[k] = pool[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
+      if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k) && fits(k)) w[k] = pool[k];   // a small pool: kinds may run
+      if (!Object.keys(w).length && mo && mo.includes(Object.keys(pool)[0])) for (const k in this.rc.chunks) if (CHUNKS[k].d <= maxD && k !== this.last && fits(k)) w[k] = this.rc.chunks[k];   // no motif chunk fits: the rest of its pool
+      if (Object.keys(w).length || !mo) id = pick(rnd, w);
+      else if (!this.rested && left >= CHUNKS.rest.rows.length * this.tile) { id = 'rest'; this.rested = true; }   // nothing fits: the rest, under the way out
+      else { this.finish(); return; }
     }
     let c = CHUNKS[id];
     if (!this.script && this.top - c.rows.length * this.tile < this.endY) { this.finish(); return; }

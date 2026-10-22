@@ -184,13 +184,13 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
 // Fuji's cranes (the owner's pick, research/variants/fuji-cranes-1-px.png A): a crane flying, its neck out, its legs trailing, wings up and down
 CRITTER.craneUp = ['........#####...................', '.........######.................', '.....###########................', '.......#########................', '........#########...............', '......###########...............', '........#########........#####..', '.........#########.##########.##', '.........##############.........', '......#############.............', '.######...#######...............', '................................', '................................', '................................', '................................', '................................', '................................', '................................'];
 CRITTER.craneDown = ['................................', '................................', '................................', '................................', '................................', '................................', '.........................#####..', '...........#######.##########.##', '.........##############.........', '......#############.............', '.######..#########..............', '........#########...............', '......###########...............', '........#########...............', '.......#########................', '.....###########................', '.........######.................', '........#####...................'];
-// The crow in the red cord (RIBBON): the cord over a crow sitting (CRITTER.crow's 24 x 16), wound across its body, an end hanging off it
-CRITTER.cord = ['........................', '........................', '........................', '........................', '.........##......##.....',
-  '..........##....##......', '...........##..##.......', '............####........', '.............##.........', '............####........', '...........##..##.......',
-  '..........##....###.....', '.........##.......##....', '..................##....', '...................##...', '....................##..'];   // (two pixels thick: read from afar)
-for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'cord']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
-// The crow in the red cord (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
-// (the chunk 'ribbon', 1-3's set piece), flapping in the cord now and then; a touch frees it, coins and its thanks, off it flies with the cord on it,
+// The crow's red ring (RIBBON): round its neck, 2 x 3 pixels over CRITTER.crow's (ring) and over its wings' (ringFly), which hold the head lower
+// (owner, on the questions page, П2: «Нить не похожа на нить, сделай просто красным кольцом вокруг шеи ворона»)
+const ringAt = (k, r0) => Array.from({ length: 16 }, (_, j) => (j >= r0 && j < r0 + 3 ? '.'.repeat(k) + '##' + '.'.repeat(22 - k) : '.'.repeat(24)));
+CRITTER.ring = ringAt(14, 4); CRITTER.ringFly = ringAt(16, 5);
+for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'ring', 'ringFly']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// The crow with the red ring (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
+// (the chunk 'ribbon', 1-3's set piece), flapping there now and then; a touch frees it, coins and its thanks, off it flies with the ring on it,
 // and `card` s later the card (STORY village_crow, behind ?story till the owner's «да»), its thanks read first (a card's panel clears a toast)
 const RIBBON = { card: 2.4, reach: 1.3, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
@@ -867,8 +867,8 @@ const CAMPAIGN = [
     news: { en: 'falling bridges', es: 'puentes que caen', pt: 'pontes que caem', ja: 'おちる はし' } },   // (short: one line at 320 px; «keep moving» is the crumble hint's)
   { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: { mosswall: 2, chimney: 1, stairs: 2, shelves: 1, planks: 1, rubberwall: 1, crumble: 1 }, intro: [],   // by the
     motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler', 'tumbler'], foes: 0.4, pair: 0.15, candy: ['bubble'], seed: 4106,   // practice
-    // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow in
-    // the red cord midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers and tumblers
+    // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow with
+    // the red ring midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers and tumblers
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1, spring: 1 }, intro: [],   // by the
     motif: ['ambush', 'ambush2'], every: 3, steps: true, sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
@@ -1183,7 +1183,7 @@ const UNLOCKS = [
 //   o  coin   O  big coin   B  bubble in the wall (a shop or a stash)
 //   X  cracked block: a head-butt from below (or a smash) breaks it for good — the way into a stash in the wall
 //   Y  a stalactite under the block above: it falls on a hero passing under it   A  an arena's middle (waves of enemies)   a  an ambush's (AMBUSH)
-//   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   n  a nurikabe over it   r  the crow in the red cord on it (RIBBON)
+//   e  a crawler on the ledge under it (the tutorial's)   p  a spitter on the ledge under it   n  a nurikabe over it   r  the crow with the red ring on it (RIBBON)
 const CHUNKS = {
   stairs: { d: 1, rows: [
     '............',
@@ -1483,7 +1483,7 @@ const CHUNKS = {
     '............',
     '###DDDDDD...',
     '............'] },
-  ribbon: { d: 1, rows: [   // the crow in the red cord (RIBBON, r) on a quiet ledge mid-shaft, short of both walls (come to from either side, the way on at
+  ribbon: { d: 1, rows: [   // the crow with the red ring (RIBBON, r) on a quiet ledge mid-shaft, short of both walls (come to from either side, the way on at
     '............',   // either wall), coins under it; no enemy in the chunk (Level.place). (At a wall it was over the ledge under it: the bot stuck)
     '............',
     '###......###',
@@ -2512,7 +2512,7 @@ class Level {
       else if (FOE_LETTER[ch]) {   // an enemy on the ledge under it (FOE_LETTER): a crawler (the tutorial's), a spitter (1-3's), a nurikabe over it (1-5's)
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = FOE_LETTER[ch];
         if (q) this.spawns.push({ type, x, y: q.y0 - 1.2 * R * ENEMY[type].size, ledge: q });
-      } else if (ch === 'r') {   // the crow in the red cord on the ledge under it (RIBBON), facing into the shaft
+      } else if (ch === 'r') {   // the crow with the red ring on the ledge under it (RIBBON), facing into the shaft
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
@@ -4783,13 +4783,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
     else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: about a tile and a half long
-    else if (f.kind === 'ribbon') {   // the crow in the red cord (RIBBON): a flap in it now and then; free, its wings going and the cord's end streaming
-      const L = f.dir > 0 ? '' : 'L', P = PIX.size;
-      if (!f.fly) { spr(CRITTER[(f.t % 1.6 < 0.24 ? 'crowUp' : 'crow') + L], f.x, f.y, th.wall, 1, false); spr(CRITTER['cord' + L], f.x, f.y, PAL.red, 1, false); }
-      else {
-        spr(CRITTER[(Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') + L], f.x, f.y, th.wall, 1, false);
-        for (let i = 1; i <= 4; i++) box(f.x - f.dir * (4 + 2 * i) * P, f.y - (6 + Math.round(Math.sin(T * 14 + i) * 1.2)) * P, f.x - f.dir * (4 + 2 * i) * P + 2 * P, f.y - (5 + Math.round(Math.sin(T * 14 + i) * 1.2)) * P, PAL.red, 1, 0, 10, 0);
-      }
+    else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
+      const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : f.t % 1.6 < 0.24 ? 'crowUp' : 'crow';
+      spr(CRITTER[wing + L], f.x, f.y, th.wall, 1, false); spr(CRITTER[(wing === 'crow' ? 'ring' : 'ringFly') + L], f.x, f.y, PAL.red, 1, false);
     }
   }
   if (CINE) this.route = bonusEye ? 4 : 0;

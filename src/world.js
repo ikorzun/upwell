@@ -97,6 +97,11 @@ const ASTRO = { p: 0.35, at: [0.25, 0.6], lift: 0.2, v: 2.6, time: 30 };   // ti
 // pace eased to it at `ease`/s), steered by the sides, stuck to nothing; a hit (spikes, an enemy, a blob, the fire) or a jump pops it with no heart lost,
 // then `grace` s of a hit's safety; `size`: the bubble's R, the hero's
 const BUBBLE = { time: 6, rise: 2.4, ease: 6, size: 1.7, grace: 0.8 };
+// Wind (owner, 2026-10-22: «ветер: порывы сносят вбок, а заранее их показывают… летящие листья»): over a chunk a recipe's `wind` of them get, gusts across
+// it `push` R/s² (half on a floor), `on` s of each blowing after `off` s of calm; `warn` s before a gust sakura petals start drifting its way, and through
+// it they fly, with white streaks; a koinobori off the wall it blows from hangs limp in the calm, fills with the petals and flies with the gust (see the
+// renderer); the hero's bubble goes with it too, a wall or a floor holds the hero
+const WIND = { push: 10, on: 2.2, off: 2.6, warn: 0.9, pole: 3.2 };   // pole: its koinobori's lowest height over the chunk's foot, in tiles
 const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE };
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
@@ -761,7 +766,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
-    motif: ['ride', 'ride2'], sparse: true, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+    motif: ['ride', 'ride2'], sparse: true, wind: 0.5, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['bubble'], seed: 4102 },
@@ -1706,7 +1711,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -1719,7 +1724,7 @@ class Level {
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
@@ -1750,6 +1755,7 @@ class Level {
     }
     this.fizzAt = o.kind === 'well' && o.height ? CANDIES.at.slice(0, rc ? rc.candy.length : CANDIES.at.length).map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies (a recipe's, as many)
     this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY).filter((k) => k !== 'astro'));   // and which kinds, by a generator of their own: the shaft is laid as before
+    this.windRng = mulberry32((o.seed ^ 0x51ed2700) >>> 0);   // a level's wind, by a generator of its own (the shaft laid as without it)
     const ar = this.astroRng = mulberry32((o.seed ^ 0x3c6ef372) >>> 0);   // a level's astro (ASTRO), by a generator of its own (its ledge too: the level is laid as without it)
     if (rc && rc.astro && o.height && ar() < ASTRO.p) {   // in its place among the level's candies, low to high
       const y = this.floor - o.height * (ASTRO.at[0] + ar() * (ASTRO.at[1] - ASTRO.at[0])), k = this.fizzAt.filter((v) => v > y).length;
@@ -1845,7 +1851,7 @@ class Level {
     const keep = (o) => o.y0 === undefined ? o.y <= y : o.y0 <= y;
     this.rects = this.rects.filter((r) => r.cap || r.safe || keep(r));   // a ledge a fall may come back to stays
     this.spikes = this.spikes.filter(keep);
-    this.coats = this.coats.filter(keep);
+    this.coats = this.coats.filter(keep); this.winds = this.winds.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
     this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep); this.runes = this.runes.filter(keep); this.rings = this.rings.filter(keep);
   }
@@ -1916,6 +1922,24 @@ class Level {
     if (this.ringAt != null && this.top - h < this.ringAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addRing(this.top - h, this.top);
     if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addSpot(this.top - h, this.top);
     if (this.runeAt.length && this.top - h < this.runeAt[0].y && c !== CHUNKS.pocket) this.addRune(this.top - h, this.top);
+    if (this.rc && this.rc.wind && c.kind !== 'moving' && id !== 'rest' && c !== CHUNKS.pocket && this.windRng() < this.rc.wind) {   // a gusty one (WIND)
+      // its koinobori's pole: off the wall it blows from, on the widest way across, as low as its carp, hanging or flying, is clear of the chunk's ledges
+      const dir = this.windRng() < 0.5 ? -1 : 1, t = this.tile, rs = this.rects.slice(lens[0]).filter((q) => !q.move);
+      const clear = (x0, x1, y0, y1) => !rs.some((q) => q.x1 > Math.min(x0, x1) && q.x0 < Math.max(x0, x1) && q.y1 > y0 && q.y0 < y1);
+      const wall = (py) => {   // the wall it blows from, on the widest way across at py
+        const x = [this.l]; for (const r of rs.filter((q) => !q.crumble && q.y0 < py + 0.6 * t && q.y1 > py - 0.6 * t).sort((a, b) => a.x0 - b.x0)) x.push(r.x0, r.x1);
+        x.push(this.r); let span = [this.l, this.r], wide = -1;
+        for (let i = 0, e = this.l; i < x.length; i += 2) { e = Math.max(e, x[i]); if (x[i + 1] - e > wide) { wide = x[i + 1] - e; span = [e, x[i + 1]]; } }   // (e: the furthest right end so far)
+        return dir > 0 ? span[0] : span[1];
+      };
+      let pole = null;
+      for (let up = WIND.pole; up <= h / t - 1 && !pole; up++) {
+        const py = this.top - up * t, px = wall(py), tip = px + dir * 0.55 * t;
+        if (clear(px, tip + dir * 0.6 * t, py - 0.5 * t, py + 2.6 * t) && clear(px, tip + dir * 3.2 * t, py - 0.6 * t, py + 0.6 * t)) pole = { px, py };
+      }
+      if (!pole) { const py = this.top - WIND.pole * t; pole = { px: wall(py), py }; }
+      this.winds.push({ y0: this.top - h, y1: this.top, dir, ph: this.windRng() * (WIND.on + WIND.off), ...pole });
+    }
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
     this.top -= h;
@@ -4190,6 +4214,30 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(Math.max(lv.l, x0), y0, Math.min(lv.r, x1), y1, INK.dark, 1, 0, 10, 0); box(Math.max(lv.l, x0), y0, Math.min(lv.r, x1), y0 + 0.12 * R, PAL.white, 1, 0, 10, 0);
       for (let x = x1 - 0.9 * R; x > x0 + 0.5 * R; x -= 1.3 * R) if (x > lv.l && x < lv.r) box(x - 0.4 * R, y0 + 0.35 * R, x + 0.4 * R, y0 + 0.35 * R + 0.5 * (y1 - y0), INK.coin, 1, 0, 10, 0);
       if (x1 > lv.l && x1 < lv.r + R) { F(x1, (y0 + y1) / 2, 1.4 * R, 0, 0, 0.7 * R, PAL.white, 0.35, 1); disc(Math.min(x1, lv.r) - 0.2 * R, y1 - 0.35 * R, 0.18 * R, PAL.white, 1); }
+    }
+  }
+  for (const w of lv.winds) if (seen(w.y0, w.y1)) {   // a gust's way (WIND): its koinobori; sakura petals drifting its way before it, flying through it, tumbling, white streaks with them
+    const u = (T + w.ph) % (WIND.on + WIND.off), s = u - (WIND.off - WIND.warn), d0 = w.dir, sc = lv.tile;   // (the kit's carp's size)
+    const k = u < 0.6 ? 1 - u / 0.6 : s < 0 ? 0 : s < WIND.warn ? (0.6 * s) / WIND.warn : 0.6 + 0.4 * Math.min(1, (s - WIND.warn) / 0.25);   // how full: limp, filling, flying, then falling back
+    let cx = w.px + d0 * 0.55 * lv.tile, cy = w.py;
+    const tilt = (i) => (1 - k) * (Math.PI / 2) * (0.9 + 0.05 * i) + k * (0.08 + Math.sin(T * 9 - i * 1.3) * (0.06 + 0.07 * i));   // a part's slope: down, or along the wind, waving
+    line(w.px, cy, cx, cy, PAL.gray, 1, 2);   // the pole, the mouth's hoop; then the kit's blue carp (scales dotted) down its length: hanging, or along the wind
+    { const a = tilt(0), hw = 0.45 * sc * (0.45 + 0.55 * k); line(cx - d0 * Math.sin(a) * hw, cy + Math.cos(a) * hw, cx + d0 * Math.sin(a) * hw, cy - Math.cos(a) * hw, PAL.gray, 1, 1.5); }
+    for (const [i, L, hh] of [[0, 0.6, 0.45], [1, 0.88, 0.38], [2, 0.7, 0.28]]) {
+      const a = tilt(i), hw = hh * sc * (0.45 + 0.55 * k), nx = cx + d0 * Math.cos(a) * L * sc, ny = cy + Math.sin(a) * L * sc;
+      line(cx, cy, nx, ny, PAL.blue, 1, (2 * hw) / kitP, 1);
+      if (i === 0) { const ex = cx + d0 * Math.cos(a) * 0.55 * L * sc + d0 * Math.sin(a) * 0.08 * sc, ey = cy + Math.sin(a) * 0.55 * L * sc - Math.cos(a) * 0.08 * sc; disc(ex, ey, 0.2 * sc, PAL.gray, 1); disc(ex, ey, 0.09 * sc, PAL.black, 1); }   // its eye
+      if (i === 2) for (const e of [-0.45, 0.45]) line(nx, ny, nx + d0 * Math.cos(a + e) * 0.5 * sc, ny + Math.sin(a + e) * 0.5 * sc, PAL.blue, 1, (0.2 * sc) / kitP, 1);   // its tail, forked
+      cx = nx; cy = ny;
+    }
+    if (s < 0) continue;   // the petals, since they set off
+    const Wd = lv.r - lv.l, P = PIX.size, sn = (v) => Math.round(v / P) * P, gust = s >= WIND.warn;
+    const d = 3 * R * Math.min(s, WIND.warn) + 9 * R * Math.max(0, s - WIND.warn);   // how far they have come: slowly, then at the gust's pace
+    for (let i = 0; i < 8; i++) {
+      const f = (i * 0.618034) % 1, x = sn(lv.l + ((((d * w.dir + i * 0.37 * Wd) % Wd) + Wd) % Wd)), y = sn(w.y0 + (0.1 + 0.8 * f) * (w.y1 - w.y0) + Math.sin(T * 3 + i) * 0.3 * R);
+      const flat = Math.sin(T * 7 + i * 2) > 0;   // on its side, then on its edge
+      box(x, y, x + (flat ? 3 : 2) * P, y + (flat ? 2 : 3) * P, PAL.purple, 1, 0, 10, 0);
+      if (gust && i % 2 === 0) box(sn(x - w.dir * 1.6 * R), y + 4 * P, sn(x - w.dir * 0.4 * R), y + 5 * P, INK.white, 0.6, 0, 10, 0);
     }
   }
   for (const rg of lv.rings) if (!rg.used && seen(rg.y - 2 * R, rg.y + 2 * R)) {   // a boost ring: gold, two rims, lights going round it, a glow

@@ -689,7 +689,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.hurt = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -1430,7 +1430,7 @@ class Game {
     if (this.bonus) return false;
     if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
     if (this.rc && this.rc.safe && this.hp <= 1) return false;
-    this.hp--; this.hurt = true; return true;   // (a heart lost: no clean medal this time, MEDAL)
+    this.hp--; this.harmed = true; return true;   // (a heart lost: no clean medal this time, MEDAL; not `hurt`, the method that loses it)
   }
   room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
   roomFloor() { return Math.max(CAM.floorShow, view.keep + this.R); }   // a shop's or a stash's floor over the screen's bottom: over the touch keys, as the well's camera keeps the hero (step)
@@ -1457,7 +1457,7 @@ class Game {
     this.curAt = t0; const tl = lv.tile;
     save.cur = { ci: this.ci, seed: this.seed, order: this.rc.order || null, sig: lv.sig, y: (lv.floor - H.maxY) / tl, fire: lv.fire ? (lv.fire.y - H.maxY) / tl : null, hp: this.hp,
       coins: this.coins, got: lv.coinsTaken, kills: this.kills, m: this.levelM, t: lv.t, taken: lv.taken.slice(), gone: lv.gone.slice(), neon: [...lv.neonLit.keys()],
-      tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n), hurt: this.hurt };
+      tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n), harmed: this.harmed };
     persist();
   }
   // Continue into the level under way (saveCur): the level laid again, what was taken and done off it, the hero on the highest steady ledge
@@ -1478,7 +1478,7 @@ class Game {
     this.invuln = HEALTH.invuln;   // a moment to look round
     lv.cam = Math.max(this.hero.cy - CAM.anchor * view.h, lv.capY - CAM.top);
     if (lv.fire) lv.fire.y = this.hero.maxY + Math.max(cur.fire == null ? 0 : cur.fire * tl, 0.6 * view.h);   // as far under it as it was, a breath at least
-    this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t; this.hurt = !!cur.hurt;   // (this.kept: the purse at its start, so its coins count once)
+    this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t; this.harmed = !!cur.harmed;   // (this.kept: the purse at its start, so its coins count once)
     save.cur = cur; ui.toast(t('resumed'), 1800);
   }
   // Where a fall comes back to: the newest of those ledges still there, a little above it.
@@ -1781,7 +1781,7 @@ class Game {
     }
     this.medals = null;
     if (!this.bonus && this.mode === 'camp' && this.daily == null) {   // the mastery medals (MEDAL): its time (the shaft's clock: a room's time is the room's), no heart lost
-      const c = save.camp, par = this.parOf(), got = (lv.t <= par ? 1 : 0) | (this.hurt ? 0 : 2), had = c.medals[this.ci] | 0;
+      const c = save.camp, par = this.parOf(), got = (lv.t <= par ? 1 : 0) | (this.harmed ? 0 : 2), had = c.medals[this.ci] | 0;
       c.medals[this.ci] = had | got; this.medals = { par, t: lv.t, got, had }; persist();
     }
     this.climbed += this.daily != null ? this.rc.len : this.levelM; this.levelM = 0;   // (the daily's: its whole length, where its medal stands)

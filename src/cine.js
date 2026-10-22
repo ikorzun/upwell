@@ -9,9 +9,9 @@
 const CINE = (() => {
   const m = /[?&]cine(?:=([^&]*))?/.exec(location.search);
   if (!m) return null;
-  const set = new Set((!m[1] ? 'vol,light,glow,shadow,motes,grade,depth,rays,fog' : m[1] === 'all' ? 'vol,light,glow,shadow,motes,grade,depth,rays,fog,dof,extrude' : m[1]).split(','));   // (owner 2026-10-22: «Визуальна разница минимальна, просто добавляется размытие… добавить объема платформам и деревьям сделав их в 2.5d»: the blur off, the volume on)
+  const set = new Set((!m[1] ? 'vol,depth,motes' : m[1] === 'all' ? 'vol,light,glow,shadow,motes,grade,depth,rays,fog,dof,extrude' : m[1]).split(','));   // (owner, after: «освещение оставь пиксельное — свет от неона»: no light of ours by default)   // (owner 2026-10-22: «Визуальна разница минимальна, просто добавляется размытие… добавить объема платформам и деревьям сделав их в 2.5d»: the blur off, the volume on)
   const r = /[?&]res=(\d)/.exec(location.search);
-  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : 2, motes: [], lastT: null, light: [], K: 0.06 };
+  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], lastT: null, light: [], K: 0.06, DEEP: 0.7, SMALL: 0.3 };
 })();
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
@@ -42,20 +42,39 @@ void main() {
 // The picture: what is behind (sharp at the walls, out of focus and hazed in the well, the play's soft shadow on it), the play's thickness, the light, the
 // halos and the rays, then the grade.
 const CINE_COMP_FS = GLSL + `in vec2 vUv; out vec4 o;
-uniform sampler2D uFar, uFarB, uPlay, uSoft, uRays, uSt; uniform vec2 uLow, uWell, uShOff, uExOff, uEye; uniform float uAsp, uTime; uniform vec2 uK3;
+uniform sampler2D uFar, uFarB, uPlay, uSoft, uRays, uSt, uSm; uniform vec2 uLow, uWell, uShOff, uExOff, uEye; uniform float uAsp, uTime; uniform vec2 uK3, uK4;
 uniform vec4 uL[16]; uniform vec3 uLC[16]; uniform int uNL; uniform vec4 uK; uniform vec4 uK2; uniform vec3 uFogC, uShadeC; uniform float uGrade;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
-vec4 stAt(vec2 q) { return texelFetch(uSt, clamp(ivec2(floor(q)), ivec2(0), ivec2(uLow) - 1), 0); }
-vec4 matAt(vec2 q) {   // a structure's own colour at q (its pattern carried back: an awning's stripes), but past a dither's black dot, so they do not streak its depth
-  vec4 a = stAt(q); if (a.a > 0.5 && dot(a.rgb, vec3(0.333)) > 0.12) return a;
-  vec4 b = stAt(q + vec2(1.0, 0.0)); if (b.a > 0.5 && dot(b.rgb, vec3(0.333)) > 0.12) return b;
-  vec4 c = stAt(q + vec2(0.0, 1.0)); if (c.a > 0.5 && dot(c.rgb, vec3(0.333)) > 0.12) return c;
+vec4 at(sampler2D t, vec2 q) { return texelFetch(t, clamp(ivec2(floor(q)), ivec2(0), ivec2(uLow) - 1), 0); }
+vec4 matAt(sampler2D t, vec2 q) {   // a thing's own colour at q (its pattern carried back: an awning's stripes), but past a dither's black dot, so it does not streak its depth
+  vec4 a = at(t, q); if (a.a > 0.5 && dot(a.rgb, vec3(0.333)) > 0.12) return a;
+  vec4 b = at(t, q + vec2(1.0, 0.0)); if (b.a > 0.5 && dot(b.rgb, vec3(0.333)) > 0.12) return b;
+  vec4 c = at(t, q + vec2(0.0, 1.0)); if (c.a > 0.5 && dot(c.rgb, vec3(0.333)) > 0.12) return c;
   return a;
+}
+// Is the game pixel pg in the depth of something in t (its fronts), seen from the eye? From pg back along the way to the eye to the nearest front; its face
+// in that front's colour: lit on top (its body past the lit edge and a grass strip), darker on its end, darkest under it, a tone darker going in.
+bool depthOf(sampler2D t, vec2 pg, vec2 k, out vec3 col) {
+  vec2 o = (uEye - pg) * k.x; float ol = length(o); if (ol > k.y) { o *= k.y / ol; ol = k.y; }
+  float n = ceil(ol); vec2 dir = o / max(ol, 1e-3);
+  for (int i = 1; i <= 16; i++) {
+    if (float(i) > n) break;
+    float s = float(i) / n; vec2 q = pg - o * s;
+    if (at(t, q).a > 0.5) {
+      bool top = dir.y > 0.2 && at(t, q + vec2(0.0, 1.0)).a < 0.5, bot = dir.y < -0.2 && at(t, q - vec2(0.0, 1.0)).a < 0.5;
+      vec4 m = top ? matAt(t, q - vec2(0.0, 7.0)) : bot ? matAt(t, q + vec2(0.0, 3.0)) : matAt(t, q);
+      if (m.a < 0.5 && top) m = matAt(t, q - vec2(0.0, 3.0));
+      if (m.a < 0.5) m = matAt(t, q);
+      col = (m.rgb * (top ? 1.12 : bot ? 0.42 : 0.62) + (top ? 0.03 : 0.0)) * (1.0 - 0.3 * s);
+      return true;
+    }
+  }
+  return false;
 }
 void main() {
   vec2 uv = vUv; ivec2 tc = clamp(ivec2(floor(uv * uLow)), ivec2(0), ivec2(uLow) - 1);
-  vec4 pl = texelFetch(uPlay, tc, 0), st = texelFetch(uSt, tc, 0);
+  vec4 pl = texelFetch(uPlay, tc, 0), st = texelFetch(uSt, tc, 0), sm = texelFetch(uSm, tc, 0);
   vec3 col = texelFetch(uFar, tc, 0).rgb;
   bool well = uv.x > uWell.x && uv.x < uWell.y;
   if (well) {
@@ -64,32 +83,20 @@ void main() {
     vec2 eu = uv + uExOff; vec4 ex = texelFetch(uPlay, clamp(ivec2(floor(eu * uLow)), ivec2(0), ivec2(uLow) - 1), 0);
     if (pl.a < 0.5 && ex.a > 0.5 && texture(uSoft, eu).r > 0.45) col = mix(col, ex.rgb * 0.3, uK.w);   // its thickness (the big shapes only: not the coins')
   }
-  if (st.a < 0.5 && uK3.x > 0.0 && texture(uSoft, uv).r > 0.003) {   // 2.5D: is this pixel in a structure's depth? From it back along the way to the eye
-    vec2 pg = uv * uLow, o = (uEye - pg) * uK3.x; float ol = length(o); if (ol > uK3.y) { o *= uK3.y / ol; ol = uK3.y; }
-    float n = ceil(ol); vec2 dir = o / max(ol, 1e-3);
-    for (int i = 1; i <= 14; i++) {
-      if (float(i) > n) break;
-      float s = float(i) / n; vec2 q = pg - o * s;
-      if (stAt(q).a > 0.5) {   // the nearest point of its front: which face, and its material past the lit edge
-        bool top = dir.y > 0.2 && stAt(q + vec2(0.0, 1.0)).a < 0.5, bot = dir.y < -0.2 && stAt(q - vec2(0.0, 1.0)).a < 0.5;
-        vec4 m = top ? matAt(q - vec2(0.0, 7.0)) : bot ? matAt(q + vec2(0.0, 3.0)) : matAt(q);   // (its body: past the lit edge and a grass strip on top)
-        if (m.a < 0.5 && top) m = matAt(q - vec2(0.0, 3.0));
-        if (m.a < 0.5) m = matAt(q);
-        vec3 base = m.rgb * (top ? 1.12 : bot ? 0.42 : 0.62) + (top ? 0.03 : 0.0);   // its own colour in a tone: lit on top, darker on its end, darkest under it
-        col = base * (1.0 - 0.3 * s);   // a tone darker going in
-        st.a = 2.0; break;   // (marked: it is in front of what is behind, lit as the structures)
-      }
-    }
-  }
+  bool lit3 = false;   // (a thing's front or depth: lit as the things, a little)
+  if (uK3.x > 0.0 && texture(uSoft, uv).r > 0.003) {   // 2.5D (the system above feat): the ledges deep, then the small things over them
+    vec2 pg = floor(uv * uLow) + 0.5; vec3 dc;
+    if (st.a > 0.5) { col = st.rgb; lit3 = true; } else if (depthOf(uSt, pg, uK3, dc)) { col = dc; lit3 = true; }
+    if (sm.a > 0.5) { col = sm.rgb; lit3 = true; } else if (depthOf(uSm, pg, uK4, dc)) { col = dc; lit3 = true; }
+  } else if (st.a > 0.5 || sm.a > 0.5) { col = sm.a > 0.5 ? sm.rgb : st.rgb; lit3 = true; }
   vec3 L = vec3(uK2.x), G = vec3(0.0);
   for (int i = 0; i < 16; i++) {
     if (i >= uNL) break;
     vec2 d = (uv - uL[i].xy) * vec2(uAsp, 1.0); float r = length(d) / uL[i].z, f = max(0.0, 1.0 - r);
     L += uLC[i] * f * f * uL[i].w; G += uLC[i] * exp(-r * r * 36.0) * uL[i].w;
   }
-  col *= st.a > 1.5 ? mix(vec3(1.0), L, 0.5) : L;   // (a structure's depth lit as it is, a little)
-  if (st.a > 0.5 && st.a < 1.5) col = st.rgb * mix(vec3(1.0), L, 0.4);   // the structures' fronts
-  if (well && st.a < 0.5) {   // the haze: faint and dark, drifting, thicker low down; lit where a light reaches it through the gaps (the rays)
+  col *= lit3 ? mix(vec3(1.0), L, 0.45) : L;
+  if (well && !lit3) {   // the haze: faint and dark, drifting, thicker low down; lit where a light reaches it through the gaps (the rays)
     float fg = noise(vec2(uv.x * 2.4 + uTime * 0.025, uv.y * 3.2 / uAsp - uTime * 0.04)) * 0.65 + noise(vec2(uv.x * 7.0 - uTime * 0.05, uv.y * 10.0)) * 0.35;
     float dn = uK.y * smoothstep(0.25, 0.85, fg) * (0.6 + 0.4 * (1.0 - uv.y));
     col += uFogC * dn + texture(uRays, uv).rgb * uK2.y * (0.25 + dn * 2.2);
@@ -115,7 +122,7 @@ if (CINE) {
       this.pCopy = program(gl, BG_VS, CINE_COPY_FS); this.pAlpha = program(gl, BG_VS, CINE_ALPHA_FS); this.pBlur = program(gl, BG_VS, CINE_BLUR_FS);
       this.pRays = program(gl, BG_VS, CINE_RAYS_FS); this.pComp = program(gl, BG_VS, CINE_COMP_FS);
     } catch (err) { console.error(err); return false; }
-    this.fFar = new Float32Array(14 * 512); this.nFar = 0; this.fSt = new Float32Array(14 * 1024); this.nSt = 0; this.route = 0;
+    this.fFar = new Float32Array(14 * 512); this.nFar = 0; this.fSt = new Float32Array(14 * 1024); this.nSt = 0; this.fSm = new Float32Array(14 * 1024); this.nSm = 0; this.route = 0;
     this.cine = null; if (this.low) this.makeTarget();
     return true;
   };
@@ -127,31 +134,40 @@ if (CINE) {
       for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v); return t; };
     const target = (w, h, rb) => { const t = tex(w, h), fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
       if (rb) gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, rb); return { fb, tex: t, w, h }; };
-    const old = this.cine; if (old) { for (const k of ['far', 'st', 'h1', 'h2', 'q1', 'q2', 'q3']) { gl.deleteFramebuffer(old[k].fb); gl.deleteTexture(old[k].tex); } gl.deleteFramebuffer(old.play.fb); gl.deleteTexture(old.play.tex); gl.deleteRenderbuffer(old.stencil); }
+    const old = this.cine; if (old) { for (const k of ['far', 'st', 'sm', 'h1', 'h2', 'q1', 'q2', 'q3']) { gl.deleteFramebuffer(old[k].fb); gl.deleteTexture(old[k].tex); } gl.deleteFramebuffer(old.play.fb); gl.deleteTexture(old.play.tex); gl.deleteRenderbuffer(old.stencil); }
     const st = gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER, st); gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, lw, lh);
     const hw = Math.max(1, lw >> 1), hh = Math.max(1, lh >> 1), qw = Math.max(1, lw >> 2), qh = Math.max(1, lh >> 2);
-    const c = this.cine = { stencil: st, play: target(lw, lh, st), far: target(lw, lh), st: target(lw, lh), h1: target(hw, hh), h2: target(hw, hh), q1: target(qw, qh), q2: target(qw, qh), q3: target(qw, qh) };
+    const c = this.cine = { stencil: st, play: target(lw, lh, st), far: target(lw, lh), st: target(lw, lh), sm: target(lw, lh), h1: target(hw, hh), h2: target(hw, hh), q1: target(qw, qh), q2: target(qw, qh), q3: target(qw, qh) };
     this.target = { fb: c.play.fb, tex: c.play.tex };
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.bindRenderbuffer(gl.RENDERBUFFER, null); gl.bindTexture(gl.TEXTURE_2D, null);
   };
-  // Where a feature goes (draw sets route): 0 the play (as ever), 1 the kits' layers (what they draw DIM behind, the rest a structure: a prop, a sign), 2 a
-  // structure (a ledge, a door), 3 behind (the walls' depth).
+  // What has depth, the system (owner 2026-10-22: «оставь только платформы и бонусы в 2.5d, освещение оставь пиксельное — свет от неона. Вход в магазин и
+  // пещеры тоже плоские, как и алтари. А вот мелкое типа фонариков и деревьев нужно сделать 2.5d. Нужна система»):
+  //   deep  (CINE.DEEP tiles at most): what the hero stands on: ledges, planks, movers, crumbles, an air conditioner;
+  //   small (CINE.SMALL): what the hero takes (coins, candies, a shop's items) and the small things set on the ledges: trees, lanterns, a scarecrow, a
+  //         koinobori, a vending machine, a bonsai;
+  //   flat: the walls and all behind (DIM), the doors (a shop's, a stash's, a cave's), altars and shrines, signs, the characters, the effects; the light
+  //         is the game's own, in pixels (a neon's halo, a lantern's glow).
+  // Where a feature goes (draw sets route): 0 flat (the play), 1 a kit's layer (DIM behind, the rest small), 2 deep, 3 behind, 4 small, 5 a kit's flat
+  // thing (DIM behind, the rest flat). A soft glow is always flat.
   Renderer.prototype.feat = function (cx, cy, ax, ay, bx, by, r, g, b, a, type, p1, p2, p3) {
     const rt = this.route | 0;
     if (rt === 0 || (type === 1 && rt !== 3)) return gumFeat.call(this, cx, cy, ax, ay, bx, by, r, g, b, a, type, p1, p2, p3);   // (a soft glow stays in the play: it has no depth)
-    const far = rt === 3 || (rt === 1 && a > 1.001 && a < 1.36), key = far ? 'fFar' : 'fSt', nk = far ? 'nFar' : 'nSt';
+    const dim = a > 1.001 && a < 1.36, far = rt === 3 || ((rt === 1 || rt === 5) && dim);
+    if (!far && rt === 5) return gumFeat.call(this, cx, cy, ax, ay, bx, by, r, g, b, a, type, p1, p2, p3);
+    const key = far ? 'fFar' : rt === 2 ? 'fSt' : 'fSm', nk = far ? 'nFar' : rt === 2 ? 'nSt' : 'nSm';
     if ((this[nk] + 1) * 14 > this[key].length) { const d = new Float32Array(this[key].length * 2); d.set(this[key]); this[key] = d; }
     const F = this[key], o = this[nk]++ * 14;
     F[o] = cx; F[o + 1] = cy; F[o + 2] = ax; F[o + 3] = ay; F[o + 4] = bx; F[o + 5] = by;
     F[o + 6] = r; F[o + 7] = g; F[o + 8] = b; F[o + 9] = a; F[o + 10] = type; F[o + 11] = p1; F[o + 12] = p2; F[o + 13] = p3;
   };
   // The far list after the play's in the one store (drawn first, into the far target): where it starts.
-  Renderer.prototype.cineAppend = function () {   // (then the structures' after them)
-    const need = (this.nf + this.nFar + this.nSt) * 14;
+  Renderer.prototype.cineAppend = function () {   // (then the deep ones' and the small ones' after them)
+    const need = (this.nf + this.nFar + this.nSt + this.nSm) * 14;
     if (need > this.fdata.length) { let n = this.fdata.length; while (n < need) n *= 2; const d = new Float32Array(n); d.set(this.fdata.subarray(0, this.nf * 14)); this.fdata = d; }
-    this.fdata.set(this.fFar.subarray(0, this.nFar * 14), this.nf * 14); this.fdata.set(this.fSt.subarray(0, this.nSt * 14), (this.nf + this.nFar) * 14);
-    this.farStart = this.nf; this.stStart = this.nf + this.nFar;
-    return this.nf + this.nFar + this.nSt;
+    this.fdata.set(this.fFar.subarray(0, this.nFar * 14), this.nf * 14); this.fdata.set(this.fSt.subarray(0, this.nSt * 14), (this.nf + this.nFar) * 14); this.fdata.set(this.fSm.subarray(0, this.nSm * 14), (this.nf + this.nFar + this.nSt) * 14);
+    this.farStart = this.nf; this.stStart = this.nf + this.nFar; this.smStart = this.nf + this.nFar + this.nSt;
+    return this.nf + this.nFar + this.nSt + this.nSm;
   };
 }
 
@@ -255,27 +271,27 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
   const tex = (unit, tx, u) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tx); gl.uniform1i(u, unit); };
   const pass = (tg, prog, set) => { gl.bindFramebuffer(gl.FRAMEBUFFER, tg ? tg.fb : null); gl.viewport(0, 0, tg ? tg.w : this.canvas.width, tg ? tg.h : this.canvas.height); gl.useProgram(prog.p); set(prog.u); gl.drawArrays(gl.TRIANGLES, 0, 3); };
   const blur = (a, b, src) => { pass(a, this.pBlur, (u) => { tex(0, src.tex, u.uTex); gl.uniform2f(u.uDir, 1 / a.w, 0); }); pass(b, this.pBlur, (u) => { tex(0, a.tex, u.uTex); gl.uniform2f(u.uDir, 0, 1 / b.h); }); };
-  pass(c.h1, this.pCopy, (u) => tex(0, c.far.tex, u.uTex)); blur(c.h2, c.h1, c.h1);   // what is behind, out of focus: in h1
-  pass(c.q1, this.pAlpha, (u) => { tex(0, c.play.tex, u.uTex); tex(1, c.st.tex, u.uTex2); }); blur(c.q2, c.q3, c.q1);   // the play's and the structures' coverage in q1, softened in q3
+  if (on('dof')) { pass(c.h1, this.pCopy, (u) => tex(0, c.far.tex, u.uTex)); blur(c.h2, c.h1, c.h1); }   // what is behind, out of focus: in h1
+  pass(c.q1, this.pAlpha, (u) => { tex(0, c.st.tex, u.uTex); tex(1, c.sm.tex, u.uTex2); }); blur(c.q2, c.q3, c.q1);   // the things' coverage in q1, softened in q3 (where to look for depth; the shadow's)
   const toUv = (x, y) => [(x + sx) / W, 1 - (y + sy) / H];
   const L = cineLights(this, g, lv, vlamps).filter(([x, y, r]) => y + sy > -r && y + sy < H + r).sort((a, b) => b[3] * b[2] - a[3] * a[2]);
   const rays = on('rays') ? L.filter((l) => l[2] > 1.6 * lv.R).slice(0, 4) : [];
-  pass(c.q2, this.pRays, (u) => {
+  if (rays.length) pass(c.q2, this.pRays, (u) => {
     tex(0, c.q1.tex, u.uOcc); const R4 = new Float32Array(16), C4 = new Float32Array(12);
     rays.forEach(([x, y, r, i, col], j) => { const [ux, uy] = toUv(x, y); R4.set([ux, uy, (r * 1.8) / H, i], j * 4); C4.set(col, j * 3); });
     gl.uniform4fv(u['uR[0]'], R4); gl.uniform3fv(u['uRC[0]'], C4); gl.uniform1i(u.uNR, rays.length); gl.uniform1f(u.uAsp, W / H);
   });
   const lights = on('light') || on('glow') ? L.slice(0, 16) : [];
   pass(null, this.pComp, (u) => {
-    tex(0, c.far.tex, u.uFar); tex(1, c.h1.tex, u.uFarB); tex(2, c.play.tex, u.uPlay); tex(3, c.q3.tex, u.uSoft); tex(4, c.q2.tex, u.uRays); tex(5, c.st.tex, u.uSt);
-    gl.uniform2f(u.uEye, (((lv.l + lv.r) / 2 + sx) / W) * lw, 0.5 * lh); gl.uniform2f(u.uK3, on('vol') ? CINE.K : 0, (0.7 * lv.tile) / PIX.size);   // 2.5D: the eye in the middle, the deepest a face goes
+    tex(0, c.far.tex, u.uFar); tex(1, c.h1.tex, u.uFarB); tex(2, c.play.tex, u.uPlay); tex(3, c.q3.tex, u.uSoft); tex(4, c.q2.tex, u.uRays); tex(5, c.st.tex, u.uSt); tex(6, c.sm.tex, u.uSm);
+    gl.uniform2f(u.uEye, (((lv.l + lv.r) / 2 + sx) / W) * lw, 0.5 * lh); gl.uniform2f(u.uK3, on('vol') ? CINE.K : 0, (CINE.DEEP * lv.tile) / PIX.size); gl.uniform2f(u.uK4, on('vol') ? CINE.K : 0, (CINE.SMALL * lv.tile) / PIX.size);   // 2.5D: the eye in the middle, the deepest each kind goes
     gl.uniform2f(u.uLow, lw, lh); gl.uniform2f(u.uWell, (lv.l + sx) / W, (lv.r + sx) / W); gl.uniform1f(u.uAsp, W / H); gl.uniform1f(u.uTime, lv.t);
     gl.uniform2f(u.uShOff, -3 / lw, 8 / lh); gl.uniform2f(u.uExOff, -1 / lw, 3 / lh);
     const LU = new Float32Array(64), LC = new Float32Array(48);
     lights.forEach(([x, y, r, i, col], j) => { const [ux, uy] = toUv(x, y); LU.set([ux, uy, r / H, on('light') ? i : 0], j * 4); LC.set(col, j * 3); });
     gl.uniform4fv(u['uL[0]'], LU); gl.uniform3fv(u['uLC[0]'], LC); gl.uniform1i(u.uNL, lights.length);
     gl.uniform4f(u.uK, on('dof') ? 0.5 : 0, on('fog') ? 0.6 : 0, on('shadow') ? 0.85 : 0, on('extrude') ? 1 : 0);
-    gl.uniform4f(u.uK2, on('light') ? look.amb : 1, on('rays') ? 0.8 : 0, on('glow') ? 0.7 : 0, on('grade') ? 0.03 : 0);
+    gl.uniform4f(u.uK2, on('light') ? look.amb : 1, rays.length ? 0.8 : 0, on('glow') ? 0.7 : 0, on('grade') ? 0.03 : 0);
     gl.uniform3fv(u.uFogC, look.fog); gl.uniform3fv(u.uShadeC, look.shade); gl.uniform1f(u.uGrade, on('grade') ? 1 : 0);
   });
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, null);

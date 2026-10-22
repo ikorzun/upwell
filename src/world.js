@@ -67,15 +67,15 @@ const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09 }
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
 const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the hearts back (user)
-// A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. It counts
-// when the hero meets an enemy from over it: its middle `above` of their radii over the enemy's and at least
-// `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
-// testers found stomps too exact). `bounce` was 1.0, then 0.8: the user found the hop off a kill too high.
-// A stomp: the hero's middle over the enemy's by `above` of the two radii (all its top half, the tester could not tell the old cone's edge), not going up
-// into it faster than `rel` px/s, or falling onto it while it is over its middle at all; else a touch hurts. An enemy that can be stomped looks scared with the
-// hero over it within `look` R (Game.frame), and cross otherwise
-const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, rel: -350, look: 3 };
-const stompable = (H, b, rel) => { const dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (dy > STOMP.above * S && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * S); };
+// A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. `bounce` was 1.0, then 0.8: the user found the hop off
+// a kill too high.
+// A stomp: the hero's feet over the enemy's middle (overFoe: all its top half, the tester could not tell the old cone's edge), not going up into it faster
+// than `rel` px/s, or falling onto it while over its middle at all; else a touch hurts. On level ground the feet are at the floor, under any enemy's middle,
+// so a touch from the side always hurts (742dd52 weighed the two middles: a squat one's side, a crawler's as it pulsed, came and went as a stomp). An enemy
+// that can be stomped looks scared with the hero over it within `look` R (Game.frame), and cross otherwise.
+const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350, look: 3 };
+const overFoe = (H, b) => H.maxY < b.cy;
+const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
 const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]] };   // plus: s a candy lasts longer with 'long'; at: the parts of a level's height its candies are laid in (the fizz gun gone, owner 2026-10-22: «удалим пистолет, он лишний как смысл»)
 // The helmet (once rock candy; user): for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
@@ -267,6 +267,11 @@ const MEDAL = { perM: 0.5, step: 5, min: 20 };
 // home in on the hero from anywhere, at `seek` px/s more than its own pace (three times that a
 // second on), turning at `steer`/s: they always get to it.
 const COIN = { r: 0.54, magnet: 2.6, drag: 2.4, burst: 260, home: 0.25, seek: 600, steer: 10 };   // a coin the magnet reaches homes in as an enemy's does (user: faster)
+// Coins hover clear of what they are laid by (owner, 2026-10-22: «монеты и другие бонусы не должны соприкасаться с платформами, они как бы парят над ними на
+// минимальном расстоянии, не соприкасаясь даже под углом»). A coin's radius is over half a cell, so one in a cell's middle touched the ledge under it (half of
+// all coins did). Level.clearBonuses moves each `gap` game pixels clear of ledges, blocks, a mover's whole way and the walls, corners too: up first, else
+// down, aside or up aside, a game pixel at a time, `reach` tiles at most. A seesaw's and a mill's seats come and go: not counted. Candies already hover.
+const BONUS_GAP = { gap: 2, reach: 0.6 };
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
 // Ledges by world (user: some bounce, some pull; the random run's): a Cave plank in `bouncy` of them throws the hero up at `v`
 // of a jump as it lands; a Mine block in `magnet` pulls it in within `range` R at `pull` R/s² (MAGNET), more the nearer.
@@ -352,6 +357,20 @@ const FOE_COLOR = {
   goo: { id: 'goo', base: PAL.black, deep: PAL.gray },   // a skull's black goo (the user's picture)
   gray: { id: 'gray', base: PAL.gray, deep: PAL.black },   // the Dark Forest's enemies (black and white, their eyes lit)
 };
+// The red enemies' paint, five ways till the owner picks one (owner, 2026-10-22: «Не обязательно всех врагов красить в красный полностью. Они могут быть
+// частично окрашены случайно или быть белыми и иметь красную текстуру тени (сейчас черная) поверх… враги могут краснеть при приближении героя»), `?paint=`:
+// A red, shaded black (as they were); B white, shaded red; C B with red patches of its own, as a kohaku carp's (its face left white the longest); D B
+// going red as the hero comes from `far` to `near` R of it, patches growing over it till it is all A's; E C going red so. A patch is where its field
+// (paintField, the body shader's: three waves of its own phases over the body, riding with it) is over a level: `spots` for C's, `none` none, `all` all.
+const FOE_PAINT = { v: ((/[?&]paint=([a-e])\b/i.exec(location.search) || [])[1] || 'a').toUpperCase(), far: 7, near: 2, spots: 0.6, none: 3.5, all: -5.5 };
+const PAINT_ALL = new Float32Array([-99, 0, 0]);   // (any other body: its colour all over, as before)
+const paintField = (x, y, p) => { const v = y - 0.05; return Math.sin(x * 3.3 + p[1]) + Math.sin(y * 2.9 + p[2]) + Math.sin((x - y) * 2.1 + 1.7 * p[1]) - 2.4 * Math.exp(-5 * (x * x + v * v)); };
+const foePaint = (e, H) => {   // uPaint: the level, the field's two phases
+  const P = FOE_PAINT, v = P.v, p = e.paint || (e.paint = new Float32Array([0, Math.random() * TAU, Math.random() * TAU])), b = e.body;
+  const near = v === 'D' || v === 'E' ? clamp((P.far - (Math.hypot(b.cx - H.cx, b.cy - H.cy) - H.R - b.R) / H.R) / (P.far - P.near), 0, 1) : 0, from = v === 'C' || v === 'E' ? P.spots : P.none;
+  p[0] = v === 'A' ? -99 : from + (P.all - from) * near;
+  return p;
+};
 // A world in one ink over black for its walls, ledges and far dots, with white for the edge you
 // stand on; the surfaces that behave differently in colours of their own (`o` picks others where
 // the usual one is the world's ink): ice, moss, rubber, crumbling blocks, movers, springs.
@@ -399,7 +418,19 @@ const ENEMY = {
   chaser: { design: 'slug', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 5, speed: 70, step: 0.5, move: 'wall', chase: true },
   worm: { design: 'round', color: 'red', size: 0.85, grav: 1, stomp: true, coins: 6, speed: 0, step: 0.9, move: 'flow' },   // a knot of tubes, flowing ledge to ledge (WORM)
   skull: { design: 'dome', color: 'goo', size: 1.1, grav: 1, stomp: true, coins: 5, speed: 40, step: 0.8, move: 'crawl' },   // a skull in black goo, dripping (SKULL; the Crypt's)
+  // the square ones (owner, 2026-10-22: «еще нужны квадратные враги», all three he picked): jelly cubes ('cube')
+  tumbler: { design: 'cube', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 4, speed: 0, step: 1, move: 'tumble' },   // a yokan somersaulting along its ledge (TUMBLE)
+  tofu: { design: 'cube', color: 'red', size: 0.95, grav: 1, stomp: true, coins: 2, speed: 32, step: 0.9, move: 'crawl' },   // a soft cube: stomped, it falls into four (TOFU)
+  tofuMini: { design: 'cube', color: 'red', size: 0.45, grav: 1, stomp: true, coins: 1, speed: 70, step: 0.45, move: 'crawl' },
+  nurikabe: { design: 'cube', color: 'red', size: 1.1, grav: 0, stomp: true, coins: 6, speed: 0, step: 1, move: 'crush' },   // a wall yokai hanging over its ledge, it drops on the hero under it (CRUSH)
 };
+// A tumbler: sits `rest` s on its ledge (crouching its last `crouch`), then somersaults `hop` R ahead, up and over in `air` s, turning at the ledge's end. Sitting it
+// is stomped; in the air its corners hurt. A nurikabe: hangs `up` tiles over its ledge (less if a ceiling is nearer); the hero under it (within `reach` R of its
+// sides), it shakes `warn` s, falls at `fall` times gravity, lies `down` s (stomped only then; from over it before, the hero bounces off its top), rises at
+// `rise` R/s. A tofu stomped: `n` small ones, thrown apart
+const TUMBLE = { rest: 1.1, crouch: 0.3, air: 0.45, hop: 2.4 };
+const CRUSH = { up: 3.6, reach: 1.2, warn: 0.55, fall: 3, down: 1.4, rise: 2.2 };
+const TOFU = { n: 4 };
 // The worm (user's video: dithered tubes flowing over each other, ball tips): its knot is stomped, its tubes hurt. Four tubes,
 // two to a side, waving up and out (the knot's top is clear: the way to stomp it); `len` theirs, R, in discs `seg` apart, `w`
 // half-wide, `tip` the balls at their ends. On a ledge it `wait`s, then, on screen, reaches a tube out (`reach` s, the warning)
@@ -429,6 +460,10 @@ const FOE_DESC = {
   mini: { en: "A splitter's half: small and quick.", es: 'Medio divisor: pequeño y rápido.', pt: 'Metade de um divisor: pequeno e rápido.', ja: 'ブンレツの かたわれ。はやい。' },
   chaser: { en: 'Crawls the walls up to your height.', es: 'Trepa las paredes hasta tu altura.', pt: 'Sobe as paredes até a sua altura.', ja: 'きみの たかさまで かべを のぼる。' },
   worm: { en: 'Stomp the knot, not the tubes!', es: '¡Pisa el nudo, no los tubos!', pt: 'Pise no nó, não nos tubos!', ja: 'むすびめを ふめ、くだは さけろ！' },
+  tumbler: { en: 'Somersaults along its ledge. Stomp it as it sits.', es: 'Da volteretas por su saliente. Písalo cuando para.', pt: 'Dá cambalhotas na borda. Pise quando para.', ja: 'でんぐりがえしで すすむ。とまったら ふもう。' },
+  tofu: { en: 'Stomp it and it falls into four.', es: 'Písalo y se parte en cuatro.', pt: 'Pise e ele vira quatro.', ja: 'ふむと よっつに わかれる。' },
+  tofuMini: { en: "A quarter of a tofu: small and quick.", es: 'Un cuarto de tofu: pequeño y rápido.', pt: 'Um quarto de tofu: pequeno e rápido.', ja: 'とうふの かけら。はやい。' },
+  nurikabe: { en: 'Drops on you from above. Stomp it once it lands.', es: 'Cae sobre ti. Písalo cuando aterriza.', pt: 'Cai em você. Pise quando ele pousa.', ja: 'うえから おちてくる。おちたら ふもう。' },
   skull: { en: 'Creeps in its goo, lunges up close.', es: 'Se arrastra en su baba; se lanza de cerca.', pt: 'Rasteja na gosma; ataca de perto.', ja: 'どろどろ はう。ちかいと とびかかる。' },
 };
 const FOE_NAMES = {
@@ -439,6 +474,8 @@ const FOE_NAMES = {
   splitter: { en: 'Splitter', es: 'Divisor', pt: 'Divisor', ja: 'ブンレツ' }, mini: { en: 'Mini', es: 'Mini', pt: 'Mini', ja: 'チビ' },
   chaser: { en: 'Chaser', es: 'Perseguidor', pt: 'Perseguidor', ja: 'オイカケ' }, worm: { en: 'Worm', es: 'Gusano', pt: 'Minhoca', ja: 'ワーム' },
   skull: { en: 'Skull', es: 'Calavera', pt: 'Caveira', ja: 'ドクロ' },
+  tumbler: { en: 'Tumbler', es: 'Volteretas', pt: 'Cambalhota', ja: 'ゴロゴロようかん' }, tofu: { en: 'Tofu', es: 'Tofu', pt: 'Tofu', ja: 'とうふ' },
+  tofuMini: { en: 'Tofu bit', es: 'Trocito', pt: 'Pedacinho', ja: 'とうふの かけら' }, nurikabe: { en: 'Nurikabe', es: 'Nurikabe', pt: 'Nurikabe', ja: 'ぬりかべ' },
 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
@@ -464,7 +501,7 @@ const WORLDS = [
   // The Mine became the Village (owner, 2026-10-20: the Japanese countryside in spring); its id stays 'mine' (the saves, its music).
   { id: 'mine', name: { en: 'Village', es: 'Aldea', pt: 'Aldeia', ja: 'むら' }, theme: THEMES.mine, heights: [54, 62, 70], fire: 0.7, dark: [1], magnet: 0.25,
     chunks: { crumble: 3, bridge: 3, lift: 3, planks: 2, shelves: 2, spring: 2, spikes: 1, comb: 2, chimney: 1, movers: 1, rest: 1, stairs: 1, rubberwall: 2, mosswall: 1, fork2: 2, vault: 1 },
-    foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2, worm: 1 },
+    foes: 0.8, enemies: { crawler: 2, climber: 2, circler: 2, hedgehog: 1, shell: 1, spitter: 2, splitter: 2, worm: 1, tumbler: 2, tofu: 1, nurikabe: 2 },   // (the square three: the campaign's 1-3, 1-4, 1-5)
     intro: [{ news: { en: 'bridges, lifts, spitters and splitters', es: 'puentes, elevadores, escupidores y divisores', pt: 'pontes, elevadores, cuspidores e divisores', ja: 'はし、リフト、ペッペ、ブンレツ' } }, {}, { news: { en: 'spikes', es: 'pinchos', pt: 'espinhos', ja: 'トゲ' } }] },
   { id: 'void', name: { en: 'Void', es: 'Vacío', pt: 'Vazio', ja: 'こくう' }, theme: THEMES.void, heights: [66, 74, 82], fire: 0.85, dark: [1],
     chunks: { movers: 3, sparse: 3, spikewalls: 2, twinshaft: 2, planks: 2, shelves: 1, spikes: 1, lift: 2, bridge: 1, rest: 1, rubberwall: 2, fork: 1, fork2: 1, vault: 1 },
@@ -809,11 +846,11 @@ const CAMPAIGN = [
     news: { en: 'how to climb', es: 'cómo trepar', pt: 'como escalar', ja: 'のぼりかた' } },
   { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: MINE, intro: ['crumble', 'bridge'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['bubble', 'bubble'], cage: true, seed: 4105,   // (1-1's surfaces first, it being the tutorial now)
     news: { en: "crumbling blocks: don't stand still", es: 'bloques que se caen: no te quedes quieto', pt: 'blocos que desmoronam: não fique parado', ja: 'くずれる ブロック: とまるな' } },
-  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler'], foes: 0.45, candy: ['bubble'], seed: 4106,
+  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler', 'tumbler'], foes: 0.45, candy: ['bubble'], seed: 4106,
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.55, pair: 0.1, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.55, pair: 0.1, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,
     news: { en: 'the pit: waves, then a fat spitter', es: 'la mina: oleadas y un escupidor gordo', pt: 'a mina: ondas e um cuspidor gordo', ja: 'こうどう: ウェーブと でっかい ペッペ' } },
-  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
+  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler', 'nurikabe'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
     motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], trial: { at: 0.7, goal: 'coins' }, enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
@@ -1038,6 +1075,8 @@ DESIGNS.unshift({ id: 'round', n: 32, size: 1.0, firm: 1.2, kernel: [0, 0], sdf:
   face: { eye: [0.3, 0.02], eyeR: [0.075, 0.095], mouth: [0, 0.2], mouthW: 0.13, blush: [0.52, 0.17] } });
 // The new enemies' shapes (y down): a shell's dome, a spitter's drop narrowing to its spout, a
 // splitter's bean of two lobes, a chaser's tall slug.
+DESIGNS.push({ id: 'cube', n: 36, size: 1.0, firm: 2.2, kernel: [0, 0], sdf: (x, y) => sdRoundBox(x, y, 0.86, 0.86, 0.16),   // a jelly cube (the square enemies)
+  face: { eye: [0.3, -0.05], eyeR: [0.075, 0.095], mouth: [0, 0.22], mouthW: 0.13, blush: [0.5, 0.15] } });
 DESIGNS.push(
   { id: 'dome', n: 34, size: 1.0, firm: 1.6, kernel: [0, 0.12], sdf: (x, y) => Math.max(sdEll(x, y - 0.18, 1.1, 0.95), y - 0.5),
     face: { eye: [0.3, 0.12], eyeR: [0.072, 0.09], mouth: [0, 0.3], mouthW: 0.11, blush: [0.5, 0.28] } },
@@ -1955,6 +1994,26 @@ class Level {
       }
       if (rnd() < 0.45) this.pickups.push({ x: cx, y: at(0.8), r: 0.6 * R, item: GIFT, sold: false, near: false });
     }
+    this.clearBonuses(-Infinity, Infinity);   // (BONUS_GAP)
+  }
+  // Coins laid from y0 down to y1 moved off what they touch (BONUS_GAP): a ledge, a block, a mover's whole way, a wall. One with no room within reach (a
+  // squeeze) goes where there is the most and is drawn just small enough to hover there (c.fit, of its radius).
+  clearBonuses(y0, y1) {
+    const R = this.R, P = PIX.size, gap = BONUS_GAP.gap * P, cr = COIN.r * R, l = this.l, r = this.r;
+    const solid = this.rects.filter((q) => !q.gone && !(q.move && (q.move.wheel || q.move.seesaw)) && q.y1 > y0 - 3 * R && q.y0 < y1 + 3 * R)
+      .map((q) => q.move ? { x0: Math.min(q.move.a, q.move.b), x1: Math.max(q.move.a, q.move.b) + q.x1 - q.x0, y0: q.y0, y1: q.y1 } : q);
+    const room = (x, y) => solid.reduce((m, q) => Math.min(m, Math.hypot(Math.max(q.x0 - x, 0, x - q.x1), Math.max(q.y0 - y, 0, y - q.y1))), Math.min(x - l, r - x));   // the radius free there
+    for (const c of this.coins) {
+      const rad = c.v > 1 ? 1.4 * cr : cr;
+      if (c.drop || c.y < y0 || c.y > y1 || room(c.x, c.y) >= rad + gap) continue;
+      let best = { x: c.x, y: c.y, f: room(c.x, c.y) };
+      out: for (let d = P; d <= BONUS_GAP.reach * this.tile; d += P) for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const x = c.x + dx * d, y = c.y + dy * d, f = room(x, y);
+        if (f >= rad + gap) { best = { x, y, f }; break out; }
+        if (f > best.f) best = { x, y, f };
+      }
+      c.x = best.x; c.y = best.y; if (best.f < rad + gap) c.fit = Math.max(0.3, (best.f - gap) / rad);
+    }
   }
   ensure(y) { while (this.top > y) this.addChunk(); }
   // Drop what has fallen far below the camera (a crumbled block stays: it comes back).
@@ -2065,6 +2124,7 @@ class Level {
       for (const q of [...on, { y0: -Infinity, y1: this.top - h + t }]) { const top = Math.max(q.y1, this.top - h + t); if (y - top > (free ? free[0] - free[1] : 0)) free = [y, top]; y = Math.min(y, q.y0); }
       if (bare && free && free[0] - free[1] >= 3 * t) { const span = Math.min(want, free[0] - free[1]), y1 = free[0] - at * (free[0] - free[1] - span); this.fireWalls.push({ side, y0: y1 - span, y1, ph }); }
     }
+    this.clearBonuses(this.top - h - this.tile, this.top + 2 * this.tile);   // its coins, and the last chunk's under its foot (BONUS_GAP)
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
     this.top -= h;
@@ -2314,7 +2374,7 @@ class Level {
     for (let i = 0; i < n; i++) {
       const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.filter((k) => wd.enemies[k]).map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
       const taken = (r) => this.spawns.some((q) => q.ledge === r || q.rect === r);   // one enemy to a ledge or block
-      if (ENEMY[type].move === 'crawl' || ENEMY[type].move === 'flow') {   // (a worm sits on a ledge too)
+      if (ENEMY[type].move === 'crawl' || ENEMY[type].move === 'flow' || ENEMY[type].move === 'tumble' || ENEMY[type].move === 'crush') {   // (a worm sits on a ledge too; a tumbler, and a nurikabe over one)
         const ok = rects.filter((r) => !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 3 * t && !taken(r) &&
           !this.spikes.some((q) => q.dir === 0 && Math.abs(q.y1 - r.y0) < 1 && q.x1 > r.x0 && q.x0 < r.x1));
         if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y0 - 1.2 * eR, ledge: r }); }
@@ -2729,7 +2789,7 @@ void main() {
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
 // black outline. Its patterns ride with the body (uOrigin is its centre in game pixels).
 const BODY_FS_PIX = GLSL + PIX_GLSL + `in vec3 vN; in float vAO; in float vA; in vec2 vUV; out vec4 o;
-uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin;
+uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin; uniform vec3 uPaint;
 float sdRoundBox(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
 void main() {
   if (vA < 0.04) discard;
@@ -2739,7 +2799,10 @@ void main() {
   vec3 L = normalize(vec3(-0.42, -0.62, 0.66));
   float wrap = clamp((dot(n, L) + 0.45) / 1.45, 0.0, 1.0) * mix(1.0, vAO, 0.85);
   int k = wrap > 0.58 ? 0 : wrap > 0.46 ? 2 : wrap > 0.34 ? 3 : 4;
-  vec3 col = tone(k, g) > 0.5 ? uDeep : uBase;
+  // its colour shaded deep on its patches, white shaded in its colour elsewhere (FOE_PAINT: paintField over uPaint.x; -99 all of it, as any body but an enemy)
+  vec2 u = vUV - vec2(0.0, 0.05);
+  bool hot = sin(vUV.x * 3.3 + uPaint.y) + sin(vUV.y * 2.9 + uPaint.z) + sin((vUV.x - vUV.y) * 2.1 + 1.7 * uPaint.y) - 2.4 * exp(-5.0 * dot(u, u)) > uPaint.x;
+  vec3 col = tone(k, g) > 0.5 ? (hot ? uDeep : uBase) : (hot ? uBase : PAL[8]);
   vec3 R = reflect(vec3(0.0, 0.0, -1.0), n);
   if (sdRoundBox(R.xy - vec2(-0.36, -0.5), vec2(0.17, 0.1), 0.07) < 0.0) col = PAL[8];
   o = vec4(col, 1.0);
@@ -2818,7 +2881,8 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     if (!closed && fc.surprise <= 0.35) {   // tips down (the spikes' tips point to −B)
       frame(f.mouth[0], f.mouth[1] + m * 0.3, m * 0.8, 0, 0, -m * 0.6);
       const la = Math.hypot(P1.x - P0.x, P1.y - P0.y), lb = Math.hypot(P2.x - P0.x, P2.y - P0.y);
-      put(1, 1, 1, 6, la, lb, la);
+      const c = b.paint && paintField(f.mouth[0], f.mouth[1], b.paint) <= b.paint[0] ? PAL.red : [1, 1, 1];   // (red where its mouth is white: FOE_PAINT)
+      put(c[0], c[1], c[2], 6, la, lb, la);
     }
   } else if (!closed) {
     if (fc.open > 0.6) for (let side = -1; side <= 1; side += 2) { frame(ex * side + lx + rx * 0.4, ey + ly + ry * 0.45, rx * 0.28, 0, 0, ry * 0.26); put(1, 1, 1, 0); }
@@ -4383,7 +4447,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const c of lv.coins) {
     if (c.y < top || c.y > bot) continue;
     // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded
-    const r = c.v > 1 ? cr * 1.4 : cr, a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
+    const r = (c.v > 1 ? cr * 1.4 : cr) * (c.fit || 1), a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
     const cy = c.y - (CINE ? cineRide(lv, c.x, c.y, r, cam, H) : 0);   // (the cinematic fork: riding its ledge's top face, see cineRide)
     const coin = (ox, oy, k) => { F(c.x + edge + ox, cy + oy, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, k, 9, 0); F(c.x + ox, cy + oy, r * s, 0, 0, r, INK.coinD, k, 9, 0);
       if (k === 1) { F(c.x - r * s * 0.04, cy - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6); F(c.x - r * s * 0.3, cy - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0); } };
@@ -4701,7 +4765,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
     const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
-    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P));
+    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
     if (!BOSS_FIT[r.b.look]) {   // the target always has a stencil (a boss its sheet's drawing: only that on its body, the body unseen)
       // Fill by winding number (as in Gum), so a crushed outline that turns back on
       // itself neither folds nor loses lobes.

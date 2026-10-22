@@ -15,7 +15,7 @@ const STR = {
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_rebound: 'Jump as you land: bounce higher!', rebound_ok: 'Boing! Right on the beat', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge', seen_wind: 'When the carp flag fills, a gust blows you aside', seen_mochi: 'The pestle flattens you: then you fit under low beams', seen_fork: 'Two ways up: the risky one pays more', seen_fireWall: 'Fire bursts out of some walls: wait for it to die down',
-    seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
+    seen_splitter: 'A splitter breaks in two', seen_tumbler: 'A tumbler: stomp it between its somersaults', seen_tofu: 'Stomp a tofu and it falls into four', seen_nurikabe: 'A nurikabe drops on you: stomp it once it lands', seen_chaser: 'A chaser follows you on its wall',
     got_smash: 'Helmet! Jumps smash blocks · {s} s', got_bubble: 'Bubble gum! Float up · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
@@ -32,7 +32,7 @@ const STR = {
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_rebound: '¡Salta al aterrizar: rebotas más alto!', rebound_ok: '¡Boing! Justo a tiempo', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva', seen_wind: 'Cuando se infla la carpa, una ráfaga te empuja de lado', seen_mochi: 'El mazo te aplasta: así cabes bajo las vigas bajas', seen_fork: 'Dos caminos: el arriesgado paga más', seen_fireWall: 'De algunas paredes sale fuego: espera a que se apague',
-    seen_splitter: 'El divisor se parte en dos', seen_chaser: 'El perseguidor te sigue por su pared',
+    seen_splitter: 'El divisor se parte en dos', seen_tumbler: 'Volteretas: písalo entre salto y salto', seen_tofu: 'Pisa un tofu y se parte en cuatro', seen_nurikabe: 'La nurikabe cae sobre ti: písala al aterrizar', seen_chaser: 'El perseguidor te sigue por su pared',
     got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_bubble: '¡Chicle! Flotas hacia arriba · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
@@ -49,7 +49,7 @@ const STR = {
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_rebound: 'Pule ao pousar: quica mais alto!', rebound_ok: 'Boing! Bem na hora', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie', seen_wind: 'Quando a carpa enche, uma rajada te empurra de lado', seen_mochi: 'O pilão te achata: aí você passa sob as vigas baixas', seen_fork: 'Dois caminhos: o arriscado paga mais', seen_fireWall: 'Algumas paredes soltam fogo: espere ele baixar',
-    seen_splitter: 'O divisor se parte em dois', seen_chaser: 'O perseguidor segue você pela parede',
+    seen_splitter: 'O divisor se parte em dois', seen_tumbler: 'Cambalhota: pise entre um salto e outro', seen_tofu: 'Pise num tofu e ele vira quatro', seen_nurikabe: 'A nurikabe cai em você: pise quando ela pousa', seen_chaser: 'O perseguidor segue você pela parede',
     got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_bubble: 'Chiclete! Flutue para cima · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
@@ -66,7 +66,7 @@ const STR = {
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_rebound: 'ちゃくちの しゅんかんに ジャンプ: たかく はねる！', rebound_ok: 'ボヨン！ ぴったり', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ', seen_wind: 'こいのぼりが ふくらむと とっぷう: よこへ ながされる', seen_mochi: 'きねに つぶされると ひくい はりの したを とおれる', seen_fork: 'みちは ふたつ: あぶない ほうが たくさん もらえる', seen_fireWall: 'かべから ひが ふきだす: おさまるまで まとう',
-    seen_splitter: 'ブンレツは ふたつに わかれる', seen_chaser: 'オイカケは かべを つたって おってくる',
+    seen_splitter: 'ブンレツは ふたつに わかれる', seen_tumbler: 'ゴロゴロようかん: とまった すきに ふもう', seen_tofu: 'とうふを ふむと よっつに わかれる', seen_nurikabe: 'ぬりかべが おちてくる: おちたら ふもう', seen_chaser: 'オイカケは かべを つたって おってくる',
     got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_bubble: 'ガム！ ふわふわ うく · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
@@ -284,12 +284,14 @@ class Foe {
     const b = this.body, def = this.def, lv = g.lv;
     const steer = (tvx, tvy, k, xOnly) => { const q = Math.min(1, k * dt); addVel(b, (tvx - b.rigVx) * q, xOnly ? 0 : (tvy - b.rigVy) * q); };
     this.t += dt; b.ghost = this.state === 'shell';   // kept in step with the state (a bot's restored branch included)
-    turnUp(b, 6, dt);
+    if (def.move !== 'tumble' || !(this.flip > 0)) turnUp(b, 6, dt);
     this.ph = (this.ph + dt / def.step) % 1;
     const pulse = 0.25 + 1.5 * Math.pow(Math.max(0, Math.sin(this.ph * TAU)), 2);   // averages about one
     const push = this.ph < this.lastPh;   // a new pulse begins
     this.lastPh = this.ph;
     if (def.move === 'flow') { this.flow(dt, g); return; }
+    if (def.move === 'tumble') { this.tumble(dt, g); return; }   // (it turns itself up between its somersaults)
+    if (def.move === 'crush') { this.crush(dt, g); return; }
     if (def.move === 'crawl') {   // back and forth along its ledge (or the floor, between the walls)
       if (this.state === 'shell') { this.roll(dt, g); return; }
       if (!(b.wallMask & 8)) return;
@@ -321,6 +323,52 @@ class Foe {
       if (push) b.kickSquash(side ? 1 : 0, side ? 0 : 1, -0.9);
       const p = s < w ? [x0 + s, y0] : s < w + h ? [x0 + w, y0 + s - w] : s < 2 * w + h ? [x0 + w - (s - w - h), y0 + h] : [x0, y0 + h - (s - 2 * w - h)];
       steer((p[0] + jx - b.cx) * 8, (p[1] - b.cy) * 8, 10);
+    }
+  }
+  canStomp() { return !!this.def.stomp && !(this.flip > 0) && !(this.type === 'nurikabe' && this.cs !== 'down'); }   // (a tumbler in the air, a nurikabe not lying down: no)
+  // A tumbler (TUMBLE): it sits on its ledge, crouches, then somersaults a hop ahead (spun round once, up and over), turning before it would leave its ledge;
+  // it lands with a thud
+  tumble(dt, g) {
+    const b = this.body, l = this.ledge, R = g.R, on = b.cy > g.lv.cam && b.cy < g.lv.cam + view.h;
+    if (this.flip > 0) {
+      if ((this.flip -= dt) <= 0 || ((b.wallMask & 8) && this.flip < 0.15)) { this.flip = 0; this.rest = TUMBLE.rest; this.crouched = false; setVel(b, 0, b.rigVy); b.fric = undefined; b.kickSquash(0, 1, 1.6); if (on) sound.play('land', 0.55, 0.5); }   // down, and still (a crawler's no-drag would slide it on)
+      return;
+    }
+    if (!(b.wallMask & 8)) return;
+    if (this.rest == null) this.rest = TUMBLE.rest * Math.random();
+    if ((this.rest -= dt) > 0) { if (this.rest < TUMBLE.crouch && !this.crouched) { this.crouched = true; b.kickSquash(0, 1, 1.1); } return; }
+    const hop = TUMBLE.hop * R;
+    if (l && !l.gone) { if (b.cx + this.dir * hop > l.x1 - 0.7 * b.R) this.dir = -1; else if (b.cx + this.dir * hop < l.x0 + 0.7 * b.R) this.dir = 1; }
+    if (b.wallMask & 1) this.dir = 1; else if (b.wallMask & 2) this.dir = -1;
+    b.fric = 0; setVel(b, (this.dir * hop) / TUMBLE.air, -0.5 * WORLD.gravity * TUMBLE.air);   // down again in `air` s
+    const w = (this.dir * TAU) / TUMBLE.air;
+    for (let i = 0; i < b.n; i++) { b.vx[i] -= w * (b.y[i] - b.cy); b.vy[i] += w * (b.x[i] - b.cx); }   // spun round once on the way
+    this.flip = TUMBLE.air + 0.2;
+  }
+  // A nurikabe (CRUSH): over its ledge (lower under a ceiling) it hangs; the hero under it, it shakes, falls, lies there, and rises back
+  crush(dt, g) {
+    const b = this.body, H = g.hero, R = g.R, lv = g.lv, t = lv.tile, on = b.cy > lv.cam - 2 * t && b.cy < lv.cam + view.h;
+    const goTo = (x, y, k) => { const q = Math.min(1, 8 * dt); addVel(b, ((x - b.cx) * k - b.rigVx) * q, ((y - b.cy) * k - b.rigVy) * q); };
+    if (this.home == null) {   // its height: `up` tiles over its ledge, or under whatever is lower over it
+      const l = this.ledge, base = l ? l.y0 : b.maxY, x0 = b.cx - b.R, x1 = b.cx + b.R;
+      const over = lv.rects.filter((r) => !r.cap && r.y1 <= base - 0.5 * t && r.x1 > x0 && r.x0 < x1).reduce((m, r) => Math.max(m, r.y1), -Infinity);
+      this.homeX = b.cx; this.home = Math.max(base - CRUSH.up * t - b.R, over + b.R + 0.3 * t); this.cs = this.home < base - 2.4 * b.R ? 'hang' : 'down'; this.ct = 0;
+      if (this.cs === 'hang') b.translate(0, this.home - b.cy);
+    }
+    this.ct += dt;
+    if (this.cs === 'hang' || this.cs === 'warn') {
+      b.gScale = 0; goTo(this.homeX + (this.cs === 'warn' ? Math.sin(this.ct * 70) * 0.06 * R : 0), this.home, 10);
+      const under = Math.abs(H.cx - b.cx) < b.R + CRUSH.reach * R && H.cy > b.cy && H.cy < b.cy + 9 * t;
+      if (this.cs === 'hang' && under && on) { this.cs = 'warn'; this.ct = 0; b.face.wide = 1; }
+      else if (this.cs === 'warn' && this.ct > CRUSH.warn) { this.cs = 'drop'; this.ct = 0; }
+    } else if (this.cs === 'drop') {
+      b.gScale = CRUSH.fall;
+      if (((b.wallMask & 8) && this.ct > 0.08) || this.ct > 3) { this.cs = 'down'; this.ct = 0; b.kickSquash(0, 1, 2.2); if (on) { sound.play('stomp', 0.9, 0.45); shake.add(4); fx.dust(b.cx, b.maxY, IMPACT.puffSpeed + 600); } }
+    } else if (this.cs === 'down') {
+      b.gScale = 1; if (this.ct > CRUSH.down && this.home < b.cy - 2.4 * b.R) { this.cs = 'rise'; this.ct = 0; }
+    } else {   // rising back to its height
+      b.gScale = 0; goTo(this.homeX, this.home, CRUSH.rise * R / Math.max(R, Math.abs(this.home - b.cy)));
+      if (Math.abs(b.cy - this.home) < 0.25 * R) this.cs = 'hang';
     }
   }
   // A Kikimora (KIKI): the hero near and level with her, she shivers on her wall, flashing red (b.warn), leaps out at him with her broom
@@ -1217,7 +1265,7 @@ class Game {
     }
   }
   arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped, each where it will come shown first (arenaDrop)
-    const lv = this.lv, R = this.R, n = ARENA.waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini');
+    const lv = this.lv, R = this.R, n = ARENA.waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini' && k !== 'tofu' && k !== 'tofuMini');   // (not a tofu: its four each would crowd the arena)
     const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
     a.foes = []; a.drops = []; a.dropT = ARENA.warn;
     for (let k = 0; k < n; k++) a.drops.push({ type: kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor });
@@ -1275,10 +1323,11 @@ class Game {
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
-    if (e.state === 'shell' || (e.type === 'mini' && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter: harmless
+    if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
     const above = stompable(H, b, rel);   // from over it (its whole top half), or falling onto it
-    const boss = e === this.lv.boss, can = boss ? e.open() : e.def.stomp;
+    const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
+    if (e.type === 'nurikabe' && !can && above) { this.bounceOff(e); return; }   // its hard top, hanging or going: a bounce, nothing more (CRUSH)
     if (boss && e.def && e.def.top && !can && H.cy < b.cy - 0.2 * b.R && dx < b.R) { this.bounceOff(e); return; }   // the Puck's hard dome: a bounce, nothing more
     if (boss && e.def && e.def.rail && e.angry > 0) return;   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
@@ -1293,7 +1342,7 @@ class Game {
     setVel(H, H.rigVx + (Math.sign(H.cx - e.body.cx) || 1) * 2 * this.R, -0.8 * BOSS.bounce * this.vjump); unstick(H, 0.08);
     this.air = Math.max(this.air, 1); this.sinceContact = JUMP.coyote + 1; this.rising = false;
     fx.ring(H.cx, H.maxY, 1.2 * this.R, INK.white); sound.play('spring', 0.7, 1.6); haptics.buzz(10);
-    if (!e.topped++) ui.toast(L2(e.def.top), 2600);
+    if (e.def.top && !e.topped++) ui.toast(L2(e.def.top), 2600);
   }
   wormTouch(e) {   // a worm's tubes hurt (its knot is stomped, see meet); pouring itself over, the knot does too
     const H = this.hero, b = e.body, hr = H.R * H.growth * 0.8, pow = this.power('rainbow') || this.power('grow') || this.power('swarm');
@@ -1362,6 +1411,10 @@ class Game {
     juiceFx(b.cx, b.cy, b.R, b.color.base); splatFx(b.cx, b.cy, b.R, b.color.base);   // it bursts like ripe fruit (user)
     if (e.type === 'skull') sparkFx(b.cx, b.cy - 0.3 * b.R, 16, -Math.PI / 2, Math.PI, [150, 450], [1.5, 3.2], [0.4, 0.8], [PAL.white, PAL.white, PAL.gray], 0.9);   // its bone in bits, over the goo
     this.drop(b.cx, b.cy, Math.round(e.def.coins * this.mods.coinMul));
+    if (e.type === 'tofu' && byHero) for (let k = 0; k < TOFU.n; k++) {   // in four, thrown apart (TOFU)
+      const u = k - (TOFU.n - 1) / 2, m = new Foe({ type: 'tofuMini', x: b.cx + u * 0.45 * b.R, y: b.cy - 0.2 * b.R, ledge: e.ledge, dir: u < 0 ? -1 : 1 }, lv);
+      setVel(m.body, u * 2.2 * this.R, -(4 + (k % 2) * 2.5) * this.R); lv.enemies.push(m); lv.foeTotal++;
+    }
     if (e.type === 'splitter' && byHero) for (const d of [-1, 1]) {   // in two, thrown apart
       const m = new Foe({ type: 'mini', x: b.cx + d * 0.5 * b.R, y: b.cy, ledge: e.ledge, dir: d }, lv);
       setVel(m.body, d * 3 * this.R, -4 * this.R); lv.enemies.push(m); lv.foeTotal++;
@@ -2042,9 +2095,10 @@ class Game {
     this.look.x = b.cx; this.look.y = b.cy; this.look.t = now;
     for (const e of lv.enemies) {   // an enemy that can be stomped looks scared with the hero over it (its whole top half: stompable), cross with the hero anywhere else (tester:
       // «теряю сердца по причине «задел врага»… вот этой границы хитбокса врагов я до конца понять не смог»)
-      const fb = e.body, over = e.def && e.def.stomp && e !== lv.boss && b.cy < fb.cy - STOMP.above * (b.R + fb.R) && Math.abs(b.cx - fb.cx) < STOMP.look * this.R && fb.cy - b.cy < 2 * STOMP.look * this.R;
+      const fb = e.body, over = e.def && e.canStomp() && e !== lv.boss && overFoe(b, fb) && Math.abs(b.cx - fb.cx) < STOMP.look * this.R && fb.cy - b.cy < 2 * STOMP.look * this.R;
       e.over = over && e.state !== 'shell';   // (and a chevron over it: the renderer)
       if (e.state !== 'shell') { fb.face.frown = !over; if (over) { fb.face.wide = Math.max(fb.face.wide, 0.5); fb.face.surprise = Math.max(fb.face.surprise, 0.7); } }   // (scared: wide eyes, its mouth open)
+      if (e.def && e.def.color === 'red' && e !== lv.boss) fb.paint = foePaint(e, b);   // its paint (FOE_PAINT)
       fb.face.update(dt, fb, this.look, now);
     }
     for (const f of lv.folk || []) if (f.body) f.body.face.update(dt, f.body, this.look, now);

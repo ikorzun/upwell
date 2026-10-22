@@ -18,11 +18,12 @@ const CINE_ON = (() => {
 // The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
 let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
-const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || /[?&]cine\b/.test(location.search));   // the worlds done: the Village, the Mine
+const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || /[?&]cine\b/.test(location.search));   // the worlds done: the Village, the Mine, Fuji
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
   : th.town ? { fog: [0.2, 0.08, 0.24], shade: [0.03, 0.01, 0.04], amb: 0.48, moon: null, motes: { dust: 12, rain: 34 }, planes: 'city' }
   : th.mines ? { fog: [0.1, 0.1, 0.12], shade: [0.012, 0.012, 0.02], amb: 0.5, moon: null, motes: { dust: 14 }, planes: null }   // (no embers: orange is a lamp lit)
+  : th.fuji ? { fog: [0.1, 0.12, 0.2], shade: [0.01, 0.015, 0.04], amb: 0.55, moon: null, motes: { snow: 18, ember: 4 }, planes: null }   // (snow, a few embers: the mountain's fire)
   : { fog: [0.12, 0.12, 0.17], shade: [0.015, 0.015, 0.03], amb: 0.55, moon: null, motes: { dust: 16, ember: 6 }, planes: null };
 
 const CINE_COPY_FS = GLSL + `in vec2 vUv; out vec4 o; uniform sampler2D uTex; void main() { o = texture(uTex, vUv); }`;
@@ -49,7 +50,7 @@ void main() {
 // The picture: what is behind (sharp at the walls, out of focus and hazed in the well, the play's soft shadow on it), the play's thickness, the light, the
 // halos and the rays, then the grade.
 const CINE_COMP_FS = GLSL + `in vec2 vUv; out vec4 o;
-uniform sampler2D uFar, uFarB, uPlay, uSoft, uRays, uSt, uSm; uniform vec2 uLow, uWell, uShOff, uExOff, uEye; uniform float uAsp, uTime; uniform vec2 uK3, uK4;
+uniform sampler2D uFar, uFarB, uPlay, uSoft, uRays, uSt, uSm; uniform vec3 uWhite; uniform vec2 uLow, uWell, uShOff, uExOff, uEye; uniform float uAsp, uTime; uniform vec2 uK3, uK4;
 uniform vec4 uL[16]; uniform vec3 uLC[16]; uniform int uNL; uniform vec4 uK; uniform vec4 uK2; uniform vec3 uFogC, uShadeC; uniform float uGrade;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
@@ -75,6 +76,7 @@ bool depthOf(sampler2D t, vec2 pg, vec2 k, out vec3 col) {
       vec4 m = top ? matAt(t, q - vec2(0.0, d)) : bot ? matAt(t, q + vec2(0.0, 3.0)) : matAt(t, q);
       if (m.a < 0.5) m = matAt(t, q);
       float lum = dot(m.rgb, vec3(0.299, 0.587, 0.114)), light = smoothstep(0.45, 0.8, lum);   // a light front's top no lighter than it: the white lip the lightest
+      if (lum > 0.86) { m.rgb = uWhite; lum = dot(m.rgb, vec3(0.299, 0.587, 0.114)); light = smoothstep(0.45, 0.8, lum); }   // a white front's depth in the world's ink, not grey
       col = (m.rgb * (top ? mix(1.12, 0.9, light) : bot ? 0.42 : 0.62) + (top ? 0.03 * (1.0 - light) : 0.0)) * (1.0 - 0.3 * s);
       return true;
     }
@@ -196,12 +198,11 @@ function cineRide(lv, x, y, r, cam, H) {
   return Math.round(lift / PIX.size) * PIX.size;
 }
 
-// The world's own far shapes in planes, each sliding by its depth f of the climb (a shape's world y is its own plus (1 - f) of the camera's), drawn DIM into
-// the far target: the Village a grove (cedars far, bamboo nearer), Tokyo a city (towers of flats far, lattice masts and pipes nearer, their small red lights).
-function cineBack(rd, lv, cam, H, box, F, T) {
-  const look = CINE_LOOK(lv.theme), t = lv.tile, P = PIX.size, snap = (v) => Math.round(v / P) * P, top = cam - 60, bot = cam + H + 60;
-  rd.cineL = [];
-  if (CINE.on('vol')) {   // 2.5D: the walls' inner faces, from their edge in to the shaft's back (toward the eye in the middle), darker going in
+// The walls' inner faces in 2.5D, from their edge in to the shaft's back (toward the eye in the middle), darker going in: after every far thing, so a far
+// thing (a kit's far layer, a plane) never shows in front of a wall's face (draw calls it before the doors)
+function cineFaces(rd, lv, cam, H, box) {
+  const P = PIX.size, top = cam - 60, bot = cam + H + 60;
+  if (CINE.on('vol')) {
     const ex = (lv.l + lv.r) / 2;
     const th = lv.theme, ink = (c) => (c.kind === 'ice' ? th.slick : c.kind === 'rubber' ? th.rubber : th.moss);   // a coat's own (as the coats are drawn)
     const runs = (side) => {   // a wall's height on the screen in pieces: its coats' inks where they line it (ice, rubber, moss), its own between
@@ -214,6 +215,12 @@ function cineBack(rd, lv, cam, H, box, F, T) {
       for (let i = 0; i < n; i++) { const x = wx + s * i * P; for (const [y0, y1, c] of rs) box(s > 0 ? x : x - P, y0, s > 0 ? x + P : x - 0, y1, c, i < n / 3 ? 1.55 : i < (2 * n) / 3 ? 1.4 : 1.37, 0, 10, 0); } }
     rd.route = rt;
   }
+}
+// The world's own far shapes in planes, each sliding by its depth f of the climb (a shape's world y is its own plus (1 - f) of the camera's), drawn DIM into
+// the far target: the Village a grove (cedars far, bamboo nearer), Tokyo a city (towers of flats far, lattice masts and pipes nearer, their small red lights).
+function cineBack(rd, lv, cam, H, box, F, T) {
+  const look = CINE_LOOK(lv.theme), t = lv.tile, P = PIX.size, snap = (v) => Math.round(v / P) * P, top = cam - 60, bot = cam + H + 60;
+  rd.cineL = [];
   if (!CINE.on('depth') || !look.planes || lv.kind !== 'well') return;
   const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const ln = (x0, y0, x1, y1, c, a) => { const ax = (x1 - x0) / 2, ay = (y1 - y0) / 2, l = Math.hypot(ax, ay) || 1, hw = 0.55 * P; F((x0 + x1) / 2, (y0 + y1) / 2, ax, ay, (-ay / l) * hw, (ax / l) * hw, c, a, 10, l, hw, 0); };   // a thin line (as the renderer's line())
@@ -268,16 +275,17 @@ function cineMotes(rd, g, lv, cam, H, box, disc, T) {
   const want = []; for (const [k, n] of Object.entries(look.motes)) for (let i = 0; i < n; i++) want.push(k);
   if (M.length !== want.length || M.theme !== lv.theme) { M.length = 0; M.theme = lv.theme; for (const k of want) M.push({ k, x: 0, y: 1e9, ph: Math.random() * 6.28 }); }
   const spawn = (m, any) => { m.x = lv.l + Math.random() * (lv.r - lv.l); m.y = any ? cam + Math.random() * H : cam - 10 - Math.random() * 40; m.ph = Math.random() * 6.28;
-    m.vx = m.k === 'rain' ? -60 : (Math.random() - 0.5) * 12; m.vy = m.k === 'rain' ? 520 + Math.random() * 120 : m.k === 'petal' ? 22 + Math.random() * 18 : m.k === 'ember' ? -26 - Math.random() * 20 : (Math.random() - 0.5) * 8; };
+    m.vx = m.k === 'rain' ? -60 : (Math.random() - 0.5) * 12; m.vy = m.k === 'rain' ? 520 + Math.random() * 120 : m.k === 'petal' ? 22 + Math.random() * 18 : m.k === 'snow' ? 16 + Math.random() * 14 : m.k === 'ember' ? -26 - Math.random() * 20 : (Math.random() - 0.5) * 8; };
   for (const m of M) {
-    if (m.y > cam + H + 30 || m.y < cam - 60 || m.x < lv.l - 10 || m.x > lv.r + 10) spawn(m, m.y === 1e9 || m.k !== 'rain' && m.k !== 'petal');
+    if (m.y > cam + H + 30 || m.y < cam - 60 || m.x < lv.l - 10 || m.x > lv.r + 10) spawn(m, m.y === 1e9 || m.k !== 'rain' && m.k !== 'petal' && m.k !== 'snow');
     m.ph += dt;
-    m.x += (m.vx + (m.k === 'petal' ? Math.sin(m.ph * 2.1) * 18 : m.k === 'fly' ? Math.sin(m.ph * 1.3) * 14 : 0)) * dt; m.y += (m.vy + (m.k === 'fly' ? Math.cos(m.ph * 0.9) * 10 : 0)) * dt;
+    m.x += (m.vx + (m.k === 'petal' ? Math.sin(m.ph * 2.1) * 18 : m.k === 'snow' ? Math.sin(m.ph * 1.7) * 10 : m.k === 'fly' ? Math.sin(m.ph * 1.3) * 14 : 0)) * dt; m.y += (m.vy + (m.k === 'fly' ? Math.cos(m.ph * 0.9) * 10 : 0)) * dt;
     const x = snap(m.x), y = snap(m.y);
     if (m.k === 'dust') box(x, y, x + P, y + P, PAL.gray, 1.45, 0, 10, 0);
     else if (m.k === 'petal') box(x, y, x + 2 * P, y + P, PAL.purple, 1.7, 0, 10, 0);
     else if (m.k === 'rain') box(x, y, x + P, y + 3 * P, PAL.gray, 1.4, 0, 10, 0);
     else if (m.k === 'ember') box(x, y, x + P, y + P, PAL.orange, 1, 0, 10, 0);
+    else if (m.k === 'snow') box(x, y, x + P, y + P, PAL.white, 1.45, 0, 10, 0);
     else if (m.k === 'fly') { const on = 0.5 + 0.5 * Math.sin(m.ph * 2.4); if (on > 0.25) box(x, y, x + P, y + P, PAL.white, 1, 0, 10, 0); rd.cineL.push([m.x, m.y, 1.0 * t, 0.45 * on, [0.62, 1.0, 0.42]]); }
   }
 }
@@ -320,6 +328,7 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
   const lights = on('light') || on('glow') ? L.slice(0, 16) : [];
   pass(null, this.pComp, (u) => {
     tex(0, c.far.tex, u.uFar); tex(1, c.h1.tex, u.uFarB); tex(2, c.play.tex, u.uPlay); tex(3, c.q3.tex, u.uSoft); tex(4, c.q2.tex, u.uRays); tex(5, c.st.tex, u.uSt); tex(6, c.sm.tex, u.uSm);
+    gl.uniform3fv(u.uWhite, lv.theme.wall);
     gl.uniform2f(u.uEye, (((lv.l + lv.r) / 2 + sx) / W) * lw, 0.5 * lh); gl.uniform2f(u.uK3, on('vol') ? CINE.K : 0, (CINE.DEEP * lv.tile) / PIX.size); gl.uniform2f(u.uK4, on('vol') ? CINE.K : 0, (CINE.SMALL * lv.tile) / PIX.size);   // 2.5D: the eye in the middle, the deepest each kind goes
     gl.uniform2f(u.uLow, lw, lh); gl.uniform2f(u.uWell, (lv.l + sx) / W, (lv.r + sx) / W); gl.uniform1f(u.uAsp, W / H); gl.uniform1f(u.uTime, lv.t);
     gl.uniform2f(u.uShOff, -3 / lw, 8 / lh); gl.uniform2f(u.uExOff, -1 / lw, 3 / lh);
@@ -342,7 +351,9 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
 // crow gone); with the system asking for less motion nothing sways and less is shed. A rustle with each (a short soft gust), wings with the crow.
 const POKE = { reach: 0.5, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
   kinds: { sakura: { sway: 0.06, shed: 'petal', n: 8 }, scarecrow: { sway: 0.09, bird: true }, koinobori: { sway: 0.05 }, bonsai: { sway: 0.08, shed: 'needle', n: 5 },
-    bats: { sway: 0, bats: true }, cart: { sway: 0.06, clunk: true } } };   // (the Mine's: sleeping bats wake and fly off, a cart rocks on its rails)
+    bats: { sway: 0, bats: true }, cart: { sway: 0.06, clunk: true },   // (the Mine's: sleeping bats wake and fly off, a cart rocks on its rails)
+    bell: { sway: 0.05, ding: true }, pine: { sway: 0.06, shed: 'snow', n: 6 }, snowman: { sway: 0.07 } } };   // (Fuji's: a rung bell nudged dings low, a pine sheds snow, a
+    // snowman's bucket wobbles)
 function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
   const k = POKE.kinds[kind];
   if (!CINE || !CINE.on('poke') || !k) return 0;
@@ -354,7 +365,8 @@ function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
       CINE.fx.push({ k: k.shed, x: x0 + Math.random() * (x1 - x0), y: y0 + Math.random() * (y1 - y0) * 0.5, vx: P.d * (15 + Math.random() * 35), vy: 5 + Math.random() * 20, ph: Math.random() * 6.28, on: r, life: 0 });
     if (k.bird && perch && P.back <= T) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0 }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }
     if (k.bats && perch && P.back <= T) { perch.forEach(([x, y], i) => CINE.fx.push({ k: 'bat', x, y, vx: P.d * (50 + Math.random() * 70) * (i % 2 ? 1 : -0.6), vy: -(60 + Math.random() * 90), life: -0.12 * i })); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.2, 2.4); }   // (one after another)
-    if (typeof sound !== 'undefined') { if (k.clunk) sound.play('land', 0.25, 0.6); else if (!k.bats && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s); }
+    if (typeof sound !== 'undefined') { if (k.clunk) sound.play('land', 0.25, 0.6); else if (k.ding) sound.note(0, 0.12); else if (!k.bats && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s); }   // (a ding
+    // lower and quieter than the task's ring)
   }
   P.was = inside;
   const e = T - P.t;
@@ -388,6 +400,6 @@ function cineFx(g, lv, cam, H, box, dt) {
       if (f.y > cam + H + 30) { F.splice(i, 1); continue; }
     } else { f.rest += dt; if (f.rest > 7.5 || (r && r.gone)) { F.splice(i, 1); continue; } }
     const a = lying && f.rest > 6 ? 1 - (f.rest - 6) / 1.5 : 1, x = snap(f.x), y = snap(f.y);
-    if (f.k === 'petal') box(x, y, x + 2 * P, y + P, PAL.purple, a, 0, 10, 0); else box(x, y, x + P, y + 2 * P, PAL.green, a, 0, 10, 0);
+    if (f.k === 'petal') box(x, y, x + 2 * P, y + P, PAL.purple, a, 0, 10, 0); else if (f.k === 'snow') box(x, y, x + P, y + P, PAL.white, lying ? 1.6 : 1.5, 0, 10, 0); else box(x, y, x + P, y + 2 * P, PAL.green, a, 0, 10, 0);
   }
 }

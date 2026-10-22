@@ -252,7 +252,9 @@ const kitThing = (lv, r) => {
   } else if (th.skazka) {   // the Dark Forest's: Baba Yaga's fence (its skulls' eyes the dark's lights) by a hash of its height, on two ledges in six with room
     const k = Math.floor(((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) / 4294967296) * 6);
     if ((k === 0 || k === 3) && steady(3.2) && room(0, 3.2, 3.5)) out = { kind: 'fence' };
-  } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t) out = { kind: 'bell', x: wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t, y: r.y1 + 0.4 * t };
+  } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t
+    && ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3) out = { kind: 'bell', x: wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t, y: r.y1 + 0.4 * t };   // (on one
+    // boardwalk in three: what hangs off a ledge, the rule book's)
   return (r.kit = out);
 };
 const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ CANDIES.plus a Long charge; all 3 s longer than at first, user)
@@ -3480,8 +3482,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
     const clear = (x0, y0, x1, y1) => !atDoor(x0, y0, x1, y1) && !lv.rects.some((q) => !q.gone && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
+    const rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork, the rule book: far off behind, the kamakura flat, the props small with
+    // their thin parts and steam flat)
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
+    L(3);
     {   // Fuji far off (A): a cone of blue, its flat top and its snow grey down its ridges, two clouds; low on the screen, sinking a little as the climb goes on
       const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
       for (let y = 0; y < ht; y += 2 * P) {
@@ -3491,8 +3496,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
       for (const [dx, dy, w] of [[-4.6, -4.4, 2.8], [4.4, -5.0, 2.3]]) box(snap(cx + (dx - w / 2) * t), snap(foot + dy * t), snap(cx + (dx + w / 2) * t), snap(foot + dy * t) + 3 * P, PAL.gray, DIM, 0, 10, 0);
     }
-    for (let k = Math.floor(top / (18 * t)) - 1; k * 18 * t < bot; k++) {   // a pair of cranes (A) crossing the shaft, slowly, by turns of height either way
-      const dir = mod(k, 2) ? 1 : -1, span = lv.r - lv.l + 8 * t, x = lv.l - 4 * t + mod(T * 0.9 * t + k * 7.3 * t, span), y = (k * 18 + 9) * t;
+    const csh = CINE ? 0.55 * cam : 0;   // (2.5D: the cranes on a plane of their own, far: 0.45 of the climb)
+    for (let k = Math.floor((top - csh) / (18 * t)) - 1; k * 18 * t + csh < bot; k++) {   // a pair of cranes (A) crossing the shaft, slowly, by turns of height either way
+      const dir = mod(k, 2) ? 1 : -1, span = lv.r - lv.l + 8 * t, x = lv.l - 4 * t + mod(T * 0.9 * t + k * 7.3 * t, span), y = (k * 18 + 9) * t + csh;
       if (y < top - 2 * t || y > bot) continue;
       for (const [ox, oy] of [[0, 0], [-2.6, 1.3]]) { const fx = dir > 0 ? x + ox * t : lv.r + lv.l - x - ox * t, fr = Math.floor(T * 2.4 + ox) % 2 ? 'craneUp' : 'craneDown';
         const rows = CRITTER[fr + (dir > 0 ? '' : 'L')], x0 = snap(fx - rows[0].length * P / 2), y0 = snap(y + oy * t);
@@ -3510,7 +3516,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const k = mod(Math.round(r.y0 / t), 6), wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
       const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);
       if (k === 0 && w >= 4 * t && room(0, 3.8, 3.4)) {   // a kamakura (E): a dome of snow bricks 3.5 tiles across, its doorway lit by a candle, holly on top
-        const kx = X(1.9), rx = 1.75 * t, ry = 1.6 * t;
+        L(0); const kx = X(1.9), rx = 1.75 * t, ry = 1.6 * t;   // (flat: a way in, and its glow stays behind its candle)
         F(kx, b, rx, 0, 0, ry, PAL.gray, 1, 0);
         for (const v of [0.4, 0.8, 1.2]) { const hw = rx * Math.sqrt(Math.max(0, 1 - (v * t / ry) ** 2)); box(snap(kx - hw), snap(b - v * t), snap(kx + hw), snap(b - v * t) + P, PAL.black, 1, 0, 10, 0);
           for (let j = -4; j <= 4; j++) { const jx = snap(kx + (j + (Math.round(v / 0.4) % 2 ? 0.5 : 0)) * 0.5 * t); if (Math.abs(jx - kx) < hw - 2 * P) box(jx, snap(b - v * t), jx + P, snap(b - (v - 0.4) * t), PAL.black, 1, 0, 10, 0); } }
@@ -3521,21 +3527,24 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const e of [-1, 1]) box(Math.min(snap(kx + e * 0.08 * t), snap(kx + e * 0.34 * t)), snap(b - ry - 0.14 * t), Math.max(snap(kx + e * 0.08 * t), snap(kx + e * 0.34 * t)), snap(b - ry + 0.02 * t), PAL.green, 1, 0, 10, 0);
         for (const e of [-1, 1]) box(snap(kx + e * 0.06 * t) - P, snap(b - ry - 0.1 * t) - P, snap(kx + e * 0.06 * t) + 2 * P, snap(b - ry - 0.1 * t) + 2 * P, PAL.orange, 1, 0, 10, 0);
         if (w >= 5.6 * t && room(3.8, 5.3, 2.2)) {   // the snow rabbit (B): an egg of snow, leaf ears, berry eyes
+          L(4);
           const ux = X(4.55), uh = 1.4 * t;
           F(ux, snap(b - 0.45 * uh), 0.62 * t, 0, 0, 0.55 * uh, PAL.gray, 1, 0);
           for (const e of [-1, 1]) for (let j = 0; j < 5; j++) box(snap(ux + e * (0.12 + 0.05 * j) * t), snap(b - uh - (0.1 + 0.1 * j) * t), snap(ux + e * (0.12 + 0.05 * j) * t) + 3 * P, snap(b - uh - (0.1 + 0.1 * j) * t) + 3 * P, PAL.green, 1, 0, 10, 0);
           for (const e of [-1, 1]) box(snap(ux + e * 0.22 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.22 * t) + 2 * P, snap(b - 0.62 * uh) + 3 * P, PAL.orange, 1, 0, 10, 0);
         }
       } else if (k === 1 && room(0, 2.2, 2.9)) {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
+        L(4); const sw = CINE ? cinePoke(g, lv, r, 'snowman', Math.min(X(0.3), X(1.9)), b - 2.8 * t, Math.max(X(0.3), X(1.9)), b) : 0, SH = (v) => (sw ? snap(sw * v * t) : 0);   // (poked: he
+        // sways, his bucket the most)
         const sx = X(1.1);
-        disc(sx, snap(b - 0.68 * t), 0.75 * t, PAL.gray, 1); disc(sx, snap(b - 1.72 * t), 0.5 * t, PAL.gray, 1);
-        box(snap(sx - 0.42 * t), snap(b - 2.2 * t), snap(sx + 0.42 * t), snap(b - 2.06 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx - 0.32 * t), snap(b - 2.72 * t), snap(sx + 0.32 * t), snap(b - 2.2 * t), PAL.purple, 1, 0, 10, 0);
-        for (const e of [-1, 1]) box(snap(sx + e * 0.2 * t) - P, snap(b - 1.86 * t), snap(sx + e * 0.2 * t) + 2 * P, snap(b - 1.72 * t), PAL.black, 1, 0, 10, 0);
-        box(snap(sx - 0.48 * t), snap(b - 1.32 * t), snap(sx + 0.48 * t), snap(b - 1.16 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx + 0.08 * t), snap(b - 1.16 * t), snap(sx + 0.26 * t), snap(b - 0.72 * t), PAL.purple, 1, 0, 10, 0);
+        disc(sx + SH(0.68), snap(b - 0.68 * t), 0.75 * t, PAL.gray, 1); disc(sx + SH(1.72), snap(b - 1.72 * t), 0.5 * t, PAL.gray, 1);
+        box(snap(sx - 0.42 * t) + SH(2.6), snap(b - 2.2 * t), snap(sx + 0.42 * t) + SH(2.6), snap(b - 2.06 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx - 0.32 * t) + SH(2.9), snap(b - 2.72 * t), snap(sx + 0.32 * t) + SH(2.9), snap(b - 2.2 * t), PAL.purple, 1, 0, 10, 0);
+        for (const e of [-1, 1]) box(snap(sx + e * 0.2 * t) - P + SH(1.8), snap(b - 1.86 * t), snap(sx + e * 0.2 * t) + 2 * P + SH(1.8), snap(b - 1.72 * t), PAL.black, 1, 0, 10, 0);
+        box(snap(sx - 0.48 * t) + SH(1.24), snap(b - 1.32 * t), snap(sx + 0.48 * t) + SH(1.24), snap(b - 1.16 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx + 0.08 * t) + SH(1.0), snap(b - 1.16 * t), snap(sx + 0.26 * t) + SH(1.0), snap(b - 0.72 * t), PAL.purple, 1, 0, 10, 0);
       } else if (k === 2 && w >= 3.4 * t && room(0, 3.2, 3.2)) {   // a snow monkey in a hot tub, steam rising
         const roof = ((Math.round(r.y0 / t) * 7) & 1) === 1, tx = X(roof ? 1.5 : 2.1), hy = snap(b - 1.3 * t);
-        if (!roof) lantern(X(0.5), b, 2);
-        steam(tx - 0.6 * t, hy - 0.6 * t, 1, 2); steam(tx + 0.7 * t, hy - 0.4 * t, 2, 2);
+        L(4); if (!roof) lantern(X(0.5), b, 2);
+        L(0); steam(tx - 0.6 * t, hy - 0.6 * t, 1, 2); steam(tx + 0.7 * t, hy - 0.4 * t, 2, 2); L(4);
         disc(tx, hy, 0.62 * t, PAL.gray, 1);
         for (const [dx, dy] of [[-0.62, -0.2], [0.62, -0.2], [-0.42, -0.5], [0.42, -0.5], [0, -0.62], [-0.2, -0.6], [0.2, -0.6]]) box(snap(tx + dx * t) - P, snap(hy + dy * t) - P, snap(tx + dx * t) + P, snap(hy + dy * t) + P, PAL.gray, 1, 0, 10, 0);   // its fluffy head
         disc(tx, snap(hy + 0.08 * t), 0.4 * t, PAL.orange, 1);
@@ -3551,22 +3560,25 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         }
       } else if (k === 4 && w >= 3.4 * t && room(0.3, 3.5, 4.3)) {   // persimmons drying (E): strings off a beam on a knee brace, purple ties and tassels
         const by = snap(b - 4.1 * t);
-        box(Math.min(X(0), X(3.3)), by, Math.max(X(0), X(3.3)), by + snap(0.2 * t), PAL.gray, 1, 0, 10, 0); brace(wx, d, by + snap(0.2 * t), snap(0.8 * t), 2 * P, PAL.gray);
+        L(4); box(Math.min(X(0), X(3.3)), by, Math.max(X(0), X(3.3)), by + snap(0.2 * t), PAL.gray, 1, 0, 10, 0); L(0); brace(wx, d, by + snap(0.2 * t), snap(0.8 * t), 2 * P, PAL.gray);   // (the beam
+        // and the fruit small; the brace, the strings, the ties and the tassels flat)
         for (const u of [1.0, 1.6, 2.2, 2.8]) {
-          const sx = X(u); box(sx, by + snap(0.2 * t), sx + P, snap(b - 1.4 * t), PAL.gray, 1, 0, 10, 0); box(sx - P, by + snap(0.2 * t), sx + 2 * P, by + snap(0.45 * t), PAL.purple, 1, 0, 10, 0);
-          for (let j = 0; j < 4; j++) { const fy = snap(by + (0.7 + 0.5 * j) * t); disc(sx + P / 2, fy, 0.2 * t, PAL.orange, 1); box(sx - P, fy - snap(0.24 * t), sx + 2 * P, fy - snap(0.16 * t), PAL.green, 1, 0, 10, 0); }
+          const sx = X(u); L(0); box(sx, by + snap(0.2 * t), sx + P, snap(b - 1.4 * t), PAL.gray, 1, 0, 10, 0); box(sx - P, by + snap(0.2 * t), sx + 2 * P, by + snap(0.45 * t), PAL.purple, 1, 0, 10, 0);
+          for (let j = 0; j < 4; j++) { const fy = snap(by + (0.7 + 0.5 * j) * t); L(4); disc(sx + P / 2, fy, 0.2 * t, PAL.orange, 1); L(0); box(sx - P, fy - snap(0.24 * t), sx + 2 * P, fy - snap(0.16 * t), PAL.green, 1, 0, 10, 0); }
           for (const e of [-1, 0, 1]) rod(sx, snap(b - 1.4 * t), sx + e * 0.14 * t, snap(b - 1.12 * t), PAL.purple);   // its tassel
         }
       } else if (k === 5 && w >= 3.6 * t && room(0, 4.0, 5.2)) {   // a pine: C (a grey trunk, its ropes off) or D (an orange one in yukitsuri)
-        const ropes = ((Math.round(r.y0 / t) * 7) & 1) === 1, cx = X(1.9), Y = (v) => b - v * t, PX = (u) => cx + d * u * t;
-        const trunk = (q) => [PX(0.36 * Math.sin(q * Math.PI * 1.6) - 0.1), Y(3.8 * q)];
-        for (let q = 0; q <= 1; q += P / (3.8 * t)) { const [x, y] = trunk(q); disc(x, y, (0.26 - 0.14 * q) * t, ropes ? PAL.orange : PAL.gray, 1); }
+        const ropes = ((Math.round(r.y0 / t) * 7) & 1) === 1, cx = X(1.9), Y = (v) => b - v * t, SW = CINE ? cinePoke(g, lv, r, 'pine', Math.min(X(0.6), X(3.2)), b - 4.4 * t, Math.max(X(0.6), X(3.2)), b) : 0;
+        const PX = (u, v = 0) => cx + d * u * t + (SW ? snap(SW * v * t) : 0);   // (poked, it sways, its top the most, and sheds snow)
+        const trunk = (q) => [PX(0.36 * Math.sin(q * Math.PI * 1.6) - 0.1, 3.8 * q), Y(3.8 * q)];
+        L(4); for (let q = 0; q <= 1; q += P / (3.8 * t)) { const [x, y] = trunk(q); disc(x, y, (0.26 - 0.14 * q) * t, ropes ? PAL.orange : PAL.gray, 1); }
         const pads = [[0, 4.0, 0.84], [-1.0, 3.1, 0.72], [1.0, 3.2, 0.76], [0.9, 2.0, 0.72], [-0.84, 2.1, 0.6]];
-        for (const [u, v, rx] of pads) { F(PX(u), Y(v) - 0.1 * t, rx * t, 0, 0, 0.32 * t, PAL.gray, 1, 0); F(PX(u), Y(v) + 0.06 * t, rx * t, 0, 0, 0.26 * t, PAL.green, 1, 9, 0); }
-        if (ropes) { const tx = PX(0), ty = Y(5.1); box(snap(tx) - P, snap(ty), snap(tx) + 2 * P, snap(Y(4.0)), PAL.orange, 1, 0, 10, 0);
-          for (const [u, v, rx] of pads) rod(tx, ty, PX(u + Math.sign(u || 1) * rx * 0.9), Y(v), PAL.gray); }
+        for (const [u, v, rx] of pads) { F(PX(u, v), Y(v) - 0.1 * t, rx * t, 0, 0, 0.32 * t, PAL.gray, 1, 0); F(PX(u, v), Y(v) + 0.06 * t, rx * t, 0, 0, 0.26 * t, PAL.green, 1, 9, 0); }
+        if (ropes) { const tx = PX(0, 5.1), ty = Y(5.1); box(snap(tx) - P, snap(ty), snap(tx) + 2 * P, snap(Y(4.0)), PAL.orange, 1, 0, 10, 0);
+          L(0); for (const [u, v, rx] of pads) line(tx, ty, PX(u + Math.sign(u || 1) * rx * 0.9, v), Y(v), PAL.gray, 1, 1); }   // (its ropes flat, a feature each)
       }
     }
+    this.route = rt0;
   }
   if (th.village) for (const r of lv.rects) if (r.plank && r.move && !r.move.wheel && seen(r.y0 - 4 * kitT, r.y0)) {   // a yaen's cable across the shaft at its pulley, behind (DEPTH)
     const cy = snap(r.y0 - snap(YAEN.frame * kitT) - YAEN.wheel * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.gray, DIM, 0, 10, 0);
@@ -4281,23 +4293,26 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.move || r.bouncy) return false;
       box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 2);
       for (let x = r.x0 + 0.7 * t; x < r.x1 - 0.3 * t; x += 0.7 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y1, PAL.black, 1, 0, 10, 0);
+      if (CINE) this.route = 0;   // (the cinematic fork: its brace and its garland flat, thin things)
       for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {
         brace(wx, d, snap(r.y1) + P, snap(0.9 * t), 2 * P, th.plank);
-        if (r.x1 - r.x0 >= 3 * t) {
+        if (r.x1 - r.x0 >= 3 * t && hsh(5) < 1 / 3) {   // (a garland on one in three)
           const g0 = wx + d * 1.0 * t, g1 = wl ? r.x1 - 0.35 * t : r.x0 + 0.35 * t, gy = snap(r.y1) + P;
           for (let i = 0; i <= 16; i++) { const u = i / 16, gx = snap(g0 + (g1 - g0) * u), yy = snap(gy + 0.35 * t * 4 * u * (1 - u)); box(gx, yy, gx + P, yy + P, PAL.orange, 1, 0, 10, 0); }
         }
       }
       const bell = kitThing(lv, r);
       if (bell) {   // its bell off its free end (C's; the task): grey till the hero comes near, then rung for good, orange, swinging, rings of its sound going out from it
-        const on = lv.tended.get(r), u = on != null ? T - on : 1e9, sw = u < 1.6 ? snap(Math.sin(u * 13) * 0.12 * t * (1 - u / 1.6)) : 0, c = on != null ? PAL.orange : PAL.gray;
-        const bx = snap(bell.x), by = snap(r.y1 + 0.2 * t);
+        const bx = snap(bell.x), by = snap(r.y1 + 0.2 * t), on = lv.tended.get(r), u = on != null ? T - on : 1e9, c = on != null ? PAL.orange : PAL.gray;
+        const nud = CINE && on != null && u > 1.6 ? cinePoke(g, lv, r, 'bell', bx - 0.4 * t, r.y1, bx + 0.4 * t, by + 0.5 * t) : 0;   // (2.5D: rung, a nudge swings it again, less)
+        const sw = u < 1.6 ? snap(Math.sin(u * 13) * 0.12 * t * (1 - u / 1.6)) : nud ? snap(nud * 1.2 * t) : 0;
         box(bx, r.y1, bx + P, by, PAL.gray, 1, 0, 10, 0);   // its cord, the bell (twice C's size: a task's), its lip, its clapper
+        if (CINE) this.route = 4;   // (the bell small, its cord and its rings flat)
         box(bx + sw - snap(0.13 * t), by, bx + sw + snap(0.13 * t) + P, snap(by + 0.24 * t), c, 1, 0, 10, 0); box(bx + sw - snap(0.22 * t), snap(by + 0.24 * t), bx + sw + snap(0.22 * t) + P, snap(by + 0.36 * t), c, 1, 0, 10, 0);
         box(bx + 2 * sw, snap(by + 0.36 * t), bx + 2 * sw + P, snap(by + 0.36 * t) + 2 * P, PAL.black, 1, 0, 10, 0);
-        for (let i = 0; i < 3; i++) { const q = (u - i * 0.22) / 1.1; if (q > 0 && q < 1) F(bx, by + 0.2 * t, (0.35 + 1.9 * q) * t, 0, 0, (0.35 + 1.9 * q) * t, PAL.orange, 1 - q, 4); }
+        if (CINE) this.route = 0; for (let i = 0; i < 3; i++) { const q = (u - i * 0.22) / 1.1; if (q > 0 && q < 1) F(bx, by + 0.2 * t, (0.35 + 1.9 * q) * t, 0, 0, (0.35 + 1.9 * q) * t, PAL.orange, 1 - q, 4); }
       }
-      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+      if (CINE) this.route = 2; box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
     box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0);
@@ -4376,7 +4391,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
-  if (CINE) this.route = 0;   // (the cinematic fork: the doors flat, the ledges deep)
+  if (CINE) { cineFaces(this, lv, cam, H, box); this.route = 0; }   // (the cinematic fork: the walls' faces over every far thing; the doors flat, the ledges deep)
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);   // the ways into a shop or a stash, over the worlds' back layers: nothing covers them (owner)
   if (CINE) this.route = 2;
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
@@ -4441,7 +4456,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea || th.mines)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines || th.fuji)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);

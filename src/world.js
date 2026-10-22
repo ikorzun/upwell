@@ -4107,46 +4107,60 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const ring = (u, v, rr, c = G) => { F(X(u), Y(v), rr * t, 0, 0, rr * t, c, 1, 4); };
       const pot = (u, w, h, c = G) => { bx(u - w / 2, 0, u + w / 2, h, c, 1, 4); bx(u - w / 2 - 0.04, h - 0.06, u + w / 2 + 0.04, h, c); };
       const leaves = (u, v, n, s = 1) => { for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.5; ln(u, v, u + Math.cos(a) * 0.3 * s, v - Math.sin(a) * 0.35 * s, i % 3 === 1 ? PAL.green : G, 2); } };
-      if (p.kind === 'bikes') {   // mamachari bicycles parked by the wall
-        const k = V.bikes, bike = (u, s, extra) => { for (const e of [0, 1.15]) { ring(u + e * s, 0.38 * s, 0.36 * s); disc(X(u + e * s), Y(0.38 * s), 0.04 * t, G, 1); }
+      const tilesP = (u0, v0, u1, v1, tw = 0.27, tr = 0.2, a = 1.6) => { for (let v = v0, i = 0; v < v1 - 0.02; v += tr, i++) { bx(u0, Math.min(v1, v + tr) - P / t, u1, Math.min(v1, v + tr), G, a); for (let u = u0 + (i % 2 ? tw / 2 : tw); u < u1 - 0.02; u += tw) bx(u, v, u + P / t, Math.min(v1, v + tr), G, a); } };   // tiles cast into concrete: their joints
+      const shelter = (u0, u1, h, roof, c = G, a = 1) => {   // a bicycle shelter: two posts, its roof flat, gabled, sloping or a frame
+        for (const u of [u0, u1]) bx(u, 0, u + 0.08, h, G);
+        if (roof === 'flat') { bx(u0 - 0.12, h, u1 + 0.2, h + 0.12, c, a); bx(u0 - 0.12, h, u1 + 0.2, h + 0.04, K, 0.6); }
+        else if (roof === 'gable') { const m = (u0 + u1) / 2; ln(u0 - 0.15, h, m, h + 0.45, c, 3); ln(m, h + 0.45, u1 + 0.23, h, c, 3); bx(u0 - 0.1, h - 0.04, u1 + 0.18, h, G); }
+        else if (roof === 'slope') { for (let i = 0; i < 4; i++) ln(u0 - 0.15, h + 0.32 - i * 0.03, u1 + 0.23, h - i * 0.03, c, 1, i ? 1.6 : 1); }
+        else bx(u0, h, u1 + 0.08, h + 0.08, G);
+      };
+      if (p.kind === 'bikes') {   // bicycles under a shelter in Maekawa's estate (DANCHI_V.bikes, mk-bikes): A two, a child seat, a plant; B under a flat aqua roof;
+        // C under a gabled roof; D under a frame with a lamp; E under a sloping roof; F a shelter with its sign. Seats muted: the sheets' red, orange and green
+        // seats are blue, purple or grey here (those inks mean things)
+        const k = V.bikes, bike = (u, s, extra, sc = PAL.blue) => { for (const e of [0, 1.15]) { ring(u + e * s, 0.38 * s, 0.36 * s); disc(X(u + e * s), Y(0.38 * s), 0.04 * t, G, 1); }
           ln(u, 0.38 * s, u + 0.55 * s, 0.38 * s); ln(u + 0.55 * s, 0.38 * s, u + 0.9 * s, 0.8 * s); ln(u + 0.35 * s, 0.82 * s, u + 0.55 * s, 0.38 * s); ln(u + 0.35 * s, 0.82 * s, u + 0.9 * s, 0.8 * s); ln(u + 0.9 * s, 0.8 * s, u + 1.15 * s, 0.38 * s);   // its frame
           ln(u + 0.95 * s, 0.8 * s, u + 1.02 * s, 1.0 * s, G, 2); ln(u + 0.9 * s, 1.0 * s, u + 1.15 * s, 1.02 * s); bx(u + 0.28 * s, 0.85 * s, u + 0.45 * s, 0.9 * s, K);   // its handlebar, its saddle
-          if (extra === 'basket') bx(u + 1.1 * s, 0.75 * s, u + 1.45 * s, 1.0 * s, G, 1, 4); if (extra === 'seat') { bx(u - 0.25 * s, 0.85 * s, u + 0.1 * s, 1.25 * s, PAL.blue, MUTE); } if (extra === 'plants') { bx(u + 1.1 * s, 0.75 * s, u + 1.45 * s, 1.0 * s, G, 1, 4); leaves(u + 1.27 * s, 1.0 * s, 3, 0.6); } };
-        if (k === 0) { bike(0.35, 1, 'seat'); bike(0.35, 1, 'basket'); }   // A: a child seat at the back, a basket at the front
-        else if (k === 1) { bike(0.3, 1, 'basket'); bx(1.42, 0.75, 1.75, 1.0, PAL.purple, MUTE, 4); }   // B: a purple basket
-        else if (k === 2) bike(0.3, 1, 'basket');   // C: plain, a wire basket
-        else if (k === 3) { bike(0.35, 1, 'basket'); bx(0.1, 0.85, 0.45, 1.3, G, 1, 0); }   // D: a grey child seat
-        else if (k === 4) { bike(0.3, 1, 'basket'); bike(1.55, 0.8, null); }   // E: two, a small one
-        else bike(0.4, 1, 'plants');   // F: herbs in its basket
-      } else if (p.kind === 'plants') {   // a little balcony garden
+          if (extra === 'basket' || extra === 'both') bx(u + 1.1 * s, 0.75 * s, u + 1.45 * s, 1.0 * s, G, 1, 4); if (extra === 'seat' || extra === 'both') bx(u - 0.25 * s, 0.85 * s, u + 0.1 * s, 1.25 * s, sc, MUTE); };
+        if (k === 0) { bike(0.3, 1, 'seat'); bike(1.75, 0.82, 'basket'); pot(2.75, 0.28, 0.35); leaves(2.75, 0.35, 4, 0.7); }   // A
+        else if (k === 1) { shelter(0.1, 2.4, 1.4, 'flat', PAL.aqua, MUTE); bike(0.5, 1, 'both', PAL.purple); }   // B
+        else if (k === 2) { shelter(0.1, 2.4, 1.3, 'gable'); bike(0.3, 0.9, 'seat', PAL.purple); bike(1.5, 0.82, 'basket'); }   // C
+        else if (k === 3) { shelter(0.1, 2.4, 1.45, 'frame'); mnLampSafe(X(1.25), Y(1.45)); bike(0.5, 1, 'basket'); }   // D
+        else if (k === 4) { shelter(0.1, 2.4, 1.3, 'slope'); bike(0.3, 0.9, 'seat'); bike(1.5, 0.82, 'basket'); }   // E
+        else { shelter(0.1, 2.4, 1.45, 'flat'); bx(1.75, 0.95, 2.45, 1.4, G, 1, 0); ring(1.95, 1.15, 0.1, K); ring(2.25, 1.15, 0.1, K); ln(1.95, 1.15, 2.1, 1.28, K); ln(2.1, 1.28, 2.25, 1.15, K); bike(0.35, 1, 'seat'); }   // F: its sign, a bicycle drawn on it
+      } else if (p.kind === 'plants') {   // a little garden in Maekawa's estate (DANCHI_V.plants, mk-plants): A a tiled planter, a box of vegetables, a watering can; B a
+        // tall plant, laundry on a line; C three pots up a stepped shelf; D a small tree, a shelf of jars; E a box of vegetables, a tall plant, a hose; F a stone
+        // lantern, a bamboo screen, a low plant. Leaves mostly grey (green is moss you hold here)
         const k = V.plants;
-        if (k === 0) { pot(0.5, 0.35, 0.45); leaves(0.5, 0.45, 5); bx(0.9, 0, 1.9, 0.35, G, 1, 1); for (const u of [1.05, 1.35, 1.65]) leaves(u, 0.35, 3, 0.6); ln(1.45, 0.35, 1.45, 1.9); for (const v of [0.9, 1.3, 1.7]) disc(X(1.45 + 0.08), Y(v), 0.08 * t, PAL.purple, MUTE); bx(2.0, 0, 2.3, 0.25, PAL.blue, MUTE); }   // A: a box of greens, a morning glory, a watering can
-        else if (k === 1) { ln(0.2, 1.8, 2.1, 1.8); for (const [u, c] of [[0.7, PAL.blue], [1.1, PAL.purple], [1.5, G]]) bx(u, 1.15, u + 0.32, 1.8, c, MUTE); pot(0.6, 0.3, 0.4); leaves(0.6, 0.4, 4); pot(1.2, 0.25, 0.3); leaves(1.2, 0.3, 3, 0.7); bx(1.5, 0, 2.1, 0.35, G, 1, 1); leaves(1.8, 0.35, 4, 0.7); }   // B: laundry over its pots
-        else if (k === 2) { ln(0.1, 1.9, 1.6, 1.9, G, 2); mnLampSafe(X(1.5), Y(1.9)); ln(0.25, 0, 0.25, 1.9); for (const v of [1.0, 1.4]) disc(X(0.33), Y(v), 0.08 * t, PAL.purple, MUTE); pot(0.9, 0.35, 0.4); leaves(0.9, 0.4, 5); bx(1.3, 0, 2.0, 0.3, G, 1, 1); leaves(1.6, 0.3, 4, 0.6); }   // C: a lamp on a bracket, a morning glory up the post
-        else if (k === 3) { bx(0.15, 0, 1.8, 1.55, G, DIM, 1); pot(0.4, 0.3, 0.35); leaves(0.4, 0.35, 3); bx(0.8, 0, 1.6, 0.35, G, 1, 1); leaves(1.2, 0.35, 5, 0.7); ln(1.85, 0, 1.85, 1.6, G, 3); for (const v of [1.0, 1.35]) disc(X(1.92), Y(v), 0.08 * t, PAL.purple, MUTE); }   // D: a trellis behind, a tall pot
-        else if (k === 4) { ln(0.1, 0, 0.1, 2.0); ln(0.1, 1.85, 0.4, 1.85, PAL.blue, 1, MUTE); pot(0.6, 0.35, 0.5); leaves(0.6, 0.5, 6, 1.1); bx(1.0, 0, 1.7, 0.3, G, 1, 1); leaves(1.35, 0.3, 4, 0.6); bx(1.75, 0, 2.2, 0.45, G, 1, 3); }   // E: a tall plant, a crate
-        else { pot(0.5, 0.3, 0.35); leaves(0.5, 0.35, 4); ring(1.2, 0.3, 0.28); ring(1.75, 0.3, 0.28); ln(1.2, 0.3, 1.75, 0.3); bx(2.0, 0, 2.3, 0.3, G, 1, 4); ln(2.15, 0.3, 2.15, 1.8); for (const v of [1.0, 1.4, 1.7]) disc(X(2.23), Y(v), 0.08 * t, PAL.purple, MUTE); }   // F: a kid's bike, a morning glory
-      } else if (p.kind === 'mail') {   // the block's mailboxes on the wall over the ledge, its number painted big over them
-        const k = V.mail, num = [32, 47, 51, 26, 13, 64][k], mb = (u0, v0, cols, rows) => { for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) { bx(u0 + i * 0.36, v0 + j * 0.3, u0 + i * 0.36 + 0.32, v0 + j * 0.3 + 0.26, G, 1, 0); bx(u0 + i * 0.36 + 0.06, v0 + j * 0.3 + 0.14, u0 + i * 0.36 + 0.26, v0 + j * 0.3 + 0.17, K); } };
+        if (k === 0) { bx(0.15, 0, 1.25, 0.45, G); tilesP(0.15, 0.05, 1.25, 0.45, 0.25, 0.2); for (const u of [0.35, 0.7, 1.05]) leaves(u, 0.45, 4, 0.8); bx(1.4, 0, 2.1, 0.32, G, 1, 1); for (const u of [1.55, 1.8, 2.0]) bx(u, 0.32, u + 0.06, 0.48, PAL.green); bx(2.25, 0, 2.5, 0.3, G); ln(2.5, 0.25, 2.7, 0.35, G, 2); }   // A
+        else if (k === 1) { pot(0.5, 0.35, 0.45); leaves(0.5, 0.45, 7, 1.3); ln(0.1, 1.85, 2.2, 1.85); for (const [u, c] of [[1.0, PAL.blue], [1.5, PAL.purple]]) bx(u, 1.2, u + 0.35, 1.85, c, MUTE); }   // B
+        else if (k === 2) { for (let i = 0; i < 3; i++) { bx(0.2 + i * 0.6, 0, 0.8 + i * 0.6, 0.25 + i * 0.3, G, 1, i ? 0 : 1); pot(0.5 + i * 0.6, 0.24, 0.28 + 0, G); } for (let i = 0; i < 3; i++) leaves(0.5 + i * 0.6, 0.25 + i * 0.3 + 0.28, 3, 0.6); }   // C: up a stepped shelf
+        else if (k === 3) { pot(0.6, 0.45, 0.4); bx(0.57, 0.4, 0.63, 1.1, G); F(X(0.6), Y(1.35), 0.42 * t, 0, 0, 0.32 * t, G, 1, 4); for (const [e, f] of [[-0.2, 1.4], [0.15, 1.25]]) bx(0.6 + e, f, 0.6 + e + 0.08, f + 0.08, PAL.green); bx(1.2, 0, 1.9, 1.3, G, 1.5); for (const v of [0.4, 0.85]) { bx(1.2, v, 1.9, v + 0.05, G); for (const u of [1.3, 1.55]) bx(u, v + 0.05, u + 0.15, v + 0.3, G); } }   // D
+        else if (k === 4) { bx(0.2, 0, 1.0, 0.32, G, 1, 1); for (const u of [0.35, 0.6, 0.85]) bx(u, 0.32, u + 0.06, 0.5, PAL.green); pot(1.35, 0.3, 0.4); leaves(1.35, 0.4, 6, 1.2); ring(2.0, 0.3, 0.26); ring(2.0, 0.3, 0.12, K); }   // E
+        else { bx(0.25, 0, 0.45, 0.5, G); bx(0.15, 0.5, 0.55, 0.62, G); bx(0.22, 0.62, 0.48, 0.85, G); bx(0.28, 0.68, 0.42, 0.78, PAL.orange, LIT); bx(0.1, 0.85, 0.6, 0.95, G); vlamps.push([X(0.35), Y(0.73), 0.3, 1.0]); for (let u = 0.9; u < 2.0; u += 0.12) bx(u, 0, u + 0.06, 1.2 + 0.1 * Math.sin(u * 9), G, 1.5); bx(0.85, 1.0, 2.05, 1.05, G); leaves(2.3, 0, 5, 0.8); }   // F: a stone lantern lit, a bamboo screen
+      } else if (p.kind === 'mail') {   // the block's mailboxes in Maekawa's estate (DANCHI_V.mail, mk-mail), its number painted big over them: A set in a tiled wall,
+        // a notice board; B an aqua notice board, a deep eave over; C three rows, a plant; D a big bank, a plant; E a framed board of notices; F a lantern lit
+        const k = V.mail, num = [32, 47, 51, 26, 13, 64][k], mb = (u0, v0, cols, rows) => { for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) { bx(u0 + i * 0.36, v0 + j * 0.3, u0 + i * 0.36 + 0.32, v0 + j * 0.3 + 0.26, G, 1, 0); bx(u0 + i * 0.36 + 0.06, v0 + j * 0.3 + 0.16, u0 + i * 0.36 + 0.26, v0 + j * 0.3 + 0.19, K); } };
         { const nl = Math.min(X(0.25), X(1.0)), nt = Y(2.15), digit = (x, n) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
-          [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * P, nt + b0 * P, x + a1 * P, nt + b1 * P, G, 1, 0, 10, 0); }); };   // a digit five pixels by nine, read the same on either wall
-          digit(nl, Math.floor(num / 10)); digit(nl + 7 * P, num % 10); }   // its number, painted grey on the wall
-        mb(0.15, 0.2, 2, 4);
-        if (k === 0 || k === 3) { bx(1.05, 0.5, 1.75, 1.2, G, 1.5, 1); for (const v of [0.65, 0.8, 0.95]) bx(1.12, v, 1.65, v + 0.05, K); }   // A, D: a notice board
-        if (k === 1) { bx(0.0, 2.45, 1.4, 2.55, G); for (const u of [0.05, 1.3]) bx(u, 1.2, u + 0.06, 2.45, G); }   // B: a canopy over them
-        if (k === 2) mnLampSafe(X(0.6), Y(2.6));   // C: a lamp over them
-        if (k === 3) { pot(1.3, 0.3, 0.35); leaves(1.3, 0.35, 4); }   // D: a plant
-        if (k === 4) { bx(1.0, 0.2, 1.4, 1.3, G, 1, 4); bx(1.1, 0.9, 1.3, 1.1, K); bx(1.45, 0, 2.0, 0.35, G, 1, 1); leaves(1.7, 0.35, 4, 0.6); }   // E: an intercom panel, a box of greens
-        if (k === 5) { ln(1.2, 2.6, 1.2, 0.0, G, 3); ln(1.2, 0.9, 1.5, 0.9, G, 3); bx(1.4, 0.4, 1.6, 0.9, G, 1, 4); }   // F: a pipe down past them, a valve box
-      } else if (p.kind === 'cat') {   // a stray cat
-        const k = V.cat, cat = (u, sleep, c = G) => { if (sleep) { F(X(u), Y(0.22), 0.36 * t, 0, 0, 0.2 * t, c, 1, 0); F(X(u + 0.28 * d * d), Y(0.3), 0.15 * t, 0, 0, 0.13 * t, c, 1, 0); for (const e of [0.2, 0.36]) bx(u + e, 0.38, u + e + 0.06, 0.48, c); bx(u + 0.24, 0.3, u + 0.34, 0.31, K); }
-          else { F(X(u), Y(0.3), 0.22 * t, 0, 0, 0.3 * t, c, 1, 0); F(X(u + 0.05), Y(0.72), 0.16 * t, 0, 0, 0.14 * t, c, 1, 0); for (const e of [-0.08, 0.12]) bx(u + e, 0.82, u + e + 0.07, 0.95, c); for (const e of [-0.02, 0.1]) bx(u + e, 0.72, u + e + 0.03, 0.75, K); ln(u - 0.2, 0.05, u - 0.45, 0.35, c, 2); } };
-        if (k === 0) { bx(0.3, 0, 1.3, 0.14, PAL.purple, MUTE); cat(0.75, true); }   // A: asleep on a cushion
-        else if (k === 1) { cat(0.8, false); bx(1.25, 0, 1.6, 0.1, G); }   // B: sitting by its bowl
-        else if (k === 2) { bx(0.35, 0, 1.25, 0.6, G, 1, 0); bx(0.6, 0, 1.0, 0.4, K); ln(0.25, 0.6, 0.8, 0.95, G, 3); ln(0.8, 0.95, 1.35, 0.6, G, 3); cat(0.8, true); }   // C: on its little house
-        else if (k === 3) { ln(0.2, 0, 0.2, 1.6); ln(0.2, 1.5, 1.4, 1.5); bx(0.6, 0.85, 0.95, 1.5, PAL.blue, MUTE); bx(1.0, 0.9, 1.25, 1.5, G, 1, 4); cat(0.9, true, K); }   // D: a black cat under the laundry
-        else if (k === 4) { F(X(0.8), Y(0.2), 0.42 * t, 0, 0, 0.16 * t, G, 1, 0); F(X(1.2), Y(0.32), 0.14 * t, 0, 0, 0.12 * t, G, 1, 0); for (const e of [1.12, 1.24]) bx(e, 0.4, e + 0.06, 0.5, G); ln(0.4, 0.2, 0.2, 0.5, G, 2); bx(1.4, 0, 1.7, 0.1, G); }   // E: stretching by its bowl
-        else { bx(0.25, 0, 1.25, 0.14, PAL.blue, MUTE); cat(0.7, true); pot(1.5, 0.3, 0.3); leaves(1.5, 0.3, 4, 0.7); }   // F: on a blue cushion, a pot
+          [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * P, nt + b0 * P, x + a1 * P, nt + b1 * P, G, 1, 0, 10, 0); }); };   // a digit five by nine
+          if (k !== 1) { digit(nl, Math.floor(num / 10)); digit(nl + 7 * P, num % 10); } }   // its number, painted grey on the wall
+        if (k === 0) { bx(0.05, 0.05, 2.0, 1.55, G, DIM); tilesP(0.05, 0.05, 2.0, 1.55, 0.3, 0.25, 1.35); mb(0.15, 0.2, 2, 4); bx(1.05, 0.5, 1.75, 1.2, G, 1.5, 1); for (const v of [0.65, 0.8, 0.95]) bx(1.12, v, 1.65, v + 0.05, K); }   // A
+        else if (k === 1) { bx(-0.05, 2.0, 2.3, 2.3, G); bx(-0.05, 2.0, 2.3, 2.06, K, 0.6); mb(0.15, 0.2, 2, 4); bx(1.05, 0.5, 1.75, 1.25, PAL.aqua, MUTE); for (const v of [0.7, 0.9]) bx(1.15, v, 1.6, v + 0.05, K); }   // B: an eave over them
+        else if (k === 2) { mb(0.15, 0.25, 3, 3); pot(1.6, 0.3, 0.35); leaves(1.6, 0.35, 4); }   // C
+        else if (k === 3) { mb(0.1, 0.15, 4, 4); pot(1.8, 0.3, 0.35); leaves(1.8, 0.35, 4); }   // D
+        else if (k === 4) { mb(0.15, 0.2, 2, 4); bx(1.0, 0.4, 1.85, 1.35, G); bx(1.06, 0.46, 1.79, 1.29, K); for (const [u, v] of [[1.12, 0.55], [1.45, 0.6], [1.15, 0.9], [1.5, 0.95]]) bx(u, v, u + 0.25, v + 0.25, G, 1.4); }   // E: a framed board of notices
+        else { mb(0.15, 0.2, 2, 4); ln(1.4, 2.1, 1.4, 1.6); bx(1.3, 1.25, 1.5, 1.6, PAL.orange, LIT); bx(1.28, 1.6, 1.52, 1.66, G); bx(1.28, 1.19, 1.52, 1.25, G); vlamps.push([X(1.4), Y(1.42), 0.35, 1.1]); }   // F: a lantern lit
+      } else if (p.kind === 'cat') {   // a stray cat in Maekawa's estate (DANCHI_V.cat, mk-cat): A asleep on a concrete bench, B sitting under a wall lamp lit, C sitting
+        // by its blue bowl, D asleep on a purple cushion, E sitting on a tiled step, F stretching by its bowl, a plant (the sheets' ginger cat and red bowl
+        // are grey and blue here)
+        const k = V.cat, cat = (u, sleep, c = G, v0 = 0) => { if (sleep) { F(X(u), Y(v0 + 0.22), 0.36 * t, 0, 0, 0.2 * t, c, 1, 0); F(X(u + 0.28 * d * d), Y(v0 + 0.3), 0.15 * t, 0, 0, 0.13 * t, c, 1, 0); for (const e of [0.2, 0.36]) bx(u + e, v0 + 0.38, u + e + 0.06, v0 + 0.48, c); bx(u + 0.24, v0 + 0.3, u + 0.34, v0 + 0.31, K); }
+          else { F(X(u), Y(v0 + 0.3), 0.22 * t, 0, 0, 0.3 * t, c, 1, 0); F(X(u + 0.05), Y(v0 + 0.72), 0.16 * t, 0, 0, 0.14 * t, c, 1, 0); for (const e of [-0.08, 0.12]) bx(u + e, v0 + 0.82, u + e + 0.07, v0 + 0.95, c); for (const e of [-0.02, 0.1]) bx(u + e, v0 + 0.72, u + e + 0.03, v0 + 0.75, K); ln(u - 0.2, v0 + 0.05, u - 0.45, v0 + 0.35, c, 2); } };
+        if (k === 0) { bx(0.2, 0.3, 1.35, 0.42, G); for (const u of [0.3, 1.18]) bx(u, 0, u + 0.08, 0.3, G); cat(0.75, true, G, 0.42); }   // A
+        else if (k === 1) { mnLampSafe(X(0.8), Y(1.7)); cat(0.8, false); }   // B
+        else if (k === 2) { cat(0.7, false); bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE); }   // C
+        else if (k === 3) { bx(0.3, 0, 1.25, 0.14, PAL.purple, MUTE); cat(0.75, true, G, 0.0); }   // D (the sheet's ginger cat grey: orange is crumbling here)
+        else if (k === 4) { bx(0.3, 0, 1.3, 0.35, G); tilesP(0.3, 0.05, 1.3, 0.35, 0.25, 0.15); cat(0.8, false, G, 0.35); }   // E
+        else { F(X(0.8), Y(0.2), 0.42 * t, 0, 0, 0.16 * t, G, 1, 0); F(X(1.2), Y(0.32), 0.14 * t, 0, 0, 0.12 * t, G, 1, 0); for (const e of [1.12, 1.24]) bx(e, 0.4, e + 0.06, 0.5, G); ln(0.4, 0.2, 0.2, 0.5, G, 2); bx(1.4, 0, 1.7, 0.1, PAL.blue, MUTE); pot(2.0, 0.28, 0.3); leaves(2.0, 0.3, 4, 0.7); }   // F
       }
     }
     dcFar(V.far);

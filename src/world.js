@@ -267,6 +267,11 @@ const MEDAL = { perM: 0.5, step: 5, min: 20 };
 // home in on the hero from anywhere, at `seek` px/s more than its own pace (three times that a
 // second on), turning at `steer`/s: they always get to it.
 const COIN = { r: 0.54, magnet: 2.6, drag: 2.4, burst: 260, home: 0.25, seek: 600, steer: 10 };   // a coin the magnet reaches homes in as an enemy's does (user: faster)
+// Coins hover clear of what they are laid by (owner, 2026-10-22: «монеты и другие бонусы не должны соприкасаться с платформами, они как бы парят над ними на
+// минимальном расстоянии, не соприкасаясь даже под углом»). A coin's radius is over half a cell, so one in a cell's middle touched the ledge under it (half of
+// all coins did). Level.clearBonuses moves each `gap` game pixels clear of ledges, blocks, a mover's whole way and the walls, corners too: up first, else
+// down, aside or up aside, a game pixel at a time, `reach` tiles at most. A seesaw's and a mill's seats come and go: not counted. Candies already hover.
+const BONUS_GAP = { gap: 2, reach: 0.6 };
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
 // Ledges by world (user: some bounce, some pull; the random run's): a Cave plank in `bouncy` of them throws the hero up at `v`
 // of a jump as it lands; a Mine block in `magnet` pulls it in within `range` R at `pull` R/s² (MAGNET), more the nearer.
@@ -1989,6 +1994,26 @@ class Level {
       }
       if (rnd() < 0.45) this.pickups.push({ x: cx, y: at(0.8), r: 0.6 * R, item: GIFT, sold: false, near: false });
     }
+    this.clearBonuses(-Infinity, Infinity);   // (BONUS_GAP)
+  }
+  // Coins laid from y0 down to y1 moved off what they touch (BONUS_GAP): a ledge, a block, a mover's whole way, a wall. One with no room within reach (a
+  // squeeze) goes where there is the most and is drawn just small enough to hover there (c.fit, of its radius).
+  clearBonuses(y0, y1) {
+    const R = this.R, P = PIX.size, gap = BONUS_GAP.gap * P, cr = COIN.r * R, l = this.l, r = this.r;
+    const solid = this.rects.filter((q) => !q.gone && !(q.move && (q.move.wheel || q.move.seesaw)) && q.y1 > y0 - 3 * R && q.y0 < y1 + 3 * R)
+      .map((q) => q.move ? { x0: Math.min(q.move.a, q.move.b), x1: Math.max(q.move.a, q.move.b) + q.x1 - q.x0, y0: q.y0, y1: q.y1 } : q);
+    const room = (x, y) => solid.reduce((m, q) => Math.min(m, Math.hypot(Math.max(q.x0 - x, 0, x - q.x1), Math.max(q.y0 - y, 0, y - q.y1))), Math.min(x - l, r - x));   // the radius free there
+    for (const c of this.coins) {
+      const rad = c.v > 1 ? 1.4 * cr : cr;
+      if (c.drop || c.y < y0 || c.y > y1 || room(c.x, c.y) >= rad + gap) continue;
+      let best = { x: c.x, y: c.y, f: room(c.x, c.y) };
+      out: for (let d = P; d <= BONUS_GAP.reach * this.tile; d += P) for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const x = c.x + dx * d, y = c.y + dy * d, f = room(x, y);
+        if (f >= rad + gap) { best = { x, y, f }; break out; }
+        if (f > best.f) best = { x, y, f };
+      }
+      c.x = best.x; c.y = best.y; if (best.f < rad + gap) c.fit = Math.max(0.3, (best.f - gap) / rad);
+    }
   }
   ensure(y) { while (this.top > y) this.addChunk(); }
   // Drop what has fallen far below the camera (a crumbled block stays: it comes back).
@@ -2099,6 +2124,7 @@ class Level {
       for (const q of [...on, { y0: -Infinity, y1: this.top - h + t }]) { const top = Math.max(q.y1, this.top - h + t); if (y - top > (free ? free[0] - free[1] : 0)) free = [y, top]; y = Math.min(y, q.y0); }
       if (bare && free && free[0] - free[1] >= 3 * t) { const span = Math.min(want, free[0] - free[1]), y1 = free[0] - at * (free[0] - free[1] - span); this.fireWalls.push({ side, y0: y1 - span, y1, ph }); }
     }
+    this.clearBonuses(this.top - h - this.tile, this.top + 2 * this.tile);   // its coins, and the last chunk's under its foot (BONUS_GAP)
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
     this.top -= h;
@@ -4396,7 +4422,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const c of lv.coins) {
     if (c.y < top || c.y > bot) continue;
     // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded
-    const r = c.v > 1 ? cr * 1.4 : cr, a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
+    const r = (c.v > 1 ? cr * 1.4 : cr) * (c.fit || 1), a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
     F(c.x + edge, c.y, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, 1, 9, 0);
     F(c.x, c.y, r * s, 0, 0, r, INK.coinD, 1, 9, 0);
     F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6);

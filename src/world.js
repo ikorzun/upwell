@@ -4053,7 +4053,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
     if (r.crumble) {   // a rope bridge (the owner's pick C, 2026-10-21, of six in wood: grey looked strange in a village): narrow slats wide apart, each shaking
       // its own way as it gives, two grey ropes through them
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = r.board ? 1 : Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;   // (a board: one slat, the one that goes)
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, n = r.board ? 1 : Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;   // (a board: one slat, the one that goes; 2.5D: no fading, a dither in depth reads as a sieve: it shakes)
       for (let i = 0; i < n; i++) {
         const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 || r.board ? 2 * P : 0) + ox;   // (a board's last too: the next board's comes on)
         box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);   // a slat, its underside in shade

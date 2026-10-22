@@ -3165,14 +3165,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
         || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'))) continue;
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
+      const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
       if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
       for (const [hw, a0, a1] of [[0.5, 0, 0.07], [0.45, 0.07, 0.17], [0.38, 0.17, 0.25]]) box(snap(cx - hw * t), snap(by + a0 * t), snap(cx + hw * t), snap(by + a1 * t), PAL.gray, 1, 0, 10, 0);
       for (const f of [-0.27, 0.27]) box(snap(cx + f * t) - P, snap(by + 0.25 * t), snap(cx + f * t) + P, r.y0, PAL.gray, 1, 0, 10, 0);
-      const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03), Y(0.95 * q)];
+      const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03) + SB(0.95 * q), Y(0.95 * q)];
       for (let q = 0; q <= 1; q += P / (0.95 * t)) { const [x, y] = trunk(q); disc(x, y, (0.1 - 0.055 * q) * t, PAL.orange, 1); }
-      for (const [q, u, v] of [[0.32, 0.55, 0.52], [0.55, -0.55, 0.5], [0.8, 0.5, 0.92], [0.7, -0.5, 0.86]]) { const [x0, y0] = trunk(q); for (let e = 0; e <= 1; e += 0.12) disc(x0 + (X(u) - x0) * e, y0 + (Y(v) - y0) * e, 0.035 * t, PAL.orange, 1); }
+      for (const [q, u, v] of [[0.32, 0.55, 0.52], [0.55, -0.55, 0.5], [0.8, 0.5, 0.92], [0.7, -0.5, 0.86]]) { const [x0, y0] = trunk(q); for (let e = 0; e <= 1; e += 0.12) disc(x0 + (X(u) + SB(v) - x0) * e, y0 + (Y(v) - y0) * e, 0.035 * t, PAL.orange, 1); }
       for (const [u, v, rx, ry] of [[-0.05, 1.12, 0.32, 0.14], [-0.5, 0.86, 0.28, 0.12], [0.5, 0.92, 0.3, 0.12], [0.55, 0.52, 0.28, 0.11], [-0.55, 0.5, 0.24, 0.1]]) {
-        F(X(u), Y(v), rx * t, 0, 0, ry * t, PAL.green, 1, 9, 0); F(X(u) - d * 0.08 * t, Y(v) - 0.08 * t, 0.6 * rx * t, 0, 0, 0.6 * ry * t, PAL.green, 1, 9, 0);   // a pad, a tuft on it
+        F(X(u) + SB(v), Y(v), rx * t, 0, 0, ry * t, PAL.green, 1, 9, 0); F(X(u) + SB(v) - d * 0.08 * t, Y(v) - 0.08 * t, 0.6 * rx * t, 0, 0, 0.6 * ry * t, PAL.green, 1, 9, 0);   // a pad, a tuft on it
       }
     }
     if (CINE) this.route = 1;
@@ -3549,13 +3550,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (!p) continue;
       if (CINE) this.route = 4;   // (the cinematic fork: a sakura, a scarecrow, a lantern, a koinobori: small things in depth, whole)
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
-      const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
-      const el = (u, v, ru, rv, c) => { if (CINE && CINE.on('vol')) { F(X(u) + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(X(u) - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(X(u) - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(X(u), Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume)
+      const pk = CINE && { sakura: [0.4, 4.2, 4.6], scarecrow: [0.2, 2.9, 3.8], koinobori: [0.7, 4.4, 5.3] }[p.kind], sw = pk ? cinePoke(g, lv, r, p.kind, Math.min(X(pk[0]), X(pk[1])), Y(pk[2]), Math.max(X(pk[0]), X(pk[1])), b, p.kind === 'scarecrow' ? [X(2.75), Y(2.55)] : null) : 0;
+      const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its top the most; see cinePoke)
+      const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => { const q = SW((v0 + v1) / 2); box(Math.min(X(u0), X(u1)) + q, Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)) + q, Y(Math.min(v0, v1)), c, a, 0, 10, tn); };   // by tiles out from the wall and up from the ledge
+      const el = (u, v, ru, rv, c) => { const xu = X(u) + SW(v); if (CINE && CINE.on('vol')) { F(xu + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(xu - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(xu - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(xu, Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume, swaying)
       if (p.kind === 'sakura') {   // a sakura in full bloom (C): its gnarled trunk grey (C's dark grey), its branches, clouds of blossom, petals falling
         const bark = 1.5;   // a grey half the way from the black: C's trunk was dark
         bx(0.95, 0, 1.55, 0.22, PAL.gray, 0, bark); bx(1.05, 0.22, 1.45, 1.1, PAL.gray, 0, bark); bx(1.12, 1.1, 1.5, 1.75, PAL.gray, 0, bark); bx(1.22, 1.75, 1.55, 2.25, PAL.gray, 0, bark); bx(1.2, 0.35, 1.2 + px, 1.5, PAL.black);
         if (CINE && CINE.on('vol')) for (const [u0, v0, u1, v1] of [[1.05, 0.22, 1.45, 1.1], [1.12, 1.1, 1.5, 1.75], [1.22, 1.75, 1.55, 2.25]]) { bx(u0, v0, u0 + 2 * px, v1, PAL.gray, 0, 1); bx(u1 - 2 * px, v0, u1, v1, PAL.black, 0, 1.15); }   // (the cinematic fork: round, lit and dark)
-        for (const [u0, v0, u1, v1] of [[1.35, 2.15, 0.75, 2.7], [1.45, 2.05, 2.55, 2.4], [1.4, 2.2, 1.65, 3.6], [1.5, 2.2, 3.1, 3.05]]) line(X(u0), Y(v0), X(u1), Y(v1), PAL.gray, bark, 2);
+        for (const [u0, v0, u1, v1] of [[1.35, 2.15, 0.75, 2.7], [1.45, 2.05, 2.55, 2.4], [1.4, 2.2, 1.65, 3.6], [1.5, 2.2, 3.1, 3.05]]) line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), PAL.gray, bark, 2);
         for (const [u, v, ru, rv] of [[1.0, 4.05, 0.62, 0.42], [1.75, 4.3, 0.7, 0.45], [2.4, 4.05, 0.55, 0.38], [1.6, 3.82, 0.55, 0.32], [3.0, 3.3, 0.5, 0.38], [3.65, 3.38, 0.5, 0.36],
           [3.95, 3.18, 0.35, 0.25], [0.72, 2.62, 0.45, 0.33], [1.25, 2.72, 0.45, 0.32], [2.75, 2.02, 0.4, 0.3], [3.25, 2.07, 0.4, 0.3]]) el(u, v, ru, rv, PAL.purple);   // purple: the nearest the inks have to pink
         for (const [u, v] of [[1.3, 4.2], [2.1, 4.05], [3.35, 3.35], [0.85, 2.65], [3.0, 2.05], [1.7, 3.9]]) bx(u, v, u + 2 * px, v + px, PAL.gray);   // light specks in it
@@ -3569,6 +3572,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         bx(1.07, 2.73, 2.03, 3.02, PAL.gray); for (const u of [1.32, 1.74]) bx(u, 2.86, u + px, 2.86 + 2 * px, PAL.black); bx(1.42, 2.8, 1.66, 2.8 + px, PAL.black);   // (F's face half red)
         bx(0.47, 3.0, 2.66, 3.2, th.block); bx(1.0, 3.2, 2.1, 3.62, th.block, 1); bx(1.2, 3.62, 1.9, 3.72, th.block);
         for (const [u, h, l] of [[0.45, 0.7, -0.08], [0.62, 0.95, 0.05], [0.88, 0.6, 0.1], [1.12, 0.8, -0.05], [2.05, 0.75, 0.06], [2.75, 0.9, -0.06], [2.98, 0.65, 0.08], [3.25, 0.8, 0.03]]) ln(u, 0, u + l, h, PAL.green);
+        if (CINE && CINE.on('poke') && cinePerched(r, lv.t)) cineSpr(box, CRITTER[d > 0 ? 'crow' : 'crowL'], X(2.75) + SW(2.55), Y(2.55), th.wall);   // (the cinematic fork: a crow on its hand, off when the hero comes)
         ln(2.3, 0, 2.3, 0.85, PAL.green); bx(2.18, 0.85, 2.42, 1.09, PAL.purple); bx(2.29, 0.95, 2.29 + px, 0.95 + px, PAL.black);   // a flower (F's yellow: yellow is for what you take)
       } else if (p.kind === 'lantern') {   // a little Inari shrine (D): a stone lantern, a fox either side on its plinth, the shrine, a branch of sakura out of the wall
         // (the task: its lantern dark till the hero comes near, then lit for good, flickering on, a ring of light going out from it, its glow as the neon's;
@@ -4228,15 +4232,16 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else F(cx, cy, 0, hl, hd, 0, INK.spike, 1, 6, hl, hd, tw);
   }
   const cr = COIN.r * R;
-  if (CINE) this.route = 4;   // (the cinematic fork: the bonuses small things in depth)
+  const bonusEye = CINE && (CINE.bonus === 'B' || CINE.bonus === 'D'), bonusStack = CINE && CINE.bonus === 'C';   // (the cinematic fork: the bonuses' depth, see CINE.bonus)
+  if (CINE) this.route = bonusEye ? 4 : 0;
   for (const c of lv.coins) {
     if (c.y < top || c.y > bot) continue;
     // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded
     const r = c.v > 1 ? cr * 1.4 : cr, a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
-    F(c.x + edge, c.y, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, 1, 9, 0);
-    F(c.x, c.y, r * s, 0, 0, r, INK.coinD, 1, 9, 0);
-    F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6);
-    F(c.x - r * s * 0.3, c.y - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0);
+    const coin = (ox, oy, k) => { F(c.x + edge + ox, c.y + oy, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, k, 9, 0); F(c.x + ox, c.y + oy, r * s, 0, 0, r, INK.coinD, k, 9, 0);
+      if (k === 1) { F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6); F(c.x - r * s * 0.3, c.y - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0); } };
+    if (bonusStack) for (let q = 3; q >= 1; q--) coin(q * 0.7 * PIX.size, q * PIX.size, 1.62 - 0.07 * q);   // (C: a token's thickness, down and to the right)
+    coin(0, 0, 1);
   }
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
@@ -4249,16 +4254,17 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
     else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: about a tile and a half long
   }
-  if (CINE) this.route = 4;
+  if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;
     F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1);
+    if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4, T * 1.8 + p.x * 0.05);   // (C: its thickness)
     iconSpin(p.item.id, p.x, y, a, 2.4, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
     const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
-    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
+    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); if (bonusStack) for (let q = 3; q >= 1; q--) iconSpin(p.kind, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, k, T * 2.2 + p.x * 0.05); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
   if (CINE) this.route = 0;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down

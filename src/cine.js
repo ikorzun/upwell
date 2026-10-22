@@ -9,9 +9,9 @@
 const CINE = (() => {
   const m = /[?&]cine(?:=([^&]*))?/.exec(location.search);
   if (!m) return null;
-  const set = new Set((!m[1] ? 'vol,depth,motes' : m[1] === 'all' ? 'vol,light,glow,shadow,motes,grade,depth,rays,fog,dof,extrude' : m[1]).split(','));   // (owner, after: «освещение оставь пиксельное — свет от неона»: no light of ours by default)   // (owner 2026-10-22: «Визуальна разница минимальна, просто добавляется размытие… добавить объема платформам и деревьям сделав их в 2.5d»: the blur off, the volume on)
+  const set = new Set((!m[1] ? 'vol,depth,motes,poke' : m[1] === 'all' ? 'vol,light,glow,shadow,motes,grade,depth,rays,fog,dof,extrude,poke' : m[1]).split(','));   // (owner, after: «освещение оставь пиксельное — свет от неона»: no light of ours by default)   // (owner 2026-10-22: «Визуальна разница минимальна, просто добавляется размытие… добавить объема платформам и деревьям сделав их в 2.5d»: the blur off, the volume on)
   const r = /[?&]res=(\d)/.exec(location.search);
-  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], lastT: null, light: [], K: 0.06, DEEP: 0.7, SMALL: 0.3 };
+  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-D])/.exec(location.search) || [])[1] || 'A', DEEP: 0.7, SMALL: 0.3 };
 })();
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
@@ -226,6 +226,8 @@ function cineBack(rd, lv, cam, H, box, F, T) {
 // Motes in the air, in front of the play but small and dim: dust everywhere, the Village's fireflies (each a light) and falling petals, Tokyo's rain,
 // embers elsewhere. Kept in a band round the view; each one that leaves it starts again at its top or anywhere in it.
 function cineMotes(rd, g, lv, cam, H, box, disc, T) {
+  { const dt0 = CINE.fxT == null ? 0 : Math.max(0, Math.min(0.05, T - CINE.fxT)); CINE.fxT = T; const h = g.hero; if (CINE.hp && dt0 > 0) CINE.hv = Math.hypot(h.cx - CINE.hp[0], h.cy - CINE.hp[1]) / dt0; CINE.hp = [h.cx, h.cy];
+    if (CINE.fx.length && CINE.fx.lv !== lv) CINE.fx.length = 0; CINE.fx.lv = lv; cineFx(g, lv, cam, H, box, dt0); }   // (what the pokes shed: see cinePoke)
   if (!CINE.on('motes')) return;
   const look = CINE_LOOK(lv.theme), t = lv.tile, P = PIX.size, snap = (v) => Math.round(v / P) * P, M = CINE.motes;
   const dt = CINE.lastT == null ? 0 : Math.max(0, Math.min(0.05, T - CINE.lastT)); CINE.lastT = T;
@@ -297,3 +299,53 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, null);
   gl.enable(gl.BLEND);
 };
+
+// The world answers the hero (owner 2026-10-22: «легкое взаимодействие героя с объектами мира: у дерева опадают листья или колышется крона, пугало чуть
+// наклоняется и из него вылетает птица»). A thing the hero comes into (its box, POKE.reach tiles round it) is poked, as hard as the hero moves: it sways,
+// leaning away from the hero and back, a decaying swing, its top the most (the shear its drawing takes, see the Village's props and Tokyo's bonsai); it
+// sheds what it sheds (a sakura its petals, a bonsai needles), which fall and lie on its ledge a while; a scarecrow's crow flies off and is back only later.
+// The digest's §8: the juice medium, a peak only for a hard poke; it starts at once and is over in about a second; the world remembers (petals lying, the
+// crow gone); with the system asking for less motion nothing sways and less is shed. A rustle with each (a short soft gust), wings with the crow.
+const POKE = { reach: 0.5, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
+  kinds: { sakura: { sway: 0.06, shed: 'petal', n: 8 }, scarecrow: { sway: 0.09, bird: true }, koinobori: { sway: 0.05 }, bonsai: { sway: 0.08, shed: 'needle', n: 5 } } };
+function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
+  const k = POKE.kinds[kind];
+  if (!CINE || !CINE.on('poke') || !k) return 0;
+  const H = g.hero, t = lv.tile, T = lv.t, P = r.poke || (r.poke = { t: -9, s: 0, d: 1, was: false, back: 0 });
+  const m = POKE.reach * t, inside = g.state === 'play' && H.maxX > x0 - m && H.minX < x1 + m && H.maxY > y0 - m && H.minY < y1 + m;
+  if (inside && !P.was && T - P.t > POKE.cool) {
+    P.t = T; P.s = Math.min(1, 0.4 + (CINE.hv || 0) / (10 * lv.R)); P.d = H.cx < (x0 + x1) / 2 ? 1 : -1;
+    if (k.shed) for (let i = 0, n = Math.max(1, Math.round(k.n * P.s * (POKE.still ? 0.4 : 1))); i < n; i++)
+      CINE.fx.push({ k: k.shed, x: x0 + Math.random() * (x1 - x0), y: y0 + Math.random() * (y1 - y0) * 0.5, vx: P.d * (15 + Math.random() * 35), vy: 5 + Math.random() * 20, ph: Math.random() * 6.28, on: r, life: 0 });
+    if (k.bird && perch && P.back <= T) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0 }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }
+    if (typeof sound !== 'undefined' && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s);
+  }
+  P.was = inside;
+  const e = T - P.t;
+  return POKE.still || e > 2.2 ? 0 : k.sway * P.s * P.d * Math.exp(-e * POKE.decay) * Math.sin(e * POKE.freq);
+}
+const cinePerched = (r, T) => !r.poke || r.poke.back <= T;   // a scarecrow's crow on its hand (back from its flight)
+function cineSpr(box, rows, x, y, ink) {   // a CRITTER picture a game pixel a dot, centred on x, its foot at y (as the renderer's spr)
+  const s = PIX.size, x0 = Math.round(x / s) * s - (rows[0].length * s) / 2, y0 = Math.round(y / s) * s - rows.length * s;
+  rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); });
+}
+// What the pokes shed and send off, each frame (in front, flat): petals and needles falling, lying on their ledge a while, fading; a crow flying off.
+function cineFx(g, lv, cam, H, box, dt) {
+  const P = PIX.size, snap = (v) => Math.round(v / P) * P, F = CINE.fx, ink = lv.theme.wall;
+  for (let i = F.length - 1; i >= 0; i--) {
+    const f = F[i]; f.life += dt;
+    if (f.k === 'bird') {
+      f.x += f.vx * dt; f.y += f.vy * dt; f.vy -= 40 * dt;
+      if (f.y < cam - 60 || f.x < lv.l - 40 || f.x > lv.r + 40) { F.splice(i, 1); continue; }
+      cineSpr(box, CRITTER[(Math.floor(f.life * 9) % 2 ? 'crowUp' : 'crowDown') + (f.vx > 0 ? '' : 'L')], f.x, f.y, ink); continue;
+    }
+    const r = f.on, lying = f.rest != null;
+    if (!lying) {
+      f.ph += dt; f.vy = Math.min(45, f.vy + 30 * dt); f.vx *= 1 - 1.2 * dt; f.x += (f.vx + Math.sin(f.ph * 2.3) * 14) * dt; f.y += f.vy * dt;
+      if (r && !r.gone && f.y >= r.y0 - P && f.y < r.y0 + P && f.x > r.x0 && f.x < r.x1) { f.rest = 0; f.y = r.y0 - P; }
+      if (f.y > cam + H + 30) { F.splice(i, 1); continue; }
+    } else { f.rest += dt; if (f.rest > 7.5 || (r && r.gone)) { F.splice(i, 1); continue; } }
+    const a = lying && f.rest > 6 ? 1 - (f.rest - 6) / 1.5 : 1, x = snap(f.x), y = snap(f.y);
+    if (f.k === 'petal') box(x, y, x + 2 * P, y + P, PAL.purple, a, 0, 10, 0); else box(x, y, x + P, y + 2 * P, PAL.green, a, 0, 10, 0);
+  }
+}

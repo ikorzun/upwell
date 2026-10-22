@@ -2867,7 +2867,7 @@ function layout() {
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
-  renderer.resize(W, H, PIXELATED ? 1 / PIX.size : window.devicePixelRatio || 1);   // the canvas as many pixels as the game draws, the page scales it up
+  renderer.resize(W, H, PIXELATED ? (CINE ? CINE.k : 1) / PIX.size : window.devicePixelRatio || 1);   // (the cinematic fork: k times the game's pixels, its light that smooth)   // the canvas as many pixels as the game draws, the page scales it up
   // pixelated (index.html): a phone gets no full-resolution copy of each frame to keep and compose (on a 3x iPhone 20 times the pixels for nothing);
   // a browser that cannot scale it pixelated gets the copy, a device pixel per pixel, as before
   game.applyMods();

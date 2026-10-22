@@ -2757,7 +2757,7 @@ Renderer.prototype.makeTarget = function () {
 Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
-  this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0;
+  this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.toFar = false;   // (nFar, toFar: the cinematic fork's, see cine.js)
   const lv = g.lv, th = lv.theme, W = this.w, H = this.h, cam = lv.cam, top = cam - 80, bot = cam + H + 80, R = lv.R, T = lv.t;
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
@@ -3066,6 +3066,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }
+  if (CINE) { this.toFar = true; cineBack(this, lv, cam, H, box, F, T); }   // (the cinematic fork: what the kits draw DIM from here goes behind, see cine.js)
   const kitT = lv.tile, kitP = PIX.size, snap = (v) => Math.round(v / kitP) * kitP;
   const brace = (wx, d, y0, h, s, c) => {   // a knee brace off the wall at wx out toward d, from y0 down h, a pixel clear of the wall: a leg down
     // the wall, a bar along its top and a strut s wide between their ends (Tokyo's slabs, its air conditioners)
@@ -3121,6 +3122,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, DIM, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
     }
+    const tfN = this.toFar; this.toFar = false;   // (the cinematic fork: a sign stays whole in the play, its tubes off or lit)
     for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
       // (the owner's pick, research/variants/tokyo-neon-1.png B): tubes, its word and a picture of what is sold, framed on a dark box with grey caps
       // over and under it; its tubes off and faint (behind, DEPTH) till the hero jumps close past it, then lit red or blue in full, glowing, and so
@@ -3137,6 +3139,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, ia, kk, ink));
       icon(pic, cx, y1 - 3 * P - 0.45 * gw, ia, kk, ink);
     }
+    this.toFar = tfN;
     for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges (the owner's pick, research/variants/tokyo-vending-1.png
       // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is
       // for what you take), the slot under the front
@@ -3544,10 +3547,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (!p) continue;
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
-      const el = (u, v, ru, rv, c) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, 1, 0), ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);
+      const el = (u, v, ru, rv, c) => { if (CINE && CINE.on('vol')) { F(X(u) + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(X(u) - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(X(u) - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(X(u), Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume)
       if (p.kind === 'sakura') {   // a sakura in full bloom (C): its gnarled trunk grey (C's dark grey), its branches, clouds of blossom, petals falling
         const bark = 1.5;   // a grey half the way from the black: C's trunk was dark
         bx(0.95, 0, 1.55, 0.22, PAL.gray, 0, bark); bx(1.05, 0.22, 1.45, 1.1, PAL.gray, 0, bark); bx(1.12, 1.1, 1.5, 1.75, PAL.gray, 0, bark); bx(1.22, 1.75, 1.55, 2.25, PAL.gray, 0, bark); bx(1.2, 0.35, 1.2 + px, 1.5, PAL.black);
+        if (CINE && CINE.on('vol')) for (const [u0, v0, u1, v1] of [[1.05, 0.22, 1.45, 1.1], [1.12, 1.1, 1.5, 1.75], [1.22, 1.75, 1.55, 2.25]]) { bx(u0, v0, u0 + 2 * px, v1, PAL.gray, 0, 1); bx(u1 - 2 * px, v0, u1, v1, PAL.black, 0, 1.15); }   // (the cinematic fork: round, lit and dark)
         for (const [u0, v0, u1, v1] of [[1.35, 2.15, 0.75, 2.7], [1.45, 2.05, 2.55, 2.4], [1.4, 2.2, 1.65, 3.6], [1.5, 2.2, 3.1, 3.05]]) line(X(u0), Y(v0), X(u1), Y(v1), PAL.gray, bark, 2);
         for (const [u, v, ru, rv] of [[1.0, 4.05, 0.62, 0.42], [1.75, 4.3, 0.7, 0.45], [2.4, 4.05, 0.55, 0.38], [1.6, 3.82, 0.55, 0.32], [3.0, 3.3, 0.5, 0.38], [3.65, 3.38, 0.5, 0.36],
           [3.95, 3.18, 0.35, 0.25], [0.72, 2.62, 0.45, 0.33], [1.25, 2.72, 0.45, 0.32], [2.75, 2.02, 0.4, 0.3], [3.25, 2.07, 0.4, 0.3]]) el(u, v, ru, rv, PAL.purple);   // purple: the nearest the inks have to pink
@@ -4096,7 +4100,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         const lx = snap(wl ? r.x1 - 0.25 * t : r.x0 + 0.25 * t), ly = r.y0 + 2 * rh + 0.2 * t;
         box(lx - P / 2, r.y0 + 2 * rh, lx + P / 2, ly, PAL.gray, 1, 0, 10, 0); box(snap(lx - 0.12 * t), ly, snap(lx + 0.12 * t), ly + 2 * P, PAL.gray, 1, 0, 10, 0);
         const l0 = ly + 2 * P, l1 = snap(ly + 0.66 * t);
-        box(snap(lx - 0.22 * t), l0, snap(lx + 0.22 * t), l1, PAL.orange, 1, 0, 10, 0);
+        box(snap(lx - 0.22 * t), l0, snap(lx + 0.22 * t), l1, PAL.orange, 1, 0, 10, 0); if (CINE && this.cineL) this.cineL.push([lx, (l0 + l1) / 2, 1.7 * lv.R, 0.6, [1.0, 0.6, 0.25]]);   // (the cinematic fork: it glows)
         for (const f of [0.36, 0.68]) { const ry = snap(l0 + f * (l1 - l0)); box(snap(lx - 0.22 * t), ry, snap(lx + 0.22 * t), ry + P, PAL.black, 1, 0, 10, 0); }
         box(snap(lx - 0.12 * t), l1, snap(lx + 0.12 * t), l1 + 2 * P, PAL.gray, 1, 0, 10, 0);
       }
@@ -4128,6 +4132,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
+  this.toFar = false;
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);   // the ways into a shop or a stash, over the worlds' back layers: nothing covers them (owner)
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
   const vaultSpan = (r) => {   // a vault's cracked floor from cage wall to cage wall: the slot rule (Level.place) cut it back from a wall its cage stands
@@ -4138,6 +4143,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   for (const r of lv.rects) {
     if (r.gone || !seen(r.y0, r.y1)) continue;
+    if (CINE) cineVol(this, lv, r, box, F, cam, H);   // (the cinematic fork: its depth, see cine.js)
     if (r.cage) {   // a vault's cage (the owner's pick, research/variants/tokyo-vault-1-px.png F; Level.place makes it this thin): blue posts, a white roof bar dotted
       // grey under it, and its floor: a plate dotted black, its top edge white, a notch in it where it is cracked (a glint of gold there now and then), rubble in
       // its corners, and three thin bars from it up to the roof, behind the coins
@@ -4469,14 +4475,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
     disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, (g.power('smash') ? 0.22 : 0.15) * R, g.power('smash') ? INK.flame : INK.white, 1);   // orange: the next one rams
   for (let k = 0; k < nDots; k++) { const u = k / Math.max(1, JUMP.dots - 1); disc(dots[2 * k], dots[2 * k + 1], (2.4 - 1.2 * u) * PIX.size, INK.white, 1); }   // the slingshot's arc: solid dots that shrink (tiny see-through ones would dither to crumbs)
+  if (CINE) cineMotes(this, g, lv, cam, H, box, disc, T);
   const nFront = this.nf - front;
   gl.bindVertexArray(null);
   this.upload(gl.ARRAY_BUFFER, this.vbo, this.vtx, this.nv * 10, 'vboCap');
   if (this.idxDirty) { this.upload(gl.ELEMENT_ARRAY_BUFFER, this.ebo, this.idx, this.ni, 'eboCap'); this.idxSig = sig; }
-  this.upload(gl.ARRAY_BUFFER, this.fbo, this.fdata, this.nf * 14, 'fboCap');
+  this.upload(gl.ARRAY_BUFFER, this.fbo, this.fdata, (CINE ? this.cineAppend() : this.nf) * 14, 'fboCap');
   const P = PIX.size, sx = Math.round(shake.x / P) * P, sy = Math.round((shake.y - cam) / P) * P;   // the camera, in whole game pixels
   const [lw, lh] = this.low, grid = (u) => gl.uniform2f(u.uGrid, -sx / P, lh - sy / P);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, CINE ? this.cine.far.fb : this.target.fb);   // (the cinematic fork: the backdrop into what is behind)
   gl.viewport(0, 0, lw, lh);
   gl.clear(gl.STENCIL_BUFFER_BIT);
   gl.disable(gl.BLEND);
@@ -4491,6 +4498,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
+  if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, then the play on nothing)
   this.drawFeat(0, back);
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
@@ -4551,6 +4559,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   gl.bindVertexArray(null);
+  if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb);   // up onto the canvas, pixel for pixel
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
   gl.blitFramebuffer(0, 0, lw, lh, 0, 0, this.canvas.width, this.canvas.height, gl.COLOR_BUFFER_BIT, gl.NEAREST);

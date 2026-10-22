@@ -2863,6 +2863,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
     rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), y0 + j * s, Math.max(u, v), y0 + (j + 1) * s, PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    if (CINE && CINE.bonus === 'E' && a === 1) {   // (the fork's E: its thickness, CINE.THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
+      const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE.THICK * s) / P) * P;
+      if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
+        const bx = x0 + col(sn > 0 ? iL : iR + 1), dx = (sn > 0 ? -d : d) * (c < 0 ? -1 : 1);
+        box(Math.min(bx, bx + dx), y0 + j * s, Math.max(bx, bx + dx), y0 + (j + 1) * s, PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
+    }
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
   // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is

@@ -110,6 +110,13 @@ const WIND = { push: 10, on: 2.2, off: 2.6, warn: 0.9, pole: 3.2 };   // pole: i
 // (measured: flat 0.9 tiles tall, it goes under 1.1; crouched, 1.26, it needs 1.3; the body as it is, 1.6). `head`: the head's width, in tiles
 const MOCHI = { up: 1.4, hold: 0.5, shake: 0.35, slam: 0.08, rest: 0.6, flat: 2.2, slow: 0.5, jump: 0.6, squeeze: 1.4, beam: 0.2, head: 1.8 };
 const MOCHI_P = MOCHI.up + MOCHI.hold + MOCHI.slam + MOCHI.rest;
+function forkSign(lv, p) {   // a campaign fork's sign (see the renderer): under the foot of its middle wall, pointing to the way with the big coins; none without them
+  const t = lv.tile, mid = (lv.l + lv.r) / 2, big = lv.coins.filter((c) => c.v >= 5 && c.y > p.y0 && c.y < p.y1);
+  const wall = lv.rects.find((r) => r.y0 >= p.y0 - 1 && r.y1 <= p.y1 + 1 && r.y1 - r.y0 >= 6 * t && r.x1 - r.x0 <= 3 * t && Math.abs((r.x0 + r.x1) / 2 - mid) < 2 * t);
+  if (!wall || !big.length) return null;
+  const x = (wall.x0 + wall.x1) / 2;
+  return { x, y: wall.y1, d: big.reduce((a, c) => a + c.x, 0) / big.length > x ? 1 : -1 };
+}
 function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): the height of its foot, whether it is on its way down or down, its shake
   const u = (t + (kn.ph || 0)) % MOCHI_P, a = MOCHI.up, b = a + MOCHI.hold, c = b + MOCHI.slam;
   if (u < a) { const e = u / a; return { y: kn.yHit + (kn.yUp - kn.yHit) * e * e * (3 - 2 * e), down: false, shake: 0 }; }
@@ -781,7 +788,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
-    motif: ['ride', 'ride2'], sparse: true, wind: 0.5, set: 'mochi', intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+    motif: ['ride', 'ride2'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['bubble'], seed: 4102 },
@@ -1950,7 +1957,7 @@ class Level {
     if (this.ringAt != null && this.top - h < this.ringAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addRing(this.top - h, this.top);
     if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addSpot(this.top - h, this.top);
     if (this.runeAt.length && this.top - h < this.runeAt[0].y && c !== CHUNKS.pocket) this.addRune(this.top - h, this.top);
-    if (this.rc && this.rc.wind && c.kind !== 'moving' && c.kind !== 'set' && id !== 'rest' && c !== CHUNKS.pocket && this.windRng() < this.rc.wind) {   // a gusty one (WIND)
+    if (this.rc && this.rc.wind && c.kind !== 'moving' && c.kind !== 'set' && c.kind !== 'fork' && id !== 'rest' && c !== CHUNKS.pocket && this.windRng() < this.rc.wind) {   // a gusty one (WIND; not a fork: its risky way is risk enough)
       // its koinobori's pole: off the wall it blows from, on the widest way across, as low as its carp, hanging or flying, is clear of the chunk's ledges
       const dir = this.windRng() < 0.5 ? -1 : 1, t = this.tile, rs = this.rects.slice(lens[0]).filter((q) => !q.move);
       const clear = (x0, x1, y0, y1) => !rs.some((q) => q.x1 > Math.min(x0, x1) && q.x0 < Math.max(x0, x1) && q.y1 > y0 && q.y0 < y1);
@@ -4270,6 +4277,17 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(snap(sx - 0.32 * t), snap(sy - 0.3 * t), snap(sx + 0.32 * t), snap(sy + 0.3 * t), PAL.gray, 1, 0, 10, 0); disc(kn.px, py, 0.14 * t, PAL.gray, 1);
     box(snap(ex - hw), snap(ey), snap(ex + hw), snap(yb), th.plank, 1, 0, 10, 1); box(snap(ex - hw), snap(ey + 0.35 * hh), snap(ex + hw), snap(ey + 0.35 * hh) + 2 * kitP, PAL.gray, 1, 0, 10, 0);
     box(snap(ex - hw), snap(yb) - kitP, snap(ex + hw), snap(yb), th.plank, 1, 0, 10, 4);
+  }
+  if (lv.rc) for (const p of lv.placed) if (CHUNKS[p.id].kind === 'fork' && seen(p.y0, p.y1)) {   // a fork's sign (owner: «Вторая дорога… развилки уже есть, их надо сделать
+    // заметнее»): a board on two cords under its middle wall, an arrow to the risky way, on it a big coin and a spike (yellow: to take; red: danger)
+    if (p.sign === undefined) p.sign = forkSign(lv, p);
+    const sg = p.sign; if (!sg) continue;
+    const t = lv.tile, d = sg.d, bw = 0.85 * t, bh = 0.36 * t, cx = sg.x, cy = sg.y + 0.8 * t;
+    for (const e of [-1, 1]) box(snap(cx + e * 0.55 * t), snap(sg.y), snap(cx + e * 0.55 * t) + kitP, snap(cy - bh), PAL.gray, 1, 0, 10, 0);
+    box(snap(cx - bw), snap(cy - bh), snap(cx + bw), snap(cy + bh), th.plank, 1, 0, 10, 0);
+    F(cx + d * (bw + 0.24 * t), cy, 0, 1.4 * bh, -d * 0.24 * t, 0, th.plank, 1, 6, 1.4 * bh, 0.24 * t, 2.8 * bh);
+    disc(cx - d * 0.32 * t, cy, 0.24 * t, INK.coin, 1); disc(cx - d * 0.32 * t - 0.07 * t, cy - 0.08 * t, 0.07 * t, PAL.white, 1);
+    F(cx + d * 0.34 * t, cy + 0.02 * t, 0.2 * t, 0, 0, 0.2 * t, INK.spike, 1, 6, 0.2 * t, 0.2 * t, 0.4 * t);
   }
   for (const w of lv.winds) if (seen(w.y0, w.y1)) {   // a gust's way (WIND): its koinobori; sakura petals drifting its way before it, flying through it, tumbling, white streaks with them
     const u = (T + w.ph) % (WIND.on + WIND.off), s = u - (WIND.off - WIND.warn), d0 = w.dir, sc = lv.tile;   // (the kit's carp's size)

@@ -43,6 +43,10 @@ const CROUCH = { squeeze: 1, height: 2 };
 // as fast as `min` of a jump or more goes up to `1 + k` times as high (a fall from a jump's top: 1.5), the faster the fall the higher; `hint`: hard
 // landings without one before the hint says how
 const REBOUND = { min: 0.6, after: 0.08, k: 0.5, hint: 3 };
+// The hero's face as a cue (owner, 2026-10-22: «лицо героя как подсказка»), out of what Gum's face has (its look, frown, wide eyes, surprise): it looks at
+// the nearest danger within `near` R (spikes, an enemy, a blob, the fire's top) and frowns, eyes wide inside `scare` R; a chain paid, `joy` s of
+// wide eyes looking up; after a fall, `dizzy` s of its eyes going round, frowning
+const FACE = { near: 4, scare: 2, joy: 1.2, dizzy: 1.2 };
 // Thicknesses in R; a shaft is made `ahead` views above the camera and dropped `behind`
 // views below it; `room` (R) is the least space under a solid ledge over another one;
 // `toPlank` of the plain one-tile ledges are laid as planks, to jump up through.

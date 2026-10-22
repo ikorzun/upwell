@@ -688,7 +688,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -807,7 +807,7 @@ class Game {
     const reb = !inAir && !aimed && !sup && side === 0 && !ram && this.landT <= REBOUND.after && this.landV >= REBOUND.min * v, q = reb ? clamp(this.landV / v, 0, 1) : 0;   // in the beat of a hard landing
     let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : reb ? Math.sqrt(1 + REBOUND.k * q) : 1), rise = !aimed && !sup;
     this.rebounded = reb;
-    if (reb) { this.landUsed = true; this.missed = 0; if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
+    if (reb) { this.landUsed = true; this.missed = 0; H.face.surprise = Math.max(H.face.surprise, 0.7); if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
@@ -1471,7 +1471,7 @@ class Game {
     const lv = this.lv, sp = this.safeSpot();
     this.combo = 0; ui.comboEnd(); this.rising = false;
     this.placeHero(sp.x, sp.y); this.regroup();
-    this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1; this.fallV = 0; this.landT = Infinity; this.landUsed = true;
+    this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1; this.fallV = 0; this.landT = Infinity; this.landUsed = true; this.dizzyT = FACE.dizzy;   // (its face: dizzy, FACE)
     lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
     if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; }
     this.idleT = 0;
@@ -1589,6 +1589,7 @@ class Game {
     let rw = null;
     for (const c of COMBO) if (n >= c.at - s) rw = c;
     if (!rw) return;
+    this.joyT = FACE.joy;   // (its face: glad, FACE)
     const pay = rw.coins * ((this.bonus && this.bonus.comboMul) || 1), H = this.hero;
     this.drop(H.cx, H.minY, pay / 5, 5);   // out of the hero as big coins that fly back in: the reward seen (every reward is a multiple of 5)
     sparkFx(H.cx, H.minY, Math.min(36, 6 + 3 * n), -Math.PI / 2, 0.9, [250, 650], [1.5, 3.5], [0.4, 0.8], [INK.coin, INK.coinD, INK.white], 1); shake.add(rw.hp ? 6 : 3);
@@ -1606,6 +1607,15 @@ class Game {
     const how = coarse ? (save.stick ? 'S' : 'T') : 'K';   // the words for the controls in use
     if (H.stuck && (glueSide(H) === 1 || glueSide(H) === 2)) this.hint('wall', 'seen_wall' + how);   // stuck to a wall the first time: how to let go
     if (how !== 'T' && (m & 8) && this.idleT > 4 && !this.learning()) this.hint('crouch', 'seen_crouch' + how);   // standing about: there is a high jump (no down on the touch keys)
+  }
+  danger() {   // the nearest danger within FACE.near R of the hero, for its face to look at: spikes, an enemy, a blob, the fire's top
+    const H = this.hero, lv = this.lv, lim = FACE.near * this.R; let best = null, bd = lim;
+    const see = (x, y) => { const q = Math.hypot(x - H.cx, y - H.cy); if (q < bd) { bd = q; best = { x, y, d: q }; } };
+    for (const e of lv.enemies) if (Math.abs(e.body.cy - H.cy) < lim) see(e.body.cx, e.body.cy);
+    for (const q of lv.shots) if (Math.abs(q.y - H.cy) < lim) see(q.x, q.y);
+    for (const q of lv.spikes) if (q.y1 > H.cy - lim && q.y0 < H.cy + lim) see(clamp(H.cx, q.x0, q.x1), (q.y0 + q.y1) / 2);
+    if (lv.fire && lv.fire.y - H.maxY < lim) see(H.cx, lv.fire.y);
+    return best;
   }
   hint(kind, key = 'seen_' + kind, icon) { const now = performance.now(); if (save.seen[kind] || this.stateT < 3 || now < (this.hintAt || 0)) return; save.seen[kind] = 1; persist(); ui.toast(t(key), 2400, icon); this.hintAt = now + 2600; }   // not over the level's banner, nor over another hint (that one waits its turn)
   spring(r) {
@@ -1952,8 +1962,13 @@ class Game {
     }
     lv.ensure(lv.cam - view.h * LEVEL.ahead);
     if ((this.pruneT += dt) > 0.5) { this.pruneT = 0; if (lv.kind === 'well' && !lv.under) lv.prune(lv.cam + view.h * (1 + LEVEL.behind)); }
-    const d = input.dir;   // the hero looks where it runs
-    if (d && this.state === 'play') { this.heroLook.x = b.cx + d * 240; this.heroLook.y = b.cy - 40; this.heroLook.t = now; }
+    const d = input.dir, look = (x, y) => { this.heroLook.x = x; this.heroLook.y = y; this.heroLook.t = now; };   // the hero looks where it runs, or (FACE) round
+    const dz = this.state === 'play' && !this.dizzyT && !this.joyT ? this.danger() : null;   // dizzy after a fall, glad after a chain, wary of what is near
+    if (this.dizzyT > 0) { this.dizzyT = Math.max(0, this.dizzyT - dt); const a = (now / 1000) * 9; look(b.cx + Math.cos(a) * 200, b.cy + Math.sin(a) * 200); }
+    else if (this.joyT > 0) { this.joyT = Math.max(0, this.joyT - dt); b.face.wide = Math.max(b.face.wide, 0.8); look(b.cx, b.cy - 300); }
+    else if (dz) { look(dz.x, dz.y); if (dz.d < FACE.scare * this.R) b.face.wide = Math.max(b.face.wide, 0.6); }
+    else if (d && this.state === 'play') look(b.cx + d * 240, b.cy - 40);
+    b.face.frown = this.dizzyT > 0 || !!dz;
     b.face.update(dt, b, this.heroLook, now);
     this.look.x = b.cx; this.look.y = b.cy; this.look.t = now;
     for (const e of lv.enemies) e.body.face.update(dt, e.body, this.look, now);

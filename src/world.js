@@ -236,11 +236,13 @@ const kitThing = (lv, r) => {
   } else if (th.mines) {   // the Mine's by a hash of its height: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore
     // in the wall behind it, a cart on its rails, the miners' tools, a winch
     const k = Math.floor(((Math.imul(Math.round(b / t) + 3, 0x9e3779b1) >>> 0) / 4294967296) * 6);
+    const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5;   // the props but the lamps (a task) on half their ledges: about four in six with
+    // a thing on them, as the Village (the rule book's detail: «Сократить до 4 из 6»)
     if ((k === 0 || k === 3) && steady(1.8) && room(0, 1.6, 2.6)) out = { kind: 'lamp', x: X(0.5), y: b - 2.0 * t };
-    else if (k === 1 && steady(2.6) && room(0, 2.6, 2.0)) out = { kind: 'cart' };
-    else if (k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
-    else if (k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
-    else if (k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
+    else if (half && k === 1 && steady(2.6) && room(0, 2.6, 2.0)) out = { kind: 'cart' };
+    else if (half && k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
+    else if (half && k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
+    else if (half && k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
   } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
     const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
     if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse', x: X(2.3), y: b - 3.5 * t };   // (its lamp's place: the task's, see its drawing)
@@ -2938,7 +2940,7 @@ Renderer.prototype.makeTarget = function () {
 Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
-  this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0;
+  this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.nSm = 0; this.route = 0;   // (nFar, nSt, nSm, route: the cinematic fork's 2.5D, see cine.js)
   const lv = g.lv, th = lv.theme, W = this.w, H = this.h, cam = lv.cam, top = cam - 80, bot = cam + H + 80, R = lv.R, T = lv.t;
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
@@ -2953,6 +2955,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
     rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), y0 + j * s, Math.max(u, v), y0 + (j + 1) * s, PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
+      const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s) / P) * P;
+      if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
+        const bx = x0 + col(sn > 0 ? iL : iR + 1), dx = (sn > 0 ? -d : d) * (c < 0 ? -1 : 1);
+        box(Math.min(bx, bx + dx), y0 + j * s, Math.max(bx, bx + dx), y0 + (j + 1) * s, PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
+    }
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
   // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is
@@ -3205,7 +3213,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
     bx(0.25, 0, 2.25, dh + 0.45, G, 1); bx(0.5, 0, 2.0, dh, INK.dark);   // its wooden front, the doorway dim inside
     for (const u of [0.3, 2.0]) bx(u, 0, u + 0.2, dh + 0.4, G, 3); bx(0.25, dh + 0.3, 2.25, dh + 0.45, G); bx(0.25, dh + 0.3, 2.25, dh + 0.3 + px, K);   // its posts, its lintel
-    bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 1, 3);   // its flat roof
+    bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 3, 1);   // its flat roof (grey, its grain dotted: it was white, an alpha of 3, and read as a ledge's edge)
     bx(0.5, dh - 0.6, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.6, u + px, dh, K);   // its noren, in strips,
     F(dx, Y(dh - 0.3), 0.17 * t, 0, 0, 0.17 * t, PAL.white, 1, 4); bx(1.25 - px, dh - 0.45, 1.25 + px, dh - 0.15, PAL.white); bx(1.1, dh - 0.31, 1.4, dh - 0.29, PAL.white);   // a mark on it
     bx(2.3, 0.9, 2.75, 1.4, PAL.orange); bx(2.3, 1.15, 2.75, 1.15 + px, K); bx(2.52 - px / 2, 0.9, 2.52 + px / 2, 1.4, K); vlamps.push([X(2.52), Y(1.15), 0.4, 1.2]);   // a window lit (a light)
@@ -3215,8 +3223,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const mnStash = (d) => {
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
-    for (let i = 0; i < 9; i++) { const q = i / 8, u = q < 0.3 ? 0.32 : q > 0.7 ? 2.18 : 0.32 + ((q - 0.3) / 0.4) * 1.86, v = q < 0.3 ? (q / 0.3) * dh : q > 0.7 ? ((1 - q) / 0.3) * dh : dh; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1.5, 1); }   // its frame of stones
-    bx(0.5, 0, 2.0, dh, G, 1.5, 3); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber, iron bands
+    for (let i = 0; i < 9; i++) { const q = i / 8, u = q < 0.3 ? 0.32 : q > 0.7 ? 2.18 : 0.32 + ((q - 0.3) / 0.4) * 1.86, v = q < 0.3 ? (q / 0.3) * dh : q > 0.7 ? ((1 - q) / 0.3) * dh : dh; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1, 1.5); }   // its frame of stones (half dark)
+    bx(0.5, 0, 2.0, dh, G, 3, 1.5); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber (half dark: it was pure white), iron bands
     for (const [u, v] of [[0.62, 0.3], [1.88, 0.3], [0.62, 1.6], [1.88, 1.6]]) bx(u, v, u + px, v + px, PAL.white);   // its studs
     for (const [u0, v0, u1, v1] of [[0.8, 1.6, 0.95, 1.1], [0.95, 1.1, 0.85, 0.7], [1.6, 1.9, 1.5, 1.35], [1.5, 1.35, 1.65, 0.9], [1.2, 0.5, 1.3, 0.1]]) ln(u0, v0, u1, v1, c, 1);   // its cracks, glowing purple
     bx(1.1, 0.8, 1.4, 1.15, G); bx(1.22, 0.86, 1.28, 1.05, K);   // its lock, its keyhole
@@ -3248,6 +3256,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }
+  if (CINE) { this.route = 1; cineBack(this, lv, cam, H, box, F, T); }   // (the cinematic fork: from here what the kits draw DIM goes behind, the rest is a small thing in depth; see cine.js)
   const kitT = lv.tile, kitP = PIX.size, snap = (v) => Math.round(v / kitP) * kitP;
   const brace = (wx, d, y0, h, s, c) => {   // a knee brace off the wall at wx out toward d, from y0 down h, a pixel clear of the wall: a leg down
     // the wall, a bar along its top and a strut s wide between their ends (Tokyo's slabs, its air conditioners)
@@ -3303,6 +3312,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         if (mod(k, 3) === (side < 0 ? 0 : 1)) { const [c0, c1] = span(0.05 * t, 0.7 * t); box(c0, y + 0.5 * t, c1, y + 1.5 * t, PAL.gray, DIM, 0, 10, 0); box(c0, y + 0.9 * t, c1, y + 0.9 * t + P, PAL.black, 1, 0, 10, 0); }   // a transformer can
       }
     }
+    const tfN = this.route; if (CINE) this.route = 0;   // (the cinematic fork: a sign is flat, whole, its tubes off or lit)
     for (let k = Math.floor(top / (11 * t)) - 1; k * 11 * t < bot; k++) if (mod(k, 3) !== 2) {   // a neon sign on two arms off a wall, two in every three beats, the walls and the words in turn
       // (the owner's pick, research/variants/tokyo-neon-1.png B): tubes, its word and a picture of what is sold, framed on a dark box with grey caps
       // over and under it; its tubes off and faint (behind, DEPTH) till the hero jumps close past it, then lit red or blue in full, glowing, and so
@@ -3319,6 +3329,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       word.forEach((ch, j) => icon('kana_' + ch, cx, y0 + 3 * P + (j + 0.5) * gw, ia, kk, ink));
       icon(pic, cx, y1 - 3 * P - 0.45 * gw, ia, kk, ink);
     }
+    this.route = tfN;
+    if (CINE) this.route = 4;   // (the cinematic fork: a vending machine, a bonsai: small things in depth, whole)
     for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges (the owner's pick, research/variants/tokyo-vending-1.png
       // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is
       // for what you take), the slot under the front
@@ -3343,29 +3355,33 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
         || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'))) continue;
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
+      const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
       if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
       for (const [hw, a0, a1] of [[0.5, 0, 0.07], [0.45, 0.07, 0.17], [0.38, 0.17, 0.25]]) box(snap(cx - hw * t), snap(by + a0 * t), snap(cx + hw * t), snap(by + a1 * t), PAL.gray, 1, 0, 10, 0);
       for (const f of [-0.27, 0.27]) box(snap(cx + f * t) - P, snap(by + 0.25 * t), snap(cx + f * t) + P, r.y0, PAL.gray, 1, 0, 10, 0);
-      const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03), Y(0.95 * q)];
+      const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03) + SB(0.95 * q), Y(0.95 * q)];
       for (let q = 0; q <= 1; q += P / (0.95 * t)) { const [x, y] = trunk(q); disc(x, y, (0.1 - 0.055 * q) * t, PAL.orange, 1); }
-      for (const [q, u, v] of [[0.32, 0.55, 0.52], [0.55, -0.55, 0.5], [0.8, 0.5, 0.92], [0.7, -0.5, 0.86]]) { const [x0, y0] = trunk(q); for (let e = 0; e <= 1; e += 0.12) disc(x0 + (X(u) - x0) * e, y0 + (Y(v) - y0) * e, 0.035 * t, PAL.orange, 1); }
+      for (const [q, u, v] of [[0.32, 0.55, 0.52], [0.55, -0.55, 0.5], [0.8, 0.5, 0.92], [0.7, -0.5, 0.86]]) { const [x0, y0] = trunk(q); for (let e = 0; e <= 1; e += 0.12) disc(x0 + (X(u) + SB(v) - x0) * e, y0 + (Y(v) - y0) * e, 0.035 * t, PAL.orange, 1); }
       for (const [u, v, rx, ry] of [[-0.05, 1.12, 0.32, 0.14], [-0.5, 0.86, 0.28, 0.12], [0.5, 0.92, 0.3, 0.12], [0.55, 0.52, 0.28, 0.11], [-0.55, 0.5, 0.24, 0.1]]) {
-        F(X(u), Y(v), rx * t, 0, 0, ry * t, PAL.green, 1, 9, 0); F(X(u) - d * 0.08 * t, Y(v) - 0.08 * t, 0.6 * rx * t, 0, 0, 0.6 * ry * t, PAL.green, 1, 9, 0);   // a pad, a tuft on it
+        F(X(u) + SB(v), Y(v), rx * t, 0, 0, ry * t, PAL.green, 1, 9, 0); F(X(u) + SB(v) - d * 0.08 * t, Y(v) - 0.08 * t, 0.6 * rx * t, 0, 0, 0.6 * ry * t, PAL.green, 1, 9, 0);   // a pad, a tuft on it
       }
     }
+    if (CINE) this.route = 1;
   }
   const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon
   // The Mine's shared pieces (the owner's picks, 2026-10-21, research/variants/mine-*-game.png): its lamp, a kantera hung at (x, y), a dome on a caged body (A; lit:
   // a glow round it, a light of the dark; the wall ones the hero lights, a task), its ore glinting in the wall over a ledge (C), its things on ledges, its bats, the
   // mine far off
-  const mnLamp = (x, y, lit, s = 1, arm = 0) => {   // arm: the side its wall is on (its bracket from there), 0 off a hook
-    const t = kitT, G = PAL.gray, K = PAL.black, O = PAL.orange, U = (u) => snap(x + u * s * t), V = (v) => snap(y + v * s * t);
+  const mnLamp = (x, y, lit, s = 1, arm = 0, t0 = null) => {   // arm: the side its wall is on (its bracket from there), 0 off a hook; t0: when the hero lit it
+    const t = kitT, G = PAL.gray, K = PAL.black, O = PAL.orange, V = (v) => snap(y + v * s * t), e = CINE && !POKE.still && t0 != null ? T - t0 : 9;
+    const sw = e < 1.6 ? snap(Math.sin(e * 13) * 0.12 * t * (1 - e / 1.6)) : 0, U = (u) => snap(x + u * s * t) + (u === 0 || Math.abs(u) > 0.25 ? 0 : sw);   // (the cinematic fork:
+    // lit, it swings on its hook a moment, its body the most; the rule book's «лампа качается, когда её зажигают»)
     const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(V(v0), V(v1)), Math.max(U(u0), U(u1)), Math.max(V(v0), V(v1)), c, a, 0, 10, tn);
     const gl = lit ? O : K, cy = V(0.6);
     if (arm) { bx(-arm * 0.55, -0.16, -arm * 0.47, 0.16, G); bx(-arm * 0.55, -0.05, 0.02 * arm, 0.03, G); }   // its bracket off the wall
-    bx(-0.03, 0.03, 0.03, 0.22, G);   // its hook and link
-    if (lit) { F(U(0), cy, 0.8 * s * t, 0, 0, 0.8 * s * t, O, 0.3 + 0.06 * Math.sin(T * 5 + x * 0.1), 1); vlamps.push([U(0), cy, 0.6 * s, 1.8 * s]); }   // its glow, breathing (a light)
-    F(U(0), V(0.3), 0.17 * s * t, 0, 0, 0.1 * s * t, G, 1, 0); bx(-0.2, 0.28, 0.2, 0.36, G); bx(-0.22, 0.36, 0.22, 0.88, G, 1, 4); bx(-0.14, 0.42, 0.14, 0.82, gl); bx(-0.2, 0.88, 0.2, 0.96, G);   // its dome, its caged body, its glass
+    box(snap(x - 0.03 * s * t), V(0.03), snap(x + 0.03 * s * t), V(0.22), G, 1, 0, 10, 0);   // its hook and link (what it swings from)
+    if (lit) { F(U(0) + sw, cy, 0.8 * s * t, 0, 0, 0.8 * s * t, O, 0.3 + 0.06 * Math.sin(T * 5 + x * 0.1), 1); vlamps.push([U(0) + sw, cy, 0.6 * s, 1.8 * s]); }   // its glow, breathing (a light)
+    F(U(0) + sw, V(0.3), 0.17 * s * t, 0, 0, 0.1 * s * t, G, 1, 0); bx(-0.2, 0.28, 0.2, 0.36, G); bx(-0.22, 0.36, 0.22, 0.88, G, 1, 4); bx(-0.14, 0.42, 0.14, 0.82, gl); bx(-0.2, 0.88, 0.2, 0.96, G);   // its dome, its caged body, its glass
     for (const v of [0.55, 0.69]) bx(-0.14, v, 0.14, v + 0.03, G);   // the bars across it
     if (lit) bx(-0.04, 0.54, 0.04, 0.68, PAL.yellow);   // its flame
   };
@@ -3385,6 +3401,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   const mnBats = (r) => {   // four bats hanging asleep under a ledge, folded in their wings, one with an eye open (a tiny light), clear of a brace under it
     const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, n = 4, wl = r.x0 <= lv.l + 1, x0 = wl ? r.x0 + 1.95 * t : r.x1 - 1.95 * t - (n - 1) * 0.55 * t;
+    if (CINE) {   // (the cinematic fork: come near, they wake and fly off one after another; back later; the rule book's «летучие мыши просыпаются и разлетаются»)
+      const B = r.batsP || (r.batsP = {}), at = [];
+      for (let i = 0; i < n; i++) at.push([snap(x0 + i * 0.55 * t), snap(r.y1 + 0.75 * t)]);
+      cinePoke(g, lv, B, 'bats', x0 - 0.3 * t, r.y1, x0 + (n - 1) * 0.55 * t + 0.3 * t, r.y1 + 0.8 * t, at);
+      if (!cinePerched(B, lv.t)) return;
+    }
     for (let i = 0; i < n; i++) {
       const x = snap(x0 + i * 0.55 * t), y = snap(r.y1 + (0.12 + 0.03 * Math.sin(T * 1.6 + i)) * t), hw = 0.17 * t, hh = 0.3 * t, ey = snap(y + hh * 1.25);
       box(x - P, r.y1, x + P, y, G, 1, 0, 10, 0);   // its feet hooked on
@@ -3394,26 +3416,32 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x + snap(0.04 * t), ey, x + snap(0.1 * t), ey + P, G, 1, 0, 10, 0);   // eyes shut
     }
   };
-  const mnThing = (kind, wx, b, d) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
-    const t = kitT, P = kitP, px = P / t, G = PAL.gray, K = PAL.black, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
+  const mnThing = (kind, wx, b, d, r) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
+    const rt = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork: thin parts flat, the bodies small, what is under the ledge behind)
+    const roll = kind === 'cart' && CINE && r ? cinePoke(g, lv, r, 'cart', Math.min(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b - 1.1 * kitT, Math.max(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b) : 0;
+    const t = kitT, P = kitP, px = P / t, G = PAL.gray, K = PAL.black, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t), R = (u) => X(u) + snap(roll * 3 * t);   // (a cart rocked: its body)
     const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const ln = (u0, v0, u1, v1, c = G, wd = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wd);
     if (kind === 'cart') {   // a little mine cart (torokko) parked on its rails, slatted, heaped with ore glinting; a stop block
-      bx(0.3, 0, 2.7, 0.06, G); for (let u = 0.35; u < 2.65; u += 0.4) bx(u, 0, u + 0.18, 0.1, G, 1.5); bx(2.55, 0, 2.7, 0.5, G);   // its rails, sleepers, a stop block
-      bx(0.5, 0.35, 2.3, 1.05, G, 1, 3); bx(0.45, 1.0, 2.35, 1.08, G); for (let u = 0.75; u < 2.2; u += 0.3) bx(u, 0.4, u + px, 1.0, K);   // its body, its rim, its slats
-      for (const u of [0.85, 1.95]) { F(X(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, K, 1, 0); F(X(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, G, 1, 4); disc(X(u), Y(0.22), 0.05 * t, G, 1); }   // its wheels
-      F(X(1.4), Y(1.08), 0.85 * t, 0, 0, 0.3 * t, G, 1.6, 0); for (const [u, v] of [[0.9, 1.2], [1.3, 1.3], [1.75, 1.22]]) bx(u, v, u + 2 * px, v + px, PAL.white, Math.sin(T * 2 + u * 3) > 0.2 ? 1 : DIM);   // its ore, glinting
+      L(0); bx(0.3, 0, 2.7, 0.06, G); for (let u = 0.35; u < 2.65; u += 0.4) bx(u, 0, u + 0.18, 0.1, G, 1.5); bx(2.55, 0, 2.7, 0.5, G);   // its rails, sleepers, a stop block
+      const rb = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(R(u0), R(u1)), Math.min(Y(v0), Y(v1)), Math.max(R(u0), R(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+      L(rt); rb(0.5, 0.35, 2.3, 1.05, G, 1, 3); rb(0.45, 1.0, 2.35, 1.08, G); for (let u = 0.75; u < 2.2; u += 0.3) rb(u, 0.4, u + px, 1.0, K);   // its body, its rim, its slats
+      for (const u of [0.85, 1.95]) { F(R(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, K, 1, 0); F(R(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, G, 1, 4); disc(R(u), Y(0.22), 0.05 * t, G, 1); }   // its wheels
+      F(R(1.4), Y(1.08), 0.85 * t, 0, 0, 0.3 * t, G, 1.6, 0); L(0); for (const [u, v] of [[0.9, 1.2], [1.3, 1.3], [1.75, 1.22]]) rb(u, v, u + 2 * px, v + px, G, Math.sin(T * 2 + u * 3) > 0.2 ? 1 : DIM);   // its ore, glinting
+      // (grey: no white on a prop, the rule book; flat in 2.5D, too small for depth, and one layer whether it glints or not)
     } else if (kind === 'tools') {   // the miners' tools by the wall: two pickaxes and a shovel leaning, a straw basket (zaru), a straw raincoat (mino) on a peg
       const pick = (u, lean) => { ln(u, 0, u + lean, 1.2, G, 2); ln(u + lean - 0.32, 1.08, u + lean - 0.08, 1.26, G, 2); ln(u + lean - 0.08, 1.26, u + lean + 0.12, 1.26, G, 3); ln(u + lean + 0.12, 1.26, u + lean + 0.36, 1.06, G, 2); };
-      pick(0.15, 0.3); pick(0.45, 0.22); ln(0.8, 0.35, 1.1, 1.35, G, 2); bx(0.68, 0, 0.9, 0.38, G);   // its pickaxes, its shovel
-      bx(1.05, 0, 1.65, 0.42, G, 1, 4); bx(1.01, 0.42, 1.69, 0.48, G);   // its basket
+      L(0); pick(0.15, 0.3); pick(0.45, 0.22); ln(0.8, 0.35, 1.1, 1.35, G, 2); bx(0.68, 0, 0.9, 0.38, G);   // its pickaxes, its shovel
+      L(rt); bx(1.05, 0, 1.65, 0.42, G, 1, 4); bx(1.01, 0.42, 1.69, 0.48, G); L(0);   // its basket
       bx(1.92, 1.9, 1.98, 2.02, G); for (let i = 0; i < 7; i++) ln(1.95, 1.9, 1.6 + i * 0.12, 0.9 - (i % 2) * 0.08, G, 1); bx(1.55, 0.82, 2.37, 0.9, G, DIM);   // its raincoat on its peg
     } else if (kind === 'winch') {   // a headframe over a pit: its posts and cap, its wheel, its rope down past the ledge to a bucket; a ladder, a small cart
-      bx(0.9, 0, 1.05, 3.2, G, 1, 3); bx(2.1, 0, 2.25, 3.2, G, 1, 3); bx(0.9, 3.1, 2.25, 3.25, G, 1, 3); F(X(1.6), Y(2.85), 0.24 * t, 0, 0, 0.24 * t, G, 1, 4);
-      ln(1.6, 2.6, 1.6, -1.7); bx(1.38, -2.12, 1.82, -1.7, G, 1, 4); bx(1.35, -1.78, 1.85, -1.7, G); ln(1.4, -1.7, 1.6, -1.52); ln(1.6, -1.52, 1.8, -1.7);   // its rope, its bucket
-      ln(2.35, 0, 2.6, 2.6, G, 2); ln(2.75, 0, 3.0, 2.6, G, 2); for (let q = 0.12; q < 1; q += 0.16) ln(2.35 + 0.25 * q, 2.6 * q, 2.75 + 0.25 * q, 2.6 * q, G, 1);   // a ladder
-      bx(0.1, 0.25, 0.75, 0.6, G, 1, 3); disc(X(0.25), Y(0.15), 0.1 * t, K, 1); disc(X(0.6), Y(0.15), 0.1 * t, K, 1);   // a small cart
+      L(0); bx(0.9, 0, 1.05, 3.2, G, 1, 3); bx(2.1, 0, 2.25, 3.2, G, 1, 3); bx(0.9, 3.1, 2.25, 3.25, G, 1, 3); F(X(1.6), Y(2.85), 0.24 * t, 0, 0, 0.24 * t, G, 1, 4);
+      L(3); ln(1.6, 2.6, 1.6, -1.7); bx(1.38, -2.12, 1.82, -1.7, G, 1, 4); bx(1.35, -1.78, 1.85, -1.7, G); ln(1.4, -1.7, 1.6, -1.52); ln(1.6, -1.52, 1.8, -1.7);   // its rope, its bucket (behind
+      // its ledge in 2.5D, as in 2D)
+      L(0); ln(2.35, 0, 2.6, 2.6, G, 2); ln(2.75, 0, 3.0, 2.6, G, 2); for (let q = 0.12; q < 1; q += 0.16) ln(2.35 + 0.25 * q, 2.6 * q, 2.75 + 0.25 * q, 2.6 * q, G, 1);   // a ladder
+      L(rt); bx(0.1, 0.25, 0.75, 0.6, G, 1, 3); disc(X(0.25), Y(0.15), 0.1 * t, K, 1); disc(X(0.6), Y(0.15), 0.1 * t, K, 1);   // a small cart
     }
+    this.route = rt;
   };
   const mnFar = () => {   // the mine far off: a tunnel going off into the dark, its frames smaller and smaller, rails running in, lamps glowing deep in it, a lamp on a post;
     // screen-fixed, low, at a quarter (DIM), the lamps lights (they show the frames round them)
@@ -3428,16 +3456,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   if (th.mines && lv.kind === 'well') {   // the Mine's things on its ledges (kitThing): the lamps on the wall (lit for good once the hero comes: lv.tended), the ore,
     // a cart, the tools, a winch; bats under some ledges; the mine far off
+    const rt0 = this.route;   // (the cinematic fork, the rule book: a lamp small, the ore behind, the props small with their thin parts flat, the bats flat, the mine far
+    // off behind, whatever its tones)
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 3.6 * kitT, r.y0 + kitT) && kitThing(lv, r);
       if (!p) continue;
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1;
-      if (p.kind === 'lamp') mnLamp(snap(p.x), snap(p.y), lv.tended.has(r), 1, d);
-      else if (p.kind === 'ore') mnOre(wl ? lv.l : lv.r, r.y0, d, Math.round(r.y0 / kitT));
-      else mnThing(p.kind, wl ? lv.l : lv.r, r.y0, d);
+      if (p.kind === 'lamp') { if (CINE) this.route = 4; mnLamp(snap(p.x), snap(p.y), lv.tended.has(r), 1, d, lv.tended.has(r) ? lv.tended.get(r) : null); }
+      else if (p.kind === 'ore') { if (CINE) this.route = 3; mnOre(wl ? lv.l : lv.r, r.y0, d, Math.round(r.y0 / kitT)); }
+      else { if (CINE) this.route = 4; mnThing(p.kind, wl ? lv.l : lv.r, r.y0, d, r); }
     }
+    if (CINE) this.route = 0;
     for (const r of lv.rects) if (!r.gone && seen(r.y1 - kitT, r.y1 + 2 * kitT) && mnBatsAt(r)) mnBats(r);   // bats asleep under some ledges
+    if (CINE) this.route = 3;
     mnFar();
+    this.route = rt0;
   }
   if (th.fuji && lv.kind === 'well') {   // Mount Fuji's kit (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png): each its size on the sheets (owner:
     // "twice as big: their size from the mockup"), and only where nothing laid stands in front of it. Far off, behind the shaft at a quarter (DIM, the owner's depth
@@ -3736,13 +3769,17 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);   // which, and where (kitThing)
       if (!p) continue;
+      if (CINE) this.route = 4;   // (the cinematic fork: a sakura, a scarecrow, a lantern, a koinobori: small things in depth, whole)
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
-      const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
-      const el = (u, v, ru, rv, c) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, 1, 0), ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0), Y(v0), X(u1), Y(v1), c, 1, wp, tn);
+      const pk = CINE && { sakura: [0.4, 4.2, 4.6], scarecrow: [0.2, 2.9, 3.8], koinobori: [0.7, 4.4, 5.3] }[p.kind], sw = pk ? cinePoke(g, lv, r, p.kind, Math.min(X(pk[0]), X(pk[1])), Y(pk[2]), Math.max(X(pk[0]), X(pk[1])), b, p.kind === 'scarecrow' ? [X(2.75), Y(2.55)] : null) : 0;
+      const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its top the most; see cinePoke)
+      const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => { const q = SW((v0 + v1) / 2); box(Math.min(X(u0), X(u1)) + q, Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)) + q, Y(Math.min(v0, v1)), c, a, 0, 10, tn); };   // by tiles out from the wall and up from the ledge
+      const el = (u, v, ru, rv, c) => { const xu = X(u) + SW(v); if (CINE && CINE.on('vol')) { F(xu + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(xu - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(xu - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(xu, Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume, swaying)
       if (p.kind === 'sakura') {   // a sakura in full bloom (C): its gnarled trunk grey (C's dark grey), its branches, clouds of blossom, petals falling
         const bark = 1.5;   // a grey half the way from the black: C's trunk was dark
         bx(0.95, 0, 1.55, 0.22, PAL.gray, 0, bark); bx(1.05, 0.22, 1.45, 1.1, PAL.gray, 0, bark); bx(1.12, 1.1, 1.5, 1.75, PAL.gray, 0, bark); bx(1.22, 1.75, 1.55, 2.25, PAL.gray, 0, bark); bx(1.2, 0.35, 1.2 + px, 1.5, PAL.black);
-        for (const [u0, v0, u1, v1] of [[1.35, 2.15, 0.75, 2.7], [1.45, 2.05, 2.55, 2.4], [1.4, 2.2, 1.65, 3.6], [1.5, 2.2, 3.1, 3.05]]) line(X(u0), Y(v0), X(u1), Y(v1), PAL.gray, bark, 2);
+        if (CINE && CINE.on('vol')) for (const [u0, v0, u1, v1] of [[1.05, 0.22, 1.45, 1.1], [1.12, 1.1, 1.5, 1.75], [1.22, 1.75, 1.55, 2.25]]) { bx(u0, v0, u0 + 2 * px, v1, PAL.gray, 0, 1); bx(u1 - 2 * px, v0, u1, v1, PAL.black, 0, 1.15); }   // (the cinematic fork: round, lit and dark)
+        for (const [u0, v0, u1, v1] of [[1.35, 2.15, 0.75, 2.7], [1.45, 2.05, 2.55, 2.4], [1.4, 2.2, 1.65, 3.6], [1.5, 2.2, 3.1, 3.05]]) line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), PAL.gray, bark, 2);
         for (const [u, v, ru, rv] of [[1.0, 4.05, 0.62, 0.42], [1.75, 4.3, 0.7, 0.45], [2.4, 4.05, 0.55, 0.38], [1.6, 3.82, 0.55, 0.32], [3.0, 3.3, 0.5, 0.38], [3.65, 3.38, 0.5, 0.36],
           [3.95, 3.18, 0.35, 0.25], [0.72, 2.62, 0.45, 0.33], [1.25, 2.72, 0.45, 0.32], [2.75, 2.02, 0.4, 0.3], [3.25, 2.07, 0.4, 0.3]]) el(u, v, ru, rv, PAL.purple);   // purple: the nearest the inks have to pink
         for (const [u, v] of [[1.3, 4.2], [2.1, 4.05], [3.35, 3.35], [0.85, 2.65], [3.0, 2.05], [1.7, 3.9]]) bx(u, v, u + 2 * px, v + px, PAL.gray);   // light specks in it
@@ -3756,6 +3793,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         bx(1.07, 2.73, 2.03, 3.02, PAL.gray); for (const u of [1.32, 1.74]) bx(u, 2.86, u + px, 2.86 + 2 * px, PAL.black); bx(1.42, 2.8, 1.66, 2.8 + px, PAL.black);   // (F's face half red)
         bx(0.47, 3.0, 2.66, 3.2, th.block); bx(1.0, 3.2, 2.1, 3.62, th.block, 1); bx(1.2, 3.62, 1.9, 3.72, th.block);
         for (const [u, h, l] of [[0.45, 0.7, -0.08], [0.62, 0.95, 0.05], [0.88, 0.6, 0.1], [1.12, 0.8, -0.05], [2.05, 0.75, 0.06], [2.75, 0.9, -0.06], [2.98, 0.65, 0.08], [3.25, 0.8, 0.03]]) ln(u, 0, u + l, h, PAL.green);
+        if (CINE && CINE.on('poke') && cinePerched(r, lv.t)) cineSpr(box, CRITTER[d > 0 ? 'crow' : 'crowL'], X(2.75) + SW(2.55), Y(2.55), th.wall);   // (the cinematic fork: a crow on its hand, off when the hero comes)
         ln(2.3, 0, 2.3, 0.85, PAL.green); bx(2.18, 0.85, 2.42, 1.09, PAL.purple); bx(2.29, 0.95, 2.29 + px, 0.95 + px, PAL.black);   // a flower (F's yellow: yellow is for what you take)
       } else if (p.kind === 'lantern') {   // a little Inari shrine (D): a stone lantern, a fox either side on its plinth, the shrine, a branch of sakura out of the wall
         // (the task: its lantern dark till the hero comes near, then lit for good, flickering on, a ring of light going out from it, its glow as the neon's;
@@ -3766,6 +3804,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         bx(0.5, 1.15, 0.76, 1.45, PAL.red, 0, lit ? 1 : DIM);   // its window
         if (on != null && T - on < 0.7) { const q = (T - on) / 0.7; F(lx, ly, (0.3 + 1.7 * q) * t, 0, 0, (0.3 + 1.7 * q) * t, PAL.red, 1 - q, 4); }
         bx(0.25, 1.6, 1.01, 1.74, PAL.gray); bx(0.56, 1.74, 0.71, 1.94, PAL.gray);
+        if (CINE) this.route = 0;   // (the cinematic fork: the altar flat, its foxes too)
         for (const [c, f] of [[1.4, 1], [3.45, -1]]) {   // a fox, facing the shrine: grey stone, its tail up behind it, an orange bib (D's collar red)
           bx(c - 0.4, 0, c + 0.4, 0.26, PAL.gray); bx(c - 0.4, 0.26, c + 0.4, 0.26 + px, PAL.black);
           bx(c - 0.24, 0.3, c + 0.24, 0.86, PAL.gray); bx(c - f * 0.24, 0.3, c - f * 0.38, 0.78, PAL.gray); bx(c - 0.17, 0.6, c + 0.17, 0.76, PAL.orange);
@@ -3777,6 +3816,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const u of [1.85, 2.86]) bx(u, 0.32, u + 0.13, 1.95, th.block, 4); bx(1.85, 1.76, 2.99, 1.95, th.block, 4);
         bx(1.3, 1.95, 3.55, 2.2, PAL.gray, 2); bx(1.12, 2.08, 1.35, 2.34, PAL.gray); bx(3.5, 2.08, 3.73, 2.34, PAL.gray); bx(1.55, 2.2, 3.3, 2.5, PAL.gray);
         bx(2.05, 2.5, 2.8, 2.78, PAL.gray, 2); bx(2.35, 2.26, 2.5, 2.42, th.block); bx(2.37, 2.78, 2.48, 3.0, PAL.gray); el(2.42, 3.08, 0.09, 0.09, PAL.gray); bx(2.4, 3.15, 2.45, 3.4, PAL.gray);
+        if (CINE) this.route = 4;
         ln(0, 2.3, 1.2, 2.95, th.block, 3, 4); ln(1.2, 2.95, 2.05, 3.42, th.block, 2, 4); ln(0.65, 2.62, 0.55, 3.3, th.block, 2, 4);   // the branch, its blossoms
         for (const [u, v] of [[0.3, 3.9], [1.0, 4.0], [1.75, 3.88], [0.48, 3.35], [1.3, 3.32], [2.05, 3.45]]) { bx(u - 0.13, v - 0.04, u + 0.13, v + 0.04, PAL.purple); bx(u - 0.04, v - 0.13, u + 0.04, v + 0.13, PAL.purple); }
       } else if (p.kind === 'koinobori') {   // koinobori (D): a stone foot, the pole, a wheel on its top (D's gold: orange), three carps on arms off it waving in the wind
@@ -3792,6 +3832,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         }
       }
     }
+    if (CINE) this.route = 1;
   }
   if (th.panels && lv.kind === 'well') {   // the Tower Blocks' kit (THEMES.blocks; see the parts catalog): a riser pipe up each wall on a bracket every
     // 4 tiles, satellite dishes on the walls, an entrance (a blue door, its canopy and lamp, a bench) at the wall end of some wide ledges.
@@ -4177,13 +4218,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const room = (u0, u1, v0, v1) => { const x0 = Math.min(W(u0), W(u1)), x1 = Math.max(W(u0), W(u1)), y0 = Y(v0), y1 = Y(v1); return !lv.rects.some((q) => q !== r && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1); };   // nothing laid there
     const R0 = r.mnRoom || (r.mnRoom = { under: room(0, Math.min(wt - 0.2, 3.3), ht, ht + 2.2), end: room(wt - 0.7, wt, ht, ht + 1.1), wall: room(0, 0.4, -1.4, ht + 1.1) });   // (once a ledge: where its timber has room)
     if (r.crumble) {   // loose rubble and broken ore held up by rotten boards: rounded stones with black gaps in two rows, shaking as it gives, grit falling
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0);
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0);   // (2.5D: no
+      // fading, a dither in depth reads as a sieve: it shakes)
       box(r.x0, r.y0 + 2 * P, r.x1, r.y1, K, a, 0, 10, 0);   // the dark between its stones
       const n = Math.max(1, Math.round(wt / 0.55));
       for (let j = 0; j < 2; j++) for (let i = 0; i < n; i++) { const q = (i + 0.5 + (j % 2) * 0.35) / n; if (q > 1) continue; const rr = (0.24 + 0.08 * hsh(i * 7 + j)) * t, x = W(q * wt) + shake(i + j * 9), y = snap(r.y0 + ((j + 0.5) / 2) * (r.y1 - r.y0) + 0.04 * t);
         F(x, y, rr, 0, 0, rr * 0.85, c, a, 0); F(x - snap(0.06 * t), y - snap(0.06 * t), rr * 0.45, 0, 0, rr * 0.35, c, a * 1.6, 0); }   // a stone, its lit side
       if (R0.under) { post(0.02, ht, ht + 1.2, c); bw(wt - 0.6, ht, wt - 0.4, ht + 0.5, c, 3, HALF); }   // a post at the wall, a short one at its end
-      for (let i = 0; i < 3; i++) { const q = (T * 0.55 + i / 3 + hsh(i + 40)) % 1, dx = snap(Math.sin(i * 2.1) * 0.12 * t), x = E(0.4); box(x + dx, snap(r.y1 + q * 1.7 * t), x + dx + P + (i % 2) * P, snap(r.y1 + q * 1.7 * t) + P + (i % 2) * P, c, 1 - q, 0, 10, 0); }   // grit trickling off it
+      if (CINE) this.route = 0; for (let i = 0; i < 3; i++) { const q = (T * 0.55 + i / 3 + hsh(i + 40)) % 1, dx = snap(Math.sin(i * 2.1) * 0.12 * t), x = E(0.4); box(x + dx, snap(r.y1 + q * 1.7 * t), x + dx + P + (i % 2) * P, snap(r.y1 + q * 1.7 * t) + P + (i % 2) * P, c, 1 - q, 0, 10, 0); } if (CINE) this.route = 2;   // grit trickling off it (flat)
       for (let i = 0, m = Math.max(1, Math.round(wt)); i < m; i++) { const x0 = snap(r.x0 + (i * w) / m) + shake(i), x1 = snap(r.x0 + ((i + 1) * w) / m) + shake(i); box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25); }   // its edge, in pieces
       return true;
     }
@@ -4193,20 +4235,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       bx(-hw, 0, hw, ht, c);   // its roof
       for (const u of [-hw, -0.07, hw - 0.15]) bx(u, ht, u + 0.15, ht + 1.85, c); bx(-hw, ht + 1.7, hw, ht + 1.85, c);   // its posts, its floor
       line(X(-hw + 0.15), Y(ht), X(-0.07), Y(ht + 1.7), c, 1, 2); line(X(-0.07), Y(ht), X(-hw + 0.15), Y(ht + 1.7), c, 1, 2);   // braced across
-      mnLamp(X(hw * 0.55), r.y1, true, 0.75);   // a lamp in it
+      if (CINE) this.route = 4; mnLamp(X(hw * 0.55), r.y1, true, 0.75); if (CINE) this.route = 2;   // a lamp in it (small, as on the walls)
       { const bx0 = X(hw * 0.55), by = Y(ht + 1.38); box(snap(bx0 - 0.18 * t), by, snap(bx0 + 0.18 * t), snap(by + 0.29 * t), G, 1, 0, 10, 4); box(snap(bx0 - 0.21 * t), by, snap(bx0 + 0.21 * t), by + P, G, 1, 0, 10, 0); }   // a basket on its floor
-      for (const u of [-0.4, 0.4]) { F(X(u), Y(-0.3), 0.17 * t, 0, 0, 0.17 * t, c, 1, 4); line(X(u), Y(-0.45), X(u), Y(-3), G, 1, 1); }   // its pulleys, their ropes up
+      if (CINE) this.route = 0; for (const u of [-0.4, 0.4]) { F(X(u), Y(-0.3), 0.17 * t, 0, 0, 0.17 * t, c, 1, 4); line(X(u), Y(-0.45), X(u), Y(-3), G, 1, 1); } if (CINE) this.route = 2;   // its pulleys, their ropes up (flat)
       lip(); return true;
     }
     if (r.plank) {   // a scaffold board: weathered grey planks, their grain in lines, on a post up the wall, a chain from it to its middle, a pickaxe hung off its end
       if (r.bouncy) return false;
       box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 3); box(r.x0, r.y1 - P, r.x1, r.y1, K, 1, 0, 10, 0);   // its boards, their lower edge
-      if (on && R0.wall) { bw(0, -1.3, 0.22, ht + 1.0, G, 3, HALF); for (let i = 0; i < 6; i++) { const q = (i + 0.5) / 6; box(snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))), snap(Y(-1.2) + q * (r.y0 - Y(-1.2))), snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))) + 2 * P, snap(Y(-1.2) + q * (r.y0 - Y(-1.2))) + P, G, 1, 0, 10, 0); } }   // its post, the chain's links
-      if (R0.end) { const x = E(0.2), y = Y(ht + 0.3), dir = -d, hx = snap(x + dir * 0.27 * t), hy = snap(y + 0.68 * t), Q = (u, v) => [snap(hx + dir * u * 0.9 * t), snap(hy - v * 0.9 * t)];   // a pickaxe hung off its end by its head
+      if (on && R0.wall) { bw(0, -1.3, 0.22, ht + 1.0, G, 3, HALF); if (CINE) this.route = 0; if (hsh(31) < 1 / 3) for (let i = 0; i < 6; i++) { const q = (i + 0.5) / 6; box(snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))), snap(Y(-1.2) + q * (r.y0 - Y(-1.2))), snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))) + 2 * P, snap(Y(-1.2) + q * (r.y0 - Y(-1.2))) + P, G, 1, 0, 10, 0); } }   // its post, the chain's links
+      if (CINE) this.route = 0;   // (what hangs off it flat, and on one board in three: the rule book)
+      if (R0.end && hsh(32) < 1 / 3) { const x = E(0.2), y = Y(ht + 0.3), dir = -d, hx = snap(x + dir * 0.27 * t), hy = snap(y + 0.68 * t), Q = (u, v) => [snap(hx + dir * u * 0.9 * t), snap(hy - v * 0.9 * t)];   // a pickaxe hung off its end by its head
         line(x, r.y1, x, y, G, 1, 1); line(x, y, hx, hy, G, 1, 2);
         const [ax, ay] = Q(-0.4, 0.2), [bx0, by0] = Q(-0.15, -0.04), [cx0, cy0] = Q(0.15, -0.04), [ex, ey] = Q(0.42, 0.22);
         line(ax, ay, bx0, by0, G, 1, 2); line(bx0, by0, cx0, cy0, G, 1, 3); line(cx0, cy0, ex, ey, G, 1, 2); }
-      lip(); return true;
+      if (CINE) this.route = 2; lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
     {   // rough rock, dotted grey, its underside shaded: a timber beam under it, a post down to its footing, a coil of rope off its end (half dark)
@@ -4220,7 +4263,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(r.x0, Y(0.3), r.x1, Y(0.48), G, 1, 0, 10, 3);   // its cap
       }
       if (R0.under) { bw(0, ht, Math.min(wt - 0.4, 3.2), ht + 0.3, G, 3, HALF); post(0.55, ht + 0.3, ht + 1.9); bw(0.45, ht + 1.9, 0.85, ht + 2.08, G, 4, HALF); }   // its beam, its post, its footing
-      if (R0.end) { const x = E(0.2), y = r.y1; for (const rr of [0.27, 0.19, 0.11]) F(x, snap(y + 0.3 * t), rr * t, 0, 0, rr * 1.2 * t, G, 1, 4); line(x, snap(y + 0.6 * t), snap(x + 0.06 * t), snap(y + 0.95 * t), G, 1, 1); box(x, y, x + P, snap(y + 0.05 * t), G, 1, 0, 10, 0); }   // a coil of rope hung, its end
+      if (R0.end && hsh(33) < 1 / 3) { if (CINE) this.route = 0; const x = E(0.2), y = r.y1; for (const rr of [0.27, 0.19, 0.11]) F(x, snap(y + 0.3 * t), rr * t, 0, 0, rr * 1.2 * t, G, 1, 4); line(x, snap(y + 0.6 * t), snap(x + 0.06 * t), snap(y + 0.95 * t), G, 1, 1); box(x, y, x + P, snap(y + 0.05 * t), G, 1, 0, 10, 0); if (CINE) this.route = 2; }   // a coil of rope
+      // hung, its end (on one ledge in three; flat)
       lip(); return true;
     }
   };
@@ -4300,7 +4344,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         const lx = snap(wl ? r.x1 - 0.25 * t : r.x0 + 0.25 * t), ly = r.y0 + 2 * rh + 0.2 * t;
         box(lx - P / 2, r.y0 + 2 * rh, lx + P / 2, ly, PAL.gray, 1, 0, 10, 0); box(snap(lx - 0.12 * t), ly, snap(lx + 0.12 * t), ly + 2 * P, PAL.gray, 1, 0, 10, 0);
         const l0 = ly + 2 * P, l1 = snap(ly + 0.66 * t);
-        box(snap(lx - 0.22 * t), l0, snap(lx + 0.22 * t), l1, PAL.orange, 1, 0, 10, 0);
+        box(snap(lx - 0.22 * t), l0, snap(lx + 0.22 * t), l1, PAL.orange, 1, 0, 10, 0); if (CINE && this.cineL) this.cineL.push([lx, (l0 + l1) / 2, 1.7 * lv.R, 0.6, [1.0, 0.6, 0.25]]);   // (the cinematic fork: it glows)
         for (const f of [0.36, 0.68]) { const ry = snap(l0 + f * (l1 - l0)); box(snap(lx - 0.22 * t), ry, snap(lx + 0.22 * t), ry + P, PAL.black, 1, 0, 10, 0); }
         box(snap(lx - 0.12 * t), l1, snap(lx + 0.12 * t), l1 + 2 * P, PAL.gray, 1, 0, 10, 0);
       }
@@ -4332,7 +4376,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
   };
+  if (CINE) this.route = 0;   // (the cinematic fork: the doors flat, the ledges deep)
   for (const b of lv.bubbles) if (seen(b.y0 - 10, b.y1)) door(b, b.kind);   // the ways into a shop or a stash, over the worlds' back layers: nothing covers them (owner)
+  if (CINE) this.route = 2;
   if (lv.floor < bot) { box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 800, th.wall, 1, 0); box(lv.l - 2, lv.floor, lv.r + 2, lv.floor + 2.5, th.lip, 1, 0); }
   const vaultSpan = (r) => {   // a vault's cracked floor from cage wall to cage wall: the slot rule (Level.place) cut it back from a wall its cage stands
     // at, so it is drawn across the gap it left (too narrow for the hero to pass)
@@ -4395,7 +4441,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
@@ -4409,6 +4455,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
+  this.route = 0;   // (the cinematic fork: the play again)
   for (const s of lv.spikes) {
     if (!seen(s.y0, s.y1)) continue;
     const vert = s.dir < 2, len = vert ? s.x1 - s.x0 : s.y1 - s.y0, dep = vert ? s.y1 - s.y0 : s.x1 - s.x0;
@@ -4419,15 +4466,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else F(cx, cy, 0, hl, hd, 0, INK.spike, 1, 6, hl, hd, tw);
   }
   const cr = COIN.r * R;
+  const bonusEye = CINE && (CINE.bonus === 'B' || CINE.bonus === 'D'), bonusStack = CINE && CINE.bonus === 'C';   // (the cinematic fork: the bonuses' depth, see CINE.bonus)
+  if (CINE) this.route = bonusEye ? 4 : 0;
   for (const c of lv.coins) {
     if (c.y < top || c.y > bot) continue;
     // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded; all one size, a big one's worth too (owner)
     const r = cr, a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
-    F(c.x + edge, c.y, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, 1, 9, 0);
-    F(c.x, c.y, r * s, 0, 0, r, INK.coinD, 1, 9, 0);
-    F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6);
-    F(c.x - r * s * 0.3, c.y - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0);
+    const cy = c.y - (CINE ? cineRide(lv, c.x, c.y, r, cam, H) : 0);   // (the cinematic fork: riding its ledge's top face, see cineRide)
+    const coin = (ox, oy, k) => { F(c.x + edge + ox, cy + oy, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, k, 9, 0); F(c.x + ox, cy + oy, r * s, 0, 0, r, INK.coinD, k, 9, 0);
+      if (k === 1) { F(c.x - r * s * 0.04, cy - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6); F(c.x - r * s * 0.3, cy - r * 0.34, r * s * 0.18, 0, 0, r * 0.16, INK.white, 1, 0); } };
+    if (bonusStack) for (let q = 3; q >= 1; q--) coin(q * 0.7 * PIX.size, q * PIX.size, 1.62 - 0.07 * q);   // (C: a token's thickness, down and to the right)
+    coin(0, 0, 1);
   }
+  if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
     rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); });
@@ -4438,16 +4489,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
     else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: about a tile and a half long
   }
+  if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
-    const y = p.y + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;
-    F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1);
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face)
+    if (bonusEye) this.route = 3; F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1); if (bonusEye) this.route = 4;   // (B, D: its glow behind it, not dotted over it)
+    if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4, T * 1.8 + p.x * 0.05);   // (C: its thickness)
     iconSpin(p.item.id, p.x, y, a, 2.4, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
-    const y = p.y + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;   // (the fork: riding its ledge's face)
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
-    F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
+    if (bonusEye) this.route = 3; F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); if (bonusEye) this.route = 4; if (bonusStack) for (let q = 3; q >= 1; q--) iconSpin(p.kind, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, k, T * 2.2 + p.x * 0.05); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
+  if (CINE) this.route = 0;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
     : (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
   for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);
@@ -4698,14 +4752,16 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
     disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, (g.power('smash') ? 0.22 : 0.15) * R, g.power('smash') ? INK.flame : INK.white, 1);   // orange: the next one rams
   for (let k = 0; k < nDots; k++) { const u = k / Math.max(1, JUMP.dots - 1); disc(dots[2 * k], dots[2 * k + 1], (2.4 - 1.2 * u) * PIX.size, INK.white, 1); }   // the slingshot's arc: solid dots that shrink (tiny see-through ones would dither to crumbs)
+  if (CINE) cineMotes(this, g, lv, cam, H, box, disc, T);
   const nFront = this.nf - front;
   gl.bindVertexArray(null);
   this.upload(gl.ARRAY_BUFFER, this.vbo, this.vtx, this.nv * 10, 'vboCap');
   if (this.idxDirty) { this.upload(gl.ELEMENT_ARRAY_BUFFER, this.ebo, this.idx, this.ni, 'eboCap'); this.idxSig = sig; }
-  this.upload(gl.ARRAY_BUFFER, this.fbo, this.fdata, this.nf * 14, 'fboCap');
+  const nAll = CINE ? this.cineAppend() : this.nf;   // (first: the fork's append may move fdata to a bigger store)
+  this.upload(gl.ARRAY_BUFFER, this.fbo, this.fdata, nAll * 14, 'fboCap');
   const P = PIX.size, sx = Math.round(shake.x / P) * P, sy = Math.round((shake.y - cam) / P) * P;   // the camera, in whole game pixels
   const [lw, lh] = this.low, grid = (u) => gl.uniform2f(u.uGrid, -sx / P, lh - sy / P);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, CINE ? this.cine.far.fb : this.target.fb);   // (the cinematic fork: the backdrop into what is behind)
   gl.viewport(0, 0, lw, lh);
   gl.clear(gl.STENCIL_BUFFER_BIT);
   gl.disable(gl.BLEND);
@@ -4720,6 +4776,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
+  if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
   this.drawFeat(0, back);
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
@@ -4772,7 +4829,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const [x, y, r0 = 0.9, r1 = 2.6] of vlamps) light(x, y, r0, r1);   // the Village's stone lanterns, the Dark Forest's fences, candles and moon (see their kits)
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
-    for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y, 0.5, 1.3);
+    for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y - (CINE ? cineRide(lv, c.x, c.y, COIN.r * R, cam, H) : 0), 0.5, 1.3);   // (the fork: where it is drawn)
     const pd = this.pDark;
     gl.useProgram(pd.p); grid(pd.u);
     gl.uniform4fv(pd.u['uLights[0]'], L); gl.uniform1i(pd.u.uN, n); gl.uniform2f(pd.u.uFire, lv.fire ? lv.fire.y / P : 1e9, (3 * R) / P);
@@ -4780,6 +4837,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   gl.bindVertexArray(null);
+  if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb);   // up onto the canvas, pixel for pixel
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
   gl.blitFramebuffer(0, 0, lw, lh, 0, 0, this.canvas.width, this.canvas.height, gl.COLOR_BUFFER_BIT, gl.NEAREST);

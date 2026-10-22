@@ -250,6 +250,10 @@ const COMBO = [{ at: 3, coins: 10 }, { at: 5, coins: 25 }, { at: 8, coins: 50, h
 // A level's stars: one for getting out, the second for `half` its coins, the third for all of them (enemies do not
 // count, user); `coins` pays for 1, 2, 3.
 const STARS = { coins: [1, 2, 5], half: 0.5 };
+// The mastery medals (owner, 2026-10-22: «Медаль мастерства. По желанию: пройти уровень на время или без урона»): two a campaign level, apart from its stars,
+// kept once won: `time`, out by its hole within its par, and `clean`, with no heart lost. The par is its height at `perM` s a metre, up to a `step`, `min` at the
+// least (a recipe's `par` over it): a first guess, to tune by playing. By the bot's sweep it is never under 1.4 times the bot's time, about twice it as a rule
+const MEDAL = { perM: 0.5, step: 5, min: 20 };
 // Coins: radius and magnet reach in R. An enemy's burst out at `burst` px/s and after `home` s
 // home in on the hero from anywhere, at `seek` px/s more than its own pace (three times that a
 // second on), turning at `steer`/s: they always get to it.
@@ -947,6 +951,8 @@ const ICONS = {
 };
 ICONS.star = '.....yy...../.....yy...../....yyyy..../yyyyyyyyyyoo/.yyyyyyyyoo./..yyyyyyoo../...yyyyoo.../..yyyyyyoo../..yyy..yoo../.yyy....ooo./.yy......oo./............';
 ICONS.starOff = ICONS.star.replace(/[yo]/g, 's');
+ICONS.clock = '....yyyy..../..yywwwwyy../.ywwwwkwwwy./.ywwwwkwwwy./ywwwwwkwwwwy/ywwwwwkwwwwy/ywwwwwkkkkwy/ywwwwwwwwwwy/.ywwwwwwwwy./.ywwwwwwwwy./..yywwwwyy../....yyyy....';   // a medal's (MEDAL)
+ICONS.clockOff = ICONS.clock.replace(/[yw]/g, 's'); ICONS.heartOff = ICONS.heart.replace(/[rw]/g, 's');
 ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.....ww...../....w..w..../...w.yy.w.../..w.yyyy.w../..wyyyyyyw../.wwwwwwwwww./............';
 ICONS.bubble = '............/....pppp..../..pppppppp../.ppwwpppppp./.pwwppppppp./pppppppppppp/pppppppppppp/.ppppppppppp/.pppppppppp./..pppppppp../....pppp..../............';   // a bubble of gum, its shine
 ICONS.maxhp = ICONS.heart;

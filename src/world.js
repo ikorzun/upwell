@@ -235,11 +235,13 @@ const kitThing = (lv, r) => {
   } else if (th.mines) {   // the Mine's by a hash of its height: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore
     // in the wall behind it, a cart on its rails, the miners' tools, a winch
     const k = Math.floor(((Math.imul(Math.round(b / t) + 3, 0x9e3779b1) >>> 0) / 4294967296) * 6);
+    const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5;   // the props but the lamps (a task) on half their ledges: about four in six with
+    // a thing on them, as the Village (the rule book's detail: «Сократить до 4 из 6»)
     if ((k === 0 || k === 3) && steady(1.8) && room(0, 1.6, 2.6)) out = { kind: 'lamp', x: X(0.5), y: b - 2.0 * t };
-    else if (k === 1 && steady(2.6) && room(0, 2.6, 2.0)) out = { kind: 'cart' };
-    else if (k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
-    else if (k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
-    else if (k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
+    else if (half && k === 1 && steady(2.6) && room(0, 2.6, 2.0)) out = { kind: 'cart' };
+    else if (half && k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
+    else if (half && k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
+    else if (half && k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
   } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
     const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
     if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse', x: X(2.3), y: b - 3.5 * t };   // (its lamp's place: the task's, see its drawing)
@@ -3211,7 +3213,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
     bx(0.25, 0, 2.25, dh + 0.45, G, 1); bx(0.5, 0, 2.0, dh, INK.dark);   // its wooden front, the doorway dim inside
     for (const u of [0.3, 2.0]) bx(u, 0, u + 0.2, dh + 0.4, G, 3); bx(0.25, dh + 0.3, 2.25, dh + 0.45, G); bx(0.25, dh + 0.3, 2.25, dh + 0.3 + px, K);   // its posts, its lintel
-    bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 1, 3);   // its flat roof
+    bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 3, 1);   // its flat roof (grey, its grain dotted: it was white, an alpha of 3, and read as a ledge's edge)
     bx(0.5, dh - 0.6, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.6, u + px, dh, K);   // its noren, in strips,
     F(dx, Y(dh - 0.3), 0.17 * t, 0, 0, 0.17 * t, PAL.white, 1, 4); bx(1.25 - px, dh - 0.45, 1.25 + px, dh - 0.15, PAL.white); bx(1.1, dh - 0.31, 1.4, dh - 0.29, PAL.white);   // a mark on it
     bx(2.3, 0.9, 2.75, 1.4, PAL.orange); bx(2.3, 1.15, 2.75, 1.15 + px, K); bx(2.52 - px / 2, 0.9, 2.52 + px / 2, 1.4, K); vlamps.push([X(2.52), Y(1.15), 0.4, 1.2]);   // a window lit (a light)
@@ -3221,8 +3223,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const mnStash = (d) => {
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
-    for (let i = 0; i < 9; i++) { const q = i / 8, u = q < 0.3 ? 0.32 : q > 0.7 ? 2.18 : 0.32 + ((q - 0.3) / 0.4) * 1.86, v = q < 0.3 ? (q / 0.3) * dh : q > 0.7 ? ((1 - q) / 0.3) * dh : dh; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1.5, 1); }   // its frame of stones
-    bx(0.5, 0, 2.0, dh, G, 1.5, 3); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber, iron bands
+    for (let i = 0; i < 9; i++) { const q = i / 8, u = q < 0.3 ? 0.32 : q > 0.7 ? 2.18 : 0.32 + ((q - 0.3) / 0.4) * 1.86, v = q < 0.3 ? (q / 0.3) * dh : q > 0.7 ? ((1 - q) / 0.3) * dh : dh; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1, 1.5); }   // its frame of stones (half dark)
+    bx(0.5, 0, 2.0, dh, G, 3, 1.5); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber (half dark: it was pure white), iron bands
     for (const [u, v] of [[0.62, 0.3], [1.88, 0.3], [0.62, 1.6], [1.88, 1.6]]) bx(u, v, u + px, v + px, PAL.white);   // its studs
     for (const [u0, v0, u1, v1] of [[0.8, 1.6, 0.95, 1.1], [0.95, 1.1, 0.85, 0.7], [1.6, 1.9, 1.5, 1.35], [1.5, 1.35, 1.65, 0.9], [1.2, 0.5, 1.3, 0.1]]) ln(u0, v0, u1, v1, c, 1);   // its cracks, glowing purple
     bx(1.1, 0.8, 1.4, 1.15, G); bx(1.22, 0.86, 1.28, 1.05, K);   // its lock, its keyhole
@@ -3370,14 +3372,16 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // The Mine's shared pieces (the owner's picks, 2026-10-21, research/variants/mine-*-game.png): its lamp, a kantera hung at (x, y), a dome on a caged body (A; lit:
   // a glow round it, a light of the dark; the wall ones the hero lights, a task), its ore glinting in the wall over a ledge (C), its things on ledges, its bats, the
   // mine far off
-  const mnLamp = (x, y, lit, s = 1, arm = 0) => {   // arm: the side its wall is on (its bracket from there), 0 off a hook
-    const t = kitT, G = PAL.gray, K = PAL.black, O = PAL.orange, U = (u) => snap(x + u * s * t), V = (v) => snap(y + v * s * t);
+  const mnLamp = (x, y, lit, s = 1, arm = 0, t0 = null) => {   // arm: the side its wall is on (its bracket from there), 0 off a hook; t0: when the hero lit it
+    const t = kitT, G = PAL.gray, K = PAL.black, O = PAL.orange, V = (v) => snap(y + v * s * t), e = CINE && !POKE.still && t0 != null ? T - t0 : 9;
+    const sw = e < 1.6 ? snap(Math.sin(e * 13) * 0.12 * t * (1 - e / 1.6)) : 0, U = (u) => snap(x + u * s * t) + (u === 0 || Math.abs(u) > 0.25 ? 0 : sw);   // (the cinematic fork:
+    // lit, it swings on its hook a moment, its body the most; the rule book's «лампа качается, когда её зажигают»)
     const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(V(v0), V(v1)), Math.max(U(u0), U(u1)), Math.max(V(v0), V(v1)), c, a, 0, 10, tn);
     const gl = lit ? O : K, cy = V(0.6);
     if (arm) { bx(-arm * 0.55, -0.16, -arm * 0.47, 0.16, G); bx(-arm * 0.55, -0.05, 0.02 * arm, 0.03, G); }   // its bracket off the wall
-    bx(-0.03, 0.03, 0.03, 0.22, G);   // its hook and link
-    if (lit) { F(U(0), cy, 0.8 * s * t, 0, 0, 0.8 * s * t, O, 0.3 + 0.06 * Math.sin(T * 5 + x * 0.1), 1); vlamps.push([U(0), cy, 0.6 * s, 1.8 * s]); }   // its glow, breathing (a light)
-    F(U(0), V(0.3), 0.17 * s * t, 0, 0, 0.1 * s * t, G, 1, 0); bx(-0.2, 0.28, 0.2, 0.36, G); bx(-0.22, 0.36, 0.22, 0.88, G, 1, 4); bx(-0.14, 0.42, 0.14, 0.82, gl); bx(-0.2, 0.88, 0.2, 0.96, G);   // its dome, its caged body, its glass
+    box(snap(x - 0.03 * s * t), V(0.03), snap(x + 0.03 * s * t), V(0.22), G, 1, 0, 10, 0);   // its hook and link (what it swings from)
+    if (lit) { F(U(0) + sw, cy, 0.8 * s * t, 0, 0, 0.8 * s * t, O, 0.3 + 0.06 * Math.sin(T * 5 + x * 0.1), 1); vlamps.push([U(0) + sw, cy, 0.6 * s, 1.8 * s]); }   // its glow, breathing (a light)
+    F(U(0) + sw, V(0.3), 0.17 * s * t, 0, 0, 0.1 * s * t, G, 1, 0); bx(-0.2, 0.28, 0.2, 0.36, G); bx(-0.22, 0.36, 0.22, 0.88, G, 1, 4); bx(-0.14, 0.42, 0.14, 0.82, gl); bx(-0.2, 0.88, 0.2, 0.96, G);   // its dome, its caged body, its glass
     for (const v of [0.55, 0.69]) bx(-0.14, v, 0.14, v + 0.03, G);   // the bars across it
     if (lit) bx(-0.04, 0.54, 0.04, 0.68, PAL.yellow);   // its flame
   };
@@ -3397,6 +3401,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   const mnBats = (r) => {   // four bats hanging asleep under a ledge, folded in their wings, one with an eye open (a tiny light), clear of a brace under it
     const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, n = 4, wl = r.x0 <= lv.l + 1, x0 = wl ? r.x0 + 1.95 * t : r.x1 - 1.95 * t - (n - 1) * 0.55 * t;
+    if (CINE) {   // (the cinematic fork: come near, they wake and fly off one after another; back later; the rule book's «летучие мыши просыпаются и разлетаются»)
+      const B = r.batsP || (r.batsP = {}), at = [];
+      for (let i = 0; i < n; i++) at.push([snap(x0 + i * 0.55 * t), snap(r.y1 + 0.75 * t)]);
+      cinePoke(g, lv, B, 'bats', x0 - 0.3 * t, r.y1, x0 + (n - 1) * 0.55 * t + 0.3 * t, r.y1 + 0.8 * t, at);
+      if (!cinePerched(B, lv.t)) return;
+    }
     for (let i = 0; i < n; i++) {
       const x = snap(x0 + i * 0.55 * t), y = snap(r.y1 + (0.12 + 0.03 * Math.sin(T * 1.6 + i)) * t), hw = 0.17 * t, hh = 0.3 * t, ey = snap(y + hh * 1.25);
       box(x - P, r.y1, x + P, y, G, 1, 0, 10, 0);   // its feet hooked on
@@ -3406,26 +3416,32 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x + snap(0.04 * t), ey, x + snap(0.1 * t), ey + P, G, 1, 0, 10, 0);   // eyes shut
     }
   };
-  const mnThing = (kind, wx, b, d) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
-    const t = kitT, P = kitP, px = P / t, G = PAL.gray, K = PAL.black, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
+  const mnThing = (kind, wx, b, d, r) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
+    const rt = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork: thin parts flat, the bodies small, what is under the ledge behind)
+    const roll = kind === 'cart' && CINE && r ? cinePoke(g, lv, r, 'cart', Math.min(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b - 1.1 * kitT, Math.max(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b) : 0;
+    const t = kitT, P = kitP, px = P / t, G = PAL.gray, K = PAL.black, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t), R = (u) => X(u) + snap(roll * 3 * t);   // (a cart rocked: its body)
     const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const ln = (u0, v0, u1, v1, c = G, wd = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wd);
     if (kind === 'cart') {   // a little mine cart (torokko) parked on its rails, slatted, heaped with ore glinting; a stop block
-      bx(0.3, 0, 2.7, 0.06, G); for (let u = 0.35; u < 2.65; u += 0.4) bx(u, 0, u + 0.18, 0.1, G, 1.5); bx(2.55, 0, 2.7, 0.5, G);   // its rails, sleepers, a stop block
-      bx(0.5, 0.35, 2.3, 1.05, G, 1, 3); bx(0.45, 1.0, 2.35, 1.08, G); for (let u = 0.75; u < 2.2; u += 0.3) bx(u, 0.4, u + px, 1.0, K);   // its body, its rim, its slats
-      for (const u of [0.85, 1.95]) { F(X(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, K, 1, 0); F(X(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, G, 1, 4); disc(X(u), Y(0.22), 0.05 * t, G, 1); }   // its wheels
-      F(X(1.4), Y(1.08), 0.85 * t, 0, 0, 0.3 * t, G, 1.6, 0); for (const [u, v] of [[0.9, 1.2], [1.3, 1.3], [1.75, 1.22]]) bx(u, v, u + 2 * px, v + px, PAL.white, Math.sin(T * 2 + u * 3) > 0.2 ? 1 : DIM);   // its ore, glinting
+      L(0); bx(0.3, 0, 2.7, 0.06, G); for (let u = 0.35; u < 2.65; u += 0.4) bx(u, 0, u + 0.18, 0.1, G, 1.5); bx(2.55, 0, 2.7, 0.5, G);   // its rails, sleepers, a stop block
+      const rb = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(R(u0), R(u1)), Math.min(Y(v0), Y(v1)), Math.max(R(u0), R(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+      L(rt); rb(0.5, 0.35, 2.3, 1.05, G, 1, 3); rb(0.45, 1.0, 2.35, 1.08, G); for (let u = 0.75; u < 2.2; u += 0.3) rb(u, 0.4, u + px, 1.0, K);   // its body, its rim, its slats
+      for (const u of [0.85, 1.95]) { F(R(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, K, 1, 0); F(R(u), Y(0.22), 0.2 * t, 0, 0, 0.2 * t, G, 1, 4); disc(R(u), Y(0.22), 0.05 * t, G, 1); }   // its wheels
+      F(R(1.4), Y(1.08), 0.85 * t, 0, 0, 0.3 * t, G, 1.6, 0); L(0); for (const [u, v] of [[0.9, 1.2], [1.3, 1.3], [1.75, 1.22]]) rb(u, v, u + 2 * px, v + px, G, Math.sin(T * 2 + u * 3) > 0.2 ? 1 : DIM);   // its ore, glinting
+      // (grey: no white on a prop, the rule book; flat in 2.5D, too small for depth, and one layer whether it glints or not)
     } else if (kind === 'tools') {   // the miners' tools by the wall: two pickaxes and a shovel leaning, a straw basket (zaru), a straw raincoat (mino) on a peg
       const pick = (u, lean) => { ln(u, 0, u + lean, 1.2, G, 2); ln(u + lean - 0.32, 1.08, u + lean - 0.08, 1.26, G, 2); ln(u + lean - 0.08, 1.26, u + lean + 0.12, 1.26, G, 3); ln(u + lean + 0.12, 1.26, u + lean + 0.36, 1.06, G, 2); };
-      pick(0.15, 0.3); pick(0.45, 0.22); ln(0.8, 0.35, 1.1, 1.35, G, 2); bx(0.68, 0, 0.9, 0.38, G);   // its pickaxes, its shovel
-      bx(1.05, 0, 1.65, 0.42, G, 1, 4); bx(1.01, 0.42, 1.69, 0.48, G);   // its basket
+      L(0); pick(0.15, 0.3); pick(0.45, 0.22); ln(0.8, 0.35, 1.1, 1.35, G, 2); bx(0.68, 0, 0.9, 0.38, G);   // its pickaxes, its shovel
+      L(rt); bx(1.05, 0, 1.65, 0.42, G, 1, 4); bx(1.01, 0.42, 1.69, 0.48, G); L(0);   // its basket
       bx(1.92, 1.9, 1.98, 2.02, G); for (let i = 0; i < 7; i++) ln(1.95, 1.9, 1.6 + i * 0.12, 0.9 - (i % 2) * 0.08, G, 1); bx(1.55, 0.82, 2.37, 0.9, G, DIM);   // its raincoat on its peg
     } else if (kind === 'winch') {   // a headframe over a pit: its posts and cap, its wheel, its rope down past the ledge to a bucket; a ladder, a small cart
-      bx(0.9, 0, 1.05, 3.2, G, 1, 3); bx(2.1, 0, 2.25, 3.2, G, 1, 3); bx(0.9, 3.1, 2.25, 3.25, G, 1, 3); F(X(1.6), Y(2.85), 0.24 * t, 0, 0, 0.24 * t, G, 1, 4);
-      ln(1.6, 2.6, 1.6, -1.7); bx(1.38, -2.12, 1.82, -1.7, G, 1, 4); bx(1.35, -1.78, 1.85, -1.7, G); ln(1.4, -1.7, 1.6, -1.52); ln(1.6, -1.52, 1.8, -1.7);   // its rope, its bucket
-      ln(2.35, 0, 2.6, 2.6, G, 2); ln(2.75, 0, 3.0, 2.6, G, 2); for (let q = 0.12; q < 1; q += 0.16) ln(2.35 + 0.25 * q, 2.6 * q, 2.75 + 0.25 * q, 2.6 * q, G, 1);   // a ladder
-      bx(0.1, 0.25, 0.75, 0.6, G, 1, 3); disc(X(0.25), Y(0.15), 0.1 * t, K, 1); disc(X(0.6), Y(0.15), 0.1 * t, K, 1);   // a small cart
+      L(0); bx(0.9, 0, 1.05, 3.2, G, 1, 3); bx(2.1, 0, 2.25, 3.2, G, 1, 3); bx(0.9, 3.1, 2.25, 3.25, G, 1, 3); F(X(1.6), Y(2.85), 0.24 * t, 0, 0, 0.24 * t, G, 1, 4);
+      L(3); ln(1.6, 2.6, 1.6, -1.7); bx(1.38, -2.12, 1.82, -1.7, G, 1, 4); bx(1.35, -1.78, 1.85, -1.7, G); ln(1.4, -1.7, 1.6, -1.52); ln(1.6, -1.52, 1.8, -1.7);   // its rope, its bucket (behind
+      // its ledge in 2.5D, as in 2D)
+      L(0); ln(2.35, 0, 2.6, 2.6, G, 2); ln(2.75, 0, 3.0, 2.6, G, 2); for (let q = 0.12; q < 1; q += 0.16) ln(2.35 + 0.25 * q, 2.6 * q, 2.75 + 0.25 * q, 2.6 * q, G, 1);   // a ladder
+      L(rt); bx(0.1, 0.25, 0.75, 0.6, G, 1, 3); disc(X(0.25), Y(0.15), 0.1 * t, K, 1); disc(X(0.6), Y(0.15), 0.1 * t, K, 1);   // a small cart
     }
+    this.route = rt;
   };
   const mnFar = () => {   // the mine far off: a tunnel going off into the dark, its frames smaller and smaller, rails running in, lamps glowing deep in it, a lamp on a post;
     // screen-fixed, low, at a quarter (DIM), the lamps lights (they show the frames round them)
@@ -3440,16 +3456,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   if (th.mines && lv.kind === 'well') {   // the Mine's things on its ledges (kitThing): the lamps on the wall (lit for good once the hero comes: lv.tended), the ore,
     // a cart, the tools, a winch; bats under some ledges; the mine far off
+    const rt0 = this.route;   // (the cinematic fork, the rule book: a lamp small, the ore behind, the props small with their thin parts flat, the bats flat, the mine far
+    // off behind, whatever its tones)
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 3.6 * kitT, r.y0 + kitT) && kitThing(lv, r);
       if (!p) continue;
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1;
-      if (p.kind === 'lamp') mnLamp(snap(p.x), snap(p.y), lv.tended.has(r), 1, d);
-      else if (p.kind === 'ore') mnOre(wl ? lv.l : lv.r, r.y0, d, Math.round(r.y0 / kitT));
-      else mnThing(p.kind, wl ? lv.l : lv.r, r.y0, d);
+      if (p.kind === 'lamp') { if (CINE) this.route = 4; mnLamp(snap(p.x), snap(p.y), lv.tended.has(r), 1, d, lv.tended.has(r) ? lv.tended.get(r) : null); }
+      else if (p.kind === 'ore') { if (CINE) this.route = 3; mnOre(wl ? lv.l : lv.r, r.y0, d, Math.round(r.y0 / kitT)); }
+      else { if (CINE) this.route = 4; mnThing(p.kind, wl ? lv.l : lv.r, r.y0, d, r); }
     }
+    if (CINE) this.route = 0;
     for (const r of lv.rects) if (!r.gone && seen(r.y1 - kitT, r.y1 + 2 * kitT) && mnBatsAt(r)) mnBats(r);   // bats asleep under some ledges
+    if (CINE) this.route = 3;
     mnFar();
+    this.route = rt0;
   }
   if (th.fuji && lv.kind === 'well') {   // Mount Fuji's kit (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png): each its size on the sheets (owner:
     // "twice as big: their size from the mockup"), and only where nothing laid stands in front of it. Far off, behind the shaft at a quarter (DIM, the owner's depth
@@ -4197,13 +4218,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const room = (u0, u1, v0, v1) => { const x0 = Math.min(W(u0), W(u1)), x1 = Math.max(W(u0), W(u1)), y0 = Y(v0), y1 = Y(v1); return !lv.rects.some((q) => q !== r && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1); };   // nothing laid there
     const R0 = r.mnRoom || (r.mnRoom = { under: room(0, Math.min(wt - 0.2, 3.3), ht, ht + 2.2), end: room(wt - 0.7, wt, ht, ht + 1.1), wall: room(0, 0.4, -1.4, ht + 1.1) });   // (once a ledge: where its timber has room)
     if (r.crumble) {   // loose rubble and broken ore held up by rotten boards: rounded stones with black gaps in two rows, shaking as it gives, grit falling
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0);
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0);   // (2.5D: no
+      // fading, a dither in depth reads as a sieve: it shakes)
       box(r.x0, r.y0 + 2 * P, r.x1, r.y1, K, a, 0, 10, 0);   // the dark between its stones
       const n = Math.max(1, Math.round(wt / 0.55));
       for (let j = 0; j < 2; j++) for (let i = 0; i < n; i++) { const q = (i + 0.5 + (j % 2) * 0.35) / n; if (q > 1) continue; const rr = (0.24 + 0.08 * hsh(i * 7 + j)) * t, x = W(q * wt) + shake(i + j * 9), y = snap(r.y0 + ((j + 0.5) / 2) * (r.y1 - r.y0) + 0.04 * t);
         F(x, y, rr, 0, 0, rr * 0.85, c, a, 0); F(x - snap(0.06 * t), y - snap(0.06 * t), rr * 0.45, 0, 0, rr * 0.35, c, a * 1.6, 0); }   // a stone, its lit side
       if (R0.under) { post(0.02, ht, ht + 1.2, c); bw(wt - 0.6, ht, wt - 0.4, ht + 0.5, c, 3, HALF); }   // a post at the wall, a short one at its end
-      for (let i = 0; i < 3; i++) { const q = (T * 0.55 + i / 3 + hsh(i + 40)) % 1, dx = snap(Math.sin(i * 2.1) * 0.12 * t), x = E(0.4); box(x + dx, snap(r.y1 + q * 1.7 * t), x + dx + P + (i % 2) * P, snap(r.y1 + q * 1.7 * t) + P + (i % 2) * P, c, 1 - q, 0, 10, 0); }   // grit trickling off it
+      if (CINE) this.route = 0; for (let i = 0; i < 3; i++) { const q = (T * 0.55 + i / 3 + hsh(i + 40)) % 1, dx = snap(Math.sin(i * 2.1) * 0.12 * t), x = E(0.4); box(x + dx, snap(r.y1 + q * 1.7 * t), x + dx + P + (i % 2) * P, snap(r.y1 + q * 1.7 * t) + P + (i % 2) * P, c, 1 - q, 0, 10, 0); } if (CINE) this.route = 2;   // grit trickling off it (flat)
       for (let i = 0, m = Math.max(1, Math.round(wt)); i < m; i++) { const x0 = snap(r.x0 + (i * w) / m) + shake(i), x1 = snap(r.x0 + ((i + 1) * w) / m) + shake(i); box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25); }   // its edge, in pieces
       return true;
     }
@@ -4213,20 +4235,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       bx(-hw, 0, hw, ht, c);   // its roof
       for (const u of [-hw, -0.07, hw - 0.15]) bx(u, ht, u + 0.15, ht + 1.85, c); bx(-hw, ht + 1.7, hw, ht + 1.85, c);   // its posts, its floor
       line(X(-hw + 0.15), Y(ht), X(-0.07), Y(ht + 1.7), c, 1, 2); line(X(-0.07), Y(ht), X(-hw + 0.15), Y(ht + 1.7), c, 1, 2);   // braced across
-      mnLamp(X(hw * 0.55), r.y1, true, 0.75);   // a lamp in it
+      if (CINE) this.route = 4; mnLamp(X(hw * 0.55), r.y1, true, 0.75); if (CINE) this.route = 2;   // a lamp in it (small, as on the walls)
       { const bx0 = X(hw * 0.55), by = Y(ht + 1.38); box(snap(bx0 - 0.18 * t), by, snap(bx0 + 0.18 * t), snap(by + 0.29 * t), G, 1, 0, 10, 4); box(snap(bx0 - 0.21 * t), by, snap(bx0 + 0.21 * t), by + P, G, 1, 0, 10, 0); }   // a basket on its floor
-      for (const u of [-0.4, 0.4]) { F(X(u), Y(-0.3), 0.17 * t, 0, 0, 0.17 * t, c, 1, 4); line(X(u), Y(-0.45), X(u), Y(-3), G, 1, 1); }   // its pulleys, their ropes up
+      if (CINE) this.route = 0; for (const u of [-0.4, 0.4]) { F(X(u), Y(-0.3), 0.17 * t, 0, 0, 0.17 * t, c, 1, 4); line(X(u), Y(-0.45), X(u), Y(-3), G, 1, 1); } if (CINE) this.route = 2;   // its pulleys, their ropes up (flat)
       lip(); return true;
     }
     if (r.plank) {   // a scaffold board: weathered grey planks, their grain in lines, on a post up the wall, a chain from it to its middle, a pickaxe hung off its end
       if (r.bouncy) return false;
       box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 3); box(r.x0, r.y1 - P, r.x1, r.y1, K, 1, 0, 10, 0);   // its boards, their lower edge
-      if (on && R0.wall) { bw(0, -1.3, 0.22, ht + 1.0, G, 3, HALF); for (let i = 0; i < 6; i++) { const q = (i + 0.5) / 6; box(snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))), snap(Y(-1.2) + q * (r.y0 - Y(-1.2))), snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))) + 2 * P, snap(Y(-1.2) + q * (r.y0 - Y(-1.2))) + P, G, 1, 0, 10, 0); } }   // its post, the chain's links
-      if (R0.end) { const x = E(0.2), y = Y(ht + 0.3), dir = -d, hx = snap(x + dir * 0.27 * t), hy = snap(y + 0.68 * t), Q = (u, v) => [snap(hx + dir * u * 0.9 * t), snap(hy - v * 0.9 * t)];   // a pickaxe hung off its end by its head
+      if (on && R0.wall) { bw(0, -1.3, 0.22, ht + 1.0, G, 3, HALF); if (CINE) this.route = 0; if (hsh(31) < 1 / 3) for (let i = 0; i < 6; i++) { const q = (i + 0.5) / 6; box(snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))), snap(Y(-1.2) + q * (r.y0 - Y(-1.2))), snap(W(0.22) + q * (E(wt * 0.4) - W(0.22))) + 2 * P, snap(Y(-1.2) + q * (r.y0 - Y(-1.2))) + P, G, 1, 0, 10, 0); } }   // its post, the chain's links
+      if (CINE) this.route = 0;   // (what hangs off it flat, and on one board in three: the rule book)
+      if (R0.end && hsh(32) < 1 / 3) { const x = E(0.2), y = Y(ht + 0.3), dir = -d, hx = snap(x + dir * 0.27 * t), hy = snap(y + 0.68 * t), Q = (u, v) => [snap(hx + dir * u * 0.9 * t), snap(hy - v * 0.9 * t)];   // a pickaxe hung off its end by its head
         line(x, r.y1, x, y, G, 1, 1); line(x, y, hx, hy, G, 1, 2);
         const [ax, ay] = Q(-0.4, 0.2), [bx0, by0] = Q(-0.15, -0.04), [cx0, cy0] = Q(0.15, -0.04), [ex, ey] = Q(0.42, 0.22);
         line(ax, ay, bx0, by0, G, 1, 2); line(bx0, by0, cx0, cy0, G, 1, 3); line(cx0, cy0, ex, ey, G, 1, 2); }
-      lip(); return true;
+      if (CINE) this.route = 2; lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
     {   // rough rock, dotted grey, its underside shaded: a timber beam under it, a post down to its footing, a coil of rope off its end (half dark)
@@ -4240,7 +4263,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(r.x0, Y(0.3), r.x1, Y(0.48), G, 1, 0, 10, 3);   // its cap
       }
       if (R0.under) { bw(0, ht, Math.min(wt - 0.4, 3.2), ht + 0.3, G, 3, HALF); post(0.55, ht + 0.3, ht + 1.9); bw(0.45, ht + 1.9, 0.85, ht + 2.08, G, 4, HALF); }   // its beam, its post, its footing
-      if (R0.end) { const x = E(0.2), y = r.y1; for (const rr of [0.27, 0.19, 0.11]) F(x, snap(y + 0.3 * t), rr * t, 0, 0, rr * 1.2 * t, G, 1, 4); line(x, snap(y + 0.6 * t), snap(x + 0.06 * t), snap(y + 0.95 * t), G, 1, 1); box(x, y, x + P, snap(y + 0.05 * t), G, 1, 0, 10, 0); }   // a coil of rope hung, its end
+      if (R0.end && hsh(33) < 1 / 3) { if (CINE) this.route = 0; const x = E(0.2), y = r.y1; for (const rr of [0.27, 0.19, 0.11]) F(x, snap(y + 0.3 * t), rr * t, 0, 0, rr * 1.2 * t, G, 1, 4); line(x, snap(y + 0.6 * t), snap(x + 0.06 * t), snap(y + 0.95 * t), G, 1, 1); box(x, y, x + P, snap(y + 0.05 * t), G, 1, 0, 10, 0); if (CINE) this.route = 2; }   // a coil of rope
+      // hung, its end (on one ledge in three; flat)
       lip(); return true;
     }
   };
@@ -4417,7 +4441,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);

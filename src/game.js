@@ -1958,7 +1958,7 @@ class Game {
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
-    ui.hideAll(); ui.banner();
+    ui.hideAll(); this.story(STORY_LIVE && w === 0 && s === 0 && 'moon_fall', () => ui.banner());   // (the story's first card, before 1-1: STORY)
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
@@ -2037,7 +2037,15 @@ class Game {
   }
   where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + this.num; }
   get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.mode === 'camp' ? wNo(this.world) : this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
+  // A story card (STORY) once a play-through, the game held under it till Next; `then` after it, or at once when none is due (`again`: shown seen or not)
+  story(id, then, again) {
+    const c = id && STORY[id];
+    if (!c || (save.seen['card_' + id] && !again)) { if (then) then(); return; }
+    this.storyOn = true; this.paused = this.state; this.state = 'pause'; input.clear();
+    ui.story(c, () => { save.seen['card_' + id] = 1; persist(); this.storyOn = false; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); if (then) then(); });
+  }
   togglePause(on) {
+    if (this.storyOn) return;   // (a story card is up: its Next goes on)
     if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); pmsg('level_paused', this.lvl()); }   // (the platform told: no play while paused, nor in the menu after)
     else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); pmsg('level_resumed', this.lvl()); }
   }
@@ -2157,6 +2165,27 @@ function px(text, max = Infinity, left = false) {
   }
   return e;
 }
+// Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once, new art from the pack's
+// prompts): `n` the numeral on the frame, `still` the approved art, `title` under the card. Game.story shows one, the game held under it till Next.
+const STORY = {
+  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
+  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
+  city_friendship: { n: 'III', still: 'assets/cards/03_city_friendship.png', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+};
+const STORY_LIVE = /[?&]story\b/.test(location.search);   // (till the owner's «да» to the cards' art they come by themselves only with ?story)
+// The cards' one frame, drawn here in its own pixels (the pack: «draw the thin frame procedurally… more reliable and always aligned»): indigo round a 2:3
+// window, an ivory keyline, lavender stepped corners, a crescent moon at its top with a vermilion knot either side, gold specks at its tips.
+function storyFrame() {
+  const I = '#201638', W = '#f7f3ee', L = '#ab80e5', R = '#f34545', G = '#ffb642', r = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+  let s = `<path fill="${I}" fill-rule="evenodd" d="M0 0H128V192H0Z M4 6V186H124V6Z"/>` + r(3, 5, 122, 1, W) + r(3, 186, 122, 1, W) + r(3, 5, 1, 182, W) + r(124, 5, 1, 182, W);
+  for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {   // a corner: an L along each edge and a step inside it
+    const X = (x, w) => (sx > 0 ? x : 128 - x - w), Y = (y, h) => (sy > 0 ? y : 192 - y - h);
+    s += r(X(0, 12), Y(0, 2), 12, 2, L) + r(X(0, 2), Y(0, 14), 2, 14, L) + r(X(5, 3), Y(8, 3), 3, 3, L) + r(X(0, 1), Y(0, 1), 1, 1, G);
+  }
+  s += `<circle cx="64" cy="4" r="7" fill="${I}"/><circle cx="64" cy="4" r="6" fill="none" stroke="${L}" stroke-width="1"/><circle cx="63" cy="4" r="3.5" fill="${W}"/><circle cx="65" cy="3" r="3" fill="${I}"/>`;
+  s += r(53, 2, 3, 3, R) + r(72, 2, 3, 3, R);
+  return `<svg class="sframe" viewBox="0 0 128 192" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
+}
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
 function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
@@ -2205,7 +2234,7 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
-  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map']) $(id).classList.remove('on'); this.open = null; },
+  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; },
   menu() {
     const p = this.panel('menu');
     const title = cap(el('h1', 'title', 'UPWELL'), 'title'); title.lang = 'en'; p.append(title);   // the name in VT323 whatever the language
@@ -2399,6 +2428,12 @@ const ui = {
     for (const id of game.taken) build.append(iconEl(id));
     for (const id of game.syns) { const i = iconEl(SYNERGIES.find((q) => q.id === id).of[0]); i.classList.add('syn'); build.append(i); }   // a synergy: its first card, ringed
     p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, ...(d25 ? [d25] : []), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+  },
+  story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
+    const p = this.panel('story'), card = el('div', 'scard'), art = new Image();
+    art.className = 'sart'; art.alt = L2(c.title); art.decoding = 'async'; art.src = c.still;
+    card.innerHTML = storyFrame(); card.prepend(art); card.append(el('div', 'snum', c.n));
+    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', done), 'next'));
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
@@ -3155,6 +3190,7 @@ window.__up = {
   go(w, s = 0, seed) { if (game.state === 'menu') game.startRun(); game.mode = 'run'; game.rc = null; game.world = w; game.stage = s; nextSeed = seed == null ? null : seed; game.state = 'play'; game.buildLevel(false); ui.hideAll(); return this.state; },
   god(on = true) { game.invuln = on ? 1e9 : 0; return game.invuln; },
   give(n) { game.coins += n; return game.coins; },
+  story(id) { game.story(id, null, true); return !!STORY[id]; },   // a story card shown, seen or not (for a look)
   // Press or let go of a control as a player would: 'left', 'right', 'down' or 'jump'.
   key(what, on = true) { input.set(what, !!on); return { dir: input.dir, down: input.down, jump: input.jump }; },
   // A slingshot pull (dx, dy) in CSS px from where the mouse went down, let go at once.

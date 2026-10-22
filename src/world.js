@@ -296,7 +296,7 @@ const GATE = { at: [0.55, 0.65], run: ['gate', 'gate2', 'gate3', 'gate3'] };
 // `rest` s (from, to), rings and flashes `warn` s, then the train, `len` views long, goes through at `v` views a second, and hurts.
 const TRAIN = { p: 0.45, at: [0.3, 0.7], h: 0.11, rest: [4, 7], warn: 1.6, len: 2.5, v: 2.2 };
 const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
-const CRUMBLE = { time: 0.55, back: 3 };   // gives way `time` s after a touch, is back `back` s later
+const CRUMBLE = { time: 0.55, back: 3, board: 0.45 };   // gives way `time` s after a touch, is back `back` s later; a rope bridge's board (D) `board` tiles deep
 const SLICK = { fr: 0.03 };
 // Wall coats beside ice: moss takes the hero at a touch and lets it slide at `slide` of the
 // usual speed; rubber takes nothing and throws it back off at `x` R/s and `up` of a jump's
@@ -852,8 +852,11 @@ const CAMPAIGN = [
   { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutShop', 'tutEnemy', 'tutHelmet', 'tutMix', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
     intro: [], enemies: ['crawler'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,   // the tutorial (owner): CHUNKS.tut*, in their order
     news: { en: 'how to climb', es: 'cómo trepar', pt: 'como escalar', ja: 'のぼりかた' } },
-  { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: MINE, intro: ['crumble', 'bridge'], enemies: ['crawler', 'shell'], foes: 0.5, candy: ['bubble', 'bubble'], cage: true, seed: 4105,   // (1-1's surfaces first, it being the tutorial now)
-    news: { en: "crumbling blocks: don't stand still", es: 'bloques que se caen: no te quedes quieto', pt: 'blocos que desmoronam: não fique parado', ja: 'くずれる ブロック: とまるな' } },
+  { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: { mosswall: 3, chimney: 2, planks: 1, shelves: 1, stairs: 1, crumble: 1, bridge: 1, lift: 1 },   // (1-1's surfaces first, it being the tutorial now)
+    motif: ['rope', 'rope2', 'ropewall'], steps: true, sparse: true, intro: ['crumble'], enemies: ['crawler', 'shell'], foes: 0.7, pair: 0.3, candy: ['bubble', 'bubble'], cage: true, seed: 4105,   // the Village's second by the practice of 1-7 (owner, 2026-10-22,
+    // round 2: «Начинай все по списку»): its one idea bridges of boards falling behind the hero, met (a crumbling block), applied (a bridge across), varied (bridges by
+    // turns up the shaft), with the walls (the towers' channel); enemies more and in pairs, decor less; the walls in the pool (moss, chimneys)
+    news: { en: 'falling bridges', es: 'puentes que caen', pt: 'pontes que caem', ja: 'おちる はし' } },   // (short: one line at 320 px; «keep moving» is the crumble hint's)
   { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: MINE, intro: [], enemies: ['spitter', 'crawler', 'tumbler'], foes: 0.45, candy: ['bubble'], seed: 4106,
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: MINE, intro: [], set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.55, pair: 0.1, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,
@@ -1149,6 +1152,7 @@ const UNLOCKS = [
 // any one can follow any other within a jump (the bottom rises about 6.3 tiles). `d`: difficulty 1–3. Which way
 // round a chunk goes is picked from its footholds (see stepCost).
 //   #  block        I  ice block (nothing sticks)   C  crumbles (and comes back)
+//   D  a rope bridge's board, one a tile: stood on, it gives way by itself (a run of them falls board by board behind the hero), from below a plank
 //   =  plank (one-way, at the top of its tile)      M  plank sliding along its row   W  one sliding 3 tiles past its ends and back
 //   S  spring on the block below    ^  spikes on the block below   v  spikes under the block above
 //   >  spikes on the left wall      <  on the right    [  ice on the left wall   ]  on the right
@@ -1285,6 +1289,51 @@ const CHUNKS = {
     '............',
     '..o.........',
     '####........'] },
+  rope: { d: 1, rows: [   // a rope bridge of boards (D) across the shaft to a ledge up at the far wall, coins along it: run it, its boards falling behind
+    '............',   // (1-2's own, owner 2026-10-22: «мостки, которые обрушиваются за спиной»); its far ledge clear over its end, for the jump up
+    '............',
+    '..........##',
+    '............',
+    '............',
+    '...o.o.o.o..',
+    '............',
+    '###DDDDDD...',
+    '............'] },
+  rope2: { d: 2, rows: [   // short bridges of boards off small ledges at the walls, by turns: up across the shaft from the end of one onto the next, each
+    '............',   // giving way under the hero (a ledge over a ledge at its wall: none to climb straight up past the boards)
+    '...o........',
+    '##DDDD......',
+    '............',
+    '............',
+    '........o...',
+    '......DDDD##',
+    '............',
+    '............',
+    '...o........',
+    '##DDDD......',
+    '............'] },
+  ropewall: { d: 2, tall: true, rows: [   // the towers' channel with boards for steps, by turns off each side: up them before they go, or by the walls
+    '............',   // (the hero's own surfaces; the boards a way up, not the only one); four rows over the towers: out of the channel onto one,
+    '............',   // room to jump round what the next chunk has over the channel (a gate's ledge over it all: the bot butted it from in the channel)
+    '............',
+    '............',
+    '####....####',
+    '####.o..####',
+    '####..DD####',
+    '####....####',
+    '####....####',
+    '####DD..####',
+    '####..o.####',
+    '####....####',
+    '####..DD####',
+    '####....####',
+    '####....####',
+    '####DD..####',
+    '####.o..####',
+    '####....####',
+    '####....####',
+    '............',
+    '............'] },
   lift: { d: 2, rows: [
     '............',
     '............',
@@ -1768,7 +1817,7 @@ const CHUNKS = {
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
-  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge'],
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge', 'rope', 'rope2', 'ropewall'],
   danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
@@ -1790,7 +1839,7 @@ const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).filter((id) => !CHUNKS[id].ta
 // (`tall` ones left out: they are a motif level's, which fills its height by `fits`, and the other levels' rooms stay planned as they were)
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
-const STAND = new Set(['#', 'I', 'C', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z', 'U', 'L']);
+const STAND = new Set(['#', 'I', 'C', 'D', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z', 'U', 'L']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
@@ -2060,8 +2109,9 @@ class Level {
       if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k) && fits(k)) w[k] = pool[k];   // a small pool: kinds may run
       if (!Object.keys(w).length && mo && mo.includes(Object.keys(pool)[0])) for (const k in this.rc.chunks) if (CHUNKS[k].d <= maxD && k !== this.last && fits(k)) w[k] = this.rc.chunks[k];   // no motif chunk fits: the rest of its pool
       if (mo && mo.includes(Object.keys(pool)[0])) {   // a motif's chunks by turns: one not laid yet in this level first, while there is one (the pilot shows each)
-        const fresh = Object.keys(w).filter((k) => !this.placed.some((q) => q.id === k));
-        if (fresh.length) for (const k of Object.keys(w)) if (!fresh.includes(k)) delete w[k];
+        const fresh = Object.keys(w).filter((k) => !this.placed.some((q) => q.id === k)), next = this.rc.steps && mo.find((k) => fresh.includes(k));   // (`steps`: in the
+        // motif's order, meet, apply, vary, combine: the digest §5's four steps)
+        if (fresh.length) for (const k of Object.keys(w)) if (next ? k !== next : !fresh.includes(k)) delete w[k];
       }
       if (Object.keys(w).length || !mo) id = pick(rnd, w);
       else if (!this.rested && left >= CHUNKS.rest.rows.length * this.tile) { id = 'rest'; this.rested = true; }   // nothing fits: the rest, under the way out
@@ -2265,7 +2315,8 @@ class Level {
         while (r1 + 1 < H && same(r1 + 1)) r1++;
         for (let rr = r; rr <= r1; rr++) for (let q = k; q <= k1; q++) used.add(key(rr, q));
         this.rects.push(this.box(X(k), Y(r1 + 1), X(k1 + 1), Y(r) - (ch === 'L' ? MOCHI.beam * t : 0), SOLID[ch]));   // (a low beam: shy of its tile's foot, MOCHI)
-      } else if ((ch === '=' || ch === 'M' || ch === 'W') && first) {
+      } else if (ch === 'D') this.rects.push(this.box(X(k), Y(r + 1), X(k + 1), Y(r + 1) + CRUMBLE.board * t, { plank: true, crumble: true, board: true }));   // a board (each its own; deeper than a plank: its slats seen)
+      else if ((ch === '=' || ch === 'M' || ch === 'W') && first) {
         const k1 = runEnd(r, k, ch), b = this.box(X(k), Y(r + 1), X(k1 + 1), Y(r + 1) + LEVEL.plank * R, { plank: true });
         if (ch === 'M') b.move = { a: l, b: this.r - (b.x1 - b.x0), v: (this.rng() < 0.5 ? -1 : 1) * R * (1.6 + this.rng() * 1.2) };
         else if (ch === 'W') b.move = { a: X(Math.max(0, k - 3)), b: X(Math.min(COLS, k1 + 4)) - (b.x1 - b.x0), v: (this.rng() < 0.5 ? -1 : 1) * R * (1.6 + this.rng() * 1.2) };   // a short way to and fro,
@@ -2451,7 +2502,7 @@ class Level {
           if (r.crumbling && (r.t += dt) > AC.time) { r.gone = true; r.t = 0; sound.play('crumble', 1, 0.55); crumbleFx(r, PAL.gray); }
         }
       } else if (r.crumble && !r.gone) {
-        if (r.hit && !r.crumbling) { r.crumbling = true; sound.play('crumble', 0.6); }
+        if (r.hit && !r.crumbling) { r.crumbling = true; sound.play('crumble', r.board ? 0.35 : 0.6, r.board ? 1.3 : 1); }   // (a board's softer, higher: a bridge of them creaks in a run)
         r.hit = false;
         if (r.crumbling && (r.t += dt) > (this.crumbleTime || CRUMBLE.time)) { r.gone = true; r.t = 0; crumbleFx(r, this.theme.crumble); }
       } else if (r.crumble || r.broke) {   // back again once the hero is out of its way: a crumbled block in a while, a smashed one sooner, or at once under a hero coming down onto it
@@ -4002,9 +4053,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
     if (r.crumble) {   // a rope bridge (the owner's pick C, 2026-10-21, of six in wood: grey looked strange in a village): narrow slats wide apart, each shaking
       // its own way as it gives, two grey ropes through them
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = 1 - 0.5 * u * u, n = r.board ? 1 : Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;   // (a board: one slat, the one that goes)
       for (let i = 0; i < n; i++) {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 ? 2 * P : 0) + ox;
+        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 || r.board ? 2 * P : 0) + ox;   // (a board's last too: the next board's comes on)
         box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);   // a slat, its underside in shade
         box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
       }
@@ -4014,7 +4065,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           const ky = snap(r.y0 - 1.0 * t), kx = snap(wx + d * 0.17 * t);
           box(snap(Math.min(wx, wx + d * 0.32 * t)), ky, snap(Math.max(wx, wx + d * 0.32 * t)), ky + snap(0.28 * t), PAL.gray, a, 0, 10, 0); box(kx, ky + P, kx + P, ky + 2 * P, PAL.black, a, 0, 10, 0);
           line(wx + d * 0.3 * t, ky + 0.22 * t, wx + d * 0.85 * t, r.y0 + 2 * P, PAL.gray, a);
-        } else if (hang) {
+        } else if (hang && !r.board) {   // (a bridge of boards: none off each)
           const hx = snap(ex + d * 0.22 * t), wy = snap(r.y1 + 0.75 * t);
           if (wl || wr) { box(hx, r.y1, hx + P, wy, PAL.gray, a, 0, 10, 0); box(hx - 2 * P, wy, hx + 3 * P, wy + 4 * P, PAL.gray, a, 0, 10, 0); box(hx, wy + P, hx + P, wy + 2 * P, PAL.black, a, 0, 10, 0); }   // its rope, a weight on it
           else box(hx, r.y1, hx + P, snap(r.y1 + 0.3 * t), PAL.gray, a, 0, 10, 0);   // a frayed end of rope

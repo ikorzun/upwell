@@ -13,8 +13,8 @@ const CINE = (() => {
   const r = /[?&]res=(\d)/.exec(location.search);
   // bonus (?bonus=A-E), the bonuses' depth to pick from (owner: «У монет и сердец потерялся объем»; no 3D engine: «будем отрисовывать кодом псевдо 3д»): A as at
   // first, flat; B in depth toward the eye (SMALL); C a token's thickness, three copies a tone darker; D as B, deeper; E turning with its thickness (THICK
-  // of its pixels) on the side turned to us, in its own inks a tone darker
-  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'A', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
+  // of its pixels) on the side turned to us, in its own inks a tone darker: the owner's pick («Е»), the default
+  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
 })();
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }

@@ -219,12 +219,13 @@ const kitThing = (lv, r) => {
   const th = lv.theme, t = lv.tile, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, w = r.x1 - r.x0, X = (u) => wx + d * u * t;
   const clear = (x0, y0, x1, y1) => !lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1) && !lv.rects.some((q) => !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
-  const steady = (min) => !(r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.crack || r.cage || r.slick || r.magnet) && (wl || wr) && w >= min * t
+  const steady = (min) => !(r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.crack || r.cage || r.slick || r.magnet) && (wl || wr) && !(wl && wr) && w >= min * t   // (a row across the shaft is a way through: the tutorial's helmet breaks one)
     && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader'));
   let out = null;
   if (th.village) {   // by a hash of its height, so that two ledges a beat apart are not alike
     const k = Math.floor(((Math.imul(Math.round(b / t), 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    if (k === 0 && steady(2.6) && room(0, 4.6, 4.9)) out = { kind: 'sakura' };
+    if (r.kitWant === 'lantern' && steady(4) && room(0, 4, 4.4)) out = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t };   // asked for by its chunk (CHUNKS kit)
+    else if (k === 0 && steady(2.6) && room(0, 4.6, 4.9)) out = { kind: 'sakura' };
     else if (k === 1 && steady(3) && room(0, 3.5, 3.8)) out = { kind: 'scarecrow' };
     else if (k === 2 && steady(4) && room(0, 4, 4.4)) out = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t };
     else if (k === 4 && steady(2.2) && room(0, 4.4, 5.3)) out = { kind: 'koinobori' };
@@ -270,7 +271,8 @@ const COIN = { r: 0.54, magnet: 2.6, drag: 2.4, burst: 260, home: 0.25, seek: 60
 // Coins hover clear of what they are laid by (owner, 2026-10-22: «монеты и другие бонусы не должны соприкасаться с платформами, они как бы парят над ними на
 // минимальном расстоянии, не соприкасаясь даже под углом»). A coin's radius is over half a cell, so one in a cell's middle touched the ledge under it (half of
 // all coins did). Level.clearBonuses moves each `gap` game pixels clear of ledges, blocks, a mover's whole way and the walls, corners too: up first, else
-// down, aside or up aside, a game pixel at a time, `reach` tiles at most. A seesaw's and a mill's seats come and go: not counted. Candies already hover.
+// down, aside or up aside, a game pixel at a time, `reach` tiles at most; with no room there it is not laid. A seesaw's and a mill's seats come and go:
+// not counted. Candies already hover.
 const BONUS_GAP = { gap: 2, reach: 0.6 };
 const SPRING = { v: 1.45, anim: 0.18 };   // v: of a jump's speed
 // Ledges by world (user: some bounce, some pull; the random run's): a Cave plank in `bouncy` of them throws the hero up at `v`
@@ -1595,16 +1597,16 @@ const CHUNKS = {
     '####........',
     '............'] },
   mochi: { d: 2, rows: [   // the pestle for mochi (MOCHI): a trip hammer pounds a mortar sunk in the ledge, right at the mouth of a way under a low beam that
-    '............',   // only a flat hero fits, coins and a big one at its end, a block closing it (a mortar standing on the ledge was a step: the hero came off
-    '..###.......',   // it bouncing, too tall for the way in). The ledges stop short of the walls, so the ledge is come to from under either side and the walls
-    '............',   // climbed past the ledges over it (off walls, the bot, out of a ride2's channel, found no way round). The way up is by the post, clear of
-    '............',   // the hammer
+    '............',   // only a flat hero fits, into a closed room at its end with a big coin (a coin hovers clear, and the way's 1.2 tiles have no room for
+    '..###.......',   // one: BONUS_GAP), a block closing it (a mortar standing on the ledge was a step: the hero came off it bouncing, too tall for the way in).
+    '............',   // The ledges stop short of the walls, so the ledge is come to from under either side and the walls climbed past the ledges over it (off
+    '............',   // walls, the bot, out of a ride2's channel, found no way round). The way up is by the post, clear of the hammer
     '.......###..',
     '............',
     '............',
-    '......KKK...',
-    '..#LLL......',
-    '..#O.o...P..',
+    '..###.KKK...',
+    '..#..L......',
+    '..#.O....P..',
     '..####UUU#..',
     '............'] },
   icicles: { d: 2, rows: [
@@ -1721,7 +1723,8 @@ const CHUNKS = {
     '...2..o.....',
     '............',
     '.......####.'] },
-  tutEnemy: { d: 1, kind: 'tut', rows: [   // one crawler on the one wide ledge on the way
+  tutEnemy: { d: 1, kind: 'tut', kit: 'lantern', rows: [   // one crawler on the one wide ledge on the way; the shrine on its wall's ledge, under the helmet's
+    // (owner: «перенеси святилище до бонуса с каской или после: сейчас платформа ломается и его нельзя зажечь»; it stood on the row the helmet breaks)
     '............',
     '............',
     '.........###',
@@ -1996,24 +1999,20 @@ class Level {
     }
     this.clearBonuses(-Infinity, Infinity);   // (BONUS_GAP)
   }
-  // Coins laid from y0 down to y1 moved off what they touch (BONUS_GAP): a ledge, a block, a mover's whole way, a wall. One with no room within reach (a
-  // squeeze) goes where there is the most and is drawn just small enough to hover there (c.fit, of its radius).
+  // Coins laid from y0 down to y1 moved off what they touch (BONUS_GAP): a ledge, a block, a mover's whole way, a wall. One with no room within reach is
+  // not laid (all coins one size: owner, 2026-10-22, «Монеты всегда одинакового размера, как сейчас мелкие»).
   clearBonuses(y0, y1) {
-    const R = this.R, P = PIX.size, gap = BONUS_GAP.gap * P, cr = COIN.r * R, l = this.l, r = this.r;
+    const R = this.R, P = PIX.size, need = COIN.r * R + BONUS_GAP.gap * P, l = this.l, r = this.r;
     const solid = this.rects.filter((q) => !q.gone && !(q.move && (q.move.wheel || q.move.seesaw)) && q.y1 > y0 - 3 * R && q.y0 < y1 + 3 * R)
       .map((q) => q.move ? { x0: Math.min(q.move.a, q.move.b), x1: Math.max(q.move.a, q.move.b) + q.x1 - q.x0, y0: q.y0, y1: q.y1 } : q);
-    const room = (x, y) => solid.reduce((m, q) => Math.min(m, Math.hypot(Math.max(q.x0 - x, 0, x - q.x1), Math.max(q.y0 - y, 0, y - q.y1))), Math.min(x - l, r - x));   // the radius free there
-    for (const c of this.coins) {
-      const rad = c.v > 1 ? 1.4 * cr : cr;
-      if (c.drop || c.y < y0 || c.y > y1 || room(c.x, c.y) >= rad + gap) continue;
-      let best = { x: c.x, y: c.y, f: room(c.x, c.y) };
-      out: for (let d = P; d <= BONUS_GAP.reach * this.tile; d += P) for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-        const x = c.x + dx * d, y = c.y + dy * d, f = room(x, y);
-        if (f >= rad + gap) { best = { x, y, f }; break out; }
-        if (f > best.f) best = { x, y, f };
-      }
-      c.x = best.x; c.y = best.y; if (best.f < rad + gap) c.fit = Math.max(0.3, (best.f - gap) / rad);
-    }
+    const clear = (x, y) => x - l >= need && r - x >= need && solid.every((q) => Math.hypot(Math.max(q.x0 - x, 0, x - q.x1), Math.max(q.y0 - y, 0, y - q.y1)) >= need);
+    const n = this.coins.length;
+    this.coins = this.coins.filter((c) => {
+      if (c.drop || c.y < y0 || c.y > y1 || clear(c.x, c.y)) return true;
+      for (let d = P; d <= BONUS_GAP.reach * this.tile; d += P) for (const [dx, dy] of [[0, -d], [0, d], [-d, 0], [d, 0], [-d, -d], [d, -d]]) if (clear(c.x + dx, c.y + dy)) { c.x += dx; c.y += dy; return true; }
+      return false;
+    });
+    this.coinTotal = Math.max(0, this.coinTotal - (n - this.coins.length));   // (counted as laid: the stars' "all coins" are those there are)
   }
   ensure(y) { while (this.top > y) this.addChunk(); }
   // Drop what has fallen far below the camera (a crumbled block stays: it comes back).
@@ -2085,6 +2084,7 @@ class Level {
     }
     this.coinTotal += this.coins.length - lens[3]; this.foeTotal += this.spawns.length - lens[4];   // as laid at last
     if (c.kind === 'gate') for (const r of this.rects.slice(lens[0])) if (r.crack) r.key = true;   // a gate's keystone
+    if (c.kit) for (const r of this.rects.slice(lens[0])) r.kitWant = c.kit;   // the thing it asks for on its wall's ledge (kitThing)
     if (this.fizzAt.length && this.top - (lift + c.rows.length) * this.tile < this.fizzAt[0] && c !== CHUNKS.pocket) {   // a candy due: over a steady ledge of this chunk
       const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile);
       if (ok.length) { const r = ok[((this.fizzKind[this.fizz.length] === 'astro' ? this.astroRng : this.rng)() * ok.length) | 0]; this.fizz.push({ x: (r.x0 + r.x1) / 2, y: r.y0 - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
@@ -4421,8 +4421,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const cr = COIN.r * R;
   for (const c of lv.coins) {
     if (c.y < top || c.y > bot) continue;
-    // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded
-    const r = (c.v > 1 ? cr * 1.4 : cr) * (c.fit || 1), a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
+    // a thick coin turning: its edge shows beside the face as it turns away, the rim and the face are shaded; all one size, a big one's worth too (owner)
+    const r = cr, a = T * 4 + c.ph, cs = Math.cos(a), s = 0.2 + 0.8 * Math.abs(cs), edge = 0.22 * r * Math.sin(a) * (cs < 0 ? -1 : 1);
     F(c.x + edge, c.y, r * s + Math.abs(edge) * 0.5, 0, 0, r, INK.coinD, 1, 9, 0);
     F(c.x, c.y, r * s, 0, 0, r, INK.coinD, 1, 9, 0);
     F(c.x - r * s * 0.04, c.y - r * 0.04, r * s * 0.72, 0, 0, r * 0.72, INK.coin, 1, 9, 6);

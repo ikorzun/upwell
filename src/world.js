@@ -114,6 +114,11 @@ const MOCHI_P = MOCHI.up + MOCHI.hold + MOCHI.slam + MOCHI.rest;
 // it turns (they hang off its rim, as a big wheel's cars do), `rad` tiles out, once round in `turn` s (2.2 tiles/s at the rim: under the 1 px a step a plank
 // takes from below, see collideLevel), its rising side the way in's (a mirrored one turns the other way); its boards planks `w` tiles wide, `hang` under the rim
 const MILL = { n: 4, rad: 3.5, turn: 10, w: 2.2, hang: 0.5 };
+// The seesaw (owner, 2026-10-22: «…и доска-качели, которую наклоняет вес героя»): a beam on a post ('V' its pivot) with a seat at each end, `L` tiles out (a jump
+// from one seat, with no run, reaches the other: at 4 tiles it fell short), planks `w` tiles wide, level. The hero's weight on a seat tips it down (`push` rad/s²,
+// `damp` 1/s: 0.8 rad/s at most, 2.2 tiles/s at a seat) as far as `max` rad (1.2 tiles), the other seat up; left alone it comes back level, slowly (`spring`: a seat left up is still most of the way up when a jump off the other gets there)
+const SEESAW = { L: 2.75, w: 3, max: 0.45, push: 2.4, damp: 3, spring: 2 };
+function seatAt(sw, side) { return { x: sw.px + side * sw.L * Math.cos(sw.th), y: sw.py + side * sw.L * Math.sin(sw.th) }; }   // a seat's middle, its top (side -1 the left one; th > 0 tips the right one down)
 function millAt(wh, i, t) { const a = wh.ph + (i / MILL.n) * TAU + wh.w * t; return { x: wh.cx + Math.cos(a) * wh.rad, y: wh.cy + Math.sin(a) * wh.rad + wh.hang, a }; }   // board i: its middle, its top
 function forkSign(lv, p) {   // a campaign fork's sign (see the renderer): under the foot of its middle wall, pointing to the way with the big coins; none without them
   const t = lv.tile, mid = (lv.l + lv.r) / 2, big = lv.coins.filter((c) => c.v >= 5 && c.y > p.y0 && c.y < p.y1);
@@ -793,7 +798,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
-    motif: ['ride', 'ride2', 'mill'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+    motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['bubble'], seed: 4102 },
@@ -1498,6 +1503,21 @@ const CHUNKS = {
     '..========..',
     '............',
     '............'] },
+  seesaw: { d: 2, rows: [   // a seesaw (SEESAW) on a post: onto the near seat from the ledge, over to the far one while it is up (a coin over it), and off it up to the
+    '............',   // ledge over the post before it goes down: from the far seat up, a jump; from the near one down, the air jump too. The ledge over the post
+    '............',   // is clear of both seats' ways up
+    '.....##.....',
+    '............',
+    '............',
+    '........o...',
+    '............',
+    '............',
+    '......V.....',
+    '............',
+    '............',
+    '............',
+    '####..##....',
+    '............'] },
   mill: { d: 2, rows: [   // a water wheel (MILL): from a ledge onto its boards as they come up its side, round over its top, off onto a ledge on the other side
     '............',
     '............',
@@ -1679,7 +1699,7 @@ const CHUNKS = {
 };
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
-  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill'], crumbling: ['crumble', 'bridge'],
+  walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2', 'mill', 'seesaw'], crumbling: ['crumble', 'bridge'],
   danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
@@ -1689,7 +1709,7 @@ const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '('
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'h', '1', '2', '3', 'P', 'Q']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'h', '1', '2', '3', 'P', 'Q', 'V']);
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -1767,7 +1787,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -1780,7 +1800,7 @@ class Level {
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
@@ -1907,7 +1927,7 @@ class Level {
     const keep = (o) => o.y0 === undefined ? o.y <= y : o.y0 <= y;
     this.rects = this.rects.filter((r) => r.cap || r.safe || keep(r));   // a ledge a fall may come back to stays
     this.spikes = this.spikes.filter(keep);
-    this.coats = this.coats.filter(keep); this.winds = this.winds.filter(keep); this.kines = this.kines.filter(keep); this.wheels = this.wheels.filter(keep);
+    this.coats = this.coats.filter(keep); this.winds = this.winds.filter(keep); this.kines = this.kines.filter(keep); this.wheels = this.wheels.filter(keep); this.seesaws = this.seesaws.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
     this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep); this.runes = this.runes.filter(keep); this.rings = this.rings.filter(keep);
   }
@@ -1940,6 +1960,10 @@ class Level {
       for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && CHUNKS[k].kind !== lastKind && !once(k) && fits(k)) w[k] = pool[k] * (mid ? 1 + 0.6 * (CHUNKS[k].d - 1) : 1);
       if (!Object.keys(w).length) for (const k in pool) if (CHUNKS[k].d <= maxD && k !== this.last && !once(k) && fits(k)) w[k] = pool[k];   // a small pool: kinds may run
       if (!Object.keys(w).length && mo && mo.includes(Object.keys(pool)[0])) for (const k in this.rc.chunks) if (CHUNKS[k].d <= maxD && k !== this.last && fits(k)) w[k] = this.rc.chunks[k];   // no motif chunk fits: the rest of its pool
+      if (mo && mo.includes(Object.keys(pool)[0])) {   // a motif's chunks by turns: one not laid yet in this level first, while there is one (the pilot shows each)
+        const fresh = Object.keys(w).filter((k) => !this.placed.some((q) => q.id === k));
+        if (fresh.length) for (const k of Object.keys(w)) if (!fresh.includes(k)) delete w[k];
+      }
       if (Object.keys(w).length || !mo) id = pick(rnd, w);
       else if (!this.rested && left >= CHUNKS.rest.rows.length * this.tile) { id = 'rest'; this.rested = true; }   // nothing fits: the rest, under the way out
       else { this.finish(); return; }
@@ -1952,7 +1976,7 @@ class Level {
     this.lastFeet = mirror ? flipRuns(c.last) : c.last;
     // Laid right on the last one, a chunk may hang a solid ledge just over a ledge under it, with
     // no room to stand there and jump: then it goes a tile higher, up to three.
-    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles, this.arenas, this.icicles, this.fizz, this.signs, this.kines, this.wheels], lens = keep.map((a) => a.length);   // (a chunk laid again higher takes back all it laid)
+    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles, this.arenas, this.icicles, this.fizz, this.signs, this.kines, this.wheels, this.seesaws], lens = keep.map((a) => a.length);   // (a chunk laid again higher takes back all it laid)
     let lift = 0;
     for (;;) {
       this.place(c, this.top - lift * this.tile, mirror);
@@ -2142,6 +2166,12 @@ class Level {
       } else if (ch === 'S') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - 0.7 * R, Y(r) - 0.36 * R, cx + 0.7 * R, Y(r), { spring: true })); }
       else if (ch === 'o' || ch === 'O') this.coin(X(k) + t / 2, Y(r) - t / 2, ch === 'O' ? 5 : 1);
       else if (ch === 'Y') this.icicles.push({ x: X(k) + t / 2, y: Y(r + 1), state: 'hang', t: 0 });
+      else if (ch === 'V') {   // a seesaw's pivot (SEESAW): its post down to the block under it, a seat at each end of its beam
+        let rr = r - 1; while (rr >= 0 && !SOLID[at(rr, k)]) rr--;
+        const py = Y(r) - t / 2, sw = { px: X(k) + t / 2, py, L: SEESAW.L * t, th: 0, om: 0, foot: rr >= 0 ? Y(rr + 1) : py + 2 * t, y0: py - (SEESAW.L + 2) * t, y1: py + (SEESAW.L + 2) * t };
+        this.seesaws.push(sw);
+        for (const side of [-1, 1]) { const p = seatAt(sw, side), hw = (SEESAW.w * t) / 2; this.rects.push(this.box(p.x - hw, p.y, p.x + hw, p.y + LEVEL.plank * R, { plank: true, move: { seesaw: sw, side } })); }
+      }
       else if (ch === 'Q') {   // a mill's hub (MILL): its wheel and its boards, at the level's time
         const cy = Y(r) - t / 2, wh = { cx: X(k) + t / 2, cy, rad: MILL.rad * t, hang: MILL.hang * t, w: ((mirror ? -1 : 1) * TAU) / MILL.turn, ph: 0, y0: cy - (MILL.rad + 2) * t, y1: cy + (MILL.rad + 2) * t };
         this.wheels.push(wh);
@@ -2284,8 +2314,16 @@ class Level {
   // Once per step: movers slide, touched crumbles count down, springs settle, the fire rises (in play only).
   update(dt, g) {
     this.t += dt;
+    for (const sw of this.seesaws) {   // the hero's weight on a seat tips it down; left alone it comes back level (SEESAW)
+      const fr = g.hero && g.hero.floorRect, on = fr && fr.move && fr.move.seesaw === sw && (g.hero.wallMask & 8) ? fr.move.side : 0;
+      sw.om += ((on ? on * SEESAW.push : -SEESAW.spring * sw.th) - SEESAW.damp * sw.om) * dt; sw.th += sw.om * dt;
+      if (Math.abs(sw.th) > SEESAW.max) { sw.th = Math.sign(sw.th) * SEESAW.max; sw.om = 0; }
+    }
     for (const r of this.rects) {
-      if (r.move && r.move.wheel) {   // a mill's board, round its hub, level (MILL)
+      if (r.move && r.move.seesaw) {   // a seesaw's seat, at its beam's end, level
+        const p = seatAt(r.move.seesaw, r.move.side), w = r.x1 - r.x0, h = r.y1 - r.y0, x0 = p.x - w / 2;
+        r.dx = x0 - r.x0; r.dy = p.y - r.y0; r.x0 = x0; r.x1 = x0 + w; r.y0 = p.y; r.y1 = p.y + h;
+      } else if (r.move && r.move.wheel) {   // a mill's board, round its hub, level (MILL)
         const p = millAt(r.move.wheel, r.move.i, this.t), w = r.x1 - r.x0, h = r.y1 - r.y0, x0 = p.x - w / 2;
         r.dx = x0 - r.x0; r.dy = p.y - r.y0; r.x0 = x0; r.x1 = x0 + w; r.y0 = p.y; r.y1 = p.y + h;
       } else if (r.move) {
@@ -2398,7 +2436,7 @@ Body.prototype.collideLevel = function (lv, h) {
       const r = near[k], x0 = r.x0 - sk, x1 = r.x1 + sk, y0 = r.y0 - sk, y1 = r.y1 + sk;
       if (x[i] <= x0 || x[i] >= x1 || y[i] <= y0 || y[i] >= y1) continue;
       let face = 0;
-      if (r.plank) { if (this.stepMaxY > y0 + 3 || py[i] > y0 + 1) continue; face = 8; }
+      if (r.plank) { const up = Math.min(0, r.dy || 0); if (this.stepMaxY > y0 - up + 3 || py[i] > y0 - up + 1) continue; face = 8; }   // (one that rose this step, as a seesaw's seat or a mill's board: met at its top as it was)
       else if (r.stair && this.stepMaxY > r.y0 + 1 && this.stepMaxY < r.y1 + 0.5 * this.R && py[i] < y1 - 2) face = 8;   // a stair step lifts what walks into its riser onto its tread (a step-up), but only a body whose feet are at the riser: one under it is stopped
       else {
         const dT = y[i] - y0, dB = y1 - y[i], dL = x[i] - x0, dR = x1 - x[i];
@@ -2414,7 +2452,7 @@ Body.prototype.collideLevel = function (lv, h) {
       if (face === 8) {
         const v = (y[i] - py[i]) / h;
         if (v > hitW[3]) hitW[3] = v;
-        y[i] = y0; x[i] -= (x[i] - px[i] - (hero && r.move && r.move.wheel ? 0 : r.dx) * carry) * rf; mask |= 8; this.floorX += x[i]; this.floorN++; this.floorY = r.y0; this.floorRect = r;   // friction against the ledge's own motion: a mover carries what rides it (the hero on a mill's board is moved with it, Game.step)
+        y[i] = y0; x[i] -= (x[i] - px[i] - (hero && r.move && (r.move.wheel || r.move.seesaw) ? 0 : r.dx) * carry) * rf; mask |= 8; this.floorX += x[i]; this.floorN++; this.floorY = r.y0; this.floorRect = r;   // friction against the ledge's own motion: a mover carries what rides it (the hero on a mill's board is moved with it, Game.step)
         if ((r.spring || r.bouncy) && hero) this.springHit = r;
       } else if (face === 4) { const v = (py[i] - y[i]) / h; if (v > hitW[2]) hitW[2] = v; y[i] = y1; x[i] -= (x[i] - px[i]) * rf; mask |= 4; if (canTop && st && (CEIL.any || r.moss)) stick(i, 4, y1, x0, x1, r); }
       else if (face === 2) { const v = (x[i] - px[i]) / h; if (v > hitW[1]) hitW[1] = v; x[i] = x0; y[i] -= (y[i] - py[i]) * rf; mask |= 2; if (canStick && st && (v > MOVE.cling || this.pressX > 0)) stick(i, 2, x0, y0, y1, r); }
@@ -3788,6 +3826,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
       return true;
     }
+    if (r.move && r.move.seesaw) {   // a seesaw's seat (SEESAW): a board, its dark underside, on its beam's end
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
     if (r.move && r.move.wheel) {   // a mill's board (MILL): planks, their dark underside, its hanger up to the rim
       const cx = snap((r.x0 + r.x1) / 2);
       box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);
@@ -4313,6 +4355,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let x = x1 - 0.9 * R; x > x0 + 0.5 * R; x -= 1.3 * R) if (x > lv.l && x < lv.r) box(x - 0.4 * R, y0 + 0.35 * R, x + 0.4 * R, y0 + 0.35 * R + 0.5 * (y1 - y0), INK.coin, 1, 0, 10, 0);
       if (x1 > lv.l && x1 < lv.r + R) { F(x1, (y0 + y1) / 2, 1.4 * R, 0, 0, 0.7 * R, PAL.white, 0.35, 1); disc(Math.min(x1, lv.r) - 0.2 * R, y1 - 0.35 * R, 0.18 * R, PAL.white, 1); }
     }
+  }
+  for (const sw of lv.seesaws) if (seen(sw.y0, sw.y1)) {   // a seesaw (SEESAW): its post from the block under it, a stone at its foot, its beam under the seats, the pin
+    const t = lv.tile, a = seatAt(sw, -1), b = seatAt(sw, 1), dy = 0.45 * t;
+    box(snap(sw.px - 0.2 * t), snap(sw.py), snap(sw.px + 0.2 * t), snap(sw.foot), th.plank, 1, 0, 10, 0); box(snap(sw.px - 0.55 * t), snap(sw.foot - 0.3 * t), snap(sw.px + 0.55 * t), snap(sw.foot), PAL.gray, 1, 0, 10, 0);
+    line(a.x, a.y + dy, b.x, b.y + dy, th.plank, 1, (0.3 * t) / kitP); disc(sw.px, sw.py + 0.15 * t, 0.16 * t, PAL.gray, 1);
   }
   for (const kn of lv.kines) if (seen(kn.y0, kn.y1)) {   // a pestle for mochi (MOCHI): its post, its lever with a stone on its short end, its head with an iron band
     const t = lv.tile, hw = 0.5 * MOCHI.head * t, hh = 0.5 * MOCHI.head * t, st = mochiAt(kn, T), Hb = g.hero;

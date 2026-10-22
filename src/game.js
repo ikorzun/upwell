@@ -564,7 +564,7 @@ class Boss {
     this.st += dt;
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
     if (ph >= 1 && !lv.crumbleTime) { lv.crumbleTime = CART.crumble[0]; lv.crumbleBack = CART.crumble[1]; }
-    if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move && !r.move.wheel) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
+    if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move && r.move.v) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
     let vx = 0;
     if (this.state === 'hover') {
       vx = (this.dir * (rail.x1 - rail.x0) / CART.pass[ph]) * k;
@@ -731,10 +731,11 @@ class Game {
     const done = new Set(), level = (lv) => {
       if (!lv || done.has(lv)) return; done.add(lv);   // (a room is the shaft's door's too: once)
       lv.r = X(lv.r); lv.R *= k; lv.tile *= k; for (const key of ['floor', 'top', 'endY', 'capY', 'cam']) lv[key] = Y(lv[key]);
-      for (const r of lv.rects) { box(r); if (r.move && !r.move.wheel) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
+      for (const r of lv.rects) { box(r); if (r.move && !r.move.wheel && !r.move.seesaw) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
       for (const o of [...lv.spikes, ...lv.bubbles]) { box(o); xy(o); }
       for (const c of [...lv.coats, ...(lv.winds || [])]) { c.y0 = Y(c.y0); c.y1 = Y(c.y1); }
       for (const w of lv.winds || []) { w.px = X(w.px); w.py = Y(w.py); }   // (a koinobori's pole)
+      for (const sw of lv.seesaws || []) { sw.px = X(sw.px); for (const key of ['py', 'foot', 'y0', 'y1']) sw[key] = Y(sw[key]); sw.L *= k; }   // (a seesaw, SEESAW)
       for (const wh of lv.wheels || []) { wh.cx = X(wh.cx); for (const key of ['cy', 'y0', 'y1']) wh[key] = Y(wh[key]); wh.rad *= k; wh.hang *= k; }   // (a mill, MILL: its boards are boxes, above)
       for (const kn of lv.kines || []) { kn.x = X(kn.x); kn.px = X(kn.px); for (const key of ['yUp', 'yHit', 'foot', 'y0', 'y1']) kn[key] = Y(kn[key]); }   // (a pestle, MOCHI)
       for (const o of [lv.coins, lv.shots, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
@@ -821,7 +822,7 @@ class Game {
       rise = false;
     }
     if (flat && !aimed && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
-    { const fr = H.floorRect; if (!inAir && !aimed && side === 0 && fr && fr.move && fr.move.wheel && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board: its way along with it (it carried the hero, with no pace of its own, MILL)
+    { const fr = H.floorRect; if (!inAir && !aimed && side === 0 && fr && fr.move && (fr.move.wheel || fr.move.seesaw) && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board or a seat: its way along with it (it carried the hero, with no pace of its own)
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
     if (reb) {   // a rebound: the squash let go, a white ring as big as the leap, sparks up
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 700); fx.ring(H.cx, foot, (1 + 0.8 * q) * R, INK.white); fx.ring(H.cx, foot, 0.7 * R, hc);
@@ -1032,7 +1033,7 @@ class Game {
     if (this.hitstop > 0) { this.hitstop -= dt; return; }
     const lv = this.lv, hero = this.hero, playing = st === 'play', h = dt / PHYS.substeps, sk2 = 2 * WORLD.skin;
     lv.update(dt, this);
-    { const r = hero.floorRect; if (r && r.move && r.move.wheel && (hero.wallMask & 8)) hero.translate(r.dx, r.dy); }   // a mill's board carries the hero standing on it as it goes round, up and down too (MILL)
+    { const r = hero.floorRect; if (r && r.move && (r.move.wheel || r.move.seesaw) && (hero.wallMask & 8)) hero.translate(r.dx, r.dy); }   // a mill's board or a seesaw's seat carries the hero standing on it, up and down too (MILL, SEESAW)
     if (st === 'clear' && lv.portal) { this.suck(dt); this.followStep(); }
     if (playing) {
       this.activate();
@@ -1432,7 +1433,7 @@ class Game {
   // pruned, so a fall after a long wall climb still finds it.
   markSafe(r) {
     const H = this.hero, x = H.cx;
-    if (r && (r.crumble || r.spring || r.cap || r.gone || (r.move && r.move.wheel))) return;   // (nor a mill's board: round its wheel, it may be anywhere)
+    if (r && (r.crumble || r.spring || r.cap || r.gone || (r.move && (r.move.wheel || r.move.seesaw)))) return;   // (nor a mill's board nor a seesaw's seat: they may be anywhere then)
     if (r) for (const s of this.lv.spikes) if (s.dir === 0 && Math.abs(s.y1 - r.y0) < 1 && s.x1 > x - H.R && s.x0 < x + H.R) return;
     const last = this.safes[this.safes.length - 1], dx = r ? x - r.x0 : x;
     if (last && last.r === r) { last.dx = dx; return; }

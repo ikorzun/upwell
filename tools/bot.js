@@ -77,6 +77,7 @@ function snap() {
     cross: lv.crossing && Object.assign({}, lv.crossing),   // the level crossing's clock and train (the tries ran it on)
     tasks: (lv.tasks || []).map((q) => q.n), neon: new Map(lv.neonLit), tended: new Map(lv.tended), taken: lv.taken && lv.taken.slice(), gone: lv.gone && lv.gone.slice(),   // the level's tasks so far, the neon lit, the kits' things tended (a try did it)
     boss: lv.boss && { f: Object.fromEntries(Object.entries(lv.boss).filter(([, v]) => typeof v !== 'object')), b: snapBody(lv.boss.body) }, crumble: [lv.crumbleTime, lv.crumbleBack],   // its hearts, turn and clocks; the Minecart's quicker bridges
+    seesaws: (lv.seesaws || []).map((sw) => [sw.th, sw.om]),   // a seesaw's tip and its turning (SEESAW)
     rocket: g.rocket && Object.assign({}, g.rocket), rings: lv.rings.map((r) => [r, r.used]),   // a flight under way (an astro's, a boost ring's; its band moves up) and the rings flown through
   };
 }
@@ -87,7 +88,7 @@ function restore(S) {
   restoreBody(g.hero, S.hero);
   const lv = g.lv;
   lv.cam = S.cam; lv.t = S.t; lv.rects = S.rects.slice();
-  S.rects.forEach((r, i) => { const v = S.rs[i]; r.x0 = v[0]; r.x1 = v[1]; r.dx = v[2]; r.gone = v[3]; r.t = v[4]; r.hit = v[5]; r.crumbling = v[6]; r.safe = v[7]; if (r.move && !r.move.wheel) r.move.v = v[8]; r.broke = v[9]; r.paid = v[10]; r.crack = v[11]; r.y0 = v[12]; r.y1 = v[13]; r.dy = v[14]; });
+  S.rects.forEach((r, i) => { const v = S.rs[i]; r.x0 = v[0]; r.x1 = v[1]; r.dx = v[2]; r.gone = v[3]; r.t = v[4]; r.hit = v[5]; r.crumbling = v[6]; r.safe = v[7]; if (r.move && r.move.v !== undefined) r.move.v = v[8]; r.broke = v[9]; r.paid = v[10]; r.crack = v[11]; r.y0 = v[12]; r.y1 = v[13]; r.dy = v[14]; });
   lv.coins = S.coins.map((c) => Object.assign({}, c)); lv.spawns = S.spawns.slice(); lv.shots = S.shots.map((q) => Object.assign({}, q));
   [lv.coinsTaken, lv.foeKilled, lv.foeTotal] = S.counts; lv.fizz.forEach((p, i) => { p.taken = S.fizz[i]; });
   if (lv.fire) { lv.fire.y = S.fire.y; lv.fire.spitT = S.fire.spitT; lv.fire.warn = S.fire.warn && Object.assign({}, S.fire.warn); }
@@ -96,6 +97,7 @@ function restore(S) {
   lv.folk = S.folk.map(({ f, o, b }) => { for (const k of Object.keys(f)) if (!(k in o)) delete f[k]; Object.assign(f, o); if (b) restoreBody(f.body, b); return f; });   // a body made in a look ahead goes again
   lv.pickups = S.pickups.slice(); lv.pickups.forEach((p, i) => { p.sold = S.sold[i]; });
   lv.icicles = S.icicles.map((c) => Object.assign({}, c)); lv.arenas = S.arenas.map(({ a, o }) => Object.assign(a, o, { foes: o.foes.slice() }));
+  (lv.seesaws || []).forEach((sw, i) => { if (S.seesaws[i]) [sw.th, sw.om] = S.seesaws[i]; });
   if (lv.crossing) Object.assign(lv.crossing, S.cross);
   (lv.tasks || []).forEach((q, i) => { q.n = S.tasks[i]; }); lv.neonLit = new Map(S.neon); lv.tended = new Map(S.tended); if (S.taken) lv.taken = S.taken.slice(); if (S.gone) lv.gone = S.gone.slice();
   if (lv.boss) {   // what a try first set goes again (the Minecart's `called`, else the real fight never calls its spitter)

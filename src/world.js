@@ -102,6 +102,21 @@ const BUBBLE = { time: 6, rise: 2.4, ease: 6, size: 1.7, grace: 0.8 };
 // it they fly, with white streaks; a koinobori off the wall it blows from hangs limp in the calm, fills with the petals and flies with the gust (see the
 // renderer); the hero's bubble goes with it too, a wall or a floor holds the hero
 const WIND = { push: 10, on: 2.2, off: 2.6, warn: 0.9, pole: 3.2 };   // pole: its koinobori's lowest height over the chunk's foot, in tiles
+// The pestle for mochi (owner, 2026-10-22: «Пест для моти. В Деревне огромный пест бьёт по ступе. Попал под него — стал блином на пару секунд, медленный,
+// зато пролезаешь под низкими балками; иногда это нужно нарочно»): a trip hammer, its lever on a post ('K' its head, raised; 'P' its post's foot; 'U' the
+// mortar it pounds) lifts in `up` s, waits `hold` (its head shaking the last `shake`), comes down in `slam`, lies `rest`. Whoever is under it then is flat
+// for `flat` s, no heart lost: at `slow` the pace, `jump` the height, no crouch jump, as flat as the body goes (`squeeze`), and still flat while a beam is close
+// over it. 'L', a low beam: a block `beam` tiles shy of its tile's foot, so the way under it over a floor two rows down is 1.2 tiles, and only a flat hero fits
+// (measured: flat 0.9 tiles tall, it goes under 1.1; crouched, 1.26, it needs 1.3; the body as it is, 1.6). `head`: the head's width, in tiles
+const MOCHI = { up: 1.4, hold: 0.5, shake: 0.35, slam: 0.08, rest: 0.6, flat: 2.2, slow: 0.5, jump: 0.6, squeeze: 1.4, beam: 0.2, head: 1.8 };
+const MOCHI_P = MOCHI.up + MOCHI.hold + MOCHI.slam + MOCHI.rest;
+function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): the height of its foot, whether it is on its way down or down, its shake
+  const u = (t + (kn.ph || 0)) % MOCHI_P, a = MOCHI.up, b = a + MOCHI.hold, c = b + MOCHI.slam;
+  if (u < a) { const e = u / a; return { y: kn.yHit + (kn.yUp - kn.yHit) * e * e * (3 - 2 * e), down: false, shake: 0 }; }
+  if (u < b) return { y: kn.yUp, down: false, shake: u > b - MOCHI.shake ? Math.round(Math.sin(u * 90)) * PIX.size : 0 };
+  if (u < c) { const e = (u - b) / MOCHI.slam; return { y: kn.yUp + (kn.yHit - kn.yUp) * e * e, down: true, shake: 0 }; }
+  return { y: kn.yHit, down: true, shake: 0 };
+}
 const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE };
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
@@ -766,7 +781,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
-    motif: ['ride', 'ride2'], sparse: true, wind: 0.5, intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+    motif: ['ride', 'ride2'], sparse: true, wind: 0.5, set: 'mochi', intro: [], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['bubble'], seed: 4102 },
@@ -1471,6 +1486,19 @@ const CHUNKS = {
     '..========..',
     '............',
     '............'] },
+  mochi: { d: 2, rows: [   // the pestle for mochi (MOCHI): a trip hammer pounds a mortar sunk in the ledge, right at the mouth of a way under a low beam that
+    '............',   // only a flat hero fits, coins and a big one at its end, a block closing it (a mortar standing on the ledge was a step: the hero came off
+    '..###.......',   // it bouncing, too tall for the way in). The ledges stop short of the walls, so the ledge is come to from under either side and the walls
+    '............',   // climbed past the ledges over it (off walls, the bot, out of a ride2's channel, found no way round). The way up is by the post, clear of
+    '............',   // the hammer
+    '.......###..',
+    '............',
+    '............',
+    '......KKK...',
+    '..#LLL......',
+    '..#O.o...P..',
+    '..####UUU#..',
+    '............'] },
   icicles: { d: 2, rows: [
     '............',
     '............',
@@ -1624,7 +1652,7 @@ const CHUNKS = {
 // What each chunk is mostly made of: two of a kind never run (the level's rhythm, see addChunk).
 for (const [kind, ids] of Object.entries({ blocks: ['stairs', 'pillars', 'comb', 'overhang', 'iceblocks', 'vault'], planks: ['planks', 'shelves'],
   walls: ['icewall', 'mosswall', 'rubberwall', 'spikewalls', 'chimney', 'chimney2', 'towers'], moving: ['movers', 'lift', 'ride', 'ride2'], crumbling: ['crumble', 'bridge'],
-  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
+  danger: ['spikes', 'sparse'], fork: ['twinshaft', 'fork', 'fork2'], spring: ['spring'], rest: ['rest', 'pocket'], set: ['garden', 'treasury', 'arena', 'icicles', 'mochi'], gate: ['gate', 'gate2', 'gate3'], flight: ['flight'] })) for (const id of ids) CHUNKS[id].kind = kind;
 // Which set pieces each world has (one of them a level, as hard as the level allows), and an arena's waves: so many enemies each.
 const SETS = [['garden', 'treasury', 'arena'], ['icicles', 'garden', 'treasury', 'arena'], ['arena', 'treasury', 'icicles'], ['arena', 'icicles', 'treasury']];
 const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coins: big ones for winning; reach: R round its middle that starts it; drop: R over it they fall from; warn: s a wave's places are shown before it comes
@@ -1633,7 +1661,7 @@ const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '('
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'h', '1', '2', '3']);
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'Y', 'e', 'h', '1', '2', '3', 'P']);
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -1645,7 +1673,7 @@ const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).filter((id) => !CHUNKS[id].ta
 // (`tall` ones left out: they are a motif level's, which fills its height by `fits`, and the other levels' rooms stay planned as they were)
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
-const STAND = new Set(['#', 'I', 'C', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z']);
+const STAND = new Set(['#', 'I', 'C', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z', 'U', 'L']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
   const runs = (r) => {   // a tile under spikes is no foothold
@@ -1711,7 +1739,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -1724,7 +1752,7 @@ class Level {
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
@@ -1851,7 +1879,7 @@ class Level {
     const keep = (o) => o.y0 === undefined ? o.y <= y : o.y0 <= y;
     this.rects = this.rects.filter((r) => r.cap || r.safe || keep(r));   // a ledge a fall may come back to stays
     this.spikes = this.spikes.filter(keep);
-    this.coats = this.coats.filter(keep); this.winds = this.winds.filter(keep);
+    this.coats = this.coats.filter(keep); this.winds = this.winds.filter(keep); this.kines = this.kines.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
     this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep); this.runes = this.runes.filter(keep); this.rings = this.rings.filter(keep);
   }
@@ -1896,7 +1924,7 @@ class Level {
     this.lastFeet = mirror ? flipRuns(c.last) : c.last;
     // Laid right on the last one, a chunk may hang a solid ledge just over a ledge under it, with
     // no room to stand there and jump: then it goes a tile higher, up to three.
-    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles, this.arenas, this.icicles, this.fizz, this.signs], lens = keep.map((a) => a.length);   // (a chunk laid again higher takes back all it laid)
+    const keep = [this.rects, this.spikes, this.coats, this.coins, this.spawns, this.bubbles, this.arenas, this.icicles, this.fizz, this.signs, this.kines], lens = keep.map((a) => a.length);   // (a chunk laid again higher takes back all it laid)
     let lift = 0;
     for (;;) {
       this.place(c, this.top - lift * this.tile, mirror);
@@ -1922,7 +1950,7 @@ class Level {
     if (this.ringAt != null && this.top - h < this.ringAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addRing(this.top - h, this.top);
     if (this.spotAt != null && this.top - h < this.spotAt && c !== CHUNKS.pocket && c.kind !== 'set' && c.kind !== 'gate') this.addSpot(this.top - h, this.top);
     if (this.runeAt.length && this.top - h < this.runeAt[0].y && c !== CHUNKS.pocket) this.addRune(this.top - h, this.top);
-    if (this.rc && this.rc.wind && c.kind !== 'moving' && id !== 'rest' && c !== CHUNKS.pocket && this.windRng() < this.rc.wind) {   // a gusty one (WIND)
+    if (this.rc && this.rc.wind && c.kind !== 'moving' && c.kind !== 'set' && id !== 'rest' && c !== CHUNKS.pocket && this.windRng() < this.rc.wind) {   // a gusty one (WIND)
       // its koinobori's pole: off the wall it blows from, on the widest way across, as low as its carp, hanging or flying, is clear of the chunk's ledges
       const dir = this.windRng() < 0.5 ? -1 : 1, t = this.tile, rs = this.rects.slice(lens[0]).filter((q) => !q.move);
       const clear = (x0, x1, y0, y1) => !rs.some((q) => q.x1 > Math.min(x0, x1) && q.x0 < Math.max(x0, x1) && q.y1 > y0 && q.y0 < y1);
@@ -2063,7 +2091,7 @@ class Level {
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
-    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true }, H: { cage: true }, Z: { cage: true, crack: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
+    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true }, H: { cage: true }, Z: { cage: true, crack: true }, U: { mortar: true }, L: { beam: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
@@ -2073,7 +2101,7 @@ class Level {
         let r1 = r;
         while (r1 + 1 < H && same(r1 + 1)) r1++;
         for (let rr = r; rr <= r1; rr++) for (let q = k; q <= k1; q++) used.add(key(rr, q));
-        this.rects.push(this.box(X(k), Y(r1 + 1), X(k1 + 1), Y(r), SOLID[ch]));
+        this.rects.push(this.box(X(k), Y(r1 + 1), X(k1 + 1), Y(r) - (ch === 'L' ? MOCHI.beam * t : 0), SOLID[ch]));   // (a low beam: shy of its tile's foot, MOCHI)
       } else if ((ch === '=' || ch === 'M' || ch === 'W') && first) {
         const k1 = runEnd(r, k, ch), b = this.box(X(k), Y(r + 1), X(k1 + 1), Y(r + 1) + LEVEL.plank * R, { plank: true });
         if (ch === 'M') b.move = { a: l, b: this.r - (b.x1 - b.x0), v: (this.rng() < 0.5 ? -1 : 1) * R * (1.6 + this.rng() * 1.2) };
@@ -2086,6 +2114,11 @@ class Level {
       } else if (ch === 'S') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - 0.7 * R, Y(r) - 0.36 * R, cx + 0.7 * R, Y(r), { spring: true })); }
       else if (ch === 'o' || ch === 'O') this.coin(X(k) + t / 2, Y(r) - t / 2, ch === 'O' ? 5 : 1);
       else if (ch === 'Y') this.icicles.push({ x: X(k) + t / 2, y: Y(r + 1), state: 'hang', t: 0 });
+      else if (ch === 'K' && first) {   // a pestle's head, raised (MOCHI), over its run: it comes down on the block under it; its lever's post stands where the chunk's 'P' is
+        let rr = r - 1; while (rr >= 0 && !SOLID[at(rr, k)]) rr--;
+        let post = null; for (let q = 0; q < H && !post; q++) for (let kk = 0; kk < COLS; kk++) if (at(q, kk) === 'P') { post = { x: X(kk) + t / 2, foot: Y(q) }; break; }
+        if (rr >= 0 && post) this.kines.push({ x: (X(k) + X(runEnd(r, k, ch) + 1)) / 2, yUp: Y(r), yHit: Y(rr + 1), px: post.x, foot: post.foot, y0: Y(r + 1) - 2 * t, y1: Y(rr + 1) });
+      }
       else if (ch === 'e') {   // a crawler on the ledge under it (the tutorial's)
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
         if (q) this.spawns.push({ type: 'crawler', x, y: q.y0 - 1.2 * R * ENEMY.crawler.size, ledge: q });
@@ -3707,6 +3740,17 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
       return true;
     }
+    if (r.mortar) {   // a mortar for mochi (MOCHI): a wooden tub, two black hoops round it, the dark of its bowl at its mouth, its rim an edge to stand on
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 1); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);
+      for (const v of [0.38, 0.78]) box(r.x0, snap(r.y0 + v * hgt), r.x1, snap(r.y0 + v * hgt) + P, PAL.black, 1, 0, 10, 0);
+      box(snap(r.x0 + 0.3 * t), r.y0 + 2 * P, snap(r.x1 - 0.3 * t), r.y0 + 4 * P, PAL.black, 1, 0, 10, 0);
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
+    if (r.beam) {   // a low beam (MOCHI): a squared timber, its grain, a black peg near each end, its underside dark: only a flat hero goes under it
+      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, snap(r.y0 + 0.5 * hgt), r.x1, snap(r.y0 + 0.5 * hgt) + P, th.plank, 1, 0, 10, 4); box(r.x0, r.y1 - P, r.x1, r.y1, PAL.black, 1, 0, 10, 0);
+      for (const x of [r.x0 + 0.35 * t, r.x1 - 0.35 * t]) box(snap(x), snap(r.y0 + 0.25 * hgt), snap(x) + P, snap(r.y0 + 0.25 * hgt) + P, PAL.black, 1, 0, 10, 0);
+      box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }
     if (r.plank && r.move) {
       const yb = snap(r.y0 + 0.85 * t), pt = r.y0 - snap(YAEN.frame * t), cx = snap((r.x0 + r.x1) / 2), py = snap(pt - YAEN.wheel * t);
       box(r.x0, r.y0, r.x1, yb, th.mover, 1, 0, 10, 0);   // the basket under its floor, black between its rails, a post in its middle, its bottom's edge
@@ -4215,6 +4259,17 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (let x = x1 - 0.9 * R; x > x0 + 0.5 * R; x -= 1.3 * R) if (x > lv.l && x < lv.r) box(x - 0.4 * R, y0 + 0.35 * R, x + 0.4 * R, y0 + 0.35 * R + 0.5 * (y1 - y0), INK.coin, 1, 0, 10, 0);
       if (x1 > lv.l && x1 < lv.r + R) { F(x1, (y0 + y1) / 2, 1.4 * R, 0, 0, 0.7 * R, PAL.white, 0.35, 1); disc(Math.min(x1, lv.r) - 0.2 * R, y1 - 0.35 * R, 0.18 * R, PAL.white, 1); }
     }
+  }
+  for (const kn of lv.kines) if (seen(kn.y0, kn.y1)) {   // a pestle for mochi (MOCHI): its post, its lever with a stone on its short end, its head with an iron band
+    const t = lv.tile, hw = 0.5 * MOCHI.head * t, hh = 0.5 * MOCHI.head * t, st = mochiAt(kn, T), Hb = g.hero;
+    let yb = st.y;   // the head's foot, on a flat hero under it (as on the mochi)
+    if (g.flatT > 0 && Hb.maxX > kn.x - hw && Hb.minX < kn.x + hw && Hb.minY < yb && Hb.maxY > kn.yUp) yb = Math.min(yb, Hb.minY);
+    const ex = kn.x + st.shake, ey = yb - hh, py = (kn.yHit + kn.yUp) / 2 - hh, ax = ex - kn.px, ay = ey - py, al = Math.hypot(ax, ay) || 1, sx = kn.px - (ax / al) * 1.1 * t, sy = py - (ay / al) * 1.1 * t;
+    box(snap(kn.px - 0.16 * t), snap(py), snap(kn.px + 0.16 * t), kn.foot, th.plank, 1, 0, 10, 0);
+    line(sx, sy, ex, ey, th.plank, 1, (0.34 * t) / kitP);
+    box(snap(sx - 0.32 * t), snap(sy - 0.3 * t), snap(sx + 0.32 * t), snap(sy + 0.3 * t), PAL.gray, 1, 0, 10, 0); disc(kn.px, py, 0.14 * t, PAL.gray, 1);
+    box(snap(ex - hw), snap(ey), snap(ex + hw), snap(yb), th.plank, 1, 0, 10, 1); box(snap(ex - hw), snap(ey + 0.35 * hh), snap(ex + hw), snap(ey + 0.35 * hh) + 2 * kitP, PAL.gray, 1, 0, 10, 0);
+    box(snap(ex - hw), snap(yb) - kitP, snap(ex + hw), snap(yb), th.plank, 1, 0, 10, 4);
   }
   for (const w of lv.winds) if (seen(w.y0, w.y1)) {   // a gust's way (WIND): its koinobori; sakura petals drifting its way before it, flying through it, tumbling, white streaks with them
     const u = (T + w.ph) % (WIND.on + WIND.off), s = u - (WIND.off - WIND.warn), d0 = w.dir, sc = lv.tile;   // (the kit's carp's size)

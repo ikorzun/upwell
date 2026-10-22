@@ -71,7 +71,11 @@ const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the 
 // when the hero meets an enemy from over it: its middle `above` of their radii over the enemy's and at least
 // `slope` as far up as across, not rising away faster than `rel` px/s — or coming down on it at all (generous:
 // testers found stomps too exact). `bounce` was 1.0, then 0.8: the user found the hop off a kill too high.
-const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, slope: 0.3, rel: -350 };
+// A stomp: the hero's middle over the enemy's by `above` of the two radii (all its top half, the tester could not tell the old cone's edge), not going up
+// into it faster than `rel` px/s, or falling onto it while it is over its middle at all; else a touch hurts. An enemy that can be stomped looks scared with the
+// hero over it within `look` R (Game.frame), and cross otherwise
+const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, above: 0.15, rel: -350, look: 3 };
+const stompable = (H, b, rel) => { const dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (dy > STOMP.above * S && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
 const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]] };   // plus: s a candy lasts longer with 'long'; at: the parts of a level's height its candies are laid in (the fizz gun gone, owner 2026-10-22: «удалим пистолет, он лишний как смысл»)
 // The helmet (once rock candy; user): for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
@@ -101,6 +105,11 @@ const BUBBLE = { time: 6, rise: 2.4, ease: 6, size: 1.7, grace: 0.8 };
 // it `push` R/s² (half on a floor), `on` s of each blowing after `off` s of calm; `warn` s before a gust sakura petals start drifting its way, and through
 // it they fly, with white streaks; a koinobori off the wall it blows from hangs limp in the calm, fills with the petals and flies with the gust (see the
 // renderer); the hero's bubble goes with it too, a wall or a floor holds the hero
+// Fire on the walls (owner, 2026-10-22: «где-то можно сделать огненные стены, а не пол. чтобы не давать по стенке подниматься спокойно… сейчас больше половины
+// можно пропрыгать просто по стене»): a stretch of the shaft's wall (`len` tiles) in a share of a level's chunks (`share`, by the campaign's world, more
+// further on; a recipe's `fireWalls` over it; none in a world's first level, a boss's or a bonus one) bursts into flame for `on` s after `off` s (under a hit's safety: one heart a burst at most), its embers
+// glowing brighter `warn` s before. Touched then, or within its flames' `reach` tiles of it, it burns: a heart, thrown off. The wall is still climbed, in its beats
+const FIREWALL = { share: [0.2, 0.2, 0.25, 0.3, 0.3, 0.35, 0.35, 0.4], on: 0.9, off: 2.0, warn: 0.6, reach: 0.7, len: [5, 8] };
 const WIND = { push: 10, on: 2.2, off: 2.6, warn: 0.9, pole: 3.2 };   // pole: its koinobori's lowest height over the chunk's foot, in tiles
 // The pestle for mochi (owner, 2026-10-22: «Пест для моти. В Деревне огромный пест бьёт по ступе. Попал под него — стал блином на пару секунд, медленный,
 // зато пролезаешь под низкими балками; иногда это нужно нарочно»): a trip hammer, its lever on a post ('K' its head, raised; 'P' its post's foot; 'U' the
@@ -1021,6 +1030,7 @@ ICONS.neonBowl = '...o..o..o.../...o..o..o.../............./ooooooooooooo/.ooooo
 ICONS.neonFish = '...ooooo...../.ooooooooo..o/oo.oooooooooo/ooooooooooooo/.ooooooooo..o/...ooooo.....';
 ICONS.neonMic = '...ooo.../..ooooo../..ooooo../..ooooo../...ooo.../....o..../....o..../....o..../..ooooo..';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
+const ICON_SPIN = 0.3;   // a turning icon's least width, of its own (see iconSpin)
 const ICON_INK ={ k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white', c: 'aqua' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
 // standing on a floor, and runnier than at first (firm 2.0, then 1.4; user: it rattled about at speed, then: softer still).
@@ -1798,7 +1808,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -1811,7 +1821,7 @@ class Level {
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
@@ -1843,6 +1853,8 @@ class Level {
     this.fizzAt = o.kind === 'well' && o.height ? CANDIES.at.slice(0, rc ? rc.candy.length : CANDIES.at.length).map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies (a recipe's, as many)
     this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY).filter((k) => k !== 'astro'));   // and which kinds, by a generator of their own: the shaft is laid as before
     this.windRng = mulberry32((o.seed ^ 0x51ed2700) >>> 0);   // a level's wind, by a generator of its own (the shaft laid as without it)
+    this.fireRng = mulberry32((o.seed ^ 0x0f1e3a11) >>> 0);   // and its fire on the walls (FIREWALL), the same
+    this.fireShare = !rc || rc.boss || rc.bonus != null || rc.script || !(this.stage > 0) ? 0 : rc.fireWalls != null ? rc.fireWalls : FIREWALL.share[CAMPAIGN.findIndex((x) => x.world === o.world)] || 0;
     const ar = this.astroRng = mulberry32((o.seed ^ 0x3c6ef372) >>> 0);   // a level's astro (ASTRO), by a generator of its own (its ledge too: the level is laid as without it)
     if (rc && rc.astro && o.height && ar() < ASTRO.p) {   // in its place among the level's candies, low to high
       const y = this.floor - o.height * (ASTRO.at[0] + ar() * (ASTRO.at[1] - ASTRO.at[0])), k = this.fizzAt.filter((v) => v > y).length;
@@ -1950,7 +1962,7 @@ class Level {
     const keep = (o) => o.y0 === undefined ? o.y <= y : o.y0 <= y;
     this.rects = this.rects.filter((r) => r.cap || r.safe || keep(r));   // a ledge a fall may come back to stays
     this.spikes = this.spikes.filter(keep);
-    this.coats = this.coats.filter(keep); this.winds = this.winds.filter(keep); this.kines = this.kines.filter(keep); this.wheels = this.wheels.filter(keep); this.seesaws = this.seesaws.filter(keep);
+    this.coats = this.coats.filter(keep); this.winds = this.winds.filter(keep); this.kines = this.kines.filter(keep); this.wheels = this.wheels.filter(keep); this.seesaws = this.seesaws.filter(keep); this.fireWalls = this.fireWalls.filter(keep);
     this.coins = this.coins.filter((c) => c.drop || keep(c));   // an enemy's, on its way to the hero, stays
     this.folk = this.folk.filter(keep); this.icicles = this.icicles.filter(keep); this.arenas = this.arenas.filter(keep); this.spots = this.spots.filter(keep); this.runes = this.runes.filter(keep); this.rings = this.rings.filter(keep);
   }
@@ -2042,6 +2054,16 @@ class Level {
       }
       if (!pole) { const py = this.top - WIND.pole * t; pole = { px: wall(py), py }; }
       this.winds.push({ y0: this.top - h, y1: this.top, dir, ph: this.windRng() * (WIND.on + WIND.off), ...pole });
+    }
+    if (this.fireShare && c !== CHUNKS.pocket && id !== 'rest' && c.kind !== 'set' && c.kind !== 'gate' && this.fireRng() < this.fireShare) {   // a stretch of a wall on fire (FIREWALL),
+      // on a side with no coat, no spikes and no door of its own
+      // of the wall's longest stretch left bare by the chunk's blocks (a block against the wall hides it: no fire there)
+      const t = this.tile, side = this.fireRng() < 0.5 ? 1 : 2, want = (FIREWALL.len[0] + Math.floor(this.fireRng() * (FIREWALL.len[1] - FIREWALL.len[0] + 1))) * t, at = this.fireRng(), ph = this.fireRng() * (FIREWALL.on + FIREWALL.off);
+      const bare = !this.coats.slice(lens[2]).some((q) => q.side === side) && !this.spikes.slice(lens[1]).some((q) => q.dir === (side === 1 ? 2 : 3)) && !this.bubbles.slice(lens[5]).length;
+      const on = this.rects.slice(lens[0]).filter((q) => (side === 1 ? q.x0 <= this.l + 1 : q.x1 >= this.r - 1) && !q.move).sort((a, b) => b.y1 - a.y1);
+      let free = null, y = this.top - t;   // from the chunk's foot up, between the blocks on that wall
+      for (const q of [...on, { y0: -Infinity, y1: this.top - h + t }]) { const top = Math.max(q.y1, this.top - h + t); if (y - top > (free ? free[0] - free[1] : 0)) free = [y, top]; y = Math.min(y, q.y0); }
+      if (bare && free && free[0] - free[1] >= 3 * t) { const span = Math.min(want, free[0] - free[1]), y1 = free[0] - at * (free[0] - free[1] - span); this.fireWalls.push({ side, y0: y1 - span, y1, ph }); }
     }
     this.placed.push({ id, y1: this.top, y0: this.top - h });   // which chunk is where (for checks)
     this.last = id;
@@ -2459,7 +2481,12 @@ Body.prototype.collideLevel = function (lv, h) {
       const r = near[k], x0 = r.x0 - sk, x1 = r.x1 + sk, y0 = r.y0 - sk, y1 = r.y1 + sk;
       if (x[i] <= x0 || x[i] >= x1 || y[i] <= y0 || y[i] >= y1) continue;
       let face = 0;
-      if (r.plank) { const up = Math.min(0, r.dy || 0); if (this.stepMaxY > y0 - up + 3 || py[i] > y0 - up + 1) continue; face = 8; }   // (one that rose this step, as a seesaw's seat or a mill's board: met at its top as it was)
+      if (r.plank) {   // from above only: a point that was under its top passes; a body whose bottom was under its top passes whole, but not off the plank it stands
+        // on (tester: «падаю вниз сквозь края тонких платформ»: landed near an end, the body sagged past it, its bottom went under the top and the plank let it all through)
+        const up = Math.min(0, r.dy || 0);   // (one that rose this step, as a seesaw's seat or a mill's board: met at its top as it was)
+        if ((this.stepMaxY > y0 - up + 3 && this.stepFloor !== r) || py[i] > y0 - up + 1) continue;
+        face = 8;
+      }
       else if (r.stair && this.stepMaxY > r.y0 + 1 && this.stepMaxY < r.y1 + 0.5 * this.R && py[i] < y1 - 2) face = 8;   // a stair step lifts what walks into its riser onto its tread (a step-up), but only a body whose feet are at the riser: one under it is stopped
       else {
         const dT = y[i] - y0, dB = y1 - y[i], dL = x[i] - x0, dR = x1 - x[i];
@@ -2857,8 +2884,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
   };
   const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
-    // cosine (past a quarter turn its back, mirrored); no grey edge beside it (owner: «убери серый псевдообъем у бонусов»)
-    const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c = Math.cos(th), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
+    // cosine (past a quarter turn its back, mirrored); no grey edge beside it (owner: «убери серый псевдообъем у бонусов»), and never thinner than `ICON_SPIN`
+    // of its width (with its edge gone it shrank to a sliver of a pixel edge on, and blinked out: the tester's «анимация вращения … поломалась»)
+    const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
     rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), y0 + j * s, Math.max(u, v), y0 + (j + 1) * s, PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
   };
@@ -4406,6 +4434,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     disc(cx - d * 0.32 * t, cy, 0.24 * t, INK.coin, 1); disc(cx - d * 0.32 * t - 0.07 * t, cy - 0.08 * t, 0.07 * t, PAL.white, 1);
     F(cx + d * 0.34 * t, cy + 0.02 * t, 0.2 * t, 0, 0, 0.2 * t, INK.spike, 1, 6, 0.2 * t, 0.2 * t, 0.4 * t);
   }
+  for (const fw of lv.fireWalls) if (seen(fw.y0, fw.y1)) {   // fire on a wall (FIREWALL): a scorched strip on it with embers; they glow brighter before it bursts out in
+    // tongues of flame along it, flickering
+    const u = (T + fw.ph) % (FIREWALL.on + FIREWALL.off), on = u >= FIREWALL.off, warn = !on && u >= FIREWALL.off - FIREWALL.warn, d = fw.side === 1 ? 1 : -1, wx = fw.side === 1 ? lv.l : lv.r, t = lv.tile, P = PIX.size;
+    box(snap(Math.min(wx, wx + d * 0.18 * t)), snap(fw.y0), snap(Math.max(wx, wx + d * 0.18 * t)), snap(fw.y1), INK.fire, warn || on ? 1 : 0.5, 0, 10, 0);   // its seam, smouldering red (seen
+    // before it burns: which stretch of the wall is the fire's), lit up when it is about to
+    for (let y = fw.y0 + 0.5 * t, k = 0; y < fw.y1 - 0.2 * t; y += 1.1 * t, k++) { const ex = snap(wx + d * 0.28 * t) - (d < 0 ? 2 * P : 0); box(ex, snap(y), ex + 2 * P, snap(y) + 2 * P, INK.flame, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.5) : on ? 1 : 0.45, 0, 10, 0); }   // its embers
+    if (on) {
+      const n = Math.max(1, Math.round((fw.y1 - fw.y0) / (0.9 * t))), hw = (fw.y1 - fw.y0) / n / 2;
+      for (let i = 0; i < n; i++) {
+        const y = fw.y0 + (i + 0.5) * 2 * hw, len = (0.55 + 0.45 * Math.abs(Math.sin(T * 13 + i * 1.7))) * FIREWALL.reach * t;
+        F(wx + (d * len) / 2, y, 0, hw, (-d * len) / 2, 0, INK.fire, 1, 6, hw, len / 2, 2 * hw);
+        F(wx + d * len * 0.3, y, 0, 0.6 * hw, -d * len * 0.3, 0, INK.flame, 1, 6, 0.6 * hw, len * 0.3, 1.2 * hw);
+      }
+    }
+  }
   for (const w of lv.winds) if (seen(w.y0, w.y1)) {   // a gust's way (WIND): its koinobori; sakura petals drifting its way before it, flying through it, tumbling, white streaks with them
     const u = (T + w.ph) % (WIND.on + WIND.off), s = u - (WIND.off - WIND.warn), d0 = w.dir, sc = lv.tile;   // (the kit's carp's size)
     const k = u < 0.6 ? 1 - u / 0.6 : s < 0 ? 0 : s < WIND.warn ? (0.6 * s) / WIND.warn : 0.6 + 0.4 * Math.min(1, (s - WIND.warn) / 0.25);   // how full: limp, filling, flying, then falling back
@@ -4538,6 +4581,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(x0, y0 - P, x1, y0 + P, INK.white, 1, 0, 10, 0); box(x0, y1 - P, x1, y1 + P, INK.white, 1, 0, 10, 0);
     for (let k = 0; k <= 4; k++) { const x = x0 + ((x1 - x0) * k) / 4; box(x - P, y0, x + P, y1, INK.white, 1, 0, 10, 0); }
     box(b.cx - 0.2 * R, y0 + 0.75 * R, b.cx + 0.2 * R, y0 + 1.15 * R, INK.coin, 1, 0, 10, 0); box(b.cx - 0.1 * R, y0 + 0.55 * R, b.cx + 0.1 * R, y0 + 0.75 * R, INK.coinD, 1, 0, 10, 0);
+  }
+  for (const e of lv.enemies) if (e.over && seen(e.body.minY - 2 * R, e.body.maxY)) {   // one that can be stomped, the hero over it (STOMP, Game.frame): a white chevron
+    // over it, bobbing, «land here» (tester: «вот этой границы хитбокса врагов я до конца понять не смог»)
+    const b = e.body, y = b.minY - 0.6 * R + Math.round(Math.sin(T * 6) * 1.5) * PIX.size, hw = 0.3 * R, hd = 0.2 * R;
+    F(b.cx, y, hw, 0, 0, -hd, PAL.white, 1, 6, hw, hd, 2 * hw);
   }
   const bs = lv.boss;
   for (const e of lv.enemies) if (e.type === 'skull' && seen(e.body.minY, e.body.maxY)) {   // a skull over its black goo (the user's picture): its eye glints on the hero

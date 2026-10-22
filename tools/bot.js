@@ -41,7 +41,7 @@ const random = () => {
 
 // ── saving and restoring everything a step can change ──
 const GAME_KEYS = ['hp', 'maxHp', 'invuln', 'sinceContact', 'queueT', 'air', 'hitstop', 'touch', 'queued', 'rising', 'combo', 'coins',
-  'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunCD', 'gunMax', 'dashT', 'dashCD', 'mantleCD', 'airDash', 'pow', 'ram', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY', 'freed', 'crouch', 'noteK', 'noteT', 'bonusT', 'lastBy', 'kept', 'swarm'];   // (a bonus level's clock too: tries ran it out)
+  'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunMax', 'fallV', 'landV', 'landT', 'landUsed', 'missed', 'rebounded', 'flatT', 'harmed', 'dashT', 'dashCD', 'mantleCD', 'airDash', 'pow', 'ram', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY', 'freed', 'crouch', 'noteK', 'noteT', 'bonusT', 'lastBy', 'kept', 'swarm'];   // (a bonus level's clock too: tries ran it out)
 const copyItem = (e) => (e && typeof e === 'object' && !('x0' in e) ? Object.assign({}, e) : e);   // boxes stay shared
 function snapBody(b) {
   const o = {};
@@ -68,15 +68,16 @@ function snap() {
   return {
     g: GAME_KEYS.map((k) => g[k]), safes: g.safes.map((s) => Object.assign({}, s)), seed,
     input: [input.left, input.right, input.down, input.jump], hero: snapBody(g.hero),
-    cam: lv.cam, t: lv.t, rects: lv.rects.slice(), rs: lv.rects.map((r) => [r.x0, r.x1, r.dx, r.gone, r.t, r.hit, r.crumbling, r.safe, r.move ? r.move.v : 0, r.broke, r.paid, r.crack]),
+    cam: lv.cam, t: lv.t, rects: lv.rects.slice(), rs: lv.rects.map((r) => [r.x0, r.x1, r.dx, r.gone, r.t, r.hit, r.crumbling, r.safe, r.move ? r.move.v ?? 0 : 0, r.broke, r.paid, r.crack, r.y0, r.y1, r.dy]),
     coins: lv.coins.map((c) => Object.assign({}, c)), spawns: lv.spawns.slice(), shots: lv.shots.map((q) => Object.assign({}, q)),
-    counts: [lv.coinsTaken, lv.foeKilled, lv.foeTotal], bullets: lv.bullets.map((q) => Object.assign({}, q)), fizz: lv.fizz.map((p) => p.taken), fire: lv.fire && { y: lv.fire.y, spitT: lv.fire.spitT, warn: lv.fire.warn && Object.assign({}, lv.fire.warn) }, bubbles: lv.bubbles.map((b) => b.cd),
+    counts: [lv.coinsTaken, lv.foeKilled, lv.foeTotal], fizz: lv.fizz.map((p) => p.taken), fire: lv.fire && { y: lv.fire.y, spitT: lv.fire.spitT, warn: lv.fire.warn && Object.assign({}, lv.fire.warn) }, bubbles: lv.bubbles.map((b) => b.cd),
     enemies: lv.enemies.map((e) => ({ e, f: Object.fromEntries(Object.entries(e).filter(([k, v]) => typeof v !== 'object' || k === 'to' || k === 'from')), b: snapBody(e.body) })),   // (a worm's way over too: replaced, never changed)
     folk: lv.folk.map((f) => ({ f, o: Object.assign({}, f), b: f.body && snapBody(f.body) })), pickups: lv.pickups.slice(), sold: lv.pickups.map((p) => p.sold),
     icicles: lv.icicles.map((c) => Object.assign({}, c)), arenas: lv.arenas.map((a) => ({ a, o: Object.assign({}, a, { foes: a.foes.slice() }) })),
     cross: lv.crossing && Object.assign({}, lv.crossing),   // the level crossing's clock and train (the tries ran it on)
     tasks: (lv.tasks || []).map((q) => q.n), neon: new Map(lv.neonLit), tended: new Map(lv.tended), taken: lv.taken && lv.taken.slice(), gone: lv.gone && lv.gone.slice(),   // the level's tasks so far, the neon lit, the kits' things tended (a try did it)
     boss: lv.boss && { f: Object.fromEntries(Object.entries(lv.boss).filter(([, v]) => typeof v !== 'object')), b: snapBody(lv.boss.body) }, crumble: [lv.crumbleTime, lv.crumbleBack],   // its hearts, turn and clocks; the Minecart's quicker bridges
+    seesaws: (lv.seesaws || []).map((sw) => [sw.th, sw.om]),   // a seesaw's tip and its turning (SEESAW)
     rocket: g.rocket && Object.assign({}, g.rocket), rings: lv.rings.map((r) => [r, r.used]),   // a flight under way (an astro's, a boost ring's; its band moves up) and the rings flown through
   };
 }
@@ -87,15 +88,16 @@ function restore(S) {
   restoreBody(g.hero, S.hero);
   const lv = g.lv;
   lv.cam = S.cam; lv.t = S.t; lv.rects = S.rects.slice();
-  S.rects.forEach((r, i) => { const v = S.rs[i]; r.x0 = v[0]; r.x1 = v[1]; r.dx = v[2]; r.gone = v[3]; r.t = v[4]; r.hit = v[5]; r.crumbling = v[6]; r.safe = v[7]; if (r.move) r.move.v = v[8]; r.broke = v[9]; r.paid = v[10]; r.crack = v[11]; });
+  S.rects.forEach((r, i) => { const v = S.rs[i]; r.x0 = v[0]; r.x1 = v[1]; r.dx = v[2]; r.gone = v[3]; r.t = v[4]; r.hit = v[5]; r.crumbling = v[6]; r.safe = v[7]; if (r.move && r.move.v !== undefined) r.move.v = v[8]; r.broke = v[9]; r.paid = v[10]; r.crack = v[11]; r.y0 = v[12]; r.y1 = v[13]; r.dy = v[14]; });
   lv.coins = S.coins.map((c) => Object.assign({}, c)); lv.spawns = S.spawns.slice(); lv.shots = S.shots.map((q) => Object.assign({}, q));
-  [lv.coinsTaken, lv.foeKilled, lv.foeTotal] = S.counts; lv.bullets = S.bullets.map((q) => Object.assign({}, q)); lv.fizz.forEach((p, i) => { p.taken = S.fizz[i]; });
+  [lv.coinsTaken, lv.foeKilled, lv.foeTotal] = S.counts; lv.fizz.forEach((p, i) => { p.taken = S.fizz[i]; });
   if (lv.fire) { lv.fire.y = S.fire.y; lv.fire.spitT = S.fire.spitT; lv.fire.warn = S.fire.warn && Object.assign({}, S.fire.warn); }
   lv.bubbles.forEach((b, i) => { b.cd = S.bubbles[i]; });
   lv.enemies = S.enemies.map((o) => { Object.assign(o.e, o.f); restoreBody(o.e.body, o.b); return o.e; });
   lv.folk = S.folk.map(({ f, o, b }) => { for (const k of Object.keys(f)) if (!(k in o)) delete f[k]; Object.assign(f, o); if (b) restoreBody(f.body, b); return f; });   // a body made in a look ahead goes again
   lv.pickups = S.pickups.slice(); lv.pickups.forEach((p, i) => { p.sold = S.sold[i]; });
   lv.icicles = S.icicles.map((c) => Object.assign({}, c)); lv.arenas = S.arenas.map(({ a, o }) => Object.assign(a, o, { foes: o.foes.slice() }));
+  (lv.seesaws || []).forEach((sw, i) => { if (S.seesaws[i]) [sw.th, sw.om] = S.seesaws[i]; });
   if (lv.crossing) Object.assign(lv.crossing, S.cross);
   (lv.tasks || []).forEach((q, i) => { q.n = S.tasks[i]; }); lv.neonLit = new Map(S.neon); lv.tended = new Map(S.tended); if (S.taken) lv.taken = S.taken.slice(); if (S.gone) lv.gone = S.gone.slice();
   if (lv.boss) {   // what a try first set goes again (the Minecart's `called`, else the real fight never calls its spitter)
@@ -131,8 +133,18 @@ function play(p, st) {
     input.set('jump', jumped && t < p.jumpAt + p.hold);
     step();
     if (g.state === 'play' && g.onFloor()) st.stand = Math.max(st.stand, heightOf(g.hero.floorY));
+    if (live && run) { run.frames++; if ((g.hero.wallMask & 3) && !(g.hero.wallMask & 8)) run.wallFrames++; if (g.flatT > 0 && !run.flat) run.flats++; run.flat = g.flatT > 0; }   // the moves really played: how much of it on a wall, off any floor; flattened by a pestle (MOCHI)
   }
 }
+// The jumps really played, and how many were off a wall (the hero's own surface: a climb that never needs one is a ladder)
+const jump0 = Game.prototype.jump;
+Game.prototype.jump = function (...a) {
+  const counted = live && run && this === g, floor = !a[0] && (this.hero.wallMask & 8);
+  if (counted) { run.jumps++; if ((this.hero.wallMask & 3) && !(this.hero.wallMask & 8)) run.wallJumps++; }
+  const out = jump0.apply(this, a);
+  if (counted && floor) { run.floorJumps++; if (this.rebounded) run.rebounds++; }   // and off a floor, how many in the beat of a landing (REBOUND)
+  return out;
+};
 function score(base, st) {
   if (g.state === 'dead') return -1e9;
   if (g.state === 'clear') return 1e9;
@@ -230,7 +242,7 @@ function start(world, stage = 0, s = 1, opts = {}) {
   killed = {};
   const spawned = {};
   for (const e of lv.spawns) spawned[e.type] = (spawned[e.type] || 0) + 1;
-  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
+  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, frames: 0, wallFrames: 0, jumps: 0, wallJumps: 0, floorJumps: 0, rebounds: 0, flats: 0, flat: false, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
     out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [], boss: bs ? { name: bs.def ? bs.def.name.en : 'Lid', max: bs.max, dealt: [] } : null } };
   return { started: true, foes: run.foes };
 }
@@ -264,7 +276,7 @@ function advance(ms = 30000) {
     if (!R.opts.until) input.clear();
     Object.assign(out, { result: g.state, time: +R.t.toFixed(1), decisions: R.decisions, heartsLost: R.startHp - g.hp, height: +R.best.toFixed(1), of: +R.top.toFixed(1),
       coins: R.coins0 - lv.coins.filter((c) => !c.drop).length, coinsPlaced: R.coins0, got: g.coins, foes: R.foes, kills: g.kills, spawned: R.spawned, killed, combo: g.bestCombo,
-      tightness: +(1 - R.safeSum / Math.max(1, R.decisions)).toFixed(2), tasks: (lv.tasks || []).map((q) => q.id + ' ' + q.n + '/' + q.of).join(', ') });   // (the bot does not go for them: what a climb does by the way)
+      tightness: +(1 - R.safeSum / Math.max(1, R.decisions)).toFixed(2), wall: +(R.wallFrames / Math.max(1, R.frames)).toFixed(2), wallJumps: `${R.wallJumps}/${R.jumps}`, rebounds: `${R.rebounds}/${R.floorJumps}`, flats: R.flats, tasks: (lv.tasks || []).map((q) => q.id + ' ' + q.n + '/' + q.of).join(', ') });   // (the bot does not go for them: what a climb does by the way)
     if (bs) Object.assign(out.boss, { hp: Math.max(0, bs.hp), beaten: bs.dead });   // result: 'won', 'dead', or 'play' at BOSS_T
     run = null;
     return out;

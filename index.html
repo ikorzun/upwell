@@ -67,7 +67,7 @@
   .chip .cap { margin-top: 0; }
   .big.capped { padding-top: 0; padding-bottom: 0; }   /* (its words and their caption inside its one height) */
   .big, .chip, .head, .title, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
-  .langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; max-width: 340px; }   /* in one row, by their short names (owner) */
+  .langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; }   /* in one row, by their short names, the width of the buttons (owner: «Языки растяни на всю ширину, а то куцо») */
   .langs .chip { text-transform: none; }   /* 日本語 as it is written */
   #map { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
   .tree { align-self: stretch; flex: 1; min-height: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; scrollbar-width: none; margin: 8px 0; }   /* a world's map (ui.map): its tiers up, scrolled by touch */
@@ -221,10 +221,16 @@
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
   #pause { justify-content: flex-end; }
+  #story { background: rgba(11, 7, 22, 0.92); justify-content: flex-end; padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* a story card over the game held under it (STORY) */
+  .scard { position: relative; flex: none; margin-bottom: 14px; }   /* its size by ui.story: whole pixels, from the view */
+  .scard .sart { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; background: #0b0716; }   /* the art whole under the frame, its edge under the frame's (the pack: a few pixels) */
+  .scard .sframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .scard .snum { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 50%); --p: 2; color: #f7f3ee; background: #201638; box-shadow: 0 0 0 2px #ab80e5; padding: 2px 10px 4px; }
+  .stitle { --p: 3; color: var(--white); filter: drop-shadow(0 3px 0 var(--ink)); }
   .summary { flex: 1; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
   .big.alt { --p: 3; background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as wide, a size smaller: not the main one (and "Controls: buttons" in one line) */
   .big.alt:active { box-shadow: inset 0 0 0 2px var(--yellow); }   /* pressed: a yellow edge, nothing sinks (owner: no pseudo-volume) */
-  .big.thumb { align-self: stretch; margin-top: 8px; }   /* the main button: the width of the screen, at its bottom */
+  .big.thumb { align-self: stretch; }   /* the main button: the width of the screen, at its bottom; the panel's 12 px gap over it, as at its sides (owner: «по вертикали расстояние между кнопками такое же, сколько по краям от кнопки») */
   #menu { background: linear-gradient(transparent var(--split, 58%), var(--gray) var(--split, 58%), var(--gray) calc(var(--split, 58%) + 2px), var(--ink) calc(var(--split, 58%) + 2px)); justify-content: flex-end; }   /* the hero shows through the top (--split: set by ui.menu) */
   .title { margin: 0 0 auto; padding-top: 12%; --p: 6; filter: drop-shadow(0 6px 0 var(--ink)); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
@@ -263,6 +269,10 @@
   .stars { display: flex; align-items: center; gap: 6px; --p: 3; color: var(--yellow); }
   .stars .ico { animation: starIn 0.4s steps(5) both; }   /* in one after another (delays set in game.js) */
   .stars .ico.won { animation: starIn 0.4s steps(5) both, starTwinkle 1.4s steps(2) infinite; }
+  .mastery { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 14px; --p: 2; color: var(--gray); }   /* a level's mastery medals (MEDAL): grey till won (.medal is the daily's) */
+  .mast { display: flex; align-items: center; gap: 6px; }
+  .mast.won, .mast.new { color: var(--yellow); }
+  .mast.new .ico { animation: starIn 0.4s steps(5) 1.5s both, starTwinkle 1.4s steps(2) 2s infinite; }   /* one won now: in after the stars */
   .stars .pay { animation: payIn 0.3s steps(3) 1.1s both; }   /* what they paid, once they are all in */   /* a level's stars and their coins */   /* its picture on the left, name over description */
   .card b { color: var(--yellow); }
   .card:active { box-shadow: inset 0 0 0 2px var(--yellow); }
@@ -309,9 +319,11 @@
   <div id="pause" class="panel"></div>
   <div id="result" class="panel"></div>
   <div id="map" class="panel"></div>
+  <div id="story" class="panel"></div>
 </div>
 <script src="src/gum.js"></script>
 <script src="src/world.js"></script>
+<script src="src/cine.js"></script>
 <script src="src/game.js"></script>
 </body>
 </html>

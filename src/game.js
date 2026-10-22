@@ -11,16 +11,16 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
-    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge',
-    seen_splitter: 'A splitter breaks in two', seen_chaser: 'A chaser follows you on its wall',
-    got_fizz: 'Fizz! You shoot by yourself · {s} s', got_smash: 'Helmet! Jumps smash blocks · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
+    seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_rebound: 'Jump as you land: bounce higher!', rebound_ok: 'Boing! Right on the beat', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge', seen_wind: 'When the carp flag fills, a gust blows you aside', seen_mochi: 'The pestle flattens you: then you fit under low beams', seen_fork: 'Two ways up: the risky one pays more', seen_fireWall: 'Fire bursts out of some walls: wait for it to die down',
+    seen_splitter: 'A splitter breaks in two', seen_tumbler: 'A tumbler: stomp it between its somersaults', seen_tofu: 'Stomp a tofu and it falls into four', seen_nurikabe: 'A nurikabe drops on you: stomp it once it lands', seen_chaser: 'A chaser follows you on its wall',
+    got_smash: 'Helmet! Jumps smash blocks · {s} s', got_bubble: 'Bubble gum! Float up · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
-    noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
+    noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
     random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', bookTap: 'Tap one to read it', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
@@ -28,16 +28,16 @@ const STR = {
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
-    seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva',
-    seen_splitter: 'El divisor se parte en dos', seen_chaser: 'El perseguidor te sigue por su pared',
-    got_fizz: '¡Burbujas! Disparas solo · {s} s', got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
+    seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_rebound: '¡Salta al aterrizar: rebotas más alto!', rebound_ok: '¡Boing! Justo a tiempo', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva', seen_wind: 'Cuando se infla la carpa, una ráfaga te empuja de lado', seen_mochi: 'El mazo te aplasta: así cabes bajo las vigas bajas', seen_fork: 'Dos caminos: el arriesgado paga más', seen_fireWall: 'De algunas paredes sale fuego: espera a que se apague',
+    seen_splitter: 'El divisor se parte en dos', seen_tumbler: 'Volteretas: písalo entre salto y salto', seen_tofu: 'Pisa un tofu y se parte en cuatro', seen_nurikabe: 'La nurikabe cae sobre ti: písala al aterrizar', seen_chaser: 'El perseguidor te sigue por su pared',
+    got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_bubble: '¡Chicle! Flotas hacia arriba · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
-    noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
+    noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
     random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', bookTap: 'Toca uno para leerlo', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
@@ -45,16 +45,16 @@ const STR = {
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
-    seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie',
-    seen_splitter: 'O divisor se parte em dois', seen_chaser: 'O perseguidor segue você pela parede',
-    got_fizz: 'Gasosa! Você atira sozinho · {s} s', got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
+    seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_rebound: 'Pule ao pousar: quica mais alto!', rebound_ok: 'Boing! Bem na hora', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie', seen_wind: 'Quando a carpa enche, uma rajada te empurra de lado', seen_mochi: 'O pilão te achata: aí você passa sob as vigas baixas', seen_fork: 'Dois caminhos: o arriscado paga mais', seen_fireWall: 'Algumas paredes soltam fogo: espere ele baixar',
+    seen_splitter: 'O divisor se parte em dois', seen_tumbler: 'Cambalhota: pise entre um salto e outro', seen_tofu: 'Pise num tofu e ele vira quatro', seen_nurikabe: 'A nurikabe cai em você: pise quando ela pousa', seen_chaser: 'O perseguidor segue você pela parede',
+    got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_bubble: 'Chiclete! Flutue para cima · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
-    noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
+    noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
     random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', bookTap: 'Toque em um para ler', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
@@ -62,16 +62,16 @@ const STR = {
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
-    seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ',
-    seen_splitter: 'ブンレツは ふたつに わかれる', seen_chaser: 'オイカケは かべを つたって おってくる',
-    got_fizz: 'シュワシュワ！ じどうで うつ · {s} びょう', got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
+    seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_rebound: 'ちゃくちの しゅんかんに ジャンプ: たかく はねる！', rebound_ok: 'ボヨン！ ぴったり', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ', seen_wind: 'こいのぼりが ふくらむと とっぷう: よこへ ながされる', seen_mochi: 'きねに つぶされると ひくい はりの したを とおれる', seen_fork: 'みちは ふたつ: あぶない ほうが たくさん もらえる', seen_fireWall: 'かべから ひが ふきだす: おさまるまで まとう',
+    seen_splitter: 'ブンレツは ふたつに わかれる', seen_tumbler: 'ゴロゴロようかん: とまった すきに ふもう', seen_tofu: 'とうふを ふむと よっつに わかれる', seen_nurikabe: 'ぬりかべが おちてくる: おちたら ふもう', seen_chaser: 'オイカケは かべを つたって おってくる',
+    got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_bubble: 'ガム！ ふわふわ うく · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
-    noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
+    noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
     random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', bookTap: 'さわって よもう', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
@@ -87,14 +87,14 @@ const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || na
 // ── Save ─────────────────────────────────────────────────────
 // What outlives a run: best climb, coins of all runs (they unlock colours),
 // wins (the first one opens hard mode) and the chosen look.
-const SAVE_KEY = 'upwell.save', LOCAL_KEY = 'upwell.local';   // (LOCAL_KEY: the browser's own copy, a key no Bridge storage takes over)
+const SAVE_KEY = 'upwell.save', LOCAL_KEY = 'upwell.local';   // (LOCAL_KEY: the browser's copy of a visit without the Bridge, a key no Bridge storage takes over)
 // Kept through the Playgama Bridge's storage (its checklist: never localStorage itself), the whole of it under one key in
 // one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
 const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: true, camp: null };   // seen: hints shown once; stick: touch by a stick, not the keys
 // The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
 // purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
 // run's progress stays in save.run, for the random run.
-const campFresh = () => ({ last: 1, stars: [], wallet: 0, builds: [], fails: {}, runes: [] });   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level   // last: the level played last
+const campFresh = () => ({ last: 1, stars: [], wallet: 0, builds: [], fails: {}, runes: [], medals: {} });   // medals: a level's mastery medals won (MEDAL), bits: 1 its time, 2 no heart lost   // runes: the worlds whose tapestry is seen   // fails: the losses running at a boss, by its level   // last: the level played last
 const met = (kind, id) => { const b = save.book = save.book || {}; const k = b[kind] = b[kind] || {}; if (!k[id]) { k[id] = 1; persist(); } };   // into the book
 // The daily well (owner, 2026-10-20: the day's three Tokyo recipes): three levels of the Tokyo map in a row, one from its tiers 2-3,
 // one from 4-5, one from 7-8, each on a column the day picks, laid on the day's seeds: the same for everyone (the day by the platform's
@@ -121,7 +121,7 @@ const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += day
 // tier by tier in turn, the middle one out to both sides or the sides in to the middle (ups). A world opens with the last one's boss.
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
-const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 1;
+const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
 // come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu.
 const CAMP_STARS = { skazka: 180 };
@@ -186,7 +186,7 @@ shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
-  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = [];
+  if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = []; if (!c.medals || typeof c.medals !== 'object') c.medals = {};   // (v6 to v7: the medals, MEDAL)
   if ((save.v | 0) < 3) {   // v2 to v3: a world's ten levels in a row onto its map, each the middle of its tier (a boss's losses with it)
     const at = (i) => Math.floor(i / 10) * 30 + (i % 10) * 3 + 1, old = c.stars, f = {};
     c.stars = []; old.forEach((n, i) => { if (n > 0) c.stars[at(i)] = n; });
@@ -214,11 +214,12 @@ function loadSave(s) {
     for (const k in c.fails) { if (!/^\d+$/.test(k)) f[k] = c.fails[k]; else if (at(+k) >= 0) f[at(+k)] = c.fails[k]; }
     c.builds.forEach((u, w) => { if (to(w) >= 0) b[to(w)] = u; });
     c.fails = f; c.builds = b; c.runes = c.runes.map(to).filter((w) => w >= 0); c.last = c.last != null && at(c.last) >= 0 ? at(c.last) : 1;
+    const md = {}; for (const k in c.medals) if (/^\d+$/.test(k) && at(+k) >= 0) md[at(+k)] = c.medals[k]; c.medals = md;   // and its medals
     if (save.cur) { if (at(save.cur.ci) >= 0) save.cur.ci = at(save.cur.ci); else delete save.cur; }   // a level under way goes with its world too
   }
   c.order = ids;   // the worlds' order this save is in (the next change follows it)
   delete c.open;   // what is open comes of the stars (campOpen)
-  save.v = 6; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
+  save.v = 7; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
 }
 let saveIn = false, cloud = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
@@ -226,11 +227,12 @@ let saveIn = false, cloud = false;   // the save loaded (boot): nothing is writt
 // never writes over the Bridge's copy with what this visit began from (the browser's copy, or nothing).
 function persist() {
   if (!saveIn) return;
-  save.at = Date.now();   // which copy is the newer one, at the next boot
+  save.at = Date.now();   // (which copy is the newer, of two as far on)
   const s = JSON.stringify(save);
-  try { localStorage.setItem(LOCAL_KEY, s); } catch (e) { /* private mode: this visit only */ }   // always: a visit without the Bridge goes on from it
-  if (cloud) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});
+  if (cloud) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});   // through the Bridge's Storage alone (Playgama's checklist: never localStorage)
+  else try { localStorage.setItem(LOCAL_KEY, s); } catch (e) { /* private mode: this visit only */ }   // no Bridge this visit (none, late, or its storage not answering): the browser keeps it
 }
+const progress = (x) => (x && x.camp && Array.isArray(x.camp.stars) ? x.camp.stars.reduce((n, v) => n + (v > 0 ? v : 0), 0) : 0) * 1e7 + (x && x.bank > 0 ? x.bank : 0);   // a save's stars, then its coins of all runs
 
 // ── Bodies ───────────────────────────────────────────────────
 // The rigid part of a body's motion becomes (vx, vy); the wobble on top of it stays.
@@ -282,12 +284,14 @@ class Foe {
     const b = this.body, def = this.def, lv = g.lv;
     const steer = (tvx, tvy, k, xOnly) => { const q = Math.min(1, k * dt); addVel(b, (tvx - b.rigVx) * q, xOnly ? 0 : (tvy - b.rigVy) * q); };
     this.t += dt; b.ghost = this.state === 'shell';   // kept in step with the state (a bot's restored branch included)
-    turnUp(b, 6, dt);
+    if (def.move !== 'tumble' || !(this.flip > 0)) turnUp(b, 6, dt);
     this.ph = (this.ph + dt / def.step) % 1;
     const pulse = 0.25 + 1.5 * Math.pow(Math.max(0, Math.sin(this.ph * TAU)), 2);   // averages about one
     const push = this.ph < this.lastPh;   // a new pulse begins
     this.lastPh = this.ph;
     if (def.move === 'flow') { this.flow(dt, g); return; }
+    if (def.move === 'tumble') { this.tumble(dt, g); return; }   // (it turns itself up between its somersaults)
+    if (def.move === 'crush') { this.crush(dt, g); return; }
     if (def.move === 'crawl') {   // back and forth along its ledge (or the floor, between the walls)
       if (this.state === 'shell') { this.roll(dt, g); return; }
       if (!(b.wallMask & 8)) return;
@@ -319,6 +323,52 @@ class Foe {
       if (push) b.kickSquash(side ? 1 : 0, side ? 0 : 1, -0.9);
       const p = s < w ? [x0 + s, y0] : s < w + h ? [x0 + w, y0 + s - w] : s < 2 * w + h ? [x0 + w - (s - w - h), y0 + h] : [x0, y0 + h - (s - 2 * w - h)];
       steer((p[0] + jx - b.cx) * 8, (p[1] - b.cy) * 8, 10);
+    }
+  }
+  canStomp() { return !!this.def.stomp && !(this.flip > 0) && !(this.type === 'nurikabe' && this.cs !== 'down'); }   // (a tumbler in the air, a nurikabe not lying down: no)
+  // A tumbler (TUMBLE): it sits on its ledge, crouches, then somersaults a hop ahead (spun round once, up and over), turning before it would leave its ledge;
+  // it lands with a thud
+  tumble(dt, g) {
+    const b = this.body, l = this.ledge, R = g.R, on = b.cy > g.lv.cam && b.cy < g.lv.cam + view.h;
+    if (this.flip > 0) {
+      if ((this.flip -= dt) <= 0 || ((b.wallMask & 8) && this.flip < 0.15)) { this.flip = 0; this.rest = TUMBLE.rest; this.crouched = false; setVel(b, 0, b.rigVy); b.fric = undefined; b.kickSquash(0, 1, 1.6); if (on) sound.play('land', 0.55, 0.5); }   // down, and still (a crawler's no-drag would slide it on)
+      return;
+    }
+    if (!(b.wallMask & 8)) return;
+    if (this.rest == null) this.rest = TUMBLE.rest * Math.random();
+    if ((this.rest -= dt) > 0) { if (this.rest < TUMBLE.crouch && !this.crouched) { this.crouched = true; b.kickSquash(0, 1, 1.1); } return; }
+    const hop = TUMBLE.hop * R;
+    if (l && !l.gone) { if (b.cx + this.dir * hop > l.x1 - 0.7 * b.R) this.dir = -1; else if (b.cx + this.dir * hop < l.x0 + 0.7 * b.R) this.dir = 1; }
+    if (b.wallMask & 1) this.dir = 1; else if (b.wallMask & 2) this.dir = -1;
+    b.fric = 0; setVel(b, (this.dir * hop) / TUMBLE.air, -0.5 * WORLD.gravity * TUMBLE.air);   // down again in `air` s
+    const w = (this.dir * TAU) / TUMBLE.air;
+    for (let i = 0; i < b.n; i++) { b.vx[i] -= w * (b.y[i] - b.cy); b.vy[i] += w * (b.x[i] - b.cx); }   // spun round once on the way
+    this.flip = TUMBLE.air + 0.2;
+  }
+  // A nurikabe (CRUSH): over its ledge (lower under a ceiling) it hangs; the hero under it, it shakes, falls, lies there, and rises back
+  crush(dt, g) {
+    const b = this.body, H = g.hero, R = g.R, lv = g.lv, t = lv.tile, on = b.cy > lv.cam - 2 * t && b.cy < lv.cam + view.h;
+    const goTo = (x, y, k) => { const q = Math.min(1, 8 * dt); addVel(b, ((x - b.cx) * k - b.rigVx) * q, ((y - b.cy) * k - b.rigVy) * q); };
+    if (this.home == null) {   // its height: `up` tiles over its ledge, or under whatever is lower over it
+      const l = this.ledge, base = l ? l.y0 : b.maxY, x0 = b.cx - b.R, x1 = b.cx + b.R;
+      const over = lv.rects.filter((r) => !r.cap && r.y1 <= base - 0.5 * t && r.x1 > x0 && r.x0 < x1).reduce((m, r) => Math.max(m, r.y1), -Infinity);
+      this.homeX = b.cx; this.home = Math.max(base - CRUSH.up * t - b.R, over + b.R + 0.3 * t); this.cs = this.home < base - 2.4 * b.R ? 'hang' : 'down'; this.ct = 0;
+      if (this.cs === 'hang') b.translate(0, this.home - b.cy);
+    }
+    this.ct += dt;
+    if (this.cs === 'hang' || this.cs === 'warn') {
+      b.gScale = 0; goTo(this.homeX + (this.cs === 'warn' ? Math.sin(this.ct * 70) * 0.06 * R : 0), this.home, 10);
+      const under = Math.abs(H.cx - b.cx) < b.R + CRUSH.reach * R && H.cy > b.cy && H.cy < b.cy + 9 * t;
+      if (this.cs === 'hang' && under && on) { this.cs = 'warn'; this.ct = 0; b.face.wide = 1; }
+      else if (this.cs === 'warn' && this.ct > CRUSH.warn) { this.cs = 'drop'; this.ct = 0; }
+    } else if (this.cs === 'drop') {
+      b.gScale = CRUSH.fall;
+      if (((b.wallMask & 8) && this.ct > 0.08) || this.ct > 3) { this.cs = 'down'; this.ct = 0; b.kickSquash(0, 1, 2.2); if (on) { sound.play('stomp', 0.9, 0.45); shake.add(4); fx.dust(b.cx, b.maxY, IMPACT.puffSpeed + 600); } }
+    } else if (this.cs === 'down') {
+      b.gScale = 1; if (this.ct > CRUSH.down && this.home < b.cy - 2.4 * b.R) { this.cs = 'rise'; this.ct = 0; }
+    } else {   // rising back to its height
+      b.gScale = 0; goTo(this.homeX, this.home, CRUSH.rise * R / Math.max(R, Math.abs(this.home - b.cy)));
+      if (Math.abs(b.cy - this.home) < 0.25 * R) this.cs = 'hang';
     }
   }
   // A Kikimora (KIKI): the hero near and level with her, she shivers on her wall, flashing red (b.warn), leaps out at him with her broom
@@ -563,7 +613,7 @@ class Boss {
     this.st += dt;
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
     if (ph >= 1 && !lv.crumbleTime) { lv.crumbleTime = CART.crumble[0]; lv.crumbleBack = CART.crumble[1]; }
-    if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
+    if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move && r.move.v) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
     let vx = 0;
     if (this.state === 'hover') {
       vx = (this.dir * (rail.x1 - rail.x0) / CART.pass[ph]) * k;
@@ -622,7 +672,7 @@ class Game {
     this.tier = save.wins > 0 ? Math.min(save.tier || (save.hard ? 1 : 0), save.tierMax || 1) : 0; this.hard = this.tier > 0;   // the hard mode's tier (an old save's hard mode: tier 1)
     this.endless = false; this.loop = 0;
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0; this.syns = [];
-    this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0;
+    this.climbed = 0; this.levelM = 0; this.revives = 0; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0; this.cardDue = null;
     this.mode = 'run'; this.rc = null; this.ci = -1; this.lastBy = null; this.daily = null;   // the random run; playLevel makes it a campaign level
     const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
@@ -687,7 +737,7 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunCD = 0; this.gunMax = 1; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) this.hero.thread = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -706,7 +756,7 @@ class Game {
     lv.coins.forEach((c, i) => { c.id = i; }); lv.folk.forEach((f, i) => { f.id = i; }); lv.rects.forEach((r, i) => { r.id = i; });   // each its number (Game.saveCur): taken
     lv.taken = []; lv.gone = []; lv.sig = [lv.rects.length, lv.coins.length, lv.folk.length].join();   // and gone kept by them; the level's measure, to know it again
     const kits = (kind) => lv.rects.filter((r) => { const k = kitThing(lv, r); return k && k.kind === kind && k.y > lv.capY && k.y < lv.floor; }).length;   // the kits' (kitThing): the ones the hero can get to
-    for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0], ['lantern', kits('lantern')], ['bell', kits('bell')], ['lamp', kits('lamp')]]) if (of) lv.tasks.push({ id, n: 0, of });
+    for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0], ['lantern', kits('lantern')], ['bell', kits('bell')], ['lamp', kits('lamp')], ['lighthouse', kits('lighthouse')]]) if (of) lv.tasks.push({ id, n: 0, of });
   }
   task(id) {   // one more of task `id` done (in the shaft only: the flip side's crows are not its); the last of it rings, and says so with its picture
     const q = !this.well && this.lv.tasks && this.lv.tasks.find((o) => o.id === id);
@@ -730,10 +780,15 @@ class Game {
     const done = new Set(), level = (lv) => {
       if (!lv || done.has(lv)) return; done.add(lv);   // (a room is the shaft's door's too: once)
       lv.r = X(lv.r); lv.R *= k; lv.tile *= k; for (const key of ['floor', 'top', 'endY', 'capY', 'cam']) lv[key] = Y(lv[key]);
-      for (const r of lv.rects) { box(r); if (r.move) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
+      for (const r of lv.rects) { box(r); if (r.move && !r.move.wheel && !r.move.seesaw) { r.move.a = X(r.move.a); r.move.b = X(r.move.b); r.move.v *= k; } if (num(r.dx)) r.dx *= k; if (r.kit) { r.kit.x = X(r.kit.x); r.kit.y = Y(r.kit.y); } if (r.spikes) for (const o of r.spikes) { box(o); xy(o); } }   // (a smashed one's spikes, kept with it for its return)
       for (const o of [...lv.spikes, ...lv.bubbles]) { box(o); xy(o); }
-      for (const c of lv.coats) { c.y0 = Y(c.y0); c.y1 = Y(c.y1); }
-      for (const o of [lv.coins, lv.shots, lv.bullets, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
+      for (const c of [...lv.coats, ...(lv.winds || [])]) { c.y0 = Y(c.y0); c.y1 = Y(c.y1); }
+      for (const w of lv.winds || []) { w.px = X(w.px); w.py = Y(w.py); }   // (a koinobori's pole)
+      for (const fw of lv.fireWalls || []) { fw.y0 = Y(fw.y0); fw.y1 = Y(fw.y1); }   // (fire on a wall, FIREWALL)
+      for (const sw of lv.seesaws || []) { sw.px = X(sw.px); for (const key of ['py', 'foot', 'y0', 'y1']) sw[key] = Y(sw[key]); sw.L *= k; }   // (a seesaw, SEESAW)
+      for (const wh of lv.wheels || []) { wh.cx = X(wh.cx); for (const key of ['cy', 'y0', 'y1']) wh[key] = Y(wh[key]); wh.rad *= k; wh.hang *= k; }   // (a mill, MILL: its boards are boxes, above)
+      for (const kn of lv.kines || []) { kn.x = X(kn.x); kn.px = X(kn.px); for (const key of ['yUp', 'yHit', 'foot', 'y0', 'y1']) kn[key] = Y(kn[key]); }   // (a pestle, MOCHI)
+      for (const o of [lv.coins, lv.shots, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
       for (const sp of lv.spots || []) { const r = sp.r; xy(sp); sp.r = r; }   // (a pit's size is in R: it grows with R)
       const walls = new Set(), wall = (w) => { if (!w || walls.has(w)) return; walls.add(w); w.y0 = Y(w.y0); w.y1 = Y(w.y1); };   // (a wall can be a spawn's and its climber's both)
       for (const s of lv.spawns) wall(s.wall);
@@ -754,7 +809,8 @@ class Game {
     for (const o of [this.heroLook, this.look]) if (o) xy(o);
     fx.n = 0;   // the sparks in the air: gone
     const lv = this.lv, H = this.hero;   // the camera as a level, a room or a respawn sets it: the hero in sight where it was meant (a width alone changing, the view's height did not)
-    if (lv.kind !== 'well') lv.cam = Math.max(lv.floor + CAM.floorShow - view.h, lv.floor + this.room() - view.h);
+    if (lv.exit) lv.cam = lv.floor + this.roomFloor() - view.h;   // a room's (enterRoom)
+    else if (lv.kind !== 'well') lv.cam = Math.max(lv.floor + CAM.floorShow - view.h, lv.floor + this.room() - view.h);
     else if (lv.under) lv.cam = clamp(H.cy - 0.35 * view.h, lv.capY - CAM.top, lv.floor + this.room() - view.h);
     else if (this.state !== 'menu') lv.cam = Math.max(Math.min(H.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
   }
@@ -793,6 +849,7 @@ class Game {
   requestJump(aimed = null) {
     if (this.state !== 'play') return;
     if (this.sinceContact <= JUMP.coyote) this.jump(false, aimed);
+    else if (this.power('bubble')) this.jump(true, aimed);   // in a bubble: popped by a jump, a hop out of it (no air jump spent)
     else if (this.air > 0) { this.air--; this.jump(true, aimed); }
     else { this.queueT = JUMP.buffer; this.queued = aimed; }
   }
@@ -800,9 +857,13 @@ class Game {
   // or with a side pressed a dash that way. In the air: up again, with a puff under it. A slingshot
   // launch goes where it was aimed, and letting go of a button cannot cut it.
   jump(inAir, aimed) {
+    if (this.power('bubble')) { this.gunT = 0; this.powerEnd(); }   // a jump pops the bubble, and is a jump
     const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || (!aimed && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
-    const sup = !inAir && !aimed && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it
-    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : 1), rise = !aimed && !sup;
+    const flat = this.flatT > 0, sup = !flat && !inAir && !aimed && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it (flat: not, MOCHI)
+    const reb = !flat && !inAir && !aimed && !sup && side === 0 && !ram && this.landT <= REBOUND.after && this.landV >= REBOUND.min * v, q = reb ? clamp(this.landV / v, 0, 1) : 0;   // in the beat of a hard landing
+    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : reb ? Math.sqrt(1 + REBOUND.k * q) : 1), rise = !aimed && !sup;
+    this.rebounded = reb;
+    if (reb) { this.landUsed = true; this.missed = 0; H.face.surprise = Math.max(H.face.surprise, 0.7); if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
     if (aimed) { vx = aimed.vx; vy = aimed.vy; }
     else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
@@ -810,13 +871,18 @@ class Game {
       else { vx = 0; vy = JUMP.ceil * v; }
       rise = false;
     }
+    if (flat && !aimed && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
+    { const fr = H.floorRect; if (!inAir && !aimed && side === 0 && fr && fr.move && (fr.move.wheel || fr.move.seesaw) && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board or a seat: its way along with it (it carried the hero, with no pace of its own)
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
-    if (inAir || ram || sup) {
+    if (reb) {   // a rebound: the squash let go, a white ring as big as the leap, sparks up
+      fx.dust(H.cx, foot, IMPACT.puffSpeed + 700); fx.ring(H.cx, foot, (1 + 0.8 * q) * R, INK.white); fx.ring(H.cx, foot, 0.7 * R, hc);
+      sparkFx(H.cx, foot, 12, -Math.PI / 2, 1.2, [260, 620], [1.5, 3], [0.3, 0.55], [INK.white, hc], 0.3);
+    } else if (inAir || ram || sup) {
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 900); fx.ring(H.cx, foot, 0.8 * R, hc); fx.ring(H.cx, foot, 1.3 * R, INK.white);
       sparkFx(H.cx, foot, 16, Math.PI / 2, 1.0, [220, 560], [1.5, 3.2], [0.3, 0.6], [INK.white, hc, INK.white], 0.25);
     } else if (side === 1 || side === 2) sparkFx(side === 1 ? H.minX : H.maxX, H.cy, 9, side === 1 ? Math.PI : 0, 0.8, [120, 340], [1.2, 2.6], [0.25, 0.45], [INK.white, hc], 0.3);
     else if (side !== 4) sparkFx(H.cx, foot, 8, Math.PI / 2, 1.45, [90, 260], [1.2, 2.4], [0.2, 0.4], [INK.white, PAL.gray], 0.15);
-    sound.play(inAir || ram || sup ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8, ram ? 0.8 : sup ? 0.85 : 1);
+    if (reb) sound.play('spring', 0.75, 0.95 + 0.25 * q); else sound.play(inAir || ram || sup ? 'airjump' : side === 1 || side === 2 ? 'walljump' : 'jump', 0.8, ram ? 0.8 : sup ? 0.85 : 1);
     setVel(H, vx, vy);
     unstick(H, JUMP.stickAfter);
     const sp = Math.hypot(vx, vy) || 1;
@@ -832,7 +898,8 @@ class Game {
     const lv = this.lv, on = (q) => q.x1 > r.x0 && q.x0 < r.x1;
     return lv.kind === 'well' && !r.cap && !r.spring && r.y1 - r.y0 <= SMASH.maxH * lv.tile &&
       !lv.spikes.some((s) => s.dir < 2 && on(s) && Math.abs(s.dir ? s.y0 - r.y1 : s.y1 - r.y0) < 1) &&   // red stays danger
-      !lv.rects.some((q) => q.spring && on(q) && Math.abs(q.y1 - r.y0) < 1) && !lv.bubbles.some((b) => on(b) && Math.abs(b.y1 - r.y0) < 1);
+      !lv.rects.some((q) => q.spring && on(q) && Math.abs(q.y1 - r.y0) < 1) && !lv.bubbles.some((b) => on(b) && Math.abs(b.y1 - r.y0) < 1) &&
+      !(kitThing(lv, r) && KIT_TEND[kitThing(lv, r).kind]);   // nor a task's thing on it (a shrine, a lamp, a bell): it would go with it
   }
   ramUp() {   // each step of a ram on its way up: what is just overhead goes before the hero meets it, or the ram stops on what does not break
     const H = this.hero, vy = H.vy.reduce((s, v) => s + v, 0) / H.n;   // the rigid part, as setVel set it (rigVy lags a jump by a step)
@@ -987,7 +1054,7 @@ class Game {
   }
   // A swipe to a side: up to a run's speed that way at once (the keys ease in; a swipe is too short to).
   nudge(dir) {
-    const H = this.hero, want = dir * MOVE.speed * this.R;
+    const H = this.hero, want = dir * MOVE.speed * this.R * (this.flatT > 0 ? MOCHI.slow : 1);
     if (this.state === 'play' && !(H.stuck && glueSide(H) !== 4) && dir * H.rigVx < dir * want) addVel(H, want - H.rigVx, 0);
   }
   // Left and right run along a floor and steer in the air; while down is held nothing sticks.
@@ -998,6 +1065,7 @@ class Game {
     H.pressX = d; H.crawl = top && d !== 0;   // only a body hanging from a ceiling alone creeps along it
     const crouch = input.down && floor;   // down on a floor: squashed flat, ready for a high jump (see jump)
     if (crouch !== this.crouch) { this.crouch = crouch; H.sqAx = 0; H.sqAy = 1; H.squeezeIn = crouch ? CROUCH.squeeze : 0; }
+    if (this.flatT > 0) { H.sqAx = 0; H.sqAy = 1; H.squeezeIn = MOCHI.squeeze; }   // flat under a pestle (MOCHI): as flat as the body goes, whatever the crouch
     if (input.down) H.stickCD = Math.max(H.stickCD || 0, 0.05);
     if (this.dashT > 0) this.dashT -= dt;
     if (this.dashCD > 0) this.dashCD -= dt;
@@ -1005,7 +1073,7 @@ class Game {
     if (d && this.state === 'play') this.mantle(d);
     H.fric = this.dashT > 0 ? 0 : floor && d ? (input.swipe ? 0 : MOVE.slip) : undefined;
     if (!d || (H.stuck && !top)) return;   // stuck to a wall it slides; under a ceiling it creeps along
-    const dv = (d * (top ? MOVE.ceil : MOVE.speed) * this.R - H.rigVx) * Math.min(1, (floor || top ? MOVE.accel : MOVE.air) * (input.joy ? JOY.accel : 1) * dt);   // the stick eases in faster than the keys
+    const dv = (d * (top ? MOVE.ceil : MOVE.speed) * this.R * (this.flatT > 0 ? MOCHI.slow : 1) - H.rigVx) * Math.min(1, (floor || top ? MOVE.accel : MOVE.air) * (input.joy ? JOY.accel : 1) * dt);   // the stick eases in faster than the keys
     if (dv * d > 0 || (input.swipe && floor && !(this.dashT > 0))) addVel(H, dv, 0);   // toward the pressed side only, so a faster leap is not braked, bar a swipe's along a floor
   }
 
@@ -1016,6 +1084,7 @@ class Game {
     if (this.hitstop > 0) { this.hitstop -= dt; return; }
     const lv = this.lv, hero = this.hero, playing = st === 'play', h = dt / PHYS.substeps, sk2 = 2 * WORLD.skin;
     lv.update(dt, this);
+    { const r = hero.floorRect; if (r && r.move && (r.move.wheel || r.move.seesaw) && (hero.wallMask & 8)) hero.translate(r.dx, r.dy); }   // a mill's board or a seesaw's seat carries the hero standing on it, up and down too (MILL, SEESAW)
     if (st === 'clear' && lv.portal) { this.suck(dt); this.followStep(); }
     if (playing) {
       this.activate();
@@ -1037,7 +1106,7 @@ class Game {
     this.warns = playing ? this.threats(dt) : [];
     const bs = this.bodyList(), puck = lv.boss && !lv.boss.dead && lv.boss.def && lv.boss.def.slide ? lv.boss.body : null;
     this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
-    for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.touchHero = false; b.beginStep(dt); }
+    for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.stepFloor = (b.wallMask & 8) ? b.floorRect : null; b.touchHero = false; b.beginStep(dt); }   // (stepFloor: the plank it stands on holds it, see collideLevel)
     hero.springHit = null; hero.rubber = 0;
     for (let s = 0; s < PHYS.substeps; s++) {
       for (const b of bs) { b.integrate(h, WORLD.maxSpeed); b.solve(h); b.updateBounds(); }
@@ -1057,8 +1126,13 @@ class Game {
     if (this.contact()) {   // what a jump would push off
       const m = hero.wallMask;
       this.touch = m & 8 ? 0 : glueSide(hero) || (m & 1 ? 1 : m & 2 ? 2 : m & 4 ? 4 : 0);
+      if (m & 8) {   // on a floor: a landing just now (how hard: the fastest of the fall, REBOUND), or how long since
+        if (this.sinceContact > 0) { this.landV = this.fallV; this.landT = 0; this.landUsed = false; } else this.landT += dt;
+        if (!this.landUsed && this.landT > REBOUND.after) { this.landUsed = true; if (this.landV >= REBOUND.min * this.vjump && ++this.missed >= REBOUND.hint) this.hint('rebound'); }   // a hard one let go by
+      }
+      this.fallV = 0;
       this.sinceContact = 0; this.air = this.mods.airJumps; this.airDash = 0; this.diving = false;
-    } else this.sinceContact += dt;
+    } else { this.sinceContact += dt; this.fallV = Math.max(this.fallV, hero.rigVy); }
     if (this.queueT > 0) { this.queueT -= dt; if (this.sinceContact === 0) this.jump(false, this.queued); }
     if (hero.springHit && hero.rigVy > -0.5 * SPRING.v * this.vjump) this.spring(hero.springHit);
     if (playing && hero.rubber && !(hero.wallMask & 8)) this.rubberHit(hero.rubber);   // standing, rubber is just a wall
@@ -1088,11 +1162,17 @@ class Game {
   // keeps over its head; critters keep clear of the hero.
   folkStep(dt) {
     const lv = this.lv, H = this.hero, R = this.R, near = (x, y, d) => Math.hypot(H.cx - x, H.cy - y) < d;
+    if (this.cardDue && (this.cardDue.t -= dt) <= 0) { const id = this.cardDue.id; this.cardDue = null; this.story(id); }   // a story card due a moment after its moment (RIBBON)
     for (let i = lv.folk.length - 1; i >= 0; i--) {
       const f = lv.folk[i], b = f.body;
       if (f.kind === 'cage' && b) {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
+      else if (f.kind === 'ribbon') {   // the crow in the red cord (RIBBON): a touch frees it; then off it flies
+        f.t += dt;
+        if (!f.fly && Math.abs(H.cx - f.x) < RIBBON.reach * R && H.maxY > f.y - 2 * R && H.minY < f.y) this.untangle(f);
+        if (f.fly) { f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R) lv.folk.splice(i, 1); }
+      }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
         if (!f.fly && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
         if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
@@ -1105,6 +1185,15 @@ class Game {
       }
     }
     this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
+  }
+  untangle(f) {   // the crow in the red cord set free (RIBBON): sparks, its thanks and coins, off up it flies with the cord on it, and the story's card II
+    const R = this.R, lv = this.lv;   // a moment after (behind ?story till the owner's «да», as card I)
+    f.fly = true; f.t = 0; f.vx = f.dir * 70; f.vy = -190;
+    if (lv.gone && !this.well) lv.gone.push(f.id);
+    sparkFx(f.x, f.y - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red], 0.6); fx.ring(f.x, f.y - R, 1.6 * R, INK.white);
+    sound.play('bubble', 0.9, 1.4); sound.play('buy', 0.6, 1.2); haptics.buzz(16);
+    this.drop(f.x, f.y - 2 * R, FOLK.coins); ui.toast(L2(RIBBON.thanks) + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400);
+    if (STORY_LIVE) this.cardDue = { id: 'village_crow', t: RIBBON.card };
   }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
     const H = this.hero, lv = this.lv;
@@ -1122,7 +1211,7 @@ class Game {
       if (!s || !neonIn(lv, s) || !near(s.x0, s.y0, s.x1, s.y1, NEON_REACH)) continue;
       lv.neonLit.set(k, lv.t); sound.note(2 + (lv.neonLit.size % 8), 0.3); this.task('neon');
     }
-    if (lv.theme.village || lv.theme.fuji || lv.theme.mines) for (const r of lv.near(y0, y1)) {
+    if (lv.theme.village || lv.theme.fuji || lv.theme.mines || lv.theme.sea) for (const r of lv.near(y0, y1)) {
       const k = !lv.tended.has(r) && kitThing(lv, r), id = k && KIT_TEND[k.kind];
       if (!id || !(k.y > lv.capY && k.y < lv.floor) || !near(k.x, k.y, k.x, k.y, KIT_REACH)) continue;
       lv.tended.set(r, lv.t); sound.note(2 + (lv.tended.size % 8), 0.3); this.task(id);
@@ -1143,6 +1232,35 @@ class Game {
   // meets); an arena starts as the hero comes to its middle, sends its waves down, pays in big coins once they are all gone.
   setStep(dt) {
     const lv = this.lv, H = this.hero, R = this.R;
+    for (const fw of lv.fireWalls || []) {   // fire on a wall (FIREWALL): burning, it burns the hero touching it, or in its flames
+      if (fw.y1 > lv.cam && fw.y0 < lv.cam + view.h) this.hint('fireWall');
+      if ((lv.t + fw.ph) % (FIREWALL.on + FIREWALL.off) < FIREWALL.off || H.maxY < fw.y0 || H.minY > fw.y1) continue;
+      const reach = FIREWALL.reach * lv.tile;
+      if (fw.side === 1 ? H.minX < lv.l + reach : H.maxX > lv.r - reach) this.hurt(fw.side === 1 ? 1 : -1, -0.3, 'fire');
+    }
+    if (lv.rc) for (const p of lv.placed) if (p.sign && p.y1 > lv.cam && p.y1 < lv.cam + view.h) this.hint('fork');   // a campaign fork's foot on the screen, its sign drawn: told once
+    for (const kn of lv.kines || []) {   // a pestle (MOCHI): down, it flattens whoever is under it; it thuds as it lands, if it is on the screen
+      const st = mochiAt(kn, lv.t), hw = 0.5 * MOCHI.head * lv.tile - 0.2 * R, on = kn.y1 > lv.cam && kn.y0 < lv.cam + view.h, land = MOCHI.up + MOCHI.hold + MOCHI.slam, u = (lv.t + (kn.ph || 0)) % MOCHI_P;
+      if (on) this.hint('mochi');
+      if (on && u >= land && u - dt < land) { sound.play('stomp', 0.5, 0.5); fx.dust(kn.x, kn.yHit, IMPACT.puffSpeed + 300); }
+      if (st.down && H.maxX > kn.x - hw && H.minX < kn.x + hw && H.maxY > st.y - 0.5 * MOCHI.head * lv.tile && H.minY < kn.yHit) {
+        if (!(this.flatT > 0)) {   // pounded: flat, dizzy, a thud and a shake (no heart lost); a bubble pops
+          if (this.power('bubble')) { this.gunT = 0; this.powerEnd(); }
+          setVel(H, H.rigVx * 0.3, Math.max(0, H.rigVy)); this.dizzyT = Math.max(this.dizzyT, 0.6 * MOCHI.flat); sound.play('land', 0.9, 0.6); shake.add(4); haptics.buzz(20);
+        }
+        this.flatT = MOCHI.flat;
+      }
+    }
+    if (this.flatT > 0 && (this.flatT -= dt) <= 0) {   // flat no more: up again with the squeeze's own spring, unless a beam is close over it (MOCHI)
+      const t = lv.tile, over = lv.rects.some((r) => !r.plank && !r.gone && r.x1 > H.minX && r.x0 < H.maxX && r.y1 <= H.minY + 0.1 * t && r.y1 > H.minY - 1.0 * t);
+      if (over) this.flatT = 0.05;
+      else { H.squeezeIn = this.crouch ? CROUCH.squeeze : 0; sound.play('spring', 0.6, 1.5); fx.ring(H.cx, H.cy, 1.2 * R, INK.white); }
+    }
+    for (const w of lv.winds || []) {   // a gust (WIND); its petals setting off on the screen: its sound, from the side it blows from, and once the hint
+      const u = (lv.t + w.ph) % (WIND.on + WIND.off), s = WIND.off - WIND.warn;
+      if (H.cy > w.y0 && H.cy < w.y1 && u >= WIND.off) addVel(H, w.dir * WIND.push * R * dt * (this.onFloor() ? 0.5 : 1), 0);
+      if (u >= s && u - dt < s && w.y1 > lv.cam && w.y0 < lv.cam + view.h) { sound.gust(w.dir, WIND.warn + WIND.on); this.hint('wind'); }
+    }
     for (let i = lv.icicles.length - 1; i >= 0; i--) {
       const c = lv.icicles[i];
       if (c.state === 'hang' && Math.abs(H.cx - c.x) < ICICLE.reach * R && H.minY > c.y && H.minY - c.y < ICICLE.below * R) { c.state = 'shake'; c.t = ICICLE.shake; sound.play('crumble', 0.4, 1.6); }
@@ -1151,24 +1269,29 @@ class Game {
     for (const a of lv.arenas) {
       if (a.done) continue;
       if (a.on && H.cy < a.y - view.h) { a.done = true; continue; }   // left behind (its waves pruned below): over, and nothing paid
-      if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }
+      if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; if (!a.small) ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }   // (an ambush: its rings and the sound)
+      if (a.drops) { if ((a.dropT -= dt) <= 0) this.arenaDrop(a); continue; }
       if (a.foes.some((e) => lv.enemies.includes(e))) continue;
-      if (a.wave < ARENA.waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
-      if (this.rc && this.rc.mini && !a.mini) {   // the last wave a mini-boss (MINI): a big spitter, dropping in
-        const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0], f = new Foe({ type: 'spitter', big: true, x: a.x, y: a.y - ARENA.drop * R, ledge: floor }, lv);
-        a.mini = true; a.foes = [f]; lv.enemies.push(f); lv.foeTotal++; fx.ring(f.body.cx, f.body.cy, 2 * R, INK.spike); ui.toast(t('miniSpit'), 1600); sound.play('bubble', 1, 0.5); continue;
+      if (a.wave < (a.small ? AMBUSH : ARENA).waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
+      if (this.rc && this.rc.mini && !a.mini && !a.small) {   // the last wave a mini-boss (MINI): a big spitter, dropping in, shown first as the waves are
+        const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
+        a.mini = true; a.foes = []; a.drops = [{ type: 'spitter', big: true, x: a.x, y: a.y - ARENA.drop * R, ledge: floor }]; a.dropT = ARENA.warn; ui.toast(t('miniSpit'), 1600); sound.play('bubble', 1, 0.5); continue;
       }
-      a.done = true; this.drop(a.x, a.y - R, ARENA.coins, 5); ui.toast(tf('arenaWon', { n: 5 * ARENA.coins }), 2000); sound.play('combo', 1, 1.1); shake.add(4);
+      const n = (a.small ? AMBUSH : ARENA).coins; a.done = true; this.drop(a.x, a.y - R, n, 5); ui.toast(tf('arenaWon', { n: 5 * n }), 2000); sound.play('combo', 1, 1.1); if (!a.small) shake.add(4);
     }
   }
-  arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped
-    const lv = this.lv, R = this.R, n = ARENA.waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini');
+  arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped, each where it will come shown first (arenaDrop)
+    const lv = this.lv, R = this.R, n = (a.small ? AMBUSH : ARENA).waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini' && k !== 'tofu' && k !== 'tofuMini');   // (not a tofu: its four each would crowd the arena)
     const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
-    a.foes = [];
-    for (let k = 0; k < n; k++) {
-      const type = kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', f = new Foe({ type, x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor }, lv);
-      lv.enemies.push(f); lv.foeTotal++; a.foes.push(f); fx.ring(f.body.cx, f.body.cy, 1.2 * R, INK.spike);
-    }
+    a.foes = []; a.drops = []; a.dropT = ARENA.warn;
+    for (let k = 0; k < n; k++) a.drops.push({ type: kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor });
+  }
+  // A wave's enemies come ARENA.warn s after the places they come to are shown (the renderer's red rings), not out of the air on the hero
+  // (owner: «иногда враги появляются сверху из пустоты и это сложно. Нужно показывать на пару секунд, что в этом месте появится враг»)
+  arenaDrop(a) {
+    const lv = this.lv;
+    for (const s of a.drops) { const f = new Foe(s, lv); lv.enemies.push(f); lv.foeTotal++; a.foes.push(f); fx.ring(f.body.cx, f.body.cy, (s.big ? 2 : 1.2) * this.R, INK.spike); }
+    a.drops = null;
   }
   free(f) {
     const b = f.body, R = this.R, i = this.lv.folk.indexOf(f);
@@ -1191,9 +1314,10 @@ class Game {
     if (lv.boss && !lv.boss.dead && lv.boss.body.touchHero) this.meet(lv.boss);
     if (this.state !== 'play') return;
     if (this.bonus && (this.bonusT -= dt) <= 0) { this.endBonus('timeUp'); return; }
+    if (this.lv.trial) this.trialStep(dt);
     this.spikes(); this.fireStep(dt); this.fireTouch();
     if (this.state !== 'play') return;   // the fire ended a bonus level
-    this.shots(dt); this.collect(dt); this.gun(dt); this.folkStep(dt); this.followStep(); this.setStep(dt);
+    this.shots(dt); this.collect(dt); this.candies(dt); this.folkStep(dt); this.followStep(); this.setStep(dt);
     for (const f of lv.folk) if (f.body && !f.open && f.y > lv.cam && f.y < lv.cam + view.h) this.hint(f.kind);   // a cage or a trader, told once
     if (lv.tasks && lv.tasks.length && !(lv.signs && lv.signs.length)) this.hint('tasks', 'seen_tasks', 'star');   // and what the third star is for (after the tutorial: one thing at a time)
     if (!save.seen.crack) for (const r of lv.near(lv.cam + view.h * 0.2, lv.cam + view.h * 0.8)) if (r.crack) { this.hint('crack'); break; }
@@ -1211,14 +1335,15 @@ class Game {
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
     if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (!this.gated()) this.idleT += dt; }   // no new height: the fire speeds up
-    if (H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys
+    if (!lv.exit && H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
   }
   // From above it is a stomp; anything else is a hit.
-  meet(e) {
-    if (e.state === 'shell' || (e.type === 'mini' && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter: harmless
+  meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
+    if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
-    const above = (dy > STOMP.above * (H.R + b.R) && dy > dx * STOMP.slope && rel > STOMP.rel) || (dy > 0 && rel > 60 && dx < 0.95 * (H.R + b.R));   // from over it, or falling onto it
-    const boss = e === this.lv.boss, can = boss ? e.open() : e.def.stomp;
+    const above = stompable(H, b, rel);   // from over it (its whole top half), or falling onto it
+    const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
+    if (e.type === 'nurikabe' && !can && above) { this.bounceOff(e); return; }   // its hard top, hanging or going: a bounce, nothing more (CRUSH)
     if (boss && e.def && e.def.top && !can && H.cy < b.cy - 0.2 * b.R && dx < b.R) { this.bounceOff(e); return; }   // the Puck's hard dome: a bounce, nothing more
     if (boss && e.def && e.def.rail && e.angry > 0) return;   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
@@ -1233,7 +1358,7 @@ class Game {
     setVel(H, H.rigVx + (Math.sign(H.cx - e.body.cx) || 1) * 2 * this.R, -0.8 * BOSS.bounce * this.vjump); unstick(H, 0.08);
     this.air = Math.max(this.air, 1); this.sinceContact = JUMP.coyote + 1; this.rising = false;
     fx.ring(H.cx, H.maxY, 1.2 * this.R, INK.white); sound.play('spring', 0.7, 1.6); haptics.buzz(10);
-    if (!e.topped++) ui.toast(L2(e.def.top), 2600);
+    if (e.def.top && !e.topped++) ui.toast(L2(e.def.top), 2600);
   }
   wormTouch(e) {   // a worm's tubes hurt (its knot is stomped, see meet); pouring itself over, the knot does too
     const H = this.hero, b = e.body, hr = H.R * H.growth * 0.8, pow = this.power('rainbow') || this.power('grow') || this.power('swarm');
@@ -1302,6 +1427,10 @@ class Game {
     juiceFx(b.cx, b.cy, b.R, b.color.base); splatFx(b.cx, b.cy, b.R, b.color.base);   // it bursts like ripe fruit (user)
     if (e.type === 'skull') sparkFx(b.cx, b.cy - 0.3 * b.R, 16, -Math.PI / 2, Math.PI, [150, 450], [1.5, 3.2], [0.4, 0.8], [PAL.white, PAL.white, PAL.gray], 0.9);   // its bone in bits, over the goo
     this.drop(b.cx, b.cy, Math.round(e.def.coins * this.mods.coinMul));
+    if (e.type === 'tofu' && byHero) for (let k = 0; k < TOFU.n; k++) {   // in four, thrown apart (TOFU)
+      const u = k - (TOFU.n - 1) / 2, m = new Foe({ type: 'tofuMini', x: b.cx + u * 0.45 * b.R, y: b.cy - 0.2 * b.R, ledge: e.ledge, dir: u < 0 ? -1 : 1 }, lv);
+      setVel(m.body, u * 2.2 * this.R, -(4 + (k % 2) * 2.5) * this.R); lv.enemies.push(m); lv.foeTotal++;
+    }
     if (e.type === 'splitter' && byHero) for (const d of [-1, 1]) {   // in two, thrown apart
       const m = new Foe({ type: 'mini', x: b.cx + d * 0.5 * b.R, y: b.cy, ledge: e.ledge, dir: d }, lv);
       setVel(m.body, d * 3 * this.R, -4 * this.R); lv.enemies.push(m); lv.foeTotal++;
@@ -1353,6 +1482,7 @@ class Game {
   }
   hurt(dx, dy, by = 'other') {
     if (this.invuln > 0 || this.power('rainbow') || this.power('swarm') || this.state !== 'play') return false;
+    if (this.power('bubble')) { this.gunT = 0; this.powerEnd(); this.invuln = BUBBLE.grace; haptics.buzz(20); return false; }   // the bubble takes the hit, popping (BUBBLE)
     const H = this.hero, d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
     const lost = this.loseHeart();
@@ -1368,19 +1498,24 @@ class Game {
   }
   // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; a learning level never
   // takes the last (the digest §3: no losing while learning). False: none was lost.
+  parOf() {   // a campaign level's par for its time medal (MEDAL)
+    const lv = this.lv, m = lv.portal ? (lv.floor - lv.portal.y) / (R_PER_M * this.R) : 0;
+    return (this.rc && this.rc.par) || Math.max(MEDAL.min, MEDAL.step * Math.ceil((m * MEDAL.perM) / MEDAL.step));
+  }
   loseHeart() {
     if (this.bonus) return false;
     if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
     if (this.rc && this.rc.safe && this.hp <= 1) return false;
-    this.hp--; return true;
+    this.hp--; this.harmed = true; return true;   // (a heart lost: no clean medal this time, MEDAL; not `hurt`, the method that loses it)
   }
   room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
+  roomFloor() { return Math.max(CAM.floorShow, view.keep + this.R); }   // a shop's or a stash's floor over the screen's bottom: over the touch keys, as the well's camera keeps the hero (step)
   // The last few ledges the hero stood on (null: the floor), with where on them. Crumbling
   // ones and springs do not count, nor a spot beside spikes; a ledge kept here is never
   // pruned, so a fall after a long wall climb still finds it.
   markSafe(r) {
     const H = this.hero, x = H.cx;
-    if (r && (r.crumble || r.spring || r.cap || r.gone)) return;
+    if (r && (r.crumble || r.spring || r.cap || r.gone || (r.move && (r.move.wheel || r.move.seesaw)))) return;   // (nor a mill's board nor a seesaw's seat: they may be anywhere then)
     if (r) for (const s of this.lv.spikes) if (s.dir === 0 && Math.abs(s.y1 - r.y0) < 1 && s.x1 > x - H.R && s.x0 < x + H.R) return;
     const last = this.safes[this.safes.length - 1], dx = r ? x - r.x0 : x;
     if (last && last.r === r) { last.dx = dx; return; }
@@ -1398,7 +1533,7 @@ class Game {
     this.curAt = t0; const tl = lv.tile;
     save.cur = { ci: this.ci, seed: this.seed, order: this.rc.order || null, sig: lv.sig, y: (lv.floor - H.maxY) / tl, fire: lv.fire ? (lv.fire.y - H.maxY) / tl : null, hp: this.hp,
       coins: this.coins, got: lv.coinsTaken, kills: this.kills, m: this.levelM, t: lv.t, taken: lv.taken.slice(), gone: lv.gone.slice(), neon: [...lv.neonLit.keys()],
-      tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n) };
+      tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n), harmed: this.harmed };
     persist();
   }
   // Continue into the level under way (saveCur): the level laid again, what was taken and done off it, the hero on the highest steady ledge
@@ -1419,7 +1554,7 @@ class Game {
     this.invuln = HEALTH.invuln;   // a moment to look round
     lv.cam = Math.max(this.hero.cy - CAM.anchor * view.h, lv.capY - CAM.top);
     if (lv.fire) lv.fire.y = this.hero.maxY + Math.max(cur.fire == null ? 0 : cur.fire * tl, 0.6 * view.h);   // as far under it as it was, a breath at least
-    this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t;   // (this.kept: the purse at its start, so its coins count once)
+    this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t; this.harmed = !!cur.harmed;   // (this.kept: the purse at its start, so its coins count once)
     save.cur = cur; ui.toast(t('resumed'), 1800);
   }
   // Where a fall comes back to: the newest of those ledges still there, a little above it.
@@ -1452,7 +1587,7 @@ class Game {
     const lv = this.lv, sp = this.safeSpot();
     this.combo = 0; ui.comboEnd(); this.rising = false;
     this.placeHero(sp.x, sp.y); this.regroup();
-    this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1;
+    this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1; this.fallV = 0; this.landT = Infinity; this.landUsed = true; this.dizzyT = FACE.dizzy; this.flatT = 0; this.hero.squeezeIn = 0;   // (its face: dizzy, FACE; not flat, MOCHI)
     lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
     if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; }
     this.idleT = 0;
@@ -1504,15 +1639,15 @@ class Game {
     splatFx(H.cx, f.y, this.R * 0.7, INK.flame, 6);
     f.y = Math.max(f.y, H.maxY + FIRE.back * view.h); f.warn = null;   // and sinks back: a throw into a ceiling must not land in it again
   }
-  // A fizz candy taken, the hero shoots by itself for a while: at the nearest enemy or blob in range.
   power(k) { return this.gunT > 0 && this.pow === k; }   // a candy at work
   take(kind) {   // one candy at a time: a new one takes over, the same one starts again
     if (this.gunT > 0 && this.pow !== kind) this.powerEnd();   // a rainbow or a giant cut short still ends safely
     met('candy', kind);
-    this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.gunCD = 0; this.ram = false;
+    this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.ram = false;
     if (kind === 'grow') { this.hero.growthTarget = GROW.size; fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('spring', 0.8, 0.6); shake.add(4); }
     if (kind === 'rainbow' || kind === 'swarm') this.invuln = 0;   // a hit's blink would let enemies through untouched
     if (kind === 'swarm') this.swarmUp();
+    if (kind === 'bubble') { const H = this.hero; H.gScale = 0; H.sticky = false; unstick(H, 0.2); setVel(H, H.rigVx, Math.min(H.rigVy, 0)); fx.ring(H.cx, H.cy, BUBBLE.size * this.R, PAL.purple); sound.play('bubble', 0.9, 1.15); }   // in a bubble (BUBBLE)
     if (kind === 'astro') {   // off up through a fifth of the level (ASTRO; on as a boost ring's flight, Game.ringStep)
       const H = this.hero, lv = this.lv, R = this.R;
       this.rocket = { to: H.cy - ASTRO.lift * Math.max(lv.floor - lv.endY, 10 * R), astro: true, y: H.maxY };
@@ -1524,36 +1659,18 @@ class Game {
     if (this.pow === 'rainbow') { this.invuln = Math.max(this.invuln, RAINBOW.grace); fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.6, 0.8); }
     if (this.pow === 'swarm') { for (const b of this.swarm) sparkFx(b.cx, b.cy, 6, -Math.PI / 2, Math.PI, [80, 220], [1.2, 2.4], [0.2, 0.4], [b.color.base, INK.white], 0.4); this.swarm = []; this.invuln = Math.max(this.invuln, RAINBOW.grace); sound.play('bubble', 0.6, 1.1); }   // home, and a moment of safety
     if (this.pow === 'grow') { this.hero.growthTarget = 1; this.invuln = Math.max(this.invuln, GROW.grace); fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('bubble', 0.7, 0.7); }   // back to size, and a while blinking
+    if (this.pow === 'bubble') { const H = this.hero; H.gScale = 1; H.sticky = true; sparkFx(H.cx, H.cy, 14, -Math.PI / 2, Math.PI, [120, 380], [1.5, 3], [0.25, 0.5], [PAL.purple, INK.white], 0.4); fx.ring(H.cx, H.cy, BUBBLE.size * this.R, INK.white); sound.play('bubble', 0.9, 0.7); }   // popped
     this.pow = null; this.ram = false;
   }
-  gun(dt) {
+  candies(dt) {   // a candy touched is taken (`take`), and runs out
     const lv = this.lv, H = this.hero, R = this.R;
     for (const p of lv.fizz || []) if (!p.taken && Math.hypot(H.cx - p.x, H.cy - p.y) < p.r + 0.8 * H.R * H.growth) {   // (a giant's reach is its size)
-      p.taken = true; this.take(p.kind || 'fizz');
+      p.taken = true; this.take(p.kind);
       fx.ring(p.x, p.y, 1.4 * R, INK.coin); sound.play('buy'); haptics.buzz(14);
     }
+    if (this.power('bubble')) { const up = -BUBBLE.rise * R; addVel(H, 0, (up - H.rigVy) * Math.min(1, BUBBLE.ease * dt)); }   // floating up, its pace eased to the bubble's
     if (this.gunT > 0 && (this.gunT -= dt) <= 0) this.powerEnd();
     for (const p of lv.fizz || []) if (p.again && p.taken && !this.power(p.kind) && H.cy > p.y - 6 * R) p.taken = false;   // the tutorial's helmet: back for a hero still under its blocks
-    if (this.power('fizz') && (this.gunCD -= dt) <= 0) {
-      let best = null, bd = GUN.range * R;
-      for (const e of lv.enemies) { const d = Math.hypot(e.body.cx - H.cx, e.body.cy - H.cy); if (d < bd) { bd = d; best = [e.body.cx, e.body.cy]; } }
-      for (const s of lv.shots) { const d = Math.hypot(s.x - H.cx, s.y - H.cy); if (d < bd) { bd = d; best = [s.x, s.y]; } }
-      if (best) {
-        const dx = (best[0] - H.cx) / bd, dy = (best[1] - H.cy) / bd;
-        lv.bullets.push({ x: H.cx + dx * H.R, y: H.cy + dy * H.R, vx: dx * GUN.speed * R, vy: dy * GUN.speed * R, t: 0 });
-        this.gunCD = GUN.every; sound.play('shot', 0.35, 0.9 + Math.random() * 0.2);
-      }
-    }
-    for (let i = lv.bullets.length - 1; i >= 0; i--) {   // a bullet: through the air until it meets an enemy, a blob or a block
-      const b = lv.bullets[i];
-      b.x += b.vx * dt; b.y += b.vy * dt; b.t += dt;
-      let gone = b.t > 1 || b.y < lv.cam - R || b.y > lv.cam + view.h + R;
-      for (const r of lv.near(b.y, b.y)) if (!r.plank && b.x > r.x0 && b.x < r.x1) { gone = true; if (r.crumble) r.hit = true; }
-      if (b.x < lv.l || b.x > lv.r) gone = true;
-      for (const e of lv.enemies.slice()) { const q = e.body; if (!gone && b.x > q.minX && b.x < q.maxX && b.y > q.minY && b.y < q.maxY) { this.kill(e, true); gone = true; } }
-      for (let k = lv.shots.length - 1; k >= 0 && !gone; k--) { const s = lv.shots[k]; if (Math.hypot(s.x - b.x, s.y - b.y) < s.r + GUN.r * R) { splatFx(s.x, s.y, s.r * 2, INK.spike, 4); lv.shots.splice(k, 1); gone = true; } }
-      if (gone) lv.bullets.splice(i, 1);
-    }
   }
   shots(dt) {
     const lv = this.lv, H = this.hero, sh = lv.shots;
@@ -1578,7 +1695,7 @@ class Game {
         c.vx += ((dx / d) * sp - c.vx) * f; c.vy += ((dy / d) * sp - c.vy) * f;
       }
       if (c.moving) { if (!home) { c.vx *= k; c.vy *= k; } c.x += c.vx * dt; c.y += c.vy * dt; }
-      if (d < H.R * H.growth * 0.85 + (c.v > 1 ? 1.4 : 1) * cr && !(c.drop && c.t < COIN.home)) this.takeCoin(i);   // a dropped one only once its burst is over: a combo's fountain is seen
+      if (d < H.R * H.growth * 0.85 + cr && !(c.drop && c.t < COIN.home)) this.takeCoin(i);   // a dropped one only once its burst is over: a combo's fountain is seen
     }
   }
   takeCoin(i) {   // coin i of the level's into the purse (counted for the stars and kept for a level under way: Game.saveCur)
@@ -1591,6 +1708,7 @@ class Game {
     let rw = null;
     for (const c of COMBO) if (n >= c.at - s) rw = c;
     if (!rw) return;
+    this.joyT = FACE.joy;   // (its face: glad, FACE)
     const pay = rw.coins * ((this.bonus && this.bonus.comboMul) || 1), H = this.hero;
     this.drop(H.cx, H.minY, pay / 5, 5);   // out of the hero as big coins that fly back in: the reward seen (every reward is a multiple of 5)
     sparkFx(H.cx, H.minY, Math.min(36, 6 + 3 * n), -Math.PI / 2, 0.9, [250, 650], [1.5, 3.5], [0.4, 0.8], [INK.coin, INK.coinD, INK.white], 1); shake.add(rw.hp ? 6 : 3);
@@ -1608,6 +1726,15 @@ class Game {
     const how = coarse ? (save.stick ? 'S' : 'T') : 'K';   // the words for the controls in use
     if (H.stuck && (glueSide(H) === 1 || glueSide(H) === 2)) this.hint('wall', 'seen_wall' + how);   // stuck to a wall the first time: how to let go
     if (how !== 'T' && (m & 8) && this.idleT > 4 && !this.learning()) this.hint('crouch', 'seen_crouch' + how);   // standing about: there is a high jump (no down on the touch keys)
+  }
+  danger() {   // the nearest danger within FACE.near R of the hero, for its face to look at: spikes, an enemy, a blob, the fire's top
+    const H = this.hero, lv = this.lv, lim = FACE.near * this.R; let best = null, bd = lim;
+    const see = (x, y) => { const q = Math.hypot(x - H.cx, y - H.cy); if (q < bd) { bd = q; best = { x, y, d: q }; } };
+    for (const e of lv.enemies) if (Math.abs(e.body.cy - H.cy) < lim) see(e.body.cx, e.body.cy);
+    for (const q of lv.shots) if (Math.abs(q.y - H.cy) < lim) see(q.x, q.y);
+    for (const q of lv.spikes) if (q.y1 > H.cy - lim && q.y0 < H.cy + lim) see(clamp(H.cx, q.x0, q.x1), (q.y0 + q.y1) / 2);
+    if (lv.fire && lv.fire.y - H.maxY < lim) see(H.cx, lv.fire.y);
+    return best;
   }
   hint(kind, key = 'seen_' + kind, icon) { const now = performance.now(); if (save.seen[kind] || this.stateT < 3 || now < (this.hintAt || 0)) return; save.seen[kind] = 1; persist(); ui.toast(t(key), 2400, icon); this.hintAt = now + 2600; }   // not over the level's banner, nor over another hint (that one waits its turn)
   spring(r) {
@@ -1633,15 +1760,15 @@ class Game {
   enterRoom(bub) {
     if (!bub.room) {
       const room = new Level();
-      room.reset({ kind: bub.kind, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' ? THEMES.stash : THEMES.room, hard: this.hard });
+      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor() });
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
     this.bankDrops();   // in the purse at once: they are for the shop in there
-    this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false;
+    this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false; this.lv.cam = this.lv.floor + this.roomFloor() - view.h;   // (as it was built, the view as it is now)
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
-    aimCancel(); ui.flash(); ui.toast(t(bub.kind), 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
+    aimCancel(); ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
   }
   // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in the dark, with coins as rain and no
   // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).
@@ -1671,12 +1798,26 @@ class Game {
     well.cam = Math.max(this.hero.cy - CAM.anchor * view.h, well.capY - CAM.top); well.ensure(well.cam - view.h * LEVEL.ahead);
     this.regroup(); aimCancel(); ui.flash(); ui.toast(t('back'), 1400); sound.play('portal', 0.8, 1.2); haptics.buzz(20);
   }
+  trialStep(dt) {   // a trial room's clock and goal (TRIAL): on a moment after coming in; done in time, its pay dropped in; out of time, its coins go
+    const lv = this.lv, tr = lv.trial, R = this.R;
+    if (tr.state === 'ready') { if ((tr.t += dt) >= TRIAL.start) { tr.state = 'on'; tr.t = 0; } return; }   // (coins count from the way in: the throw in may take one or two)
+    if (tr.state !== 'on') return;
+    tr.t += dt; tr.got = lv.coinsTaken - tr.c0;
+    if (tr.got >= tr.n) {
+      tr.state = 'won'; this.drop((lv.l + lv.r) / 2, lv.capY + 3 * R, TRIAL.pay / 5, 5);
+      fx.ring(this.hero.cx, this.hero.cy, 2.4 * R, INK.coin); sound.play('combo', 1, 1.2); this.chime(); shake.add(3); ui.toast(tf('trialWon', { n: TRIAL.pay }), 2200);
+    } else if (tr.t >= tr.time) {
+      tr.state = 'lost';
+      for (const c of lv.coins) sparkFx(c.x, c.y, 5, -Math.PI / 2, Math.PI, [60, 160], [1, 2], [0.2, 0.4], [INK.coin, INK.white], 0.4);
+      lv.coins.length = 0; sound.play('deny', 0.9); ui.toast(t('timeUp'), 1600);
+    }
+  }
   leaveRoom() {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
     this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R); this.regroup();   // beside the door, on its ledge
     bub.cd = 1.2; aimCancel(); ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
-    if (bub.kind === 'treasure' && !room.coins.length) {   // a stash with all its coins taken: its way in closes behind the hero
+    if ((bub.kind === 'treasure' && !room.coins.length) || bub.kind === 'trial') {   // a stash with all its coins taken, or a trial (TRIAL: one try, left halfway or not): its way in closes behind the hero
       this.lv.bubbles.splice(this.lv.bubbles.indexOf(bub), 1);
       sparkFx(bub.x, bub.y, 14, -Math.PI / 2, Math.PI, [80, 240], [1.5, 3], [0.3, 0.6], [this.lv.theme.wall, INK.white], 0.6); fx.dust(bub.x, bub.y1, IMPACT.puffSpeed + 500);
     }
@@ -1713,6 +1854,11 @@ class Game {
     if (!this.bonus) {   // the third for every coin and every task (owner)
       this.stars = { n: 1 + half + (allCoins && tasks.every((q) => q.n >= q.of)), coins: [lv.coinsTaken, lv.coinTotal], tasks: tasks.map((q) => Object.assign({}, q)) };
       this.stars.pay = STARS.coins[this.stars.n - 1]; this.coins += this.stars.pay;
+    }
+    this.medals = null;
+    if (!this.bonus && this.mode === 'camp' && this.daily == null) {   // the mastery medals (MEDAL): its time (the shaft's clock: a room's time is the room's), no heart lost
+      const c = save.camp, par = this.parOf(), got = (lv.t <= par ? 1 : 0) | (this.harmed ? 0 : 2), had = c.medals[this.ci] | 0;
+      c.medals[this.ci] = had | got; this.medals = { par, t: lv.t, got, had }; persist();
     }
     this.climbed += this.daily != null ? this.rc.len : this.levelM; this.levelM = 0;   // (the daily's: its whole length, where its medal stands)
     if (this.mode === 'camp' && !this.bonus) this.campDone(this.stars.n);
@@ -1827,7 +1973,7 @@ class Game {
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
-    ui.hideAll(); ui.banner();
+    ui.hideAll(); this.story(STORY_LIVE && (storyLook || (w === 0 && s === 0)) && 'moon_fall', () => ui.banner(), storyLook); storyLook = false;   // (the story's first card, before 1-1: STORY)
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
@@ -1906,7 +2052,15 @@ class Game {
   }
   where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + this.num; }
   get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.mode === 'camp' ? wNo(this.world) : this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
+  // A story card (STORY) once a play-through, the game held under it till Next; `then` after it, or at once when none is due (`again`: shown seen or not)
+  story(id, then, again) {
+    const c = id && STORY[id];
+    if (!c || (save.seen['card_' + id] && !again)) { if (then) then(); return; }
+    this.storyOn = true; this.paused = this.state; this.state = 'pause'; input.clear();
+    ui.story(c, () => { save.seen['card_' + id] = 1; persist(); this.storyOn = false; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); if (then) then(); });
+  }
   togglePause(on) {
+    if (this.storyOn) return;   // (a story card is up: its Next goes on)
     if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); pmsg('level_paused', this.lvl()); }   // (the platform told: no play while paused, nor in the menu after)
     else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); pmsg('level_resumed', this.lvl()); }
   }
@@ -1954,11 +2108,23 @@ class Game {
     }
     lv.ensure(lv.cam - view.h * LEVEL.ahead);
     if ((this.pruneT += dt) > 0.5) { this.pruneT = 0; if (lv.kind === 'well' && !lv.under) lv.prune(lv.cam + view.h * (1 + LEVEL.behind)); }
-    const d = input.dir;   // the hero looks where it runs
-    if (d && this.state === 'play') { this.heroLook.x = b.cx + d * 240; this.heroLook.y = b.cy - 40; this.heroLook.t = now; }
+    const d = input.dir, look = (x, y) => { this.heroLook.x = x; this.heroLook.y = y; this.heroLook.t = now; };   // the hero looks where it runs, or (FACE) round
+    const dz = this.state === 'play' && !this.dizzyT && !this.joyT ? this.danger() : null;   // dizzy after a fall, glad after a chain, wary of what is near
+    if (this.dizzyT > 0) { this.dizzyT = Math.max(0, this.dizzyT - dt); const a = (now / 1000) * 9; look(b.cx + Math.cos(a) * 200, b.cy + Math.sin(a) * 200); }
+    else if (this.joyT > 0) { this.joyT = Math.max(0, this.joyT - dt); b.face.wide = Math.max(b.face.wide, 0.8); look(b.cx, b.cy - 300); }
+    else if (dz) { look(dz.x, dz.y); if (dz.d < FACE.scare * this.R) b.face.wide = Math.max(b.face.wide, 0.6); }
+    else if (d && this.state === 'play') look(b.cx + d * 240, b.cy - 40);
+    b.face.frown = this.dizzyT > 0 || !!dz;
     b.face.update(dt, b, this.heroLook, now);
     this.look.x = b.cx; this.look.y = b.cy; this.look.t = now;
-    for (const e of lv.enemies) e.body.face.update(dt, e.body, this.look, now);
+    for (const e of lv.enemies) {   // an enemy that can be stomped looks scared with the hero over it (its whole top half: stompable), cross with the hero anywhere else (tester:
+      // «теряю сердца по причине «задел врага»… вот этой границы хитбокса врагов я до конца понять не смог»)
+      const fb = e.body, over = e.def && e.canStomp() && e !== lv.boss && overFoe(b, fb) && Math.abs(b.cx - fb.cx) < STOMP.look * this.R && fb.cy - b.cy < 2 * STOMP.look * this.R;
+      e.over = over && e.state !== 'shell';   // (and a chevron over it: the renderer)
+      if (e.state !== 'shell') { fb.face.frown = !over; if (over) { fb.face.wide = Math.max(fb.face.wide, 0.5); fb.face.surprise = Math.max(fb.face.surprise, 0.7); } }   // (scared: wide eyes, its mouth open)
+      if (e.def && e.def.color === 'red' && e !== lv.boss) fb.paint = foePaint(e, b);   // its paint (FOE_PAINT)
+      fb.face.update(dt, fb, this.look, now);
+    }
     for (const f of lv.folk || []) if (f.body) f.body.face.update(dt, f.body, this.look, now);
     for (const f of this.followers) f.body.face.update(dt, f.body, this.look, now);
     if (lv.boss && !lv.boss.dead) lv.boss.body.face.update(dt, lv.boss.body, this.look, now);
@@ -2014,6 +2180,28 @@ function px(text, max = Infinity, left = false) {
   }
   return e;
 }
+// Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once, new art from the pack's
+// prompts): `n` the numeral on the frame, `still` the approved art, `title` under the card. Game.story shows one, the game held under it till Next.
+const STORY = {
+  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
+  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
+  city_friendship: { n: 'III', still: 'assets/cards/03_city_friendship.png', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+};
+const STORY_LIVE = /[?&]story\b/.test(location.search);   // (till the owner's «да» to the cards' art they come by themselves only with ?story,
+let storyLook = STORY_LIVE;   // which shows card I before the first level played, seen or not: a save well under way shows it too)
+// The cards' one frame, drawn here in its own pixels (the pack: «draw the thin frame procedurally… more reliable and always aligned»): indigo round a 2:3
+// window, an ivory keyline, lavender stepped corners, a crescent moon at its top with a vermilion knot either side, gold specks at its tips.
+function storyFrame() {
+  const I = '#201638', W = '#f7f3ee', L = '#ab80e5', R = '#f34545', G = '#ffb642', r = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+  let s = `<path fill="${I}" fill-rule="evenodd" d="M0 0H128V192H0Z M4 6V186H124V6Z"/>` + r(3, 5, 122, 1, W) + r(3, 186, 122, 1, W) + r(3, 5, 1, 182, W) + r(124, 5, 1, 182, W);
+  for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {   // a corner: an L along each edge and a step inside it
+    const X = (x, w) => (sx > 0 ? x : 128 - x - w), Y = (y, h) => (sy > 0 ? y : 192 - y - h);
+    s += r(X(0, 12), Y(0, 2), 12, 2, L) + r(X(0, 2), Y(0, 14), 2, 14, L) + r(X(5, 3), Y(8, 3), 3, 3, L) + r(X(0, 1), Y(0, 1), 1, 1, G);
+  }
+  s += `<circle cx="64" cy="4" r="7" fill="${I}"/><circle cx="64" cy="4" r="6" fill="none" stroke="${L}" stroke-width="1"/><circle cx="63" cy="4" r="3.5" fill="${W}"/><circle cx="65" cy="3" r="3" fill="${I}"/>`;
+  s += r(53, 2, 3, 3, R) + r(72, 2, 3, 3, R);
+  return `<svg class="sframe" viewBox="0 0 128 192" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
+}
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
 function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
@@ -2042,7 +2230,7 @@ function pixelDisc(r, fill) {
     + '<path class="rim" fill-rule="evenodd" d="' + rows(q) + rows(q - 1) + '"/><path class="in" fill-opacity="' + fill + '" d="' + rows(q - 1) + '"/></svg>';
   return t.content.firstChild;
 }
-const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon, taskLantern, taskBell, taskLamp
+const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon, taskLantern, taskBell, taskLamp, taskLighthouse
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 const goOwed = (f) => { if (!game.owed(f)) f(); };   // into a campaign level: a card owed first (Game.owed)
@@ -2062,7 +2250,7 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
-  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map']) $(id).classList.remove('on'); this.open = null; },
+  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; },
   menu() {
     const p = this.panel('menu');
     const title = cap(el('h1', 'title', 'UPWELL'), 'title'); title.lang = 'en'; p.append(title);   // the name in VT323 whatever the language
@@ -2143,6 +2331,16 @@ const ui = {
       const pay = px('+' + st.pay); pay.classList.add('pay'); row.append(pay);
       p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
       if (st.tasks.length) { const tr = el('div', 'tasks'); tr.append(...st.tasks.map(taskEl)); p.append(tr); }   // and its tasks, done or not
+    }
+    const md = game.medals;
+    if (md) {   // its mastery medals (MEDAL): the time (the par, and the time it took when missed) and no heart lost; one won now pops in after the stars
+      const row = el('div', 'mastery');
+      for (const [bit, on, off, text] of [[1, 'clock', 'clockOff', tf('medalTime', { p: md.par }) + (md.got & 1 ? '' : ' · ' + Math.ceil(md.t))], [2, 'heart', 'heartOff', t('medalClean')]]) {
+        const fresh = md.got & bit && !(md.had & bit), chip = el('div', 'mast' + (fresh ? ' new' : (md.got | md.had) & bit ? ' won' : ''));
+        chip.append(iconEl((md.got | md.had) & bit ? on : off), px(text)); row.append(chip);
+        if (fresh) setTimeout(() => sound.play('chime', 0.9, bit === 1 ? 1.5 : 1.7), 1500 + 200 * bit);
+      }
+      p.append(row);
     }
   },
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
@@ -2238,13 +2436,23 @@ const ui = {
     const p = this.panel('pause');
     const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); }), 'sound');
     const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); }), 'shake');
+    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); this.pause(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
     const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
     langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
     for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); this.pause(); }); b.lang = k; langs.append(b); }
     const build = el('div', 'build');   // the upgrades taken (the world's build, in the campaign), as their pictures
     for (const id of game.taken) build.append(iconEl(id));
     for (const id of game.syns) { const i = iconEl(SYNERGIES.find((q) => q.id === id).of[0]); i.classList.add('syn'); build.append(i); }   // a synergy: its first card, ringed
-    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, ...(d25 ? [d25] : []), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+  },
+  story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
+    const p = this.panel('story'), card = el('div', 'scard'), art = new Image();
+    const fit = Math.min((view.w - 16) / 256, (view.h - 180) / 384), d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // the pack's
+    card.style.width = 256 * k + 'px'; card.style.height = 384 * k + 'px';   // whole pixels: a whole number of the screen's to each of the art's, the most that fits the view as layout
+    // measured it (a CSS 100vh is taller than the page under iOS Safari's bar), unless that loses over 30% of it (a small screen: then as it fits)
+    art.className = 'sart'; art.alt = L2(c.title); art.decoding = 'async'; art.src = c.still;
+    card.innerHTML = storyFrame(); card.prepend(art); card.append(el('div', 'snum', c.n));
+    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', done), 'next'));
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
@@ -2358,7 +2566,7 @@ const ui = {
     if (left) { gun.dataset.k = g.pow; gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
     const m = Math.floor(g.climbed + g.levelM);
     if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
-    const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : g.num;   // a bonus level counts its seconds down
+    const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.trial ? (g.lv.trial.state === 'on' ? `${g.lv.trial.got}/${g.lv.trial.n} · ${Math.max(0, Math.ceil(g.lv.trial.time - g.lv.trial.t))}` : t('trial')) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : g.num;   // a bonus level counts its seconds down
     if (st !== this.stage) { this.stage = st; $('stage').replaceChildren(px(st)); }
     const tk = (playing && !g.well && g.lv.tasks) || [], tkey = tk.map((q) => q.id + q.n + '/' + q.of).join();   // the level's tasks, how far each
     if (tkey !== this.tkey) { this.tkey = tkey; $('tasks').replaceChildren(...tk.map(taskEl)); view.hudB = 0; }   // (the HUD measured again)
@@ -2575,7 +2783,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // summit, quieter while paused or over (each fetched when first wanted, the last four kept: all of them decoded are ~170 MB). It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
-  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'shot', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
+  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
 const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
 const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', junk: 'junk', skazka: 'skazka', sea: 'sea' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {
@@ -2616,6 +2824,18 @@ const sound = {
     }
     g.connect(this.fx);
   },
+  gust(dir, len, vol = 1) {   // a gust of wind (WIND): noise through a band that rises and falls, swelling over `len` s, going from the side it blows from to the other
+    if (!this.ctx || save.sound === false || this.ctx.state !== 'running') return;
+    const c = this.ctx, t = c.currentTime;
+    if (!this.noise) { const d = (this.noise = c.createBuffer(1, 2 * c.sampleRate, c.sampleRate)).getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    const s = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain(), pan = c.createStereoPanner ? c.createStereoPanner() : null;
+    s.buffer = this.noise; s.loop = true; bp.type = 'bandpass'; bp.Q.value = 1.2;
+    bp.frequency.setValueAtTime(300, t); bp.frequency.linearRampToValueAtTime(900, t + 0.5 * len); bp.frequency.linearRampToValueAtTime(400, t + len);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.45 * len); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    s.connect(bp); bp.connect(g);
+    if (pan) { pan.pan.setValueAtTime(-0.6 * dir, t); pan.pan.linearRampToValueAtTime(0.6 * dir, t + len); g.connect(pan); pan.connect(this.fx); } else g.connect(this.fx);   // (no panner: Safari before 14.1)
+    s.start(t); s.stop(t + len + 0.05);
+  },
   play(name, vol = 1, rate = 1) {
     const b = this.bufs[name];
     if (!b || save.sound === false || this.ctx.state !== 'running') return;
@@ -2644,7 +2864,7 @@ const sound = {
   frame(g) {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const kind = g.lv.kind;
-    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
+    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' || kind === 'trial' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
     const duck = g.state === 'play' || g.state === 'menu' ? 1 : 0.35;
     if (duck !== this.duck) { this.duck = duck; this.mus.gain.setTargetAtTime(MUSIC_VOL * duck, this.ctx.currentTime, 0.2); }
   },
@@ -2674,13 +2894,14 @@ const ads = {
       const t0 = performance.now();
       const go = () => {
         if (!window.bridge) { if (performance.now() - t0 < BRIDGE_WAIT) setTimeout(go, 50); else done(false); return; }
-        const late = setTimeout(() => done(false), BRIDGE_WAIT);
+        const late = setTimeout(() => { this.late = true; done(false); }, BRIDGE_WAIT);
         bridge.initialize().then(() => {
           clearTimeout(late); this.ok = true;
           bridge.platform.on(bridge.EVENT_NAME.AUDIO_STATE_CHANGED, (on) => { this.off = !on; this.hush(); });
           bridge.platform.on(bridge.EVENT_NAME.PAUSE_STATE_CHANGED, (p) => { this.held = p; this.hush(); if (p) game.togglePause(true); });
           this.off = !bridge.platform.isAudioEnabled; this.hush();
           done(true);
+          if (this.late && started) bridge.platform.sendMessage('game_ready');   // (up after boot gave it up: the game playable already; without it no interstitial ever comes)
         }).catch(() => { clearTimeout(late); done(false); });
       };
       go();
@@ -2808,7 +3029,7 @@ function layout() {
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
-  renderer.resize(W, H, PIXELATED ? 1 / PIX.size : window.devicePixelRatio || 1);   // the canvas as many pixels as the game draws, the page scales it up
+  renderer.resize(W, H, PIXELATED ? (CINE ? CINE.k : 1) / PIX.size : window.devicePixelRatio || 1);   // (the cinematic fork: k times the game's pixels, its light that smooth)   // the canvas as many pixels as the game draws, the page scales it up
   // pixelated (index.html): a phone gets no full-resolution copy of each frame to keep and compose (on a 3x iPhone 20 times the pixels for nothing);
   // a browser that cannot scale it pixelated gets the copy, a device pixel per pixel, as before
   game.applyMods();
@@ -2897,6 +3118,7 @@ function perfSend(now) {
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.
 function runFrame(now, fixedDt) {
   if (window.devicePixelRatio !== loop.dpr) { loop.dpr = window.devicePixelRatio; layoutQueued = true; }   // moved to another screen
+  if (CINE_ON) cineSync(game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for)
   if (layoutQueued) { layoutQueued = false; layout(); }
   let dt = fixedDt != null ? fixedDt : (now - loop.last) / 1000;
   loop.last = now;
@@ -2926,15 +3148,16 @@ async function boot() {
   let b = null, got = false, l = null;   // the Bridge's copy (got: its storage answered), the browser's
   if (br) try { const r = await Promise.race([bridge.storage.get([SAVE_KEY]), new Promise((ok) => setTimeout(() => ok(null), 2500))]); if (r) { b = parse(r[0]); got = true; } } catch (e) { b = null; }   // (no answer in 2.5 s: as a failed one)
   try { l = parse(localStorage.getItem(LOCAL_KEY)) || parse(localStorage.getItem(SAVE_KEY)); } catch (e) { l = null; }   // (SAVE_KEY: a save from before the Bridge, or the mock's)
-  const s = !b ? l : !l ? b : (l.at || 0) > (b.at || 0) ? l : b;   // the newer (unstamped saves of before: the Bridge's)
+  const s = !b ? l : !l ? b : progress(l) !== progress(b) ? (progress(l) > progress(b) ? l : b) : (l.at || 0) > (b.at || 0) ? l : b;   // the one further on (a visit without the Bridge may have begun from nothing), then the newer, then the Bridge's
   cloud = br && got;
   loadSave(s);
+  if (save.flat) cineUse(false);   // (the cinematic fork: 2D, as the player set it)
   if (br) bridge.platform.getServerTime().then((ms) => { today = Math.floor(ms / 86400000); }).catch(() => {});
   ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen
   start();
-  if (cloud && s && s !== b) persist();   // the browser's copy the newer one: the Bridge's storage takes it
-  if (br) bridge.platform.sendMessage('game_ready');
+  if (cloud && s && s !== b) persist();   // the browser's copy further on (a visit without the Bridge, or a save from before it): the Bridge's storage takes it
+  if (br || ads.ok) bridge.platform.sendMessage('game_ready');   // (ads.ok: up late, while the type loaded)
 }
 // The words in another language: the page's (the type follows it, see .tx in index.html), and the HUD written again.
 function setLang(l) {
@@ -2986,6 +3209,7 @@ window.__up = {
   go(w, s = 0, seed) { if (game.state === 'menu') game.startRun(); game.mode = 'run'; game.rc = null; game.world = w; game.stage = s; nextSeed = seed == null ? null : seed; game.state = 'play'; game.buildLevel(false); ui.hideAll(); return this.state; },
   god(on = true) { game.invuln = on ? 1e9 : 0; return game.invuln; },
   give(n) { game.coins += n; return game.coins; },
+  story(id) { game.story(id, null, true); return !!STORY[id]; },   // a story card shown, seen or not (for a look)
   // Press or let go of a control as a player would: 'left', 'right', 'down' or 'jump'.
   key(what, on = true) { input.set(what, !!on); return { dir: input.dir, down: input.down, jump: input.jump }; },
   // A slingshot pull (dx, dy) in CSS px from where the mouse went down, let go at once.

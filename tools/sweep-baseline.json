@@ -1,6 +1,6 @@
 {
- "commit": "232b707+changes+gen",
- "made": "2026-10-21",
+ "commit": "226db88",
+ "made": "2026-10-22",
  "levels": {
   "c1-1": {
    "result": "clear",
@@ -53,7 +53,7 @@
   },
   "c1-7": {
    "result": "clear",
-   "time": 25.5,
+   "time": 31,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -99,7 +99,7 @@
   },
   "c2-3": {
    "result": "clear",
-   "time": 23.5,
+   "time": 24,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -352,7 +352,7 @@
   },
   "c5-4": {
    "result": "clear",
-   "time": 37.5,
+   "time": 37,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -529,7 +529,7 @@
   },
   "c7-4": {
    "result": "clear",
-   "time": 34,
+   "time": 32.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -614,7 +614,7 @@
   },
   "c8-5": {
    "result": "clear",
-   "time": 26.5,
+   "time": 26,
    "heartsLost": 1,
    "stuck": [],
    "hits": [

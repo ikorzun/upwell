@@ -2377,7 +2377,13 @@ class Level {
   flavour(from) {
     const w = this.world;
     if (w.clouds) { for (const r of this.rects.slice(from)) if (r.plank && !r.move && !(r.x0 <= this.l + 1 || r.x1 >= this.r - 1)) { r.crumble = true; r.cloud = true; } return; }   // the Skyscraper: a free plank is a cloud and gives way (its kit: a cloud always dissolves, a catwalk off a wall holds)
-    if (w.awnings) { for (const r of this.rects.slice(from)) if (r.plank && !r.move && (r.x0 <= this.l + 1 || r.x1 >= this.r - 1)) r.bouncy = true; return; }   // Tokyo: a plank off a wall is a shop's awning, and an awning always bounces (its kit)
+    if (w.awnings) {   // Tokyo: a plank off a wall is a shop's awning, and an awning always bounces (its kit); but none within a throw's reach of another over or under
+      // it (owner: «эти платформы не должны быть расположены так близко, иначе сильно колбасит героя между ними»): that one is a steel beam
+      const reach = BOUNCY.v ** 2 * JUMP.height * this.R + this.tile, t = this.tile, aw = this.rects.filter((q) => q.bouncy);
+      for (const r of this.rects.slice(from).sort((a, b) => b.y0 - a.y0)) if (r.plank && !r.move && (r.x0 <= this.l + 1 || r.x1 >= this.r - 1)
+        && !aw.some((q) => q.x1 > r.x0 - t / 2 && q.x0 < r.x1 + t / 2 && Math.abs(q.y0 - r.y0) < reach)) { r.bouncy = true; aw.push(r); }
+      return;
+    }
     if (this.rc || !(w.bouncy || w.magnet)) return;
     for (const r of this.rects.slice(from)) {
       if (r.move || r.crumble || r.spring || r.slick || r.cap) continue;
@@ -2684,7 +2690,7 @@ class Level {
         }
       }
       if (r.flash > 0) r.flash -= dt;
-      if (r.spring && r.t > 0) r.t = Math.max(0, r.t - dt);
+      if ((r.spring || (r.bouncy && !r.crumbling)) && r.t > 0) r.t = Math.max(0, r.t - dt);   // a spring's throw, a bouncy plank's sag (it stayed sagged after its first throw)
     }
     const f = this.fire;
     if (f && g.state === 'play' && !(f.calm > 0 && (f.calm -= dt) > 0)) {   // faster while the hero gains no height (not in a calm start)

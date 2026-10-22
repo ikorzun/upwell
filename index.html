@@ -220,7 +220,8 @@
   #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
-  #pause { justify-content: flex-end; }
+  #pause { justify-content: flex-end; gap: 8px; }
+  #pause .big.thumb { margin-top: 0; }   /* 8 px between its buttons (owner: «Просто уменьши расстояние между кнопками до 8 px»: the 2.5D switch in, all still 64 px on a 320 × 568 phone) */
   .summary { flex: 1; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
   .big.alt { --p: 3; background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as wide, a size smaller: not the main one (and "Controls: buttons" in one line) */
   .big.alt:active { box-shadow: inset 0 0 0 2px var(--yellow); }   /* pressed: a yellow edge, nothing sinks (owner: no pseudo-volume) */

@@ -1,14 +1,13 @@
 // Pixel Art + Cinematic 3D, an experiment (owner 2026-10-22: «Pixel Art + Cinematic 3D. Геометрия остаётся практически неизменной, но появляются объёмный
-// свет, параллакс, глубина, частицы и 3D-эффекты. Визуально ближе к The Last Night»; his picture research/style/cine-reference-tokyo.png). Off unless the page
-// is opened with ?cine (all of it) or ?cine=a,b,... naming the parts: light (the world dark but round its lights), glow (a soft halo round each light), rays
+// свет, параллакс, глубина, частицы и 3D-эффекты. Визуально ближе к The Last Night»; his picture research/style/cine-reference-tokyo.png). On, its default
+// parts, unless the page has ?plain or the settings' switch says 2D (save.flat, cineUse); ?cine=all for all of it, or ?cine=a,b,... naming the parts: light (the world dark but round its lights), glow (a soft halo round each light), rays
 // (light through the gaps between ledges), fog (a haze drifting over what is behind), dof (what is behind out of focus), shadow (the play's soft shadow on the
 // wall behind it), extrude (a little of the ledges' thickness), depth (planes of the world's own far shapes sliding at their depth), motes (dust, fireflies,
 // petals, rain), grade (a vignette, the shadows toned, grain). ?res=k draws the canvas k times the game's pixels (default 2), the lighting that smooth.
 // How: what is drawn behind the shaft (the kits' far layers and wall props, all in a DIM tone: see DEPTH) goes into a target of its own; the play stays in
 // sharp game pixels in another (see Renderer.prototype.draw's CINE lines); a pass at the canvas's size puts the two together (cinePost).
-const CINE = (() => {
-  const m = /[?&]cine(?:=([^&]*))?/.exec(location.search);
-  if (!m) return null;
+const CINE_ON = (() => {
+  const m = /[?&]cine(?:=([^&]*))?/.exec(location.search) || ['', ''];
   const set = new Set((!m[1] ? 'vol,depth,motes,poke' : m[1] === 'all' ? 'vol,light,glow,shadow,motes,grade,depth,rays,fog,dof,extrude,poke' : m[1]).split(','));   // (owner, after: «освещение оставь пиксельное — свет от неона»: no light of ours by default)   // (owner 2026-10-22: «Визуальна разница минимальна, просто добавляется размытие… добавить объема платформам и деревьям сделав их в 2.5d»: the blur off, the volume on)
   const r = /[?&]res=(\d)/.exec(location.search);
   // bonus (?bonus=A-E), the bonuses' depth to pick from (owner: «У монет и сердец потерялся объем»; no 3D engine: «будем отрисовывать кодом псевдо 3д»): A as at
@@ -16,6 +15,7 @@ const CINE = (() => {
   // of its pixels) on the side turned to us, in its own inks a tone darker: the owner's pick («Е»), the default
   return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
 })();
+let CINE = /[?&]plain\b/.test(location.search) || /plain/.test(location.hash) ? null : CINE_ON;   // the 2.5D now: CINE_ON, or null for 2D (cineUse)
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
   : th.town ? { fog: [0.2, 0.08, 0.24], shade: [0.03, 0.01, 0.04], amb: 0.48, moon: null, motes: { dust: 12, rain: 34 }, planes: 'city' }
@@ -116,7 +116,7 @@ void main() {
   o = vec4(col, 1.0);
 }`;
 
-if (CINE) {
+if (CINE_ON) {
   const gumMake = Renderer.prototype.makeTarget, gumFeat = Renderer.prototype.feat, gumInitW = Renderer.prototype.init;
   Renderer.prototype.init = function () {
     if (!gumInitW.call(this)) return false;
@@ -130,14 +130,16 @@ if (CINE) {
     return true;
   };
   // The targets: the play's (a texture now, so it can be read; its stencil as before), what is behind, and the small ones the blurs and the rays use.
+  // In 2D the game's own; either way the other kind is let go first (the settings' switch, cineUse).
   Renderer.prototype.makeTarget = function () {
     const gl = this.gl, [lw, lh] = this.low;
-    if (!this.pComp) return gumMake.call(this);
+    const old = this.cine; if (old) { for (const k of ['far', 'st', 'sm', 'h1', 'h2', 'q1', 'q2', 'q3']) { gl.deleteFramebuffer(old[k].fb); gl.deleteTexture(old[k].tex); } gl.deleteFramebuffer(old.play.fb); gl.deleteTexture(old.play.tex); gl.deleteRenderbuffer(old.stencil); this.cine = null; this.target = null; }
+    if (!this.pComp || !CINE) return gumMake.call(this);
+    const g0 = this.target; if (g0) { gl.deleteFramebuffer(g0.fb); gl.deleteRenderbuffer(g0.color); gl.deleteRenderbuffer(g0.stencil); this.target = null; }
     const tex = (w, h) => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v); return t; };
     const target = (w, h, rb) => { const t = tex(w, h), fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
       if (rb) gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, rb); return { fb, tex: t, w, h }; };
-    const old = this.cine; if (old) { for (const k of ['far', 'st', 'sm', 'h1', 'h2', 'q1', 'q2', 'q3']) { gl.deleteFramebuffer(old[k].fb); gl.deleteTexture(old[k].tex); } gl.deleteFramebuffer(old.play.fb); gl.deleteTexture(old.play.tex); gl.deleteRenderbuffer(old.stencil); }
     const st = gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER, st); gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, lw, lh);
     const hw = Math.max(1, lw >> 1), hh = Math.max(1, lh >> 1), qw = Math.max(1, lw >> 2), qh = Math.max(1, lh >> 2);
     const c = this.cine = { stencil: st, play: target(lw, lh, st), far: target(lw, lh), st: target(lw, lh), sm: target(lw, lh), h1: target(hw, hh), h2: target(hw, hh), q1: target(qw, qh), q2: target(qw, qh), q3: target(qw, qh) };
@@ -173,6 +175,9 @@ if (CINE) {
     return this.nf + this.nFar + this.nSt + this.nSm;
   };
 }
+// The 2.5D on or off as the game runs (owner: «сделай в настройках переключатель на 2d, как в примере… с деревней»): the targets and the canvas made
+// again on the next frame (layout); 2D is the game as it is without the fork, but for the bonuses' look (CINE_ON.bonus)
+function cineUse(on) { CINE = on && CINE_ON ? CINE_ON : null; queueLayout(); }
 
 // The world's own far shapes in planes, each sliding by its depth f of the climb (a shape's world y is its own plus (1 - f) of the camera's), drawn DIM into
 // the far target: the Village a grove (cedars far, bamboo nearer), Tokyo a city (towers of flats far, lattice masts and pipes nearer, their small red lights).

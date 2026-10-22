@@ -2336,13 +2336,14 @@ const ui = {
     const p = this.panel('pause');
     const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); }), 'sound');
     const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); }), 'shake');
+    const d25 = CINE_ON ? cap(button('2.5D: ' + t(CINE ? 'on' : 'off'), 'big thumb alt', () => { save.flat = !!CINE; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); this.pause(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D)
     const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
     langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
     for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); this.pause(); }); b.lang = k; langs.append(b); }
     const build = el('div', 'build');   // the upgrades taken (the world's build, in the campaign), as their pictures
     for (const id of game.taken) build.append(iconEl(id));
     for (const id of game.syns) { const i = iconEl(SYNERGIES.find((q) => q.id === id).of[0]); i.classList.add('syn'); build.append(i); }   // a synergy: its first card, ringed
-    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, ...(d25 ? [d25] : []), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
@@ -3040,6 +3041,7 @@ async function boot() {
   const s = !b ? l : !l ? b : progress(l) !== progress(b) ? (progress(l) > progress(b) ? l : b) : (l.at || 0) > (b.at || 0) ? l : b;   // the one further on (a visit without the Bridge may have begun from nothing), then the newer, then the Bridge's
   cloud = br && got;
   loadSave(s);
+  if (CINE && save.flat) cineUse(false);   // (the cinematic fork: 2D, as the player set it)
   if (br) bridge.platform.getServerTime().then((ms) => { today = Math.floor(ms / 86400000); }).catch(() => {});
   ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen

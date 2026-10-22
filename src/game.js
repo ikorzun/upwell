@@ -1958,7 +1958,7 @@ class Game {
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
-    ui.hideAll(); this.story(STORY_LIVE && w === 0 && s === 0 && 'moon_fall', () => ui.banner());   // (the story's first card, before 1-1: STORY)
+    ui.hideAll(); this.story(STORY_LIVE && (storyLook || (w === 0 && s === 0)) && 'moon_fall', () => ui.banner(), storyLook); storyLook = false;   // (the story's first card, before 1-1: STORY)
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
@@ -2172,7 +2172,8 @@ const STORY = {
   village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
   city_friendship: { n: 'III', still: 'assets/cards/03_city_friendship.png', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
 };
-const STORY_LIVE = /[?&]story\b/.test(location.search);   // (till the owner's «да» to the cards' art they come by themselves only with ?story)
+const STORY_LIVE = /[?&]story\b/.test(location.search);   // (till the owner's «да» to the cards' art they come by themselves only with ?story,
+let storyLook = STORY_LIVE;   // which shows card I before the first level played, seen or not: a save well under way shows it too)
 // The cards' one frame, drawn here in its own pixels (the pack: «draw the thin frame procedurally… more reliable and always aligned»): indigo round a 2:3
 // window, an ivory keyline, lavender stepped corners, a crescent moon at its top with a vermilion knot either side, gold specks at its tips.
 function storyFrame() {
@@ -2431,6 +2432,9 @@ const ui = {
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
     const p = this.panel('story'), card = el('div', 'scard'), art = new Image();
+    const fit = Math.min((view.w - 16) / 256, (view.h - 180) / 384), d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // the pack's
+    card.style.width = 256 * k + 'px'; card.style.height = 384 * k + 'px';   // whole pixels: a whole number of the screen's to each of the art's, the most that fits the view as layout
+    // measured it (a CSS 100vh is taller than the page under iOS Safari's bar), unless that loses over 30% of it (a small screen: then as it fits)
     art.className = 'sart'; art.alt = L2(c.title); art.decoding = 'async'; art.src = c.still;
     card.innerHTML = storyFrame(); card.prepend(art); card.append(el('div', 'snum', c.n));
     p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', done), 'next'));

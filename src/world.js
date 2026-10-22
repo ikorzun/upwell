@@ -108,6 +108,11 @@ const WIND = { push: 10, on: 2.2, off: 2.6, warn: 0.9, pole: 3.2 };   // pole: i
 // for `flat` s, no heart lost: at `slow` the pace, `jump` the height, no crouch jump, as flat as the body goes (`squeeze`), and still flat while a beam is close
 // over it. 'L', a low beam: a block `beam` tiles shy of its tile's foot, so the way under it over a floor two rows down is 1.2 tiles, and only a flat hero fits
 // (measured: flat 0.9 tiles tall, it goes under 1.1; crouched, 1.26, it needs 1.3; the body as it is, 1.6). `head`: the head's width, in tiles
+// A trial room (owner, 2026-10-22: «Комнаты-испытания. Как тайник, но с целью на 15–20 секунд: «собери 10 монет», «не касайся пола», «растопчи пятерых»; за успех
+// подарок»): a room behind a door (a recipe's `trial`: { at, goal }, its place up the level and its goal) where a clock starts `start` s after the hero comes in.
+// Done in time, it pays `pay` coins, dropped in; not, the coins left there go. Either way its door closes behind the hero (one try). Goals: `coins`, `n` of the
+// room's coins in `time` s (the other two, the floor and the stomps, to come)
+const TRIAL = { coins: { n: 10, time: 15 }, pay: 20, start: 0.8 };
 const MOCHI = { up: 1.4, hold: 0.5, shake: 0.35, slam: 0.08, rest: 0.6, flat: 2.2, slow: 0.5, jump: 0.6, squeeze: 1.4, beam: 0.2, head: 1.8 };
 const MOCHI_P = MOCHI.up + MOCHI.hold + MOCHI.slam + MOCHI.rest;
 // The mill (owner, 2026-10-22: «Мельница и качели. Водяное колесо с лопастями-платформами…»): a water wheel on its hub ('Q') with `n` boards round it, level as
@@ -798,7 +803,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { ...MINE, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'icicles', enemies: ['spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['bubble'], seed: 4108 },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
   { role: 'twist', len: 30, pair: 0.4, fire: 0.38, maxD: 2, chunks: { chimney2: 4, towers: 4, mosswall: 3, crumble: 1, bridge: 1 },   // walls the way between the planks, ones that hold (owner: too many ledges, the walls lost): no planks, shelves, stairs, comb, nor rubber (it throws off)
-    motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
+    motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], trial: { at: 0.7, goal: 'coins' }, enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101,   // the pilot (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'moving planks', es: 'tablas móviles', pt: 'tábuas móveis', ja: 'うごく いた' } },
   { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...MINE, movers: 2, lift: 2, icewall: 1 }, intro: [], set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.7, pair: 0.25, candy: ['bubble'], seed: 4102 },
@@ -1518,10 +1523,10 @@ const CHUNKS = {
     '............',
     '####..##....',
     '............'] },
-  mill: { d: 2, rows: [   // a water wheel (MILL): from a ledge onto its boards as they come up its side, round over its top, off onto a ledge on the other side
+  mill: { d: 2, rows: [   // a water wheel (MILL): from a ledge onto its boards as they come up its side, round over its top, off onto a ledge on the other side;
+    '............',   // a ledge over its rising side too, for one who goes up the wall there off a board (the bot did, under the next chunk's block, and was stuck)
     '............',
-    '............',
-    '.........###',
+    '###......###',
     '......o.....',
     '............',
     '............',
@@ -1845,6 +1850,7 @@ class Level {
       const rnd = this.rng, H = o.height;
       if (rc ? rc.shop : !o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (rc ? rc.shop : 0.3 + rnd() * 0.4), kind: 'shop', done: false });
       if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
+      if (rc && rc.trial) this.plan.push({ y: this.floor - H * rc.trial.at, kind: 'trial', goal: rc.trial.goal, done: false });   // a trial room (TRIAL)
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
       if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
     } else this.build(o);
@@ -1890,6 +1896,17 @@ class Level {
       shuffled(rnd, SHOP_ITEMS).slice(0, 3).forEach((item, k) => {
         this.pickups.push({ x: cx + (k - 1) * 0.3 * W, y: at(0.38), r: 0.6 * R, item, sold: false, near: false });   // centred, a third of the width apart, as the user's sketch has them; a full jump reaches (was 0.45, user: hard to reach)
       });
+    } else if (o.kind === 'trial') {   // a trial (TRIAL), the coins goal's: three planks up from side to side, three coins over each, two up the far wall, two in
+      // the air in the middle (13, for 10 of them in time)
+      const g = TRIAL[o.goal] || TRIAL.coins;
+      this.trial = { goal: TRIAL[o.goal] ? o.goal : 'coins', n: g.n, time: g.time, t: 0, got: 0, c0: 0, state: 'ready' };
+      [[0.24, -1], [0.44, 1], [0.64, -1]].forEach(([f, d]) => {
+        const x = cx + d * W * 0.22, y = at(f);
+        this.rects.push(this.box(x - W * 0.18, y, x + W * 0.18, y + LEVEL.plank * R, { plank: true }));
+        for (let k = 0; k < 3; k++) this.coin(x + (k - 1) * 1.2 * R, y - 0.75 * R, 1);
+      });
+      for (const f of [0.34, 0.54]) this.coin(this.r - 1.3 * R, at(f), 1);
+      for (const f of [0.34, 0.76]) this.coin(cx, at(f), 1);
     } else {   // a stash: one of five, each with its own lot of coins (user: one was dull)
       const ledge = (x0, x1, y, f = {}) => this.rects.push(this.box(x0, y, x1, y + (f.plank ? LEVEL.plank : LEVEL.thick) * R, f));
       const row = (y, n, gap, v = 1) => { for (let k = 0; k < n; k++) this.coin(cx + (k - (n - 1) / 2) * gap * R, y, v); };
@@ -1941,7 +1958,7 @@ class Level {
     // could carry into the end's margin goes in now, a little under its height: else a short level's lost it, as Fuji's and the Sea's first did their shops)
     let id;
     if (this.script) { if (!this.script.length) { this.finish(); return; } id = this.script.shift(); }   // a level as written: its chunks in turn, then its end
-    if (!id && plan) { plan.done = true; if (this.top - this.endY > G) { id = 'pocket'; this.pocketKind = plan.kind; } }
+    if (!id && plan) { plan.done = true; if (this.top - this.endY > G) { id = 'pocket'; this.pocketKind = plan.kind; this.pocketGoal = plan.goal; } }
     if (!id && this.intro.length && this.placed.length) id = this.intro.shift();   // after a first easy one, what the level is to show
     if (!id && this.gateAt != null && this.top < this.gateAt) { id = this.gateId; this.gateAt = null; }   // its gate (GATE), before a set piece due too: it must fit
     if (!id && this.setAt != null && this.top < this.setAt) { id = this.setId; this.setAt = null; }   // its set piece
@@ -2190,7 +2207,7 @@ class Level {
       else if (ch === 'A') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [] });
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
-        this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, side, cd: 0, room: null });
+        this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, goal: this.pocketKind === 'trial' ? this.pocketGoal : undefined, side, cd: 0, room: null });
       }
     }
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) if (at(r, k) === '~') {   // moss under a block: that block's underside holds
@@ -2939,7 +2956,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // a thatch in two tiers under a dark ridge, grey posts on a stone footing, a lit window, a purple noren, a lantern off a bracket. What is inside bobs in the
   // doorway; sparks rise past it.
   const farmhouse = (d, kind) => {
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple, y1 = d.y1, px = P / t;
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : kind === 'trial' ? INK.coin : PAL.purple, y1 = d.y1, px = P / t;   // (a trial's yellow: coins to win)
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
     const on = (u) => lv.rects.some((q) => !q.gone && Math.abs(q.y0 - y1) < 2 && Math.min(X(u - 0.3), X(u + 0.3)) >= q.x0 && Math.max(X(u - 0.3), X(u + 0.3)) <= q.x1);   // its ledge goes on out under u
@@ -2996,7 +3013,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // water as in Ine, built round the doorway on the ledge, its boat bay under the ledge behind (DIM); the noren red for the shop, purple for the stash (the
   // owner's), a lit window, a lattice panel by the door, a lantern off its eave. What is inside bobs in the doorway; sparks rise past it.
   const funaya = (d, kind) => {
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple, y1 = d.y1, px = P / t;
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : kind === 'trial' ? INK.coin : PAL.purple, y1 = d.y1, px = P / t;   // (a trial's yellow: coins to win)
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
     const W = 3.2, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);

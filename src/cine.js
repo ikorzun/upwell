@@ -15,7 +15,10 @@ const CINE_ON = (() => {
   // of its pixels) on the side turned to us, in its own inks a tone darker: the owner's pick («Е»), the default
   return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
 })();
-let CINE = /[?&]plain\b/.test(location.search) || /plain/.test(location.hash) ? null : CINE_ON;   // the 2.5D now: CINE_ON, or null for 2D (cineUse)
+// The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
+// (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
+let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
+const CINE_DONE = (th) => !!th && (!!th.village || /[?&]cine\b/.test(location.search));   // the worlds done: the Village
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
   : th.town ? { fog: [0.2, 0.08, 0.24], shade: [0.03, 0.01, 0.04], amb: 0.48, moon: null, motes: { dust: 12, rain: 34 }, planes: 'city' }
@@ -66,10 +69,12 @@ bool depthOf(sampler2D t, vec2 pg, vec2 k, out vec3 col) {
     float s = float(i) / n; vec2 q = pg - o * s;
     if (at(t, q).a > 0.5) {
       bool top = dir.y > 0.2 && at(t, q + vec2(0.0, 1.0)).a < 0.5, bot = dir.y < -0.2 && at(t, q - vec2(0.0, 1.0)).a < 0.5;
-      vec4 m = top ? matAt(t, q - vec2(0.0, 7.0)) : bot ? matAt(t, q + vec2(0.0, 3.0)) : matAt(t, q);
-      if (m.a < 0.5 && top) m = matAt(t, q - vec2(0.0, 3.0));
+      float d = 0.0; if (top) for (int j = 1; j <= 7; j++) { if (at(t, q - vec2(0.0, float(j))).a < 0.5) break; d = float(j); }   // (the body under its lit edge, as deep as
+      // 7 px while still in this front: a thin plank's own colour, not what hangs under it)
+      vec4 m = top ? matAt(t, q - vec2(0.0, d)) : bot ? matAt(t, q + vec2(0.0, 3.0)) : matAt(t, q);
       if (m.a < 0.5) m = matAt(t, q);
-      col = (m.rgb * (top ? 1.12 : bot ? 0.42 : 0.62) + (top ? 0.03 : 0.0)) * (1.0 - 0.3 * s);
+      float lum = dot(m.rgb, vec3(0.299, 0.587, 0.114)), light = smoothstep(0.45, 0.8, lum);   // a light front's top no lighter than it: the white lip the lightest
+      col = (m.rgb * (top ? mix(1.12, 0.9, light) : bot ? 0.42 : 0.62) + (top ? 0.03 * (1.0 - light) : 0.0)) * (1.0 - 0.3 * s);
       return true;
     }
   }
@@ -90,7 +95,7 @@ void main() {
   if (uK3.x > 0.0 && texture(uSoft, uv).r > 0.003) {   // 2.5D (the system above feat): the ledges deep, then the small things over them
     vec2 pg = floor(uv * uLow) + 0.5; vec3 dc;
     if (st.a > 0.5) { col = st.rgb; lit3 = true; } else if (depthOf(uSt, pg, uK3, dc)) { col = dc; lit3 = true; }
-    if (sm.a > 0.5) { col = sm.rgb; lit3 = true; } else if (depthOf(uSm, pg, uK4, dc)) { col = dc; lit3 = true; }
+    if (sm.a > 0.5) { col = sm.rgb; lit3 = true; } else if (st.a < 0.5 && depthOf(uSm, pg, uK4, dc)) { col = dc; lit3 = true; }   // (a small thing's depth never over a ledge's front: its lip stays)
   } else if (st.a > 0.5 || sm.a > 0.5) { col = sm.a > 0.5 ? sm.rgb : st.rgb; lit3 = true; }
   vec3 L = vec3(uK2.x), G = vec3(0.0);
   for (int i = 0; i < 16; i++) {
@@ -177,7 +182,8 @@ if (CINE_ON) {
 }
 // The 2.5D on or off as the game runs (owner: «сделай в настройках переключатель на 2d, как в примере… с деревней»): the targets and the canvas made
 // again on the next frame (layout); 2D is the game as it is without the fork, but for the bonuses' look (CINE_ON.bonus)
-function cineUse(on) { CINE = on && CINE_ON ? CINE_ON : null; queueLayout(); }
+function cineUse(on) { cinePref = !!on; }
+function cineSync(th) { const want = cinePref && CINE_ON && CINE_DONE(th) ? CINE_ON : null; if (want !== CINE) { CINE = want; queueLayout(); } }   // (the targets and the canvas made again)
 // A bonus under the eye rides its ledge's top face (the owner's pick of four ways, «2», for his rule «монеты и другие бонусы не должны соприкасаться с
 // платформами… на минимальном расстоянии, не соприкасаясь даже под углом»): drawn as much higher as a ledge's top face would be at its foot, so it hovers the
 // same small gap over the face at any angle, and never into what is over it. How many px to lift a thing of radius r at (x, y): 0 over the eye
@@ -196,7 +202,16 @@ function cineBack(rd, lv, cam, H, box, F, T) {
   rd.cineL = [];
   if (CINE.on('vol')) {   // 2.5D: the walls' inner faces, from their edge in to the shaft's back (toward the eye in the middle), darker going in
     const ex = (lv.l + lv.r) / 2;
-    const rt = rd.route; rd.route = 3; for (const [wx, s] of [[lv.l, 1], [lv.r, -1]]) { const dw = Math.abs(ex - wx) * CINE.K, n = Math.max(1, Math.round(dw / P)); for (let i = 0; i < n; i++) { const x = wx + s * i * P; box(s > 0 ? x : x - P, top, s > 0 ? x + P : x - 0, bot, lv.theme.wall, i < n / 3 ? 1.55 : i < (2 * n) / 3 ? 1.4 : 1.37, 0, 10, 0); } } rd.route = rt;
+    const th = lv.theme, ink = (c) => (c.kind === 'ice' ? th.slick : c.kind === 'rubber' ? th.rubber : th.moss);   // a coat's own (as the coats are drawn)
+    const runs = (side) => {   // a wall's height on the screen in pieces: its coats' inks where they line it (ice, rubber, moss), its own between
+      const out = []; let y = top;
+      for (const c of lv.coats.filter((c) => c.side === side && c.y1 > top && c.y0 < bot).sort((a, b) => a.y0 - b.y0)) { const a = Math.max(y, c.y0), b = Math.min(bot, c.y1); if (a > y) out.push([y, a, th.wall]); if (b > a) out.push([a, b, ink(c)]); y = Math.max(y, b); }
+      if (y < bot) out.push([y, bot, th.wall]); return out;
+    };
+    const rt = rd.route; rd.route = 3;
+    for (const [wx, s, side] of [[lv.l, 1, 1], [lv.r, -1, 2]]) { const dw = Math.abs(ex - wx) * CINE.K, n = Math.max(1, Math.round(dw / P)), rs = runs(side);
+      for (let i = 0; i < n; i++) { const x = wx + s * i * P; for (const [y0, y1, c] of rs) box(s > 0 ? x : x - P, y0, s > 0 ? x + P : x - 0, y1, c, i < n / 3 ? 1.55 : i < (2 * n) / 3 ? 1.4 : 1.37, 0, 10, 0); } }
+    rd.route = rt;
   }
   if (!CINE.on('depth') || !look.planes || lv.kind !== 'well') return;
   const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };

@@ -4000,7 +4000,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (const e of [-1, 1]) box(snap(sx + e * 0.2 * t) - P + SH(1.8), snap(b - 1.86 * t), snap(sx + e * 0.2 * t) + 2 * P + SH(1.8), snap(b - 1.72 * t), PAL.black, 1, 0, 10, 0);
         box(snap(sx - 0.48 * t) + SH(1.24), snap(b - 1.32 * t), snap(sx + 0.48 * t) + SH(1.24), snap(b - 1.16 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx + 0.08 * t) + SH(1.0), snap(b - 1.16 * t), snap(sx + 0.26 * t) + SH(1.0), snap(b - 0.72 * t), PAL.purple, 1, 0, 10, 0);
       } else if (k === 2 && w >= 2.9 * t && room(0, 2.9, 2.6)) {   // a serow or a fox by turns of height (FUJI_V.beasts; d46 «Г»: Fuji's own beasts, the Nagano monkey gone)
-        L(4); const both = window.__fujiBoth, fox = ((Math.round(r.y0 / t) * 7) & 2) === 2, v = 'ABCDEF'[fv.beasts];
+        L(4); const both = window.__fujiBoth, fox = (((Math.round(r.y0 / t) * 7) >> 1) + (wl ? 0 : 1)) % 2 === 1, v = 'ABCDEF'[fv.beasts];   // (by turns of height, and the other one
+        // at the other wall at the same height: never a pair of twins)
         if (both) { fspr('serow-' + v, X(0.3), b, !wl); fspr('fox-' + v, X(3.0), b, !wl); }   // (the gallery: the pair side by side)
         else fspr((fox ? 'fox-' : 'serow-') + v, X(0.3), b, !wl);
       } else if (k === 3 && w >= 4.0 * t && room(0, 4.0, 3.6)) {   // the Fuji-ko pilgrims' stone monuments (FUJI_V.stelae; d48 «Б»), their rope grey

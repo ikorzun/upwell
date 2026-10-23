@@ -408,7 +408,7 @@ const foePaint = (e, H) => {   // uPaint: the level, the field's two phases
 const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
   slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: Object.assign(theme(PAL.gray), { mines: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { village: true }),   // the Village's kit (see villageRect; the Mine's world, its id kept)
+  cave: Object.assign(theme(PAL.gray), { mines: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true, moss: PAL.gray, rime: true, hazard: 'avalanche' }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { village: true }),   // the Village's kit (see villageRect; the Mine's world, its id kept)
  
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
@@ -3348,7 +3348,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (s.kind === 'rubber') box(x0, s.y0, x1, s.y1, th.rubber, 1, 0, 8, 8);
     else {
       box(x0, s.y0, x1, s.y1, th.moss, 1, 0, 10, 0);
-      for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
+      if (th.rime) for (let y = s.y0 + 0.2 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.3 * R, k++) { const e = s.side === 1 ? 1 : -1, l = (k % 3 === 1 ? 0.34 : 0.22) * R, ex = s.side === 1 ? lv.l : lv.r;   // rime (Fuji's, owner d36 «А»: no green in the ice): crystals
+        F(ex + (e * l) / 2, y, 0, 0.1 * R, (-e * l) / 2, 0, th.moss, 1, 6, 0.1 * R, l / 2, 0.2 * R); if (k % 2) box(ex + e * 0.06 * R - PIX.size / 2, y - PIX.size / 2, ex + e * 0.06 * R + PIX.size / 2, y + PIX.size / 2, PAL.white, 1, 0, 10, 0); }   // out of its edge, a glint here and there
+      else for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
     }
   }
   if (lv.rail && seen(lv.rail.y - R, lv.rail.y + R)) {   // the Minecart's rail: a white line from wall to wall, ties under it
@@ -4874,6 +4876,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
     if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
+      if (th.rime) for (let x = r.x0 + 0.2 * R, k = 0; x < r.x1 - 0.1 * R; x += 0.36 * R, k++) if (k % 2) box(x + ox, r.y1 - 0.06 * R, x + ox + kitP, r.y1 - 0.06 * R + kitP, PAL.white, a, 0, 10, 0);   // rime: a glint here and there (no strands hanging: owner)
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);
@@ -5007,11 +5010,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const u = (T + fw.ph) % (FIREWALL.on + FIREWALL.off), on = u >= FIREWALL.off, warn = !on && u >= FIREWALL.off - FIREWALL.warn, d = fw.side === 1 ? 1 : -1, wx = fw.side === 1 ? lv.l : lv.r, t = lv.tile, P = PIX.size;
     box(snap(Math.min(wx, wx + d * 0.18 * t)), snap(fw.y0), snap(Math.max(wx, wx + d * 0.18 * t)), snap(fw.y1), INK.fire, warn || on ? 1 : 0.5, 0, 10, 0);   // its seam, smouldering red (seen
     // before it burns: which stretch of the wall is the fire's), lit up when it is about to
-    for (let y = fw.y0 + 0.5 * t, k = 0; y < fw.y1 - 0.2 * t; y += 1.1 * t, k++) { const ex = snap(wx + d * 0.28 * t) - (d < 0 ? 2 * P : 0); box(ex, snap(y), ex + 2 * P, snap(y) + 2 * P, INK.flame, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.5) : on ? 1 : 0.45, 0, 10, 0); }   // its embers
+    for (let y = fw.y0 + 0.5 * t, k = 0; y < fw.y1 - 0.2 * t; y += 1.1 * t, k++) { const ex = snap(wx + d * 0.28 * t) - (d < 0 ? 2 * P : 0); box(ex, snap(y), ex + 2 * P, snap(y) + 2 * P, th.hazard === 'avalanche' ? PAL.white : INK.flame, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.5) : on ? 1 : 0.45, 0, 10, 0); }   // its embers
     if (on) {
       const n = Math.max(1, Math.round((fw.y1 - fw.y0) / (0.9 * t))), hw = (fw.y1 - fw.y0) / n / 2;
       for (let i = 0; i < n; i++) {
         const y = fw.y0 + (i + 0.5) * 2 * hw, len = (0.55 + 0.45 * Math.abs(Math.sin(T * 13 + i * 1.7))) * FIREWALL.reach * t;
+        if (th.hazard === 'avalanche') { const il = (0.7 + 0.3 * Math.abs(Math.sin(i * 1.7))) * FIREWALL.reach * t; F(wx + (d * il) / 2, y, 0, hw, (-d * il) / 2, 0, PAL.white, 1, 6, hw, il / 2, 2 * hw); F(wx + d * il * 0.3, y, 0, 0.5 * hw, -d * il * 0.3, 0, PAL.gray, 1, 6, 0.5 * hw, il * 0.3, hw); continue; }   // ice spikes (Fuji's, d35 «А»)
         F(wx + (d * len) / 2, y, 0, hw, (-d * len) / 2, 0, INK.fire, 1, 6, hw, len / 2, 2 * hw);
         F(wx + d * len * 0.3, y, 0, 0.6 * hw, -d * len * 0.3, 0, INK.flame, 1, 6, 0.6 * hw, len * 0.3, 1.2 * hw);
       }
@@ -5091,7 +5095,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (s.icicle) { icicle(s.x, s.y - 0.3 * R); continue; }
     if (s.bone) { const an = T * 7 + s.x * 0.05, ca = Math.cos(an) * s.r, sa = Math.sin(an) * s.r; F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); line(s.x - ca, s.y - sa, s.x + ca, s.y + sa, INK.spike, 1, 2); for (const q of [-1, 1]) for (const p of [-1, 1]) disc(s.x + q * ca + p * 0.35 * sa, s.y + q * sa - p * 0.35 * ca, 0.32 * s.r, INK.spike, 1); continue; }   // Koschei's: a bone, spinning, red
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
-    if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
+    if (s.fire) { if (th.hazard === 'avalanche') { disc(s.x, s.y, s.r * 0.8, PAL.white, 1); disc(s.x + s.r * 0.2, s.y + s.r * 0.2, s.r * 0.35, PAL.gray, 1); } else disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1); }   // (an avalanche's: a snowball in its red rim)
   }
   if (g.swarm && g.power('swarm')) for (const b of g.swarm) (b.trail || []).forEach(([x, y], i, tr) => { const f = (i + 1) / tr.length; disc(x, y, b.R * (0.3 + 0.55 * f), b.color.base, 0.3 + 0.55 * f); });   // each clone's trail, in its colour (user)
   const tl = g.tail, hb = g.hero, bw = RAINBOW.band * R;   // a rainbow's tail: six bands along the hero's way, fading to its end
@@ -5140,35 +5144,55 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (lv.fire && lv.fire.y - 2.4 * R < bot) {   // the fire, between the walls: a red body under two layers of tongues, red behind and orange in front
     const fy = lv.fire.y, W = lv.r - lv.l;
-    box(lv.l, fy, lv.r, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
-    box(lv.l, fy + 0.9 * R, lv.r, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
-    box(lv.l, fy + 2.2 * R, lv.r, fy + H + 200, INK.fire, 1, 0, 10, 5);
     const steady = (i, k) => { const q = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return q - Math.floor(q); };   // a tongue's own numbers, the same every frame
-    for (const [c, gap, h0, h1, w0, w1, drift, k, off] of [[INK.fire, 0.7, 1.3, 1.45, 0.5, 0.5, 0.3, 1, 0], [INK.flame, 0.7, 0.8, 0.9, 0.36, 0.36, 0.3, 2, 0.5]]) {   // evener than at first (user)
-      const n = Math.ceil(W / (gap * R));
-      for (let i = 0; i < n; i++) {   // alike and evenly set, the front row between the back one's, a gentle flicker, drifting along and wrapping round,
-        const a = steady(i, k), f = 5 + 2 * steady(i, k + 3), x = lv.l + ((((i + 0.5 + off) / n) * W + T * drift * R) % W + W) % W;
-        const hw = Math.min((w0 + (w1 - w0) * a) * R, x - lv.l, lv.r - x);   // and narrower by a wall
-        if (hw < 0.5) continue;
-        const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3))) / 2;
-        F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
+    // A world's own hazard from below (th.hazard; the owner wants one for every world some day; the fire's place, speed, damage and warnings are the game's and
+    // stay): Fuji's an avalanche (owner, d34 «В»: «в ледяном мире горы Фудзи не должно быть зелени или огня»): grey snow, darker down through the dither,
+    // clods of white rolling along its top in a red rim (red: the danger edge), rocks and lumps of ice tumbling in it, spray off its top, bursts of clods up
+    if (th.hazard === 'avalanche') {
+      const P = PIX.size, n = Math.ceil(W / (0.55 * R)), clod = (i) => { const a = steady(i, 11), x = lv.l + ((((i + 0.5) / n) * W + T * 0.6 * R) % W + W) % W, r = Math.min((0.3 + 0.26 * a) * R, x - lv.l + 0.1 * R, lv.r - x + 0.1 * R); return [x, fy + 0.4 * R - 0.6 * r + 0.06 * R * Math.sin(T * (4 + 2 * a) + i), r]; };
+      box(lv.l, fy + 0.45 * R, lv.r, fy + 1.6 * R, PAL.gray, 1, 0, 10, 0); box(lv.l, fy + 1.6 * R, lv.r, fy + 2.6 * R, PAL.gray, 1, 0, 10, 4); box(lv.l, fy + 2.6 * R, lv.r, fy + H + 200, PAL.gray, 1, 0, 10, 5);   // its mass
+      for (let i = 0; i < 7; i++) { const a = steady(i, 13), x = lv.l + ((a * W + T * (0.5 + 0.6 * a) * R) % W + W) % W, y = fy + (0.95 + 1.3 * steady(i, 14)) * R + 0.12 * R * Math.sin(T * 3 + i), r = (0.13 + 0.12 * steady(i, 15)) * R;   // rocks and lumps of ice in it
+        if (i % 2) { disc(x, y, r, PAL.black, 1); disc(x - 0.3 * r, y - 0.3 * r, 0.4 * r, PAL.gray, 1); } else F(x, y, r, 0, 0, r, PAL.blue, 1, 6, r, r, 2 * r); }
+      for (let i = 0; i < n; i++) { const [x, y, r] = clod(i); disc(x, y, r + P, INK.spike, 1); }   // its clods: the red rim first,
+      for (let i = 0; i < n; i++) { const [x, y, r] = clod(i); disc(x, y, r, PAL.white, 1); disc(x + 0.25 * r, y + 0.25 * r, 0.45 * r, PAL.gray, 1); }   // then the snow, shaded under
+      for (let k = 0; k < 5; k++) { const u = (T * 0.5 + k / 5) % 1, x = lv.l + steady(Math.floor(T * 0.5 + k / 5), k + 20) * W, y = fy - u * 1.4 * R, l = (0.5 + 0.5 * steady(k, 21)) * R * (1 - u);   // spray off its top
+        if (l > P) box(Math.max(lv.l, x - l), y, Math.min(lv.r, x + l), y + 2 * P, PAL.white, 1, 0, 10, 4); }
+      for (let k = 0; k < 3; k++) {   // bursts of clods up between the walls, now and then (where the fire threw its jets)
+        const u = (T * 0.45 + k / 3) % 1;
+        if (u > 0.16) continue;
+        const x = lv.l + (0.2 + 0.6 * steady(Math.floor(T * 0.45 + k / 3), k + 7)) * W, h = Math.sin((u / 0.16) * Math.PI) * 2.2 * R;
+        for (let j = 0; j < 4; j++) { const yy = fy - (h * (j + 1)) / 4, rr = (0.3 - 0.05 * j) * R; disc(x, yy, rr + P, INK.spike, 1); disc(x, yy, rr, PAL.white, 1); }
+      }
+    } else {
+      box(lv.l, fy, lv.r, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
+      box(lv.l, fy + 0.9 * R, lv.r, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
+      box(lv.l, fy + 2.2 * R, lv.r, fy + H + 200, INK.fire, 1, 0, 10, 5);
+      for (const [c, gap, h0, h1, w0, w1, drift, k, off] of [[INK.fire, 0.7, 1.3, 1.45, 0.5, 0.5, 0.3, 1, 0], [INK.flame, 0.7, 0.8, 0.9, 0.36, 0.36, 0.3, 2, 0.5]]) {   // evener than at first (user)
+        const n = Math.ceil(W / (gap * R));
+        for (let i = 0; i < n; i++) {   // alike and evenly set, the front row between the back one's, a gentle flicker, drifting along and wrapping round,
+          const a = steady(i, k), f = 5 + 2 * steady(i, k + 3), x = lv.l + ((((i + 0.5 + off) / n) * W + T * drift * R) % W + W) % W;
+          const hw = Math.min((w0 + (w1 - w0) * a) * R, x - lv.l, lv.r - x);   // and narrower by a wall
+          if (hw < 0.5) continue;
+          const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3))) / 2;
+          F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
+        }
+      }
+      // its mouth (user: a big open mouth wall to wall, fire bursting out of it): a black gum line on its rim, white fangs along it and
+      // big ones at the walls, and now and then a tall jet of flame out between them (to look at: the fire's blobs are what hurt)
+      box(lv.l, fy + 0.3 * R, lv.r, fy + 0.55 * R, INK.dark, 1, 0, 10, 0);
+      for (let n = Math.max(4, Math.round(W / (1.1 * R))), i = 0; i <= n; i++) {
+        const x = lv.l + (i / n) * W, big = i === 0 || i === n, hw = (big ? 0.45 : 0.28) * R, hd = (big ? 0.75 : 0.42) * R * (0.96 + 0.04 * Math.sin(T * 4 + i));
+        F(clamp(x, lv.l + hw, lv.r - hw), fy + 0.32 * R - hd, hw, 0, 0, hd, INK.white, 1, 6, hw, hd, 2 * hw);
+      }
+      for (let k = 0; k < 3; k++) {   // three jets in turn, each a moment every two seconds or so
+        const u = (T * 0.45 + k / 3) % 1;
+        if (u > 0.16) continue;
+        const x = lv.l + (0.2 + 0.6 * steady(Math.floor(T * 0.45 + k / 3), k + 7)) * W, h = Math.sin((u / 0.16) * Math.PI) * 2.2 * R;
+        F(x, fy - h / 2, 0.42 * R, 0, 0, h / 2 + 0.3 * R, INK.fire, 1, 6, 0.42 * R, h / 2 + 0.3 * R, 0.84 * R); F(x, fy - h * 0.35, 0.24 * R, 0, 0, h * 0.35 + 0.2 * R, INK.flame, 1, 6, 0.24 * R, h * 0.35 + 0.2 * R, 0.48 * R);
       }
     }
-    // its mouth (user: a big open mouth wall to wall, fire bursting out of it): a black gum line on its rim, white fangs along it and
-    // big ones at the walls, and now and then a tall jet of flame out between them (to look at: the fire's blobs are what hurt)
-    box(lv.l, fy + 0.3 * R, lv.r, fy + 0.55 * R, INK.dark, 1, 0, 10, 0);
-    for (let n = Math.max(4, Math.round(W / (1.1 * R))), i = 0; i <= n; i++) {
-      const x = lv.l + (i / n) * W, big = i === 0 || i === n, hw = (big ? 0.45 : 0.28) * R, hd = (big ? 0.75 : 0.42) * R * (0.96 + 0.04 * Math.sin(T * 4 + i));
-      F(clamp(x, lv.l + hw, lv.r - hw), fy + 0.32 * R - hd, hw, 0, 0, hd, INK.white, 1, 6, hw, hd, 2 * hw);
-    }
-    for (let k = 0; k < 3; k++) {   // three jets in turn, each a moment every two seconds or so
-      const u = (T * 0.45 + k / 3) % 1;
-      if (u > 0.16) continue;
-      const x = lv.l + (0.2 + 0.6 * steady(Math.floor(T * 0.45 + k / 3), k + 7)) * W, h = Math.sin((u / 0.16) * Math.PI) * 2.2 * R;
-      F(x, fy - h / 2, 0.42 * R, 0, 0, h / 2 + 0.3 * R, INK.fire, 1, 6, 0.42 * R, h / 2 + 0.3 * R, 0.84 * R); F(x, fy - h * 0.35, 0.24 * R, 0, 0, h * 0.35 + 0.2 * R, INK.flame, 1, 6, 0.24 * R, h * 0.35 + 0.2 * R, 0.48 * R);
-    }
     const w = lv.fire.warn;
-    if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
+    if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, th.hazard === 'avalanche' ? (u > 0.5 ? INK.spike : PAL.white) : u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
   }
   for (const f of lv.folk) if (f.kind === 'cage' && !f.open && f.body && seen(f.body.minY - R, f.body.maxY)) {   // a cage: white bars, a yellow lock (yellow: touch it)
     const b = f.body, P = PIX.size, x0 = b.cx - 0.95 * R, x1 = b.cx + 0.95 * R, y1 = b.maxY + 1, y0 = y1 - 1.9 * R;

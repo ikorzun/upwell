@@ -2297,6 +2297,9 @@ const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png 
     { ink: '#808080', pts: [[120.5, 74.5, 0.25], [121.5, 96.5, 1]] }, { ink: '#808080', pts: [[120.5, 74.5, 0.25], [130.5, 98.5, 1]] }] },
   boss_pigeon: { planes: [['boss', 0.6], ['hero', 1]] },
   boss_koschei: { planes: [['boss', 0.6], ['hero', 1]] },
+  arrive_mine: { planes: [['hero', 1]] }, arrive_cave: { planes: [['hero', 1]] }, arrive_ice: { planes: [['hero', 1]] }, arrive_tokyo: { planes: [['hero', 1]] },
+  arrive_blocks: { planes: [['hero', 1]] }, arrive_skazka: { planes: [['hero', 1]] },
+  arrive_sea: { planes: [['boss', 0.7], ['hero', 1]] }, arrive_sky: { planes: [['boss', 0.7], ['hero', 1]] },   // (what the hero rides: the boat, the lift's car)
 };
 const cardEase = {
   io: (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2),   // slow in, slow out
@@ -2350,6 +2353,42 @@ const CARD_MOTION = {
     return { boss: [-1.2 * k, -0.4 * k], hero: [hx, cardHop(u - 1.6, 0.8, 0.12, 0.23)], blink: u > 4.4 && u < 4.55 };
   },
 };
+// The arrivals' (owner, К17 «А»: «тоже анимируй как карточки боссов»): Mochi (Kolobok in the Forest) come to the world, each in its own way
+Object.assign(CARD_MOTION, {
+  arrive_mine(t) {   // Mochi in the straw it fell into: it sinks, pops up and drops back with a little give, then sits
+    const u = t % 3.2, y = u < 0.3 ? 0.5 * cardEase.io(u / 0.3) : u < 0.7 ? 0.5 - 1.6 * cardEase.out(seg(u, 0.3, 0.7)) : u < 1.05 ? -1.1 * (1 - cardEase.in(seg(u, 0.7, 1.05))) : u < 1.3 ? 0.25 * Math.sin(Math.PI * seg(u, 1.05, 1.3)) : 0;
+    return { hero: [0, y], blink: u > 2.2 && u < 2.35 };
+  },
+  arrive_cave(t) {   // Mochi peers into the tunnel: leans in, holds, leans back, breathing
+    const u = t % 4.2, k = u < 1.2 ? cardEase.io(u / 1.2) : u < 2 ? 1 : u < 3.2 ? 1 - cardEase.io(seg(u, 2, 3.2)) : 0, b = (1 - Math.cos((2 * Math.PI * t) / 2.1)) / 2;
+    return { hero: [0.7 * k, -0.3 * cardEase.io(b)], blink: u > 3.4 && u < 3.55 };
+  },
+  arrive_ice(t) {   // Mochi on the shrine's steps, readying to climb: a crouch, a hop, a landing with a give
+    const u = t % 2.8, y = u < 0.25 ? 0.4 * cardEase.io(u / 0.25) : u < 0.85 ? 0.4 * (1 - seg(u, 0.25, 0.4)) + cardHop(u - 0.25, 1.4, 0.25, 0.35) : u < 1.05 ? 0.25 * Math.sin(Math.PI * seg(u, 0.85, 1.05)) : 0;
+    return { hero: [0, y], blink: u > 1.8 && u < 1.95 };
+  },
+  arrive_sea(t) {   // the boat rides the swell, rolling a little, Mochi in it a beat behind
+    const w = (2 * Math.PI * t) / 2.6, bx = 0.35 * Math.sin(w + 1.2), by = 0.8 * Math.sin(w);
+    return { boss: [bx, by], hero: [bx, by + 0.3 * Math.sin(w - 0.7)] };
+  },
+  arrive_tokyo(t) {   // the train's rhythm: a bump at each rail joint, Mochi swaying on its seat
+    const u = t % 0.9, y = u < 0.06 ? 0.3 * cardEase.out(u / 0.06) : u < 0.36 ? 0.3 * (1 - cardEase.back(seg(u, 0.06, 0.36))) : 0;
+    return { hero: [0.3 * Math.sin((2 * Math.PI * t) / 1.8), y] };
+  },
+  arrive_blocks(t) {   // Mochi on the top of the climbing dome: a crouch and a hop, a landing with a give
+    const u = t % 2.4, y = u < 0.2 ? 0.3 * cardEase.io(u / 0.2) : u < 0.85 ? 0.3 * (1 - seg(u, 0.2, 0.32)) + cardHop(u - 0.2, 1.4, 0.25, 0.4) : u < 1.05 ? 0.2 * Math.sin(Math.PI * seg(u, 0.85, 1.05)) : 0;
+    return { hero: [0, y], blink: u > 1.6 && u < 1.75 };
+  },
+  arrive_sky(t) {   // the lift's car goes up the tower and down again, easing in and out; Mochi in it sinks as it starts, and rises on as it stops
+    const u = t % 6, k = u < 2.2 ? cardEase.io(u / 2.2) : u < 3 ? 1 : u < 5.2 ? 1 - cardEase.io(seg(u, 3, 5.2)) : 0, cy = -2.5 * k;
+    const lag = 0.35 * Math.sin(Math.PI * seg(u, 0, 0.5)) - 0.3 * Math.sin(Math.PI * seg(u, 1.9, 2.5)) - 0.35 * Math.sin(Math.PI * seg(u, 3, 3.5)) + 0.3 * Math.sin(Math.PI * seg(u, 4.9, 5.5));
+    return { boss: [0, cy], hero: [0, cy + lag], blink: u > 2.4 && u < 2.55 };
+  },
+  arrive_skazka(t) {   // Kolobok on the forest path, uneasy: rocking side to side, and now and then a start
+    const u = t % 3.6;
+    return { hero: [0.4 * Math.sin((2 * Math.PI * t) / 2.2), cardHop(u - 2.4, 1, 0.15, 0.3)], blink: u > 1 && u < 1.15 };
+  },
+});
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
 const cardImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });

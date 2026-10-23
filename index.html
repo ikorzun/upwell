@@ -237,6 +237,8 @@
   .big.alt:active { box-shadow: inset 0 0 0 2px var(--yellow); }   /* pressed: a yellow edge, nothing sinks (owner: no pseudo-volume) */
   .big.thumb { align-self: stretch; }   /* the main button: the width of the screen, at its bottom; the panel's 12 px gap over it, as at its sides (owner: «по вертикали расстояние между кнопками такое же, сколько по краям от кнопки») */
   #menu { background: none; pointer-events: none; justify-content: flex-end; }   /* (owner, 2026-10-23, the Figma «Main») its backdrop and the hero drawn under it (Renderer.drawMenu), a finger through it to the hero (menuTouch); its buttons take theirs */
+  #topTint { display: none; position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #696d85; pointer-events: none; z-index: 70; }   /* (owner, 2026-10-23: «На сафари и ios градиент должен уходить под остров») iOS 26 Safari tints the bar over the page by a fixed element at its top (theme-color it no longer reads): the menu's backdrop's top ink there, and the bottom left as it is */
+  @media (pointer: coarse) { html.menuTop #topTint { display: block; } }
   #settings { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the menu's settings, as a pause */
   .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 22px); left: 50%; transform: translateX(-50%); width: calc(302.336px / 1.5); height: auto; }   /* the Figma's sizes at 1.5 of its px to a CSS px (its frame: a 402-pt iPhone, 603 wide) */
   .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 13px); right: 15px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its ring centred level with the logo */
@@ -322,6 +324,7 @@
     <div id="dpad"><i class="key left"></i><i class="key right"></i></div>
     <div id="act"><button id="jumpBtn" class="key jump" aria-label="Jump"></button></div>
   </div>
+  <div id="topTint" aria-hidden="true"></div>
   <div id="menu" class="panel"></div>
   <div id="settings" class="panel"></div>
   <div id="cards" class="panel"></div>

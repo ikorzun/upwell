@@ -2308,6 +2308,9 @@ function button(text, cls, fn) {
 }
 // A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
 // ("×2 con un anuncio", a world's name after Continue on a small phone).
+// The bar over the page the menu's backdrop's top ink (owner, 2026-10-23: «градиент должен уходить под остров»): #topTint for iOS 26 Safari, theme-color for the browsers that read it.
+const themeMeta = document.querySelector('meta[name="theme-color"]'), themeInk = themeMeta ? themeMeta.content : '';
+function menuTop(on) { document.documentElement.classList.toggle('menuTop', on); if (themeMeta && coarse) themeMeta.content = on ? MENU_BG.inks[0] : themeInk; }   // (a phone's: a desktop's tab bar left as it is)
 function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
   for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
 }
@@ -2318,9 +2321,9 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
-  hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
+  hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; menuTop(false); if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
-    const p = this.panel('menu');
+    const p = this.panel('menu'); menuTop(true);
     const logo = el('img', 'logo'); logo.src = 'assets/ui/upwell-logo.svg'; logo.alt = 'UPWELL'; logo.lang = 'en'; logo.draggable = false; p.append(logo);
     const set = button('', 'setBtn', () => this.settings()), gear = el('img'); gear.src = 'assets/ui/settings.svg'; gear.alt = ''; gear.draggable = false;
     set.append(gear); set.setAttribute('aria-label', t('settings')); p.append(set);

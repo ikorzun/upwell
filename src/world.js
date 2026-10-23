@@ -797,7 +797,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
   { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
-    news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' }, tip: true },
+    news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
   { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends

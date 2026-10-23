@@ -220,6 +220,10 @@ const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plan
 // little shrine whose stone lantern the hero lights, koinobori), the Mine's (a lamp on the wall the hero lights, a vein of ore, a cart, tools, a winch), Mount Fuji's bell
 // off a boardwalk's free end (the hero rings it). kitThing(lv, r) is { kind, x, y } (x, y: where the hero tends it) or null, worked out once from the level
 // as laid, on steady ledges' wall ends where nothing laid stands in front (what crumbles away for a while does not count: nothing comes and goes).
+// Fuji from the real mountain, round 2 (owner 2026-10-23, his round-1 letters; research/fuji/fuji-attributes.md): each pick in six looks, A = 0, while he
+// picks (research/variants/fuji-<el>-1-px.png the sheets; tools/gallery/fuji-*.js the game's own): stone, the slabs as the trail's dry-stone walls (d44 «Б»);
+// stick, the task's bell on a pilgrim's kongo-zue at a boardwalk's free end (d45 «Б»). window.__fujiV, the gallery's
+const FUJI_V = { stone: 0, stick: 0 };
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
 const kitThing = (lv, r) => {
@@ -263,8 +267,8 @@ const kitThing = (lv, r) => {
     const k = Math.floor(((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) / 4294967296) * 6);
     if ((k === 0 || k === 3) && steady(3.2) && room(0, 3.2, 3.5)) out = { kind: 'fence' };
   } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t
-    && ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3) out = { kind: 'bell', x: wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t, y: r.y1 + 0.4 * t };   // (on one
-    // boardwalk in three: what hangs off a ledge, the rule book's)
+    && ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3) out = { kind: 'bell', x: wl ? r.x1 - 0.3 * t : r.x0 + 0.3 * t, y: r.y0 - 1.4 * t };   // (on one
+    // boardwalk in three; its bell up on a pilgrim's staff at the free end, by the hero standing there: d45 «Б», FUJI_V.stick)
   return (r.kit = out);
 };
 const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ CANDIES.plus a Long charge; all 3 s longer than at first, user)
@@ -4699,12 +4703,28 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         }
       }
       const bell = kitThing(lv, r);
-      if (bell) {   // its bell off its free end (C's; the task): grey till the hero comes near, then rung for good, orange, swinging, rings of its sound going out from it
-        const bx = snap(bell.x), by = snap(r.y1 + 0.2 * t), on = lv.tended.get(r), u = on != null ? T - on : 1e9, c = on != null ? PAL.orange : PAL.gray;
-        const nud = CINE && on != null && u > 1.6 ? cinePoke(g, lv, r, 'bell', bx - 0.4 * t, r.y1, bx + 0.4 * t, by + 0.5 * t) : 0;   // (2.5D: rung, a nudge swings it again, less)
+      if (bell) {   // a pilgrim's kongo-zue planted at its free end, its bell on it (FUJI_V.stick; the task): grey till the hero comes near, then rung for good,
+        // orange, swinging, rings of its sound going out from it. A an orange staff, two grey bands, a hook out to the bell; B a grey staff, a round cap, a blue
+        // cloth, the bell under it; C an orange staff, a knob, a cord off a twig, the bell low, round brands; D a grey staff, its top forked, a grey cloth;
+        // E an orange staff, a purple tie and ribbon, mountain brands all down it; F a grey staff, a round top, brands as kanji, a grey tassel
+        const v = (window.__fujiV || FUJI_V).stick, dir = wl ? 1 : -1, sx = snap(bell.x), top = snap(r.y0 - 2.1 * t), on = lv.tended.get(r), u = on != null ? T - on : 1e9;
+        const c = on != null ? PAL.orange : PAL.gray, wood = v === 1 || v === 3 || v === 5 ? PAL.gray : PAL.orange, K = PAL.black, Xs = (q) => snap(sx + dir * q * t), Ys = (q) => snap(r.y0 - q * 1.27 * t);   // (its marks laid out on 1.65, the staff 2.1 tiles tall)
+        const bx = Xs([0.3, 0.14, 0.22, 0.2, 0.18, 0.2][v]), by = Ys([1.3, 1.0, 0.95, 1.05, 1.1, 1.0][v]);
+        const nud = CINE && on != null && u > 1.6 ? cinePoke(g, lv, r, 'bell', bx - 0.4 * t, by - 0.3 * t, bx + 0.4 * t, by + 0.5 * t) : 0;   // (2.5D: rung, a nudge swings it again, less)
         const sw = u < 1.6 ? snap(Math.sin(u * 13) * 0.12 * t * (1 - u / 1.6)) : nud ? snap(nud * 1.2 * t) : 0;
-        box(bx, r.y1, bx + P, by, PAL.gray, 1, 0, 10, 0);   // its cord, the bell (twice C's size: a task's), its lip, its clapper
-        if (CINE) this.route = 4;   // (the bell small, its cord and its rings flat)
+        if (CINE) this.route = 0;   // (its staff, its cord, its cloth flat: thin things)
+        box(sx - P, top, sx + 2 * P, r.y0, wood, 1, 0, 10, 0);   // the staff, three game px thick
+        const mark = (q, kind) => { const y = Ys(q); if (kind === 0) { box(sx - P, y, sx + 2 * P, y + P, K, 1, 0, 10, 0); box(sx, y - P, sx + P, y, K, 1, 0, 10, 0); }   // a brand: a little mountain,
+          else if (kind === 1) { box(sx - P, y - P, sx + 2 * P, y + P, K, 1, 0, 10, 0); box(sx, y - P, sx + P, y, wood, 1, 0, 10, 0); }   // a ring,
+          else box(sx - P, y, sx + 2 * P, y + P, K, 1, 0, 10, 0); };   // a stroke
+        const cord = (x0, y0, x1, y1) => { box(Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1) + P, Math.max(y0, y1) + P, PAL.gray, 1, 0, 10, 0); };
+        if (v === 0) { for (const q of [1.5, 1.42]) box(sx - P, Ys(q), sx + 2 * P, Ys(q) + P, PAL.gray, 1, 0, 10, 0); cord(sx + dir * P, Ys(1.56), Xs(0.3), Ys(1.56)); cord(bx, Ys(1.56), bx, by); for (const q of [1.15, 0.9, 0.65]) mark(q, 0); }
+        else if (v === 1) { disc(sx + P / 2, top, 2 * P, PAL.gray, 1); box(Math.min(sx, Xs(0.24)), Ys(1.5), Math.max(sx, Xs(0.24)) + P, Ys(1.1), PAL.blue, 1, 0, 10, 0); cord(bx, Ys(1.1), bx, by); for (const q of [1.3, 1.05, 0.8, 0.55]) mark(q, 2); }
+        else if (v === 2) { disc(sx + P / 2, top, 2 * P, PAL.orange, 1); for (const q of [1.5, 1.43]) box(sx - P, Ys(q), sx + 2 * P, Ys(q) + P, PAL.gray, 1, 0, 10, 0); cord(sx + dir * P, Ys(1.6), Xs(0.22), Ys(1.75)); cord(bx, Ys(1.65), bx, by); for (const q of [1.2, 0.95, 0.7, 0.45]) mark(q, 1); }
+        else if (v === 3) { box(sx - P, snap(top - 0.12 * t), sx, top, PAL.gray, 1, 0, 10, 0); box(sx + P, snap(top - 0.18 * t), sx + 2 * P, top + P, PAL.gray, 1, 0, 10, 0); box(Math.min(sx, Xs(0.12)), Ys(1.45), Math.max(sx, Xs(0.12)) + P, Ys(0.75), PAL.gray, 1, 0, 10, 0); cord(sx + dir * P, Ys(1.3), bx, Ys(1.3)); cord(bx, Ys(1.3), bx, by); for (const q of [0.6, 0.42]) mark(q, 2); }
+        else if (v === 4) { disc(sx + P / 2, top, 2 * P, PAL.orange, 1); box(sx - 2 * P, Ys(1.5), sx + 3 * P, Ys(1.4), PAL.purple, 1, 0, 10, 0); box(Math.min(Xs(0.1), Xs(0.14)), Ys(1.4), Math.max(Xs(0.1), Xs(0.14)) + P, Ys(0.85), PAL.purple, 1, 0, 10, 0); cord(sx + dir * P, Ys(1.4), bx, Ys(1.4)); cord(bx, Ys(1.4), bx, by); for (const q of [1.2, 1.0, 0.8, 0.6, 0.4]) mark(q, 0); }
+        else { disc(sx + P / 2, top, 2.2 * P, PAL.gray, 1); cord(sx + dir * P, Ys(1.45), bx, Ys(1.45)); cord(bx, Ys(1.45), bx, by); box(Math.min(Xs(0.26), Xs(0.3)), by, Math.max(Xs(0.26), Xs(0.3)) + P, Ys(0.55), PAL.gray, 1, 0, 10, 0); for (const q of [1.25, 1.12, 0.98, 0.84, 0.7]) mark(q, q > 1 ? 2 : 0); }
+        if (CINE) this.route = 4;   // (the bell small, its rings flat)
         box(bx + sw - snap(0.13 * t), by, bx + sw + snap(0.13 * t) + P, snap(by + 0.24 * t), c, 1, 0, 10, 0); box(bx + sw - snap(0.22 * t), snap(by + 0.24 * t), bx + sw + snap(0.22 * t) + P, snap(by + 0.36 * t), c, 1, 0, 10, 0);
         box(bx + 2 * sw, snap(by + 0.36 * t), bx + 2 * sw + P, snap(by + 0.36 * t) + 2 * P, PAL.black, 1, 0, 10, 0);
         if (CINE) this.route = 0; for (let i = 0; i < 3; i++) { const q = (u - i * 0.22) / 1.1; if (q > 0 && q < 1) F(bx, by + 0.2 * t, (0.35 + 1.9 * q) * t, 0, 0, (0.35 + 1.9 * q) * t, PAL.orange, 1 - q, 4); }
@@ -4712,14 +4732,57 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (CINE) this.route = 2; box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
-    box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0);
-    for (let y0 = r.y0 + 0.25 * t, row = 0; y0 < r.y1 - 0.5 * t; y0 += 1.8 * t, row++) for (let x = r.x0 + (0.8 + 0.6 * hsh(1 + row)) * t, i = 0; x < r.x1 - 0.5 * t; x += (1.6 + 0.8 * hsh(2 + i + 9 * row)) * t, i++) {   // cracks a tile long
-      let cx = x, j = 0; for (let y = y0; y < Math.min(r.y1 - P, y0 + 1.1 * t); y += 2 * P) { box(snap(cx), snap(y), snap(cx) + P, snap(y) + 2 * P, PAL.black, 1, 0, 10, 0); cx += hsh(i * 13 + j++ + 31 * row) < 0.5 ? -P : P; }
+    // its stones (FUJI_V.stone): the trail's dry-stone walls, boulders fitted without mortar, black gaps, small grey chinking stones in them. A a row of round
+    // boulders, the free end rounded; B two courses of flat stones, an upright stone at the free end; C boulders big and small, a heavier snow; D big boulders,
+    // the free end squared; E small and middling boulders packed in two rows, many chinks; F two even courses, the end square. (The 2.5D top takes the colour
+    // 7 game px under the edge: there only the stones' own blue or a gap a pixel wide, never a chink or a course's joint.)
+    const sv = (window.__fujiV || FUJI_V).stone, K = PAL.black, G = PAL.gray, B = th.block, n = Math.max(1, Math.round((r.y1 - r.y0) / t)), rh = (r.y1 - r.y0) / n;
+    const fe0 = !wl && r.x0 > lv.l + 1, fe1 = !wr && r.x1 < lv.r - 1;   // its free ends
+    box(r.x0, r.y0, r.x1, r.y1, K, 1, 0, 10, 0);
+    const chink = (x, y, s) => box(snap(x - s * P), snap(y - s * P), snap(x + s * P), snap(y + s * P), G, 1, 0, 10, 0);
+    const stone = (x, y, rx, ry) => { F(snap(x), snap(y + P), rx, 0, 0, ry, B, 1.55, 0); F(snap(x), snap(y - P / 2), rx - P, 0, 0, ry - P, B, 1, 0); };   // a boulder, a darker rim under it
+    const fit = (x0, x1, ws, seed) => {   // widths in a row, jittered, scaled to fill x0..x1 exactly: [centre, width] each (nothing past its ends)
+      const q = []; let sum = 0; for (let i = 0; sum < x1 - x0 || q.length < 1; i++) { const w = ws[i % ws.length] * (0.88 + 0.24 * hsh(seed + i)); q.push(w); sum += w; }
+      if (q.length > 1 && sum - q[q.length - 1] / 2 > x1 - x0) { sum -= q.pop(); }
+      const k = (x1 - x0) / sum; let x = x0; return q.map((w) => { const c = x + (w * k) / 2; x += w * k; return [c, w * k]; });
+    };
+    const boulders = (rad, cyq, mix) => {   // a row of boulders a row of the ledge: rad of rh across, their centres cyq of rh down, mix: big ones and stacked small ones by turns
+      for (let j = 0; j < n; j++) {
+        const cy = r.y0 + (j + cyq) * rh, ws = mix ? [2 * rad * rh, 1.15 * rad * rh] : [2 * rad * rh], row = fit(r.x0, r.x1, j % 2 ? ws.slice().reverse() : ws, 7 + 31 * j);
+        row.forEach(([x, w], i) => {
+          const small = mix && w < 1.6 * rad * rh, q = Math.min(w / 2 + 0.4 * P, (small ? 0.62 : 1) * Math.min(cyq, 1.02 - cyq) * rh);
+          if (!small) stone(x, cy, w / 2 + 0.4 * P, q); else { stone(x, cy - 0.24 * rh, w / 2 + 0.4 * P, q * 0.9); stone(x, cy + 0.26 * rh, w / 2 + 0.2 * P, q * 0.85); }
+          if (i < row.length - 1) { const mx = x + w / 2; chink(mx, cy + 0.42 * rh, 1); if (hsh(60 + i + 7 * j) < 0.6) chink(mx, cy - 0.47 * rh, 1); }
+        });
+      }
+    };
+    const courses = (y1q, lens, endStone) => {   // two courses of flat stones: their joint y1q of rh down (below 7 game px), stones lens tiles long by turns
+      for (let j = 0; j < n; j++) {
+        const yA = r.y0 + j * rh, yJ = snap(yA + y1q * rh), yB = r.y0 + (j + 1) * rh;
+        box(r.x0, yJ, r.x1, yJ + P, K, 1, 0, 10, 0);
+        for (const [c0, c1, row] of [[yA, yJ, 0], [yJ + P, yB, 1]]) {
+          let x = r.x0 + (row ? 0.45 * t : 0), i = 0;
+          box(r.x0, c0, r.x1, c1, B, 1, 0, 10, 0);
+          while (x < r.x1) { const l = lens[(i + row + j) % lens.length] * t * (0.9 + 0.2 * hsh(20 + i + 5 * row + 11 * j)); x += l; if (x < r.x1 - 0.3 * t) { box(snap(x), c0, snap(x) + P, c1, K, 1, 0, 10, 0); if (row && hsh(40 + i) < 0.5) chink(snap(x) + P / 2, yJ + P / 2, 1); } i++; }
+          for (const [x, e] of [[r.x0, 1], [r.x1, -1]]) if ((e > 0 ? fe0 : fe1)) { box(Math.min(x, x + e * 2 * P), c0, Math.max(x, x + e * 2 * P), c0 + P, K, 1, 0, 10, 0); box(Math.min(x, x + e * 2 * P), c1 - P, Math.max(x, x + e * 2 * P), c1, K, 1, 0, 10, 0); }   // its corners worn round
+        }
+        if (endStone) for (const [x, e] of [[r.x0, 1], [r.x1, -1]]) if (e > 0 ? fe0 : fe1) { const xi = snap(x + e * 0.7 * t); box(Math.min(xi, xi + e * P), yA, Math.max(xi, xi + e * P), yB, K, 1, 0, 10, 0); box(Math.min(x, xi), yJ, Math.max(x, xi), yJ + P, B, 1, 0, 10, 0); }   // an upright stone across both
+      }
+    };
+    if (sv === 0) boulders(0.5, 0.53, false);
+    else if (sv === 1) courses(0.58, [1.6, 1.2, 1.9], true);
+    else if (sv === 2) boulders(0.5, 0.53, true);
+    else if (sv === 3) { boulders(0.62, 0.53, false); for (const [x, e] of [[r.x0, 1], [r.x1, -1]]) if (e > 0 ? fe0 : fe1) { const xi = snap(x + e * 0.62 * t); box(Math.min(x, xi), r.y0, Math.max(x, xi), r.y1, B, 1, 0, 10, 0); box(Math.min(xi, xi + e * P), r.y0, Math.max(xi, xi + e * P), r.y1, K, 1, 0, 10, 0); } }   // its end squared
+    else if (sv === 4) for (let j = 0; j < n; j++) {   // E: flat capstones over a row of boulders, many chinks in it
+      const yA = r.y0 + j * rh, yJ = snap(yA + 0.56 * rh), cap = fit(r.x0, r.x1, [1.4 * t, 1.0 * t], 13 + 7 * j), row = fit(r.x0, r.x1, [0.62 * rh, 0.5 * rh], 29 + 7 * j);
+      box(r.x0, yA, r.x1, yJ, B, 1, 0, 10, 0); cap.forEach(([x, w], i) => { if (i < cap.length - 1) box(snap(x + w / 2), yA, snap(x + w / 2) + P, yJ, K, 1, 0, 10, 0); });
+      row.forEach(([x, w], i) => { stone(x, yJ + P + 0.22 * rh, w / 2 + 0.3 * P, 0.24 * rh); if (i < row.length - 1) chink(x + w / 2, yJ + 0.4 * rh, 1); if (hsh(120 + i) < 0.5) chink(x + w / 4, yA + rh - P, 1); });
     }
-    for (let x = r.x0 + 0.4 * t, i = 0; x < r.x1 - 0.3 * t; x += (0.5 + 0.5 * hsh(30 + i)) * t, i++) box(snap(x), snap(r.y1 - (1 + Math.round(2 * hsh(50 + i))) * P), snap(x + (0.15 + 0.2 * hsh(70 + i)) * t), r.y1, PAL.black, 1, 0, 10, 0);   // notches in its underside
-    const sy = snap(r.y0 + 0.16 * t);
+    else courses(0.58, [1.5], false);
+    const sy = snap(r.y0 + (sv === 2 ? 0.2 : 0.16) * t);
     box(r.x0, r.y0, r.x1, sy, PAL.white, 1, 0, 10, 0);   // the snow
-    for (let x = r.x0, i = 0; x < r.x1; x += 0.35 * t, i++) box(snap(x), sy, snap(Math.min(r.x1, x + 0.35 * t)), sy + (1 + Math.round(2 * hsh(90 + i))) * P, PAL.white, 1, 0, 10, 0);   // its lumpy edge
+    for (let x = r.x0, i = 0; x < r.x1; x += 0.35 * t, i++) box(snap(x), sy, snap(Math.min(r.x1, x + 0.35 * t)), sy + (1 + Math.round((sv === 2 ? 3 : 2) * hsh(90 + i))) * P, PAL.white, 1, 0, 10, 0);   // its lumpy edge
+    if (sv === 2) for (let x = r.x0 + 0.6 * t, i = 0; x < r.x1 - 0.4 * t; x += (1.1 + 0.8 * hsh(100 + i)) * t, i++) box(snap(x), sy, snap(x) + 2 * P, snap(r.y0 + (0.42 + 0.2 * hsh(110 + i)) * t), PAL.white, 1, 0, 10, 0);   // C: snow running down between its boulders
     if (!wl) box(r.x0, sy, r.x0 + 2 * P, snap(r.y0 + 0.4 * t), PAL.white, 1, 0, 10, 0);   // a drip over a free end
     if (!wr) box(r.x1 - 2 * P, sy, r.x1, snap(r.y0 + 0.35 * t), PAL.white, 1, 0, 10, 0);
     return true;

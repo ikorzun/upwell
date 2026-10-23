@@ -1496,8 +1496,8 @@ class Game {
     if (this.hp <= 0) this.die();
     return true;
   }
-  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; a learning level never
-  // takes the last (the digest §3: no losing while learning). False: none was lost.
+  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; the last one too, in every level (owner,
+  // 2026-10-23: «почему герой не умирает? Осталось 1 сердце, я падаю в огонь и ничего. Нужно это поменять»: a teaching level kept the last). False: none was lost.
   parOf() {   // a campaign level's par for its time medal (MEDAL)
     const lv = this.lv, m = lv.portal ? (lv.floor - lv.portal.y) / (R_PER_M * this.R) : 0;
     return (this.rc && this.rc.par) || Math.max(MEDAL.min, MEDAL.step * Math.ceil((m * MEDAL.perM) / MEDAL.step));
@@ -1505,7 +1505,6 @@ class Game {
   loseHeart() {
     if (this.bonus) return false;
     if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
-    if (this.rc && this.rc.safe && this.hp <= 1) return false;
     this.hp--; this.harmed = true; return true;   // (a heart lost: no clean medal this time, MEDAL; not `hurt`, the method that loses it)
   }
   room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
@@ -1575,7 +1574,7 @@ class Game {
   levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
-  learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
+  learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall costs no heart (the digest §6; the fire does, owner)
   fall() {
     if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
@@ -1632,7 +1631,7 @@ class Game {
     if (!f || H.maxY < f.y) return;
     if (this.bonus) { this.endBonus('caught'); return; }   // the fire race: caught is the end of it
     if (this.fireFree > 0 && this.invuln <= 0) { this.fireFree--; this.invuln = HEALTH.invuln; fx.ring(H.cx, H.cy, 1.6 * this.R, INK.white); setVel(H, H.rigVx, -0.9 * this.vjump); sound.play('burn'); return; }   // a Fire walker: its first touch a level, free
-    if (!this.learning()) this.hurt(0, -1, 'fire');
+    this.hurt(0, -1, 'fire');   // (in 1-1's first minute too: the fire costs its heart, the last one included; only a fall there is free)
     sound.play('burn');
     if (this.state !== 'play') return;
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;

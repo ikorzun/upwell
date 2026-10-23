@@ -19,7 +19,7 @@ const STR = {
     got_smash: 'Helmet! Jumps smash blocks · {s} s', got_bubble: 'Bubble gum! Float up · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
-    again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
+    again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
@@ -36,7 +36,7 @@ const STR = {
     got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_bubble: '¡Chicle! Flotas hacia arriba · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
-    again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
+    again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
@@ -53,7 +53,7 @@ const STR = {
     got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_bubble: 'Chiclete! Flutue para cima · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
-    again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
+    again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
@@ -70,7 +70,7 @@ const STR = {
     got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_bubble: 'ガム！ ふわふわ うく · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
-    again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
+    again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
@@ -270,7 +270,7 @@ class Foe {
     this.type = s.type; this.def = def; this.ledge = s.ledge || null; this.rect = s.rect || null; this.wall = s.wall || null;
     this.big = !!s.big; this.hp = this.big ? MINI.hp : 1;   // a mini-boss (MINI)
     this.body = new Body(designById(def.design), foeColor(def.color), s.x, s.y, lv.R * def.size * (this.big ? MINI.size : 1), 0.5);
-    this.body.gScale = def.grav; this.body.sticky = false; this.body.face.frown = true;
+    this.body.gScale = def.grav; this.body.sticky = false; this.body.face.frown = true; if (s.type === 'shell') this.body.helmet = 'kame';   // (a shell's hard look: writeFace)
     this.body.fric = 0;   // no drag from what it crawls on (a wall's friction all but holds it still): its steering sets the pace
     this.dir = s.dir || (Math.random() < 0.5 ? -1 : 1); this.t = 0; this.stall = 0; this.ph = Math.random(); this.lastPh = this.ph;
     this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
@@ -705,11 +705,22 @@ class Game {
     b.translate(x - b.cx, y - b.cy);
     b.vx.fill(0); b.vy.fill(0); unstick(b, 0.2); b.ceilT = 0; b.peelT = 0;
   }
-  // The menu's backdrop is the first level of a fresh run with the hero standing in it.
+  // The menu's scene (owner, 2026-10-23, the Figma «Main»): no level behind it, its backdrop (Renderer.drawMenu) and the hero alone, big, over
+  // the colours, to drag and press as in Gum (menuTouch); ui.menu sizes and places it (menuFit). Play or Continue builds the level as ever.
   toMenu() {
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
-    this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world; this.buildLevel(true);   // behind the menu, the world Play or Continue goes to
-    ui.hideAll(); ui.menu();   // (which sets the camera on the hero)
+    this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
+    this.builtW = view.w; this.R = this.menuR || 0.25 * view.w; this.well = null; this.door = null; this.lv = new Level();
+    this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
+    this.makeHero();
+    ui.hideAll(); ui.menu();
+  }
+  // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
+  // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
+  menuFit(rowY, logoY) {
+    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
+    this.menuFloor = floorY; this.menuSplit = rowY; this.lv.menuAt(floorY);
+    if (Math.abs(R - this.R) > 0.5) { this.menuR = this.R = R; this.lv.R = R; this.makeHero(); }
   }
   startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round
     this.newRun(); if (daily) { this.daily = today; this.tier = 0; this.hard = false; } this.endless = !!endless;   // (the daily well the same for all: no hard mode)
@@ -1091,7 +1102,10 @@ class Game {
       for (const e of lv.enemies) e.think(dt, this);
       if (lv.boss && !lv.boss.dead) lv.boss.think(dt, this);
     }
-    if (this.invuln > 0) this.invuln -= dt;
+    if (this.invuln > 0) {   // its blink ends once out of an enemy it passed into (at most `hold` s on): not a hit for being inside it
+      this.invuln -= dt;
+      if (this.invuln <= 0 && playing && (this.blinkHold || 0) < HEALTH.hold && this.insideFoe()) { this.blinkHold = (this.blinkHold || 0) + dt; this.invuln = 0.5 * dt; }
+    } else this.blinkHold = 0;
     const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
     if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
     if (hang) setVel(hero, 0, 0);
@@ -1106,7 +1120,7 @@ class Game {
     this.warns = playing ? this.threats(dt) : [];
     const bs = this.bodyList(), puck = lv.boss && !lv.boss.dead && lv.boss.def && lv.boss.def.slide ? lv.boss.body : null;
     this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
-    for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.stepFloor = (b.wallMask & 8) ? b.floorRect : null; b.touchHero = false; b.beginStep(dt); }   // (stepFloor: the plank it stands on holds it, see collideLevel)
+    for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.stepFloor = (b.wallMask & 8) ? b.floorRect : null; b.touchHero = false; b.blinkHero = false; b.beginStep(dt); }   // (stepFloor: the plank it stands on holds it, see collideLevel)
     hero.springHit = null; hero.rubber = 0;
     for (let s = 0; s < PHYS.substeps; s++) {
       for (const b of bs) { b.integrate(h, WORLD.maxSpeed); b.solve(h); b.updateBounds(); }
@@ -1117,7 +1131,10 @@ class Game {
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
         const solid = lv.boss && !(lv.boss.def && (lv.boss.def.slide || lv.boss.def.rail)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
-        if (withHero && ((this.invuln > 0 && !solid) || !playing || A.ghost || B.ghost)) continue;   // a hit hero passes through for a moment, and a rolling shell through the hero
+        if (withHero && this.invuln > 0 && !solid && playing && !A.ghost && !B.ghost) {   // a hit hero passes through for a moment, but a stomp from over one still counts (Game.blinkMeet)
+          const o = A === hero ? B : A; if (o.maxX > hero.minX && o.minX < hero.maxX && o.maxY > hero.minY && o.minY < hero.maxY) o.blinkHero = true; continue;
+        }
+        if (withHero && ((this.invuln > 0 && !solid) || !playing || A.ghost || B.ghost)) continue;   // and a rolling shell through the hero
         if (collidePair(A, B) && withHero) (A === hero ? B : A).touchHero = true;
       }
       for (const b of bs) { if (!b.thread) b.collideLevel(lv, h); b.finishSubstep(h); b.updateBounds(); }
@@ -1187,13 +1204,13 @@ class Game {
     this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
   }
   untangle(f) {   // the crow with the red ring set free (RIBBON): sparks, its thanks and coins, off up it flies with the ring on it, and the story's card II
-    const R = this.R, lv = this.lv;   // a moment after (behind ?story till the owner's «да», as card I)
+    const R = this.R, lv = this.lv;   // a moment after
     f.fly = true; f.t = 0; f.vx = f.dir * 70; f.vy = -190;
     if (lv.gone && !this.well) lv.gone.push(f.id);
     sparkFx(f.x, f.y - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red], 0.6); fx.ring(f.x, f.y - R, 1.6 * R, INK.white);
     sound.play('bubble', 0.9, 1.4); sound.play('buy', 0.6, 1.2); haptics.buzz(16);
     this.drop(f.x, f.y - 2 * R, FOLK.coins); ui.toast(L2(RIBBON.thanks) + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400);
-    if (STORY_LIVE) this.cardDue = { id: 'village_crow', t: RIBBON.card };
+    this.cardDue = { id: 'village_crow', t: RIBBON.card };
   }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
     const H = this.hero, lv = this.lv;
@@ -1307,6 +1324,7 @@ class Game {
   interact(dt) {
     const lv = this.lv, H = this.hero;
     for (const e of lv.enemies.slice()) if (e.body.touchHero) this.meet(e);
+    for (const e of lv.enemies.slice()) if (e.body.blinkHero && lv.enemies.includes(e)) this.blinkMeet(e);
     for (const e of lv.enemies.slice()) if (e.type === 'worm') this.wormTouch(e);
     this.rolling(dt);
     for (const s of lv.signs || []) if (Math.abs(s.y - H.cy) < 2.5 * this.R) this.hint('tut' + s.id, 'seen_tut' + s.id + (s.id === 1 ? (coarse ? (save.stick ? 'S' : 'T') : 'K') : ''));   // the tutorial's words where they are needed, before any other
@@ -1339,7 +1357,7 @@ class Game {
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
-    if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
+    if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < (e.def.safe || 0.35))) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
     const above = stompable(H, b, rel);   // from over it (its whole top half), or falling onto it
     const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
@@ -1353,6 +1371,14 @@ class Game {
     else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
   }
+  // Blinking after a hit the hero passes through an enemy, but coming down onto one it can stomp still stomps it (owner, 2026-10-23: «если герой моргает и
+  // прыгает на врага сверху, то все так же его убивает»: it fell in, and its blink ended inside it, a hit); anything else, through it
+  blinkMeet(e) {
+    if (e.state === 'shell' || e === this.lv.boss) return;
+    const H = this.hero, b = e.body, rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;
+    if (e.canStomp() && stompable(H, b, rel)) this.stomp(e);
+  }
+  insideFoe() { const H = this.hero; return this.lv.enemies.some((e) => { const b = e.body; return b.maxX > H.minX && b.minX < H.maxX && b.maxY > H.minY && b.minY < H.maxY; }); }
   bounceOff(e) {   // off a boss's hard top (BOSSES.puck): up and aside with a clang; the first time, a word on what does work
     const H = this.hero;
     setVel(H, H.rigVx + (Math.sign(H.cx - e.body.cx) || 1) * 2 * this.R, -0.8 * BOSS.bounce * this.vjump); unstick(H, 0.08);
@@ -1496,8 +1522,8 @@ class Game {
     if (this.hp <= 0) this.die();
     return true;
   }
-  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; a learning level never
-  // takes the last (the digest §3: no losing while learning). False: none was lost.
+  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; the last one too, in every level (owner,
+  // 2026-10-23: «почему герой не умирает? Осталось 1 сердце, я падаю в огонь и ничего. Нужно это поменять»: a teaching level kept the last). False: none was lost.
   parOf() {   // a campaign level's par for its time medal (MEDAL)
     const lv = this.lv, m = lv.portal ? (lv.floor - lv.portal.y) / (R_PER_M * this.R) : 0;
     return (this.rc && this.rc.par) || Math.max(MEDAL.min, MEDAL.step * Math.ceil((m * MEDAL.perM) / MEDAL.step));
@@ -1505,7 +1531,6 @@ class Game {
   loseHeart() {
     if (this.bonus) return false;
     if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
-    if (this.rc && this.rc.safe && this.hp <= 1) return false;
     this.hp--; this.harmed = true; return true;   // (a heart lost: no clean medal this time, MEDAL; not `hurt`, the method that loses it)
   }
   room() { return Math.max(CAM.floorShow, view.keep + CAM.keep * 2 * this.R); }   // what the camera keeps under the hero: the keys and CAM.keep heights more
@@ -1575,7 +1600,7 @@ class Game {
   levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
-  learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall or the fire costs no heart (the digest §6)
+  learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall costs no heart (the digest §6; the fire does, owner)
   fall() {
     if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
@@ -1632,7 +1657,7 @@ class Game {
     if (!f || H.maxY < f.y) return;
     if (this.bonus) { this.endBonus('caught'); return; }   // the fire race: caught is the end of it
     if (this.fireFree > 0 && this.invuln <= 0) { this.fireFree--; this.invuln = HEALTH.invuln; fx.ring(H.cx, H.cy, 1.6 * this.R, INK.white); setVel(H, H.rigVx, -0.9 * this.vjump); sound.play('burn'); return; }   // a Fire walker: its first touch a level, free
-    if (!this.learning()) this.hurt(0, -1, 'fire');
+    this.hurt(0, -1, 'fire');   // (in 1-1's first minute too: the fire costs its heart, the last one included; only a fall there is free)
     sound.play('burn');
     if (this.state !== 'play') return;
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;
@@ -1973,7 +1998,9 @@ class Game {
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
-    ui.hideAll(); this.story(STORY_LIVE && (storyLook || (w === 0 && s === 0)) && 'moon_fall', () => ui.banner(), storyLook); storyLook = false;   // (the story's first card, before 1-1: STORY)
+    ui.hideAll(); this.story('moon_fall', () => this.story(s === 0 && 'arrive_' + CAMPAIGN[w].world.id, () => this.story(rc.boss && 'boss_' + rc.boss, () => ui.banner())), storyLook); storyLook = false;   // the story's first card, once, before the first level played (a
+    // save under way: before its next); a world's own coming-in card on its first level (arrive_); and a boss's card before its first fight (owner,
+    // К11 «А»), then the level's banner (STORY)
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
@@ -2055,7 +2082,7 @@ class Game {
   // A story card (STORY) once a play-through, the game held under it till Next; `then` after it, or at once when none is due (`again`: shown seen or not)
   story(id, then, again) {
     const c = id && STORY[id];
-    if (!c || (save.seen['card_' + id] && !again)) { if (then) then(); return; }
+    if (!c || (c.draft && !STORY_LIVE) || (save.seen['card_' + id] && !again)) { if (then) then(); return; }   // (a draft, till the owner's «да» to its art: ?story only)
     this.storyOn = true; this.paused = this.state; this.state = 'pause'; input.clear();
     ui.story(c, () => { save.seen['card_' + id] = 1; persist(); this.storyOn = false; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); if (then) then(); });
   }
@@ -2154,8 +2181,6 @@ const FONT = {
   '◀': '...#/..##/.###/####/.###/..##/...#',
   '▶': '#.../##../###./####/###./##../#...',
   '★': '...#.../..###../#######/.#####./..###../.##.##./.#...#.',   // a bonus world's number (wNo)
-  '\u{E000}': '...#.../..##.#./####..#/####..#/####..#/..##.#./...#...',
-  '\u{E001}': '...#.../..##.../####.#./#####.#/####.#./..##.../...#...',   // the last two: sound on / off
 };
 for (const c in FONT) FONT[c] = FONT[c].split('/');
 const GLYPHS = new RegExp('([' + Object.keys(FONT).join('') + '])', 'u');
@@ -2180,32 +2205,99 @@ function px(text, max = Infinity, left = false) {
   }
   return e;
 }
-// Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once, new art from the pack's
-// prompts): `n` the numeral on the frame, `still` the approved art, `title` under the card. Game.story shows one, the game held under it till Next.
+// Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once; round 5: one
+// to each world, with the story's start and end, К5–К8 «А»): `n` the numeral on the frame (in the story's order; the bonus world a star like
+// its number; the end none till the last worlds are built), `still` the art, `cells` its own pixel grid (each card cut on the grid its art
+// was drawn on, К7), `ink` its world's colours for the frame (К6), `boss` the world whose boss beaten brings it (II and VI come after their own
+// episodes: the crow in 1-3, the treat in Tokyo), `title` under the card. Game.story shows one, the game held under it till Next.
 const STORY = {
-  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
-  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
-  city_friendship: { n: 'III', still: 'assets/cards/03_city_friendship.png', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [168, 252], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
+  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', cells: [192, 288], ink: 'village', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
+  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [159, 239], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
+  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [136, 203], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
+  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [162, 243], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
+  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [171, 256], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [167, 251], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
+  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [143, 214], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
+  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [192, 288], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
+  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
+  // A card for Mochi's coming to each world, before its first level (owner, 2026-10-23: «историю с карточками нужно дополнить, например, сначала показываем
+  // падение с луны, потом что герой упал в деревню – т.е. везде добавить +1 карточку перехода»; the scheme of the others, drawn out as the bosses' were:
+  // «у карточек тоже используй подход с детализацией»): drafts till his «да» to their art
+  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [189, 284], ink: 'village', draft: true, title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
+  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [191, 286], ink: 'cave', draft: true, title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
+  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [186, 279], ink: 'ice', draft: true, title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
+  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [128, 192], ink: 'sea', draft: true, title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
+  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [173, 260], ink: 'tokyo', draft: true, title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
+  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [204, 305], ink: 'blocks', draft: true, title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
+  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [146, 219], ink: 'sky', draft: true, title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
+  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [192, 288], ink: 'skazka', draft: true, title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
+  // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
+  // boss is, in its world's ink and its own: for all since his К13 «А» (2026-10-23; the tram face-on, as he asked)
+  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', title: BOSSES.probka.name },
+  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [151, 227], ink: 'cave', title: BOSSES.cart.name },
+  boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [192, 288], ink: 'ice', title: BOSSES.puck.name },
+  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [189, 284], ink: 'sea', title: BOSSES.namazu.name },
+  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [171, 256], ink: 'tokyo', title: BOSSES.tram.name },
+  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [191, 287], ink: 'blocks', title: BOSSES.crane.name },
+  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [158, 237], ink: 'sky', title: BOSSES.pigeon.name },
+  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', title: BOSSES.koschei.name },
 };
-const STORY_LIVE = /[?&]story\b/.test(location.search);   // (till the owner's «да» to the cards' art they come by themselves only with ?story,
-let storyLook = STORY_LIVE;   // which shows card I before the first level played, seen or not: a save well under way shows it too)
-// The cards' one frame, drawn here in its own pixels (the pack: «draw the thin frame procedurally… more reliable and always aligned»): indigo round a 2:3
-// window, an ivory keyline, lavender stepped corners, a crescent moon at its top with a vermilion knot either side, gold specks at its tips.
-function storyFrame() {
-  const I = '#201638', W = '#f7f3ee', L = '#ab80e5', R = '#f34545', G = '#ffb642', r = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
-  let s = `<path fill="${I}" fill-rule="evenodd" d="M0 0H128V192H0Z M4 6V186H124V6Z"/>` + r(3, 5, 122, 1, W) + r(3, 186, 122, 1, W) + r(3, 5, 1, 182, W) + r(124, 5, 1, 182, W);
+for (const k in STORY) STORY[k].id = k;
+const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows the drafts too, and card I before
+let storyLook = STORY_LIVE;   // the first level of the load, seen or not)
+// A card's colours (К6): its world's ink over black as the game draws the world (DEPTH: the frame's band a quarter of the way from black to
+// the ink, the corners the ink), white, red and yellow as everywhere; the Moon's cards in the pack's own lavender; the Dark Forest grey.
+const STORY_INK = { moon: { I: '#201638', W: '#f7f3ee', L: '#ab80e5', R: '#f34545', G: '#ffb642', bg: '#0b0716' } };
+for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8ff'], ['sea', '#6fe0ee'], ['tokyo', '#c996ff'], ['blocks', '#c8c8c8'], ['sky', '#c996ff'], ['skazka', '#c8c8c8']]) {
+  const a = [1, 3, 5].map((i) => parseInt(ink.slice(i, i + 2), 16)), I = '#' + a.map((v) => Math.round(20 + (v - 20) * 0.25).toString(16).padStart(2, '0')).join('');
+  STORY_INK[k] = { I, W: '#f3f3f3', L: ink, R: '#f43e34', G: '#ffed57', bg: '#141414' };
+}
+STORY_INK.village = STORY_INK.mine;   // (the Village's world id is 'mine')
+// The cards' one frame, drawn here on the card's own grid (the pack: «draw the thin frame procedurally… more reliable and always aligned»;
+// the owner's К7: one pixel size in a card, the frame's too): its band round a 2:3 window, a white keyline, stepped corners in the ink, a
+// crescent moon at its top with a red knot either side, a yellow speck at each tip. Sizes in the pack's frame of 128 across (`u` cells to one).
+function storyFrame(f, w, h) {
+  const u = w / 128, q = (v) => Math.max(1, Math.round(v * u)), r = (x, y, ww, hh, c) => `<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${c}"/>`;
+  const B = q(4), T = q(6), cx = Math.round(w / 2);
+  let s = `<path fill="${f.I}" fill-rule="evenodd" d="M0 0H${w}V${h}H0Z M${B} ${T}V${h - T}H${w - B}V${T}Z"/>` + r(B - 1, T - 1, w - 2 * B + 2, 1, f.W) + r(B - 1, h - T, w - 2 * B + 2, 1, f.W) + r(B - 1, T - 1, 1, h - 2 * T + 2, f.W) + r(w - B, T - 1, 1, h - 2 * T + 2, f.W);
   for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {   // a corner: an L along each edge and a step inside it
-    const X = (x, w) => (sx > 0 ? x : 128 - x - w), Y = (y, h) => (sy > 0 ? y : 192 - y - h);
-    s += r(X(0, 12), Y(0, 2), 12, 2, L) + r(X(0, 2), Y(0, 14), 2, 14, L) + r(X(5, 3), Y(8, 3), 3, 3, L) + r(X(0, 1), Y(0, 1), 1, 1, G);
+    const X = (x, ww) => (sx > 0 ? x : w - x - ww), Y = (y, hh) => (sy > 0 ? y : h - y - hh);
+    s += r(X(0, q(12)), Y(0, q(2)), q(12), q(2), f.L) + r(X(0, q(2)), Y(0, q(14)), q(2), q(14), f.L) + r(X(q(5), q(3)), Y(q(8), q(3)), q(3), q(3), f.L) + r(X(0, q(1)), Y(0, q(1)), q(1), q(1), f.G);
   }
-  s += `<circle cx="64" cy="4" r="7" fill="${I}"/><circle cx="64" cy="4" r="6" fill="none" stroke="${L}" stroke-width="1"/><circle cx="63" cy="4" r="3.5" fill="${W}"/><circle cx="65" cy="3" r="3" fill="${I}"/>`;
-  s += r(53, 2, 3, 3, R) + r(72, 2, 3, 3, R);
-  return `<svg class="sframe" viewBox="0 0 128 192" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
+  s += `<circle cx="${cx}" cy="${q(4)}" r="${q(7)}" fill="${f.I}"/><circle cx="${cx}" cy="${q(4)}" r="${q(6)}" fill="none" stroke="${f.L}" stroke-width="${q(1)}"/><circle cx="${cx - q(1)}" cy="${q(4)}" r="${3.5 * u}" fill="${f.W}"/><circle cx="${cx + q(1)}" cy="${q(3)}" r="${3 * u}" fill="${f.I}"/>`;
+  s += r(cx - q(11), q(2), q(3), q(3), f.R) + r(cx + q(8), q(2), q(3), q(3), f.R);
+  return `<svg class="sframe" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
+}
+// A card comes alive by the game itself (owner, К4 «А»: as the preview), on a canvas of its cells over the art: the eyes shut for two steps of
+// eight a second every 3.5 s, small specks dim to the mid tone in turn, the three biggest lights' edges dip to the ink now and then; all
+// from assets/cards/live.json (scratchpad cards3/live.py over the art). Small and in place, so it runs under «reduce motion» too (a sweep or a
+// tilt would not).
+const LIVE = { step: 125, blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
+let liveData = null;
+function cardLive(c, card) {
+  const [w, h] = c.cells, cv = document.createElement('canvas'), g = cv.getContext('2d');
+  cv.className = 'slive'; cv.width = w; cv.height = h; card.insertBefore(cv, card.querySelector('.sframe'));
+  let f = 0, L = null;
+  (liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))).then((j) => { L = j[c.id] || null; });
+  const fill = (cells, col) => { g.fillStyle = col; for (const [x, y] of cells) g.fillRect(x, y, 1, 1); };
+  const timer = setInterval(() => {
+    if (!L) return;
+    f++; g.clearRect(0, 0, w, h);
+    if (LIVE.blink.includes(f % LIVE.every)) for (const e of L.eyes) {   // a blink: the eye white, a lid across it, its ends a cell up
+      const [x, y, ew, eh] = e.box, ly = y + Math.floor(eh * 0.6);
+      fill(e.cells, L.pal[4]); g.fillStyle = L.pal[0];
+      for (let i = 0; i < ew; i++) g.fillRect(x + i, ly - (ew >= 4 && (i === 0 || i === ew - 1) ? 1 : 0), 1, 1);
+    }
+    L.twinkle.forEach((t, i) => { if ((f + i * 5) % 12 < 3) fill(t, L.pal[2]); });
+    L.lights.forEach((l, i) => { if (!LIVE.flick[(f + i * 4) % LIVE.flick.length]) fill(l, L.pal[3]); });
+  }, LIVE.step);
+  return { stop() { clearInterval(timer); } };
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
 function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
-  const c = document.createElement('small'), ja = lang !== 'ja' || k === 'title', raw = k === 'title' ? 'アップウェル' : STR[ja ? 'ja' : 'en'][k];
+  const c = document.createElement('small'), ja = lang !== 'ja', raw = STR[ja ? 'ja' : 'en'][k];
   c.className = 'cap'; c.lang = ja ? 'ja' : 'en'; c.textContent = o ? raw.replace(/\{(\w+)\}/g, (_, n) => o[n]) : raw;
   e.classList.add('capped'); e.append(c);
   return e;
@@ -2243,6 +2335,12 @@ function button(text, cls, fn) {
 }
 // A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
 // ("×2 con un anuncio", a world's name after Continue on a small phone).
+// The bar over the page the menu's backdrop's top ink (owner, 2026-10-23: «градиент должен уходить под остров»): #topTint for iOS 26 Safari, theme-color for the browsers that read it.
+const themeMeta = document.querySelector('meta[name="theme-color"]'), themeInk = themeMeta ? themeMeta.content : '';
+function menuTop(on) { document.documentElement.classList.toggle('menuTop', on); if (themeMeta && coarse) themeMeta.content = on ? MENU_BG.inks[0] : themeInk; }   // (a phone's: a desktop's tab bar left as it is)
+function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
+  for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
+}
 function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
   const tx = b.querySelector('.tx');
   for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > min;) { p -= 0.5; b.style.setProperty('--p', p); }
@@ -2250,23 +2348,26 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
-  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; },
-  menu() {
-    const p = this.panel('menu');
-    const title = cap(el('h1', 'title', 'UPWELL'), 'title'); title.lang = 'en'; p.append(title);   // the name in VT323 whatever the language
-    const colors = el('div', 'pickers');   // the hero shows through above; under it its five colours, what the chosen one starts with, and Play
+  hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; menuTop(false); if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
+  menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
+    const p = this.panel('menu'); menuTop(true);
+    const logo = el('img', 'logo'); logo.src = 'assets/ui/upwell-logo.svg'; logo.alt = 'UPWELL'; logo.lang = 'en'; logo.draggable = false; p.append(logo);
+    const set = button('', 'setBtn', () => this.settings()), gear = el('img'); gear.src = 'assets/ui/settings.svg'; gear.alt = ''; gear.draggable = false;
+    set.append(gear); set.setAttribute('aria-label', t('settings')); p.append(set);
+    const colors = el('div', 'pickers');   // the hero over them (menuTouch: drag it, press it); under it its five colours, what the chosen one starts with, and Play
     for (const u of UNLOCKS) {
-      const open = opened(u), b = button('', 'chip swatch' + (save.color === u.id ? ' on' : '') + (open ? '' : ' locked'), () => {
+      const open = opened(u), b = button('', 'swatch' + (save.color === u.id ? ' on' : '') + (open ? '' : ' locked'), () => {
         if (!open) return;
-        save.color = u.id; persist(); game.makeHero(); this.menu();
+        save.color = u.id; persist(); game.hero.kickSquash(0, 1, 0.9); this.menu();   // the hero in its new colour at once (Game.frame paints it), with a little squash
       });
-      b.style.background = rgb(colorById(u.id).base);
+      b.style.setProperty('--c', rgb(colorById(u.id).base)); b.setAttribute('aria-label', u.id);
       if (!open) b.append(el('small', null, u.at));   // what it costs, in coins of all runs
       colors.append(b);
     }
     p.append(colors);
     const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
-    if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }
+    let line = null;
+    if (perk) { line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1])); p.append(line); }   // on one line (owner): smaller, if it must, to fit
     const r = save.run, c = save.camp, ni = campNextId(), next = campAt(ni), begun = c.stars.some((n) => n > 0), done = c.stars[CAMP_END] > 0;
     const grid = el('div', 'grid2');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid)
     if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
@@ -2296,11 +2397,24 @@ const ui = {
     else if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
     else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(1)), 'play'));   // one tap to the first level (CrazyGames: one at most)
     else p.append(cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => game.playLevel(ni))), 'continue'));   // the width of the screen, 12 px in from its edges
-    const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
-    s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
-    p.append(s);
-    const y0 = p.getBoundingClientRect().top, split = Math.min(0.58 * view.h, colors.getBoundingClientRect().top - y0 - 8), head = title.getBoundingClientRect().bottom - y0, R = game.R;   // the backdrop's edge over the colours (they climb as rows come, once won),
-    p.style.setProperty('--split', split + 'px'); if (game.state === 'menu') game.lv.cam = game.lv.floor - Math.min(split, Math.max(split - 0.12 * view.h + R, head + 2 * R + 2));   // and the hero standing over it, under the title (a short screen: less floor), so a new look shows
+    if (line) fitLine(line, p.clientWidth - 24);
+    const y0 = p.getBoundingClientRect().top;
+    if (game.state === 'menu') game.menuFit(colors.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0);   // the hero over the colours (they climb as rows come, once won)
+  },
+  // The settings (owner, 2026-10-23: the menu's icon on the right): the language, sound, shake (and 2.5D), as at a pause; Back to the menu.
+  settings() {
+    const p = this.panel('settings');
+    p.append(cap(el('div', 'head', t('settings')), 'settings'), ...this.prefs(() => this.settings()), cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
+  },
+  // The rows the settings and a pause share, each redrawing its panel (`again`) once changed.
+  prefs(again) {
+    const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); again(); }), 'sound');
+    const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); again(); }), 'shake');
+    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); again(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
+    const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
+    langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
+    for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); again(); }); b.lang = k; langs.append(b); }
+    return [langs, snd, shk, ...(d25 ? [d25] : [])];
   },
   cards(list) {
     const p = this.panel('cards');
@@ -2354,7 +2468,7 @@ const ui = {
     const p = this.panel('result'), cw = CAMPAIGN[game.world], cloth = el('div', 'cloth');
     for (const [k, ch] of [...cw.runes].entries()) { const r = document.createElement('span'); r.className = 'rune r' + k; r.textContent = ch; cloth.append(r); }
     cloth.setAttribute('aria-hidden', 'true');
-    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => this.worldDone()), 'next'));
+    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => game.story((Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
   },
   worldDone() {   // its boss beaten, after its tapestry: on into the next world on the line, or word of it coming (a bonus world: back to its map)
     let nw = game.world + 1; while (nw < CAMPAIGN.length && gated(nw)) nw++;
@@ -2434,25 +2548,21 @@ const ui = {
   },
   pause() {
     const p = this.panel('pause');
-    const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); }), 'sound');
-    const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); }), 'shake');
-    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); this.pause(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
-    const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
-    langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
-    for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); this.pause(); }); b.lang = k; langs.append(b); }
     const build = el('div', 'build');   // the upgrades taken (the world's build, in the campaign), as their pictures
     for (const id of game.taken) build.append(iconEl(id));
     for (const id of game.syns) { const i = iconEl(SYNERGIES.find((q) => q.id === id).of[0]); i.classList.add('syn'); build.append(i); }   // a synergy: its first card, ringed
-    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, ...(d25 ? [d25] : []), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), ...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
-    const p = this.panel('story'), card = el('div', 'scard'), art = new Image();
-    const fit = Math.min((view.w - 16) / 256, (view.h - 180) / 384), d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // the pack's
-    card.style.width = 256 * k + 'px'; card.style.height = 384 * k + 'px';   // whole pixels: a whole number of the screen's to each of the art's, the most that fits the view as layout
-    // measured it (a CSS 100vh is taller than the page under iOS Safari's bar), unless that loses over 30% of it (a small screen: then as it fits)
+    const p = this.panel('story'), card = el('div', 'scard'), art = new Image(), [w, h] = c.cells, f = STORY_INK[c.ink];
+    const box = Math.min(view.w - 16, (view.h - 180) * 2 / 3), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // (the view as
+    card.style.width = w * k + 'px'; card.style.height = h * k + 'px';   // layout measured it: a CSS 100vh is taller than the page under iOS Safari's bar) whole pixels: a whole number of the
+    // screen's to each of the art's cells, the most that fits a 2:3 box (cards drawn on finer grids a little smaller), unless that loses over 30% of it (then as it fits)
+    for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
     art.className = 'sart'; art.alt = L2(c.title); art.decoding = 'async'; art.src = c.still;
-    card.innerHTML = storyFrame(); card.prepend(art); card.append(el('div', 'snum', c.n));
-    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', done), 'next'));
+    card.innerHTML = storyFrame(f, w, h); card.prepend(art); if (c.n) card.append(el('div', 'snum', c.n));
+    if (this.live) this.live.stop(); this.live = cardLive(c, card);
+    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', () => { this.live.stop(); done(); }), 'next'));
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
@@ -2532,7 +2642,7 @@ const ui = {
       const e = this.labelEls[i], price = game.priceOf(p), text = L2(p.item.name) + '\n' + (p.sold ? t('sold') : price ? price : t('free'));
       if (e.dataset.text !== text) { e.dataset.text = text; e.replaceChildren(px(text, 34)); e.h = 0; }
       if (!e.h) e.h = e.offsetHeight;
-      e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round(p.y - p.r - 8 - e.h - lv.cam) + 'px) translateX(-50%)';
+      e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round((p.top != null ? p.top - 6 : p.y - p.r - 8) - e.h - lv.cam) + 'px) translateX(-50%)';   // over its drawn picture (p.top, the renderer's), clear of it
       e.classList.toggle('dim', p.sold || price > game.coins);
     });
   },
@@ -2679,7 +2789,7 @@ function hybAim(now) {   // ▲ held or pulled: aim the jump it is (off what the
 const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, fast: 500 };
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
-  if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel')) return;
+  if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel') || game.state === 'menu') return;
   if (aim.on && aim.hyb) { aimStick(e.pointerId, e.clientX, e.clientY, true); return; }   // ▲ aiming: a finger anywhere is the aim's stick
   if (gest || joy) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
   if (save.stick) { joyStart(e); return; }
@@ -3024,7 +3134,9 @@ function layout() {
   const vw = window.innerWidth, vh = window.innerHeight;
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
-  const W = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
+  PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
+  const W0 = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), W = coarse ? W0 : Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
+  // (a computer's column a whole number of game pixels across, so each is as many of the screen's as the next)
   view.w = W; view.h = H; view.left = left; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
@@ -3056,6 +3168,166 @@ function aimRelease(e, cancel) {
 }
 canvas.addEventListener('pointerup', (e) => aimRelease(e, false));
 canvas.addEventListener('pointercancel', (e) => aimRelease(e, true));
+
+// The menu's hero in the hand (owner, 2026-10-23: «главного героя можно таскать и жать на него, он такой же сквиш»): Gum's own touch (its Input,
+// for the one body). A quick tap pokes it (a dent, a puff, a startled face); a press held squeezes it flatter till let go, and it hops; a drag
+// past a few px takes it by the point under the finger (deep in, it comes whole; at its rim, it stretches); let go moving, it is flung. All of it
+// inside the walls, under the screen's top, over its floor (Level.menuAt). Its eyes follow the finger.
+class MenuPtr {
+  constructor(e, x, y, now) {
+    this.id = e.pointerId; this.touch = e.pointerType !== 'mouse';
+    this.x = this.downX = x; this.y = this.downY = y; this.downT = now; this.lastMove = now;
+    this.mode = 'press'; this.dent = null; this.grab = null; this.sq = 0; this.sqLevel = 0; this.pressure = e.pressure || 0;
+    this.ax = 0; this.ay = 1; this.c0x = 0; this.c0y = 0; this.th0 = 0; this.gdx = 0; this.gdy = 0;
+    this.h = new Float64Array(16 * 3); this.hn = 0; this.push(e.timeStamp || now, x, y);
+  }
+  push(t, x, y) {   // (samples nearer than 4 ms take the newest one's place: 16 still span the velocity's window on a fast mouse)
+    if (this.hn > 1 && t - this.h[((this.hn - 2) % 16) * 3] < 4) { const li = ((this.hn - 1) % 16) * 3; this.h[li] = t; this.h[li + 1] = x; this.h[li + 2] = y; return; }
+    const i = (this.hn % 16) * 3; this.h[i] = t; this.h[i + 1] = x; this.h[i + 2] = y; this.hn++;
+  }
+  vel(ms) {   // the finger's speed over its last `ms`
+    const n = Math.min(this.hn, 16); if (n < 2) return [0, 0];
+    const li = ((this.hn - 1) % 16) * 3, t1 = this.h[li], x1 = this.h[li + 1], y1 = this.h[li + 2];
+    let t0 = t1, x0 = x1, y0 = y1;
+    for (let k = 2; k <= n; k++) { const i = ((this.hn - k) % 16) * 3; if (t1 - this.h[i] > ms) break; t0 = this.h[i]; x0 = this.h[i + 1]; y0 = this.h[i + 2]; }
+    const dt = (t1 - t0) / 1000;
+    return dt < 0.004 ? [0, 0] : [(x1 - x0) / dt, (y1 - y0) / dt];
+  }
+}
+const menuTouch = {
+  ptrs: new Map(), lastT: 0, lastPoke: null,
+  on() { return game.state === 'menu' && ui.open === 'menu' && game.lv && game.lv.kind === 'menu' && !!game.hero; },
+  local(e) { return [e.clientX - view.left, e.clientY + game.lv.cam]; },   // in the world
+  look(x, y, now) { const l = game.heroLook; l.x = x; l.y = y; l.t = now; },
+  down(e) {
+    if (this.ptrs.has(e.pointerId)) this.up(e, true);
+    const now = performance.now(), [x, y] = this.local(e), b = game.hero, touch = e.pointerType !== 'mouse', tol = touch ? GRAB.pickTouch : GRAB.pickMouse, lp = this.lastPoke;
+    const hit = (x > b.minX - tol && x < b.maxX + tol && y > b.minY - tol && y < b.maxY + tol && (pointInPoly(b.x, b.y, b.n, x, y) || distToPoly(b.x, b.y, b.n, x, y) < tol))
+      || (lp && now - lp.t < 1000 && Math.hypot(x - lp.x, y - lp.y) < 0.6 * b.R);   // quick taps on a dented rim keep poking it
+    if (!hit) return;
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    const p = new MenuPtr(e, x, y, now);
+    this.ptrs.set(e.pointerId, p);
+    b.wake(); p.body = b; p.c0x = b.cx; p.c0y = b.cy; p.th0 = b.theta;
+    let ax = b.cx - x, ay = b.cy - y;   // the squeeze's axis, fixed at the press: the finger to the centre, turned to point down, easing to straight down near the centre
+    const d = Math.hypot(ax, ay), near = 0.3 * b.R;
+    if (d > 1e-6) { ax /= d; ay /= d; } else { ax = 0; ay = 1; }
+    if (ay < 0) { ax = -ax; ay = -ay; }
+    if (d < near) { const t = d / near; ax *= t; ay = ay * t + (1 - t); const q = Math.hypot(ax, ay) || 1; ax /= q; ay /= q; }
+    p.ax = ax; p.ay = ay;
+    p.dent = b.addDent(x, y, 'press');
+    haptics.buzz(6); this.look(x, y, now);
+  },
+  move(e) {
+    const p = this.ptrs.get(e.pointerId);
+    if (!p) return;
+    if (e.pointerType === 'mouse' && e.buttons === 0) { this.up(e, true); return; }   // the button came up where it was not heard
+    const now = performance.now(), [x, y] = this.local(e), list = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : null;
+    if (list && list.length) for (const c of list) { const [cx, cy] = this.local(c); p.push(c.timeStamp || e.timeStamp || now, cx, cy); }
+    else p.push(e.timeStamp || now, x, y);
+    p.x = x; p.y = y; p.lastMove = now; if (e.pressure) p.pressure = e.pressure;
+    this.look(x, y, now);
+    if (p.mode === 'press' && Math.hypot(x - p.downX, y - p.downY) > (p.touch ? GRAB.dragTouch : GRAB.dragMouse)) this.startGrab(p);
+  },
+  startGrab(p) {
+    const b = p.body, rot = b.theta - p.th0, c = Math.cos(rot), s = Math.sin(rot), dx = p.downX - p.c0x, dy = p.downY - p.c0y;
+    let mx = b.cx + c * dx - s * dy, my = b.cy + s * dx + c * dy;   // the point that was under the finger at the press, carried with the body since
+    if (Math.hypot(mx - p.downX, my - p.downY) > b.R) { this.release(p); return; }   // it moved off from under the finger
+    if (!pointInPoly(b.x, b.y, b.n, mx, my)) { [mx, my] = nearestOnPoly(b.x, b.y, b.n, mx, my); mx += (b.cx - mx) * 0.05; my += (b.cy - my) * 0.05; }   // just off a dented rim: hold the rim
+    p.gdx = mx - p.x; p.gdy = my - p.y;
+    p.grab = b.startGrab(p, mx, my);
+    if (p.sq > 0.04) b.kickSquash(b.sqAx, b.sqAy, -SQUEEZE.rebound * p.sq * 0.4);
+    p.sq = 0; p.mode = 'grab';
+    if (p.dent) { p.dent.rT = DENT.grabR; p.dent.depthT = DENT.grabDepth; }
+    haptics.buzz(5);
+  },
+  release(p) {   // let go of it, no poke, no fling
+    const b = p.body;
+    if (p.grab) b.endGrab(p.grab);
+    b.releaseDent(p.dent, p.mode === 'grab' ? DENT.grabRecover : DENT.pressRecover);
+    p.mode = 'done'; p.grab = null; p.sq = 0;
+  },
+  up(e, cancel) {
+    const p = this.ptrs.get(e.pointerId);
+    if (!p) return;
+    this.ptrs.delete(e.pointerId);
+    const now = performance.now(), b = p.body;
+    if (!this.on() || b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
+    if (p.mode === 'press') {
+      if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) this.poke(b, p);
+      else {
+        b.releaseDent(p.dent, DENT.pressRecover);
+        if (!cancel && p.sq > 0.04) { b.kickSquash(b.sqAx, b.sqAy, -SQUEEZE.rebound * p.sq); b.hop(SQUEEZE.hop * p.sq); haptics.buzz(8 + 20 * p.sq, 0); }
+      }
+    } else if (p.mode === 'grab') {
+      b.endGrab(p.grab); b.releaseDent(p.dent, DENT.grabRecover);
+      let [vx, vy] = p.vel(GRAB.windowMs);
+      if (now - p.lastMove > GRAB.stillMs || cancel) { vx = 0; vy = 0; }   // the finger stopped before lifting: a set-down, not a throw
+      if (Math.hypot(vx, vy) < GRAB.flingSpeed && b.area < 0.85 * b.targetArea) b.calmRelease = 0.25;   // springing back softly
+      if (!cancel) { b.fling(vx, vy); if (Math.hypot(vx, vy) > GRAB.flingSpeed) { b.face.wide = 0.7; haptics.buzz(10); } }
+    }
+  },
+  poke(b, p) {
+    const i = b.dents.indexOf(p.dent);
+    if (i >= 0) b.dents.splice(i, 1);
+    b.addDent(p.x, p.y, 'poke'); b.pokeImpulse(p.x, p.y); b.kickPuff(DENT.pokePuff); b.face.surprise = 1;
+    fx.poke(b, p.x, p.y); haptics.buzz(12, 0);
+    this.lastPoke = { x: p.x, y: p.y, t: performance.now() };
+  },
+  cancelAll() { for (const id of [...this.ptrs.keys()]) this.up({ pointerId: id }, true); },
+  update(now) {   // each frame: the squeeze of a press held, a dragging finger's target (inside the walls, under the top, over the floor)
+    const dt = Math.min(0.1, Math.max(0, (now - this.lastT) / 1000)), b = game.hero, lv = game.lv, sk = WORLD.skin;
+    this.lastT = now;
+    if (!this.on()) { if (this.ptrs.size) this.cancelAll(); return; }
+    b.squeezeIn = 0;
+    for (const p of this.ptrs.values()) {
+      if (p.body !== b) { p.mode = 'done'; continue; }
+      if (p.mode === 'press') {
+        const rot = b.theta - p.th0, cr = Math.cos(rot), sr = Math.sin(rot), ox = p.downX - p.c0x, oy = p.downY - p.c0y;   // moved off from under the finger: no longer pressed
+        if (Math.hypot(b.cx + cr * ox - sr * oy - p.x, b.cy + sr * ox + cr * oy - p.y) > b.R) { this.release(p); continue; }
+        const held = now - p.downT - SQUEEZE.holdDelayMs;
+        if (held <= 0) continue;
+        const l = Math.min(1, held / (SQUEEZE.rampS * 1000));
+        let q = 1 - (1 - l) * (1 - l) * (1 - l);
+        if (p.pressure > 0 && p.pressure !== 0.5) q = Math.min(1, q * (0.6 + 0.6 * p.pressure));
+        p.sq = q;
+        if (p.dent) p.dent.depthT = DENT.pressDepth * (0.4 + 0.6 * q);
+        if (q > b.squeezeIn) {
+          b.squeezeIn = q;
+          let ax = p.ax, ay = p.ay;
+          if (ax * b.sqAx + ay * b.sqAy < 0) { ax = -ax; ay = -ay; }
+          b.sqAx += (ax - b.sqAx) * 0.3; b.sqAy += (ay - b.sqAy) * 0.3;
+          const n = Math.hypot(b.sqAx, b.sqAy) || 1; b.sqAx /= n; b.sqAy /= n;
+        }
+        const lvl = Math.floor(q * 5);
+        if (lvl > p.sqLevel) { p.sqLevel = lvl; haptics.buzz(5 + 2 * lvl, 60); }
+      } else if (p.mode === 'grab' && p.grab) {
+        const g = p.grab;
+        if (!b.grabs.includes(g)) { this.release(p); continue; }
+        const k = 1 - Math.exp(-dt / 0.1);   // the jump past the drag's threshold eases out: the point held catches up with the finger
+        p.gdx -= p.gdx * k; p.gdy -= p.gdy * k;
+        const rot = b.grabs.length > 1 ? 0 : b.theta - g.th0, cr = Math.cos(rot), sr = Math.sin(rot);
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        for (let i = 0; i < b.n; i++) { const ox = cr * g.ox[i] - sr * g.oy[i], oy = sr * g.ox[i] + cr * g.oy[i]; if (ox < x0) x0 = ox; if (ox > x1) x1 = ox; if (oy < y0) y0 = oy; if (oy > y1) y1 = oy; }
+        const lo = lv.l + sk - x0, hi = lv.r - sk - x1, top = lv.capY + sk - y0, bot = lv.floor - sk - y1, wx = p.x + p.gdx, wy = p.y + p.gdy;
+        g.tx = lo > hi ? (lo + hi) / 2 : clamp(wx, lo, hi);
+        g.ty = top > bot ? (top + bot) / 2 : clamp(wy, top, bot);
+        p.gdx += g.tx - wx; p.gdy += g.ty - wy;   // a push past a wall is not stored up: turning back moves it at once
+        let [vx, vy] = p.vel(GRAB.aimMs);
+        if (now - p.lastMove > 45) { vx *= 0.5; vy *= 0.5; }
+        if (g.tx !== wx) vx = 0;
+        if (g.ty !== wy) vy = 0;
+        const sp = Math.hypot(vx, vy);
+        if (sp > GRAB.flingMax) { vx *= GRAB.flingMax / sp; vy *= GRAB.flingMax / sp; }
+        g.vx = vx; g.vy = vy;
+      }
+    }
+  },
+};
+canvas.addEventListener('pointerdown', (e) => { if (menuTouch.on() && e.button <= 0) menuTouch.down(e); });
+canvas.addEventListener('pointermove', (e) => menuTouch.move(e));
+canvas.addEventListener('pointerup', (e) => menuTouch.up(e, false));
+canvas.addEventListener('pointercancel', (e) => menuTouch.up(e, true));
 canvas.addEventListener('lostpointercapture', (e) => aimRelease(e, false));
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.togglePause(true); });
@@ -3115,13 +3387,22 @@ function perfSend(now) {
     frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION });
   perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss;
 }
+// A computer too slow for the finer grid (PIX.fit): its first 3 s of play measured, and if half its frames took over 25 ms, the old grid for good.
+const PIX_GUARD = { frames: 180, slow: 0.025 }, pixSeen = { n: 0, slow: 0 };
+function pixGuard(dt) {
+  if (PIX.slow || PIX.size >= PIX.base || pixSeen.n >= PIX_GUARD.frames || game.state !== 'play' || document.hidden || !(dt > 0) || dt > 0.25) return;
+  pixSeen.n++; if (dt > PIX_GUARD.slow) pixSeen.slow++;
+  if (pixSeen.n === PIX_GUARD.frames && pixSeen.slow > PIX_GUARD.frames / 2) { PIX.slow = true; queueLayout(); }
+}
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.
 function runFrame(now, fixedDt) {
   if (window.devicePixelRatio !== loop.dpr) { loop.dpr = window.devicePixelRatio; layoutQueued = true; }   // moved to another screen
   if (CINE_ON) cineSync(game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for)
   if (layoutQueued) { layoutQueued = false; layout(); }
+  menuTouch.update(now);   // (the menu's hero in the hand, before the physics: Gum's order)
   let dt = fixedDt != null ? fixedDt : (now - loop.last) / 1000;
   loop.last = now;
+  if (fixedDt == null) pixGuard(dt);
   if (!(dt > 0)) dt = 0;
   if (dt > 0.25) dt = 0.25;
   if (game.state === 'pause') dt = 0;

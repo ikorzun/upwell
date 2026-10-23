@@ -374,7 +374,7 @@ function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
 const cinePerched = (r, T) => !r.poke || r.poke.back <= T;   // a scarecrow's crow on its hand (back from its flight)
 function cineSpr(box, rows, x, y, ink) {   // a CRITTER picture a game pixel a dot, centred on x, its foot at y (as the renderer's spr); a run of one ink in a row one box
   // (a crow 54 of them, not 150)
-  const s = PIX.size, x0 = Math.round(x / s) * s - (rows[0].length * s) / 2, y0 = Math.round(y / s) * s - rows.length * s;
+  const s = PIX.base, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s;   // (a dot the levels' grid's pixel: its size kept on a finer one)
   rows.forEach((row, j) => { for (let i = 0, k; i < row.length; i = k) { for (k = i + 1; k < row.length && row[k] === row[i]; k++);
     if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + k * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); } });
 }

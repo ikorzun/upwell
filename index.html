@@ -25,6 +25,7 @@
     --ink: #141414; --red: #f43e34; --blue: #5bb8ff; --yellow: #ffed57; --green: #339c39; --purple: #c996ff; --orange: #faa23e; --gray: #c8c8c8; --white: #f3f3f3;
     --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
     --btnL: 64px; --btnS: 48px;   /* the two sizes of every button (owner: «все кнопки должны быть только 2 размеров»): a big one, the width of its panel, and a small one (48: a finger's)) */
+    --amber: #ffc300;   /* the chosen colour's ring in the menu (the Figma «Main»'s) */
     --dim: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' d='M0 0h2v2H0zM2 2h2v2H2z'/%3E%3C/svg%3E") 0 0 / 4px 4px;
     --dim2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' fill-rule='evenodd' d='M0 0h4v4H0zM1 1h1v1H1zM3 3h1v1H3z'/%3E%3C/svg%3E") 0 0 / 4px 4px;   /* seven eighths ink: the game shows through a pixel in eight */
     --p: 2;
@@ -57,16 +58,19 @@
   .tx { font-family: 'VT323', monospace; font-size: calc(var(--p) * 12.5px); line-height: 0.8; margin: -0.14em 0 -0.1em; white-space: pre-line; text-align: center; min-width: min-content; }   /* never narrower than its longest word: a price tag's "corazones" */
   .tx:lang(ja) { font-family: 'DotGothic16', 'VT323', sans-serif; font-size: calc(var(--p) * 8px); line-height: 1.25; margin: -0.21em 0 -0.16em; word-break: keep-all; }   /* broken only at its spaces, never inside a word */
   .big .tx { white-space: nowrap; }   /* a big button's words on one line (see fitBig) */
+  .big > .tx { font-size: calc(var(--p) * 10px); }   /* and a fifth smaller than other words, its caption too (owner, 2026-10-23: «тексты на желтой кнопке и подобных кнопках уменьши на 20%») */
+  .big > .tx:lang(ja) { font-size: calc(var(--p) * 6.4px); }
+  .big > .cap { font-size: max(12px, calc(var(--p) * 3.2px)); }   /* (DotGothic16 no smaller than 12 px: under that its 16-px grid blurs) */
+  .big > .cap:lang(en) { font-size: max(12px, calc(var(--p) * 4px)); }
   .tx.left { text-align: left; }
   .tx .px { vertical-align: baseline; }   /* a drawn glyph (an arrow, a triangle) stands on the line, as tall as the capitals */
   /* A heading's or a button's words in the other script, small under it: Japanese, or English in the Japanese game */
   .cap { display: block; margin-top: 4px; padding-left: 0.2em; font-family: 'DotGothic16', sans-serif; font-size: max(12px, calc(var(--p) * 4px)); line-height: 1; letter-spacing: 0.2em; }
   .cap:lang(en) { font-family: 'VT323', monospace; font-size: max(14px, calc(var(--p) * 5px)); letter-spacing: 0.1em; padding-left: 0.1em; }
-  .title .cap, .head .cap { color: var(--purple); }
-  .title .cap { margin-top: 10px; letter-spacing: 0.5em; padding-left: 0.5em; }
+  .head .cap { color: var(--purple); }
   .chip .cap { margin-top: 0; }
   .big.capped { padding-top: 0; padding-bottom: 0; }   /* (its words and their caption inside its one height) */
-  .big, .chip, .head, .title, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
+  .big, .chip, .head, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
   .langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; }   /* in one row, by their short names, the width of the buttons (owner: «Языки растяни на всю ширину, а то куцо») */
   .langs .chip { text-transform: none; }   /* 日本語 as it is written */
   #map { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
@@ -223,16 +227,23 @@
   #pause { justify-content: flex-end; }
   #story { background: rgba(11, 7, 22, 0.92); justify-content: flex-end; padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* a story card over the game held under it (STORY) */
   .scard { position: relative; flex: none; margin-bottom: 14px; }   /* its size by ui.story: whole pixels, from the view */
-  .scard .sart { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; background: #0b0716; }   /* the art whole under the frame, its edge under the frame's (the pack: a few pixels) */
+  .scard .sart, .scard .slive { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }   /* the art whole under the frame, its edge under the frame's (the pack: a few pixels); the game's own motion over it (cardLive) */
+  .scard .sart { background: var(--sbg); }
   .scard .sframe { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .scard .snum { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 50%); --p: 2; color: #f7f3ee; background: #201638; box-shadow: 0 0 0 2px #ab80e5; padding: 2px 10px 4px; }
+  .scard .snum { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 50%); --p: 2; color: var(--sW); background: var(--sI); box-shadow: 0 0 0 2px var(--sL); padding: 2px 10px 4px; }   /* in the card's world's colours (STORY_INK) */
   .stitle { --p: 3; color: var(--white); filter: drop-shadow(0 3px 0 var(--ink)); }
   .summary { flex: 1; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
   .big.alt { --p: 3; background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 2px var(--gray); }   /* as wide, a size smaller: not the main one (and "Controls: buttons" in one line) */
   .big.alt:active { box-shadow: inset 0 0 0 2px var(--yellow); }   /* pressed: a yellow edge, nothing sinks (owner: no pseudo-volume) */
   .big.thumb { align-self: stretch; }   /* the main button: the width of the screen, at its bottom; the panel's 12 px gap over it, as at its sides (owner: «по вертикали расстояние между кнопками такое же, сколько по краям от кнопки») */
-  #menu { background: linear-gradient(transparent var(--split, 58%), var(--gray) var(--split, 58%), var(--gray) calc(var(--split, 58%) + 2px), var(--ink) calc(var(--split, 58%) + 2px)); justify-content: flex-end; }   /* the hero shows through the top (--split: set by ui.menu) */
-  .title { margin: 0 0 auto; padding-top: 12%; --p: 6; filter: drop-shadow(0 6px 0 var(--ink)); }
+  #menu { background: none; pointer-events: none; justify-content: flex-end; }   /* (owner, 2026-10-23, the Figma «Main») its backdrop and the hero drawn under it (Renderer.drawMenu), a finger through it to the hero (menuTouch); its buttons take theirs */
+  #topTint { display: none; position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #696d85; pointer-events: none; z-index: 70; }   /* (owner, 2026-10-23: «На сафари и ios градиент должен уходить под остров») iOS 26 Safari tints the bar over the page by a fixed element at its top (theme-color it no longer reads): the menu's backdrop's top ink there, and the bottom left as it is */
+  @media (pointer: coarse) { html.menuTop #topTint { display: block; } }
+  #settings { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the menu's settings, as a pause */
+  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 22px); left: 50%; transform: translateX(-50%); width: calc(302.336px / 1.5); height: auto; }   /* the Figma's sizes at 1.5 of its px to a CSS px (its frame: a 402-pt iPhone, 603 wide) */
+  .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 13px); right: 15px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its ring centred level with the logo */
+  .setBtn img { width: calc(64px / 1.5); height: auto; }
+  .setBtn:active img { filter: brightness(0.8); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }
   .big {   /* flat (owner: no pseudo-volume, no orange band under it); one height, main or not */
@@ -250,16 +261,15 @@
   .chip.on { box-shadow: inset 0 0 0 2px var(--yellow); color: var(--yellow); }
   .chip.locked { background: var(--dim); box-shadow: none; color: var(--gray); }
   .chip small { color: var(--gray); }
-  .chip.swatch { width: var(--btnS); height: var(--btnS); padding: 0; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
-  .chip.swatch.on { box-shadow: inset 0 0 0 2px var(--white), inset 0 0 0 4px var(--ink); }
-  .chip.swatch small { color: var(--ink); }
+  .swatch { width: var(--btnS); height: var(--btnS); padding: 0; border: 0; background: none; display: grid; place-items: center; }   /* a round colour (the Figma «Main»: 40 px, 4 px apart in their 48-px buttons) */
+  .swatch::before { content: ''; grid-area: 1 / 1; width: 40px; height: 40px; border-radius: 50%; background: var(--c); }
+  .swatch.on::before { box-shadow: 0 0 0 2px var(--amber); }
+  .swatch.locked::before { opacity: 0.35; }
+  .swatch small { grid-area: 1 / 1; color: var(--white); }
   .chip.wide { min-width: 160px; }
   .perk { display: flex; align-items: center; gap: 8px; text-align: left; }
   .perk .ico { --p: 2; }
-  .iconBtn {
-    position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0;
-    display: flex; align-items: center; justify-content: center; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
-  }
+  .perk .tx { white-space: nowrap; }   /* on one line (owner, 2026-10-23); fitLine makes a long one smaller */
   .card {
     width: 100%; max-width: 320px; padding: 14px 16px; border: 0; box-sizing: border-box;
     background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
@@ -314,7 +324,9 @@
     <div id="dpad"><i class="key left"></i><i class="key right"></i></div>
     <div id="act"><button id="jumpBtn" class="key jump" aria-label="Jump"></button></div>
   </div>
+  <div id="topTint" aria-hidden="true"></div>
   <div id="menu" class="panel"></div>
+  <div id="settings" class="panel"></div>
   <div id="cards" class="panel"></div>
   <div id="pause" class="panel"></div>
   <div id="result" class="panel"></div>

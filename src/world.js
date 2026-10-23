@@ -12,7 +12,7 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
-const MENU_HERO = { w: 0.25, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest; its floor `gap` px over the colours, `room` px at least under the logo
+const MENU_HERO = { w: 0.25, k: 0.85, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest, then `k` of that (owner: «уменьши героя на 15%»); its floor `gap` px over the colours, `room` px at least under the logo
 const BIG_BLOCK = { w: 3.5, h: 2.6, size: 0.5, tone: 1.45 };   // a block this wide and tall (tiles) gets a kanji half its smaller side across, in its ink 0.45 of the way from the black (KANJI)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
 // floor and `air`/s in the air; `slip` is a floor's friction while running on the keys (it holds
@@ -4839,8 +4839,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     coin(0, 0, 1);
     const tw = (T + c.ph) % COIN.twinkle[1];
     if (c.v > 1 && tw < COIN.twinkle[0]) {   // a five a white twinkle off its top right, a cross growing and going (owner: «у пятёрки мигает белая искорка»; the coins all one size)
-      const P = PIX.size, q = (v) => Math.round(v / P) * P, L = Math.max(1, Math.round(Math.sin((tw / COIN.twinkle[0]) * Math.PI) * 2.5)) * P, sx = q(c.x + 0.62 * r) + P / 2, sy = q(cy - 0.62 * r) + P / 2;
-      F(sx, sy, L + P / 2, 0, 0, P / 2, INK.white, 1, 5, L + P / 2, P / 2, 0); F(sx, sy, P / 2, 0, 0, L + P / 2, INK.white, 1, 5, P / 2, L + P / 2, 0);
+      const P = PIX.size, B = PIX.base, q = (v) => Math.round(v / P) * P, L = Math.max(1, Math.round(Math.sin((tw / COIN.twinkle[0]) * Math.PI) * 2.5 * PIX.keep)) * P, sx = q(c.x + 0.62 * r) + B / 2, sy = q(cy - 0.62 * r) + B / 2;   // (in the
+      // levels' grid's pixels, as a phone's against the coin)
+      F(sx, sy, L + B / 2, 0, 0, B / 2, INK.white, 1, 5, L + B / 2, B / 2, 0); F(sx, sy, B / 2, 0, 0, L + B / 2, INK.white, 1, 5, B / 2, L + B / 2, 0);
     }
   }
   if (CINE) this.route = 0;
@@ -5030,7 +5031,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const front = this.nf;
   fx.write(this);
   for (const b of bits) {   // a burst hero's bits, on the game-pixel grid, shrinking over their last 40%
-    const P = PIX.size, s = Math.max(1, Math.round(b.s * Math.min(1, (b.life - b.t) / (0.4 * b.life)))) * P, x0 = Math.round(b.x / P) * P, y0 = Math.round(b.y / P) * P;
+    const P = PIX.size, s = Math.max(1, Math.round(b.s * PIX.keep * Math.min(1, (b.life - b.t) / (0.4 * b.life)))) * P, x0 = Math.round(b.x / P) * P, y0 = Math.round(b.y / P) * P;   // (its size in
+    // the levels' grid's pixels: as big against the hero on a computer's finer grid as on a phone)
     box(x0, y0, x0 + s, y0 + s, b.c, 1, 0, 10, 0);
   }
   if (lv.fire && lv.fire.y - 2.4 * R < bot) {   // the fire, between the walls: a red body under two layers of tongues, red behind and orange in front

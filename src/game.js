@@ -710,7 +710,7 @@ class Game {
   toMenu() {
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
-    this.builtW = view.w; this.R = this.menuR || 0.25 * view.w; this.well = null; this.door = null; this.lv = new Level();
+    this.builtW = view.w; this.R = this.menuR || MENU_HERO.k * MENU_HERO.w * view.w; this.well = null; this.door = null; this.lv = new Level();
     this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
     this.makeHero(); this.levelReset();
     ui.hideAll(); ui.menu();
@@ -718,7 +718,7 @@ class Game {
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
   // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
   menuFit(rowY, logoY) {
-    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
+    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, MENU_HERO.k * Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
     this.menuFloor = floorY; this.menuSplit = rowY; this.lv.menuAt(floorY);
     if (Math.abs(R - this.R) > 0.5) { this.menuR = this.R = R; this.lv.R = R; this.makeHero(); }
   }

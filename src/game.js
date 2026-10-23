@@ -2203,7 +2203,7 @@ const STORY = {
   boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [151, 227], ink: 'cave', draft: true, title: BOSSES.cart.name },
   boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [192, 288], ink: 'ice', draft: true, title: BOSSES.puck.name },
   boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [189, 284], ink: 'sea', draft: true, title: BOSSES.namazu.name },
-  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [170, 255], ink: 'tokyo', draft: true, title: BOSSES.tram.name },
+  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [171, 256], ink: 'tokyo', draft: true, title: BOSSES.tram.name },
   boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [191, 287], ink: 'blocks', draft: true, title: BOSSES.crane.name },
   boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [158, 237], ink: 'sky', draft: true, title: BOSSES.pigeon.name },
   boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', draft: true, title: BOSSES.koschei.name },
@@ -2236,13 +2236,13 @@ function storyFrame(f, w, h) {
 }
 // A card comes alive by the game itself (owner, К4 «А»: as the preview), on a canvas of its cells over the art: the eyes shut for two steps of
 // eight a second every 3.5 s, small specks dim to the mid tone in turn, the three biggest lights' edges dip to the ink now and then; all
-// from assets/cards/live.json (scratchpad cards3/live.py over the art). Still for those who ask the system for less motion.
+// from assets/cards/live.json (scratchpad cards3/live.py over the art). Small and in place, so it runs under «reduce motion» too (a sweep or a
+// tilt would not).
 const LIVE = { step: 125, blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
 let liveData = null;
 function cardLive(c, card) {
   const [w, h] = c.cells, cv = document.createElement('canvas'), g = cv.getContext('2d');
   cv.className = 'slive'; cv.width = w; cv.height = h; card.insertBefore(cv, card.querySelector('.sframe'));
-  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return { stop() {} };
   let f = 0, L = null;
   (liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))).then((j) => { L = j[c.id] || null; });
   const fill = (cells, col) => { g.fillStyle = col; for (const [x, y] of cells) g.fillRect(x, y, 1, 1); };

@@ -1193,7 +1193,7 @@ class Game {
     sparkFx(f.x, f.y - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red], 0.6); fx.ring(f.x, f.y - R, 1.6 * R, INK.white);
     sound.play('bubble', 0.9, 1.4); sound.play('buy', 0.6, 1.2); haptics.buzz(16);
     this.drop(f.x, f.y - 2 * R, FOLK.coins); ui.toast(L2(RIBBON.thanks) + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400);
-    if (STORY_LIVE) this.cardDue = { id: 'village_crow', t: RIBBON.card };
+    this.cardDue = { id: 'village_crow', t: RIBBON.card };
   }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
     const H = this.hero, lv = this.lv;
@@ -1973,7 +1973,8 @@ class Game {
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
-    ui.hideAll(); this.story(STORY_LIVE && (storyLook || (w === 0 && s === 0)) && 'moon_fall', () => ui.banner(), storyLook); storyLook = false;   // (the story's first card, before 1-1: STORY)
+    ui.hideAll(); this.story('moon_fall', () => this.story(rc.boss && 'boss_' + rc.boss, () => ui.banner()), storyLook); storyLook = false;   // the story's first card, once, before the first level played (a
+    // save under way: before its next); and a boss's card before its first fight (owner, К11 «А»), then the level's banner (STORY)
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
@@ -2055,7 +2056,7 @@ class Game {
   // A story card (STORY) once a play-through, the game held under it till Next; `then` after it, or at once when none is due (`again`: shown seen or not)
   story(id, then, again) {
     const c = id && STORY[id];
-    if (!c || (save.seen['card_' + id] && !again)) { if (then) then(); return; }
+    if (!c || (c.draft && !STORY_LIVE) || (save.seen['card_' + id] && !again)) { if (then) then(); return; }   // (a draft, till the owner's «да» to its art: ?story only)
     this.storyOn = true; this.paused = this.state; this.state = 'pause'; input.clear();
     ui.story(c, () => { save.seen['card_' + id] = 1; persist(); this.storyOn = false; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); if (then) then(); });
   }
@@ -2196,10 +2197,20 @@ const STORY = {
   sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [143, 214], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
   forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [192, 288], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
   moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
+  // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
+  // boss is, in its world's ink and its own: drafts till his «да» to their art
+  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [187, 280], ink: 'mine', draft: true, title: BOSSES.probka.name },
+  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [164, 247], ink: 'cave', draft: true, title: BOSSES.cart.name },
+  boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [192, 288], ink: 'ice', draft: true, title: BOSSES.puck.name },
+  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [180, 269], ink: 'sea', draft: true, title: BOSSES.namazu.name },
+  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [170, 255], ink: 'tokyo', draft: true, title: BOSSES.tram.name },
+  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [197, 296], ink: 'blocks', draft: true, title: BOSSES.crane.name },
+  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [153, 230], ink: 'sky', draft: true, title: BOSSES.pigeon.name },
+  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [174, 262], ink: 'skazka', draft: true, title: BOSSES.koschei.name },
 };
 for (const k in STORY) STORY[k].id = k;
-const STORY_LIVE = /[?&]story\b/.test(location.search);   // (till the owner's «да» to the cards' art they come by themselves only with ?story,
-let storyLook = STORY_LIVE;   // which shows card I before the first level played, seen or not: a save well under way shows it too)
+const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows the drafts too, and card I before
+let storyLook = STORY_LIVE;   // the first level of the load, seen or not)
 // A card's colours (К6): its world's ink over black as the game draws the world (DEPTH: the frame's band a quarter of the way from black to
 // the ink, the corners the ink), white, red and yellow as everywhere; the Moon's cards in the pack's own lavender; the Dark Forest grey.
 const STORY_INK = { moon: { I: '#201638', W: '#f7f3ee', L: '#ab80e5', R: '#f34545', G: '#ffb642', bg: '#0b0716' } };
@@ -2296,7 +2307,7 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
-  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; },
+  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
   menu() {
     const p = this.panel('menu');
     const title = cap(el('h1', 'title', 'UPWELL'), 'title'); title.lang = 'en'; p.append(title);   // the name in VT323 whatever the language
@@ -2400,7 +2411,7 @@ const ui = {
     const p = this.panel('result'), cw = CAMPAIGN[game.world], cloth = el('div', 'cloth');
     for (const [k, ch] of [...cw.runes].entries()) { const r = document.createElement('span'); r.className = 'rune r' + k; r.textContent = ch; cloth.append(r); }
     cloth.setAttribute('aria-hidden', 'true');
-    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => game.story(STORY_LIVE && (Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
+    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => game.story((Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
   },
   worldDone() {   // its boss beaten, after its tapestry: on into the next world on the line, or word of it coming (a bonus world: back to its map)
     let nw = game.world + 1; while (nw < CAMPAIGN.length && gated(nw)) nw++;
@@ -2499,8 +2510,8 @@ const ui = {
     for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
     art.className = 'sart'; art.alt = L2(c.title); art.decoding = 'async'; art.src = c.still;
     card.innerHTML = storyFrame(f, w, h); card.prepend(art); if (c.n) card.append(el('div', 'snum', c.n));
-    const live = cardLive(c, card);
-    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', () => { live.stop(); done(); }), 'next'));
+    if (this.live) this.live.stop(); this.live = cardLive(c, card);
+    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', () => { this.live.stop(); done(); }), 'next'));
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');

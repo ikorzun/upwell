@@ -223,8 +223,8 @@ const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: '
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
 // The Danchi's kit in Arata Isozaki's concrete (owner 2026-10-23, the questions page d19, d21): its architecture in six variants of each while the owner picks
 // (DANCHI_V, or window.__dcV from the gallery); its things as he picked them in Maekawa's (d22 «оставить»): spring E, bikes B, mail C, cat C, boxes E, its
-// garden E twice the size (d17, d18; owner on d10: «too small»): DC_GARDEN. Till batch two the walls, the far plane and the doors are Maekawa's picks (A, E, A, A)
-const DANCHI_V = { slab: 0, balcony: 0, pole: 0, stairs: 0 }, DC_GARDEN = 2;
+// garden E twice the size (d17, d18; owner on d10: «too small»): DC_GARDEN
+const DANCHI_V = { slab: 0, balcony: 0, pole: 0, stairs: 0, wall: 0, far: 0, shop: 0, stash: 0 }, DC_GARDEN = 2;
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
@@ -3471,29 +3471,43 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     mnLamp(X(2.7), Y(2.2), true, 0.85);   // a lamp
     skInside(d, 'stash', c, dx, dw, dh);
   };
-  // The Danchi's doors in Maekawa's estate (the owner's picks, 2026-10-22, d15 A, d16 A; research/variants/mk-shop-1-px.png, mk-stash-1-px.png): each under a
-  // deep concrete eave, in a front faced in tiles; the shop's red noren (its mark), a window lit; the stash a heavy door, its gaps glowing purple (its mark), no
-  // sparks rising past it (owner: «delete arrows»). What is inside bobs in the doorway (skInside), a glow breathes round it.
-  const mkFront = (bx, px, dh) => {   // its front faced in tiles (half dark), a deep eave over it (grey, its top dotted: never a ledge's edge), its soffit in shade
-    const G = PAL.gray, K = PAL.black; bx(0.15, 0, 2.75, dh + 0.42, G, 0, 1.5);
-    for (let u = 0.49; u < 2.75; u += 0.34) bx(u, 0, u + px, dh + 0.42, K); for (let v = 0.34; v < dh + 0.42; v += 0.34) bx(0.15, v, 2.75, v + px, K);
-    bx(-0.05, dh + 0.55, 3.3, dh + 0.95, G, 2); bx(-0.05, dh + 0.55, 3.3, dh + 0.55 + px, K); bx(0.1, dh + 0.42, 3.1, dh + 0.55, G, 4, 1.5);
+  // The Danchi's doors in Isozaki's concrete while the owner picks (DANCHI_V.shop, DANCHI_V.stash, research/variants/iso-shop-1-px.png, iso-stash-1-px.png): the
+  // shop in a board-formed front under a huge hollow beam out of the wall, its end cut square and open, a red noren (its mark), a window lit; the stash a heavy
+  // door set deep in the open end of a giant hollow beam, its gaps glowing purple (its mark), no sparks rising past it (owner: «delete arrows»). What is inside
+  // bobs in the doorway (skInside), a glow breathes round it. The beams' tops dotted, never a ledge's white edge; the sheets' blue bicycle, red towel and green
+  // strands grey here (red is danger, blue springs, green moss to hold).
+  const isoBeam = (bx, px, dh) => {   // a board-formed front (half dark), a huge hollow beam over it, its soffit in shade, its open end
+    const G = PAL.gray, K = PAL.black; bx(0.15, 0, 2.75, dh + 0.35, G, 0, 1.5); for (let v = 0.25; v < dh + 0.35; v += 0.25) bx(0.15, v, 2.75, v + px, K, 0, 0.6);
+    bx(-0.05, dh + 0.45, 3.4, dh + 1.25, G, 2, 1.5); bx(0.1, dh + 0.35, 3.2, dh + 0.45, G, 4, 1.5); bx(2.7, dh + 0.5, 3.4, dh + 1.2, G); bx(2.7 + 2 * px, dh + 0.5 + 2 * px, 3.4 - 2 * px, dh + 1.2 - 2 * px, K);
   };
-  const dcShop = (d) => {   // a noren in its door, a window lit, a plant in a pot
-    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.red, G = PAL.gray, K = PAL.black, O = PAL.orange, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+  const dcShop = (d) => {   // A pipes and a meter by it, a plant; B a bicycle parked by it, a plant; C a sign over its door, a lamp; D mailboxes by it, a round lantern lit;
+    // E laundry under the beam, an air conditioner; F a round vent, a meter, a plant
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__dcV || DANCHI_V).shop, c = PAL.red, G = PAL.gray, K = PAL.black, O = PAL.orange, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
-    mkFront(bx, px, dh); bx(0.42, 0, 2.08, dh + 0.08, G); bx(0.5, 0, 2.0, dh, INK.dark);   // its front, its frame, the doorway dim inside
+    isoBeam(bx, px, dh); bx(0.42, 0, 2.08, dh + 0.08, G); bx(0.5, 0, 2.0, dh, INK.dark);   // its front, its frame, the doorway dim inside
     bx(0.5, dh - 0.55, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.55, u + px, dh, K);   // its noren, in strips
     bx(2.2, 0.7, 2.5, 1.6, G); bx(2.25, 0.75, 2.45, 1.55, O); bx(2.25, 1.15, 2.45, 1.15 + px, K); vlamps.push([X(2.35), Y(1.15), 0.4, 1.2]);   // a window lit (a light)
-    bx(2.82, 0, 3.08, 0.28, G, 4); for (const e of [-0.1, 0, 0.1]) ln(2.95, 0.28, 2.95 + e * 1.6, 0.6 - Math.abs(e), e ? G : PAL.green, 2);   // a plant in a pot
+    const pot = (u) => { bx(u - 0.13, 0, u + 0.13, 0.28, G, 4); for (const e of [-0.1, 0, 0.1]) ln(u, 0.28, u + e * 1.6, 0.6 - Math.abs(e), e ? G : PAL.green, 2); };   // a plant in a pot
+    if (k === 0) { for (const u of [2.62, 2.72]) bx(u, 0, u + 0.05, dh + 0.35, G); bx(2.55, 1.0, 2.85, 1.4, G); bx(2.6, 1.1, 2.8, 1.25, K); pot(3.05); }   // A
+    else if (k === 1) { const u = 2.6; for (const e of [0, 0.75]) F(X(u + e), Y(0.3), 0.28 * t, 0, 0, 0.28 * t, G, 1, 4); ln(u, 0.3, u + 0.4, 0.3, G); ln(u + 0.4, 0.3, u + 0.6, 0.65, G); ln(u + 0.3, 0.65, u + 0.4, 0.3, G); ln(u + 0.6, 0.65, u + 0.75, 0.3, G); bx(u + 0.7, 0.62, u + 0.95, 0.75, G, 4); pot(2.3); }   // B: a bicycle
+    else if (k === 2) { bx(0.4, dh + 0.08, 2.1, dh + 0.32, G); for (const u of [0.55, 0.95, 1.35, 1.7]) bx(u, dh + 0.14, u + 0.25, dh + 0.26, K, 0, 1.4); bx(2.7, 1.55, 2.9, 1.7, G); bx(2.72, 1.38, 2.88, 1.55, O); vlamps.push([X(2.8), Y(1.46), 0.3, 1.0]); }   // C: a sign, a lamp
+    else if (k === 3) { for (let i = 0; i < 2; i++) for (let j = 0; j < 3; j++) { const u = 2.6 + i * 0.3, v = 0.3 + j * 0.28; bx(u, v, u + 0.26, v + 0.24, G); bx(u + 0.05, v + 0.14, u + 0.21, v + 0.17, K); } F(X(2.75), Y(1.75), 0.14 * t, 0, 0, 0.14 * t, O, 1, 0); vlamps.push([X(2.75), Y(1.75), 0.35, 1.1]); }   // D: mailboxes, a round lantern
+    else if (k === 4) { ln(0.3, dh + 0.3, 2.6, dh + 0.3, G); for (const [u, cc] of [[0.8, PAL.white], [1.5, G]]) { bx(u, dh + 0.03, u + 0.35, dh + 0.3, cc, 0, 1.6); bx(u - 0.08, dh + 0.18, u + 0.43, dh + 0.3, cc, 0, 1.6); } bx(2.6, 0.9, 3.2, 1.45, G); F(X(2.85), Y(1.17), 0.18 * t, 0, 0, 0.18 * t, K, 1, 4); }   // E: laundry, an air conditioner
+    else { F(X(2.75), Y(1.65), 0.2 * t, 0, 0, 0.2 * t, G, 1, 4); bx(2.6, 0.9, 2.88, 1.3, G); bx(2.65, 1.05, 2.83, 1.15, K); pot(3.05); }   // F: a round vent, a meter, a plant
     skInside(d, 'shop', c, dx, dw, dh + 1.1);
   };
-  const dcStash = (d) => {   // a heavy door (half dark, so the coins and the glow read over it), its gaps glowing above it, beside it and under it
-    const { t, sn, X, Y, bx, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+  const dcStash = (d) => {   // A a pipe down to the beam; B two pipes, an elbow; C laundry by it, a plant; D a cross on its door, a meter; E its door a grille, the glow
+    // behind; F a vaulted hood over the beam's end, a lamp
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), k = (window.__dcV || DANCHI_V).stash, c = PAL.purple, G = PAL.gray, K = PAL.black, O = PAL.orange, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
-    mkFront(bx, px, dh); bx(0.42, 0, 2.08, dh + 0.08, G);   // its front, its frame
-    bx(0.5, 0, 2.0, dh, G, 2, 1.5); bx(1.8, 0.9, 1.88, 1.15, K);   // its door, its handle
-    bx(0.5, 0, 2.0, 0.1, c); bx(2.0, 0, 2.08, dh + 0.08, c); bx(0.42, dh, 2.08, dh + 0.08, c);   // its gaps glowing
+    bx(0.15, 0, 2.75, dh + 0.6, G, 2, 1.5); bx(0.15, dh + 0.6, 2.75, dh + 0.7, G, 2); bx(0.32, 0, 2.58, dh + 0.45, K); bx(0.32, dh + 0.3, 2.58, dh + 0.45, G, 4, 1.5);   // the beam's end: its thick walls, the dark in it, its soffit
+    if (k === 4) { bx(0.5, 0, 2.0, dh, c, 0, 1.6); for (let u = 0.62; u < 2.0; u += 0.2) bx(u, 0, u + px, dh, K); for (let v = 0.2; v < dh; v += 0.2) bx(0.5, v, 2.0, v + px, K); }   // E: a grille, the glow through
+    else { bx(0.5, 0, 2.0, dh, G, 2, 1.5); bx(1.8, 0.9, 1.88, 1.15, K); bx(0.5, 0, 2.0, 0.1, c); bx(2.0, 0, 2.08, dh, c); bx(0.5, dh, 2.08, dh + 0.08, c); }   // a heavy door (half dark), its gaps glowing
+    if (k === 0) { bx(2.9, dh + 0.6, 3.0, dh + 3.0, G); bx(2.85, dh + 1.4, 3.05, dh + 1.48, G); }   // A
+    else if (k === 1) { for (const u of [2.85, 3.05]) bx(u, dh + 0.3, u + 0.08, dh + 3.0, G); ln(2.89, dh + 0.3, 2.6, dh + 0.05, G, 2); }   // B
+    else if (k === 2) { ln(2.8, 1.85, 3.5, 1.85, G); bx(2.95, 1.35, 3.25, 1.85, PAL.white, 0, 1.6); bx(2.95, 0, 3.21, 0.28, G, 4); for (const e of [-0.1, 0, 0.1]) ln(3.08, 0.28, 3.08 + e * 1.6, 0.6 - Math.abs(e), e ? G : PAL.green, 2); }   // C
+    else if (k === 3) { bx(1.2, 0.6, 1.3, 1.5, K); bx(0.85, 1.0, 1.65, 1.1, K); bx(2.85, 0.9, 3.15, 1.3, G); bx(2.9, 1.05, 3.1, 1.15, K); }   // D: a cross, a meter
+    else if (k === 5) { for (let i = 0; i < 10; i++) { const a = (i + 0.5) / 10 * Math.PI, u = 1.45 - Math.cos(a) * 1.5, v = dh + 0.7 + Math.sin(a) * 0.55; bx(u - 0.12, v - 0.06, u + 0.12, v + 0.06, G, 0, 1.5); } bx(2.85, 1.7, 3.05, 1.82, G); bx(2.87, 1.5, 3.03, 1.7, O); vlamps.push([X(2.95), Y(1.6), 0.3, 1.0]); }   // F: a vaulted hood, a lamp
     skInside(d, 'stash', c, dx, dw, dh, false);
   };
   const pech = (d) => {   // a crooked Russian stove (the stash, E), tall and lumpy and cracked, its mouth the door, its chimney bent, a bench step off it with a shelf over it
@@ -4130,32 +4144,47 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     if (CINE) this.route = 1;
   }
-  const dcFar = () => {   // the estate far off in Maekawa's concrete (the owner's pick, 2026-10-22, d14 E; research/variants/mk-far-1-px.png): a glass hall under a
-    // great roof sloping down, a pane lit here and there, low blocks, a pole; the moon over them. Screen-fixed, low, dimmer than the storeys on the walls (they
-    // pass in front of it), the lit panes and windows lights of a sort (LIT, no light cast)
-    const t = kitT, P = kitP, G = PAL.gray, FD = 1.18, cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+  const dcFar = (k) => {   // the estate far off in Isozaki's concrete (DANCHI_V.far, research/variants/iso-far-1-px.png): A the Oita library, its huge hollow beams out
+    // over its top, their ends open; B the Gunma museum, a grid of cubic frames on a plinth, a tall block; C the Kitakyushu library, a long barrel vault, its
+    // arches on its face; D a block of flats and a T of a beam on its column; E cubes stacked, a block, a tower; F blocks over a walk on hollow beams, a lantern
+    // lit; the moon over them. Screen-fixed, low, dimmer than the storeys on the walls (they pass in front of it), the lit windows lights of a sort (LIT, no light cast)
+    const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, FD = 1.18, cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
     const fb = (u0, v0, u1, v1, c = G, a = FD, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
-    const fl = (u0, v0, u1, v1, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), G, FD, wd);
-    const hs = (a, b) => ((Math.sin(a * 12.9898 + b * 78.233) * 43758.5453) % 1 + 1) % 1, lit = (u, v, w, h) => fb(u, v, u + w, v + h, PAL.orange, LIT);
-    F(U(3.6), Vv(6.4), 0.6 * t, 0, 0, 0.6 * t, G, DIM, 0);   // the moon (clear of the drainpipes on the walls; at a quarter: at 1.4 it read as a thing in play)
-    fl(-7.4, 3.5, 2.6, 2.4, 6); fl(-7.0, 3.2, 2.5, 2.15); fl(2.6, 2.4, 3.0, 2.6, 6); for (const u of [-6.6, 1.6]) fb(u, 0, u + 0.18, 2.6);   // its roof, its soffit, its posts
-    fb(-6.6, 0, 1.8, 0.2); fb(-6.6, 1.5, 1.8, 1.62); for (let u = -6.0; u < 1.6; u += 0.6) fb(u, 0.2, u + P / t, 1.5); for (let u = -5.95; u < 1.5; u += 0.6) if (hs(u, 4) < 0.35) lit(u, 0.5, 0.5, 0.6);   // the glass hall
-    { const u0 = 3.0, u1 = 6.6, top = 2 * 0.62 + 0.15; fb(u0 + 0.45, 0, u1, top, G, FD, 4); fb(u0, 0, u0 + 0.45, top);   // low blocks: checkered, an end wall, a balcony's parapet a floor, windows lit here and there
-      for (let i = 0; i < 2; i++) { const v = i * 0.62; fb(u0 + 0.45, v + 0.36, u1, v + 0.5); for (let u = u0 + 0.8; u < u1 - 0.3; u += 0.7) if (hs(u + 5, i) < 0.2) lit(u, v + 0.08, 0.22, 0.18); }
-      fb(u0, top, u1 + 0.1, top + 0.15); }
-    fb(6.95, 0, 7.05, 3.0); fb(6.6, 2.7, 7.4, 2.78); fb(6.7, 2.4, 7.3, 2.46);   // a pole, its crossbars
+    const hs = (a, b) => ((Math.sin(a * 12.9898 + b * 78.233) * 43758.5453) % 1 + 1) % 1, lit = (u, v, w = 0.22, h = 0.18) => fb(u, v, u + w, v + h, PAL.orange, LIT);
+    const blk = (u0, u1, v0, n, s) => {   // a block of flats: its body (checkered), its end wall, a balcony's parapet a floor, windows lit here and there, its roof's edge
+      const top = v0 + n * 0.62 + 0.15; fb(u0 + 0.45, v0, u1, top, G, FD, 4); fb(u0, v0, u0 + 0.45, top);
+      for (let i = 0; i < n; i++) { const v = v0 + i * 0.62; fb(u0 + 0.45, v + 0.36, u1, v + 0.5); for (let u = u0 + 0.8; u < u1 - 0.3; u += 0.7) if (hs(u + s, i) < 0.2) lit(u, v + 0.08); }
+      fb(u0, top, u1 + 0.1, top + 0.15);
+    };
+    const beam = (u0, u1, v, h = 0.5) => { fb(u0, v, u1, v + h); fb(u1 - h, v + 0.08, u1 - 0.08, v + h - 0.08, K, 1); };   // a hollow beam, its end open
+    const cube = (u, v, s) => { fb(u, v, u + s, v + s); fb(u + 0.12, v + 0.12, u + s - 0.12, v + s - 0.12, K, 1); };   // an open cubic frame
+    F(U(3.6), Vv(6.4), 0.6 * t, 0, 0, 0.6 * t, G, DIM, 0);   // the moon (clear of the drainpipes on the walls; at a quarter)
+    if (k === 0) { fb(-6.5, 0, 2.0, 2.0, G, FD, 4); for (let u = -6.0; u < 1.6; u += 0.6) if (hs(u, 1) < 0.4) lit(u, 0.8, 0.35, 0.16); beam(-7.0, 3.4, 2.0); beam(-5.5, 4.4, 2.6); beam(-6.0, 0.6, 3.2, 0.45); blk(4.6, 7.4, 0, 2, 1); }   // A
+    else if (k === 1) { fb(-6.8, 0, 1.6, 0.3); for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) cube(-6.6 + i * 2.0, 0.3 + j * 1.8, 1.7); lit(-4.5, 0.6, 0.3, 0.2); lit(-0.6, 2.4, 0.3, 0.2); fb(2.6, 0, 3.8, 4.4); for (let i = 0; i < 6; i++) if (hs(i, 2) < 0.5) lit(3.0, 0.4 + 0.65 * i, 0.3, 0.2); blk(4.6, 7.4, 0, 2, 3); }   // B
+    else if (k === 2) { fb(-7.0, 0, 3.0, 1.8, G, FD, 4); for (let u = -6.8; u < 2.8; u += 1.6) { const n = 6; for (let i = 0; i < n; i++) fb(u + i * 0.25, 1.8 + Math.sin(Math.PI * (i + 0.5) / n) * 0.7, u + (i + 1) * 0.25, 1.95 + Math.sin(Math.PI * (i + 0.5) / n) * 0.7); } for (let u = -6.4; u < 2.6; u += 0.8) if (hs(u, 3) < 0.35) lit(u, 0.7, 0.3, 0.25); blk(3.8, 7.2, 0, 3, 4); }   // C: the vaults on its roof
+    else if (k === 3) { blk(-7.0, 0.5, 0, 6, 5); fb(2.0, 0, 2.5, 3.6); fb(0.8, 3.6, 4.4, 4.2); fb(4.0, 3.68, 4.32, 4.12, K, 1); for (const u of [1.0, 3.6]) lit(u, 3.75, 0.3, 0.2); blk(4.6, 7.4, 0, 2, 6); }   // D: a T of a beam
+    else if (k === 4) { for (const [u, v] of [[-6.8, 0], [-5.1, 0], [-6.0, 1.7], [-4.3, 1.7], [-5.2, 3.4]]) cube(u, v, 1.6); blk(-2.4, 2.8, 0, 4, 7); fb(3.4, 0, 4.4, 5.0); for (let i = 0; i < 7; i++) if (hs(i, 8) < 0.45) lit(3.75, 0.4 + 0.65 * i, 0.3, 0.2); }   // E
+    else { blk(-7.0, -0.5, 1.4, 4, 9); blk(0.5, 6.4, 1.4, 3, 10); fb(-7.0, 1.0, 6.8, 1.4); for (let u = -6.5; u < 6.6; u += 2.6) fb(u, 0, u + 0.3, 1.0); for (let u = -6.0; u < 6.4; u += 2.6) fb(u + 1.9, 1.06, u + 2.24, 1.34, K, 1); lit(1.2, 0.35, 0.18, 0.3); }   // F: a walk on hollow beams, a lantern
   };
-  if (th.danchi && lv.kind === 'well') {   // the Danchi's (the owner's picks, 2026-10-22): what runs up its walls behind the play, its things on the ledges, the estate far off
-    const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, MUTE = 1.6;   // (laundry and the like in their colours, but muted: their inks mean things here)
-    for (const side of [-1, 1]) {   // up the walls, behind (DIM), in Maekawa's concrete (wall A, mk-wall): a storey every 8 tiles, its deep eave out over the shaft, its
-      // soffit in shade, the wall under it faced in tiles, a window and its sill; a drainpipe down past them. The right wall's storeys half a storey off the left's
-      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), wb = (d0, y0, d1, y1, c = G, a = DIM, tn = 0) => box(snap(Math.min(at(d0 * t), at(d1 * t))), snap(y0), snap(Math.max(at(d0 * t), at(d1 * t))), snap(y1), c, a, 0, 10, tn);
+  if (th.danchi && lv.kind === 'well') {   // the Danchi's (DANCHI_V while the owner picks; its things his picks): what runs up its walls behind the play, its things on the ledges, the estate far off
+    const t = kitT, P = kitP, V = window.__dcV || DANCHI_V, G = PAL.gray, K = PAL.black, MUTE = 1.6;   // (laundry and the like in their colours, but muted: their inks mean things here)
+    for (const side of [-1, 1]) {   // up the walls, behind (DIM), in Isozaki's concrete (DANCHI_V.wall, iso-wall): a storey every 8 tiles, the right wall's half a storey
+      // off the left's: A a hollow beam's open end out of the board-formed wall, a drainpipe; B an open frame of columns and beams, a brace across each bay; C two ducts
+      // up the wall, their seams, a small square window a storey; D cubic frames up the wall, a potted plant in one; E a barrel vault's arch a storey, laundry under it;
+      // F a board-formed wall, small square windows, one lit here and there
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), wb = (d0, y0, d1, y1, c = G, a = DIM, tn = 0) => box(snap(Math.min(at(d0 * t), at(d1 * t))), snap(y0), snap(Math.max(at(d0 * t), at(d1 * t))), snap(y1), c, a, 0, 10, tn), k = V.wall;
       const beat = (n) => { const out = []; for (let j = Math.floor(top / (n * t)) - 1; j * n * t < bot + n * t; j++) out.push(j * n * t + (side < 0 ? 0 : n * 0.5 * t)); return out; };
-      wb(2.4, top, 2.58, bot); for (let y = Math.floor(top / (2.5 * t)) * 2.5 * t; y < bot; y += 2.5 * t) wb(2.32, y, 2.66, y + 0.12 * t);   // a drainpipe, its brackets
-      for (const y of beat(8)) {   // a storey, y under its eave
+      if (k === 0) wb(2.4, top, 2.58, bot);   // A: a drainpipe
+      if (k === 1) for (const d of [0.9, 2.5]) wb(d, top, d + 0.16, bot);   // B: its columns
+      if (k === 2) for (const d of [0.5, 0.95]) { wb(d, top, d + 0.32, bot); for (let y = Math.floor(top / (1.5 * t)) * 1.5 * t; y < bot; y += 1.5 * t) wb(d - 0.04, y, d + 0.36, y + 0.1 * t); }   // C: two ducts, their seams
+      for (const y of beat(8)) {   // a storey
         const Y = (v) => y + v * t;
-        wb(0, Y(-0.4), 3.0, Y(0)); wb(0.1, Y(0), 2.8, Y(0.14), G, DIM, 4); wb(0, Y(0.14), 2.3, Y(2.6), G, DIM, 3);   // its eave, its soffit, the wall under it in tiles
-        wb(0.5, Y(0.6), 1.6, Y(2.0)); wb(0.62, Y(0.72), 1.48, Y(1.88), K, 1); wb(1.02, Y(0.72), 1.08, Y(1.88)); wb(0.4, Y(2.0), 1.7, Y(2.12));   // a window, its sill
+        if (k === 0) { wb(0, Y(0), 2.0, Y(2.4), G, DIM, 3); wb(0, Y(-0.6), 3.0, Y(0)); wb(2.4, Y(-0.5), 2.95, Y(-0.1), K, 1); }   // A: board-formed, a beam out over it, its end open
+        else if (k === 1) { wb(0, Y(0), 2.6, Y(0.18)); wb(0.95, Y(0.18), 2.5, Y(2.5), G, DIM, 1); line(at(1.06 * t), Y(0.18), at(2.5 * t), Y(2.5), G, DIM, 1); }   // B: a beam, a bay, its brace
+        else if (k === 2) { wb(1.4, Y(1.0), 2.0, Y(1.6)); wb(1.48, Y(1.08), 1.92, Y(1.52), K, 1); }   // C: a small window
+        else if (k === 3) { for (const [d, v] of [[0.2, 0.2], [1.5, 1.3]]) { wb(d, Y(v), d + 1.2, Y(v + 1.2)); wb(d + 0.14, Y(v + 0.14), d + 1.06, Y(v + 1.06), K, 1); } wb(1.95, Y(2.2), 2.25, Y(2.4)); wb(2.08, Y(1.9), 2.12, Y(2.2), PAL.green); }   // D: cubic frames, a plant
+        else if (k === 4) { const n = 8; for (let i = 0; i < n; i++) { const q = (i + 0.5) / n; wb(0.1 + i * 0.3, Y(0.6 - Math.sin(Math.PI * q) * 0.5), 0.4 + i * 0.3, Y(0.75 - Math.sin(Math.PI * q) * 0.5)); } wb(0.3, Y(1.2), 2.2, Y(1.25)); for (const [d, cc] of [[0.6, PAL.white], [1.3, G]]) wb(d, Y(1.25), d + 0.45, Y(1.9), cc); }   // E: a vault's arch, laundry
+        else { wb(0, Y(0), 2.2, Y(2.6), G, DIM, 3); for (const [d, v, i] of [[0.4, 0.5, 0], [1.3, 0.5, 1], [0.4, 1.5, 2], [1.3, 1.5, 3]]) { const on = ((Math.round(y / t) + i * 3 + (side + 1)) % 5) === 0; wb(d, Y(v), d + 0.5, Y(v + 0.5), on ? PAL.orange : K, on ? LIT : 1); } }   // F: board-formed, windows, one lit here and there
       }
     }
     for (const r of lv.rects) {   // its things on some ledges (kitThing)
@@ -4191,7 +4220,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE);   // its bowl
       }
     }
-    dcFar();
+    dcFar(V.far);
   }
   if (th.panels && lv.kind === 'well') {   // the Tower Blocks' kit (THEMES.blocks; see the parts catalog): a riser pipe up each wall on a bracket every
     // 4 tiles, satellite dishes on the walls, an entrance (a blue door, its canopy and lamp, a bench) at the wall end of some wide ledges.

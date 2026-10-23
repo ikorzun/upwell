@@ -191,7 +191,7 @@ CRITTER.ring = ringAt(14, 4); CRITTER.ringFly = ringAt(16, 5);
 for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'ring', 'ringFly']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
 // The crow with the red ring (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
 // (the chunk 'ribbon', 1-3's set piece), flapping there now and then; a touch frees it, coins and its thanks, off it flies with the ring on it,
-// and `card` s later the card (STORY village_crow, behind ?story till the owner's «да»), its thanks read first (a card's panel clears a toast)
+// and `card` s later the card (STORY village_crow), its thanks read first (a card's panel clears a toast)
 const RIBBON = { card: 2.4, reach: 1.3, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).

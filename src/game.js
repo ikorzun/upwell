@@ -1187,7 +1187,7 @@ class Game {
     this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
   }
   untangle(f) {   // the crow with the red ring set free (RIBBON): sparks, its thanks and coins, off up it flies with the ring on it, and the story's card II
-    const R = this.R, lv = this.lv;   // a moment after (behind ?story till the owner's «да», as card I)
+    const R = this.R, lv = this.lv;   // a moment after
     f.fly = true; f.t = 0; f.vx = f.dir * 70; f.vy = -190;
     if (lv.gone && !this.well) lv.gone.push(f.id);
     sparkFx(f.x, f.y - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red], 0.6); fx.ring(f.x, f.y - R, 1.6 * R, INK.white);
@@ -2199,14 +2199,14 @@ const STORY = {
   moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
   // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
   // boss is, in its world's ink and its own: drafts till his «да» to their art
-  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [187, 280], ink: 'mine', draft: true, title: BOSSES.probka.name },
-  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [164, 247], ink: 'cave', draft: true, title: BOSSES.cart.name },
+  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', draft: true, title: BOSSES.probka.name },
+  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [151, 227], ink: 'cave', draft: true, title: BOSSES.cart.name },
   boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [192, 288], ink: 'ice', draft: true, title: BOSSES.puck.name },
-  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [180, 269], ink: 'sea', draft: true, title: BOSSES.namazu.name },
+  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [189, 284], ink: 'sea', draft: true, title: BOSSES.namazu.name },
   boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [170, 255], ink: 'tokyo', draft: true, title: BOSSES.tram.name },
-  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [197, 296], ink: 'blocks', draft: true, title: BOSSES.crane.name },
-  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [153, 230], ink: 'sky', draft: true, title: BOSSES.pigeon.name },
-  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [174, 262], ink: 'skazka', draft: true, title: BOSSES.koschei.name },
+  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [191, 287], ink: 'blocks', draft: true, title: BOSSES.crane.name },
+  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [158, 237], ink: 'sky', draft: true, title: BOSSES.pigeon.name },
+  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', draft: true, title: BOSSES.koschei.name },
 };
 for (const k in STORY) STORY[k].id = k;
 const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows the drafts too, and card I before

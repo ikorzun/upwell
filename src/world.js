@@ -13,6 +13,7 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
 const MENU_HERO = { w: 0.25, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest; its floor `gap` px over the colours, `room` px at least under the logo
+const BIG_BLOCK = { w: 3.5, h: 2.6, size: 0.5, tone: 1.45 };   // a block this wide and tall (tiles) gets a kanji half its smaller side across, in its ink 0.45 of the way from the black (KANJI)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
 // floor and `air`/s in the air; `slip` is a floor's friction while running on the keys (it holds
 // the run to about 4.7 R/s: smooth, as testers wanted); a swipe runs with none, at the full
@@ -64,7 +65,7 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // costs a heart and puts it back on the last ledge it stood on.
 const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40, keep: 3 };
 const R_PER_M = 2.2;   // a metre of climb is 2.2 hero radii (64 px when the well was 12 tiles), so a level is as many jumps on any screen
-const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09 };
+const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09, hold: 1.5 };   // (hold: the most a blink is drawn out while the hero is still inside an enemy, Game.step)
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
 const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the hearts back (user)
@@ -185,15 +186,17 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
 // Fuji's cranes (the owner's pick, research/variants/fuji-cranes-1-px.png A): a crane flying, its neck out, its legs trailing, wings up and down
 CRITTER.craneUp = ['........#####...................', '.........######.................', '.....###########................', '.......#########................', '........#########...............', '......###########...............', '........#########........#####..', '.........#########.##########.##', '.........##############.........', '......#############.............', '.######...#######...............', '................................', '................................', '................................', '................................', '................................', '................................', '................................'];
 CRITTER.craneDown = ['................................', '................................', '................................', '................................', '................................', '................................', '.........................#####..', '...........#######.##########.##', '.........##############.........', '......#############.............', '.######..#########..............', '........#########...............', '......###########...............', '........#########...............', '.......#########................', '.....###########................', '.........######.................', '........#####...................'];
-// The crow's red ring (RIBBON): round its neck, 2 x 3 pixels over CRITTER.crow's (ring) and over its wings' (ringFly), which hold the head lower
-// (owner, on the questions page, П2: «Нить не похожа на нить, сделай просто красным кольцом вокруг шеи ворона»)
-const ringAt = (k, r0) => Array.from({ length: 16 }, (_, j) => (j >= r0 && j < r0 + 3 ? '.'.repeat(k) + '##' + '.'.repeat(22 - k) : '.'.repeat(24)));
-CRITTER.ring = ringAt(14, 4); CRITTER.ringFly = ringAt(16, 5);
-for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'ring', 'ringFly']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+// The crow with the red ring, the story's friend (RIBBON; owner, 2026-10-23: «ворона с красной лентой сделай крупнее и детализированнее, так как он важный
+// сюжетный персонаж»): its own frames, half again as big as Tokyo's crows, cut on their grid from its sheet (research/variants/ribbon-crow/sheet.png;
+// scratchpad cards3/crowcut.py), aligned by the ring: sitting, wings up, wings down; 'd' and 'm' the world's ink in its dark and mid tones, 'r' the ring
+CRITTER.rcrow = ["........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", ".............................#####......", "............................#ddddm#.....", "...........................#kkkkwkkk#...", "..........................#dkkkkwkkmm##.", "..........................dkkkkkkkkmmm#.", ".........................#kkkkkkkkkkkmm.", "........................#krkkkkkkkk.#...", ".....................##mmkrrrrkkkd......", "....................#dkkkkk#rrrkk#......", "...................mdkkkkkkdkrrkm#......", "..................#kkkkkkkkdkkkkm#......", "................#kkkkkkkkdkdkkdkkm......", "...............#kdkkkkkkdkdkkkkdm#......", ".............##kdkdkkkmmkkk#kkkkm#......", ".............mkdkdkkkkkkkkk#kkdkm#......", "...........#mkkkkkkkkdkkkkkkkkkm#.......", "...........#kkdkkkkkdkdkkkkkkkkm........", "..........#kkdkkdmkkkkkkkmkkkkm.........", ".........kk##kdd#kdmkkkk#kkkk#..........", "........##kkkkmmkkmkkkk#kkkdk...........", ".......#mkkmkmkkkkkkkkdkkkdk#...........", ".....##kk#mkkkkdkkkkkdkkkdk#............", "....#kkkkmkkkdkkk#kkkk#kddk.............", "...#mkkdkkkddkkk#.#kk#.kkk..............", ".....#dkkkdmkkk#....k...k#..............", "....#dkkkdmkkm......km#.kk#.............", "....#m#kkmkkm#.....#kkm#..k##...........", ".....#kkm#km#.....#kkkkk#kkdk#..........", ".......##..#.........kkkkkkkkkk.........", ".......................k.k#.k.k........."];
+CRITTER.rcrowUp = [".....#mk................................", ".....#mk..#.............................", "....##mdk#mm............................", "....mk#dmk#mm...........................", "....#dkkmkk#m#..........................", "..#.#dddkkkkmm#.........................", "..#mk#mddkkkkkm#........................", "...mdkkdddkkdkkm#.......................", "...#ddkkmddkkkkkm#......................", "....mddkkkkkkkkkm#......................", "..#mkkmdkkkkmkkkkm#.....................", "...#m#kddkkkmmddkkm#....................", "...#dddkkdkkkddkkkk#....................", "....#mddkkkkmddkkkk#....................", "...#k#mddkkkkmdddkkk....................", "...#mkkkkkdkkkddkkkk#...................", "....mddddkkkkkdddkkkm#..................", ".....mddddkkkddkkkkkk#.......#dd###.....", "......kk#kkkkkddkdkkk#.....##kkkkk##....", ".....#mk#ddkkkkdddkkkk....#kkdkkwkkk#...", ".....#mddkkkkmdkkkkkkk#...kkdkkkwkkmm#..", ".......kkddkkkkddkkkkkk..kkkkkkkkkmmmm#.", ".......kdkkkkkkkkkkkkkk#krrkkkkkkkk##.#.", ".......mddkdkkmkkkkkkkkm#rrrkkkkk##.....", ".......##mkkkkkmkkkkkkddmkrrkkkkm.......", ".........mmddkkkkkkkkkkkdmkrrrkd........", ".........##dkkkkkkkkkkkkdd#kkkkm#.......", "...........kmmkkkkkkdkkkddkkkdkm#.......", "...........#mkkkdkkkkkkkkkkkkkkm........", "............#kkmmkkkkkkkkkkkkkd#........", "..........###kkkkkkkkkkkkkkkkk#.........", ".........#ddkkkkkdkkkkkkkkkkm#..........", ".......##kkkkkkkdkkkkkkkkkkd#...........", "...##dkkkkkkkkdkkkkkkkkkkkk#............", "..#mkkkkmkkkkkkkkkkkkdkkm#..............", "..##kkkkkdkkkkkk#kmkkkk##...............", "...#mdkkdkddkk...km..k#.................", "..#mdkkmkkdkdk....kk#.k#................", "...#kkmkkmkkk#....kk#kkkk...............", ".....#dk#kmm#.....kkkkkd#k..............", ".......#kkm#.....k.km.kk#k..............", "........#.#........k#..k#...............", "........................................", "........................................"];
+CRITTER.rcrowDown = ["........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "..............................####......", ".............................#dddm#.....", "..........................##kkkkwkk##...", "..........................#kkdkkwwkm###.", ".........................#kkkkkkkwkkmm#.", "...................##mdddkrrrkkkkkkkkm##", ".................#.#mmdddmkrrkkkkkk##...", "................##mddkkkkkdkrrrkkm#.....", "..............#dmkdkkkkkkkdmkkkkm#......", "............##mkkkkkkkkkkkmmkkkm#.......", "...........#mdkkkkkkkkkkkkddmkkm#.......", "..........#kkmmkkkddkkkkkkkdk#k#........", "........#mkkdkkkmdkkkkkkkkkkkmkkm.......", ".......#dkk#kkkkkkkmkmkkdkkkkkmkkm......", "......#mkkk#dk#dkkkmmkdkdkkkkmmkkd#.....", "...###kkkkkkkmdkkdkkkmdmkkkkkkm#kd#.....", "..#mkkdkkkdkk##kdkkdkkkkdkkkkkkm#kd#....", "#mdkkdkkkdkkkkkmkkdkkkkkkkmkkkkkmkkm....", ".#kmmkkddkk.kk#kkmkkdkkkkkkmkmkkkmkk#...", "..kmdkddkdk..kk#kmkkdkkdkkkkkkkkkk#k#...", ".##kkddkdk#...kk##k#mkkdkkkkdkmkkkk#km..", "..k#ddkmm#.....k#k#kmk#mkkdkddk#mkkk#km.", "...##mkm#.....kkkk#km##mmkddkdkk#dkkm#..", "....#k#......kkkkkk#k#kmmkddkmdkk#ddkd#.", "................k#k#...#mk#dk#ddk#mmdkm#", "................#.k#....#.#mm.#ddk##dd##", "............................#..#mm..###.", "........................................"];
+for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'rcrow', 'rcrowUp', 'rcrowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
 // The crow with the red ring (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
 // (the chunk 'ribbon', 1-3's set piece), flapping there now and then; a touch frees it, coins and its thanks, off it flies with the ring on it,
-// and `card` s later the card (STORY village_crow), its thanks read first (a card's panel clears a toast)
-const RIBBON = { card: 2.4, reach: 1.3, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
+// and `card` s later the card (STORY village_crow; owner, 2026-10-23: «Как только его коснулся, карточка появляется сразу за секунду»), its thanks read first
+const RIBBON = { card: 1, reach: 1.8, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the shaft (DEPTH), the beams' and gondolas' cables too
@@ -448,15 +451,15 @@ const ENEMY = {
   // the square ones (owner, 2026-10-22: «еще нужны квадратные враги», all three he picked): jelly cubes ('cube')
   tumbler: { design: 'cube', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 4, speed: 0, step: 1, move: 'tumble' },   // a yokan somersaulting along its ledge (TUMBLE)
   tofu: { design: 'cube', color: 'red', size: 0.95, grav: 1, stomp: true, coins: 2, speed: 32, step: 0.9, move: 'crawl' },   // a soft cube: stomped, it falls into four (TOFU)
-  tofuMini: { design: 'cube', color: 'red', size: 0.45, grav: 1, stomp: true, coins: 1, speed: 70, step: 0.45, move: 'crawl' },
+  tofuMini: { design: 'cube', color: 'red', size: 0.45, grav: 1, stomp: true, coins: 1, speed: 48, step: 0.45, move: 'crawl', safe: 0.8 },   // (slower, harmless its first 0.8 s: the same; was 70, 0.35 s)
   nurikabe: { design: 'cube', color: 'red', size: 1.1, grav: 0, stomp: true, coins: 6, speed: 0, step: 1, move: 'crush' },   // a wall yokai hanging over its ledge, it drops on the hero under it (CRUSH)
 };
 // A tumbler: sits `rest` s on its ledge (crouching its last `crouch`), then somersaults `hop` R ahead, up and over in `air` s, turning at the ledge's end. Sitting it
 // is stomped; in the air its corners hurt. A nurikabe: hangs `up` tiles over its ledge (less if a ceiling is nearer); the hero under it (within `reach` R of its
 // sides), it shakes `warn` s, falls at `fall` times gravity, lies `down` s (stomped only then; from over it before, the hero bounces off its top), rises at
 // `rise` R/s. A tofu stomped: `n` small ones, thrown apart
-const TUMBLE = { rest: 1.1, crouch: 0.3, air: 0.45, hop: 2.4 };
-const CRUSH = { up: 3.6, reach: 1.2, warn: 0.55, fall: 3, down: 1.4, rise: 2.2 };
+const TUMBLE = { rest: 1.8, crouch: 0.45, air: 0.45, hop: 2.0 };   // (owner, 2026-10-23: «квадратных врагов тяжело одолеть, точно нужно проще»: it sits longer, crouches clearer, hops shorter; was 1.1, 0.3, 2.4)
+const CRUSH = { up: 3.6, reach: 1.2, warn: 0.85, fall: 2.2, down: 2.4, rise: 2.2 };   // (the same: it shakes longer, falls slower, lies longer; was 0.55, 3, 1.4)
 const TOFU = { n: 4 };
 // The worm (user's video: dithered tubes flowing over each other, ball tips): its knot is stomped, its tubes hurt. Four tubes,
 // two to a side, waving up and out (the knot's top is clear: the way to stomp it); `len` theirs, R, in discs `seg` apart, `w`
@@ -1097,6 +1100,17 @@ ICONS.runew = '....wwww..../..wwwwwwww../.wwwwwwwwww./.wwwwwwwwww./ww..wwww..ww/
 ICONS.rune8 = '............/...ww.ww..../.wwww.wwww../.wwww.wwww../www.....www./www.www.www./....www...../www.www.www./www.....www./.wwww.wwww../.wwww.wwww../...ww.ww....';   // the Sea's runes: this a ship's wheel, the next a whirl
 ICONS.runeZ = '............/............/...ww......./...www....../....ww.ww.../..ww..www.../.www..ww..../.ww.ww....../....www...../.....ww...../............/............';
 // Kana for Tokyo's signs: DotGothic16's own glyphs (the game's Japanese font, SIL OFL) on its 16-dot grid.
+// Big blocks' kanji (owner, 2026-10-23: «вот такие блоки скучно, я бы заполнял их каким-то красивым иероглифом по центру или ободряющей короткой фразой.
+// По цвету подходящий»): eight words to climb by, from DotGothic16's own 16-px grid (assets/_raw/fonts, SIL OFL): dream, courage, strength, climb, soar, light, hope, onward
+const KANJI = ["夢", "勇", "力", "登", "翔", "光", "希", "進"];
+ICONS['kanji_夢'] = '.....ww..w...../.....ww..w...../wwwwwwwwwwwwwww/.....ww..w...../..wwwwwwwwwww../..ww.ww..w..w../..wwwwwwwwwww../.............../wwwwwwwwwwwwww./w....ww......w./w...wwwwwww..w./..wwwww...w..../......w.ww...../.....www......./wwwwww.........';
+ICONS['kanji_勇'] = '..wwwwwwwwww./.....w...ww../......www..../..wwwwwwwwwww/..w....w....w/..wwwwwwwwwww/..w....w....w/..wwwwwwwwwww/.......w...../wwwwwwwwwwwww/......w.....w/.....w......w/...ww.......w/www.....wwww.';
+ICONS['kanji_力'] = '.......w....../.......w....../.......w....../.......w....../.wwwwwwwwwwwww/.......w.....w/.......w.....w/......w......w/......w......w/.....w.......w/.....w.......w/....w........w/...w........w./..w.........w./ww......wwww..';
+ICONS['kanji_登'] = '..wwwwww...w.../.......ww.w..../..w...w..w...w./...w.w....w.w../....w......w.../..ww.wwwwww.w../ww...........ww/...wwwwwwwwww../...w........w../...w........w../...wwwwwwwwww../.....w....w..../......w...w..../......w..w...../.wwwwwwwwwwwwww';
+ICONS['kanji_翔'] = 'w..w........../.w.w.wwww.wwww/.ww.....w....w/wwwww...w....w/..w..w..w.w..w/..w...w.w..w.w/wwwww..ww...ww/..w.....w....w/..w....ww...ww/..www.w.w..w.w/www..w..w.w..w/..w.....w....w/.w......w....w/.w......w....w/w....www..www.';
+ICONS['kanji_光'] = '.......w......./.......w......./..w....w....w../...w...w....w../....w..w...w.../....w..w..w..../.......w......./wwwwwwwwwwwwwww/.....w...w...../.....w...w...../....w....w...../....w....w....w/...w.....w....w/..w......w....w/ww........wwww.';
+ICONS['kanji_希'] = '..ww......ww.../....ww..ww...../.....wwww....../....ww..www..../wwww...w...ww../.....ww......../wwwwwwwwwwwwwww/....w..w......./..ww...w......./ww.wwwwwwwwww../...w...w....w../...w...w....w../...w...w....w../...w...w..ww.../.......w.......';
+ICONS['kanji_進'] = '.......w...w.../.w.....w..w..../..w...wwwwwwww./...w..w..w...../.....ww..w...../....w.wwwwwww../......w..w...../wwww..wwwwwww../...w..w..w...../...w..w..w...../...w..wwwwwwww./...w.........../...ww........../..w..wwwwwwwwww/ww.............';
 ICONS['kana_ラ'] = '................/...wwwwwwwwww.../................/................/................/..wwwwwwwwwwww../.............w../.............w../.............w../............w.../............w.../...........w..../..........w...../........ww....../...wwwww......../................';
 ICONS['kana_ー'] = '................/................/................/................/................/................/................/..wwwwwwwwwwww../................/................/................/................/................/................/................/................';
 ICONS['kana_メ'] = '................/............w.../............w.../...........w..../....w......w..../.....ww...w...../.......www....../.........ww...../........w..w..../.......w....w.../......w......w../.....w........../...ww.........../..w............./................/................';
@@ -3131,6 +3145,12 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   // The hero's helmet (b.helmet): the moto one while the smash is on (user: in place of its pips), the astro one in an astro's flight. An astro one goes under the face, which
   // shows in its window: a white dome, grey on its right, the window's black rim, and in it the hero's own colour.
   const kolo = this.kolobok && b === game.hero && b.color.id === save.color;   // the Dark Forest's hero, a Kolobok (see kolobokFace)
+  if (b.helmet === 'kame') {   // a shell enemy's hard shell (owner, 2026-10-23: «у сквиш врагов не понятно какой разбивается, а какой отъезжает»): a grey dome of
+    // turtle-shell plates (kikkō) rimmed in black over its top, a glint on it, so the one that slides off when stomped reads hard and the soft red ones break
+    dot(0, -0.6, 1.06, 0.48, ink); dot(0, -0.63, 0.98, 0.41, PAL.gray);   // (over its brows: the face shows under its rim)
+    for (const [x, y, w] of [[0, -0.74, 0.26], [-0.52, -0.56, 0.22], [0.52, -0.56, 0.22]]) { dot(x, y, w, w * 0.7, ink); dot(x, y, w * 0.72, w * 0.46, PAL.gray); }
+    dot(-0.3, -0.88, 0.14, 0.06, PAL.white);
+  }
   if (b.helmet === 'astro') { dot(0.1, 0.05, 1.03, 1.02, PAL.gray); dot(-0.05, -0.04, 0.96, 0.97, PAL.white); dot(0.93, 0.1, 0.12, 0.22, PAL.gray); dot(0, 0.13, 0.68, 0.49, ink); dot(0, 0.13, 0.56, 0.38, kolo ? KOLOBOK.base : b.color.base); }
   gumWriteFace.call(this, b, X, Y, cx, cy);
   const closed = fc.squint > 0.45, lx = fc.lx * 0.05, ly = fc.ly * 0.035, [ex, ey] = f.eye, [rx, ry] = f.eyeR, m = f.mouthW;
@@ -4786,6 +4806,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
   this.route = 0;   // (the cinematic fork: the play again)
+  if (!th.town) for (const r of lv.rects) {   // a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps its word;
+    // not Tokyo's: its blocks are buildings, their windows enough)
+    const w = r.x1 - r.x0, hh = r.y1 - r.y0;
+    if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.bouncy || r.magnet || r.stair || r.slick || r.key || r.crack || r.cage || r.mortar || r.beam || w < BIG_BLOCK.w * lv.tile || hh < BIG_BLOCK.h * lv.tile || !seen(r.y0, r.y1)) continue;
+    const ch = KANJI[(((Math.round(r.x0 / lv.tile) * 73856093) ^ (Math.round(r.y0 / lv.tile) * 19349663)) >>> 0) % KANJI.length], rows = ICONS['kanji_' + ch];
+    const kk = Math.max(1, Math.floor((BIG_BLOCK.size * Math.min(w, hh)) / (rows.length * PIX.size)));
+    icon('kanji_' + ch, (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2 + 0.06 * hh, BIG_BLOCK.tone, kk, th.block);
+  }
   for (const s of lv.spikes) {
     if (!seen(s.y0, s.y1)) continue;
     const vert = s.dir < 2, len = vert ? s.x1 - s.x0 : s.y1 - s.y0, dep = vert ? s.y1 - s.y0 : s.x1 - s.x0;
@@ -4816,7 +4844,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); });
+    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const q = row[i]; if (q !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); } });   // (d, m: the ink's dark and mid tones)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
@@ -4824,8 +4852,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
     else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, PIX.keep, false);   // a game pixel a dot: about a tile and a half long
     else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
-      const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : f.t % 1.6 < 0.24 ? 'crowUp' : 'crow';
-      spr(CRITTER[wing + L], f.x, f.y, th.wall, PIX.keep, false); spr(CRITTER[(wing === 'crow' ? 'ring' : 'ringFly') + L], f.x, f.y, PAL.red, PIX.keep, false);
+      const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'rcrowUp' : 'rcrowDown') : f.t % 1.6 < 0.24 ? 'rcrowUp' : 'rcrow';
+      spr(CRITTER[wing + L], f.x, f.y, th.wall, PIX.keep, false);
     }
   }
   if (CINE) this.route = bonusEye ? 4 : 0;

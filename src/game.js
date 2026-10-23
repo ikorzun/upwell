@@ -270,7 +270,7 @@ class Foe {
     this.type = s.type; this.def = def; this.ledge = s.ledge || null; this.rect = s.rect || null; this.wall = s.wall || null;
     this.big = !!s.big; this.hp = this.big ? MINI.hp : 1;   // a mini-boss (MINI)
     this.body = new Body(designById(def.design), foeColor(def.color), s.x, s.y, lv.R * def.size * (this.big ? MINI.size : 1), 0.5);
-    this.body.gScale = def.grav; this.body.sticky = false; this.body.face.frown = true;
+    this.body.gScale = def.grav; this.body.sticky = false; this.body.face.frown = true; if (s.type === 'shell') this.body.helmet = 'kame';   // (a shell's hard look: writeFace)
     this.body.fric = 0;   // no drag from what it crawls on (a wall's friction all but holds it still): its steering sets the pace
     this.dir = s.dir || (Math.random() < 0.5 ? -1 : 1); this.t = 0; this.stall = 0; this.ph = Math.random(); this.lastPh = this.ph;
     this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
@@ -1102,7 +1102,10 @@ class Game {
       for (const e of lv.enemies) e.think(dt, this);
       if (lv.boss && !lv.boss.dead) lv.boss.think(dt, this);
     }
-    if (this.invuln > 0) this.invuln -= dt;
+    if (this.invuln > 0) {   // its blink ends once out of an enemy it passed into (at most `hold` s on): not a hit for being inside it
+      this.invuln -= dt;
+      if (this.invuln <= 0 && playing && (this.blinkHold || 0) < HEALTH.hold && this.insideFoe()) { this.blinkHold = (this.blinkHold || 0) + dt; this.invuln = 0.5 * dt; }
+    } else this.blinkHold = 0;
     const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
     if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
     if (hang) setVel(hero, 0, 0);
@@ -1117,7 +1120,7 @@ class Game {
     this.warns = playing ? this.threats(dt) : [];
     const bs = this.bodyList(), puck = lv.boss && !lv.boss.dead && lv.boss.def && lv.boss.def.slide ? lv.boss.body : null;
     this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
-    for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.stepFloor = (b.wallMask & 8) ? b.floorRect : null; b.touchHero = false; b.beginStep(dt); }   // (stepFloor: the plank it stands on holds it, see collideLevel)
+    for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.stepFloor = (b.wallMask & 8) ? b.floorRect : null; b.touchHero = false; b.blinkHero = false; b.beginStep(dt); }   // (stepFloor: the plank it stands on holds it, see collideLevel)
     hero.springHit = null; hero.rubber = 0;
     for (let s = 0; s < PHYS.substeps; s++) {
       for (const b of bs) { b.integrate(h, WORLD.maxSpeed); b.solve(h); b.updateBounds(); }
@@ -1128,7 +1131,10 @@ class Game {
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
         const solid = lv.boss && !(lv.boss.def && (lv.boss.def.slide || lv.boss.def.rail)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
-        if (withHero && ((this.invuln > 0 && !solid) || !playing || A.ghost || B.ghost)) continue;   // a hit hero passes through for a moment, and a rolling shell through the hero
+        if (withHero && this.invuln > 0 && !solid && playing && !A.ghost && !B.ghost) {   // a hit hero passes through for a moment, but a stomp from over one still counts (Game.blinkMeet)
+          const o = A === hero ? B : A; if (o.maxX > hero.minX && o.minX < hero.maxX && o.maxY > hero.minY && o.minY < hero.maxY) o.blinkHero = true; continue;
+        }
+        if (withHero && ((this.invuln > 0 && !solid) || !playing || A.ghost || B.ghost)) continue;   // and a rolling shell through the hero
         if (collidePair(A, B) && withHero) (A === hero ? B : A).touchHero = true;
       }
       for (const b of bs) { if (!b.thread) b.collideLevel(lv, h); b.finishSubstep(h); b.updateBounds(); }
@@ -1318,6 +1324,7 @@ class Game {
   interact(dt) {
     const lv = this.lv, H = this.hero;
     for (const e of lv.enemies.slice()) if (e.body.touchHero) this.meet(e);
+    for (const e of lv.enemies.slice()) if (e.body.blinkHero && lv.enemies.includes(e)) this.blinkMeet(e);
     for (const e of lv.enemies.slice()) if (e.type === 'worm') this.wormTouch(e);
     this.rolling(dt);
     for (const s of lv.signs || []) if (Math.abs(s.y - H.cy) < 2.5 * this.R) this.hint('tut' + s.id, 'seen_tut' + s.id + (s.id === 1 ? (coarse ? (save.stick ? 'S' : 'T') : 'K') : ''));   // the tutorial's words where they are needed, before any other
@@ -1350,7 +1357,7 @@ class Game {
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
-    if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < 0.35)) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
+    if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < (e.def.safe || 0.35))) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
     const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
     const above = stompable(H, b, rel);   // from over it (its whole top half), or falling onto it
     const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
@@ -1364,6 +1371,14 @@ class Game {
     else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
   }
+  // Blinking after a hit the hero passes through an enemy, but coming down onto one it can stomp still stomps it (owner, 2026-10-23: «если герой моргает и
+  // прыгает на врага сверху, то все так же его убивает»: it fell in, and its blink ended inside it, a hit); anything else, through it
+  blinkMeet(e) {
+    if (e.state === 'shell' || e === this.lv.boss) return;
+    const H = this.hero, b = e.body, rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;
+    if (e.canStomp() && stompable(H, b, rel)) this.stomp(e);
+  }
+  insideFoe() { const H = this.hero; return this.lv.enemies.some((e) => { const b = e.body; return b.maxX > H.minX && b.minX < H.maxX && b.maxY > H.minY && b.minY < H.maxY; }); }
   bounceOff(e) {   // off a boss's hard top (BOSSES.puck): up and aside with a clang; the first time, a word on what does work
     const H = this.hero;
     setVel(H, H.rigVx + (Math.sign(H.cx - e.body.cx) || 1) * 2 * this.R, -0.8 * BOSS.bounce * this.vjump); unstick(H, 0.08);

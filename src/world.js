@@ -3831,14 +3831,32 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
-    {   // Fuji far off (A): a cone of blue, its flat top and its snow grey down its ridges, two clouds; low on the screen, sinking a little as the climb goes on
+    {   // Fuji far off: a cone of blue, its ridges uneven, its snow grey down them in tongues; a long bank of cloud across its waist in a living shape (the owner's
+      // pick, 2026-10-23, d33 C; his rule: «для природных фонов и элементов в игровом мире используй более биологическую форму», his picture's clouds: an outline
+      // of uneven round bumps, no straight runs, no symmetry, holes of the dark in it, ragged strands of checker trailing off). Low on the screen, sinking a little
+      // as the climb goes on
       const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
+      const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side)); };   // its flanks, uneven
       for (let y = 0; y < ht; y += 2 * P) {
-        const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25), yy = foot - ht + y, sn = 0.3 + 0.07 * Math.sin(y / P * 0.9);
-        box(snap(cx - w), yy, snap(cx + w), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
-        if (u < sn) box(snap(cx - w * Math.min(1, (sn - u) * 9)), yy, snap(cx + w * Math.min(1, (sn - u) * 9)), yy + 2 * P, PAL.gray, DIM, 0, 10, 0);
+        const u = y / ht, yy = foot - ht + y, wl = half(y, -1), wr = half(y, 1), sn = 0.3 + 0.06 * Math.sin(y / P * 0.9) + 0.05 * Math.sin(y / P * 2.3);
+        box(snap(cx - wl), yy, snap(cx + wr), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
+        if (u < sn) { const q = Math.min(1, (sn - u) * 9); box(snap(cx - wl * q * (1 - 0.2 * Math.abs(Math.sin(y / P * 0.61)))), yy, snap(cx + wr * q * (1 - 0.2 * Math.abs(Math.sin(y / P * 0.47 + 1)))), yy + 2 * P, PAL.gray, DIM, 0, 10, 0); }   // its snow in tongues
       }
-      for (const [dx, dy, w] of [[-4.6, -4.4, 2.8], [4.4, -5.0, 2.3]]) box(snap(cx + (dx - w / 2) * t), snap(foot + dy * t), snap(cx + (dx + w / 2) * t), snap(foot + dy * t) + 3 * P, PAL.gray, DIM, 0, 10, 0);
+      const hs = (n) => ((Math.sin(n * 12.9898 + 4.1) * 43758.5453) % 1 + 1) % 1;
+      const inCone = (x, y) => { const yy = y - (foot - ht); return yy >= 0 && yy < ht && x > cx - half(yy, -1) && x < cx + half(yy, 1); };
+      const hole = (x, y, r) => F(snap(x), snap(y), r, 0, 0, 0.8 * r, inCone(x, y) ? PAL.blue : PAL.black, inCone(x, y) ? DIM : 1, 0);   // a hole: the dark behind (or Fuji's blue)
+      const strand = (x, y, dx, dy, n, s) => { for (let j = 0; j < n; j++) { const l = (0.35 + 0.65 * hs(s + j)) * t * (1 - 0.6 * j / n), x0 = x + j * dx * t, y0 = y + j * dy * t, sx = Math.sign(dx || 1), o = (hs(s + j * 2.3) - 0.5) * 0.3 * t;   // ragged checker, a band
+          box(snap(Math.min(x0 + o, x0 + o + sx * l)), snap(y0), snap(Math.max(x0 + o, x0 + o + sx * l)), snap(y0) + 3 * P, PAL.gray, DIM, 0, 10, 4); } };
+      const cloud = (x, y, w, h, s, holes = 2, dome = 0.5) => {   // bumps of uneven size all round it, bigger over, smaller under, notches cut in its edge, holes in it
+        const nt = Math.max(4, Math.round(w / (0.32 * t))), nb = Math.max(3, Math.round(w / (0.42 * t))), bump = (bx, by, r) => F(snap(bx), snap(by), r, 0, 0, r * (0.85 + 0.25 * hs(bx * 0.13 + s)), PAL.gray, DIM, 0);
+        F(snap(x), snap(y - 0.1 * h), w * 0.42, 0, 0, 0.3 * h, PAL.gray, DIM, 0);   // its body
+        for (let i = 0; i < nt; i++) { const q = (i + 0.5) / nt, r = (0.16 + 0.3 * hs(s + i * 3.1)) * h * (0.6 + 0.7 * Math.sin(Math.PI * q)); bump(x - w / 2 + q * w + (hs(s + i) - 0.5) * 0.15 * t, y - 0.12 * h - dome * h * Math.sin(Math.PI * q) * (0.5 + 0.5 * hs(s + i * 7)), r); }   // over
+        for (let i = 0; i < nb; i++) { const q = (i + 0.5) / nb, r = (0.1 + 0.16 * hs(s + i * 4.7 + 1)) * h; bump(x - w * 0.45 + q * w * 0.9 + (hs(s + i * 2) - 0.5) * 0.2 * t, y + 0.12 * h - 0.06 * h * hs(s + i * 9), r); }   // under, smaller
+        for (let i = 0; i < 2; i++) { const e = i ? 1 : -1; F(snap(x + e * w * (0.18 + 0.12 * hs(s + 70 + i))), snap(y + 0.3 * h), (0.12 + 0.08 * hs(s + 80 + i)) * t, 0, 0, 0.1 * t, inCone(x + e * w * 0.2, y + 0.3 * h) ? PAL.blue : PAL.black, inCone(x + e * w * 0.2, y + 0.3 * h) ? DIM : 1, 0); }   // notches under it
+        for (let i = 0; i < holes; i++) hole(x - w / 3 + (i + 0.5) / holes * (w * 0.66) + (hs(s + 40 + i) - 0.5) * 0.3 * t, y - (0.1 + 0.3 * hs(s + 50 + i)) * h, (0.07 + 0.08 * hs(s + 60 + i)) * t);
+      };
+      const U = (u) => cx + u * t, V = (v) => foot - v * t;
+      cloud(U(0.2), V(2.6), 9.5 * t, 0.75 * t, 5, 5, 0.3); strand(U(-4.6), V(2.4), -0.3, 0.02, 6, 11); strand(U(5.0), V(2.4), 0.3, 0.02, 6, 12);   // the bank, its strands off both ends
     }
     const csh = CINE ? 0.55 * cam : 0;   // (2.5D: the cranes on a plane of their own, far: 0.45 of the climb)
     for (let k = Math.floor((top - csh) / (18 * t)) - 1; k * 18 * t + csh < bot; k++) {   // a pair of cranes (A) crossing the shaft, slowly, by turns of height either way

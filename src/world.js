@@ -347,7 +347,16 @@ const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], win
 // and scaled up with hard edges), the camera moves in whole game pixels, and everything is
 // drawn in the nine inks of the palette sheet (research/refs), flat or as 1-bit patterns
 // of one ink over another.
-const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2 };   // a phone's screen is small and sharp: finer there (1 was too fine)
+const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2, get keep() { return this.base / this.size; } };   // a phone's screen is small and sharp: finer there (1 was too fine)
+PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized to (a phone's 1.5, a computer's 2) whatever the drawing's: a sprite's dot PIX.keep times its pixels
+// A computer's drawing grid (owner, 2026-10-23: «на мониторах ретина на десктопе графика тоже должны быть как на телефоне», his Д1 «А»): a game pixel a whole
+// number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen
+// may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard)
+PIX.fit = function () {
+  if (this.base !== 2 || this.slow) return this.base;
+  const q = +new URLSearchParams(location.search).get('pix'), d = window.devicePixelRatio || 1;
+  return q > 0 ? q : Math.max(1, Math.round(d)) / d;
+};
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at first (user)
   red: hex('#f43e34'), blue: hex('#5bb8ff'), yellow: hex('#ffed57'), green: hex('#339c39'),
@@ -2228,7 +2237,7 @@ class Level {
   // Coins laid from y0 down to y1 moved off what they touch (BONUS_GAP): a ledge, a block, a mover's whole way, a wall. One with no room within reach is
   // not laid (all coins one size: owner, 2026-10-22, «Монеты всегда одинакового размера, как сейчас мелкие»).
   clearBonuses(y0, y1) {
-    const R = this.R, P = PIX.size, need = COIN.r * R + BONUS_GAP.gap * P, l = this.l, r = this.r;
+    const R = this.R, P = PIX.base, need = COIN.r * R + BONUS_GAP.gap * P, l = this.l, r = this.r;   // (by the levels' grid: a level laid alike whatever the drawing's, PIX.fit)
     const solid = this.rects.filter((q) => !q.gone && !(q.move && (q.move.wheel || q.move.seesaw)) && q.y1 > y0 - 3 * R && q.y0 < y1 + 3 * R)
       .map((q) => q.move ? { x0: Math.min(q.move.a, q.move.b), x1: Math.max(q.move.a, q.move.b) + q.x1 - q.x0, y0: q.y0, y1: q.y1 } : q);
     const clear = (x, y) => x - l >= need && r - x >= need && solid.every((q) => Math.hypot(Math.max(q.x0 - x, 0, x - q.x1), Math.max(q.y0 - y, 0, y - q.y1)) >= need);
@@ -3095,7 +3104,7 @@ const BOSS_FIT = { 'probka-F': ['b', 0.5, 0], 'cart-C': ['o', 0.44, 0, 2], 'puck
 const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
   const H = rows.length, W = rows[0].length, m = flip ? -1 : 1, sh = d.b.s;
   if (fit && !sh.ext) sh.ext = [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
-  const k = fit && !fit[3] ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : ((fit ? fit[3] : 1) * PIX.size) / d.b.R, cy = (fit ? fit[1] : 0.62) * H;   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
+  const k = fit && !fit[3] ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : ((fit ? fit[3] : 1) * PIX.base) / d.b.R, cy = (fit ? fit[1] : 0.62) * H;   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
   const o = fit ? (0.5 * PIX.size) / d.b.R : 0.004;   // its boxes' overlap: half a pixel on a boss, whose body is not under it to fill the seams when it squashes
   const hp = d.b.heap || 0, rt = d.b.rattle ? d.b.heapT || 0 : 0, yb = (H - cy) * k, sq = 1 - 0.4 * hp, wx = 1 + 0.3 * hp;   // a heap of bones (Koschei dazed): his rows sunk (his body squashes too) and strewn sideways, rattling before he rises
   rows.forEach((row, j) => {
@@ -3265,7 +3274,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let x = lv.l + 0.6 * R; x < lv.r; x += 1.3 * R) box(x - 1.5, lv.rail.y + 2.5, x + 1.5, lv.rail.y + 0.35 * R, th.wall, 1, 0);
   }
   for (const u of lv.runes) if (seen(u.y - R, u.y + R)) {   // a world's runes on the back wall (RUNE): a faint cloth, the rune knitted on it in the world's ink
-    const h = 8 * PIX.size; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, 1, th.wall);
+    const h = 8 * PIX.base; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, PIX.keep, th.wall);   // (its size kept on a finer grid: PIX.keep)
   }
   if (lv.exit) door(lv.exit, 'exit');
   // Mount Fuji's door into a shop or a stash (the owner's picks, research/variants/fuji-hut-1-px.png: "E and F, the shop"): a mountain hut built round the
@@ -3759,8 +3768,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const dir = mod(k, 2) ? 1 : -1, span = lv.r - lv.l + 8 * t, x = lv.l - 4 * t + mod(T * 0.9 * t + k * 7.3 * t, span), y = (k * 18 + 9) * t + csh;
       if (y < top - 2 * t || y > bot) continue;
       for (const [ox, oy] of [[0, 0], [-2.6, 1.3]]) { const fx = dir > 0 ? x + ox * t : lv.r + lv.l - x - ox * t, fr = Math.floor(T * 2.4 + ox) % 2 ? 'craneUp' : 'craneDown';
-        const rows = CRITTER[fr + (dir > 0 ? '' : 'L')], x0 = snap(fx - rows[0].length * P / 2), y0 = snap(y + oy * t);
-        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(x0 + i * P, y0 + j * P, x0 + e * P, y0 + (j + 1) * P, PAL.gray, DIM, 0, 10, 0); i = e; } }); }
+        const rows = CRITTER[fr + (dir > 0 ? '' : 'L')], Pk = PIX.base, x0 = snap(fx - rows[0].length * Pk / 2), y0 = snap(y + oy * t);
+        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(x0 + i * Pk, y0 + j * Pk, x0 + e * Pk, y0 + (j + 1) * Pk, PAL.gray, DIM, 0, 10, 0); i = e; } }); }
     }
     const steam = (x, y, k, s) => { for (let i = 0; i < 3; i++) { const u = (T * 0.25 + i / 3 + k * 0.37) % 1; F(snap(x + Math.sin(T * 1.3 + i * 2 + k) * 0.2 * s * t), snap(y - u * 1.5 * s * t), (0.2 + 0.16 * u) * s * t, 0, 0, (0.2 + 0.16 * u) * s * t, PAL.gray, 0.35 * (1 - u), 1); } };
     const lantern = (x, b, s) => {   // a little stone lantern, its window lit (the Cave's toro, smaller)
@@ -4813,19 +4822,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
-    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, 1, false);   // a game pixel a dot: about a tile and a half long
+    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, PIX.keep, false);   // a game pixel a dot: about a tile and a half long
     else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
       const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : f.t % 1.6 < 0.24 ? 'crowUp' : 'crow';
-      spr(CRITTER[wing + L], f.x, f.y, th.wall, 1, false); spr(CRITTER[(wing === 'crow' ? 'ring' : 'ringFly') + L], f.x, f.y, PAL.red, 1, false);
+      spr(CRITTER[wing + L], f.x, f.y, th.wall, PIX.keep, false); spr(CRITTER[(wing === 'crow' ? 'ring' : 'ringFly') + L], f.x, f.y, PAL.red, PIX.keep, false);
     }
   }
   if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face)
-    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size - (ICONS[p.item.id].length * PIX.size * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
+    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size - (ICONS[p.item.id].length * PIX.base * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
     if (bonusEye) this.route = 3; F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1); if (bonusEye) this.route = 4;   // (B, D: its glow behind it, not dotted over it)
-    if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4, T * 1.8 + p.x * 0.05);   // (C: its thickness)
-    iconSpin(p.item.id, p.x, y, a, 2.4, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
+    if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // (C: its thickness)
+    iconSpin(p.item.id, p.x, y, a, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
     const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;   // (the fork: riding its ledge's face)
@@ -5082,7 +5091,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
     disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, (g.power('smash') ? 0.22 : 0.15) * R, g.power('smash') ? INK.flame : INK.white, 1);   // orange: the next one rams
-  for (let k = 0; k < nDots; k++) { const u = k / Math.max(1, JUMP.dots - 1); disc(dots[2 * k], dots[2 * k + 1], (2.4 - 1.2 * u) * PIX.size, INK.white, 1); }   // the slingshot's arc: solid dots that shrink (tiny see-through ones would dither to crumbs)
+  for (let k = 0; k < nDots; k++) { const u = k / Math.max(1, JUMP.dots - 1); disc(dots[2 * k], dots[2 * k + 1], (2.4 - 1.2 * u) * PIX.base, INK.white, 1); }   // the slingshot's arc: solid dots that shrink (tiny see-through ones would dither to crumbs)
   if (CINE) cineMotes(this, g, lv, cam, H, box, disc, T);
   const nFront = this.nf - front;
   gl.bindVertexArray(null);

@@ -3107,7 +3107,9 @@ function layout() {
   const vw = window.innerWidth, vh = window.innerHeight;
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
-  const W = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
+  PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
+  const W0 = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), W = coarse ? W0 : Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
+  // (a computer's column a whole number of game pixels across, so each is as many of the screen's as the next)
   view.w = W; view.h = H; view.left = left; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
@@ -3358,6 +3360,13 @@ function perfSend(now) {
     frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION });
   perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss;
 }
+// A computer too slow for the finer grid (PIX.fit): its first 3 s of play measured, and if half its frames took over 25 ms, the old grid for good.
+const PIX_GUARD = { frames: 180, slow: 0.025 }, pixSeen = { n: 0, slow: 0 };
+function pixGuard(dt) {
+  if (PIX.slow || PIX.size >= PIX.base || pixSeen.n >= PIX_GUARD.frames || game.state !== 'play' || document.hidden || !(dt > 0) || dt > 0.25) return;
+  pixSeen.n++; if (dt > PIX_GUARD.slow) pixSeen.slow++;
+  if (pixSeen.n === PIX_GUARD.frames && pixSeen.slow > PIX_GUARD.frames / 2) { PIX.slow = true; queueLayout(); }
+}
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.
 function runFrame(now, fixedDt) {
   if (window.devicePixelRatio !== loop.dpr) { loop.dpr = window.devicePixelRatio; layoutQueued = true; }   // moved to another screen
@@ -3366,6 +3375,7 @@ function runFrame(now, fixedDt) {
   menuTouch.update(now);   // (the menu's hero in the hand, before the physics: Gum's order)
   let dt = fixedDt != null ? fixedDt : (now - loop.last) / 1000;
   loop.last = now;
+  if (fixedDt == null) pixGuard(dt);
   if (!(dt > 0)) dt = 0;
   if (dt > 0.25) dt = 0.25;
   if (game.state === 'pause') dt = 0;

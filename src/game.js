@@ -710,15 +710,15 @@ class Game {
   toMenu() {
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
-    this.builtW = view.w; this.R = this.menuR || 0.25 * view.w; this.well = null; this.door = null; this.lv = new Level();
+    this.builtW = view.w; this.R = this.menuR || MENU_HERO.k * MENU_HERO.w * view.w; this.well = null; this.door = null; this.lv = new Level();
     this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
-    this.makeHero();
+    this.makeHero(); this.levelReset();
     ui.hideAll(); ui.menu();
   }
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
   // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
   menuFit(rowY, logoY) {
-    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
+    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, MENU_HERO.k * Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
     this.menuFloor = floorY; this.menuSplit = rowY; this.lv.menuAt(floorY);
     if (Math.abs(R - this.R) > 0.5) { this.menuR = this.R = R; this.lv.R = R; this.makeHero(); }
   }
@@ -748,14 +748,19 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
+    this.levelReset();
+    this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
+    this.setTasks();
+  }
+  // What a level starts clear of, the menu's scene too (its hero not left in a candy's colours or a helmet, a combo's count gone, no swarm or
+  // followers): the timers, the powers, the landing count, the effects
+  levelReset() {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
-    this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
+    this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
-    this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
-    this.setTasks();
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
@@ -779,7 +784,7 @@ class Game {
   // растягивается»): the level under way as it is, all of it scaled by the new tile over the old about the left wall and the floor (Game.rescale),
   // the run going on where it was. (A phone held sideways changes nothing: it waits under the 'turn it upright' screen, see layout.)
   resized() {
-    if (this.state === 'menu' || this.state === 'boot') { const o = ui.open === 'map' ? ui.mapAt : null; this.toMenu(); if (o === 'book') ui.book(); else if (o != null) ui.map(o); return; }   // (the map or the book stays open)
+    if (this.state === 'menu' || this.state === 'boot') { const o = ui.open === 'map' ? ui.mapAt : null, set = ui.open === 'settings'; this.toMenu(); if (o === 'book') ui.book(); else if (o != null) ui.map(o); else if (set) ui.settings(); return; }   // (the map, the book or the settings stay open)
     const k = (view.w - 2 * LEVEL.wall) / Math.max(1, this.builtW - 2 * LEVEL.wall);
     this.builtW = view.w; this.rescale(k); this.applyMods();
   }
@@ -1145,7 +1150,7 @@ class Game {
       this.touch = m & 8 ? 0 : glueSide(hero) || (m & 1 ? 1 : m & 2 ? 2 : m & 4 ? 4 : 0);
       if (m & 8) {   // on a floor: a landing just now (how hard: the fastest of the fall, REBOUND), or how long since
         if (this.sinceContact > 0) { this.landV = this.fallV; this.landT = 0; this.landUsed = false; } else this.landT += dt;
-        if (!this.landUsed && this.landT > REBOUND.after) { this.landUsed = true; if (this.landV >= REBOUND.min * this.vjump && ++this.missed >= REBOUND.hint) this.hint('rebound'); }   // a hard one let go by
+        if (!this.landUsed && this.landT > REBOUND.after) { this.landUsed = true; if (playing && this.landV >= REBOUND.min * this.vjump && ++this.missed >= REBOUND.hint) this.hint('rebound'); }   // a hard one let go by (in play: not the menu's hero thrown)
       }
       this.fallV = 0;
       this.sinceContact = 0; this.air = this.mods.airJumps; this.airDash = 0; this.diving = false;
@@ -1450,7 +1455,9 @@ class Game {
     }
     lv.enemies.splice(i, 1);
     const b = e.body;
-    juiceFx(b.cx, b.cy, b.R, b.color.base); splatFx(b.cx, b.cy, b.R, b.color.base);   // it bursts like ripe fruit (user)
+    const H = this.hero, hx = b.cx - H.cx, hy = b.cy - H.cy, hd = Math.hypot(hx, hy) || 1, rd = fxRand(0, TAU);   // the blow's way: from the hero (else any)
+    juiceFx(b.cx, b.cy, b.R, b.color.base); splatFx(b.cx, b.cy, b.R, b.color.base); popFx(b.cx, b.cy, b.R, b.color.base, byHero ? hx / hd : Math.cos(rd), byHero ? hy / hd : Math.sin(rd));   // it
+    // bursts like ripe fruit (user), a hit's flash, ring, rays, blobs and puffs over it (owner: «больше частиц и эффектов при победе над врагом»)
     if (e.type === 'skull') sparkFx(b.cx, b.cy - 0.3 * b.R, 16, -Math.PI / 2, Math.PI, [150, 450], [1.5, 3.2], [0.4, 0.8], [PAL.white, PAL.white, PAL.gray], 0.9);   // its bone in bits, over the goo
     this.drop(b.cx, b.cy, Math.round(e.def.coins * this.mods.coinMul));
     if (e.type === 'tofu' && byHero) for (let k = 0; k < TOFU.n; k++) {   // in four, thrown apart (TOFU)
@@ -2207,31 +2214,31 @@ function px(text, max = Infinity, left = false) {
 }
 // Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once; round 5: one
 // to each world, with the story's start and end, К5–К8 «А»): `n` the numeral on the frame (in the story's order; the bonus world a star like
-// its number; the end none till the last worlds are built), `still` the art, `cells` its own pixel grid (each card cut on the grid its art
+// its number; the end none till the last worlds are built), `still` the art (the world cards drawn out finer as the bosses' since К18 «А»), `cells` its own pixel grid (each card cut on the grid its art
 // was drawn on, К7), `ink` its world's colours for the frame (К6), `boss` the world whose boss beaten brings it (II and VI come after their own
 // episodes: the crow in 1-3, the treat in Tokyo), `title` under the card. Game.story shows one, the game held under it till Next.
 const STORY = {
-  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [168, 252], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
+  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [173, 258], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
   village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', cells: [192, 288], ink: 'village', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
-  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [159, 239], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
-  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [136, 203], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
-  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [162, 243], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
-  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [171, 256], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
-  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [167, 251], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
-  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [143, 214], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
-  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [192, 288], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
-  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
+  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [181, 270], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
+  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [168, 254], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
+  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [170, 256], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
+  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [179, 268], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [171, 256], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
+  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [157, 235], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
+  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [205, 307], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
+  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [192, 288], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
   // A card for Mochi's coming to each world, before its first level (owner, 2026-10-23: «историю с карточками нужно дополнить, например, сначала показываем
   // падение с луны, потом что герой упал в деревню – т.е. везде добавить +1 карточку перехода»; the scheme of the others, drawn out as the bosses' were:
-  // «у карточек тоже используй подход с детализацией»): drafts till his «да» to their art
-  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [189, 284], ink: 'village', draft: true, title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
-  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [191, 286], ink: 'cave', draft: true, title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
-  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [186, 279], ink: 'ice', draft: true, title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
-  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [128, 192], ink: 'sea', draft: true, title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
-  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [173, 260], ink: 'tokyo', draft: true, title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
-  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [204, 305], ink: 'blocks', draft: true, title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
-  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [146, 219], ink: 'sky', draft: true, title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
-  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [192, 288], ink: 'skazka', draft: true, title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
+  // «у карточек тоже используй подход с детализацией»): for everyone since his К17 «А»
+  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [189, 284], ink: 'village', title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
+  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [191, 286], ink: 'cave', title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
+  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [186, 279], ink: 'ice', title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
+  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [128, 192], ink: 'sea', title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
+  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [173, 260], ink: 'tokyo', title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
+  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [204, 305], ink: 'blocks', title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
+  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [146, 219], ink: 'sky', title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
+  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [192, 288], ink: 'skazka', title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
   // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
   // boss is, in its world's ink and its own: for all since his К13 «А» (2026-10-23; the tram face-on, as he asked)
   boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', title: BOSSES.probka.name },
@@ -2257,42 +2264,203 @@ STORY_INK.village = STORY_INK.mine;   // (the Village's world id is 'mine')
 // The cards' one frame, drawn here on the card's own grid (the pack: «draw the thin frame procedurally… more reliable and always aligned»;
 // the owner's К7: one pixel size in a card, the frame's too): its band round a 2:3 window, a white keyline, stepped corners in the ink, a
 // crescent moon at its top with a red knot either side, a yellow speck at each tip. Sizes in the pack's frame of 128 across (`u` cells to one).
-function storyFrame(f, w, h) {
+function storyFrame(f, w, h) {   // the card's medallion (owner, К16 «Б»: «окружность сверху карточки обрезается… убери все рамки внутри карточки»): a
+  // crescent in a ring, whole a little under the card's top, a red stud each side of it; no band, no lines, no corners (the corners round, CSS)
   const u = w / 128, q = (v) => Math.max(1, Math.round(v * u)), r = (x, y, ww, hh, c) => `<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${c}"/>`;
-  const B = q(4), T = q(6), cx = Math.round(w / 2);
-  let s = `<path fill="${f.I}" fill-rule="evenodd" d="M0 0H${w}V${h}H0Z M${B} ${T}V${h - T}H${w - B}V${T}Z"/>` + r(B - 1, T - 1, w - 2 * B + 2, 1, f.W) + r(B - 1, h - T, w - 2 * B + 2, 1, f.W) + r(B - 1, T - 1, 1, h - 2 * T + 2, f.W) + r(w - B, T - 1, 1, h - 2 * T + 2, f.W);
-  for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {   // a corner: an L along each edge and a step inside it
-    const X = (x, ww) => (sx > 0 ? x : w - x - ww), Y = (y, hh) => (sy > 0 ? y : h - y - hh);
-    s += r(X(0, q(12)), Y(0, q(2)), q(12), q(2), f.L) + r(X(0, q(2)), Y(0, q(14)), q(2), q(14), f.L) + r(X(q(5), q(3)), Y(q(8), q(3)), q(3), q(3), f.L) + r(X(0, q(1)), Y(0, q(1)), q(1), q(1), f.G);
-  }
-  s += `<circle cx="${cx}" cy="${q(4)}" r="${q(7)}" fill="${f.I}"/><circle cx="${cx}" cy="${q(4)}" r="${q(6)}" fill="none" stroke="${f.L}" stroke-width="${q(1)}"/><circle cx="${cx - q(1)}" cy="${q(4)}" r="${3.5 * u}" fill="${f.W}"/><circle cx="${cx + q(1)}" cy="${q(3)}" r="${3 * u}" fill="${f.I}"/>`;
-  s += r(cx - q(11), q(2), q(3), q(3), f.R) + r(cx + q(8), q(2), q(3), q(3), f.R);
+  const cx = Math.round(w / 2), cy = q(10);
+  let s = `<circle cx="${cx}" cy="${cy}" r="${q(7)}" fill="${f.I}"/><circle cx="${cx}" cy="${cy}" r="${q(6)}" fill="none" stroke="${f.L}" stroke-width="${q(1)}"/><circle cx="${cx - q(1)}" cy="${cy}" r="${3.5 * u}" fill="${f.W}"/><circle cx="${cx + q(1)}" cy="${cy - q(1)}" r="${3 * u}" fill="${f.I}"/>`;
+  s += r(cx - q(11), cy - q(1.5), q(3), q(3), f.R) + r(cx + q(8), cy - q(1.5), q(3), q(3), f.R);
   return `<svg class="sframe" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
 }
-// A card comes alive by the game itself (owner, К4 «А»: as the preview), on a canvas of its cells over the art: the eyes shut for two steps of
-// eight a second every 3.5 s, small specks dim to the mid tone in turn, the three biggest lights' edges dip to the ink now and then; all
-// from assets/cards/live.json (scratchpad cards3/live.py over the art). Small and in place, so it runs under «reduce motion» too (a sweep or a
-// tilt would not).
+// A card comes alive by the game itself (owner, К4 «А»; К14 «В»: «наклон, перелив как в пикселях»; К15 «А»: «Движения дожны быть плавными, по
+// всем правилам анимации дисней и пиксара»; К16 «Б»: «остальные карточки делай»). Its planes (CARD_PLANES: the plate, the card with what was behind
+// its figures repainted, and each figure on its own; a card without them one plane, its art), each a canvas on the card's cells moved by whole
+// device px only, never scaled or turned. It comes in staged: the plate dithers in, then each figure, the card rising past its place a little and
+// settling; its title, then Next. Its figures move by the card's own motion (CARD_MOTION: eased, slow in and out, on arcs, anticipation, overshoot
+// and settle, secondary action out of phase); the card tilts (±8°) toward the finger, else in a slow sweep, its planes parting by depth, a dithered
+// band of the six inks across it as far as it is tipped. The eyes blink, specks twinkle, lights flicker (assets/cards/live.json, scratchpad
+// cards8/live8.py over the art), each on the plane under it. Under «reduce motion» only those.
 const LIVE = { step: 125, blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
+const CARD = { tilt: 8, par: 8, step: 0.09, each: 0.32, rise: 24, riseT: 0.56, title: 0.32, next: 0.44, fade: 0.25, w0: 9, z: 0.62, idle: 2500 };   // degrees; the
+// nearest plane's parallax at the most (device px); the coming-in (s: each plane's start after the last's, its dither's length, the rise (CSS px) and
+// its length, the title's and Next's starts and fades); the tilt's spring (rad/s, damping: one small overshoot); the sweep after so long untouched
+const CARD_BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png under them, <id>-<figure>.png each), nearest last, with their depths; what it
+  // hangs by drawn live (threads: points in cells, each with how much of its figure's move it takes, 0 the plate's to 1 the figure's), in an ink
+  boss_cart: { planes: [['boss', 0.6], ['hero', 1]], threads: [{ ink: '#c8c8c8', pts: [[75, 42, 0], [75, 60, 1]] }] },   // the spider's thread off the beam
+  boss_namazu: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_probka: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_puck: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_tram: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_crane: { planes: [['boss', 0.6], ['hero', 1]], threads: [   // Nuppeppo's cable off the hook and the three ropes of its sling
+    { ink: '#808080', pts: [[121.5, 68, 0], [120.5, 74.5, 0.25]] }, { ink: '#808080', pts: [[120.5, 74.5, 0.25], [110.5, 99.5, 1]] },
+    { ink: '#808080', pts: [[120.5, 74.5, 0.25], [121.5, 96.5, 1]] }, { ink: '#808080', pts: [[120.5, 74.5, 0.25], [130.5, 98.5, 1]] }] },
+  boss_pigeon: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_koschei: { planes: [['boss', 0.6], ['hero', 1]] },
+};
+const cardEase = {
+  io: (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2),   // slow in, slow out
+  out: (u) => 1 - Math.pow(1 - u, 3), in: (u) => u * u * u,
+  back: (u) => { const c = 1.4; return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); },   // past it a little, and back
+};
+const clamp01 = (u) => Math.max(0, Math.min(1, u)), seg = (t, a, b) => clamp01((t - a) / (b - a));
+// Each card's motion at t s: its planes' offsets in cells ({ plane: [dx, dy] }), and `blink` when its eyes may shut (at rest in a move)
+const CARD_MOTION = {
+  boss_cart(t) {   // the Tsuchigumo hangs by its thread from the beam: a pendulum's arc about the thread's anchor, slow at each end and lifting there
+    const T = 3.6, th = 0.055 * Math.sin((2 * Math.PI * t) / T), L = 44, b = (1 - Math.cos((2 * Math.PI * t) / 2.3)) / 2;   // Mochi: a held breath, its own beat
+    return { boss: [L * Math.sin(th), L * (1 - Math.cos(th))], hero: [0, -0.8 * cardEase.io(b)], blink: b < 0.04 && Math.floor(t / 2.3) % 2 === 1 };
+  },
+  boss_namazu(t) {   // the Namazu: a dip (anticipation), a surge up out of the wave on an arc, past its height and back, a float, a slow sink
+    const u = t % 5.2; let y = 0, x = 0;
+    if (u < 0.55) y = 0.8 * cardEase.io(seg(u, 0, 0.55));
+    else if (u < 1.5) { y = 0.8 - 4.8 * cardEase.back(seg(u, 0.55, 1.5)); x = 1.4 * cardEase.out(seg(u, 0.55, 1.5)); }
+    else if (u < 3.1) { y = -4 + 0.35 * Math.sin(((u - 1.5) / 1.6) * Math.PI * 2); x = 1.4; }
+    else { const k = cardEase.io(seg(u, 3.1, 5.2)); y = -4 * (1 - k); x = 1.4 * (1 - k); }
+    const h = u - 0.8;   // Mochi on the rock a beat after the surge: a hop, up quick, down slower
+    return { boss: [x, y], hero: [0, cardHop(h, 1.6, 0.28, 0.47)], blink: h > 0.8 && h < 0.95 };
+  },
+  boss_probka(t) {   // the Bake-danuki drums its belly: it crouches (anticipation), springs up, falls and lands with a little give, then breathes
+    const u = t % 2.6; let y = 0;
+    if (u < 0.22) y = 0.6 * cardEase.io(u / 0.22);
+    else if (u < 0.5) y = 0.6 - 2.2 * cardEase.out(seg(u, 0.22, 0.5));
+    else if (u < 0.78) y = -1.6 * (1 - cardEase.in(seg(u, 0.5, 0.78)));
+    else if (u < 1.05) y = 0.35 * Math.sin(Math.PI * seg(u, 0.78, 1.05));
+    else y = -0.25 * (1 - Math.cos((2 * Math.PI * (u - 1.05)) / 1.55)) / 2;
+    return { boss: [-0.3 * Math.sin(Math.PI * seg(u, 0, 0.5)), y], hero: [0, cardHop(u - 0.9, 1.2, 0.2, 0.4)], blink: u > 1.6 && u < 1.75 };   // Mochi jumps at its landing
+  },
+  boss_puck(t) {   // the Tsurara-onna floats on a figure of eight, slow; Mochi leans away as she drifts its way, breathing
+    const w = (2 * Math.PI * t) / 4.8, b = (1 - Math.cos((2 * Math.PI * t) / 2.4)) / 2;
+    return { boss: [0.9 * Math.sin(w), -0.6 - 0.6 * Math.sin(2 * w)], hero: [0.5 * Math.min(0, Math.sin(w - 0.6)), -0.3 * cardEase.io(b)] };
+  },
+  boss_tram(t) {   // the Tsukumo Tram over a rail joint each 1.2 s: down at once, back up past its rest a little and settling; Mochi jumps a beat after
+    const u = t % 1.2, y = u < 0.07 ? 0.6 * cardEase.out(u / 0.07) : u < 0.45 ? 0.6 * (1 - cardEase.back(seg(u, 0.07, 0.45))) : 0;
+    return { boss: [0, y], hero: [0, cardHop(u - 0.12, 0.9, 0.18, 0.32)], blink: u > 0.8 && u < 0.95 && Math.floor(t / 1.2) % 2 === 0 };
+  },
+  boss_crane(t) {   // Nuppeppo swings in its sling under the hook: a pendulum's arc about the hook, slow at each end and lifting there
+    const th = 0.045 * Math.sin((2 * Math.PI * t) / 4.2), L = 67, b = (1 - Math.cos((2 * Math.PI * t) / 2.6)) / 2;
+    return { boss: [L * Math.sin(th), L * (1 - Math.cos(th))], hero: [0, -0.4 * cardEase.io(b)], blink: b < 0.04 && Math.floor(t / 2.6) % 2 === 1 };
+  },
+  boss_pigeon(t) {   // the Karasu-tengu holds in the air: up quick on each downbeat of its wings, sinking slower, drifting; Mochi breathes on its cloud
+    const u = t % 0.95, y = u < 0.3 ? -1.1 * cardEase.out(u / 0.3) : -1.1 * (1 - cardEase.io(seg(u, 0.3, 0.95))), b = (1 - Math.cos((2 * Math.PI * t) / 2.4)) / 2;
+    return { boss: [0.6 * Math.sin((2 * Math.PI * t) / 5), y], hero: [0, -0.4 * cardEase.io(b)] };
+  },
+  boss_koschei(t) {   // Koschei leans in over the path, looming, holds, draws back; Kolobok hops back from him as he comes, and creeps back after
+    const u = t % 5, k = u < 1.8 ? cardEase.io(u / 1.8) : u < 2.5 ? 1 : u < 4.3 ? 1 - cardEase.io(seg(u, 2.5, 4.3)) : 0;
+    const hx = u < 1.6 ? 0 : u < 1.85 ? -0.9 * cardEase.out(seg(u, 1.6, 1.85)) : u < 2.4 ? -0.9 : u < 3.4 ? -0.9 * (1 - cardEase.io(seg(u, 2.4, 3.4))) : 0;
+    return { boss: [-1.2 * k, -0.4 * k], hero: [hx, cardHop(u - 1.6, 0.8, 0.12, 0.23)], blink: u > 4.4 && u < 4.55 };
+  },
+};
+function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
-function cardLive(c, card) {
-  const [w, h] = c.cells, cv = document.createElement('canvas'), g = cv.getContext('2d');
-  cv.className = 'slive'; cv.width = w; cv.height = h; card.insertBefore(cv, card.querySelector('.sframe'));
-  let f = 0, L = null;
-  (liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))).then((j) => { L = j[c.id] || null; });
-  const fill = (cells, col) => { g.fillStyle = col; for (const [x, y] of cells) g.fillRect(x, y, 1, 1); };
-  const timer = setInterval(() => {
-    if (!L) return;
-    f++; g.clearRect(0, 0, w, h);
-    if (LIVE.blink.includes(f % LIVE.every)) for (const e of L.eyes) {   // a blink: the eye white, a lid across it, its ends a cell up
-      const [x, y, ew, eh] = e.box, ly = y + Math.floor(eh * 0.6);
-      fill(e.cells, L.pal[4]); g.fillStyle = L.pal[0];
-      for (let i = 0; i < ew; i++) g.fillRect(x + i, ly - (ew >= 4 && (i === 0 || i === ew - 1) ? 1 : 0), 1, 1);
+const cardImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+function cardLive(c, card, tilt, clip, title, next) {
+  const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
+  const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
+  const st = { alive: true, raf: 0, t0: 0, in0: 0, tx: 0, ty: 0, vx: 0, vy: 0, gx: 0, gy: 0, lastIn: -1e9, last: 0, ready: false };
+  const planes = [], L0 = { eyes: [], twinkle: [], lights: [], pal: [] };
+  let L = L0, thread = null, sheen = null, sg = null, img = null, masks = null;
+  const show = (a, b) => { title.style.opacity = a; title.style.transform = `translateY(${8 * (1 - cardEase.out(a))}px)`; next.style.opacity = b; next.style.transform = `translateY(${8 * (1 - cardEase.out(b))}px)`; next.style.pointerEvents = b < 0.5 ? 'none' : ''; };
+  show(still ? 1 : 0, still ? 1 : 0);
+  const move = (e) => { const r = card.getBoundingClientRect(); st.gx = ((e.clientX - r.left) / r.width - 0.5) * 2; st.gy = ((e.clientY - r.top) / r.height - 0.5) * 2; st.lastIn = performance.now(); };
+  const leave = () => { st.gx = 0; st.gy = 0; };
+  card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
+  Promise.all([cardImg(def ? `assets/cards/planes/${c.id}-plate.png` : c.still), ...(def ? def.planes.map(([id]) => cardImg(`assets/cards/planes/${c.id}-${id}.png`)) : []),
+    liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))]).then((got) => {
+    if (!st.alive) return;
+    const ims = got.slice(0, -1), j = got[got.length - 1];
+    if (!ims[0]) return;   // (no art: the card's ground only)
+    L = (j && j[c.id]) || L0;
+    const specs = [['plate', 0.25], ...(def ? def.planes : [])];
+    ims.forEach((im, i) => {
+      if (!im) return;
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.className = 'spl'; clip.append(cv);
+      const pl = { id: specs[i][0], depth: specs[i][1], im, cv, g: cv.getContext('2d'), live: [], key: '' };
+      if (i > 0) {   // a figure's cells: what is not clear in its picture (its live cells' owner)
+        const t = document.createElement('canvas'); t.width = w; t.height = h; const tg = t.getContext('2d'); tg.drawImage(im, 0, 0); const d = tg.getImageData(0, 0, w, h).data;
+        pl.mask = new Uint8Array(w * h); for (let q = 0; q < w * h; q++) pl.mask[q] = d[q * 4 + 3] > 0 ? 1 : 0;
+      }
+      planes.push(pl);
+      if (i === 0 && def && def.threads) { thread = document.createElement('canvas'); thread.className = 'spl'; clip.append(thread); }   // over the plate, under what it holds
+    });
+    const owner = (cells) => { for (let i = planes.length - 1; i > 0; i--) if (cells.some(([x, y]) => planes[i].mask[y * w + x])) return planes[i]; return planes[0]; };
+    for (const e of L.eyes) owner(e.cells).live.push({ kind: 'eye', cells: e.cells, box: e.box });
+    for (const t of L.twinkle) owner(t).live.push({ kind: 'twinkle', cells: t });
+    for (const l of L.lights) owner(l).live.push({ kind: 'light', cells: l });
+    if (!still) { sheen = document.createElement('canvas'); sheen.width = w; sheen.height = h; sheen.className = 'spl ssheen'; clip.append(sheen); sg = sheen.getContext('2d'); img = sg.createImageData(w, h); }
+    masks = [];   // the coming-in's 17 dithers: level n shows the cells whose Bayer value is under n
+    for (let n = 0; n <= 16; n++) {
+      const m = document.createElement('canvas'); m.width = w; m.height = h; const mg = m.getContext('2d'), d = mg.createImageData(w, h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (CARD_BAYER[y & 3][x & 3] < n) d.data[(y * w + x) * 4 + 3] = 255;
+      mg.putImageData(d, 0, 0); masks.push(m);
     }
-    L.twinkle.forEach((t, i) => { if ((f + i * 5) % 12 < 3) fill(t, L.pal[2]); });
-    L.lights.forEach((l, i) => { if (!LIVE.flick[(f + i * 4) % LIVE.flick.length]) fill(l, L.pal[3]); });
-  }, LIVE.step);
-  return { stop() { clearInterval(timer); } };
+    st.ready = true;
+  });
+  const rgb = RAINBOW_INK.map((v) => v.map((q) => Math.round(q * 255)));
+  function drawPlane(p, level, f, blink) {   // its picture, its live cells this step, through the coming-in's dither (only when either changed)
+    const key = level + ':' + (p.live.length ? f + (blink ? 'b' : '') : '');
+    if (key === p.key) return; p.key = key;
+    const g = p.g; g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, w, h); g.drawImage(p.im, 0, 0);
+    const fill = (cells, col) => { g.fillStyle = col; for (const [x, y] of cells) g.fillRect(x, y, 1, 1); };
+    p.live.forEach((e, i) => {
+      if (e.kind === 'eye' && blink) {   // the eye white, a lid across it, its ends a cell up
+        const [x, y, ew, eh] = e.box, ly = y + Math.floor(eh * 0.6); fill(e.cells, L.pal[4]); g.fillStyle = L.pal[0];
+        for (let q = 0; q < ew; q++) g.fillRect(x + q, ly - (ew >= 4 && (q === 0 || q === ew - 1) ? 1 : 0), 1, 1);
+      }
+      if (e.kind === 'twinkle' && (f + i * 5) % 12 < 3) fill(e.cells, L.pal[2]);
+      if (e.kind === 'light' && !LIVE.flick[(f + i * 4) % LIVE.flick.length]) fill(e.cells, L.pal[3]);
+    });
+    if (level < 16) { g.globalCompositeOperation = 'destination-in'; g.drawImage(masks[level], 0, 0); }
+  }
+  function drawSheen(px, py) {   // the band of the six inks, its place by the tilt, dithered at its edges; as strong as the card is tipped
+    const amt = Math.min(1, 1.6 * Math.hypot(px, py)), d = img.data; d.fill(0);
+    if (amt >= 0.05) {
+      const ce = 0.62 + 0.9 * px + 0.5 * py, bw = 0.14;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const u = (x / w) * 0.8 + (y / h) * 0.45 - ce, a = (1 - Math.abs(u) / bw) * amt;
+        if (a <= 0 || a * 16 <= CARD_BAYER[y & 3][x & 3]) continue;
+        const k6 = Math.min(5, Math.max(0, Math.floor((u / bw + 1) * 3))), i = (y * w + x) * 4; d[i] = rgb[k6][0]; d[i + 1] = rgb[k6][1]; d[i + 2] = rgb[k6][2]; d[i + 3] = 255;
+      }
+    }
+    sg.putImageData(img, 0, 0);
+  }
+  function drawThread(off, K) {   // what it hangs by, from the plate to the figure, a cell wide, in whole device px (each point moved its part of the way)
+    const r = card.getBoundingClientRect(), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+    if (thread.width !== W || thread.height !== H) { thread.width = W; thread.height = H; }
+    const g = thread.getContext('2d'), pa = off[0], pb = off[1], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
+    g.clearRect(0, 0, W, H);
+    for (const th of def.threads) {
+      g.fillStyle = th.ink;
+      for (let s = 1; s < th.pts.length; s++) {
+        const [x0, y0] = at(th.pts[s - 1]), [x1, y1] = at(th.pts[s]), n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / K));
+        for (let i = 0; i <= n; i++) { const u = i / n; g.fillRect(Math.round(x0 + (x1 - x0) * u), Math.round(y0 + (y1 - y0) * u), Math.round(K), Math.round(K)); }
+      }
+    }
+  }
+  function step(now) {
+    if (!st.alive) return;
+    st.raf = requestAnimationFrame(step);
+    if (!st.ready) { st.last = now; return; }
+    if (!st.t0) st.t0 = st.in0 = now;   // (the coming-in from the first frame its pictures are there)
+    const dt = Math.min(0.05, (now - st.last) / 1000), t = (now - st.t0) / 1000, a = (now - st.in0) / 1000, K = kd(); st.last = now;
+    let gx = st.gx, gy = st.gy;   // the tilt's goal: the finger, else after a while untouched a slow figure of eight; none under «reduce motion»
+    if (still) { gx = 0; gy = 0; } else if (now - st.lastIn > CARD.idle) { gx = 0.55 * Math.sin(t * 0.55); gy = 0.35 * Math.sin(t * 1.1); }
+    if (a < 0.9 && !still) gy = Math.min(gy, -1.2 + a * 1.4);   // coming in tipped back, rising
+    st.vx += (CARD.w0 * CARD.w0 * (gx - st.tx) - 2 * CARD.z * CARD.w0 * st.vx) * dt; st.tx += st.vx * dt;
+    st.vy += (CARD.w0 * CARD.w0 * (gy - st.ty) - 2 * CARD.z * CARD.w0 * st.vy) * dt; st.ty += st.vy * dt;
+    const rise = still ? 0 : CARD.rise * (1 - cardEase.back(clamp01(a / CARD.riseT)));
+    tilt.style.transform = still ? '' : `translateY(${Math.round(rise * dpr) / dpr}px) perspective(700px) rotateX(${(-st.ty * CARD.tilt).toFixed(2)}deg) rotateY(${(st.tx * CARD.tilt).toFixed(2)}deg)`;
+    const mo = !still && CARD_MOTION[c.id] ? CARD_MOTION[c.id](t) : {}, f = Math.floor(t / 0.125), blink = mo.blink != null ? mo.blink : LIVE.blink.includes(f % LIVE.every), off = [];
+    planes.forEach((p, i) => {   // its motion (cells) and its depth's parallax, in whole device px; the plate first, each figure 0.09 s after
+      const [mx, my] = mo[p.id] || [0, 0], par = still ? 0 : p.depth * CARD.par, ox = Math.round(mx * K + st.tx * par), oy = Math.round(my * K + st.ty * par);
+      off.push([ox, oy]); p.cv.style.transform = `translate(${ox / dpr}px, ${oy / dpr}px)`;
+      drawPlane(p, still ? 16 : Math.round(16 * clamp01((a - CARD.step * i) / CARD.each)), f, blink);
+    });
+    if (thread) { drawThread(off, K); thread.style.opacity = still ? 1 : clamp01((a - CARD.step) / CARD.each); }
+    if (sheen) drawSheen(st.tx, st.ty);
+    show(still ? 1 : clamp01((a - CARD.title) / CARD.fade), still ? 1 : clamp01((a - CARD.next) / CARD.fade));
+  }
+  st.raf = requestAnimationFrame(step);
+  return { stop() { st.alive = false; cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
@@ -2554,15 +2722,16 @@ const ui = {
     p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), ...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
-    const p = this.panel('story'), card = el('div', 'scard'), art = new Image(), [w, h] = c.cells, f = STORY_INK[c.ink];
+    const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink];
     const box = Math.min(view.w - 16, (view.h - 180) * 2 / 3), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // (the view as
     card.style.width = w * k + 'px'; card.style.height = h * k + 'px';   // layout measured it: a CSS 100vh is taller than the page under iOS Safari's bar) whole pixels: a whole number of the
     // screen's to each of the art's cells, the most that fits a 2:3 box (cards drawn on finer grids a little smaller), unless that loses over 30% of it (then as it fits)
     for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
-    art.className = 'sart'; art.alt = L2(c.title); art.decoding = 'async'; art.src = c.still;
-    card.innerHTML = storyFrame(f, w, h); card.prepend(art); if (c.n) card.append(el('div', 'snum', c.n));
-    if (this.live) this.live.stop(); this.live = cardLive(c, card);
-    p.append(card, el('div', 'stitle', L2(c.title)), cap(button(t('next'), 'big thumb', () => { this.live.stop(); done(); }), 'next'));
+    const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); done(); }), 'next');
+    clip.setAttribute('role', 'img'); clip.setAttribute('aria-label', L2(c.title));
+    tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); card.append(tilt);
+    if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);
+    p.append(card, title, next);
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
@@ -2603,7 +2772,7 @@ const ui = {
     if (r.fresh.length || r.firstWin || r.tierUp > 1) {
       const u = el('div', 'fresh');
       u.append(el('div', 'label', t('unlocked')));
-      for (const f of r.fresh) { const c = el('span', 'chip swatch on'); c.style.background = rgb(colorById(f.id).base); u.append(c); }
+      for (const f of r.fresh) { const c = el('span', 'swatch on'); c.style.setProperty('--c', rgb(colorById(f.id).base)); u.append(c); }
       if (r.tierUp > 1) u.append(el('div', null, tf('tierOpen', { n: r.tierUp }))); else if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       box.append(u);
     }
@@ -2882,6 +3051,8 @@ function joyEnd() {
 for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, (e) => {   // iOS can lose a finger's pointerup (off the top of the screen, say): no finger on the glass, nothing held
   if (e.touches.length) return;
   joyEnd(); for (const f of padLets) f();   // (a key's finger lost too: the key would stay deaf to the next one)
+  const held = [...menuTouch.ptrs.keys()]; if (held.length) setTimeout(() => { for (const id of held) menuTouch.up({ pointerId: id }, true); }, 0);   // the menu's hero let go of
+  // a finger lost, after its pointerup if that is coming yet (a throw kept)
   if (gest) { if (gest.dir) { input.swipe = false; input.set('left', false); input.set('right', false); } if (gest.flick === 'up') input.set('jump', false); }
   gest = null; tap2 = null;
 }, { passive: true });
@@ -3252,7 +3423,8 @@ const menuTouch = {
     if (!p) return;
     this.ptrs.delete(e.pointerId);
     const now = performance.now(), b = p.body;
-    if (!this.on() || b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
+    if (b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
+    if (!this.on()) cancel = true;   // (the menu shut under it, the settings say: let go where it is, not flung)
     if (p.mode === 'press') {
       if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) this.poke(b, p);
       else {
@@ -3387,11 +3559,15 @@ function perfSend(now) {
     frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION });
   perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss;
 }
-// A computer too slow for the finer grid (PIX.fit): its first 3 s of play measured, and if half its frames took over 25 ms, the old grid for good.
-const PIX_GUARD = { frames: 180, slow: 0.025 }, pixSeen = { n: 0, slow: 0 };
+// A computer too slow for the finer grid (PIX.fit): its first 3 s of play measured, and if half its frames took over 25 ms, the old grid for good. A
+// frame is slow against the screen's own pace too, the menu's (a cheap scene): a screen or a battery saver at 30 Hz is not a slow computer.
+const PIX_GUARD = { frames: 180, slow: 0.025, over: 1.5, pace: 60 }, pixSeen = { n: 0, slow: 0, menu: [], pace: null };
 function pixGuard(dt) {
-  if (PIX.slow || PIX.size >= PIX.base || pixSeen.n >= PIX_GUARD.frames || game.state !== 'play' || document.hidden || !(dt > 0) || dt > 0.25) return;
-  pixSeen.n++; if (dt > PIX_GUARD.slow) pixSeen.slow++;
+  if (PIX.slow || PIX.size >= PIX.base || pixSeen.n >= PIX_GUARD.frames || document.hidden || !(dt > 0) || dt > 0.25) return;
+  if (game.state === 'menu') { if (pixSeen.menu.length < PIX_GUARD.pace) pixSeen.menu.push(dt); return; }   // the menu's frame gaps
+  if (game.state !== 'play') return;
+  if (pixSeen.pace == null) { const m = pixSeen.menu.slice().sort((a, b) => a - b); pixSeen.pace = m.length ? m[m.length >> 1] : 0; }   // their middle one
+  pixSeen.n++; if (dt > Math.max(PIX_GUARD.slow, PIX_GUARD.over * pixSeen.pace)) pixSeen.slow++;
   if (pixSeen.n === PIX_GUARD.frames && pixSeen.slow > PIX_GUARD.frames / 2) { PIX.slow = true; queueLayout(); }
 }
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.

@@ -56,7 +56,7 @@ void main() {
 // halos and the rays, then the grade.
 const CINE_COMP_FS = GLSL + `in vec2 vUv; out vec4 o;
 uniform sampler2D uFar, uFarB, uPlay, uSoft, uRays, uSt, uSm; uniform vec3 uWhite; uniform vec2 uLow, uWell, uShOff, uExOff, uEye; uniform float uAsp, uTime; uniform vec2 uK3, uK4;
-uniform vec4 uL[16]; uniform vec3 uLC[16]; uniform int uNL; uniform vec4 uK; uniform vec4 uK2; uniform vec3 uFogC, uShadeC; uniform float uGrade;
+uniform vec4 uL[16]; uniform vec3 uLC[16]; uniform int uNL; uniform vec4 uK; uniform vec4 uK2; uniform vec3 uFogC, uShadeC; uniform float uGrade, uKeep;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
 vec4 at(sampler2D t, vec2 q) { return texelFetch(t, clamp(ivec2(floor(q)), ivec2(0), ivec2(uLow) - 1), 0); }
@@ -71,8 +71,8 @@ vec4 matAt(sampler2D t, vec2 q) {   // a thing's own colour at q (its pattern ca
 bool depthOf(sampler2D t, vec2 pg, vec2 k, out vec3 col) {
   vec2 o = (uEye - pg) * k.x; float ol = length(o); if (ol > k.y) { o *= k.y / ol; ol = k.y; }
   float n = ceil(ol); vec2 dir = o / max(ol, 1e-3);
-  for (int i = 1; i <= 16; i++) {
-    if (float(i) > n) break;
+  for (int i = 1; i <= 64; i++) {   // (16 of the levels' grid's pixels back at most: 16 on a phone, 32 on a computer's finer grid, uKeep = PIX.keep)
+    if (float(i) > n || float(i) > 16.0 * uKeep) break;
     float s = float(i) / n; vec2 q = pg - o * s;
     if (at(t, q).a > 0.5) {
       bool top = dir.y > 0.2 && at(t, q + vec2(0.0, 1.0)).a < 0.5, bot = dir.y < -0.2 && at(t, q - vec2(0.0, 1.0)).a < 0.5;
@@ -307,7 +307,8 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
   gl.disable(gl.BLEND); gl.bindVertexArray(this.emptyVao);
   const tex = (unit, tx, u) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tx); gl.uniform1i(u, unit); };
   const pass = (tg, prog, set) => { gl.bindFramebuffer(gl.FRAMEBUFFER, tg ? tg.fb : null); gl.viewport(0, 0, tg ? tg.w : this.canvas.width, tg ? tg.h : this.canvas.height); gl.useProgram(prog.p); set(prog.u); gl.drawArrays(gl.TRIANGLES, 0, 3); };
-  const blur = (a, b, src) => { pass(a, this.pBlur, (u) => { tex(0, src.tex, u.uTex); gl.uniform2f(u.uDir, 1 / a.w, 0); }); pass(b, this.pBlur, (u) => { tex(0, a.tex, u.uTex); gl.uniform2f(u.uDir, 0, 1 / b.h); }); };
+  const blur = (a, b, src) => { pass(a, this.pBlur, (u) => { tex(0, src.tex, u.uTex); gl.uniform2f(u.uDir, PIX.keep / a.w, 0); }); pass(b, this.pBlur, (u) => { tex(0, a.tex, u.uTex); gl.uniform2f(u.uDir, 0, PIX.keep / b.h); }); };   // (as wide on a computer's
+  // finer grid as on the levels' grid: PIX.keep)
   if (on('dof')) { pass(c.h1, this.pCopy, (u) => tex(0, c.far.tex, u.uTex)); blur(c.h2, c.h1, c.h1); }   // what is behind, out of focus: in h1
   pass(c.q1, this.pAlpha, (u) => { tex(0, c.st.tex, u.uTex); tex(1, c.sm.tex, u.uTex2); }); blur(c.q2, c.q3, c.q1);   // the things' coverage in q1, softened in q3 (where to look for depth; the shadow's)
   const toUv = (x, y) => [(x + sx) / W, 1 - (y + sy) / H];
@@ -324,7 +325,8 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
     gl.uniform3fv(u.uWhite, lv.theme.wall);
     gl.uniform2f(u.uEye, (((lv.l + lv.r) / 2 + sx) / W) * lw, 0.5 * lh); gl.uniform2f(u.uK3, on('vol') ? CINE.K : 0, (CINE.DEEP * lv.tile) / PIX.size); gl.uniform2f(u.uK4, on('vol') ? CINE.K : 0, (CINE.SMALL * lv.tile) / PIX.size);   // 2.5D: the eye in the middle, the deepest each kind goes
     gl.uniform2f(u.uLow, lw, lh); gl.uniform2f(u.uWell, (lv.l + sx) / W, (lv.r + sx) / W); gl.uniform1f(u.uAsp, W / H); gl.uniform1f(u.uTime, lv.t);
-    gl.uniform2f(u.uShOff, -3 / lw, 8 / lh); gl.uniform2f(u.uExOff, -1 / lw, 3 / lh);
+    gl.uniform2f(u.uShOff, (-3 * PIX.keep) / lw, (8 * PIX.keep) / lh); gl.uniform2f(u.uExOff, (-1 * PIX.keep) / lw, (3 * PIX.keep) / lh); gl.uniform1f(u.uKeep, PIX.keep);   // (the shadow's and
+    // the thickness's offsets, and the depth's reach, in the levels' grid's pixels: as on a phone)
     const LU = new Float32Array(64), LC = new Float32Array(48);
     lights.forEach(([x, y, r, i, col], j) => { const [ux, uy] = toUv(x, y); LU.set([ux, uy, r / H, on('light') ? i : 0], j * 4); LC.set(col, j * 3); });
     gl.uniform4fv(u['uL[0]'], LU); gl.uniform3fv(u['uLC[0]'], LC); gl.uniform1i(u.uNL, lights.length);
@@ -374,9 +376,10 @@ function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
 const cinePerched = (r, T) => !r.poke || r.poke.back <= T;   // a scarecrow's crow on its hand (back from its flight)
 function cineSpr(box, rows, x, y, ink) {   // a CRITTER picture a game pixel a dot, centred on x, its foot at y (as the renderer's spr); a run of one ink in a row one box
   // (a crow 54 of them, not 150)
-  const s = PIX.base, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s;   // (a dot the levels' grid's pixel: its size kept on a finer one)
+  const s = PIX.base, g = (v) => Math.round(v / PIX.size) * PIX.size, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s;   // (a dot the levels' grid's pixel: its size kept on a finer one)
   rows.forEach((row, j) => { for (let i = 0, k; i < row.length; i = k) { for (k = i + 1; k < row.length && row[k] === row[i]; k++);
-    if (row[i] !== '.') box(x0 + i * s, y0 + j * s, x0 + k * s, y0 + (j + 1) * s, row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); } });
+    if (row[i] !== '.') box(g(x0 + i * s), g(y0 + j * s), g(x0 + k * s), g(y0 + (j + 1) * s), row[i] === 'w' ? INK.white : row[i] === 'k' ? PAL.black : ink, 1, 0, 10, 0); } });   // (each edge on
+  // the drawing grid: a dot of 1.5 or 2.5 of its pixels leaves no hole)
 }
 // What the pokes shed and send off, each frame (in front, flat): petals and needles falling, lying on their ledge a while, fading; a crow flying off.
 function cineFx(g, lv, cam, H, box, dt) {

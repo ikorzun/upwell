@@ -12,7 +12,7 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
-const MENU_HERO = { w: 0.25, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest; its floor `gap` px over the colours, `room` px at least under the logo
+const MENU_HERO = { w: 0.25, k: 0.85, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest, then `k` of that (owner: «уменьши героя на 15%»); its floor `gap` px over the colours, `room` px at least under the logo
 const BIG_BLOCK = { w: 3.5, h: 2.6, size: 0.5, tone: 1.45 };   // a block this wide and tall (tiles) gets a kanji half its smaller side across, in its ink 0.45 of the way from the black (KANJI)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
 // floor and `air`/s in the air; `slip` is a floor's friction while running on the keys (it holds
@@ -364,7 +364,8 @@ const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2, get keep(
 PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized to (a phone's 1.5, a computer's 2) whatever the drawing's: a sprite's dot PIX.keep times its pixels
 // A computer's drawing grid (owner, 2026-10-23: «на мониторах ретина на десктопе графика тоже должны быть как на телефоне», his Д1 «А»): a game pixel a whole
 // number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen
-// may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard)
+// may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard). At a screen's 125–175 % or a
+// browser's zoom a sprite's dot is 1.5 or 2.5 of its pixels: the pictures put each dot's edges on the drawing grid (onGrid), so no holes (owner: «делай по совету»)
 PIX.fit = function () {
   if (this.base !== 2 || this.slow) return this.base;
   const q = +new URLSearchParams(location.search).get('pix'), d = window.devicePixelRatio || 1;
@@ -2902,9 +2903,11 @@ function sparkFx(x, y, n, a, spread, sp, size, life, inks, g) {
 function updateBits(dt) {
   for (let i = bits.length - 1; i >= 0; i--) {
     const b = bits[i], d = Math.exp(-b.drag * dt);
+    if ((b.t += dt) < 0) continue;   // (a bit still to come: popFx's specks)
     b.vx *= d; b.vy = b.vy * d + SHOT_G * b.g * dt; b.x += b.vx * dt; b.y += b.vy * dt;
-    if ((b.t += dt) > b.life) bits.splice(i, 1);
+    if (b.t > b.life) bits.splice(i, 1);
   }
+  for (let i = pops.length - 1; i >= 0; i--) if ((pops[i].t += dt) > POP.life) pops.splice(i, 1);
 }
 // An enemy bursting like a ripe fruit (user: juicier, flying apart under the pressure): pieces of its skin and paler flesh
 // thrown in arcs, a few seeds, and a spray of juice drops falling after, over a white pop; `c` its ink.
@@ -2914,7 +2917,34 @@ function juiceFx(x, y, R, c) {
   for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: rand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: rand(0.7, 1.1), g: 1, drag: 1.2 }); }
   for (let i = 0; i < 5; i++) { const a = rand(0, TAU), v = rand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: rand(0.5, 0.9), g: 1, drag: 1.5 }); }
   for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + rand(-1.7, 1.7), v = rand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: rand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: rand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
-  fx.add(x, y, 0, 0, R * 1.5, 0.22, PAL.white, 0.9, 2); fx.ring(x, y, 1.8 * R, c);
+}   // (its white pop and ring popFx's now, crisp)
+// An enemy beaten (owner, 2026-10-23: «добавь больше частиц и эффектов при победе над врагом», with two sheets of a hit's frames): over the fruit's
+// burst, the hit's beats in crisp game pixels: a white flash, a ring thrown out, rays, a streak of drops along the blow, blobs of it flung and
+// breaking up, hollow puffs of an accent swelling and thinning, all going out through the dither as they end (pops, drawn by Renderer.draw).
+let fxSeed = 0x9e3779b9;   // the pop's own chances (fxRand): what only shows draws none of the game's (Math.random, which the bot seeds: a
+// look changed would change its runs)
+function fxRand(a, b) { fxSeed = (fxSeed + 0x6d2b79f5) >>> 0; let t = fxSeed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return a + (b - a) * (((t ^ (t >>> 14)) >>> 0) / 4294967296); }
+const POP = { life: 0.8, flash: 0.07, ring: [0.03, 0.22], rays: [0.02, 0.17], blobs: [0.05, 0.62], puffs: [0.1, 0.76], n: 12 };
+const pops = [];
+function popFx(x, y, R, c, dx, dy) {   // (dx, dy) the blow's way, a unit
+  if (pops.length >= POP.n) pops.shift();   // (a chain's: the oldest goes)
+  const a0 = Math.atan2(dy, dx), accent = c[0] > 0.9 && c[1] > 0.8 ? PAL.white : PAL.yellow;
+  const blobs = [], puffs = [], rays = [];
+  for (let i = 0; i < 8; i++) rays.push(a0 + (i / 8) * TAU + fxRand(-0.15, 0.15));
+  for (let i = 0; i < 7; i++) {   // a blob: two or three ellipses together (a splash, not a ball), out along the blow and to its sides
+    const a = a0 + (i % 2 ? 1 : -1) * fxRand(0.2, 1.3) + (i > 3 ? Math.PI : 0), lobes = [];
+    for (let k = 0, n = 2 + (i % 2); k < n; k++) lobes.push([fxRand(-0.35, 0.35), fxRand(-0.35, 0.35), fxRand(0.55, 1)]);
+    blobs.push({ a, d: fxRand(0.8, 1.7) * R, r: fxRand(0.28, 0.46) * R, lobes, t0: fxRand(0, 0.05) });
+  }
+  for (let i = 0; i < 3; i++) {   // a puff: four rings of the accent, a cloud's outline
+    const a = a0 + (Math.PI / 2) * (i - 1) + fxRand(-0.4, 0.4), lobes = [];
+    for (let k = 0; k < 4; k++) lobes.push([fxRand(-0.7, 0.7), fxRand(-0.55, 0.55), fxRand(0.55, 1)]);
+    puffs.push({ a, d: fxRand(0.9, 1.5) * R, r: fxRand(0.42, 0.62) * R, lobes });
+  }
+  pops.push({ x, y, R, c, dark: c.map((v) => v * 0.55), accent, t: 0, rays, blobs, puffs });
+  if (bits.length > 360) return;   // (a phone's budget for the rest)
+  for (let i = 0; i < 9; i++) { const v = fxRand(520, 980), a = a0 + (i % 2 ? Math.PI : 0) + fxRand(-0.12, 0.12); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.4 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: fxRand(1.5, 3), c: i % 3 ? PAL.white : c, t: 0, life: fxRand(0.22, 0.4), g: 0.25, drag: 5 }); }   // the streak, both ways
+  for (let i = 0; i < 22; i++) { const a = fxRand(0, TAU), d = fxRand(0.6, 1.8) * R, v = fxRand(30, 130); bits.push({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, s: fxRand(1, 2), c: i % 3 ? c : i % 2 ? accent : c.map((q) => q * 0.55), t: -fxRand(0.25, 0.4), life: fxRand(0.75, 1.1), g: 0.12, drag: 2 }); }   // its specks as it breaks up (from 0.25 s)
 }
 function splatFx(x, y, R, c, n = 9) {
   const k = lighten(c, 0.1);
@@ -3236,21 +3266,23 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
   const box = (x0, y0, x1, y1, c, a, rad, type, p3) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, c, a, type || 5, hw, hh, type >= 7 ? p3 : rad); };
+  const onGrid = (v) => Math.round(v / PIX.size) * PIX.size;   // (on the drawing grid: a picture's dot of 1.5 or 2.5 of its pixels, PIX.fit, leaves no hole)
   const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
     const rows = ICONS[id], s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
+    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });   // (each edge
+    // on the drawing grid)
   };
   const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
     // cosine (past a quarter turn its back, mirrored); no grey edge beside it (owner: «убери серый псевдообъем у бонусов»), and never thinner than `ICON_SPIN`
     // of its width (with its edge gone it shrank to a sliver of a pixel edge on, and blinked out: the tester's «анимация вращения … поломалась»)
     const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
-    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), y0 + j * s, Math.max(u, v), y0 + (j + 1) * s, PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
     if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
       const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s) / P) * P;
       if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
         const bx = x0 + col(sn > 0 ? iL : iR + 1), dx = (sn > 0 ? -d : d) * (c < 0 ? -1 : 1);
-        box(Math.min(bx, bx + dx), y0 + j * s, Math.max(bx, bx + dx), y0 + (j + 1) * s, PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
+        box(Math.min(bx, bx + dx), onGrid(y0 + j * s), Math.max(bx, bx + dx), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
     }
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
@@ -3823,7 +3855,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (y < top - 2 * t || y > bot) continue;
       for (const [ox, oy] of [[0, 0], [-2.6, 1.3]]) { const fx = dir > 0 ? x + ox * t : lv.r + lv.l - x - ox * t, fr = Math.floor(T * 2.4 + ox) % 2 ? 'craneUp' : 'craneDown';
         const rows = CRITTER[fr + (dir > 0 ? '' : 'L')], Pk = PIX.base, x0 = snap(fx - rows[0].length * Pk / 2), y0 = snap(y + oy * t);
-        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(x0 + i * Pk, y0 + j * Pk, x0 + e * Pk, y0 + (j + 1) * Pk, PAL.gray, DIM, 0, 10, 0); i = e; } }); }
+        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(onGrid(x0 + i * Pk), onGrid(y0 + j * Pk), onGrid(x0 + e * Pk), onGrid(y0 + (j + 1) * Pk), PAL.gray, DIM, 0, 10, 0); i = e; } }); }
     }
     const steam = (x, y, k, s) => { for (let i = 0; i < 3; i++) { const u = (T * 0.25 + i / 3 + k * 0.37) % 1; F(snap(x + Math.sin(T * 1.3 + i * 2 + k) * 0.2 * s * t), snap(y - u * 1.5 * s * t), (0.2 + 0.16 * u) * s * t, 0, 0, (0.2 + 0.16 * u) * s * t, PAL.gray, 0.35 * (1 - u), 1); } };
     const lantern = (x, b, s) => {   // a little stone lantern, its window lit (the Cave's toro, smaller)
@@ -4522,11 +4554,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const [x0, x1] of fringe) { box(x0, g0, x1, g1, PAL.green, 1, 0, 10, 0); box(x0, g1, x1, g1 + P, PAL.green, 1, 0, 10, 4); }
     box(r.x0, r.y1 - P, r.x1, r.y1, th.block, 1, 0, 10, 4);
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
-    if (r.x1 - r.x0 >= 2 * t) for (const [on, ex, d] of [[wl, r.x0, 1], [wr, r.x1, -1]]) if (!on) {   // a free end: its edge curled over it, blades of grass, a flower
+    if (r.x1 - r.x0 >= 2 * t) for (const [on, ex, d] of [[wl, r.x0, 1], [wr, r.x1, -1]]) if (!on) thin(() => {   // a free end: its edge curled over it, blades of grass,
+      // a flower (flat in 2.5D, as the rails)
       box(snap(Math.min(ex, ex + d * P)), r.y0, snap(Math.max(ex, ex + d * P)), r.y0 + 3 * P, th.lip, 1, 0, 10, 0);
       for (const [u, h] of [[0.18, 2], [0.42, 3]]) { const x = snap(ex + d * u * t); box(x, r.y0 - h * P, x + P, r.y0, PAL.green, 1, 0, 10, 0); }
       const fx = snap(ex + d * 0.62 * t); box(fx, r.y0 - 3 * P, fx + P, r.y0, PAL.green, 1, 0, 10, 0); box(fx - P, r.y0 - 5 * P, fx + 2 * P, r.y0 - 3 * P, PAL.purple, 1, 0, 10, 0);
-    }
+    });
     return true;
   };
   // The Sea's ledges (the owner's picks, research/variants/sea-*-game.png, 2026-10-20): a block is sea-worn rock in layers, barnacles on it (slab C); a plank
@@ -4975,8 +5008,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
   this.route = 0;   // (the cinematic fork: the play again)
-  if (!th.town) for (const r of lv.rects) {   // a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps its word;
-    // not Tokyo's: its blocks are buildings, their windows enough)
+  if (!th.town && !th.panels) for (const r of lv.rects) {   // a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps
+    // its word; not Tokyo's nor the Tower Blocks': their blocks are buildings, their windows enough)
     const w = r.x1 - r.x0, hh = r.y1 - r.y0;
     if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.bouncy || r.magnet || r.stair || r.slick || r.key || r.crack || r.cage || r.mortar || r.beam || w < BIG_BLOCK.w * lv.tile || hh < BIG_BLOCK.h * lv.tile || !seen(r.y0, r.y1)) continue;
     const ch = KANJI[(((Math.round(r.x0 / lv.tile) * 73856093) ^ (Math.round(r.y0 / lv.tile) * 19349663)) >>> 0) % KANJI.length], rows = ICONS['kanji_' + ch];
@@ -5006,14 +5039,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     coin(0, 0, 1);
     const tw = (T + c.ph) % COIN.twinkle[1];
     if (c.v > 1 && tw < COIN.twinkle[0]) {   // a five a white twinkle off its top right, a cross growing and going (owner: «у пятёрки мигает белая искорка»; the coins all one size)
-      const P = PIX.size, q = (v) => Math.round(v / P) * P, L = Math.max(1, Math.round(Math.sin((tw / COIN.twinkle[0]) * Math.PI) * 2.5)) * P, sx = q(c.x + 0.62 * r) + P / 2, sy = q(cy - 0.62 * r) + P / 2;
-      F(sx, sy, L + P / 2, 0, 0, P / 2, INK.white, 1, 5, L + P / 2, P / 2, 0); F(sx, sy, P / 2, 0, 0, L + P / 2, INK.white, 1, 5, P / 2, L + P / 2, 0);
+      const P = PIX.size, B = PIX.base, q = (v) => Math.round(v / P) * P, L = Math.max(1, Math.round(Math.sin((tw / COIN.twinkle[0]) * Math.PI) * 2.5 * PIX.keep)) * P, sx = q(c.x + 0.62 * r) + B / 2, sy = q(cy - 0.62 * r) + B / 2;   // (in the
+      // levels' grid's pixels, as a phone's against the coin)
+      F(sx, sy, L + B / 2, 0, 0, B / 2, INK.white, 1, 5, L + B / 2, B / 2, 0); F(sx, sy, B / 2, 0, 0, L + B / 2, INK.white, 1, 5, B / 2, L + B / 2, 0);
     }
   }
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const q = row[i]; if (q !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); } });   // (d, m: the ink's dark and mid tones)
+    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const q = row[i]; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + (i + 1) * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); } });   // (d, m: the ink's dark and mid tones)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
@@ -5187,7 +5221,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = 0; k < 6; k++) { const o = (k - 2.5) * bw; F((x0 + x1) / 2 - uy * o, (y0 + y1) / 2 + ux * o, ux * hl, uy * hl, -uy * bw / 2, ux * bw / 2, RAINBOW_INK[k], (i + 1) / tl.length, 10, hl, bw / 2, 0); }
   }
   const back = this.nf;
-  const list = g.bodyList(), hero = g.hero, heroOff = g.state === 'dead' ? !(g.dieT > 0) : g.invuln > 0 && Math.floor(g.invuln / HEALTH.blink) % 2 === 1;   // blinking, or burst (after its death's beat)
+  const list = g.bodyList(), hero = g.hero, heroOff = g.state === 'dead' ? !(g.dieT > 0) : g.invuln > 0 && Math.floor((g.invuln + (g.blinkHold || 0)) / HEALTH.blink) % 2 === 1;   // blinking (on through a
+  // blink held inside an enemy, Game.blinkHold), or burst (after its death's beat)
   let sig = '';
   for (const b of list) if (b !== hero || !heroOff) sig += b.id + ',';
   this.idxDirty = sig !== this.idxSig;
@@ -5195,8 +5230,33 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const b of list) if (b !== hero || !heroOff) this.buildBody(b, alpha);
   const front = this.nf;
   fx.write(this);
+  for (const p of pops) {   // an enemy beaten (popFx): its flash, ring, rays, blobs and puffs, each going out through the dither as it ends
+    const t = p.t, R = p.R, W = INK.white, out = (u) => 1 - Math.pow(1 - u, 3), seg = (a, b) => Math.max(0, Math.min(1, (t - a) / (b - a)));
+    if (t < POP.flash) { const r = R * (1.05 - (0.3 * t) / POP.flash); F(p.x, p.y, r, 0, 0, r, W, 1, 0); }
+    const ur = seg(POP.ring[0], POP.ring[1]);
+    if (ur > 0 && ur < 1) { const r = R * (0.8 + 1.1 * out(ur)); F(p.x, p.y, r, 0, 0, r, W, 1 - ur, 4); }
+    const ua = seg(POP.rays[0], POP.rays[1]);
+    if (ua > 0 && ua < 1) for (const a of p.rays) {   // a ray: a thin ellipse out from the flash's edge, growing and drawn back
+      const len = R * (0.4 + 1.6 * Math.sin(Math.PI * ua)), th = 0.5 * PIX.base, cx = p.x + Math.cos(a) * (0.95 * R + len / 2), cy = p.y + Math.sin(a) * (0.95 * R + len / 2);
+      F(cx, cy, (Math.cos(a) * len) / 2, (Math.sin(a) * len) / 2, -Math.sin(a) * th, Math.cos(a) * th, W, 1, 0);
+    }
+    for (const bl of p.blobs) {   // a blob: out along its way (fast, then easing), shrinking from its middle on, going out through the dither
+      const u = seg(POP.blobs[0] + bl.t0, POP.blobs[1]);
+      if (u <= 0 || u >= 1) continue;
+      const d = bl.d * out(Math.min(1, u * 1.6)), bx = p.x + Math.cos(bl.a) * d, by = p.y + Math.sin(bl.a) * d + 0.25 * R * u * u, k = u < 0.45 ? 1 : 1 - (u - 0.45) / 0.55;
+      for (const [ox, oy, rr] of bl.lobes) { const r = bl.r * rr * (0.5 + 0.5 * k); F(bx + ox * bl.r, by + oy * bl.r, r, 0, 0, r, u > 0.7 && rr < 0.75 ? p.dark : p.c, Math.min(1, 1.6 * k), 0); }
+    }
+    for (const pf of p.puffs) {   // a puff: its rings swelling, their line thinning (a ring's line is a part of its size), going out
+      const u = seg(POP.puffs[0], POP.puffs[1]);
+      if (u <= 0 || u >= 1) continue;
+      const d = pf.d * (0.6 + 0.6 * out(u)), cx = p.x + Math.cos(pf.a) * d, cy = p.y + Math.sin(pf.a) * d - 0.3 * R * u;
+      for (const [ox, oy, rr] of pf.lobes) { const r = pf.r * rr * (0.7 + 0.8 * out(u)); F(cx + ox * pf.r, cy + oy * pf.r, r, 0, 0, r, p.accent, 1 - u, 4); }
+    }
+  }
   for (const b of bits) {   // a burst hero's bits, on the game-pixel grid, shrinking over their last 40%
-    const P = PIX.size, s = Math.max(1, Math.round(b.s * Math.min(1, (b.life - b.t) / (0.4 * b.life)))) * P, x0 = Math.round(b.x / P) * P, y0 = Math.round(b.y / P) * P;
+    if (b.t < 0) continue;
+    const P = PIX.size, s = Math.max(1, Math.round(b.s * PIX.keep * Math.min(1, (b.life - b.t) / (0.4 * b.life)))) * P, x0 = Math.round(b.x / P) * P, y0 = Math.round(b.y / P) * P;   // (its size in
+    // the levels' grid's pixels: as big against the hero on a computer's finer grid as on a phone)
     box(x0, y0, x0 + s, y0 + s, b.c, 1, 0, 10, 0);
   }
   if (lv.fire && lv.fire.y - 2.4 * R < bot) {   // the fire, between the walls: a red body under two layers of tongues, red behind and orange in front

@@ -1455,7 +1455,9 @@ class Game {
     }
     lv.enemies.splice(i, 1);
     const b = e.body;
-    juiceFx(b.cx, b.cy, b.R, b.color.base); splatFx(b.cx, b.cy, b.R, b.color.base);   // it bursts like ripe fruit (user)
+    const H = this.hero, hx = b.cx - H.cx, hy = b.cy - H.cy, hd = Math.hypot(hx, hy) || 1, rd = fxRand(0, TAU);   // the blow's way: from the hero (else any)
+    juiceFx(b.cx, b.cy, b.R, b.color.base); splatFx(b.cx, b.cy, b.R, b.color.base); popFx(b.cx, b.cy, b.R, b.color.base, byHero ? hx / hd : Math.cos(rd), byHero ? hy / hd : Math.sin(rd));   // it
+    // bursts like ripe fruit (user), a hit's flash, ring, rays, blobs and puffs over it (owner: «больше частиц и эффектов при победе над врагом»)
     if (e.type === 'skull') sparkFx(b.cx, b.cy - 0.3 * b.R, 16, -Math.PI / 2, Math.PI, [150, 450], [1.5, 3.2], [0.4, 0.8], [PAL.white, PAL.white, PAL.gray], 0.9);   // its bone in bits, over the goo
     this.drop(b.cx, b.cy, Math.round(e.def.coins * this.mods.coinMul));
     if (e.type === 'tofu' && byHero) for (let k = 0; k < TOFU.n; k++) {   // in four, thrown apart (TOFU)

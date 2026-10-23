@@ -354,12 +354,12 @@ const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2, get keep(
 PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized to (a phone's 1.5, a computer's 2) whatever the drawing's: a sprite's dot PIX.keep times its pixels
 // A computer's drawing grid (owner, 2026-10-23: «на мониторах ретина на десктопе графика тоже должны быть как на телефоне», his Д1 «А»): a game pixel a whole
 // number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen
-// may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard), or where a sprite's dot would not be
-// a whole number of the grid's pixels (a screen at 125–175 %, a browser's zoom: the dots' edges on the pixels' middles leave holes)
+// may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard). At a screen's 125–175 % or a
+// browser's zoom a sprite's dot is 1.5 or 2.5 of its pixels: the pictures put each dot's edges on the drawing grid (onGrid), so no holes (owner: «делай по совету»)
 PIX.fit = function () {
   if (this.base !== 2 || this.slow) return this.base;
-  const q = +new URLSearchParams(location.search).get('pix'), d = window.devicePixelRatio || 1, s = q > 0 ? q : Math.max(1, Math.round(d)) / d, k = this.base / s;
-  return q > 0 || Math.abs(k - Math.round(k)) < 1e-6 ? s : this.base;
+  const q = +new URLSearchParams(location.search).get('pix'), d = window.devicePixelRatio || 1;
+  return q > 0 ? q : Math.max(1, Math.round(d)) / d;
 };
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at first (user)
@@ -3256,21 +3256,23 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
   const box = (x0, y0, x1, y1, c, a, rad, type, p3) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, c, a, type || 5, hw, hh, type >= 7 ? p3 : rad); };
+  const onGrid = (v) => Math.round(v / PIX.size) * PIX.size;   // (on the drawing grid: a picture's dot of 1.5 or 2.5 of its pixels, PIX.fit, leaves no hole)
   const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
     const rows = ICONS[id], s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(x0 + i * s, y0 + j * s, x0 + e * s, y0 + (j + 1) * s, ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });
+    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });   // (each edge
+    // on the drawing grid)
   };
   const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
     // cosine (past a quarter turn its back, mirrored); no grey edge beside it (owner: «убери серый псевдообъем у бонусов»), and never thinner than `ICON_SPIN`
     // of its width (with its edge gone it shrank to a sliver of a pixel edge on, and blinked out: the tester's «анимация вращения … поломалась»)
     const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
-    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), y0 + j * s, Math.max(u, v), y0 + (j + 1) * s, PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
     if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
       const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s) / P) * P;
       if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
         const bx = x0 + col(sn > 0 ? iL : iR + 1), dx = (sn > 0 ? -d : d) * (c < 0 ? -1 : 1);
-        box(Math.min(bx, bx + dx), y0 + j * s, Math.max(bx, bx + dx), y0 + (j + 1) * s, PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
+        box(Math.min(bx, bx + dx), onGrid(y0 + j * s), Math.max(bx, bx + dx), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
     }
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
@@ -3819,7 +3821,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (y < top - 2 * t || y > bot) continue;
       for (const [ox, oy] of [[0, 0], [-2.6, 1.3]]) { const fx = dir > 0 ? x + ox * t : lv.r + lv.l - x - ox * t, fr = Math.floor(T * 2.4 + ox) % 2 ? 'craneUp' : 'craneDown';
         const rows = CRITTER[fr + (dir > 0 ? '' : 'L')], Pk = PIX.base, x0 = snap(fx - rows[0].length * Pk / 2), y0 = snap(y + oy * t);
-        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(x0 + i * Pk, y0 + j * Pk, x0 + e * Pk, y0 + (j + 1) * Pk, PAL.gray, DIM, 0, 10, 0); i = e; } }); }
+        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(onGrid(x0 + i * Pk), onGrid(y0 + j * Pk), onGrid(x0 + e * Pk), onGrid(y0 + (j + 1) * Pk), PAL.gray, DIM, 0, 10, 0); i = e; } }); }
     }
     const steam = (x, y, k, s) => { for (let i = 0; i < 3; i++) { const u = (T * 0.25 + i / 3 + k * 0.37) % 1; F(snap(x + Math.sin(T * 1.3 + i * 2 + k) * 0.2 * s * t), snap(y - u * 1.5 * s * t), (0.2 + 0.16 * u) * s * t, 0, 0, (0.2 + 0.16 * u) * s * t, PAL.gray, 0.35 * (1 - u), 1); } };
     const lantern = (x, b, s) => {   // a little stone lantern, its window lit (the Cave's toro, smaller)
@@ -4876,7 +4878,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const q = row[i]; if (q !== '.') box(x0 + i * s, y0 + j * s, x0 + (i + 1) * s, y0 + (j + 1) * s, q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); } });   // (d, m: the ink's dark and mid tones)
+    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const q = row[i]; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + (i + 1) * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); } });   // (d, m: the ink's dark and mid tones)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {

@@ -2591,7 +2591,7 @@ const ui = {
       const e = this.labelEls[i], price = game.priceOf(p), text = L2(p.item.name) + '\n' + (p.sold ? t('sold') : price ? price : t('free'));
       if (e.dataset.text !== text) { e.dataset.text = text; e.replaceChildren(px(text, 34)); e.h = 0; }
       if (!e.h) e.h = e.offsetHeight;
-      e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round(p.y - p.r - 8 - e.h - lv.cam) + 'px) translateX(-50%)';
+      e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round((p.top != null ? p.top - 6 : p.y - p.r - 8) - e.h - lv.cam) + 'px) translateX(-50%)';   // over its drawn picture (p.top, the renderer's), clear of it
       e.classList.toggle('dim', p.sold || price > game.coins);
     });
   },

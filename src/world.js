@@ -4801,6 +4801,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
     const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face)
+    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size - (ICONS[p.item.id].length * PIX.size * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
     if (bonusEye) this.route = 3; F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1); if (bonusEye) this.route = 4;   // (B, D: its glow behind it, not dotted over it)
     if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4, T * 1.8 + p.x * 0.05);   // (C: its thickness)
     iconSpin(p.item.id, p.x, y, a, 2.4, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning

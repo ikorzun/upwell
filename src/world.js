@@ -13,6 +13,8 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
 const MENU_HERO = { w: 0.25, k: 0.85, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest, then `k` of that (owner: «уменьши героя на 15%»); its floor `gap` px over the colours, `room` px at least under the logo
+// Fuji's far clouds while the owner picks their living shape (owner 2026-10-23: «более биологическую форму»): FUJI_V.clouds, or window.__fjV from the gallery
+const FUJI_V = { clouds: 0 };
 const BIG_BLOCK = { w: 3.5, h: 2.6, size: 0.5, tone: 1.45 };   // a block this wide and tall (tiles) gets a kanji half its smaller side across, in its ink 0.45 of the way from the black (KANJI)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
 // floor and `air`/s in the air; `slip` is a floor's friction while running on the keys (it holds
@@ -3806,14 +3808,38 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
-    {   // Fuji far off (A): a cone of blue, its flat top and its snow grey down its ridges, two clouds; low on the screen, sinking a little as the climb goes on
-      const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
+    {   // Fuji far off: a cone of blue, its ridges uneven, its snow grey down them in tongues; its clouds in living shapes while the owner picks (FUJI_V.clouds, or
+      // window.__fjV from the gallery; owner 2026-10-23: «для природных фонов и элементов в игровом мире используй более биологическую форму», his picture's
+      // clouds: an outline of uneven round bumps, no straight runs, no symmetry, holes of the dark in them, ragged strands of checker trailing off): A two
+      // cauliflower clouds, holes, strands down; B towers of cumulus, strands both ways; C a long bank across its waist, holes of blue; D a collar of puffs round
+      // its top; E wisps, strands curling off small puffs; F a sea of cloud at its foot, two puffs over. Low on the screen, sinking a little as the climb goes on
+      const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), k = (window.__fjV || FUJI_V).clouds;
+      const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side)); };   // its flanks, uneven
       for (let y = 0; y < ht; y += 2 * P) {
-        const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25), yy = foot - ht + y, sn = 0.3 + 0.07 * Math.sin(y / P * 0.9);
-        box(snap(cx - w), yy, snap(cx + w), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
-        if (u < sn) box(snap(cx - w * Math.min(1, (sn - u) * 9)), yy, snap(cx + w * Math.min(1, (sn - u) * 9)), yy + 2 * P, PAL.gray, DIM, 0, 10, 0);
+        const u = y / ht, yy = foot - ht + y, wl = half(y, -1), wr = half(y, 1), sn = 0.3 + 0.06 * Math.sin(y / P * 0.9) + 0.05 * Math.sin(y / P * 2.3);
+        box(snap(cx - wl), yy, snap(cx + wr), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
+        if (u < sn) { const q = Math.min(1, (sn - u) * 9); box(snap(cx - wl * q * (1 - 0.2 * Math.abs(Math.sin(y / P * 0.61)))), yy, snap(cx + wr * q * (1 - 0.2 * Math.abs(Math.sin(y / P * 0.47 + 1)))), yy + 2 * P, PAL.gray, DIM, 0, 10, 0); }   // its snow in tongues
       }
-      for (const [dx, dy, w] of [[-4.6, -4.4, 2.8], [4.4, -5.0, 2.3]]) box(snap(cx + (dx - w / 2) * t), snap(foot + dy * t), snap(cx + (dx + w / 2) * t), snap(foot + dy * t) + 3 * P, PAL.gray, DIM, 0, 10, 0);
+      const hs = (n) => ((Math.sin(n * 12.9898 + 4.1) * 43758.5453) % 1 + 1) % 1;
+      const inCone = (x, y) => { const yy = y - (foot - ht); return yy >= 0 && yy < ht && x > cx - half(yy, -1) && x < cx + half(yy, 1); };
+      const hole = (x, y, r) => F(snap(x), snap(y), r, 0, 0, 0.8 * r, inCone(x, y) ? PAL.blue : PAL.black, inCone(x, y) ? DIM : 1, 0);   // a hole: the dark behind (or Fuji's blue)
+      const strand = (x, y, dx, dy, n, s) => { for (let j = 0; j < n; j++) { const l = (0.35 + 0.65 * hs(s + j)) * t * (1 - 0.6 * j / n), x0 = x + j * dx * t, y0 = y + j * dy * t, sx = Math.sign(dx || 1), o = (hs(s + j * 2.3) - 0.5) * 0.3 * t;   // ragged checker, a band
+          box(snap(Math.min(x0 + o, x0 + o + sx * l)), snap(y0), snap(Math.max(x0 + o, x0 + o + sx * l)), snap(y0) + 3 * P, PAL.gray, DIM, 0, 10, 4); } };
+      const cloud = (x, y, w, h, s, holes = 2, dome = 0.5) => {   // bumps of uneven size all round it, bigger over, smaller under, notches cut in its edge, holes in it
+        const nt = Math.max(4, Math.round(w / (0.32 * t))), nb = Math.max(3, Math.round(w / (0.42 * t))), bump = (bx, by, r) => F(snap(bx), snap(by), r, 0, 0, r * (0.85 + 0.25 * hs(bx * 0.13 + s)), PAL.gray, DIM, 0);
+        F(snap(x), snap(y - 0.1 * h), w * 0.42, 0, 0, 0.3 * h, PAL.gray, DIM, 0);   // its body
+        for (let i = 0; i < nt; i++) { const q = (i + 0.5) / nt, r = (0.16 + 0.3 * hs(s + i * 3.1)) * h * (0.6 + 0.7 * Math.sin(Math.PI * q)); bump(x - w / 2 + q * w + (hs(s + i) - 0.5) * 0.15 * t, y - 0.12 * h - dome * h * Math.sin(Math.PI * q) * (0.5 + 0.5 * hs(s + i * 7)), r); }   // over
+        for (let i = 0; i < nb; i++) { const q = (i + 0.5) / nb, r = (0.1 + 0.16 * hs(s + i * 4.7 + 1)) * h; bump(x - w * 0.45 + q * w * 0.9 + (hs(s + i * 2) - 0.5) * 0.2 * t, y + 0.12 * h - 0.06 * h * hs(s + i * 9), r); }   // under, smaller
+        for (let i = 0; i < 2; i++) { const e = i ? 1 : -1; F(snap(x + e * w * (0.18 + 0.12 * hs(s + 70 + i))), snap(y + 0.3 * h), (0.12 + 0.08 * hs(s + 80 + i)) * t, 0, 0, 0.1 * t, inCone(x + e * w * 0.2, y + 0.3 * h) ? PAL.blue : PAL.black, inCone(x + e * w * 0.2, y + 0.3 * h) ? DIM : 1, 0); }   // notches under it
+        for (let i = 0; i < holes; i++) hole(x - w / 3 + (i + 0.5) / holes * (w * 0.66) + (hs(s + 40 + i) - 0.5) * 0.3 * t, y - (0.1 + 0.3 * hs(s + 50 + i)) * h, (0.07 + 0.08 * hs(s + 60 + i)) * t);
+      };
+      const U = (u) => cx + u * t, V = (v) => foot - v * t;
+      if (k === 0) { for (const [u, v, w, s] of [[-4.6, 4.6, 3.2, 1], [4.4, 5.2, 2.6, 2]]) { cloud(U(u), V(v), w * t, 1.1 * t, s); strand(U(u - w / 2 + 0.3), V(v - 0.3), -0.25, 0.14, 7, s + 9); } }   // A
+      else if (k === 1) { for (const [u, v, s] of [[-5.0, 4.0, 3], [4.8, 4.4, 4]]) { cloud(U(u), V(v), 2.1 * t, 1.0 * t, s, 1, 0.7); cloud(U(u + 0.2), V(v + 0.9), 1.5 * t, 0.9 * t, s + 1, 1, 0.8); cloud(U(u - 0.1), V(v + 1.6), 0.9 * t, 0.7 * t, s + 2, 0, 0.9); strand(U(u - 1.0), V(v - 0.2), -0.24, 0.1, 6, s); strand(U(u + 1.0), V(v - 0.2), 0.24, 0.1, 6, s + 5); } }   // B: towers
+      else if (k === 2) { cloud(U(0.2), V(2.6), 9.5 * t, 0.75 * t, 5, 5, 0.3); strand(U(-4.6), V(2.4), -0.3, 0.02, 6, 11); strand(U(5.0), V(2.4), 0.3, 0.02, 6, 12); }   // C: a bank across its waist
+      else if (k === 3) { for (const [u, v, w, s] of [[-1.2, 5.3, 1.3, 6], [1.0, 5.2, 1.4, 7], [-0.1, 5.75, 1.1, 8], [-2.1, 4.8, 0.9, 9], [2.0, 4.7, 0.9, 10]]) cloud(U(u), V(v), w * t, 0.7 * t, s, 0, 0.6); strand(U(-2.6), V(4.6), -0.25, 0.12, 6, 13); }   // D: a collar round its top
+      else if (k === 4) { for (const [u, v, s, d] of [[-4.8, 4.8, 14, -1], [4.2, 5.4, 15, 1], [-2.6, 6.2, 16, 1]]) { cloud(U(u), V(v), 1.0 * t, 0.55 * t, s, 0, 0.5); for (let j = 0; j < 3; j++) strand(U(u + d * (0.4 + 0.5 * j)), V(v - 0.1 + 0.25 * j), d * (0.22 - 0.05 * j), 0.1 + 0.08 * j, 5, s + j * 3); } }   // E: wisps
+      else { cloud(U(-3.6), V(0.7), 7.5 * t, 0.9 * t, 17, 3, 0.35); cloud(U(3.8), V(0.8), 7.0 * t, 0.85 * t, 18, 3, 0.35); for (const [u, v, s] of [[-4.4, 4.9, 19], [4.6, 5.4, 20]]) cloud(U(u), V(v), 1.6 * t, 0.7 * t, s, 1, 0.5); strand(U(-7.2), V(0.6), -0.2, -0.04, 5, 21); }   // F: a sea of cloud at its foot
     }
     const csh = CINE ? 0.55 * cam : 0;   // (2.5D: the cranes on a plane of their own, far: 0.45 of the climb)
     for (let k = Math.floor((top - csh) / (18 * t)) - 1; k * 18 * t + csh < bot; k++) {   // a pair of cranes (A) crossing the shaft, slowly, by turns of height either way

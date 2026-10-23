@@ -5018,7 +5018,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = 0; k < 6; k++) { const o = (k - 2.5) * bw; F((x0 + x1) / 2 - uy * o, (y0 + y1) / 2 + ux * o, ux * hl, uy * hl, -uy * bw / 2, ux * bw / 2, RAINBOW_INK[k], (i + 1) / tl.length, 10, hl, bw / 2, 0); }
   }
   const back = this.nf;
-  const list = g.bodyList(), hero = g.hero, heroOff = g.state === 'dead' ? !(g.dieT > 0) : g.invuln > 0 && Math.floor(g.invuln / HEALTH.blink) % 2 === 1;   // blinking, or burst (after its death's beat)
+  const list = g.bodyList(), hero = g.hero, heroOff = g.state === 'dead' ? !(g.dieT > 0) : g.invuln > 0 && Math.floor((g.invuln + (g.blinkHold || 0)) / HEALTH.blink) % 2 === 1;   // blinking (on through a
+  // blink held inside an enemy, Game.blinkHold), or burst (after its death's beat)
   let sig = '';
   for (const b of list) if (b !== hero || !heroOff) sig += b.id + ',';
   this.idxDirty = sig !== this.idxSig;

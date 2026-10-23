@@ -712,7 +712,7 @@ class Game {
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
     this.builtW = view.w; this.R = this.menuR || 0.25 * view.w; this.well = null; this.door = null; this.lv = new Level();
     this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
-    this.makeHero();
+    this.makeHero(); this.levelReset();
     ui.hideAll(); ui.menu();
   }
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
@@ -748,14 +748,19 @@ class Game {
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
+    this.levelReset();
+    this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
+    this.setTasks();
+  }
+  // What a level starts clear of, the menu's scene too (its hero not left in a candy's colours or a helmet, a combo's count gone, no swarm or
+  // followers): the timers, the powers, the landing count, the effects
+  levelReset() {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
-    this.safes = [{ r: null, dx: W / 2 }];   // a fall before any ledge comes back to the floor
+    this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
-    this.lv.ensure(this.lv.cam - H * LEVEL.ahead);
-    this.setTasks();
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
@@ -779,7 +784,7 @@ class Game {
   // растягивается»): the level under way as it is, all of it scaled by the new tile over the old about the left wall and the floor (Game.rescale),
   // the run going on where it was. (A phone held sideways changes nothing: it waits under the 'turn it upright' screen, see layout.)
   resized() {
-    if (this.state === 'menu' || this.state === 'boot') { const o = ui.open === 'map' ? ui.mapAt : null; this.toMenu(); if (o === 'book') ui.book(); else if (o != null) ui.map(o); return; }   // (the map or the book stays open)
+    if (this.state === 'menu' || this.state === 'boot') { const o = ui.open === 'map' ? ui.mapAt : null, set = ui.open === 'settings'; this.toMenu(); if (o === 'book') ui.book(); else if (o != null) ui.map(o); else if (set) ui.settings(); return; }   // (the map, the book or the settings stay open)
     const k = (view.w - 2 * LEVEL.wall) / Math.max(1, this.builtW - 2 * LEVEL.wall);
     this.builtW = view.w; this.rescale(k); this.applyMods();
   }
@@ -1145,7 +1150,7 @@ class Game {
       this.touch = m & 8 ? 0 : glueSide(hero) || (m & 1 ? 1 : m & 2 ? 2 : m & 4 ? 4 : 0);
       if (m & 8) {   // on a floor: a landing just now (how hard: the fastest of the fall, REBOUND), or how long since
         if (this.sinceContact > 0) { this.landV = this.fallV; this.landT = 0; this.landUsed = false; } else this.landT += dt;
-        if (!this.landUsed && this.landT > REBOUND.after) { this.landUsed = true; if (this.landV >= REBOUND.min * this.vjump && ++this.missed >= REBOUND.hint) this.hint('rebound'); }   // a hard one let go by
+        if (!this.landUsed && this.landT > REBOUND.after) { this.landUsed = true; if (playing && this.landV >= REBOUND.min * this.vjump && ++this.missed >= REBOUND.hint) this.hint('rebound'); }   // a hard one let go by (in play: not the menu's hero thrown)
       }
       this.fallV = 0;
       this.sinceContact = 0; this.air = this.mods.airJumps; this.airDash = 0; this.diving = false;
@@ -2603,7 +2608,7 @@ const ui = {
     if (r.fresh.length || r.firstWin || r.tierUp > 1) {
       const u = el('div', 'fresh');
       u.append(el('div', 'label', t('unlocked')));
-      for (const f of r.fresh) { const c = el('span', 'chip swatch on'); c.style.background = rgb(colorById(f.id).base); u.append(c); }
+      for (const f of r.fresh) { const c = el('span', 'swatch on'); c.style.setProperty('--c', rgb(colorById(f.id).base)); u.append(c); }
       if (r.tierUp > 1) u.append(el('div', null, tf('tierOpen', { n: r.tierUp }))); else if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       box.append(u);
     }
@@ -2882,6 +2887,8 @@ function joyEnd() {
 for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, (e) => {   // iOS can lose a finger's pointerup (off the top of the screen, say): no finger on the glass, nothing held
   if (e.touches.length) return;
   joyEnd(); for (const f of padLets) f();   // (a key's finger lost too: the key would stay deaf to the next one)
+  const held = [...menuTouch.ptrs.keys()]; if (held.length) setTimeout(() => { for (const id of held) menuTouch.up({ pointerId: id }, true); }, 0);   // the menu's hero let go of
+  // a finger lost, after its pointerup if that is coming yet (a throw kept)
   if (gest) { if (gest.dir) { input.swipe = false; input.set('left', false); input.set('right', false); } if (gest.flick === 'up') input.set('jump', false); }
   gest = null; tap2 = null;
 }, { passive: true });
@@ -3252,7 +3259,8 @@ const menuTouch = {
     if (!p) return;
     this.ptrs.delete(e.pointerId);
     const now = performance.now(), b = p.body;
-    if (!this.on() || b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
+    if (b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
+    if (!this.on()) cancel = true;   // (the menu shut under it, the settings say: let go where it is, not flung)
     if (p.mode === 'press') {
       if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) this.poke(b, p);
       else {

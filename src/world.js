@@ -12,6 +12,7 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
+const MENU_HERO = { w: 0.25, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest; its floor `gap` px over the colours, `room` px at least under the logo
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
 // floor and `air`/s in the air; `slip` is a floor's friction while running on the keys (it holds
 // the run to about 4.7 R/s: smooth, as testers wanted); a swipe runs with none, at the full
@@ -2132,7 +2133,13 @@ class Level {
       if (rc && rc.trial) this.plan.push({ y: this.floor - H * rc.trial.at, kind: 'trial', goal: rc.trial.goal, done: false });   // a trial room (TRIAL)
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
       if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
-    } else this.build(o);
+    } else if (o.kind === 'menu') this.menuAt(o.floorY);   // the menu's (owner, 2026-10-23, the Figma «Main»): nothing in it but the hero
+    else this.build(o);
+  }
+  // The menu's: its floor `floorY` CSS px down the screen (over the colours' row, Game.menuFit), the walls, a ceiling at the screen's top.
+  menuAt(floorY) {
+    this.top = -Infinity; this.cam = this.floor - floorY; this.capY = this.cam;
+    this.rects = [this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true })];
   }
   box(x0, y0, x1, y1, f) {
     return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false,
@@ -2963,6 +2970,16 @@ void main() {
 // way out, doors, coins and the fire's blobs), each fading out through the 4×4 dither; far off a
 // sparse sieve of the world still shows (tone 1), so the shaft keeps its shape. Lights are
 // (x, y, full to, gone by) in world game pixels; uFire is the fire's top and its glow's height.
+// The menu's backdrop (owner, 2026-10-23, the Figma «Main»): a smooth fall from a grey-blue to the ink, through the design's four stops, down to
+// the colours' row (uSplit: game pixels from the screen's top; the stops as parts of it), the ink under it.
+const MENU_BG = { stops: [0.02, 0.42, 0.73, 1], inks: ['#696d85', '#32343f', '#1a1b1f', '#141414'] };
+MENU_BG.rgb = new Float32Array(MENU_BG.inks.flatMap(hex));
+const MENU_FS = GLSL + `in vec2 vUv; out vec4 o; uniform float uH, uSplit; uniform vec4 uS; uniform vec3 uC[4];
+void main() {
+  float y = (uH - gl_FragCoord.y) / uSplit;
+  vec3 c = y <= uS.x ? uC[0] : y <= uS.y ? mix(uC[0], uC[1], (y - uS.x) / (uS.y - uS.x)) : y <= uS.z ? mix(uC[1], uC[2], (y - uS.y) / (uS.z - uS.y)) : y <= uS.w ? mix(uC[2], uC[3], (y - uS.z) / (uS.w - uS.z)) : uC[3];
+  o = vec4(c, 1.0);
+}`;
 const DARK_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
 uniform vec4 uLights[32]; uniform int uN; uniform vec2 uFire;
 void main() {
@@ -3138,7 +3155,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {
   if (!gumInit.call(this)) return false;
-  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); } catch (err) { console.error(err); return false; }
+  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
   this.darkBuf = new Float32Array(128);   // 32 lights (the Dark Forest's eyes and fences as well as the coins)
   this.target = null;
   if (this.low) this.makeTarget();
@@ -3175,6 +3192,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
   this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.nSm = 0; this.route = 0;   // (nFar, nSt, nSm, route: the cinematic fork's 2.5D, see cine.js)
+  if (g.lv.kind === 'menu') { this.drawMenu(g, alpha); return; }
   const lv = g.lv, th = lv.theme, W = this.w, H = this.h, cam = lv.cam, top = cam - 80, bot = cam + H + 80, R = lv.R, T = lv.t;
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
@@ -5149,6 +5167,68 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   gl.bindVertexArray(null);
   if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb);   // up onto the canvas, pixel for pixel
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+  gl.blitFramebuffer(0, 0, lw, lh, 0, 0, this.canvas.width, this.canvas.height, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+};
+// The menu's frame (owner, 2026-10-23, the Figma «Main»): its backdrop (MENU_FS) and the hero alone over it, big, to drag and press (menuTouch in
+// game.js): its shadow, body, face and the puffs a poke sends off, on the game-pixel grid like the levels; no 2.5D, nothing of a level.
+Renderer.prototype.drawMenu = function (g, alpha) {
+  const gl = this.gl, lv = g.lv, hero = g.hero, W = this.w, H = this.h, sig = hero.id + ',';
+  this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.nSm = 0; this.route = 0;
+  this.idxDirty = sig !== this.idxSig; this.kolobok = false;
+  this.buildBody(hero, alpha);
+  const front = this.nf;
+  fx.write(this);
+  gl.bindVertexArray(null);
+  this.upload(gl.ARRAY_BUFFER, this.vbo, this.vtx, this.nv * 10, 'vboCap');
+  if (this.idxDirty) { this.upload(gl.ELEMENT_ARRAY_BUFFER, this.ebo, this.idx, this.ni, 'eboCap'); this.idxSig = sig; }
+  this.upload(gl.ARRAY_BUFFER, this.fbo, this.fdata, this.nf * 14, 'fboCap');
+  const P = PIX.size, sx = Math.round(shake.x / P) * P, sy = Math.round((shake.y - lv.cam) / P) * P, [lw, lh] = this.low, grid = (u) => gl.uniform2f(u.uGrid, -sx / P, lh - sy / P);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb);
+  gl.viewport(0, 0, lw, lh);
+  gl.clear(gl.STENCIL_BUFFER_BIT);
+  gl.disable(gl.BLEND);
+  const pm = this.pMenu;
+  gl.useProgram(pm.p);
+  gl.uniform1f(pm.u.uH, lh); gl.uniform1f(pm.u.uSplit, Math.max(1, (g.menuSplit || 0.5 * H) / P)); gl.uniform4fv(pm.u.uS, MENU_BG.stops); gl.uniform3fv(pm.u['uC[0]'], MENU_BG.rgb);
+  gl.bindVertexArray(this.emptyVao);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.enable(gl.BLEND);
+  const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
+  gl.useProgram(pf.p);
+  gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
+  gl.useProgram(ps.p);
+  gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
+  gl.uniform2f(ps.u.uOffset, 0, RENDER.shadowOffset); gl.uniform1f(ps.u.uShadowA, RENDER.shadowA);
+  gl.bindVertexArray(this.bodyVao);
+  for (const r of this.ranges) gl.drawElements(gl.TRIANGLES, r.sCount, gl.UNSIGNED_INT, r.sStart * 4);
+  gl.useProgram(pb.p);
+  gl.uniform2f(pb.u.uView, W, H); gl.uniform2f(pb.u.uShake, sx, sy); gl.uniform2f(pb.u.uOffset, 0, 0); grid(pb.u);
+  for (const r of this.ranges) {
+    gl.useProgram(pb.p);
+    gl.bindVertexArray(this.bodyVao);
+    gl.uniform3fv(pb.u.uBase, r.b.color.base); gl.uniform3fv(pb.u.uDeep, r.b.color.deep); gl.uniform3fv(pb.u.uLine, PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, PAINT_ALL);
+    gl.enable(gl.STENCIL_TEST);   // filled by winding number, as in draw
+    gl.colorMask(false, false, false, false);
+    gl.stencilFunc(gl.ALWAYS, 0, 0xff);
+    gl.stencilOpSeparate(gl.FRONT, gl.KEEP, gl.KEEP, gl.INCR_WRAP);
+    gl.stencilOpSeparate(gl.BACK, gl.KEEP, gl.KEEP, gl.DECR_WRAP);
+    gl.drawElements(gl.TRIANGLES, r.web, gl.UNSIGNED_INT, r.bStart * 4);
+    gl.colorMask(true, true, true, true);
+    gl.stencilFunc(gl.EQUAL, 0, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+    gl.drawElements(gl.TRIANGLES, r.bCount - r.web, gl.UNSIGNED_INT, (r.bStart + r.web) * 4);
+    gl.stencilFunc(gl.NOTEQUAL, 0, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.ZERO);
+    gl.drawElements(gl.TRIANGLES, r.web, gl.UNSIGNED_INT, r.bStart * 4);
+    gl.disable(gl.STENCIL_TEST);
+    if (r.fCount) { gl.useProgram(pf.p); this.drawFeat(r.fStart, r.fCount); }
+  }
+  gl.useProgram(pf.p);
+  this.drawFeat(front, this.nf - front);
+  gl.bindVertexArray(null);
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb);
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
   gl.blitFramebuffer(0, 0, lw, lh, 0, 0, this.canvas.width, this.canvas.height, gl.COLOR_BUFFER_BIT, gl.NEAREST);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);

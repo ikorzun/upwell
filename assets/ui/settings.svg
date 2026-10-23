@@ -1,0 +1,17 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 22">
+<mask id="stroke0_0_4" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64" fill="black">
+<rect fill="white" width="64" height="64"/>
+<path d="M32 2C48.5685 2 62 15.4315 62 32C62 48.5685 48.5685 62 32 62C15.4315 62 2 48.5685 2 32C2 15.4315 15.4315 2 32 2Z"/>
+</mask>
+<path id="Subtract" d="M32 2C48.5685 2 62 15.4315 62 32C62 48.5685 48.5685 62 32 62C15.4315 62 2 48.5685 2 32C2 15.4315 15.4315 2 32 2Z" stroke-width="4" stroke="white" mask="url(#stroke0_0_4)"/>
+<g id="mortar-pestle" clip-path="url(#clip0_0_4)">
+<path id="Primary" d="M46.5188 16.6937C45.8313 15.9 44.6563 15.7687 43.8125 16.3875L30.7688 26H39.8313L46.4125 19.4125C47.15 18.675 47.2 17.4875 46.5125 16.6937H46.5188ZM17 28C15.8938 28 15 28.8937 15 30C15 31.1062 15.8938 32 17 32C17 37.1562 19.7125 41.2312 24.7438 43.0125C24.05 43.8812 23.5313 44.9062 23.25 46.0187C22.975 47.0875 23.9 48 25.0063 48H37.0063C38.1125 48 39.0313 47.0875 38.7625 46.0187C38.4813 44.9062 37.9625 43.8875 37.2688 43.0125C42.3 41.225 45.0125 37.1562 45.0125 32C46.1188 32 47.0125 31.1062 47.0125 30C47.0125 28.8937 46.1188 28 45.0125 28H17Z" fill="white"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_4">
+<rect width="32" height="32" fill="white" transform="translate(15 16)"/>
+</clipPath>
+</defs>
+</svg>

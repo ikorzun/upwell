@@ -19,7 +19,7 @@ const STR = {
     got_smash: 'Helmet! Jumps smash blocks · {s} s', got_bubble: 'Bubble gum! Float up · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
-    again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
+    again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
@@ -36,7 +36,7 @@ const STR = {
     got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_bubble: '¡Chicle! Flotas hacia arriba · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
-    again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
+    again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
@@ -53,7 +53,7 @@ const STR = {
     got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_bubble: 'Chiclete! Flutue para cima · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
-    again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
+    again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
@@ -70,7 +70,7 @@ const STR = {
     got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_bubble: 'ガム！ ふわふわ うく · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
-    again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
+    again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
@@ -705,11 +705,22 @@ class Game {
     b.translate(x - b.cx, y - b.cy);
     b.vx.fill(0); b.vy.fill(0); unstick(b, 0.2); b.ceilT = 0; b.peelT = 0;
   }
-  // The menu's backdrop is the first level of a fresh run with the hero standing in it.
+  // The menu's scene (owner, 2026-10-23, the Figma «Main»): no level behind it, its backdrop (Renderer.drawMenu) and the hero alone, big, over
+  // the colours, to drag and press as in Gum (menuTouch); ui.menu sizes and places it (menuFit). Play or Continue builds the level as ever.
   toMenu() {
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
-    this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world; this.buildLevel(true);   // behind the menu, the world Play or Continue goes to
-    ui.hideAll(); ui.menu();   // (which sets the camera on the hero)
+    this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
+    this.builtW = view.w; this.R = this.menuR || 0.25 * view.w; this.well = null; this.door = null; this.lv = new Level();
+    this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
+    this.makeHero();
+    ui.hideAll(); ui.menu();
+  }
+  // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
+  // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
+  menuFit(rowY, logoY) {
+    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
+    this.menuFloor = floorY; this.menuSplit = rowY; this.lv.menuAt(floorY);
+    if (Math.abs(R - this.R) > 0.5) { this.menuR = this.R = R; this.lv.R = R; this.makeHero(); }
   }
   startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round
     this.newRun(); if (daily) { this.daily = today; this.tier = 0; this.hard = false; } this.endless = !!endless;   // (the daily well the same for all: no hard mode)
@@ -2154,8 +2165,6 @@ const FONT = {
   '◀': '...#/..##/.###/####/.###/..##/...#',
   '▶': '#.../##../###./####/###./##../#...',
   '★': '...#.../..###../#######/.#####./..###../.##.##./.#...#.',   // a bonus world's number (wNo)
-  '\u{E000}': '...#.../..##.#./####..#/####..#/####..#/..##.#./...#...',
-  '\u{E001}': '...#.../..##.../####.#./#####.#/####.#./..##.../...#...',   // the last two: sound on / off
 };
 for (const c in FONT) FONT[c] = FONT[c].split('/');
 const GLYPHS = new RegExp('([' + Object.keys(FONT).join('') + '])', 'u');
@@ -2261,7 +2270,7 @@ function cardLive(c, card) {
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
 function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
-  const c = document.createElement('small'), ja = lang !== 'ja' || k === 'title', raw = k === 'title' ? 'アップウェル' : STR[ja ? 'ja' : 'en'][k];
+  const c = document.createElement('small'), ja = lang !== 'ja', raw = STR[ja ? 'ja' : 'en'][k];
   c.className = 'cap'; c.lang = ja ? 'ja' : 'en'; c.textContent = o ? raw.replace(/\{(\w+)\}/g, (_, n) => o[n]) : raw;
   e.classList.add('capped'); e.append(c);
   return e;
@@ -2299,6 +2308,9 @@ function button(text, cls, fn) {
 }
 // A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
 // ("×2 con un anuncio", a world's name after Continue on a small phone).
+function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
+  for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
+}
 function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
   const tx = b.querySelector('.tx');
   for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > min;) { p -= 0.5; b.style.setProperty('--p', p); }
@@ -2306,23 +2318,26 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
   panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
-  hideAll() { for (const id of ['menu', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
-  menu() {
+  hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
+  menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
     const p = this.panel('menu');
-    const title = cap(el('h1', 'title', 'UPWELL'), 'title'); title.lang = 'en'; p.append(title);   // the name in VT323 whatever the language
-    const colors = el('div', 'pickers');   // the hero shows through above; under it its five colours, what the chosen one starts with, and Play
+    const logo = el('img', 'logo'); logo.src = 'assets/ui/upwell-logo.svg'; logo.alt = 'UPWELL'; logo.lang = 'en'; logo.draggable = false; p.append(logo);
+    const set = button('', 'setBtn', () => this.settings()), gear = el('img'); gear.src = 'assets/ui/settings.svg'; gear.alt = ''; gear.draggable = false;
+    set.append(gear); set.setAttribute('aria-label', t('settings')); p.append(set);
+    const colors = el('div', 'pickers');   // the hero over them (menuTouch: drag it, press it); under it its five colours, what the chosen one starts with, and Play
     for (const u of UNLOCKS) {
-      const open = opened(u), b = button('', 'chip swatch' + (save.color === u.id ? ' on' : '') + (open ? '' : ' locked'), () => {
+      const open = opened(u), b = button('', 'swatch' + (save.color === u.id ? ' on' : '') + (open ? '' : ' locked'), () => {
         if (!open) return;
-        save.color = u.id; persist(); game.makeHero(); this.menu();
+        save.color = u.id; persist(); game.hero.kickSquash(0, 1, 0.9); this.menu();   // the hero in its new colour at once (Game.frame paints it), with a little squash
       });
-      b.style.background = rgb(colorById(u.id).base);
+      b.style.setProperty('--c', rgb(colorById(u.id).base)); b.setAttribute('aria-label', u.id);
       if (!open) b.append(el('small', null, u.at));   // what it costs, in coins of all runs
       colors.append(b);
     }
     p.append(colors);
     const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
-    if (perk) { const line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1], 130, true)); p.append(line); }
+    let line = null;
+    if (perk) { line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1])); p.append(line); }   // on one line (owner): smaller, if it must, to fit
     const r = save.run, c = save.camp, ni = campNextId(), next = campAt(ni), begun = c.stars.some((n) => n > 0), done = c.stars[CAMP_END] > 0;
     const grid = el('div', 'grid2');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid)
     if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
@@ -2352,11 +2367,24 @@ const ui = {
     else if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
     else if (!begun) p.append(cap(button(t('play'), 'big thumb', () => game.playLevel(1)), 'play'));   // one tap to the first level (CrazyGames: one at most)
     else p.append(cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => game.playLevel(ni))), 'continue'));   // the width of the screen, 12 px in from its edges
-    const s = button('', 'iconBtn', () => { sound.toggle(); this.menu(); });   // sound on and off, a speaker in the corner
-    s.append(px(save.sound === false ? '\u{E001}' : '\u{E000}')); s.setAttribute('aria-label', t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'));
-    p.append(s);
-    const y0 = p.getBoundingClientRect().top, split = Math.min(0.58 * view.h, colors.getBoundingClientRect().top - y0 - 8), head = title.getBoundingClientRect().bottom - y0, R = game.R;   // the backdrop's edge over the colours (they climb as rows come, once won),
-    p.style.setProperty('--split', split + 'px'); if (game.state === 'menu') game.lv.cam = game.lv.floor - Math.min(split, Math.max(split - 0.12 * view.h + R, head + 2 * R + 2));   // and the hero standing over it, under the title (a short screen: less floor), so a new look shows
+    if (line) fitLine(line, p.clientWidth - 24);
+    const y0 = p.getBoundingClientRect().top;
+    if (game.state === 'menu') game.menuFit(colors.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0);   // the hero over the colours (they climb as rows come, once won)
+  },
+  // The settings (owner, 2026-10-23: the menu's icon on the right): the language, sound, shake (and 2.5D), as at a pause; Back to the menu.
+  settings() {
+    const p = this.panel('settings');
+    p.append(cap(el('div', 'head', t('settings')), 'settings'), ...this.prefs(() => this.settings()), cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
+  },
+  // The rows the settings and a pause share, each redrawing its panel (`again`) once changed.
+  prefs(again) {
+    const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); again(); }), 'sound');
+    const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); again(); }), 'shake');
+    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); again(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
+    const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
+    langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
+    for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); again(); }); b.lang = k; langs.append(b); }
+    return [langs, snd, shk, ...(d25 ? [d25] : [])];
   },
   cards(list) {
     const p = this.panel('cards');
@@ -2490,16 +2518,10 @@ const ui = {
   },
   pause() {
     const p = this.panel('pause');
-    const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); this.pause(); }), 'sound');
-    const shk = cap(button(t('shake') + ': ' + t(shakeOn() ? 'on' : 'off'), 'big thumb alt', () => { save.shake = !shakeOn(); persist(); track('settings_changed', { setting: 'shake', value: save.shake }); this.pause(); }), 'shake');
-    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); this.pause(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
-    const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
-    langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
-    for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); this.pause(); }); b.lang = k; langs.append(b); }
     const build = el('div', 'build');   // the upgrades taken (the world's build, in the campaign), as their pictures
     for (const id of game.taken) build.append(iconEl(id));
     for (const id of game.syns) { const i = iconEl(SYNERGIES.find((q) => q.id === id).of[0]); i.classList.add('syn'); build.append(i); }   // a synergy: its first card, ringed
-    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), langs, snd, shk, ...(d25 ? [d25] : []), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), ...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
     const p = this.panel('story'), card = el('div', 'scard'), art = new Image(), [w, h] = c.cells, f = STORY_INK[c.ink];
@@ -2737,7 +2759,7 @@ function hybAim(now) {   // ▲ held or pulled: aim the jump it is (off what the
 const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, fast: 500 };
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
-  if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel')) return;
+  if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel') || game.state === 'menu') return;
   if (aim.on && aim.hyb) { aimStick(e.pointerId, e.clientX, e.clientY, true); return; }   // ▲ aiming: a finger anywhere is the aim's stick
   if (gest || joy) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
   if (save.stick) { joyStart(e); return; }
@@ -3114,6 +3136,166 @@ function aimRelease(e, cancel) {
 }
 canvas.addEventListener('pointerup', (e) => aimRelease(e, false));
 canvas.addEventListener('pointercancel', (e) => aimRelease(e, true));
+
+// The menu's hero in the hand (owner, 2026-10-23: «главного героя можно таскать и жать на него, он такой же сквиш»): Gum's own touch (its Input,
+// for the one body). A quick tap pokes it (a dent, a puff, a startled face); a press held squeezes it flatter till let go, and it hops; a drag
+// past a few px takes it by the point under the finger (deep in, it comes whole; at its rim, it stretches); let go moving, it is flung. All of it
+// inside the walls, under the screen's top, over its floor (Level.menuAt). Its eyes follow the finger.
+class MenuPtr {
+  constructor(e, x, y, now) {
+    this.id = e.pointerId; this.touch = e.pointerType !== 'mouse';
+    this.x = this.downX = x; this.y = this.downY = y; this.downT = now; this.lastMove = now;
+    this.mode = 'press'; this.dent = null; this.grab = null; this.sq = 0; this.sqLevel = 0; this.pressure = e.pressure || 0;
+    this.ax = 0; this.ay = 1; this.c0x = 0; this.c0y = 0; this.th0 = 0; this.gdx = 0; this.gdy = 0;
+    this.h = new Float64Array(16 * 3); this.hn = 0; this.push(e.timeStamp || now, x, y);
+  }
+  push(t, x, y) {   // (samples nearer than 4 ms take the newest one's place: 16 still span the velocity's window on a fast mouse)
+    if (this.hn > 1 && t - this.h[((this.hn - 2) % 16) * 3] < 4) { const li = ((this.hn - 1) % 16) * 3; this.h[li] = t; this.h[li + 1] = x; this.h[li + 2] = y; return; }
+    const i = (this.hn % 16) * 3; this.h[i] = t; this.h[i + 1] = x; this.h[i + 2] = y; this.hn++;
+  }
+  vel(ms) {   // the finger's speed over its last `ms`
+    const n = Math.min(this.hn, 16); if (n < 2) return [0, 0];
+    const li = ((this.hn - 1) % 16) * 3, t1 = this.h[li], x1 = this.h[li + 1], y1 = this.h[li + 2];
+    let t0 = t1, x0 = x1, y0 = y1;
+    for (let k = 2; k <= n; k++) { const i = ((this.hn - k) % 16) * 3; if (t1 - this.h[i] > ms) break; t0 = this.h[i]; x0 = this.h[i + 1]; y0 = this.h[i + 2]; }
+    const dt = (t1 - t0) / 1000;
+    return dt < 0.004 ? [0, 0] : [(x1 - x0) / dt, (y1 - y0) / dt];
+  }
+}
+const menuTouch = {
+  ptrs: new Map(), lastT: 0, lastPoke: null,
+  on() { return game.state === 'menu' && ui.open === 'menu' && game.lv && game.lv.kind === 'menu' && !!game.hero; },
+  local(e) { return [e.clientX - view.left, e.clientY + game.lv.cam]; },   // in the world
+  look(x, y, now) { const l = game.heroLook; l.x = x; l.y = y; l.t = now; },
+  down(e) {
+    if (this.ptrs.has(e.pointerId)) this.up(e, true);
+    const now = performance.now(), [x, y] = this.local(e), b = game.hero, touch = e.pointerType !== 'mouse', tol = touch ? GRAB.pickTouch : GRAB.pickMouse, lp = this.lastPoke;
+    const hit = (x > b.minX - tol && x < b.maxX + tol && y > b.minY - tol && y < b.maxY + tol && (pointInPoly(b.x, b.y, b.n, x, y) || distToPoly(b.x, b.y, b.n, x, y) < tol))
+      || (lp && now - lp.t < 1000 && Math.hypot(x - lp.x, y - lp.y) < 0.6 * b.R);   // quick taps on a dented rim keep poking it
+    if (!hit) return;
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    const p = new MenuPtr(e, x, y, now);
+    this.ptrs.set(e.pointerId, p);
+    b.wake(); p.body = b; p.c0x = b.cx; p.c0y = b.cy; p.th0 = b.theta;
+    let ax = b.cx - x, ay = b.cy - y;   // the squeeze's axis, fixed at the press: the finger to the centre, turned to point down, easing to straight down near the centre
+    const d = Math.hypot(ax, ay), near = 0.3 * b.R;
+    if (d > 1e-6) { ax /= d; ay /= d; } else { ax = 0; ay = 1; }
+    if (ay < 0) { ax = -ax; ay = -ay; }
+    if (d < near) { const t = d / near; ax *= t; ay = ay * t + (1 - t); const q = Math.hypot(ax, ay) || 1; ax /= q; ay /= q; }
+    p.ax = ax; p.ay = ay;
+    p.dent = b.addDent(x, y, 'press');
+    haptics.buzz(6); this.look(x, y, now);
+  },
+  move(e) {
+    const p = this.ptrs.get(e.pointerId);
+    if (!p) return;
+    if (e.pointerType === 'mouse' && e.buttons === 0) { this.up(e, true); return; }   // the button came up where it was not heard
+    const now = performance.now(), [x, y] = this.local(e), list = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : null;
+    if (list && list.length) for (const c of list) { const [cx, cy] = this.local(c); p.push(c.timeStamp || e.timeStamp || now, cx, cy); }
+    else p.push(e.timeStamp || now, x, y);
+    p.x = x; p.y = y; p.lastMove = now; if (e.pressure) p.pressure = e.pressure;
+    this.look(x, y, now);
+    if (p.mode === 'press' && Math.hypot(x - p.downX, y - p.downY) > (p.touch ? GRAB.dragTouch : GRAB.dragMouse)) this.startGrab(p);
+  },
+  startGrab(p) {
+    const b = p.body, rot = b.theta - p.th0, c = Math.cos(rot), s = Math.sin(rot), dx = p.downX - p.c0x, dy = p.downY - p.c0y;
+    let mx = b.cx + c * dx - s * dy, my = b.cy + s * dx + c * dy;   // the point that was under the finger at the press, carried with the body since
+    if (Math.hypot(mx - p.downX, my - p.downY) > b.R) { this.release(p); return; }   // it moved off from under the finger
+    if (!pointInPoly(b.x, b.y, b.n, mx, my)) { [mx, my] = nearestOnPoly(b.x, b.y, b.n, mx, my); mx += (b.cx - mx) * 0.05; my += (b.cy - my) * 0.05; }   // just off a dented rim: hold the rim
+    p.gdx = mx - p.x; p.gdy = my - p.y;
+    p.grab = b.startGrab(p, mx, my);
+    if (p.sq > 0.04) b.kickSquash(b.sqAx, b.sqAy, -SQUEEZE.rebound * p.sq * 0.4);
+    p.sq = 0; p.mode = 'grab';
+    if (p.dent) { p.dent.rT = DENT.grabR; p.dent.depthT = DENT.grabDepth; }
+    haptics.buzz(5);
+  },
+  release(p) {   // let go of it, no poke, no fling
+    const b = p.body;
+    if (p.grab) b.endGrab(p.grab);
+    b.releaseDent(p.dent, p.mode === 'grab' ? DENT.grabRecover : DENT.pressRecover);
+    p.mode = 'done'; p.grab = null; p.sq = 0;
+  },
+  up(e, cancel) {
+    const p = this.ptrs.get(e.pointerId);
+    if (!p) return;
+    this.ptrs.delete(e.pointerId);
+    const now = performance.now(), b = p.body;
+    if (!this.on() || b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
+    if (p.mode === 'press') {
+      if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) this.poke(b, p);
+      else {
+        b.releaseDent(p.dent, DENT.pressRecover);
+        if (!cancel && p.sq > 0.04) { b.kickSquash(b.sqAx, b.sqAy, -SQUEEZE.rebound * p.sq); b.hop(SQUEEZE.hop * p.sq); haptics.buzz(8 + 20 * p.sq, 0); }
+      }
+    } else if (p.mode === 'grab') {
+      b.endGrab(p.grab); b.releaseDent(p.dent, DENT.grabRecover);
+      let [vx, vy] = p.vel(GRAB.windowMs);
+      if (now - p.lastMove > GRAB.stillMs || cancel) { vx = 0; vy = 0; }   // the finger stopped before lifting: a set-down, not a throw
+      if (Math.hypot(vx, vy) < GRAB.flingSpeed && b.area < 0.85 * b.targetArea) b.calmRelease = 0.25;   // springing back softly
+      if (!cancel) { b.fling(vx, vy); if (Math.hypot(vx, vy) > GRAB.flingSpeed) { b.face.wide = 0.7; haptics.buzz(10); } }
+    }
+  },
+  poke(b, p) {
+    const i = b.dents.indexOf(p.dent);
+    if (i >= 0) b.dents.splice(i, 1);
+    b.addDent(p.x, p.y, 'poke'); b.pokeImpulse(p.x, p.y); b.kickPuff(DENT.pokePuff); b.face.surprise = 1;
+    fx.poke(b, p.x, p.y); haptics.buzz(12, 0);
+    this.lastPoke = { x: p.x, y: p.y, t: performance.now() };
+  },
+  cancelAll() { for (const id of [...this.ptrs.keys()]) this.up({ pointerId: id }, true); },
+  update(now) {   // each frame: the squeeze of a press held, a dragging finger's target (inside the walls, under the top, over the floor)
+    const dt = Math.min(0.1, Math.max(0, (now - this.lastT) / 1000)), b = game.hero, lv = game.lv, sk = WORLD.skin;
+    this.lastT = now;
+    if (!this.on()) { if (this.ptrs.size) this.cancelAll(); return; }
+    b.squeezeIn = 0;
+    for (const p of this.ptrs.values()) {
+      if (p.body !== b) { p.mode = 'done'; continue; }
+      if (p.mode === 'press') {
+        const rot = b.theta - p.th0, cr = Math.cos(rot), sr = Math.sin(rot), ox = p.downX - p.c0x, oy = p.downY - p.c0y;   // moved off from under the finger: no longer pressed
+        if (Math.hypot(b.cx + cr * ox - sr * oy - p.x, b.cy + sr * ox + cr * oy - p.y) > b.R) { this.release(p); continue; }
+        const held = now - p.downT - SQUEEZE.holdDelayMs;
+        if (held <= 0) continue;
+        const l = Math.min(1, held / (SQUEEZE.rampS * 1000));
+        let q = 1 - (1 - l) * (1 - l) * (1 - l);
+        if (p.pressure > 0 && p.pressure !== 0.5) q = Math.min(1, q * (0.6 + 0.6 * p.pressure));
+        p.sq = q;
+        if (p.dent) p.dent.depthT = DENT.pressDepth * (0.4 + 0.6 * q);
+        if (q > b.squeezeIn) {
+          b.squeezeIn = q;
+          let ax = p.ax, ay = p.ay;
+          if (ax * b.sqAx + ay * b.sqAy < 0) { ax = -ax; ay = -ay; }
+          b.sqAx += (ax - b.sqAx) * 0.3; b.sqAy += (ay - b.sqAy) * 0.3;
+          const n = Math.hypot(b.sqAx, b.sqAy) || 1; b.sqAx /= n; b.sqAy /= n;
+        }
+        const lvl = Math.floor(q * 5);
+        if (lvl > p.sqLevel) { p.sqLevel = lvl; haptics.buzz(5 + 2 * lvl, 60); }
+      } else if (p.mode === 'grab' && p.grab) {
+        const g = p.grab;
+        if (!b.grabs.includes(g)) { this.release(p); continue; }
+        const k = 1 - Math.exp(-dt / 0.1);   // the jump past the drag's threshold eases out: the point held catches up with the finger
+        p.gdx -= p.gdx * k; p.gdy -= p.gdy * k;
+        const rot = b.grabs.length > 1 ? 0 : b.theta - g.th0, cr = Math.cos(rot), sr = Math.sin(rot);
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        for (let i = 0; i < b.n; i++) { const ox = cr * g.ox[i] - sr * g.oy[i], oy = sr * g.ox[i] + cr * g.oy[i]; if (ox < x0) x0 = ox; if (ox > x1) x1 = ox; if (oy < y0) y0 = oy; if (oy > y1) y1 = oy; }
+        const lo = lv.l + sk - x0, hi = lv.r - sk - x1, top = lv.capY + sk - y0, bot = lv.floor - sk - y1, wx = p.x + p.gdx, wy = p.y + p.gdy;
+        g.tx = lo > hi ? (lo + hi) / 2 : clamp(wx, lo, hi);
+        g.ty = top > bot ? (top + bot) / 2 : clamp(wy, top, bot);
+        p.gdx += g.tx - wx; p.gdy += g.ty - wy;   // a push past a wall is not stored up: turning back moves it at once
+        let [vx, vy] = p.vel(GRAB.aimMs);
+        if (now - p.lastMove > 45) { vx *= 0.5; vy *= 0.5; }
+        if (g.tx !== wx) vx = 0;
+        if (g.ty !== wy) vy = 0;
+        const sp = Math.hypot(vx, vy);
+        if (sp > GRAB.flingMax) { vx *= GRAB.flingMax / sp; vy *= GRAB.flingMax / sp; }
+        g.vx = vx; g.vy = vy;
+      }
+    }
+  },
+};
+canvas.addEventListener('pointerdown', (e) => { if (menuTouch.on() && e.button <= 0) menuTouch.down(e); });
+canvas.addEventListener('pointermove', (e) => menuTouch.move(e));
+canvas.addEventListener('pointerup', (e) => menuTouch.up(e, false));
+canvas.addEventListener('pointercancel', (e) => menuTouch.up(e, true));
 canvas.addEventListener('lostpointercapture', (e) => aimRelease(e, false));
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.togglePause(true); });
@@ -3178,6 +3360,7 @@ function runFrame(now, fixedDt) {
   if (window.devicePixelRatio !== loop.dpr) { loop.dpr = window.devicePixelRatio; layoutQueued = true; }   // moved to another screen
   if (CINE_ON) cineSync(game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for)
   if (layoutQueued) { layoutQueued = false; layout(); }
+  menuTouch.update(now);   // (the menu's hero in the hand, before the physics: Gum's order)
   let dt = fixedDt != null ? fixedDt : (now - loop.last) / 1000;
   loop.last = now;
   if (!(dt > 0)) dt = 0;

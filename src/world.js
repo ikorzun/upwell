@@ -5008,7 +5008,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
   this.route = 0;   // (the cinematic fork: the play again)
-  if (!th.town && !th.panels) for (const r of lv.rects) {   // a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps
+  if (!th.town && !th.panels && !th.danchi) for (const r of lv.rects) {   // (not the Danchi's: its end walls have the block's number, the owner's d31 «А») a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps
     // its word; not Tokyo's nor the Tower Blocks': their blocks are buildings, their windows enough)
     const w = r.x1 - r.x0, hh = r.y1 - r.y0;
     if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.bouncy || r.magnet || r.stair || r.slick || r.key || r.crack || r.cage || r.mortar || r.beam || w < BIG_BLOCK.w * lv.tile || hh < BIG_BLOCK.h * lv.tile || !seen(r.y0, r.y1)) continue;

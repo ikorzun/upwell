@@ -1998,8 +1998,9 @@ class Game {
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
-    ui.hideAll(); this.story('moon_fall', () => this.story(rc.boss && 'boss_' + rc.boss, () => ui.banner()), storyLook); storyLook = false;   // the story's first card, once, before the first level played (a
-    // save under way: before its next); and a boss's card before its first fight (owner, К11 «А»), then the level's banner (STORY)
+    ui.hideAll(); this.story('moon_fall', () => this.story(s === 0 && 'arrive_' + CAMPAIGN[w].world.id, () => this.story(rc.boss && 'boss_' + rc.boss, () => ui.banner())), storyLook); storyLook = false;   // the story's first card, once, before the first level played (a
+    // save under way: before its next); a world's own coming-in card on its first level (arrive_); and a boss's card before its first fight (owner,
+    // К11 «А»), then the level's banner (STORY)
   }
   // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
@@ -2220,6 +2221,17 @@ const STORY = {
   sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [143, 214], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
   forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [192, 288], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
   moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
+  // A card for Mochi's coming to each world, before its first level (owner, 2026-10-23: «историю с карточками нужно дополнить, например, сначала показываем
+  // падение с луны, потом что герой упал в деревню – т.е. везде добавить +1 карточку перехода»; the scheme of the others, drawn out as the bosses' were:
+  // «у карточек тоже используй подход с детализацией»): drafts till his «да» to their art
+  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [189, 284], ink: 'village', draft: true, title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
+  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [191, 286], ink: 'cave', draft: true, title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
+  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [186, 279], ink: 'ice', draft: true, title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
+  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [128, 192], ink: 'sea', draft: true, title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
+  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [173, 260], ink: 'tokyo', draft: true, title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
+  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [204, 305], ink: 'blocks', draft: true, title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
+  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [146, 219], ink: 'sky', draft: true, title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
+  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [192, 288], ink: 'skazka', draft: true, title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
   // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
   // boss is, in its world's ink and its own: for all since his К13 «А» (2026-10-23; the tram face-on, as he asked)
   boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', title: BOSSES.probka.name },

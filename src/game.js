@@ -472,7 +472,7 @@ class Foe {
   // lobs a blob that comes down where the hero was. True while it stands to do it.
   lunge(dt, g) {   // a skull (SKULL): the hero close on its level, it rushes at it a moment, rattling; its goo drips all along
     const b = this.body, H = g.hero, R = g.R;
-    if (Math.random() < 3 * dt) bits.push({ x: b.cx + rand(-0.5, 0.5) * b.R, y: b.maxY - 2, vx: 0, vy: 40, s: rand(1.5, 2.5), c: INK.dark, t: 0, life: rand(0.6, 1.2), g: 0.5, drag: 1 });
+    if (fxRand(0, 1) < 3 * dt) bits.push({ x: b.cx + fxRand(-0.5, 0.5) * b.R, y: b.maxY - 2, vx: 0, vy: 40, s: fxRand(1.5, 2.5), c: INK.dark, t: 0, life: fxRand(0.6, 1.2), g: 0.5, drag: 1 });
     if ((this.rush = Math.max(0, (this.rush || 0) - dt)) > 0) return true;
     if ((this.cool = Math.max(0, (this.cool || 0) - dt)) > 0) return false;
     if (Math.abs(H.cx - b.cx) > SKULL.reach * R || Math.abs(H.cy - b.cy) > 1.5 * R) return false;
@@ -762,6 +762,7 @@ class Game {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
+    this.thrown = 0; this.wallHold = 0;   // (a throw out of a room, or its hold on the wall, the old level's: the next hero stuck to a wall; review)
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
@@ -810,10 +811,12 @@ class Game {
       for (const wh of lv.wheels || []) { wh.cx = X(wh.cx); for (const key of ['cy', 'y0', 'y1']) wh[key] = Y(wh[key]); wh.rad *= k; wh.hang *= k; }   // (a mill, MILL: its boards are boxes, above)
       for (const kn of lv.kines || []) { kn.x = X(kn.x); kn.px = X(kn.px); for (const key of ['yUp', 'yHit', 'foot', 'y0', 'y1']) kn[key] = Y(kn[key]); }   // (a pestle, MOCHI)
       for (const o of [lv.coins, lv.shots, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
+      for (const a of lv.arenas || []) for (const d of a.drops || []) xy(d);   // (an arena's wave about to drop)
       for (const sp of lv.spots || []) { const r = sp.r; xy(sp); sp.r = r; }   // (a pit's size is in R: it grows with R)
       const walls = new Set(), wall = (w) => { if (!w || walls.has(w)) return; walls.add(w); w.y0 = Y(w.y0); w.y1 = Y(w.y1); };   // (a wall can be a spawn's and its climber's both)
       for (const s of lv.spawns) wall(s.wall);
-      for (const e of lv.enemies) { body(e.body); wall(e.wall); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); if (e.ax || e.ay) { e.ax = X(e.ax); e.ay = Y(e.ay); } }
+      for (const e of lv.enemies) { body(e.body); wall(e.wall); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); if (e.ax || e.ay) { e.ax = X(e.ax); e.ay = Y(e.ay); } if (num(e.home)) e.home = Y(e.home); if (num(e.homeX)) e.homeX = X(e.homeX); }   // (a nurikabe's
+      // perch with its ledge: it hung under it on a wider window; review)
       for (const f of lv.folk) body(f.body);
       if (lv.boss) body(lv.boss.body);
       for (const o of [lv.crossing, lv.portal, lv.exit, lv.rail]) if (o) { xy(o); for (const key of ['x0', 'x1']) if (num(o[key])) o[key] = X(o[key]); for (const key of ['y0', 'y1']) if (num(o[key])) o[key] = Y(o[key]); }
@@ -1181,7 +1184,7 @@ class Game {
   }
   folkUp(f) {   // a cage's blob (a hero's colour, not this one's) or the trader (purple), standing on its ledge; the hero passes through them
     const lv = this.lv, R = this.R, cage = f.kind === 'cage', cols = PALETTE.filter((c) => c.id !== save.color), r = (cage ? 0.7 : 0.95) * R;
-    const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(Math.random() * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
+    const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(fxRand(0, 1) * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
     b.gScale = 1; b.sticky = false; b.ghost = true; b.face.frown = cage;   // locked in: glum
     if (!cage) { f.p = { x: f.x, y: f.y - 3 * R, r: 0.6 * R, item: SHOP_ITEMS[(Math.random() * SHOP_ITEMS.length) | 0], sold: false, near: false, trader: f }; lv.pickups.push(f.p); }
   }
@@ -1224,7 +1227,7 @@ class Game {
   }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
     const H = this.hero, lv = this.lv;
-    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220);
+    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * fxRand(80, 140); f.vy = -fxRand(140, 220);
     if (f.kind === 'crow') { this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id); }
   }
   // Tokyo's neon (neonSign) and the kits' things (kitThing: a Village lantern lit, a Fuji bell rung, a Mine lamp lit) between y0 and
@@ -1363,7 +1366,9 @@ class Game {
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
     if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (!this.gated()) this.idleT += dt; }   // no new height: the fire speeds up
-    if (!lv.exit && H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
+    const cam = !lv.exit && (lv.under || lv.kind === 'well') ? Math.max(lv.cam, Math.min(H.maxY + view.keep + this.R - view.h, lv.floor + this.room() - view.h)) : lv.cam;   // where the frame's
+    // clamp will hold the camera (Game.frame; the camera itself left to it): at a low frame rate a long fall passed the screen's bottom between two frames and counted as off it, a heart gone (review: 30 fps, 1250 px)
+    if (!lv.exit && H.minY > cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
@@ -1495,7 +1500,7 @@ class Game {
   drop(x, y, n, v = 1) {
     for (let k = 0; k < n; k++) {
       const a = -Math.PI / 2 + rand(-1.2, 1.2), sp = COIN.burst * rand(0.6, 1.25);
-      this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: rand(0, TAU) });
+      this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: fxRand(0, TAU) });
     }
   }
   // What is about to come down into view over its top edge, by where (x) it comes in, for a sign there (the market review:
@@ -1657,7 +1662,7 @@ class Game {
       f.warn = { x: clamp(H.cx + rand(-2.5, 2.5) * R, lv.l + R, lv.r - R), t: FIRE.warn };
       f.spitT = rand(FIRE.spit[0], FIRE.spit[1]);
     }
-    if (f.y < lv.cam + view.h + R && Math.random() < dt * 14) fx.add(rand(lv.l, lv.r), f.y + rand(0, 6), rand(-25, 25), rand(-150, -50), rand(2, 3.5), rand(0.5, 0.9), Math.random() < 0.5 ? INK.fire : INK.flame, 1, 0);
+    if (f.y < lv.cam + view.h + R && fxRand(0, 1) < dt * 14) fx.add(fxRand(lv.l, lv.r), f.y + fxRand(0, 6), fxRand(-25, 25), fxRand(-150, -50), fxRand(2, 3.5), fxRand(0.5, 0.9), fxRand(0, 1) < 0.5 ? INK.fire : INK.flame, 1, 0);
     for (let i = lv.enemies.length - 1; i >= 0; i--) {
       const b = lv.enemies[i].body;
       if (b.cy > f.y) { splatFx(b.cx, f.y, b.R, INK.flame, 8); lv.enemies.splice(i, 1); }   // marmalade burns: no coins for it
@@ -2447,7 +2452,7 @@ Object.assign(CARD_MOTION, {
 });
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
-const cardImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+const cardImg = (src, ms = 6000) => new Promise((ok) => { const i = new Image(), t = setTimeout(() => ok(null), ms); i.onload = () => { clearTimeout(t); ok(i); }; i.onerror = () => { clearTimeout(t); ok(null); }; i.src = src; });   // (given up after `ms`: a stalled request held the card for good; review)
 function cardLive(c, card, tilt, clip, title, next) {
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
   const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
@@ -2456,14 +2461,15 @@ function cardLive(c, card, tilt, clip, title, next) {
   let L = L0, thread = null, sheen = null, sg = null, img = null, masks = null;
   const show = (a, b) => { title.style.opacity = a; title.style.transform = `translateY(${8 * (1 - cardEase.out(a))}px)`; next.style.opacity = b; next.style.transform = `translateY(${8 * (1 - cardEase.out(b))}px)`; next.style.pointerEvents = b < 0.5 ? 'none' : ''; };
   show(0, 0);   // (under «reduce motion» at once once the art is in: before it, Next skipped a card unseen; QA)
+  const failSafe = setTimeout(() => { if (st.alive && !st.ready) { st.forced = true; show(1, 1); } }, 3000);   // the art late: Next all the same (review)
   const move = (e) => { const r = card.getBoundingClientRect(); st.gx = ((e.clientX - r.left) / r.width - 0.5) * 2; st.gy = ((e.clientY - r.top) / r.height - 0.5) * 2; st.lastIn = performance.now(); };
   const leave = () => { st.gx = 0; st.gy = 0; };
   card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
   Promise.all([cardImg(def ? `assets/cards/planes/${c.id}-plate.png` : c.still), ...(def ? def.planes.map(([id]) => cardImg(`assets/cards/planes/${c.id}-${id}.png`)) : []),
-    liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))]).then((got) => {
+    liveData || (liveData = Promise.race([fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})), new Promise((ok) => setTimeout(() => ok({}), 6000))]))]).then((got) => {
     if (!st.alive) return;
     const ims = got.slice(0, -1), j = got[got.length - 1];
-    if (!ims[0]) return;   // (no art: the card's ground only)
+    if (!ims[0]) { show(1, 1); return; }   // (no art: the card's ground only, and its Next: a card that did not load held the game for good; review)
     L = (j && j[c.id]) || L0;
     const specs = [['plate', 0.25], ...(def ? def.planes : [])];
     ims.forEach((im, i) => {
@@ -2521,7 +2527,7 @@ function cardLive(c, card, tilt, clip, title, next) {
   function drawThread(off, K) {   // what it hangs by, from the plate to the figure, a cell wide, in whole device px (each point moved its part of the way)
     const r = card.getBoundingClientRect(), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
     if (thread.width !== W || thread.height !== H) { thread.width = W; thread.height = H; }
-    const g = thread.getContext('2d'), pa = off[0], pb = off[1], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
+    const g = thread.getContext('2d'), pa = off[0], pb = off[1] || off[0], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
     g.clearRect(0, 0, W, H);
     for (const th of def.threads) {
       g.fillStyle = th.ink;
@@ -2552,10 +2558,10 @@ function cardLive(c, card, tilt, clip, title, next) {
     });
     if (thread) { drawThread(off, K); thread.style.opacity = still ? 1 : clamp01((a - CARD.step) / CARD.each); }
     if (sheen) drawSheen(st.tx, st.ty);
-    show(still ? 1 : clamp01((a - CARD.title) / CARD.fade), still ? 1 : clamp01((a - CARD.next) / CARD.fade));
+    show(still || st.forced ? 1 : clamp01((a - CARD.title) / CARD.fade), still || st.forced ? 1 : clamp01((a - CARD.next) / CARD.fade));
   }
   st.raf = requestAnimationFrame(step);
-  return { stop() { st.alive = false; cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
+  return { stop() { st.alive = false; clearTimeout(failSafe); cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
@@ -2772,7 +2778,8 @@ const ui = {
     const p = this.panel('result'), bonus = gated(game.world), n = nw + 1, next = !bonus && n <= CAMP_OPEN, on = CAMPAIGN.slice(0, nw).filter((_, k) => !gated(k)).length + 1;   // on: its number on the line
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'));
     if (!bonus) p.append(el('div', 'label', tf(next ? 'worldNext' : 'soon', { n: on })));   // (a bonus world's end says nothing of the line's next one)
-    const go = save.camp.stars[(n - 1) * 30 + 1] > 0 ? campNextId() : (n - 1) * 30 + 1, at = campAt(go);   // (a boss beaten again: on where Continue goes, not back)
+    const go = !next ? 0 : save.camp.stars[(n - 1) * 30 + 1] > 0 ? campNextId() : (n - 1) * 30 + 1, at = next ? campAt(go) : null;   // (a boss beaten again: on where Continue goes, not back; the
+    // last world's: no next one to look up, it threw past CAMPAIGN's end and left the screen with no buttons: review)
     if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(at.w)), 'map'), cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1), 'big thumb', () => game.playLevel(go)), 'continue'));
     else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map(bonus ? game.world : undefined)), 'map'));
   },
@@ -2963,6 +2970,8 @@ const ui = {
       for (let i = 0; i < g.maxHp; i++) { const k = i < g.hp ? 'full' : 'empty', s = el('i', k); s.innerHTML = pxSvg(7, 6, `<path fill="currentColor" d="${inkPath(HEART[k], 0, 0)}"/>`); h.append(s); }
     }
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
+    $('hud').classList.toggle('tight', g.coins >= 1000 && view.w < 375);   // (four figures on a narrow screen: the purse and the height a size
+    // smaller, clear of each other; review: 27 px over at 320. Each frame: a narrower window with the same purse too)
     const bh = $('bossHp'), bs = g.lv.boss, bon = !!bs && !bs.dead && playing;   // a boss's hearts, under the HUD (Lucky Tower's players asked for them)
     bh.classList.toggle('on', bon);
     if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax || bs !== this.bboss)) { this.bhp = bs.hp; this.bmax = bs.max; this.bboss = bs; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); bh.style.setProperty('--pip', `var(--${(bs.def && bs.def.ink) || 'purple'})`); }   // in its colour

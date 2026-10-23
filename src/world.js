@@ -146,7 +146,7 @@ function forkSign(lv, p) {   // a campaign fork's sign (see the renderer): under
 function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): the height of its foot, whether it is on its way down or down, its shake
   const u = (t + (kn.ph || 0)) % MOCHI_P, a = MOCHI.up, b = a + MOCHI.hold, c = b + MOCHI.slam;
   if (u < a) { const e = u / a; return { y: kn.yHit + (kn.yUp - kn.yHit) * e * e * (3 - 2 * e), down: false, shake: 0 }; }
-  if (u < b) return { y: kn.yUp, down: false, shake: u > b - MOCHI.shake ? Math.round(Math.sin(u * 90)) * PIX.size : 0 };
+  if (u < b) return { y: kn.yUp, down: false, shake: u > b - MOCHI.shake ? Math.round(Math.sin(u * 90) * PIX.keep) * PIX.size : 0 };
   if (u < c) { const e = (u - b) / MOCHI.slam; return { y: kn.yUp + (kn.yHit - kn.yUp) * e * e, down: true, shake: 0 }; }
   return { y: kn.yHit, down: true, shake: 0 };
 }
@@ -209,7 +209,8 @@ const NEON_SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'],
 const neonSign = (lv, k) => {
   const mod = (a, n) => ((a % n) + n) % n;
   if (mod(k, 3) === 2) return null;
-  const t = lv.tile, P = PIX.size, kk = Math.max(1, Math.round((0.9 * lv.R) / (16 * P))), gw = 16 * kk * P, sw = gw + 6 * P, [word, pic] = NEON_SIGNS[mod(k - Math.floor(k / 3), 3)];
+  const t = lv.tile, P = PIX.size, kk = Math.max(1, Math.round((0.9 * lv.R) / (16 * PIX.base))) * PIX.keep, gw = 16 * kk * P, sw = gw + 6 * PIX.base, [word, pic] = NEON_SIGNS[mod(k - Math.floor(k / 3), 3)];   // (its size by the
+  // levels' grid: on a computer's finer one it came out half, and its lighting reach with it; review)
   const left = mod(k, 2) === 0, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
   const ax0 = left ? lv.l : x0, ax1 = left ? x0 + sw : lv.r;
   if (lv.bubbles.some((b) => b.x1 + t > ax0 && b.x0 - t < ax1 && b.y1 > y0 - 0.3 * t && b.y0 - t < y1 + 0.2 * t)) return null;   // nothing covers a door (owner)
@@ -2908,8 +2909,8 @@ function collidePair(A, B) {
 const bits = [];
 function burstFx(x, y, R, c) {
   for (let i = 0; i < 80; i++) {
-    const a = rand(0, TAU), sp = rand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
-    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: rand(1.5, 4.5), c: ink, t: 0, life: rand(0.8, 1.6), g: 0.9, drag: 2.2 });
+    const a = fxRand(0, TAU), sp = fxRand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
+    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: fxRand(1.5, 4.5), c: ink, t: 0, life: fxRand(0.8, 1.6), g: 0.9, drag: 2.2 });
   }
   fx.add(x, y, 0, 0, R * 1.3, 0.4, INK.white, 0.9, 2); fx.add(x, y, 0, 0, R * 0.8, 0.35, c, 1, 2, 0.08);
 }
@@ -2919,8 +2920,8 @@ function burstFx(x, y, R, c) {
 function sparkFx(x, y, n, a, spread, sp, size, life, inks, g) {
   if (bits.length > 400) return;   // a phone's budget
   for (let i = 0; i < n; i++) {
-    const t = a + rand(-spread, spread), v = rand(sp[0], sp[1]);
-    bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: rand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: rand(life[0], life[1]), g, drag: 4 });
+    const t = a + fxRand(-spread, spread), v = fxRand(sp[0], sp[1]);
+    bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: fxRand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: fxRand(life[0], life[1]), g, drag: 4 });
   }
 }
 function updateBits(dt) {
@@ -2937,9 +2938,9 @@ function updateBits(dt) {
 function juiceFx(x, y, R, c) {
   if (bits.length > 380) return;   // a phone's budget
   const flesh = c === PAL.red ? INK.flame : PAL.white;
-  for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: rand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: rand(0.7, 1.1), g: 1, drag: 1.2 }); }
-  for (let i = 0; i < 5; i++) { const a = rand(0, TAU), v = rand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: rand(0.5, 0.9), g: 1, drag: 1.5 }); }
-  for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + rand(-1.7, 1.7), v = rand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: rand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: rand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
+  for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + fxRand(-1.4, 1.4), v = fxRand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: fxRand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: fxRand(0.7, 1.1), g: 1, drag: 1.2 }); }
+  for (let i = 0; i < 5; i++) { const a = fxRand(0, TAU), v = fxRand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: fxRand(0.5, 0.9), g: 1, drag: 1.5 }); }
+  for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + fxRand(-1.7, 1.7), v = fxRand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: fxRand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: fxRand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
 }   // (its white pop and ring popFx's now, crisp)
 // An enemy beaten (owner, 2026-10-23: «добавь больше частиц и эффектов при победе над врагом», with two sheets of a hit's frames): over the fruit's
 // burst, the hit's beats in crisp game pixels: a white flash, a ring thrown out, rays, a streak of drops along the blow, blobs of it flung and
@@ -2971,13 +2972,13 @@ function popFx(x, y, R, c, dx, dy) {   // (dx, dy) the blow's way, a unit
 }
 function splatFx(x, y, R, c, n = 9) {
   const k = lighten(c, 0.1);
-  for (let i = 0; i < n; i++) { const a = rand(0, TAU), sp = rand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, rand(0.18, 0.32) * R, rand(0.35, 0.6), k, 0.95, 0); }
+  for (let i = 0; i < n; i++) { const a = fxRand(0, TAU), sp = fxRand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, fxRand(0.18, 0.32) * R, fxRand(0.35, 0.6), k, 0.95, 0); }
   fx.add(x, y, 0, 0, R * 0.9, 0.35, lighten(c, 0.3), 0.7, 2);
 }
 function crumbleFx(r, c, up) {   // a block breaking up: puffs and solid chunks of it in its ink and white, dropping away (flung up when smashed from below)
   const y = (r.y0 + r.y1) / 2;
   for (let x = r.x0 + 6; x < r.x1; x += 12) {
-    fx.add(x, y, rand(-40, 40), rand(30, 120), rand(4, 8), rand(0.4, 0.7), c, 0.9, 0);
+    fx.add(x, y, fxRand(-40, 40), fxRand(30, 120), fxRand(4, 8), fxRand(0.4, 0.7), c, 0.9, 0);
     sparkFx(x, y, up ? 3 : 2, up ? -Math.PI / 2 : Math.PI / 2, up ? 1.3 : 0.8, up ? [150, 560] : [20, 140], [1.5, 4], [0.5, 1], [c, c, INK.white], 1);
   }
 }
@@ -4944,21 +4945,22 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
-    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face)
-    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size - (ICONS[p.item.id].length * PIX.base * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5 * PIX.keep) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face; a bob in the levels'
+    // pixels, PIX.keep, as all of these: on a computer's finer grid it was half: review)
+    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5 * PIX.keep) * PIX.size - (ICONS[p.item.id].length * PIX.base * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
     if (bonusEye) this.route = 3; F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1); if (bonusEye) this.route = 4;   // (B, D: its glow behind it, not dotted over it)
     if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // (C: its thickness)
     iconSpin(p.item.id, p.x, y, a, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
-    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;   // (the fork: riding its ledge's face)
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5 * PIX.keep) * PIX.size;   // (the fork: riding its ledge's face)
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
     if (bonusEye) this.route = 3; F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); if (bonusEye) this.route = 4; if (bonusStack) for (let q = 3; q >= 1; q--) iconSpin(p.kind, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, k, T * 2.2 + p.x * 0.05); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
   if (CINE) this.route = 0;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
     : (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
-  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);
+  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5 * PIX.keep) * PIX.size : 0), c.y);
   const xg = lv.crossing;
   if (xg && seen(xg.y0 - R, xg.y1 + R)) {   // a level crossing: rails along the band's foot, the lights by the walls, and the train
     box(lv.l, xg.y1 - 0.12 * R, lv.r, xg.y1, th.lip, 1, 0, 10, 0); box(lv.l, xg.y1 - 0.42 * R, lv.r, xg.y1 - 0.3 * R, th.lip, 0.6, 0, 10, 0);
@@ -5182,7 +5184,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   for (const e of lv.enemies) if (e.over && seen(e.body.minY - 2 * R, e.body.maxY)) {   // one that can be stomped, the hero over it (STOMP, Game.frame): a white chevron
     // over it, bobbing, «land here» (tester: «вот этой границы хитбокса врагов я до конца понять не смог»)
-    const b = e.body, y = b.minY - 0.6 * R + Math.round(Math.sin(T * 6) * 1.5) * PIX.size, hw = 0.3 * R, hd = 0.2 * R;
+    const b = e.body, y = b.minY - 0.6 * R + Math.round(Math.sin(T * 6) * 1.5 * PIX.keep) * PIX.size, hw = 0.3 * R, hd = 0.2 * R;
     F(b.cx, y, hw, 0, 0, -hd, PAL.white, 1, 6, hw, hd, 2 * hw);
   }
   const bs = lv.boss;
@@ -5220,9 +5222,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
     for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
   }
-  if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
+  if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
   if (g.warns.length) {   // threats coming down into view (see Game.threats): a red sign under the HUD over where each comes in
-    const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2) * PIX.size;
+    const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size;
     for (const x of g.warns) icon('warn', clamp(x, lv.l + hw, lv.r - hw), wy, 1, wk);
   }
   if (g.power('bubble') && (g.gunT > 1 || Math.floor(T * 5) % 2 === 0)) {   // a bubble round the hero (BUBBLE): thin purple, wobbling, a white shine; blinking its last second

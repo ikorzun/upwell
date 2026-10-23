@@ -156,6 +156,8 @@
   #tasks { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; margin-top: 6px; filter: drop-shadow(0 2px 0 var(--ink)); }   /* under the level's number, out of its column (that stays put) */
   #tasks:empty { display: none; }
   #purse { display: flex; align-items: center; gap: 6px; --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); margin-left: auto; }   /* (to the right however wide the hearts are) */
+  #hud.tight #purse { --p: 2; gap: 4px; }
+  #hud.tight #height { --p: 2; }
   #purse.bump { animation: bump 0.2s steps(2); }
   .coin { display: block; width: 15px; height: 15px; }
   #pauseBtn {

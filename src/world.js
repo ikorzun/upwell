@@ -376,8 +376,9 @@ const FOE_COLOR = {
 // A red, shaded black (as they were); B white, shaded red; C B with red patches of its own, as a kohaku carp's (its face left white the longest); D B
 // going red as the hero comes from `far` to `near` R of it, patches growing over it till it is all A's; E C going red so. A patch is where its field
 // (paintField, the body shader's: three waves of its own phases over the body, riding with it) is over a level: `spots` for C's, `none` none, `all` all.
-// The owner's pick (2026-10-22: «60% красные, остальные 20 и 20 красные пятна и краснеют рядом»): each enemy draws its paint once, by `mix`; ?paint= sets one for all.
-const FOE_PAINT = { v: ((/[?&]paint=([a-e])\b/i.exec(location.search) || [])[1] || '').toUpperCase() || null, mix: [['A', 0.6], ['C', 0.2], ['D', 0.2]], far: 7, near: 2, spots: 0.6, none: 3.5, all: -5.5 };
+// The owner's pick (2026-10-22: «60% красные, остальные 20 и 20 красные пятна и краснеют рядом»; 2026-10-23, E on the page: «60% красные всегда красные с черной
+// тенью, остальные 20 и 20 красные пятна и краснеют рядом»: those that redden are E's, patched before they do): each enemy draws its paint once, by `mix`; ?paint= sets one for all.
+const FOE_PAINT = { v: ((/[?&]paint=([a-e])\b/i.exec(location.search) || [])[1] || '').toUpperCase() || null, mix: [['A', 0.6], ['C', 0.2], ['E', 0.2]], far: 7, near: 2, spots: 0.6, none: 3.5, all: -5.5 };
 const PAINT_ALL = new Float32Array([-99, 0, 0]);   // (any other body: its colour all over, as before)
 const paintField = (x, y, p) => { const v = y - 0.05; return Math.sin(x * 3.3 + p[1]) + Math.sin(y * 2.9 + p[2]) + Math.sin((x - y) * 2.1 + 1.7 * p[1]) - 2.4 * Math.exp(-5 * (x * x + v * v)); };
 const paintPick = () => { let u = Math.random(); for (const [v, w] of FOE_PAINT.mix) if ((u -= w) < 0) return v; return 'A'; };

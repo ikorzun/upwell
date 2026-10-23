@@ -2197,15 +2197,15 @@ const STORY = {
   forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [192, 288], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
   moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
   // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
-  // boss is, in its world's ink and its own: drafts till his «да» to their art
-  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', draft: true, title: BOSSES.probka.name },
-  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [151, 227], ink: 'cave', draft: true, title: BOSSES.cart.name },
-  boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [192, 288], ink: 'ice', draft: true, title: BOSSES.puck.name },
-  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [189, 284], ink: 'sea', draft: true, title: BOSSES.namazu.name },
-  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [171, 256], ink: 'tokyo', draft: true, title: BOSSES.tram.name },
-  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [191, 287], ink: 'blocks', draft: true, title: BOSSES.crane.name },
-  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [158, 237], ink: 'sky', draft: true, title: BOSSES.pigeon.name },
-  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', draft: true, title: BOSSES.koschei.name },
+  // boss is, in its world's ink and its own: for all since his К13 «А» (2026-10-23; the tram face-on, as he asked)
+  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', title: BOSSES.probka.name },
+  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [151, 227], ink: 'cave', title: BOSSES.cart.name },
+  boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [192, 288], ink: 'ice', title: BOSSES.puck.name },
+  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [189, 284], ink: 'sea', title: BOSSES.namazu.name },
+  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [171, 256], ink: 'tokyo', title: BOSSES.tram.name },
+  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [191, 287], ink: 'blocks', title: BOSSES.crane.name },
+  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [158, 237], ink: 'sky', title: BOSSES.pigeon.name },
+  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', title: BOSSES.koschei.name },
 };
 for (const k in STORY) STORY[k].id = k;
 const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows the drafts too, and card I before

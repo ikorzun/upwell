@@ -2285,9 +2285,18 @@ const CARD = { tilt: 8, par: 8, step: 0.09, each: 0.32, rise: 24, riseT: 0.56, t
 // nearest plane's parallax at the most (device px); the coming-in (s: each plane's start after the last's, its dither's length, the rise (CSS px) and
 // its length, the title's and Next's starts and fades); the tilt's spring (rad/s, damping: one small overshoot); the sweep after so long untouched
 const CARD_BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
-const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png under them, <id>-<figure>.png each), nearest last, with their depths
-  boss_cart: { planes: [['boss', 0.6], ['hero', 1]], thread: { anchor: [75, 42], attach: [75, 60] } },   // (the thread the spider hangs by, drawn live)
+const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png under them, <id>-<figure>.png each), nearest last, with their depths; what it
+  // hangs by drawn live (threads: points in cells, each with how much of its figure's move it takes, 0 the plate's to 1 the figure's), in an ink
+  boss_cart: { planes: [['boss', 0.6], ['hero', 1]], threads: [{ ink: '#c8c8c8', pts: [[75, 42, 0], [75, 60, 1]] }] },   // the spider's thread off the beam
   boss_namazu: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_probka: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_puck: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_tram: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_crane: { planes: [['boss', 0.6], ['hero', 1]], threads: [   // Nuppeppo's cable off the hook and the three ropes of its sling
+    { ink: '#808080', pts: [[121.5, 68, 0], [120.5, 74.5, 0.25]] }, { ink: '#808080', pts: [[120.5, 74.5, 0.25], [110.5, 99.5, 1]] },
+    { ink: '#808080', pts: [[120.5, 74.5, 0.25], [121.5, 96.5, 1]] }, { ink: '#808080', pts: [[120.5, 74.5, 0.25], [130.5, 98.5, 1]] }] },
+  boss_pigeon: { planes: [['boss', 0.6], ['hero', 1]] },
+  boss_koschei: { planes: [['boss', 0.6], ['hero', 1]] },
 };
 const cardEase = {
   io: (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2),   // slow in, slow out
@@ -2308,10 +2317,40 @@ const CARD_MOTION = {
     else if (u < 3.1) { y = -4 + 0.35 * Math.sin(((u - 1.5) / 1.6) * Math.PI * 2); x = 1.4; }
     else { const k = cardEase.io(seg(u, 3.1, 5.2)); y = -4 * (1 - k); x = 1.4 * (1 - k); }
     const h = u - 0.8;   // Mochi on the rock a beat after the surge: a hop, up quick, down slower
-    const hy = h > 0 && h < 0.75 ? (h < 0.28 ? -1.6 * cardEase.out(h / 0.28) : -1.6 * (1 - cardEase.in((h - 0.28) / 0.47))) : 0;
-    return { boss: [x, y], hero: [0, hy], blink: h > 0.8 && h < 0.95 };
+    return { boss: [x, y], hero: [0, cardHop(h, 1.6, 0.28, 0.47)], blink: h > 0.8 && h < 0.95 };
+  },
+  boss_probka(t) {   // the Bake-danuki drums its belly: it crouches (anticipation), springs up, falls and lands with a little give, then breathes
+    const u = t % 2.6; let y = 0;
+    if (u < 0.22) y = 0.6 * cardEase.io(u / 0.22);
+    else if (u < 0.5) y = 0.6 - 2.2 * cardEase.out(seg(u, 0.22, 0.5));
+    else if (u < 0.78) y = -1.6 * (1 - cardEase.in(seg(u, 0.5, 0.78)));
+    else if (u < 1.05) y = 0.35 * Math.sin(Math.PI * seg(u, 0.78, 1.05));
+    else y = -0.25 * (1 - Math.cos((2 * Math.PI * (u - 1.05)) / 1.55)) / 2;
+    return { boss: [-0.3 * Math.sin(Math.PI * seg(u, 0, 0.5)), y], hero: [0, cardHop(u - 0.9, 1.2, 0.2, 0.4)], blink: u > 1.6 && u < 1.75 };   // Mochi jumps at its landing
+  },
+  boss_puck(t) {   // the Tsurara-onna floats on a figure of eight, slow; Mochi leans away as she drifts its way, breathing
+    const w = (2 * Math.PI * t) / 4.8, b = (1 - Math.cos((2 * Math.PI * t) / 2.4)) / 2;
+    return { boss: [0.9 * Math.sin(w), -0.6 - 0.6 * Math.sin(2 * w)], hero: [0.5 * Math.min(0, Math.sin(w - 0.6)), -0.3 * cardEase.io(b)] };
+  },
+  boss_tram(t) {   // the Tsukumo Tram over a rail joint each 1.2 s: down at once, back up past its rest a little and settling; Mochi jumps a beat after
+    const u = t % 1.2, y = u < 0.07 ? 0.6 * cardEase.out(u / 0.07) : u < 0.45 ? 0.6 * (1 - cardEase.back(seg(u, 0.07, 0.45))) : 0;
+    return { boss: [0, y], hero: [0, cardHop(u - 0.12, 0.9, 0.18, 0.32)], blink: u > 0.8 && u < 0.95 && Math.floor(t / 1.2) % 2 === 0 };
+  },
+  boss_crane(t) {   // Nuppeppo swings in its sling under the hook: a pendulum's arc about the hook, slow at each end and lifting there
+    const th = 0.045 * Math.sin((2 * Math.PI * t) / 4.2), L = 67, b = (1 - Math.cos((2 * Math.PI * t) / 2.6)) / 2;
+    return { boss: [L * Math.sin(th), L * (1 - Math.cos(th))], hero: [0, -0.4 * cardEase.io(b)], blink: b < 0.04 && Math.floor(t / 2.6) % 2 === 1 };
+  },
+  boss_pigeon(t) {   // the Karasu-tengu holds in the air: up quick on each downbeat of its wings, sinking slower, drifting; Mochi breathes on its cloud
+    const u = t % 0.95, y = u < 0.3 ? -1.1 * cardEase.out(u / 0.3) : -1.1 * (1 - cardEase.io(seg(u, 0.3, 0.95))), b = (1 - Math.cos((2 * Math.PI * t) / 2.4)) / 2;
+    return { boss: [0.6 * Math.sin((2 * Math.PI * t) / 5), y], hero: [0, -0.4 * cardEase.io(b)] };
+  },
+  boss_koschei(t) {   // Koschei leans in over the path, looming, holds, draws back; Kolobok hops back from him as he comes, and creeps back after
+    const u = t % 5, k = u < 1.8 ? cardEase.io(u / 1.8) : u < 2.5 ? 1 : u < 4.3 ? 1 - cardEase.io(seg(u, 2.5, 4.3)) : 0;
+    const hx = u < 1.6 ? 0 : u < 1.85 ? -0.9 * cardEase.out(seg(u, 1.6, 1.85)) : u < 2.4 ? -0.9 : u < 3.4 ? -0.9 * (1 - cardEase.io(seg(u, 2.4, 3.4))) : 0;
+    return { boss: [-1.2 * k, -0.4 * k], hero: [hx, cardHop(u - 1.6, 0.8, 0.12, 0.23)], blink: u > 4.4 && u < 4.55 };
   },
 };
+function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
 const cardImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
 function cardLive(c, card, tilt, clip, title, next) {
@@ -2341,7 +2380,7 @@ function cardLive(c, card, tilt, clip, title, next) {
         pl.mask = new Uint8Array(w * h); for (let q = 0; q < w * h; q++) pl.mask[q] = d[q * 4 + 3] > 0 ? 1 : 0;
       }
       planes.push(pl);
-      if (i === 0 && def && def.thread) { thread = document.createElement('canvas'); thread.className = 'spl'; clip.append(thread); }   // over the plate, under what it holds
+      if (i === 0 && def && def.threads) { thread = document.createElement('canvas'); thread.className = 'spl'; clip.append(thread); }   // over the plate, under what it holds
     });
     const owner = (cells) => { for (let i = planes.length - 1; i > 0; i--) if (cells.some(([x, y]) => planes[i].mask[y * w + x])) return planes[i]; return planes[0]; };
     for (const e of L.eyes) owner(e.cells).live.push({ kind: 'eye', cells: e.cells, box: e.box });
@@ -2384,13 +2423,18 @@ function cardLive(c, card, tilt, clip, title, next) {
     }
     sg.putImageData(img, 0, 0);
   }
-  function drawThread(off, K) {   // from its anchor on the plate to where the figure hangs, a cell wide, in whole device px
+  function drawThread(off, K) {   // what it hangs by, from the plate to the figure, a cell wide, in whole device px (each point moved its part of the way)
     const r = card.getBoundingClientRect(), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
     if (thread.width !== W || thread.height !== H) { thread.width = W; thread.height = H; }
-    const g = thread.getContext('2d'), [ax, ay] = def.thread.anchor, [bx, by] = def.thread.attach, pa = off[0], pb = off[1];
-    g.clearRect(0, 0, W, H); g.fillStyle = STORY_INK[c.ink].L;
-    const x0 = ax * K + pa[0], y0 = ay * K + pa[1], x1 = bx * K + pb[0], y1 = by * K + pb[1], n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / K));
-    for (let i = 0; i <= n; i++) { const u = i / n; g.fillRect(Math.round(x0 + (x1 - x0) * u), Math.round(y0 + (y1 - y0) * u), Math.round(K), Math.round(K)); }
+    const g = thread.getContext('2d'), pa = off[0], pb = off[1], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
+    g.clearRect(0, 0, W, H);
+    for (const th of def.threads) {
+      g.fillStyle = th.ink;
+      for (let s = 1; s < th.pts.length; s++) {
+        const [x0, y0] = at(th.pts[s - 1]), [x1, y1] = at(th.pts[s]), n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / K));
+        for (let i = 0; i <= n; i++) { const u = i / n; g.fillRect(Math.round(x0 + (x1 - x0) * u), Math.round(y0 + (y1 - y0) * u), Math.round(K), Math.round(K)); }
+      }
+    }
   }
   function step(now) {
     if (!st.alive) return;

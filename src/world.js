@@ -4364,11 +4364,12 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const [x0, x1] of fringe) { box(x0, g0, x1, g1, PAL.green, 1, 0, 10, 0); box(x0, g1, x1, g1 + P, PAL.green, 1, 0, 10, 4); }
     box(r.x0, r.y1 - P, r.x1, r.y1, th.block, 1, 0, 10, 4);
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
-    if (r.x1 - r.x0 >= 2 * t) for (const [on, ex, d] of [[wl, r.x0, 1], [wr, r.x1, -1]]) if (!on) {   // a free end: its edge curled over it, blades of grass, a flower
+    if (r.x1 - r.x0 >= 2 * t) for (const [on, ex, d] of [[wl, r.x0, 1], [wr, r.x1, -1]]) if (!on) thin(() => {   // a free end: its edge curled over it, blades of grass,
+      // a flower (flat in 2.5D, as the rails)
       box(snap(Math.min(ex, ex + d * P)), r.y0, snap(Math.max(ex, ex + d * P)), r.y0 + 3 * P, th.lip, 1, 0, 10, 0);
       for (const [u, h] of [[0.18, 2], [0.42, 3]]) { const x = snap(ex + d * u * t); box(x, r.y0 - h * P, x + P, r.y0, PAL.green, 1, 0, 10, 0); }
       const fx = snap(ex + d * 0.62 * t); box(fx, r.y0 - 3 * P, fx + P, r.y0, PAL.green, 1, 0, 10, 0); box(fx - P, r.y0 - 5 * P, fx + 2 * P, r.y0 - 3 * P, PAL.purple, 1, 0, 10, 0);
-    }
+    });
     return true;
   };
   // The Sea's ledges (the owner's picks, research/variants/sea-*-game.png, 2026-10-20): a block is sea-worn rock in layers, barnacles on it (slab C); a plank
@@ -4807,8 +4808,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
   this.route = 0;   // (the cinematic fork: the play again)
-  if (!th.town) for (const r of lv.rects) {   // a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps its word;
-    // not Tokyo's: its blocks are buildings, their windows enough)
+  if (!th.town && !th.panels) for (const r of lv.rects) {   // a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps
+    // its word; not Tokyo's nor the Tower Blocks': their blocks are buildings, their windows enough)
     const w = r.x1 - r.x0, hh = r.y1 - r.y0;
     if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.bouncy || r.magnet || r.stair || r.slick || r.key || r.crack || r.cage || r.mortar || r.beam || w < BIG_BLOCK.w * lv.tile || hh < BIG_BLOCK.h * lv.tile || !seen(r.y0, r.y1)) continue;
     const ch = KANJI[(((Math.round(r.x0 / lv.tile) * 73856093) ^ (Math.round(r.y0 / lv.tile) * 19349663)) >>> 0) % KANJI.length], rows = ICONS['kanji_' + ch];

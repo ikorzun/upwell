@@ -2559,6 +2559,35 @@ function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
   e.classList.add('capped'); e.append(c);
   return e;
 }
+// A map's backdrop: a picture filling the panel, its pixels whole screen pixels (the smallest whole scale that covers it), low on it, opaque.
+function mapBack(p, src) {
+  const img = new Image(); p.classList.add('wmap'); p.dataset.bg = src;
+  img.onload = () => { if (p.dataset.bg !== src) return;   // (another screen took the panel meanwhile)
+    const d = devicePixelRatio || 1, k = Math.ceil(Math.max((p.clientWidth * d) / img.width, (p.clientHeight * d) / img.height));
+    p.style.backgroundImage = `url("${src}")`; p.style.backgroundSize = `${(img.width * k) / d}px ${(img.height * k) / d}px`; };
+  img.src = src;
+}
+// A boss's figure off its story card (its plane, the card's cells, cropped to them; a tall one to its upper part) into `cv`, as big as `cell` holds at
+// whole screen pixels (a map's boss level).
+const BOSS_FIG = {};
+function bossFig(id, cv, cell) {
+  const put = (f) => {
+    const d = devicePixelRatio || 1, r = cell.getBoundingClientRect(), room = [Math.max(1, r.width - 12), Math.max(1, r.height - 34)], k = Math.min((room[0] * d) / f.w, (room[1] * d) / f.h), K = k >= 1 ? Math.floor(k) : k;
+    cv.width = f.w; cv.height = f.h; cv.getContext('2d').drawImage(f.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+    cv.style.width = (f.w * K) / d + 'px'; cv.style.height = (f.h * K) / d + 'px';
+  };
+  if (BOSS_FIG[id]) { requestAnimationFrame(() => put(BOSS_FIG[id])); return; }
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+    const a = g.getImageData(0, 0, img.width, img.height).data; let x0 = img.width, y0 = img.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) if (a[(y * img.width + x) * 4 + 3] > 0) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return;
+    const w = x1 - x0 + 1, h = Math.min(y1 - y0 + 1, Math.round(1.15 * w));   // (Koschei, tall: his head and shoulders)
+    put((BOSS_FIG[id] = { img, x: x0, y: y0, w, h }));
+  };
+  img.src = 'assets/cards/planes/boss_' + id + '-boss.png';
+}
 // An ICONS picture as pixel SVG, a path per ink in the page's palette colours (the finer one, ICONS2, on a computer's Retina screen: its
 // half dot whole screen pixels at any size the page gives it).
 function iconEl(id) {
@@ -2605,7 +2634,8 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 }
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
-  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
+  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); p.classList.remove('wmap'); p.style.backgroundImage = p.style.backgroundSize = ''; delete p.dataset.bg;   // (the book shares the map's panel: not its backdrop)
+    this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
   hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; menuTop(false); if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
     const p = this.panel('menu'); menuTop(true);
@@ -2764,9 +2794,11 @@ const ui = {
   // them (lit where a cleared one leads); each its tier's number, a side's its mark instead (a heart on the calm left, an enemy on
   // the fierce right; a bonus race a coin, the boss its face), over its stars; the open ones to tap, the next one yellow; it scrolls
   // by touch to the next one, and on to that one under the thumb.
-  map(w = campAt(campNextId()).w) {
-    const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
+  map(w = campAt(campNextId()).w) {   // a world's ten levels at one look (owner, 2026-10-23: no scroll, the screen filled to the buttons' edges, its world's
+    // backdrop and no see-through, Menu alone, where the player stopped lit, each world's boss): a path up the screen, three a row and back, the boss on top
+    const p = this.panel('map'), c = save.camp, ni = campNextId(), worlds = campWorlds(), wid = CAMPAIGN[w].world.id;
     this.mapAt = w;
+    mapBack(p, 'assets/cards/planes/arrive_' + wid + '-plate.png');   // the world's own scene (its arrival card's, the figures off it), whole
     p.append(cap(el('div', 'head', tf('world', { n: wNo(w) }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: wNo(w) }));
     if (worlds.length > 1) { const tabs = el('div', 'duo'); for (const k of worlds) {   // the worlds open so far, a tab each; a bonus world's shut one its stars so far
       const shut = !campOpen(k * 30 + 1), need = CAMP_STARS[CAMPAIGN[k].world.id];
@@ -2774,35 +2806,28 @@ const ui = {
       if (shut) { const row = el('span', 'inl'); row.append(iconEl('starOff'), px(lineStars() + '/' + need)); b.append(row); }   // (one line: a small button's one height)   // (the pixel font has no star: its picture)
       tabs.append(b);
     } p.append(tabs); }
-    if (CAMP_OPEN < CAMPAIGN.length) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet
-    const tree = el('div', 'tree'), inner = el('div', 'in'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), X = (col) => 50 + col * 100, Y = (s) => 960 - s * 102;
-    svg.setAttribute('viewBox', '0 0 300 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-    for (let s = 0; s < 9; s++) for (let col = 0; col < 3; col++) {
-      const i = w * 30 + s * 3 + col;
-      if (campHas(i)) for (const u of ups(s, col)) {
-        const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        for (const [k, v] of [['x1', X(col)], ['y1', Y(s)], ['x2', X(u)], ['y2', Y(s + 1)]]) ln.setAttribute(k, v);
-        if (c.stars[i] > 0) ln.setAttribute('class', 'on');
-        svg.append(ln);
-      }
-    }
-    inner.append(svg);
-    let nextEl = null;
-    for (let s = 9; s >= 0; s--) for (let col = 0; col < 3; col++) {
-      const i = w * 30 + s * 3 + col;
-      if (!campHas(i)) continue;
-      const { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, icon = rc.boss ? 'boss' : rc.bonus != null ? 'coin' : col === 0 ? 'heal1' : col === 2 ? 'foe_crawler' : null;
-      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === ni && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) goOwed(() => game.playLevel(i)); });
-      if (icon) b.append(iconEl(icon));
+    if (CAMP_OPEN < CAMPAIGN.length && w === worlds[worlds.length - 1] && w === CAMP_OPEN - 1) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet: under the last open one
+    const grid = el('div', 'mapg'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), cells = [];
+    svg.setAttribute('aria-hidden', 'true'); grid.append(svg);
+    const at = (s) => (s === 9 ? [1, 0] : [Math.floor(s / 3) % 2 ? 2 - (s % 3) : s % 3, 3 - Math.floor(s / 3)]);   // [column, row from the top]: 1 2 3 along the bottom, 4 5 6 back, 7 8 9, the boss over the middle
+    for (let s = 0; s < 10; s++) {
+      const i = w * 30 + s * 3 + 1, { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, [col, row] = at(s);
+      const b = button(rc.boss || rc.bonus != null ? '' : String(s + 1), 'chip lvl' + (i === ni ? ' on' : '') + (open ? '' : ' locked') + (rc.boss ? ' boss' : ''), () => { if (open) goOwed(() => (save.cur && save.cur.ci === i ? game.resume() : game.playLevel(i))); });   // (a level under way goes on where it was)
+      if (rc.boss) { const cv = document.createElement('canvas'); cv.className = 'fig'; b.append(cv); bossFig(rc.boss, cv, b); }   // its world's boss off its card
+      else if (rc.bonus != null) b.append(iconEl('coin'));
       if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
-      b.style.left = (X(col) / 3) + '%'; b.style.top = (Y(s) / 10) + '%';
-      b.setAttribute('aria-label', wNo(w) + '-' + (s + 1) + ['L', '', 'R'][col]); inner.append(b);
-      if (i === ni) nextEl = b;
+      b.style.gridColumn = col + 1; b.style.gridRow = row + 1;
+      b.setAttribute('aria-label', wNo(w) + '-' + (s + 1)); grid.append(b); cells.push({ b, on: n > 0 });
     }
-    tree.append(inner); p.append(tree);
-    if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
-    if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni)))), 'continue'));
+    p.append(grid, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'));
+    requestAnimationFrame(() => {   // the path between them, from each one's middle to the next's (under the cells: it shows in the gaps), lit from a level cleared
+      const g = grid.getBoundingClientRect(), m = cells.map(({ b }) => { const r = b.getBoundingClientRect(); return [r.left - g.left + r.width / 2, r.top - g.top + r.height / 2]; });
+      svg.setAttribute('viewBox', `0 0 ${g.width} ${g.height}`);
+      for (let s = 0; s < 9; s++) {
+        const [x0, y0] = m[s], [x1, y1] = m[s + 1], d = s === 8 ? `M${x0} ${y0}V${y1}H${x1}` : `M${x0} ${y0}L${x1} ${y1}`;   // (to the boss: up, then across)
+        for (const k of ['u', 'l' + (cells[s].on ? ' on' : '')]) { const ln = document.createElementNS('http://www.w3.org/2000/svg', 'path'); ln.setAttribute('d', d); ln.setAttribute('class', k); svg.append(ln); }
+      }
+    });
   },
   pause() {
     const p = this.panel('pause');

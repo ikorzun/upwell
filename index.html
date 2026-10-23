@@ -74,14 +74,21 @@
   .langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; }   /* in one row, by their short names, the width of the buttons (owner: «Языки растяни на всю ширину, а то куцо») */
   .langs .chip { text-transform: none; }   /* 日本語 as it is written */
   #map { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
-  .tree { align-self: stretch; flex: 1; min-height: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; scrollbar-width: none; margin: 8px 0; }   /* a world's map (ui.map): its tiers up, scrolled by touch */
-  .tree::-webkit-scrollbar { display: none; }
-  .tree > .in { position: relative; height: 620px; max-width: 300px; margin: 0 auto; }
-  .tree > .in > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .tree line { stroke: var(--gray); stroke-width: 2; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }   /* the paths up; lit from a cleared level */
-  .tree line.on { stroke: var(--yellow); stroke-dasharray: none; }
-  .chip.lvl { position: absolute; transform: translate(-50%, -50%); width: 56px; min-height: 48px; padding: 4px 2px; gap: 2px; }
-  .chip.lvl > .ico { --p: 2; }   /* a bonus's coin, the boss's face (not its stars) */
+  #map.wmap { background: var(--ink) no-repeat center bottom; image-rendering: pixelated; justify-content: flex-start; gap: 10px; padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }   /* a world's map (ui.map): its world's scene, opaque (owner: no see-through), whole pixels (mapBack) */
+  .mapg { position: relative; flex: 1; min-height: 0; align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 12px; }   /* its ten levels at one look: three a row, the boss on top */
+  .mapg > svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .mapg > svg path { fill: none; stroke-linecap: square; stroke-linejoin: miter; }
+  .mapg > svg path.u { stroke: var(--ink); stroke-width: 10; }   /* under each step of the path: the ink, so it reads on any scene */
+  .mapg > svg path.l { stroke: var(--gray); stroke-width: 4; stroke-dasharray: 8 8; }
+  .mapg > svg path.l.on { stroke: var(--yellow); stroke-dasharray: none; }   /* lit from a level cleared */
+  .mapg .chip.lvl { position: relative; min-width: 0; min-height: 0; padding: 6px; gap: 6px; --p: 4; }
+  .mapg .chip.lvl.locked { background: #262626; color: #8a8a8a; }   /* shut: opaque too */
+  .mapg .chip.lvl > .ico { --p: 4; }   /* a bonus's coin */
+  .mapg .chip.lvl .mini { --p: 2; gap: 2px; }
+  .mapg .chip.lvl .fig { display: block; image-rendering: pixelated; }   /* its world's boss off its card (bossFig) */
+  .mapg .chip.lvl.on { box-shadow: inset 0 0 0 3px var(--yellow); animation: here 1.4s ease-in-out infinite alternate; }   /* where the player stopped (owner: lit at a look) */
+  @keyframes here { to { box-shadow: inset 0 0 0 6px var(--yellow); } }
+  @media (prefers-reduced-motion: reduce) { .mapg .chip.lvl.on { animation: none; } }
   .mini { display: flex; gap: 1px; --p: 1; }   /* a level's stars */
   .build { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 340px; --p: 2; }   /* the upgrades taken, in the pause */
   .cloth { display: flex; gap: 18px; padding: 16px 22px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--yellow); clip-path: var(--notch); margin: auto 0 12px; }   /* a world's tapestry */

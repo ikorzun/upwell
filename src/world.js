@@ -3294,7 +3294,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
     rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
     if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
-      const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s) / P) * P;
+      const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s * (rows.x2 || 1)) / P) * P;   // (THICK of the 12×12's pixels, a finer picture's too)
       if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
         const bx = x0 + col(sn > 0 ? iL : iR + 1), dx = (sn > 0 ? -d : d) * (c < 0 ? -1 : 1);
         box(Math.min(bx, bx + dx), onGrid(y0 + j * s), Math.max(bx, bx + dx), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });

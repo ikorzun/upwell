@@ -1,10 +1,9 @@
-// The Danchi's gallery (tools/gallery, see compose.py): its architecture's six variants each and its other elements as picked, drawn by the game in one
-// scene a step each (?play=blocks's world). window.__galEls picks the elements: slab, balcony, pole, stairs, boxes, spring,
+// The Danchi's gallery (tools/gallery, see compose.py): each of its 14 elements as the owner picked it drawn by the game in one scene, a step each
+// (?play=blocks's world). window.__galEls picks the elements: slab, balcony, pole, stairs, boxes, spring,
 // bikes, plants, mail, cat, wall, far, shop, stash.
 (() => {
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), els = window.__galEls || ['slab', 'balcony', 'pole', 'stairs', 'boxes', 'spring', 'bikes', 'plants', 'mail', 'cat', 'wall', 'far', 'shop', 'stash'];
   const scene = async (el, k) => {
-    window.__dcV = Object.assign({}, DANCHI_V, el in DANCHI_V ? { [el]: k } : {});
     const tst = document.getElementById('toast'); if (tst) tst.style.display = 'none';
     game.preview = BLOCKS; __up.go(2, 0, 3); g.state = 'play';
     const lv = g.lv, t = lv.tile, R = g.R, P = PIX.size, sn = (v) => Math.round(v / P) * P;
@@ -36,5 +35,5 @@
     const cam = y0 - 0.5 * view.h; lv.cam = cam; __up.tick(2); lv.cam = cam; __up.tick(1); lv.cam = cam; await wait(200);
     return { el, k, sy: Math.round(y0 - cam), w: el === 'plants' ? 8.0 : 7.0, at: el === 'stairs' ? 0.7 : el === 'mail' || el === 'shop' || el === 'stash' ? 0.62 : 0.55, nf: renderer.nf };
   };
-  window.__steps = els.flatMap((el) => (el in DANCHI_V ? [0, 1, 2, 3, 4, 5] : [0]).map((k) => async () => { input.clear(); return scene(el, k); }));
+  window.__steps = els.flatMap((el) => [0].map((k) => async () => { input.clear(); return scene(el, k); }));
 })();

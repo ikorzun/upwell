@@ -222,9 +222,8 @@ const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plan
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
 // The Danchi's kit in Kunio Maekawa's concrete, the owner's picks (2026-10-22, the questions page d3–d16): slab E, balcony B, pole D, stairs F, boxes E,
-// spring E, bikes B, mail C, cat C, wall A, far E, shop A, stash A. Its garden is picked again, drawn bigger (owner, d10: «too small»): DANCHI_V.plants, or
-// window.__dcV from the gallery; DC_GARDEN its scale (window.__dcGarden in the gallery)
-const DANCHI_V = { plants: 0 }, DC_GARDEN = 1.5;
+// spring E, bikes B, mail C, cat C, wall A, far E, shop A, stash A; its garden E, twice the size (d17, d18; owner on d10: «too small»): DC_GARDEN
+const DC_GARDEN = 2;
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
@@ -258,7 +257,7 @@ const kitThing = (lv, r) => {
   } else if (th.danchi) {   // the Danchi's by a hash of its height: bicycles, a balcony garden, a stray cat on the ledge, the block's mailboxes on the wall over it
     const k = Math.floor(((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) * 6);
     if (k === 0 && steady(3.0) && room(0, 2.8, 1.6)) out = { kind: 'bikes' };
-    else if (k === 2 && steady(2.7 * DC_GARDEN) && room(0, 2.7 * DC_GARDEN, 1.9 * DC_GARDEN)) out = { kind: 'plants' };   // (drawn bigger, DC_GARDEN)
+    else if (k === 2 && steady(2.3 * DC_GARDEN) && room(0, 2.3 * DC_GARDEN, 1.0 * DC_GARDEN)) out = { kind: 'plants' };   // (drawn bigger, DC_GARDEN)
     else if (k === 3 && steady(2.0) && room(0, 2.1, 2.6)) out = { kind: 'mail' };
     else if (k === 5 && steady(1.6) && room(0, 1.4, 1.2)) out = { kind: 'cat' };
   } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
@@ -4161,7 +4160,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const r of lv.rects) {   // its things on some ledges (kitThing)
       const p = !r.gone && seen(r.y0 - 3 * t, r.y0 + t) && kitThing(lv, r);
       if (!p) continue;
-      const S = p.kind === 'plants' ? window.__dcGarden || DC_GARDEN : 1;   // (the garden drawn bigger: owner, «too small»)
+      const S = p.kind === 'plants' ? DC_GARDEN : 1;   // (the garden drawn bigger: owner, «too small»)
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * S * t), Y = (v) => snap(b - v * S * t);
       const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
       const ln = (u0, v0, u1, v1, c = G, wd = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wd);
@@ -4175,16 +4174,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         ln(u, 0.38, u + 0.55, 0.38); ln(u + 0.55, 0.38, u + 0.9, 0.8); ln(u + 0.35, 0.82, u + 0.55, 0.38); ln(u + 0.35, 0.82, u + 0.9, 0.8); ln(u + 0.9, 0.8, u + 1.15, 0.38);   // its frame
         ln(u + 0.95, 0.8, u + 1.02, 1.0, G, 2); ln(u + 0.9, 1.0, u + 1.15, 1.02); bx(u + 0.28, 0.85, u + 0.45, 0.9, K);   // its handlebar, its saddle
         bx(u + 1.1, 0.75, u + 1.45, 1.0, G, 1, 4); bx(u - 0.25, 0.85, u + 0.1, 1.25, PAL.purple, MUTE);   // its basket, the child seat
-      } else if (p.kind === 'plants') {   // a little garden in Maekawa's estate (DANCHI_V.plants, mk-plants), bigger (S) while the owner picks again: A a tiled planter, a
-        // box of vegetables, a watering can; B a tall plant, laundry on a line; C three pots up a stepped shelf; D a small tree, a shelf of jars; E a box of
-        // vegetables, a tall plant, a hose; F a stone lantern, a bamboo screen, a low plant. Leaves mostly grey (green is moss you hold here)
-        const k = (window.__dcV || DANCHI_V).plants, j = P / (S * t), tilesP = (u0, v0, u1, v1, tw, tr) => { for (let v = v0, i = 0; v < v1 - 0.02; v += tr, i++) { bx(u0, Math.min(v1, v + tr) - j, u1, Math.min(v1, v + tr), G, 1.6); for (let u = u0 + (i % 2 ? tw / 2 : tw); u < u1 - 0.02; u += tw) bx(u, v, u + j, Math.min(v1, v + tr), G, 1.6); } };   // tiles cast into concrete: their joints
-        if (k === 0) { bx(0.15, 0, 1.25, 0.45, G); tilesP(0.15, 0.05, 1.25, 0.45, 0.25, 0.2); for (const u of [0.35, 0.7, 1.05]) leaves(u, 0.45, 4, 0.8); bx(1.4, 0, 2.1, 0.32, G, 1, 1); for (const u of [1.55, 1.8, 2.0]) bx(u, 0.32, u + 0.06, 0.48, PAL.green); bx(2.25, 0, 2.5, 0.3, G); ln(2.5, 0.25, 2.7, 0.35, G, 2); }   // A
-        else if (k === 1) { pot(0.5, 0.35, 0.45); leaves(0.5, 0.45, 7, 1.3); ln(0.1, 1.85, 2.2, 1.85); for (const [u, c] of [[1.0, PAL.blue], [1.5, PAL.purple]]) bx(u, 1.2, u + 0.35, 1.85, c, MUTE); }   // B
-        else if (k === 2) { for (let i = 0; i < 3; i++) { bx(0.2 + i * 0.6, 0, 0.8 + i * 0.6, 0.25 + i * 0.3, G, 1, i ? 0 : 1); pot(0.5 + i * 0.6, 0.24, 0.28, G); } for (let i = 0; i < 3; i++) leaves(0.5 + i * 0.6, 0.25 + i * 0.3 + 0.28, 3, 0.6); }   // C: up a stepped shelf
-        else if (k === 3) { pot(0.6, 0.45, 0.4); bx(0.57, 0.4, 0.63, 1.1, G); F(X(0.6), Y(1.35), 0.42 * S * t, 0, 0, 0.32 * S * t, G, 1, 4); for (const [e, f] of [[-0.2, 1.4], [0.15, 1.25]]) bx(0.6 + e, f, 0.6 + e + 0.08, f + 0.08, PAL.green); bx(1.2, 0, 1.9, 1.3, G, 1.5); for (const v of [0.4, 0.85]) { bx(1.2, v, 1.9, v + 0.05, G); for (const u of [1.3, 1.55]) bx(u, v + 0.05, u + 0.15, v + 0.3, G); } }   // D
-        else if (k === 4) { bx(0.2, 0, 1.0, 0.32, G, 1, 1); for (const u of [0.35, 0.6, 0.85]) bx(u, 0.32, u + 0.06, 0.5, PAL.green); pot(1.35, 0.3, 0.4); leaves(1.35, 0.4, 6, 1.2); ring(2.0, 0.3, 0.26); ring(2.0, 0.3, 0.12, K); }   // E
-        else { bx(0.25, 0, 0.45, 0.5, G); bx(0.15, 0.5, 0.55, 0.62, G); bx(0.22, 0.62, 0.48, 0.85, G); bx(0.28, 0.68, 0.42, 0.78, PAL.orange, LIT); bx(0.1, 0.85, 0.6, 0.95, G); vlamps.push([X(0.35), Y(0.73), 0.3, 1.0]); for (let u = 0.9; u < 2.0; u += 0.12) bx(u, 0, u + 0.06, 1.2 + 0.1 * Math.sin(u * 9), G, 1.5); bx(0.85, 1.0, 2.05, 1.05, G); leaves(2.3, 0, 5, 0.8); }   // F: a stone lantern lit, a bamboo screen
+      } else if (p.kind === 'plants') {   // a little garden (the owner's pick, d17 E, mk-plants), twice the size (S): a box of vegetables, a tall plant in a pot, a
+        // hose on its reel; leaves mostly grey (green is moss you hold here)
+        bx(0.2, 0, 1.0, 0.32, G, 1, 1); for (const u of [0.35, 0.6, 0.85]) bx(u, 0.32, u + 0.06, 0.5, PAL.green); pot(1.35, 0.3, 0.4); leaves(1.35, 0.4, 6, 1.2); ring(2.0, 0.3, 0.26); ring(2.0, 0.3, 0.12, K);
       } else if (p.kind === 'mail') {   // the block's mailboxes (mail C, mk-mail): three rows of three, a plant in a pot; the block's number painted grey over them
         const nl = Math.min(X(0.25), X(1.0)), nt = Y(2.15), digit = (x, n) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
           [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * P, nt + b0 * P, x + a1 * P, nt + b1 * P, G, 1, 0, 10, 0); }); };   // a digit five by nine

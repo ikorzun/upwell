@@ -2300,6 +2300,12 @@ const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png 
   arrive_mine: { planes: [['hero', 1]] }, arrive_cave: { planes: [['hero', 1]] }, arrive_ice: { planes: [['hero', 1]] }, arrive_tokyo: { planes: [['hero', 1]] },
   arrive_blocks: { planes: [['hero', 1]] }, arrive_skazka: { planes: [['hero', 1]] },
   arrive_sea: { planes: [['boss', 0.7], ['hero', 1]] }, arrive_sky: { planes: [['boss', 0.7], ['hero', 1]] },   // (what the hero rides: the boat, the lift's car)
+  moon_fall: { planes: [['boss', 0.45], ['hero', 1]] }, village_crow: { planes: [['boss', 0.6], ['hero', 1]] }, city_friendship: { planes: [['boss', 0.9], ['hero', 1]] },   // (the
+  // world cards: the rabbit on the Moon's rim, the crow, Ume; the lantern on its chain; Ume with hers; Mochi alone where it stood on what is as white
+  // as it, the snow, the clouds, the lighthouse's foot; the two at home together)
+  mine_lamp: { planes: [['boss', 0.7], ['hero', 1]], threads: [{ ink: '#808080', pts: [[75.5, 57, 0], [76.5, 76, 1]] }, { ink: '#e0e0e0', pts: [[78.5, 57, 0], [78.5, 76, 1]] }] },
+  fuji_bell: { planes: [['boss', 1]] }, sea_lighthouse: { planes: [['boss', 1]] }, danchi_lantern: { planes: [['boss', 0.9], ['hero', 1]] },
+  sky_clouds: { planes: [['boss', 1]] }, forest_path: { planes: [['hero', 1]] }, moon_home: { planes: [['boss', 1]] },
 };
 const cardEase = {
   io: (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2),   // slow in, slow out
@@ -2387,6 +2393,49 @@ Object.assign(CARD_MOTION, {
   arrive_skazka(t) {   // Kolobok on the forest path, uneasy: rocking side to side, and now and then a start
     const u = t % 3.6;
     return { hero: [0.4 * Math.sin((2 * Math.PI * t) / 2.2), cardHop(u - 2.4, 1, 0.15, 0.3)], blink: u > 1 && u < 1.15 };
+  },
+});
+// The world cards' (owner, К16 «Б»: «остальные карточки делай»), each its scene's own small story
+Object.assign(CARD_MOTION, {
+  moon_fall(t) {   // I: Mochi falls as a feather does, swinging side to side and slow at each end; the rabbit on the rim bobs, waving after it
+    const w = (2 * Math.PI * t) / 3.6;
+    return { hero: [1.2 * Math.sin(w), 0.5 * Math.sin(2 * w)], boss: [0, -0.4 * Math.abs(Math.sin((Math.PI * t) / 1.2))], blink: t % 3.6 > 1.7 && t % 3.6 < 1.85 };
+  },
+  village_crow(t) {   // II: the crow beats its wings, up quick and sinking slower; Mochi leans in to nudge the cord and back
+    const u = t % 1.1, y = u < 0.3 ? -0.6 * cardEase.out(u / 0.3) : -0.6 * (1 - cardEase.io(seg(u, 0.3, 1.1))), v = t % 2.2, k = v < 0.5 ? cardEase.io(v / 0.5) : v < 0.8 ? 1 : v < 1.3 ? 1 - cardEase.io(seg(v, 0.8, 1.3)) : 0;
+    return { boss: [0, y], hero: [-0.5 * k, 0], blink: v > 1.6 && v < 1.75 };
+  },
+  city_friendship(t) {   // VI: a hop each in turn, Ume's and then Mochi's (call and answer)
+    const u = t % 2.4;
+    return { boss: [0, cardHop(u - 0.2, 1, 0.2, 0.3)], hero: [0, cardHop(u - 1, 1, 0.2, 0.3)], blink: u > 1.8 && u < 1.95 };
+  },
+  mine_lamp(t) {   // III: the lantern swings on its chain off the beam, a pendulum slow at each end; Mochi watches it, breathing
+    const th = 0.05 * Math.sin((2 * Math.PI * t) / 3.2), L = 46, b = (1 - Math.cos((2 * Math.PI * t) / 2.4)) / 2;
+    return { boss: [L * Math.sin(th), L * (1 - Math.cos(th))], hero: [0, -0.3 * cardEase.io(b)] };
+  },
+  fuji_bell(t) {   // IV: Mochi by the summit's bell, glad: a crouch and a hop, a landing with a give
+    const u = t % 2.6, y = u < 0.2 ? 0.3 * cardEase.io(u / 0.2) : u < 0.8 ? 0.3 * (1 - seg(u, 0.2, 0.32)) + cardHop(u - 0.2, 1.2, 0.22, 0.35) : u < 1 ? 0.2 * Math.sin(Math.PI * seg(u, 0.8, 1)) : 0;
+    return { boss: [0, y], blink: u > 1.7 && u < 1.85 };
+  },
+  sea_lighthouse(t) {   // V: Mochi on the rock under the beam, breathing, and now and then up on its toes to look
+    const u = t % 3, b = (1 - Math.cos((2 * Math.PI * t) / 1.5)) / 2;
+    return { boss: [0, -0.3 * cardEase.io(b) + cardHop(u - 2, 0.8, 0.2, 0.35)], blink: u > 0.8 && u < 0.95 };
+  },
+  danchi_lantern(t) {   // VII: Ume bobs, glad to give the lantern; Mochi hops a beat after
+    const u = t % 1.6;
+    return { boss: [0, -0.5 * (1 - Math.cos((2 * Math.PI * u) / 1.6)) / 2], hero: [0, cardHop(u - 0.6, 0.9, 0.18, 0.3)], blink: t % 3.2 > 2.6 && t % 3.2 < 2.75 };
+  },
+  sky_clouds(t) {   // VIII: Mochi on the roof's ridge under the parting clouds: breathing, a look up on its toes
+    const u = t % 3.4, b = (1 - Math.cos((2 * Math.PI * t) / 1.7)) / 2;
+    return { boss: [0, -0.3 * cardEase.io(b) + cardHop(u - 2.2, 0.7, 0.2, 0.35)], blink: u > 1 && u < 1.15 };
+  },
+  forest_path(t) {   // ★: Kolobok on the path, the eyes in the dark on him: rolling a little this way and that, and a start
+    const u = t % 3.8;
+    return { hero: [0.6 * Math.sin((2 * Math.PI * t) / 3.8), cardHop(u - 2.6, 1, 0.15, 0.3)], blink: u > 1.2 && u < 1.35 };
+  },
+  moon_home(t) {   // Home: Mochi and the rabbit in their hug, rocking gently together
+    const w = (2 * Math.PI * t) / 3;
+    return { boss: [0.5 * Math.sin(w), -0.2 * (1 - Math.cos(2 * w)) / 2] };
   },
 });
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)

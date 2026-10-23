@@ -13,8 +13,6 @@ const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; 
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
 const MENU_HERO = { w: 0.25, k: 0.85, h: 1.89, gap: 31, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest, then `k` of that (owner: «уменьши героя на 15%»); its floor `gap` px over the colours, `room` px at least under the logo
-// Fuji's far clouds while the owner picks their living shape (owner 2026-10-23: «более биологическую форму»): FUJI_V.clouds, or window.__fjV from the gallery
-const FUJI_V = { clouds: 0 };
 const BIG_BLOCK = { w: 3.5, h: 2.6, size: 0.5, tone: 1.45 };   // a block this wide and tall (tiles) gets a kanji half its smaller side across, in its ink 0.45 of the way from the black (KANJI)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
 // floor and `air`/s in the air; `slip` is a floor's friction while running on the keys (it holds
@@ -3808,12 +3806,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
-    {   // Fuji far off: a cone of blue, its ridges uneven, its snow grey down them in tongues; its clouds in living shapes while the owner picks (FUJI_V.clouds, or
-      // window.__fjV from the gallery; owner 2026-10-23: «для природных фонов и элементов в игровом мире используй более биологическую форму», his picture's
-      // clouds: an outline of uneven round bumps, no straight runs, no symmetry, holes of the dark in them, ragged strands of checker trailing off): A two
-      // cauliflower clouds, holes, strands down; B towers of cumulus, strands both ways; C a long bank across its waist, holes of blue; D a collar of puffs round
-      // its top; E wisps, strands curling off small puffs; F a sea of cloud at its foot, two puffs over. Low on the screen, sinking a little as the climb goes on
-      const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), k = (window.__fjV || FUJI_V).clouds;
+    {   // Fuji far off: a cone of blue, its ridges uneven, its snow grey down them in tongues; a long bank of cloud across its waist in a living shape (the owner's
+      // pick, 2026-10-23, d33 C; his rule: «для природных фонов и элементов в игровом мире используй более биологическую форму», his picture's clouds: an outline
+      // of uneven round bumps, no straight runs, no symmetry, holes of the dark in it, ragged strands of checker trailing off). Low on the screen, sinking a little
+      // as the climb goes on
+      const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
       const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side)); };   // its flanks, uneven
       for (let y = 0; y < ht; y += 2 * P) {
         const u = y / ht, yy = foot - ht + y, wl = half(y, -1), wr = half(y, 1), sn = 0.3 + 0.06 * Math.sin(y / P * 0.9) + 0.05 * Math.sin(y / P * 2.3);
@@ -3834,12 +3831,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         for (let i = 0; i < holes; i++) hole(x - w / 3 + (i + 0.5) / holes * (w * 0.66) + (hs(s + 40 + i) - 0.5) * 0.3 * t, y - (0.1 + 0.3 * hs(s + 50 + i)) * h, (0.07 + 0.08 * hs(s + 60 + i)) * t);
       };
       const U = (u) => cx + u * t, V = (v) => foot - v * t;
-      if (k === 0) { for (const [u, v, w, s] of [[-4.6, 4.6, 3.2, 1], [4.4, 5.2, 2.6, 2]]) { cloud(U(u), V(v), w * t, 1.1 * t, s); strand(U(u - w / 2 + 0.3), V(v - 0.3), -0.25, 0.14, 7, s + 9); } }   // A
-      else if (k === 1) { for (const [u, v, s] of [[-5.0, 4.0, 3], [4.8, 4.4, 4]]) { cloud(U(u), V(v), 2.1 * t, 1.0 * t, s, 1, 0.7); cloud(U(u + 0.2), V(v + 0.9), 1.5 * t, 0.9 * t, s + 1, 1, 0.8); cloud(U(u - 0.1), V(v + 1.6), 0.9 * t, 0.7 * t, s + 2, 0, 0.9); strand(U(u - 1.0), V(v - 0.2), -0.24, 0.1, 6, s); strand(U(u + 1.0), V(v - 0.2), 0.24, 0.1, 6, s + 5); } }   // B: towers
-      else if (k === 2) { cloud(U(0.2), V(2.6), 9.5 * t, 0.75 * t, 5, 5, 0.3); strand(U(-4.6), V(2.4), -0.3, 0.02, 6, 11); strand(U(5.0), V(2.4), 0.3, 0.02, 6, 12); }   // C: a bank across its waist
-      else if (k === 3) { for (const [u, v, w, s] of [[-1.2, 5.3, 1.3, 6], [1.0, 5.2, 1.4, 7], [-0.1, 5.75, 1.1, 8], [-2.1, 4.8, 0.9, 9], [2.0, 4.7, 0.9, 10]]) cloud(U(u), V(v), w * t, 0.7 * t, s, 0, 0.6); strand(U(-2.6), V(4.6), -0.25, 0.12, 6, 13); }   // D: a collar round its top
-      else if (k === 4) { for (const [u, v, s, d] of [[-4.8, 4.8, 14, -1], [4.2, 5.4, 15, 1], [-2.6, 6.2, 16, 1]]) { cloud(U(u), V(v), 1.0 * t, 0.55 * t, s, 0, 0.5); for (let j = 0; j < 3; j++) strand(U(u + d * (0.4 + 0.5 * j)), V(v - 0.1 + 0.25 * j), d * (0.22 - 0.05 * j), 0.1 + 0.08 * j, 5, s + j * 3); } }   // E: wisps
-      else { cloud(U(-3.6), V(0.7), 7.5 * t, 0.9 * t, 17, 3, 0.35); cloud(U(3.8), V(0.8), 7.0 * t, 0.85 * t, 18, 3, 0.35); for (const [u, v, s] of [[-4.4, 4.9, 19], [4.6, 5.4, 20]]) cloud(U(u), V(v), 1.6 * t, 0.7 * t, s, 1, 0.5); strand(U(-7.2), V(0.6), -0.2, -0.04, 5, 21); }   // F: a sea of cloud at its foot
+      cloud(U(0.2), V(2.6), 9.5 * t, 0.75 * t, 5, 5, 0.3); strand(U(-4.6), V(2.4), -0.3, 0.02, 6, 11); strand(U(5.0), V(2.4), 0.3, 0.02, 6, 12);   // the bank, its strands off both ends
     }
     const csh = CINE ? 0.55 * cam : 0;   // (2.5D: the cranes on a plane of their own, far: 0.45 of the climb)
     for (let k = Math.floor((top - csh) / (18 * t)) - 1; k * 18 * t + csh < bot; k++) {   // a pair of cranes (A) crossing the shaft, slowly, by turns of height either way

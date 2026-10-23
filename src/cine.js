@@ -132,6 +132,7 @@ void main() {
 if (CINE_ON) {
   const gumMake = Renderer.prototype.makeTarget, gumFeat = Renderer.prototype.feat, gumInitW = Renderer.prototype.init;
   Renderer.prototype.init = function () {
+    this.cine = null; this.pComp = null;   // (a lost context's: not deleted in the new one; gumInitW's makeTarget the plain one, this one's below lets it go: QA)
     if (!gumInitW.call(this)) return false;
     try {
       const gl = this.gl;
@@ -139,7 +140,7 @@ if (CINE_ON) {
       this.pRays = program(gl, BG_VS, CINE_RAYS_FS); this.pComp = program(gl, BG_VS, CINE_COMP_FS);
     } catch (err) { console.error(err); return false; }
     this.fFar = new Float32Array(14 * 512); this.nFar = 0; this.fSt = new Float32Array(14 * 1024); this.nSt = 0; this.fSm = new Float32Array(14 * 1024); this.nSm = 0; this.route = 0;
-    this.cine = null; if (this.low) this.makeTarget();
+    if (this.low) this.makeTarget();
     return true;
   };
   // The targets: the play's (a texture now, so it can be read; its stencil as before), what is behind, and the small ones the blurs and the rays use.

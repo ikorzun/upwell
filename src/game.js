@@ -11,7 +11,7 @@ const STR = {
   en: {
     hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
+    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', tip: 'Tip: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_rebound: 'Jump as you land: bounce higher!', rebound_ok: 'Boing! Right on the beat', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge', seen_wind: 'When the carp flag fills, a gust blows you aside', seen_mochi: 'The pestle flattens you: then you fit under low beams', seen_fork: 'Two ways up: the risky one pays more', seen_fireWall: 'Fire bursts out of some walls: wait for it to die down',
@@ -21,14 +21,14 @@ const STR = {
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', depth: '2.5D', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
     random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', bookTap: 'Tap one to read it', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
+    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', tip: 'Consejo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_rebound: '¡Salta al aterrizar: rebotas más alto!', rebound_ok: '¡Boing! Justo a tiempo', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva', seen_wind: 'Cuando se infla la carpa, una ráfaga te empuja de lado', seen_mochi: 'El mazo te aplasta: así cabes bajo las vigas bajas', seen_fork: 'Dos caminos: el arriesgado paga más', seen_fireWall: 'De algunas paredes sale fuego: espera a que se apague',
@@ -38,14 +38,14 @@ const STR = {
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
-    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
+    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', depth: '2.5D', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
     random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', bookTap: 'Toca uno para leerlo', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
+    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', tip: 'Dica: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_rebound: 'Pule ao pousar: quica mais alto!', rebound_ok: 'Boing! Bem na hora', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie', seen_wind: 'Quando a carpa enche, uma rajada te empurra de lado', seen_mochi: 'O pilão te achata: aí você passa sob as vigas baixas', seen_fork: 'Dois caminhos: o arriscado paga mais', seen_fireWall: 'Algumas paredes soltam fogo: espere ele baixar',
@@ -55,14 +55,14 @@ const STR = {
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
-    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
+    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', depth: '2.5D', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
     random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', bookTap: 'Toque em um para ler', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
+    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', tip: 'ヒント: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_rebound: 'ちゃくちの しゅんかんに ジャンプ: たかく はねる！', rebound_ok: 'ボヨン！ ぴったり', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ', seen_wind: 'こいのぼりが ふくらむと とっぷう: よこへ ながされる', seen_mochi: 'きねに つぶされると ひくい はりの したを とおれる', seen_fork: 'みちは ふたつ: あぶない ほうが たくさん もらえる', seen_fireWall: 'かべから ひが ふきだす: おさまるまで まとう',
@@ -72,7 +72,7 @@ const STR = {
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
-    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
+    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', depth: 'りったい', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
     random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', bookTap: 'さわって よもう', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
   },
@@ -185,6 +185,9 @@ const shakeAdd = shake.add.bind(shake);
 shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
+  const obj = (o) => o && typeof o === 'object' && !Array.isArray(o), num = (v) => typeof v === 'number' && Number.isFinite(v);
+  for (const k of ['book', 'seen']) if (!obj(save[k])) save[k] = {};   // (a hand-edited or broken store: «book: 3» stopped the boot, «seen: null» every step; QA)
+  if (save.cur != null && !(obj(save.cur) && num(save.cur.ci) && num(save.cur.m) && num(save.cur.seed))) delete save.cur;   // (a level under way that cannot go on: «Continue · NaN m»)
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
   if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = []; if (!c.medals || typeof c.medals !== 'object') c.medals = {};   // (v6 to v7: the medals, MEDAL)
   if ((save.v | 0) < 3) {   // v2 to v3: a world's ten levels in a row onto its map, each the middle of its tier (a boss's losses with it)
@@ -469,7 +472,7 @@ class Foe {
   // lobs a blob that comes down where the hero was. True while it stands to do it.
   lunge(dt, g) {   // a skull (SKULL): the hero close on its level, it rushes at it a moment, rattling; its goo drips all along
     const b = this.body, H = g.hero, R = g.R;
-    if (Math.random() < 3 * dt) bits.push({ x: b.cx + rand(-0.5, 0.5) * b.R, y: b.maxY - 2, vx: 0, vy: 40, s: rand(1.5, 2.5), c: INK.dark, t: 0, life: rand(0.6, 1.2), g: 0.5, drag: 1 });
+    if (fxRand(0, 1) < 3 * dt) bits.push({ x: b.cx + fxRand(-0.5, 0.5) * b.R, y: b.maxY - 2, vx: 0, vy: 40, s: fxRand(1.5, 2.5), c: INK.dark, t: 0, life: fxRand(0.6, 1.2), g: 0.5, drag: 1 });
     if ((this.rush = Math.max(0, (this.rush || 0) - dt)) > 0) return true;
     if ((this.cool = Math.max(0, (this.cool || 0) - dt)) > 0) return false;
     if (Math.abs(H.cx - b.cx) > SKULL.reach * R || Math.abs(H.cy - b.cy) > 1.5 * R) return false;
@@ -737,7 +740,8 @@ class Game {
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
-      height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: wd.theme, keep: this.room() });
+      height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: (this.bonus && this.mode === 'camp' ? this.wd : wd).theme, keep: this.room() });   // (a campaign's bonus
+    // in its world's look: the Sea's and Tokyo's coin rain were the Mine's grey, the kind's own theme from the days a bonus was its world's)
     this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
     if (rc && rc.ice) for (const c of this.lv.icicles) c.y = Math.max(c.y, this.lv.cam + CAM.top);   // the Puck's icicles in sight, under the HUD (the keys push the arena's ceiling up off the screen)
     if (boss) { this.lv.boss = new Boss(this.lv, BOSSES[rc ? rc.boss : 'lid']); if ((save.camp.fails[this.failKey()] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
@@ -758,6 +762,7 @@ class Game {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
+    this.thrown = 0; this.wallHold = 0;   // (a throw out of a room, or its hold on the wall, the old level's: the next hero stuck to a wall; review)
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; aimCancel(); ui.comboEnd();
@@ -787,6 +792,7 @@ class Game {
     if (this.state === 'menu' || this.state === 'boot') { const o = ui.open === 'map' ? ui.mapAt : null, set = ui.open === 'settings'; this.toMenu(); if (o === 'book') ui.book(); else if (o != null) ui.map(o); else if (set) ui.settings(); return; }   // (the map, the book or the settings stay open)
     const k = (view.w - 2 * LEVEL.wall) / Math.max(1, this.builtW - 2 * LEVEL.wall);
     this.builtW = view.w; this.rescale(k); this.applyMods();
+    if (ui.open === 'story' && ui.storyArgs) ui.story(...ui.storyArgs);   // a story card up: fitted to the new screen (it kept its size, off the top, its Next squeezed: QA)
   }
   rescale(k) {
     const X = (x) => LEVEL.wall + (x - LEVEL.wall) * k, Y = (y) => y * k, num = (v) => Number.isFinite(v);
@@ -805,10 +811,12 @@ class Game {
       for (const wh of lv.wheels || []) { wh.cx = X(wh.cx); for (const key of ['cy', 'y0', 'y1']) wh[key] = Y(wh[key]); wh.rad *= k; wh.hang *= k; }   // (a mill, MILL: its boards are boxes, above)
       for (const kn of lv.kines || []) { kn.x = X(kn.x); kn.px = X(kn.px); for (const key of ['yUp', 'yHit', 'foot', 'y0', 'y1']) kn[key] = Y(kn[key]); }   // (a pestle, MOCHI)
       for (const o of [lv.coins, lv.shots, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
+      for (const a of lv.arenas || []) for (const d of a.drops || []) xy(d);   // (an arena's wave about to drop)
       for (const sp of lv.spots || []) { const r = sp.r; xy(sp); sp.r = r; }   // (a pit's size is in R: it grows with R)
       const walls = new Set(), wall = (w) => { if (!w || walls.has(w)) return; walls.add(w); w.y0 = Y(w.y0); w.y1 = Y(w.y1); };   // (a wall can be a spawn's and its climber's both)
       for (const s of lv.spawns) wall(s.wall);
-      for (const e of lv.enemies) { body(e.body); wall(e.wall); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); if (e.ax || e.ay) { e.ax = X(e.ax); e.ay = Y(e.ay); } }
+      for (const e of lv.enemies) { body(e.body); wall(e.wall); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); if (e.ax || e.ay) { e.ax = X(e.ax); e.ay = Y(e.ay); } if (num(e.home)) e.home = Y(e.home); if (num(e.homeX)) e.homeX = X(e.homeX); }   // (a nurikabe's
+      // perch with its ledge: it hung under it on a wider window; review)
       for (const f of lv.folk) body(f.body);
       if (lv.boss) body(lv.boss.body);
       for (const o of [lv.crossing, lv.portal, lv.exit, lv.rail]) if (o) { xy(o); for (const key of ['x0', 'x1']) if (num(o[key])) o[key] = X(o[key]); for (const key of ['y0', 'y1']) if (num(o[key])) o[key] = Y(o[key]); }
@@ -1176,7 +1184,7 @@ class Game {
   }
   folkUp(f) {   // a cage's blob (a hero's colour, not this one's) or the trader (purple), standing on its ledge; the hero passes through them
     const lv = this.lv, R = this.R, cage = f.kind === 'cage', cols = PALETTE.filter((c) => c.id !== save.color), r = (cage ? 0.7 : 0.95) * R;
-    const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(Math.random() * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
+    const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(fxRand(0, 1) * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
     b.gScale = 1; b.sticky = false; b.ghost = true; b.face.frown = cage;   // locked in: glum
     if (!cage) { f.p = { x: f.x, y: f.y - 3 * R, r: 0.6 * R, item: SHOP_ITEMS[(Math.random() * SHOP_ITEMS.length) | 0], sold: false, near: false, trader: f }; lv.pickups.push(f.p); }
   }
@@ -1219,7 +1227,7 @@ class Game {
   }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
     const H = this.hero, lv = this.lv;
-    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220);
+    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * fxRand(80, 140); f.vy = -fxRand(140, 220);
     if (f.kind === 'crow') { this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id); }
   }
   // Tokyo's neon (neonSign) and the kits' things (kitThing: a Village lantern lit, a Fuji bell rung, a Mine lamp lit) between y0 and
@@ -1358,7 +1366,9 @@ class Game {
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
     if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (!this.gated()) this.idleT += dt; }   // no new height: the fire speeds up
-    if (!lv.exit && H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
+    const cam = !lv.exit && (lv.under || lv.kind === 'well') ? Math.max(lv.cam, Math.min(H.maxY + view.keep + this.R - view.h, lv.floor + this.room() - view.h)) : lv.cam;   // where the frame's
+    // clamp will hold the camera (Game.frame; the camera itself left to it): at a low frame rate a long fall passed the screen's bottom between two frames and counted as off it, a heart gone (review: 30 fps, 1250 px)
+    if (!lv.exit && H.minY > cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
@@ -1490,7 +1500,7 @@ class Game {
   drop(x, y, n, v = 1) {
     for (let k = 0; k < n; k++) {
       const a = -Math.PI / 2 + rand(-1.2, 1.2), sp = COIN.burst * rand(0.6, 1.25);
-      this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: rand(0, TAU) });
+      this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: fxRand(0, TAU) });
     }
   }
   // What is about to come down into view over its top edge, by where (x) it comes in, for a sign there (the market review:
@@ -1652,7 +1662,7 @@ class Game {
       f.warn = { x: clamp(H.cx + rand(-2.5, 2.5) * R, lv.l + R, lv.r - R), t: FIRE.warn };
       f.spitT = rand(FIRE.spit[0], FIRE.spit[1]);
     }
-    if (f.y < lv.cam + view.h + R && Math.random() < dt * 14) fx.add(rand(lv.l, lv.r), f.y + rand(0, 6), rand(-25, 25), rand(-150, -50), rand(2, 3.5), rand(0.5, 0.9), Math.random() < 0.5 ? INK.fire : INK.flame, 1, 0);
+    if (f.y < lv.cam + view.h + R && fxRand(0, 1) < dt * 14) fx.add(fxRand(lv.l, lv.r), f.y + fxRand(0, 6), fxRand(-25, 25), fxRand(-150, -50), fxRand(2, 3.5), fxRand(0.5, 0.9), fxRand(0, 1) < 0.5 ? INK.fire : INK.flame, 1, 0);
     for (let i = lv.enemies.length - 1; i >= 0; i--) {
       const b = lv.enemies[i].body;
       if (b.cy > f.y) { splatFx(b.cx, f.y, b.R, INK.flame, 8); lv.enemies.splice(i, 1); }   // marmalade burns: no coins for it
@@ -1876,6 +1886,7 @@ class Game {
   levelClear() {
     joyEnd();   // a stick held into the hole lets go
     this.markDay();
+    if (this.cardDue) { const id = this.cardDue.id; this.cardDue = null; this.story(id); }   // a card due (the crow's, RIBBON) as the level ends: now, before what follows (QA: it was lost)
     if (!this.bonus) { pmsg('level_completed', this.lvl()); track('level_stats', { level_id: this.levelId(), seconds: Math.round(this.lv.t), coins_taken: this.lv.coinsTaken, coins_total: this.lv.coinTotal, hp: this.hp }); }   // (a bonus level is done in endBonus, by its hole or not)
     this.state = 'clear'; this.stateT = 0;
     const H = this.hero;
@@ -1936,8 +1947,9 @@ class Game {
     if (m.days.includes(today)) return;
     m.days.push(today);
     const n = m.days.length, k = MARKS.at.indexOf(n);
-    if (k >= 0) { this.coins += MARKS.pay[k]; setTimeout(() => ui.toast(tf('markPay', { n, c: MARKS.pay[k] }), 2200), 900); }   // after the hole's moment
-    else setTimeout(() => ui.toast(tf('mark', { n }), 1800), 900);
+    if (k >= 0) this.coins += MARKS.pay[k];
+    this.markSay = { text: k >= 0 ? tf('markPay', { n, c: MARKS.pay[k] }) : tf('mark', { n }), pay: k >= 0 };   // said on the screen after the level (ui.markLine), not in a toast:
+    // the toast, timed in real time, lay over the stars coming in or was put out by the panel (QA, 2026-10-23)
     persist();
   }
   // An enemy's coins still on their way to the hero as a level or the run ends get there all the same.
@@ -2440,7 +2452,7 @@ Object.assign(CARD_MOTION, {
 });
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
-const cardImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+const cardImg = (src, ms = 6000) => new Promise((ok) => { const i = new Image(), t = setTimeout(() => ok(null), ms); i.onload = () => { clearTimeout(t); ok(i); }; i.onerror = () => { clearTimeout(t); ok(null); }; i.src = src; });   // (given up after `ms`: a stalled request held the card for good; review)
 function cardLive(c, card, tilt, clip, title, next) {
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
   const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
@@ -2448,15 +2460,16 @@ function cardLive(c, card, tilt, clip, title, next) {
   const planes = [], L0 = { eyes: [], twinkle: [], lights: [], pal: [] };
   let L = L0, thread = null, sheen = null, sg = null, img = null, masks = null;
   const show = (a, b) => { title.style.opacity = a; title.style.transform = `translateY(${8 * (1 - cardEase.out(a))}px)`; next.style.opacity = b; next.style.transform = `translateY(${8 * (1 - cardEase.out(b))}px)`; next.style.pointerEvents = b < 0.5 ? 'none' : ''; };
-  show(still ? 1 : 0, still ? 1 : 0);
+  show(0, 0);   // (under «reduce motion» at once once the art is in: before it, Next skipped a card unseen; QA)
+  const failSafe = setTimeout(() => { if (st.alive && !st.ready) { st.forced = true; show(1, 1); } }, 3000);   // the art late: Next all the same (review)
   const move = (e) => { const r = card.getBoundingClientRect(); st.gx = ((e.clientX - r.left) / r.width - 0.5) * 2; st.gy = ((e.clientY - r.top) / r.height - 0.5) * 2; st.lastIn = performance.now(); };
   const leave = () => { st.gx = 0; st.gy = 0; };
   card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
   Promise.all([cardImg(def ? `assets/cards/planes/${c.id}-plate.png` : c.still), ...(def ? def.planes.map(([id]) => cardImg(`assets/cards/planes/${c.id}-${id}.png`)) : []),
-    liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))]).then((got) => {
+    liveData || (liveData = Promise.race([fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})), new Promise((ok) => setTimeout(() => ok({}), 6000))]))]).then((got) => {
     if (!st.alive) return;
     const ims = got.slice(0, -1), j = got[got.length - 1];
-    if (!ims[0]) return;   // (no art: the card's ground only)
+    if (!ims[0]) { show(1, 1); return; }   // (no art: the card's ground only, and its Next: a card that did not load held the game for good; review)
     L = (j && j[c.id]) || L0;
     const specs = [['plate', 0.25], ...(def ? def.planes : [])];
     ims.forEach((im, i) => {
@@ -2481,7 +2494,7 @@ function cardLive(c, card, tilt, clip, title, next) {
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (CARD_BAYER[y & 3][x & 3] < n) d.data[(y * w + x) * 4 + 3] = 255;
       mg.putImageData(d, 0, 0); masks.push(m);
     }
-    st.ready = true;
+    st.ready = true; if (still) show(1, 1);
   });
   const rgb = RAINBOW_INK.map((v) => v.map((q) => Math.round(q * 255)));
   function drawPlane(p, level, f, blink) {   // its picture, its live cells this step, through the coming-in's dither (only when either changed)
@@ -2514,7 +2527,7 @@ function cardLive(c, card, tilt, clip, title, next) {
   function drawThread(off, K) {   // what it hangs by, from the plate to the figure, a cell wide, in whole device px (each point moved its part of the way)
     const r = card.getBoundingClientRect(), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
     if (thread.width !== W || thread.height !== H) { thread.width = W; thread.height = H; }
-    const g = thread.getContext('2d'), pa = off[0], pb = off[1], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
+    const g = thread.getContext('2d'), pa = off[0], pb = off[1] || off[0], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
     g.clearRect(0, 0, W, H);
     for (const th of def.threads) {
       g.fillStyle = th.ink;
@@ -2545,10 +2558,10 @@ function cardLive(c, card, tilt, clip, title, next) {
     });
     if (thread) { drawThread(off, K); thread.style.opacity = still ? 1 : clamp01((a - CARD.step) / CARD.each); }
     if (sheen) drawSheen(st.tx, st.ty);
-    show(still ? 1 : clamp01((a - CARD.title) / CARD.fade), still ? 1 : clamp01((a - CARD.next) / CARD.fade));
+    show(still || st.forced ? 1 : clamp01((a - CARD.title) / CARD.fade), still || st.forced ? 1 : clamp01((a - CARD.next) / CARD.fade));
   }
   st.raf = requestAnimationFrame(step);
-  return { stop() { st.alive = false; cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
+  return { stop() { st.alive = false; clearTimeout(failSafe); cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
@@ -2557,6 +2570,35 @@ function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
   c.className = 'cap'; c.lang = ja ? 'ja' : 'en'; c.textContent = o ? raw.replace(/\{(\w+)\}/g, (_, n) => o[n]) : raw;
   e.classList.add('capped'); e.append(c);
   return e;
+}
+// A map's backdrop: a picture filling the panel, its pixels whole screen pixels (the smallest whole scale that covers it), low on it, opaque.
+function mapBack(p, src) {
+  const img = new Image(); p.classList.add('wmap'); p.dataset.bg = src;
+  img.onload = () => { if (p.dataset.bg !== src) return;   // (another screen took the panel meanwhile)
+    const d = devicePixelRatio || 1, k = Math.ceil(Math.max((p.clientWidth * d) / img.width, (p.clientHeight * d) / img.height));
+    p.style.backgroundImage = `url("${src}")`; p.style.backgroundSize = `${(img.width * k) / d}px ${(img.height * k) / d}px`; };
+  img.src = src;
+}
+// A boss's figure off its story card (its plane, the card's cells, cropped to them; a tall one to its upper part) into `cv`, as big as `cell` holds at
+// whole screen pixels (a map's boss level).
+const BOSS_FIG = {};
+function bossFig(id, cv, cell) {
+  const put = (f) => {
+    const d = devicePixelRatio || 1, r = cell.getBoundingClientRect(), room = [Math.max(1, r.width - 12), Math.max(1, r.height - 34)], k = Math.min((room[0] * d) / f.w, (room[1] * d) / f.h), K = k >= 1 ? Math.floor(k) : k;
+    cv.width = f.w; cv.height = f.h; cv.getContext('2d').drawImage(f.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+    cv.style.width = (f.w * K) / d + 'px'; cv.style.height = (f.h * K) / d + 'px';
+  };
+  if (BOSS_FIG[id]) { requestAnimationFrame(() => put(BOSS_FIG[id])); return; }
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+    const a = g.getImageData(0, 0, img.width, img.height).data; let x0 = img.width, y0 = img.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) if (a[(y * img.width + x) * 4 + 3] > 0) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return;
+    const w = x1 - x0 + 1, h = Math.min(y1 - y0 + 1, Math.round(1.15 * w));   // (Koschei, tall: his head and shoulders)
+    put((BOSS_FIG[id] = { img, x: x0, y: y0, w, h }));
+  };
+  img.src = 'assets/cards/planes/boss_' + id + '-boss.png';
 }
 // An ICONS picture as pixel SVG, a path per ink in the page's palette colours (the finer one, ICONS2, on a computer's Retina screen: its
 // half dot whole screen pixels at any size the page gives it).
@@ -2567,7 +2609,7 @@ function iconEl(id) {
     const d = inkPath(rows.map((r) => r.replace(/./g, (q) => (q === c ? '#' : '.'))), 0, 0);
     if (d) paths += `<path fill="var(--${ICON_INK[c] === 'black' ? 'ink' : ICON_INK[c]})" d="${d}"/>`;
   }
-  e.className = 'px ico'; e.innerHTML = pxSvg(rows[0].length, rows.length, paths, rows.x2);
+  e.className = 'px ico' + (rows[0].length / (rows.x2 || 1) > 12 ? ' wide' : ''); e.innerHTML = pxSvg(rows[0].length, rows.length, paths, rows.x2);   // (wide: a portrait's 16)
   return e;
 }
 const HEART = { full: '.##.##./#######/#######/.#####./..###../...#...'.split('/'), empty: '.##.##./#..#..#/#.....#/.#...#./..#.#../...#...'.split('/') };
@@ -2604,7 +2646,8 @@ function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
 }
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
-  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
+  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); p.classList.remove('wmap'); p.style.backgroundImage = p.style.backgroundSize = ''; delete p.dataset.bg;   // (the book shares the map's panel: not its backdrop)
+    this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
   hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; menuTop(false); if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
     const p = this.panel('menu'); menuTop(true);
@@ -2689,6 +2732,7 @@ const ui = {
     this.starRow(p);
     p.append(cap(el('div', 'head', t('cleared')), 'cleared'), cap(button(t('next'), 'big thumb', () => game.campNext()), 'next'));
   },
+  markLine(p) { const m = game.markSay; if (!m) return; game.markSay = null; const e = el('div', 'label mark' + (m.pay ? ' pay' : ''), m.text); p.append(e); },   // the week's mark (Game.markDay), once
   starRow(p) {
     const st = game.stars;
     if (st) {   // the level's stars, what they paid and what they were for
@@ -2713,6 +2757,7 @@ const ui = {
       }
       p.append(row);
     }
+    this.markLine(p);
   },
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
     const p = this.panel('result'), g = game, price = g.revivePrice(), boss = !!(g.rc && g.rc.boss), why = g.deathWhy();
@@ -2725,14 +2770,16 @@ const ui = {
     const p = this.panel('result'), cw = CAMPAIGN[game.world], cloth = el('div', 'cloth');
     for (const [k, ch] of [...cw.runes].entries()) { const r = document.createElement('span'); r.className = 'rune r' + k; r.textContent = ch; cloth.append(r); }
     cloth.setAttribute('aria-hidden', 'true');
-    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => game.story((Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
+    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore))); this.markLine(p);
+    p.append(cap(button(t('next'), 'big thumb', () => game.story((Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
   },
   worldDone() {   // its boss beaten, after its tapestry: on into the next world on the line, or word of it coming (a bonus world: back to its map)
     let nw = game.world + 1; while (nw < CAMPAIGN.length && gated(nw)) nw++;
     const p = this.panel('result'), bonus = gated(game.world), n = nw + 1, next = !bonus && n <= CAMP_OPEN, on = CAMPAIGN.slice(0, nw).filter((_, k) => !gated(k)).length + 1;   // on: its number on the line
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'));
     if (!bonus) p.append(el('div', 'label', tf(next ? 'worldNext' : 'soon', { n: on })));   // (a bonus world's end says nothing of the line's next one)
-    const go = save.camp.stars[(n - 1) * 30 + 1] > 0 ? campNextId() : (n - 1) * 30 + 1, at = campAt(go);   // (a boss beaten again: on where Continue goes, not back)
+    const go = !next ? 0 : save.camp.stars[(n - 1) * 30 + 1] > 0 ? campNextId() : (n - 1) * 30 + 1, at = next ? campAt(go) : null;   // (a boss beaten again: on where Continue goes, not back; the
+    // last world's: no next one to look up, it threw past CAMPAIGN's end and left the screen with no buttons: review)
     if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(at.w)), 'map'), cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1), 'big thumb', () => game.playLevel(go)), 'continue'));
     else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map(bonus ? game.world : undefined)), 'map'));
   },
@@ -2763,9 +2810,11 @@ const ui = {
   // them (lit where a cleared one leads); each its tier's number, a side's its mark instead (a heart on the calm left, an enemy on
   // the fierce right; a bonus race a coin, the boss its face), over its stars; the open ones to tap, the next one yellow; it scrolls
   // by touch to the next one, and on to that one under the thumb.
-  map(w = campAt(campNextId()).w) {
-    const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
+  map(w = campAt(campNextId()).w) {   // a world's ten levels at one look (owner, 2026-10-23: no scroll, the screen filled to the buttons' edges, its world's
+    // backdrop and no see-through, Menu alone, where the player stopped lit, each world's boss): a path up the screen, three a row and back, the boss on top
+    const p = this.panel('map'), c = save.camp, ni = campNextId(), worlds = campWorlds(), wid = CAMPAIGN[w].world.id;
     this.mapAt = w;
+    mapBack(p, 'assets/cards/planes/arrive_' + wid + '-plate.png');   // the world's own scene (its arrival card's, the figures off it), whole
     p.append(cap(el('div', 'head', tf('world', { n: wNo(w) }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: wNo(w) }));
     if (worlds.length > 1) { const tabs = el('div', 'duo'); for (const k of worlds) {   // the worlds open so far, a tab each; a bonus world's shut one its stars so far
       const shut = !campOpen(k * 30 + 1), need = CAMP_STARS[CAMPAIGN[k].world.id];
@@ -2773,35 +2822,28 @@ const ui = {
       if (shut) { const row = el('span', 'inl'); row.append(iconEl('starOff'), px(lineStars() + '/' + need)); b.append(row); }   // (one line: a small button's one height)   // (the pixel font has no star: its picture)
       tabs.append(b);
     } p.append(tabs); }
-    if (CAMP_OPEN < CAMPAIGN.length) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet
-    const tree = el('div', 'tree'), inner = el('div', 'in'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), X = (col) => 50 + col * 100, Y = (s) => 960 - s * 102;
-    svg.setAttribute('viewBox', '0 0 300 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-    for (let s = 0; s < 9; s++) for (let col = 0; col < 3; col++) {
-      const i = w * 30 + s * 3 + col;
-      if (campHas(i)) for (const u of ups(s, col)) {
-        const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        for (const [k, v] of [['x1', X(col)], ['y1', Y(s)], ['x2', X(u)], ['y2', Y(s + 1)]]) ln.setAttribute(k, v);
-        if (c.stars[i] > 0) ln.setAttribute('class', 'on');
-        svg.append(ln);
-      }
-    }
-    inner.append(svg);
-    let nextEl = null;
-    for (let s = 9; s >= 0; s--) for (let col = 0; col < 3; col++) {
-      const i = w * 30 + s * 3 + col;
-      if (!campHas(i)) continue;
-      const { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, icon = rc.boss ? 'boss' : rc.bonus != null ? 'coin' : col === 0 ? 'heal1' : col === 2 ? 'foe_crawler' : null;
-      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === ni && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) goOwed(() => game.playLevel(i)); });
-      if (icon) b.append(iconEl(icon));
+    if (CAMP_OPEN < CAMPAIGN.length && w === worlds[worlds.length - 1] && w === CAMP_OPEN - 1) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet: under the last open one
+    const grid = el('div', 'mapg'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), cells = [];
+    svg.setAttribute('aria-hidden', 'true'); grid.append(svg);
+    const at = (s) => (s === 9 ? [1, 0] : [Math.floor(s / 3) % 2 ? 2 - (s % 3) : s % 3, 3 - Math.floor(s / 3)]);   // [column, row from the top]: 1 2 3 along the bottom, 4 5 6 back, 7 8 9, the boss over the middle
+    for (let s = 0; s < 10; s++) {
+      const i = w * 30 + s * 3 + 1, { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, [col, row] = at(s);
+      const b = button(rc.boss || rc.bonus != null ? '' : String(s + 1), 'chip lvl' + (i === ni ? ' on' : '') + (open ? '' : ' locked') + (rc.boss ? ' boss' : ''), () => { if (open) goOwed(() => (save.cur && save.cur.ci === i ? game.resume() : game.playLevel(i))); });   // (a level under way goes on where it was)
+      if (rc.boss) { const cv = document.createElement('canvas'); cv.className = 'fig'; b.append(cv); bossFig(rc.boss, cv, b); }   // its world's boss off its card
+      else if (rc.bonus != null) b.append(iconEl('coin'));
       if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
-      b.style.left = (X(col) / 3) + '%'; b.style.top = (Y(s) / 10) + '%';
-      b.setAttribute('aria-label', wNo(w) + '-' + (s + 1) + ['L', '', 'R'][col]); inner.append(b);
-      if (i === ni) nextEl = b;
+      b.style.gridColumn = col + 1; b.style.gridRow = row + 1;
+      b.setAttribute('aria-label', wNo(w) + '-' + (s + 1)); grid.append(b); cells.push({ b, on: n > 0 });
     }
-    tree.append(inner); p.append(tree);
-    if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
-    if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni)))), 'continue'));
+    p.append(grid, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'));
+    requestAnimationFrame(() => {   // the path between them, from each one's middle to the next's (under the cells: it shows in the gaps), lit from a level cleared
+      const g = grid.getBoundingClientRect(), m = cells.map(({ b }) => { const r = b.getBoundingClientRect(); return [r.left - g.left + r.width / 2, r.top - g.top + r.height / 2]; });
+      svg.setAttribute('viewBox', `0 0 ${g.width} ${g.height}`);
+      for (let s = 0; s < 9; s++) {
+        const [x0, y0] = m[s], [x1, y1] = m[s + 1], d = s === 8 ? `M${x0} ${y0}V${y1}H${x1}` : `M${x0} ${y0}L${x1} ${y1}`;   // (to the boss: up, then across)
+        for (const k of ['u', 'l' + (cells[s].on ? ' on' : '')]) { const ln = document.createElementNS('http://www.w3.org/2000/svg', 'path'); ln.setAttribute('d', d); ln.setAttribute('class', k); svg.append(ln); }
+      }
+    });
   },
   pause() {
     const p = this.panel('pause');
@@ -2811,12 +2853,12 @@ const ui = {
     p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), ...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
-    const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink];
+    const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink]; this.storyArgs = [c, done];   // (laid again on a resize: Game.resized)
     const box = Math.min(view.w - 16, (view.h - 180) * 2 / 3), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // (the view as
     card.style.width = w * k + 'px'; card.style.height = h * k + 'px';   // layout measured it: a CSS 100vh is taller than the page under iOS Safari's bar) whole pixels: a whole number of the
     // screen's to each of the art's cells, the most that fits a 2:3 box (cards drawn on finer grids a little smaller), unless that loses over 30% of it (then as it fits)
     for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
-    const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); done(); }), 'next');
+    const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); this.storyArgs = null; done(); }), 'next');
     clip.setAttribute('role', 'img'); clip.setAttribute('aria-label', L2(c.title));
     tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); card.append(tilt);
     if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);
@@ -2825,6 +2867,7 @@ const ui = {
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
     p.append(cap(el('div', 'head', t(why)), why), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
+    this.markLine(p);
     if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'big thumb alt', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
     else p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'));
   },
@@ -2842,7 +2885,7 @@ const ui = {
     const rows = [[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]];
     const tb = el('div', 'rows');
     rows.forEach(([k, v], i) => { const row = el('div', 'row'); row.append(el('span', null, k), el('b', null, String(v))); tb.append(row); if (i > 1) cuts.push([3 - i / 10, row]); });   // the combo first, then the enemies, the coins
-    box.append(tb);
+    box.append(tb); this.markLine(box);
     if (r.daily) {
       const row = el('div', 'medals');
       dayMedals(r.daily.day).forEach((m, k) => { const c = el('div', 'medal'); c.append(iconEl(r.daily.best >= m ? ['medalB', 'medalS', 'medalG'][k] : 'medalOff'), px(m + ' ' + t('m'))); row.append(c); });
@@ -2882,8 +2925,10 @@ const ui = {
     const bs = game.lv.boss;
     if (bs && bs.def) { const n = save.camp.fails[game.failKey()] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? (bs.def.how ? L2(bs.def.how) : t('bossHow')) : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
     if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
-    const intro = game.rc || (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');   // (a recipe's: the campaign's, the daily well's)
-    this.toast((game.daily != null ? t('daily') : tf('world', { n: game.mode === 'camp' ? wNo(game.world) : game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
+    const intro = game.rc || (game.wd.intro && game.wd.intro[game.stage]) || {}, dark = game.lv.dark && game.stage === 0 && !intro.news && t('dark');   // (a recipe's: the campaign's, the daily well's; the dark
+    // news once, on a world's first level: it said «New: darkness» on all nine of the Mine's)
+    const news = [intro.news && L2(intro.news), dark].filter(Boolean).join(', ');   // a tip (intro.tip): a thing met before, in this world's look (the worlds' order since 2026-10-21)
+    this.toast((game.daily != null ? t('daily') : tf('world', { n: game.mode === 'camp' ? wNo(game.world) : game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf(intro.tip ? 'tip' : 'news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
   comboPop(n) { const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
   comboEnd() { $('combo').classList.remove('show'); },
@@ -2905,7 +2950,7 @@ const ui = {
     });
   },
   frame(g) {
-    const playing = g.state !== 'menu' && g.state !== 'boot';
+    const playing = g.state !== 'menu' && g.state !== 'boot' && !(g.lv && g.lv.kind === 'menu');   // (the owed cards over the menu: no level's HUD)
     $('hud').classList.toggle('on', playing);
     if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children, $('tasks')].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
@@ -2925,6 +2970,8 @@ const ui = {
       for (let i = 0; i < g.maxHp; i++) { const k = i < g.hp ? 'full' : 'empty', s = el('i', k); s.innerHTML = pxSvg(7, 6, `<path fill="currentColor" d="${inkPath(HEART[k], 0, 0)}"/>`); h.append(s); }
     }
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
+    $('hud').classList.toggle('tight', g.coins >= 1000 && view.w < 375);   // (four figures on a narrow screen: the purse and the height a size
+    // smaller, clear of each other; review: 27 px over at 320. Each frame: a narrower window with the same purse too)
     const bh = $('bossHp'), bs = g.lv.boss, bon = !!bs && !bs.dead && playing;   // a boss's hearts, under the HUD (Lucky Tower's players asked for them)
     bh.classList.toggle('on', bon);
     if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax || bs !== this.bboss)) { this.bhp = bs.hp; this.bmax = bs.max; this.bboss = bs; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); bh.style.setProperty('--pip', `var(--${(bs.def && bs.def.ink) || 'purple'})`); }   // in its colour
@@ -2966,6 +3013,7 @@ const input = {
 };
 const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', Space: 'jump' };
 document.addEventListener('keydown', (e) => {
+  if ((e.code === 'Escape' || e.code === 'KeyP') && !e.repeat && (game.state === 'play' || (game.state === 'pause' && ui.open === 'pause'))) { e.preventDefault(); game.togglePause(game.state === 'play'); return; }   // a computer's pause (QA: only its button)
   const k = KEYS[e.code];
   if (!k) return;
   if (game.state !== 'play') { const f = document.activeElement; if (!f || f.tagName !== 'BUTTON') e.preventDefault(); return; }   // (off play: not the portal page's scroll; Space still presses a button in focus)

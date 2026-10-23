@@ -146,7 +146,7 @@ function forkSign(lv, p) {   // a campaign fork's sign (see the renderer): under
 function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): the height of its foot, whether it is on its way down or down, its shake
   const u = (t + (kn.ph || 0)) % MOCHI_P, a = MOCHI.up, b = a + MOCHI.hold, c = b + MOCHI.slam;
   if (u < a) { const e = u / a; return { y: kn.yHit + (kn.yUp - kn.yHit) * e * e * (3 - 2 * e), down: false, shake: 0 }; }
-  if (u < b) return { y: kn.yUp, down: false, shake: u > b - MOCHI.shake ? Math.round(Math.sin(u * 90)) * PIX.size : 0 };
+  if (u < b) return { y: kn.yUp, down: false, shake: u > b - MOCHI.shake ? Math.round(Math.sin(u * 90) * PIX.keep) * PIX.size : 0 };
   if (u < c) { const e = (u - b) / MOCHI.slam; return { y: kn.yUp + (kn.yHit - kn.yUp) * e * e, down: true, shake: 0 }; }
   return { y: kn.yHit, down: true, shake: 0 };
 }
@@ -206,7 +206,8 @@ const NEON_SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'],
 const neonSign = (lv, k) => {
   const mod = (a, n) => ((a % n) + n) % n;
   if (mod(k, 3) === 2) return null;
-  const t = lv.tile, P = PIX.size, kk = Math.max(1, Math.round((0.9 * lv.R) / (16 * P))), gw = 16 * kk * P, sw = gw + 6 * P, [word, pic] = NEON_SIGNS[mod(k - Math.floor(k / 3), 3)];
+  const t = lv.tile, P = PIX.size, kk = Math.max(1, Math.round((0.9 * lv.R) / (16 * PIX.base))) * PIX.keep, gw = 16 * kk * P, sw = gw + 6 * PIX.base, [word, pic] = NEON_SIGNS[mod(k - Math.floor(k / 3), 3)];   // (its size by the
+  // levels' grid: on a computer's finer one it came out half, and its lighting reach with it; review)
   const left = mod(k, 2) === 0, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
   const ax0 = left ? lv.l : x0, ax1 = left ? x0 + sw : lv.r;
   if (lv.bubbles.some((b) => b.x1 + t > ax0 && b.x0 - t < ax1 && b.y1 > y0 - 0.3 * t && b.y0 - t < y1 + 0.2 * t)) return null;   // nothing covers a door (owner)
@@ -826,21 +827,21 @@ const CAMPAIGN = [
 // the Moon, a friend helped find it: Mochi's story since fedc427; the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'The city\'s lights hid the Moon.\nA friend helped find it again.', es: 'Las luces de la ciudad ocultaron la Luna.\nUn amigo ayudó a encontrarla.', pt: 'As luzes da cidade esconderam a Lua.\nUm amigo ajudou a encontrá-la.', ja: 'まちの あかりが つきを かくした。\nともだちが また みつけて くれた。' }, levels: [
   { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0.35, candy: [], safe: true, aircons: false, seed: 3111,
-    news: { en: 'jumps and springs', es: 'saltos y resortes', pt: 'pulos e molas', ja: 'ジャンプと バネ' } },
+    news: { en: 'neon signs light up as you pass', es: 'los neones se encienden al pasar', pt: 'os neons acendem quando você passa', ja: 'ネオンは ちかよると つく' } },
   { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], aircons: false, seed: 2101,
-    news: { en: 'crawlers: land on them', es: 'reptadores: cae sobre ellos', pt: 'rastejantes: pule neles', ja: 'ハイハイ: うえから ふもう' } },
+    news: { en: 'crows: come close to scare them', es: 'cuervos: acércate para espantarlos', pt: 'corvos: chegue perto para espantar', ja: 'カラス: ちかづくと にげる' } },
   { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler'], foes: 0.55, candy: [], aircons: false, seed: 5101,
     news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
   { role: 'apply', len: 46, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
-    news: { en: 'the helmet', es: 'el casco', pt: 'o capacete', ja: 'ヘルメット' } },
+    },
   { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 5106 },
   { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
-    news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' } },
+    news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' }, tip: true },
   { role: 'peak', len: 37, gate: 'gate3', fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2 }, intro: [], enemies: ['crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], crossing: true, seed: 5102,
     news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
   { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
-    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
+    },
   { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
 ] },
 // World 2, the Mine (the Cave until 2026-10-21; at first world 1; owner: «мир темной пещеры, рудников японии», and its dark the real one, «Настоящая тьма»):
@@ -848,15 +849,16 @@ const CAMPAIGN = [
 // Village's to teach: its levels do not teach them again. Its runes the old Mine's: crossed picks, a block of ore, a turn (those tired of climbing
 // began to dig sideways). Its kit the owner's picks (see mineRect, mnLamp): timber, lamps the hero lights (a task), ore, carts, bats.
 { world: WORLDS[0], runes: 'LnY', lore: { en: 'In the dark, Mochi lit the lamps.\nEvery one of them looked up.', es: 'En la oscuridad, Mochi encendió las lámparas.\nTodas miraban hacia arriba.', pt: 'No escuro, Mochi acendeu as lâmpadas.\nTodas olhavam para cima.', ja: 'くらやみで モチは あかりを ともした。\nどれも うえを むいていた。' }, levels: [
-  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], dark: true, enemies: [], foes: 0, candy: [], safe: true, seed: 3111 },
+  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], dark: true, enemies: [], foes: 0, candy: [], safe: true, seed: 3111,
+    news: { en: 'the dark: light the lamps', es: 'la oscuridad: enciende las lámparas', pt: 'o escuro: acenda as lâmpadas', ja: 'くらやみ: ランプを ともそう' } },
   { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], dark: true, enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
   { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
-    news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' } },
+    news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' }, tip: true },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
   { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
   { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
-    news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
+    news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
   { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends
@@ -865,20 +867,20 @@ const CAMPAIGN = [
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
 { world: WORLDS[1], runes: 'gyI', lore: { en: 'From the summit the Moon looked near.\nA bell opened the first step.', es: 'Desde la cima la Luna parecía cerca.\nUna campana abrió el primer escalón.', pt: 'Do cume a Lua parecia perto.\nUm sino abriu o primeiro degrau.', ja: 'ちょうじょうから つきは ちかく みえた。\nかねが さいしょの だんを ひらいた。' }, levels: [
   { role: 'teach', len: 29, fire: 0.33, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, icewall: 3, iceblocks: 2, mosswall: 1 }, intro: ['icewall', 'iceblocks'], enemies: ['crawler'], foes: 0.35, candy: [], shop: 0.5, safe: true, seed: 4101,
-    news: { en: "ice: walls don't hold", es: 'hielo: las paredes no sujetan', pt: 'gelo: as paredes não seguram', ja: 'こおり: かべに くっつけない' } },
+    news: { en: "ice: you slide, walls don't hold", es: 'hielo: resbalas y las paredes no sujetan', pt: 'gelo: você desliza e as paredes não seguram', ja: 'こおり: すべるし かべに くっつけない' } },
   { role: 'apply', len: 36, sides: [13004, 0], gate: 'gate', fire: 0.41, maxD: 2, chunks: { ...GLACIER, rubberwall: 1 }, intro: [], enemies: ['crawler'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 4108,
     news: { en: 'rainbow candy', es: 'caramelo arcoíris', pt: 'bala arco-íris', ja: 'にじの キャンディ' } },
   { role: 'teach', len: 32, fire: 0.4, maxD: 2, chunks: GLACIER, intro: [], enemies: ['shell', 'crawler'], foes: 0.55, candy: ['rainbow'], seed: 4105,
-    news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' } },
+    news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' }, tip: true },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.41, maxD: 2, chunks: GLACIER, intro: [], enemies: ['climber', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 4103,
-    news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' } },
+    news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' }, tip: true },
   { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'bonus', len: 36, bonus: 1, time: 40, seed: 4104 },
   { role: 'twist', len: 32, sides: [13975, 0], fire: 0.4, maxD: 2, chunks: { ...GLACIER, mosswall: 2 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 4102,
-    news: { en: 'icicles fall', es: 'los carámbanos caen', pt: 'os pingentes caem', ja: 'つららが おちる' } },
+    news: { en: 'icicles fall', es: 'los carámbanos caen', pt: 'os pingentes caem', ja: 'つららが おちる' }, tip: true },
   { role: 'peak', len: 32, sides: [0, 110785], gate: 'gate3', fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, rubberwall: 1, twinshaft: 1 }, intro: [], set: 'icicles', enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'rest', len: 22, fire: 0.33, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, icewall: 1 }, intro: [], enemies: ['shell'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 4104,
-    news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
+    },
   { role: 'boss', boss: 'puck', ice: true },   // an ice floor, icicles over it
 ] },
 // World 4, the Sea (owner, 2026-10-20: rivers, the sea and an island between Fuji and Tokyo; its kit in the renderer, see THEMES.sea): where the
@@ -888,20 +890,20 @@ const CAMPAIGN = [
 // wet rock. Its runes: a whirl, a ship's wheel, a star (some put to sea to sail round the climb; the sea only goes round).
 { world: SEA, runes: 'Z8k', lore: { en: 'Lighthouses shine for the ships.\nOne shone for the sky.', es: 'Los faros alumbran a los barcos.\nUno alumbró al cielo.', pt: 'Os faróis iluminam os navios.\nUm iluminou o céu.', ja: 'とうだいは ふねを てらす。\nひとつは そらを てらした。' }, levels: [
   { role: 'teach', len: 30, fire: 0.38, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, iceblocks: 3, mosswall: 1 }, intro: ['iceblocks'], enemies: ['crawler'], foes: 0.4, candy: [], shop: 0.5, safe: true, seed: 6101,
-    news: { en: 'wet rock: you slip', es: 'roca mojada: resbalas', pt: 'pedra molhada: você escorrega', ja: 'ぬれた いわ: すべる' } },
+    news: { en: 'wet rock: you slip', es: 'roca mojada: resbalas', pt: 'pedra molhada: você escorrega', ja: 'ぬれた いわ: すべる' }, tip: true },
   { role: 'apply', len: 36, gate: 'gate', fire: 0.42, maxD: 2, chunks: { ...SEAP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'shell'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 6108,
-    news: { en: 'rafts ride the streams', es: 'las balsas van con la corriente', pt: 'as jangadas seguem a correnteza', ja: 'いかだが ながれに のる' } },
+    news: { en: 'rafts ride the streams', es: 'las balsas van con la corriente', pt: 'as jangadas seguem a correnteza', ja: 'いかだが ながれに のる' }, tip: true },
   { role: 'teach', len: 33, fire: 0.42, maxD: 2, chunks: SEAP, intro: [], enemies: ['circler', 'crawler'], foes: 0.55, candy: ['smash'], seed: 6105,
     news: { en: 'circlers go round the rocks', es: 'los rondadores rodean las rocas', pt: 'os rondadores rodeiam as pedras', ja: 'グルグルが いわを まわる' } },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.44, maxD: 2, chunks: { ...SEAP, crumble: 3 }, intro: ['crumble'], enemies: ['circler', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 6103,
-    news: { en: 'driftwood gives way', es: 'la madera a la deriva cede', pt: 'a madeira à deriva cede', ja: 'ながれぎは くずれる' } },
+    news: { en: 'driftwood gives way', es: 'la madera a la deriva cede', pt: 'a madeira à deriva cede', ja: 'ながれぎは くずれる' }, tip: true },
   { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], enemies: ['circler', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6102 },
-  { role: 'bonus', len: 36, bonus: 0, time: 40, seed: 6104 },
+  { role: 'bonus', len: 36, bonus: 2, time: 40, seed: 6104 },   // the combo ladder (was the coin rain, the Mine's and Tokyo's too: the five open worlds' bonuses now combo, rain, rubber, combo, rain)
   { role: 'twist', len: 34, fire: 0.44, maxD: 2, chunks: { ...SEAP, lift: 4, crumble: 3, bridge: 1 }, intro: ['lift'], enemies: ['climber', 'crawler'], foes: 0.5, candy: ['smash'], stash: 0.3, seed: 6106,
-    news: { en: 'a river of rafts', es: 'un río de balsas', pt: 'um rio de jangadas', ja: 'いかだの かわ' } },
+    news: { en: 'a river of rafts', es: 'un río de balsas', pt: 'um rio de jangadas', ja: 'いかだの かわ' }, tip: true },
   { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], enemies: ['circler', 'shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6107 },
   { role: 'rest', len: 22, fire: 0.35, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, iceblocks: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 6109,
-    news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
+    },
   { role: 'boss', boss: 'namazu', ice: true },   // Onamazu (the boss chat, 2026-10-21): the Rat's slide (the Junkyard's, which is dropped), its floor wet rock
 ] },
 // The Dark Forest (the owner's bonus world, 2026-10-20: scary Russian fairy tales; its kit in the renderer, see THEMES.skazka; last in CAMP_ORDER, it
@@ -2430,7 +2432,9 @@ class Level {
     if (c.kit) for (const r of this.rects.slice(lens[0])) r.kitWant = c.kit;   // the thing it asks for on its wall's ledge (kitThing)
     if (this.fizzAt.length && this.top - (lift + c.rows.length) * this.tile < this.fizzAt[0] && c !== CHUNKS.pocket) {   // a candy due: over a steady ledge of this chunk
       const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile);
-      if (ok.length) { const r = ok[((this.fizzKind[this.fizz.length] === 'astro' ? this.astroRng : this.rng)() * ok.length) | 0]; this.fizz.push({ x: (r.x0 + r.x1) / 2, y: r.y0 - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
+      if (ok.length) { const r = ok[((this.fizzKind[this.fizz.length] === 'astro' ? this.astroRng : this.rng)() * ok.length) | 0], x = (r.x0 + r.x1) / 2, hw = 0.75 * this.R + BONUS_GAP.gap * PIX.base;
+        let top = r.y0; for (const q of this.rects.slice(lens[0])) if (q !== r && !q.gone && q.x0 < x + hw && q.x1 > x - hw && q.y0 < top && q.y1 >= r.y0 - 0.5 * this.tile) top = q.y0;   // a spring or a block on the ledge under it: over that (BONUS_GAP; QA: 4-2's rainbow sat on a spring)
+        this.fizz.push({ x, y: top - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
     }
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
@@ -2965,8 +2969,8 @@ function collidePair(A, B) {
 const bits = [];
 function burstFx(x, y, R, c) {
   for (let i = 0; i < 80; i++) {
-    const a = rand(0, TAU), sp = rand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
-    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: rand(1.5, 4.5), c: ink, t: 0, life: rand(0.8, 1.6), g: 0.9, drag: 2.2 });
+    const a = fxRand(0, TAU), sp = fxRand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
+    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: fxRand(1.5, 4.5), c: ink, t: 0, life: fxRand(0.8, 1.6), g: 0.9, drag: 2.2 });
   }
   fx.add(x, y, 0, 0, R * 1.3, 0.4, INK.white, 0.9, 2); fx.add(x, y, 0, 0, R * 0.8, 0.35, c, 1, 2, 0.08);
 }
@@ -2976,8 +2980,8 @@ function burstFx(x, y, R, c) {
 function sparkFx(x, y, n, a, spread, sp, size, life, inks, g) {
   if (bits.length > 400) return;   // a phone's budget
   for (let i = 0; i < n; i++) {
-    const t = a + rand(-spread, spread), v = rand(sp[0], sp[1]);
-    bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: rand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: rand(life[0], life[1]), g, drag: 4 });
+    const t = a + fxRand(-spread, spread), v = fxRand(sp[0], sp[1]);
+    bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: fxRand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: fxRand(life[0], life[1]), g, drag: 4 });
   }
 }
 function updateBits(dt) {
@@ -2994,9 +2998,9 @@ function updateBits(dt) {
 function juiceFx(x, y, R, c) {
   if (bits.length > 380) return;   // a phone's budget
   const flesh = c === PAL.red ? INK.flame : PAL.white;
-  for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: rand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: rand(0.7, 1.1), g: 1, drag: 1.2 }); }
-  for (let i = 0; i < 5; i++) { const a = rand(0, TAU), v = rand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: rand(0.5, 0.9), g: 1, drag: 1.5 }); }
-  for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + rand(-1.7, 1.7), v = rand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: rand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: rand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
+  for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + fxRand(-1.4, 1.4), v = fxRand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: fxRand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: fxRand(0.7, 1.1), g: 1, drag: 1.2 }); }
+  for (let i = 0; i < 5; i++) { const a = fxRand(0, TAU), v = fxRand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: fxRand(0.5, 0.9), g: 1, drag: 1.5 }); }
+  for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + fxRand(-1.7, 1.7), v = fxRand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: fxRand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: fxRand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
 }   // (its white pop and ring popFx's now, crisp)
 // An enemy beaten (owner, 2026-10-23: «добавь больше частиц и эффектов при победе над врагом», with two sheets of a hit's frames): over the fruit's
 // burst, the hit's beats in crisp game pixels: a white flash, a ring thrown out, rays, a streak of drops along the blow, blobs of it flung and
@@ -3028,13 +3032,13 @@ function popFx(x, y, R, c, dx, dy) {   // (dx, dy) the blow's way, a unit
 }
 function splatFx(x, y, R, c, n = 9) {
   const k = lighten(c, 0.1);
-  for (let i = 0; i < n; i++) { const a = rand(0, TAU), sp = rand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, rand(0.18, 0.32) * R, rand(0.35, 0.6), k, 0.95, 0); }
+  for (let i = 0; i < n; i++) { const a = fxRand(0, TAU), sp = fxRand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, fxRand(0.18, 0.32) * R, fxRand(0.35, 0.6), k, 0.95, 0); }
   fx.add(x, y, 0, 0, R * 0.9, 0.35, lighten(c, 0.3), 0.7, 2);
 }
 function crumbleFx(r, c, up) {   // a block breaking up: puffs and solid chunks of it in its ink and white, dropping away (flung up when smashed from below)
   const y = (r.y0 + r.y1) / 2;
   for (let x = r.x0 + 6; x < r.x1; x += 12) {
-    fx.add(x, y, rand(-40, 40), rand(30, 120), rand(4, 8), rand(0.4, 0.7), c, 0.9, 0);
+    fx.add(x, y, fxRand(-40, 40), fxRand(30, 120), fxRand(4, 8), fxRand(0.4, 0.7), c, 0.9, 0);
     sparkFx(x, y, up ? 3 : 2, up ? -Math.PI / 2 : Math.PI / 2, up ? 1.3 : 0.8, up ? [150, 560] : [20, 140], [1.5, 4], [0.5, 1], [c, c, INK.white], 1);
   }
 }
@@ -3361,6 +3365,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
       const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s * (rows.x2 || 1)) / P) * P;   // (THICK of the 12×12's pixels, a finer picture's too)
       if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
+        const q = row[sn > 0 ? iL : iR]; if (q === 'w' || q === 's') return;   // (a white or grey end a tone darker is the grey edge the owner took off: QA, astro, grow, swarm)
         const bx = x0 + col(sn > 0 ? iL : iR + 1), dx = (sn > 0 ? -d : d) * (c < 0 ? -1 : 1);
         box(Math.min(bx, bx + dx), onGrid(y0 + j * s), Math.max(bx, bx + dx), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
     }
@@ -5088,21 +5093,22 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
-    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face)
-    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size - (ICONS[p.item.id].length * PIX.base * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5 * PIX.keep) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face; a bob in the levels'
+    // pixels, PIX.keep, as all of these: on a computer's finer grid it was half: review)
+    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5 * PIX.keep) * PIX.size - (ICONS[p.item.id].length * PIX.base * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
     if (bonusEye) this.route = 3; F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1); if (bonusEye) this.route = 4;   // (B, D: its glow behind it, not dotted over it)
     if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // (C: its thickness)
     iconSpin(p.item.id, p.x, y, a, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
-    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;   // (the fork: riding its ledge's face)
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5 * PIX.keep) * PIX.size;   // (the fork: riding its ledge's face)
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
     if (bonusEye) this.route = 3; F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); if (bonusEye) this.route = 4; if (bonusStack) for (let q = 3; q >= 1; q--) iconSpin(p.kind, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, k, T * 2.2 + p.x * 0.05); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
   if (CINE) this.route = 0;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
     : (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
-  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);
+  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5 * PIX.keep) * PIX.size : 0), c.y);
   const xg = lv.crossing;
   if (xg && seen(xg.y0 - R, xg.y1 + R)) {   // a level crossing: rails along the band's foot, the lights by the walls, and the train
     box(lv.l, xg.y1 - 0.12 * R, lv.r, xg.y1, th.lip, 1, 0, 10, 0); box(lv.l, xg.y1 - 0.42 * R, lv.r, xg.y1 - 0.3 * R, th.lip, 0.6, 0, 10, 0);
@@ -5347,7 +5353,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   for (const e of lv.enemies) if (e.over && seen(e.body.minY - 2 * R, e.body.maxY)) {   // one that can be stomped, the hero over it (STOMP, Game.frame): a white chevron
     // over it, bobbing, «land here» (tester: «вот этой границы хитбокса врагов я до конца понять не смог»)
-    const b = e.body, y = b.minY - 0.6 * R + Math.round(Math.sin(T * 6) * 1.5) * PIX.size, hw = 0.3 * R, hd = 0.2 * R;
+    const b = e.body, y = b.minY - 0.6 * R + Math.round(Math.sin(T * 6) * 1.5 * PIX.keep) * PIX.size, hw = 0.3 * R, hd = 0.2 * R;
     F(b.cx, y, hw, 0, 0, -hd, PAL.white, 1, 6, hw, hd, 2 * hw);
   }
   const bs = lv.boss;
@@ -5385,9 +5391,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
     for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
   }
-  if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
+  if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
   if (g.warns.length) {   // threats coming down into view (see Game.threats): a red sign under the HUD over where each comes in
-    const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2) * PIX.size;
+    const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size;
     for (const x of g.warns) icon('warn', clamp(x, lv.l + hw, lv.r - hw), wy, 1, wk);
   }
   if (g.power('bubble') && (g.gunT > 1 || Math.floor(T * 5) % 2 === 0)) {   // a bubble round the hero (BUBBLE): thin purple, wobbling, a white shine; blinking its last second

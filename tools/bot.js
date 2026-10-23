@@ -230,6 +230,8 @@ function start(world, stage = 0, s = 1, opts = {}) {
   try { if (opts.daily) __up.daily(s, stage); else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s); }   // a campaign level (its recipe; the map's column, see campAt) or a random run's
   finally { Math.random = real; }
   g.makeHero();   // a fresh body, so a level plays the same whatever was played before it
+  seed = opts.order != null ? opts.order : s;   // and the play's chances from the seed again: the build makes a new hero (its Face: 2 Math.random) only when R
+  // changed, after the menu, so a level's run hung on what came before it in the page (a bonus 10 s alone, 10.5 after another; review)
   g.mods = MODS(); g.taken = []; g.maxHp = HEALTH.start; g.hp = g.maxHp; g.coins = 0; g.kills = 0; g.bestCombo = 0; g.applyMods();   // a fresh run's state for every level
   if (opts.god) g.invuln = 1e9;
   const lv = g.lv;

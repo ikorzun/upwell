@@ -354,11 +354,12 @@ const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2, get keep(
 PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized to (a phone's 1.5, a computer's 2) whatever the drawing's: a sprite's dot PIX.keep times its pixels
 // A computer's drawing grid (owner, 2026-10-23: «на мониторах ретина на десктопе графика тоже должны быть как на телефоне», his Д1 «А»): a game pixel a whole
 // number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen
-// may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard)
+// may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard), or where a sprite's dot would not be
+// a whole number of the grid's pixels (a screen at 125–175 %, a browser's zoom: the dots' edges on the pixels' middles leave holes)
 PIX.fit = function () {
   if (this.base !== 2 || this.slow) return this.base;
-  const q = +new URLSearchParams(location.search).get('pix'), d = window.devicePixelRatio || 1;
-  return q > 0 ? q : Math.max(1, Math.round(d)) / d;
+  const q = +new URLSearchParams(location.search).get('pix'), d = window.devicePixelRatio || 1, s = q > 0 ? q : Math.max(1, Math.round(d)) / d, k = this.base / s;
+  return q > 0 || Math.abs(k - Math.round(k)) < 1e-6 ? s : this.base;
 };
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at first (user)

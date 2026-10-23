@@ -3395,11 +3395,15 @@ function perfSend(now) {
     frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION });
   perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss;
 }
-// A computer too slow for the finer grid (PIX.fit): its first 3 s of play measured, and if half its frames took over 25 ms, the old grid for good.
-const PIX_GUARD = { frames: 180, slow: 0.025 }, pixSeen = { n: 0, slow: 0 };
+// A computer too slow for the finer grid (PIX.fit): its first 3 s of play measured, and if half its frames took over 25 ms, the old grid for good. A
+// frame is slow against the screen's own pace too, the menu's (a cheap scene): a screen or a battery saver at 30 Hz is not a slow computer.
+const PIX_GUARD = { frames: 180, slow: 0.025, over: 1.5, pace: 60 }, pixSeen = { n: 0, slow: 0, menu: [], pace: null };
 function pixGuard(dt) {
-  if (PIX.slow || PIX.size >= PIX.base || pixSeen.n >= PIX_GUARD.frames || game.state !== 'play' || document.hidden || !(dt > 0) || dt > 0.25) return;
-  pixSeen.n++; if (dt > PIX_GUARD.slow) pixSeen.slow++;
+  if (PIX.slow || PIX.size >= PIX.base || pixSeen.n >= PIX_GUARD.frames || document.hidden || !(dt > 0) || dt > 0.25) return;
+  if (game.state === 'menu') { if (pixSeen.menu.length < PIX_GUARD.pace) pixSeen.menu.push(dt); return; }   // the menu's frame gaps
+  if (game.state !== 'play') return;
+  if (pixSeen.pace == null) { const m = pixSeen.menu.slice().sort((a, b) => a - b); pixSeen.pace = m.length ? m[m.length >> 1] : 0; }   // their middle one
+  pixSeen.n++; if (dt > Math.max(PIX_GUARD.slow, PIX_GUARD.over * pixSeen.pace)) pixSeen.slow++;
   if (pixSeen.n === PIX_GUARD.frames && pixSeen.slow > PIX_GUARD.frames / 2) { PIX.slow = true; queueLayout(); }
 }
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.

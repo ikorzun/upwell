@@ -73,7 +73,7 @@
   .big, .chip, .head, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
   .langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; }   /* in one row, by their short names, the width of the buttons (owner: «Языки растяни на всю ширину, а то куцо») */
   .langs .chip { text-transform: none; }   /* 日本語 as it is written */
-  #map { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
+  #map { background: var(--ink); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
   #map.wmap { background: var(--ink) no-repeat center bottom; image-rendering: pixelated; justify-content: flex-start; gap: 10px; padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }   /* a world's map (ui.map): its world's scene, opaque (owner: no see-through), whole pixels (mapBack) */
   .mapg { position: relative; flex: 1; min-height: 0; align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 12px; }   /* its ten levels at one look: three a row, the boss on top */
   .mapg > svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
@@ -100,7 +100,8 @@
   .card2 { flex: none; display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch); text-align: left; }
   .card2.locked { background: var(--dim); box-shadow: none; color: var(--gray); }
   .card2 .pic { flex: none; width: 56px; height: 56px; display: grid; place-items: center; }
-  .card2 .pic .ico { --p: 4; }   /* the picture big: 48-56 px */
+  .card2 .pic .ico { --p: 4; }
+  .card2 .pic .ico.wide { --p: 3; }   /* an enemy's or a boss's 16 across: 48 px as the rest (QA: 64 in a 56-px frame) */   /* the picture big: 48-56 px */
   .card2 .pic .tx { --p: 4; }
   .card2 .txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; text-align: left; }
   .card2 .txt span { color: var(--gray); }
@@ -228,6 +229,7 @@
     box-sizing: border-box; background: var(--dim); pointer-events: auto; text-align: center;
   }
   .panel.on { display: flex; }
+  @media (max-height: 620px) { .panel { gap: 8px; } }   /* a short screen: the 64-px buttons whole (QA: 61 px at 320×568 under a two-row build) */
   #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
@@ -249,14 +251,15 @@
   #topTint { display: none; position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #696d85; pointer-events: none; z-index: 70; }   /* (owner, 2026-10-23: «На сафари и ios градиент должен уходить под остров») iOS 26 Safari tints the bar over the page by a fixed element at its top (theme-color it no longer reads): the menu's backdrop's top ink there, and the bottom left as it is */
   @media (pointer: coarse) { html.menuTop #topTint { display: block; } }
   #settings { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the menu's settings, as a pause */
-  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 22px); left: 50%; transform: translateX(-50%); width: calc(302.336px / 1.5); height: auto; }   /* the Figma's sizes at 1.5 of its px to a CSS px (its frame: a 402-pt iPhone, 603 wide) */
+  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 22px); left: 50%; transform: translateX(-50%); width: min(calc(302.336px / 1.5), calc(100% - 134px)); height: auto; }   /* the Figma's sizes at 1.5 of its px to a CSS px (its frame: a 402-pt iPhone, 603 wide) */
   .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 13px); right: 15px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its ring centred level with the logo */
   .setBtn img { width: calc(64px / 1.5); height: auto; }
   .setBtn:active img { filter: brightness(0.8); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }
+  .label.mark.pay { color: var(--yellow); }   /* the week's mark (ui.markLine): its pay in the colour of what can be taken */
   .big {   /* flat (owner: no pseudo-volume, no orange band under it); one height, main or not */
-    min-width: 200px; height: var(--btnL); padding: 0 28px; border: 0; --p: 4; box-sizing: border-box;
+    flex: none; min-width: 200px; height: var(--btnL); padding: 0 28px; border: 0; --p: 4; box-sizing: border-box;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     background: var(--yellow); color: var(--ink); clip-path: var(--notch);
   }

@@ -2197,7 +2197,7 @@ function inkPath(rows, x, y) {
   rows.forEach((row, ry) => { for (let k = 0; k < row.length;) { if (row[k] !== '#') { k++; continue; } let e = k; while (e < row.length && row[e] === '#') e++; d += `M${x + k} ${y + ry}h${e - k}v1h${k - e}z`; k = e; } });
   return d;
 }
-const pxSvg = (W, H, paths) => `<svg aria-hidden="true" viewBox="0 0 ${W} ${H}" style="--w:${W};--h:${H}" shape-rendering="crispEdges">${paths}</svg>`;
+const pxSvg = (W, H, paths, f = 1) => `<svg aria-hidden="true" viewBox="0 0 ${W} ${H}" style="--w:${W / f};--h:${H / f}" shape-rendering="crispEdges">${paths}</svg>`;   // (f: a picture drawn f times as fine, the same size)
 // Text, centred line under line (or `left`); `max` (--p CSS px each, the old pixel font's measure) wraps it at spaces, as
 // a '\n' does. Sized by --p too: its capitals as tall as that font's 7 pixels (see .tx in index.html).
 function px(text, max = Infinity, left = false) {
@@ -2558,15 +2558,16 @@ function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
   e.classList.add('capped'); e.append(c);
   return e;
 }
-// An ICONS picture as pixel SVG, a path per ink in the page's palette colours.
+// An ICONS picture as pixel SVG, a path per ink in the page's palette colours (the finer one, ICONS2, on a computer's Retina screen: its
+// half dot whole screen pixels at any size the page gives it).
 function iconEl(id) {
-  const rows = ICONS[id], e = document.createElement('i');
+  const rows = devicePixelRatio >= 2 ? iconRows(id) : ICONS[id], e = document.createElement('i');
   let paths = '';
   for (const c in ICON_INK) {
     const d = inkPath(rows.map((r) => r.replace(/./g, (q) => (q === c ? '#' : '.'))), 0, 0);
     if (d) paths += `<path fill="var(--${ICON_INK[c] === 'black' ? 'ink' : ICON_INK[c]})" d="${d}"/>`;
   }
-  e.className = 'px ico'; e.innerHTML = pxSvg(rows[0].length, rows.length, paths);
+  e.className = 'px ico'; e.innerHTML = pxSvg(rows[0].length, rows.length, paths, rows.x2);
   return e;
 }
 const HEART = { full: '.##.##./#######/#######/.#####./..###../...#...'.split('/'), empty: '.##.##./#..#..#/#.....#/.#...#./..#.#../...#...'.split('/') };

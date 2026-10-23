@@ -4247,6 +4247,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // (one in three) a rope hanging with a weight on it. False for what keeps the common look (ice, springs, magnets, bouncy planks, stairs).
   const villageRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    const thin = (f) => { const rt = this.route; if (CINE) this.route = 0; f(); this.route = rt; };   // (2.5D: a rail, a rope, a post or a charm flat, no depth of its own: owner, 2026-10-23: «дублирование перил и мелких деталей ради объема не нужно, сильно утяжеляет»)
     const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
     if (r.crumble) {   // a rope bridge (the owner's pick C, 2026-10-21, of six in wood: grey looked strange in a village): narrow slats wide apart, each shaking
       // its own way as it gives, two grey ropes through them
@@ -4256,8 +4257,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);   // a slat, its underside in shade
         box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
       }
-      for (const v of [0.3, 0.75]) { const y = snap(r.y0 + v * hgt); box(r.x0, y, r.x1, y + P, PAL.gray, a, 0, 10, 0); }
-      for (const [on, wx, d, ex] of [[wl, lv.l, 1, r.x0], [wr, lv.r, -1, r.x1]]) {
+      thin(() => { for (const v of [0.3, 0.75]) { const y = snap(r.y0 + v * hgt); box(r.x0, y, r.x1, y + P, PAL.gray, a, 0, 10, 0); } });
+      thin(() => { for (const [on, wx, d, ex] of [[wl, lv.l, 1, r.x0], [wr, lv.r, -1, r.x1]]) {
         if (on) {   // a peg in the wall over it, the rope down off it to its first plank
           const ky = snap(r.y0 - 1.0 * t), kx = snap(wx + d * 0.17 * t);
           box(snap(Math.min(wx, wx + d * 0.32 * t)), ky, snap(Math.max(wx, wx + d * 0.32 * t)), ky + snap(0.28 * t), PAL.gray, a, 0, 10, 0); box(kx, ky + P, kx + P, ky + 2 * P, PAL.black, a, 0, 10, 0);
@@ -4267,7 +4268,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           if (wl || wr) { box(hx, r.y1, hx + P, wy, PAL.gray, a, 0, 10, 0); box(hx - 2 * P, wy, hx + 3 * P, wy + 4 * P, PAL.gray, a, 0, 10, 0); box(hx, wy + P, hx + P, wy + 2 * P, PAL.black, a, 0, 10, 0); }   // its rope, a weight on it
           else box(hx, r.y1, hx + P, snap(r.y1 + 0.3 * t), PAL.gray, a, 0, 10, 0);   // a frayed end of rope
         }
-      }
+      } });
       return true;
     }
     if (r.move && r.move.seesaw) {   // a seesaw's seat (SEESAW): a board, its dark underside, on its beam's end
@@ -4277,7 +4278,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.move && r.move.wheel) {   // a mill's board (MILL): planks, their dark underside, its hanger up to the rim
       const cx = snap((r.x0 + r.x1) / 2);
       box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);
-      box(cx - P, snap(r.y0 - r.move.wheel.hang), cx + P, r.y0, PAL.gray, 1, 0, 10, 0); disc(cx, r.y0 - r.move.wheel.hang, 0.12 * t, PAL.gray, 1);
+      thin(() => { box(cx - P, snap(r.y0 - r.move.wheel.hang), cx + P, r.y0, PAL.gray, 1, 0, 10, 0); disc(cx, r.y0 - r.move.wheel.hang, 0.12 * t, PAL.gray, 1); });
       box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.mortar) {   // a mortar for mochi (MOCHI): a wooden tub, two black hoops round it, the dark of its bowl at its mouth, its rim an edge to stand on
@@ -4296,9 +4297,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(r.x0, r.y0, r.x1, yb, th.mover, 1, 0, 10, 0);   // the basket under its floor, black between its rails, a post in its middle, its bottom's edge
       for (const [v0, v1] of [[0.22, 0.38], [0.5, 0.66]]) box(r.x0 + 2 * P, snap(r.y0 + v0 * t), r.x1 - 2 * P, snap(r.y0 + v1 * t), PAL.black, 1, 0, 10, 0);
       box(cx - P, r.y0, cx + P, yb, th.mover, 1, 0, 10, 0); box(r.x0, yb - P, r.x1, yb, th.mover, 1, 0, 10, 4);
-      for (const x of [r.x0, r.x1 - 2 * P]) box(x, pt, x + 2 * P, r.y0, th.mover, 1, 0, 10, 0);   // the frame's posts, its top bar, the hanger up to the pulley on the cable
-      box(r.x0, pt, r.x1, pt + 2 * P, th.mover, 1, 0, 10, 0); box(cx - snap(0.14 * t), py, cx + snap(0.14 * t), pt, th.mover, 1, 0, 10, 0);
-      disc(cx, py, 0.26 * t, th.mover, 1); disc(cx, py, 0.1 * t, PAL.black, 1);
+      thin(() => {   // the frame's posts, its top bar, the hanger up to the pulley on the cable
+        for (const x of [r.x0, r.x1 - 2 * P]) box(x, pt, x + 2 * P, r.y0, th.mover, 1, 0, 10, 0);
+        box(r.x0, pt, r.x1, pt + 2 * P, th.mover, 1, 0, 10, 0); box(cx - snap(0.14 * t), py, cx + snap(0.14 * t), pt, th.mover, 1, 0, 10, 0);
+        disc(cx, py, 0.26 * t, th.mover, 1); disc(cx, py, 0.1 * t, PAL.black, 1);
+      });
       box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.plank) {
@@ -4309,19 +4312,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       }
       box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, snap(r.y0 + 0.17 * t), r.x1, snap(r.y0 + 0.17 * t) + P, th.plank, 1, 0, 10, 4); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);   // its boards, a row of nails, a rough underside
       const pw = snap(0.2 * t), ph = snap(1.15 * t), ry = snap(r.y0 - 0.7 * t), ps = [snap(wl ? r.x0 + 0.5 * t : r.x0 + 0.05 * t), snap(wr ? r.x1 - 0.5 * t : r.x1 - 0.05 * t) - pw];
-      if (ps[1] - ps[0] > 1.2 * t) {   // its rail of dried bamboo on two posts lashed at their tops, their nodes black
+      if (ps[1] - ps[0] > 1.2 * t) thin(() => {   // its rail of dried bamboo on two posts lashed at their tops, their nodes black
         for (const x of ps) {
           box(x, r.y0 - ph, x + pw, r.y0, th.plank, 1, 0, 10, 0); box(x - P, r.y0 - ph, x + pw + P, r.y0 - ph + snap(0.24 * t), th.plank, 1, 0, 10, 4);
           for (const v of [0.38, 0.76]) box(x, snap(r.y0 - v * t), x + pw, snap(r.y0 - v * t) + P, PAL.black, 1, 0, 10, 0);
         }
         box(ps[0] + pw, ry - P, ps[1], ry + P, th.plank, 1, 0, 10, 0);
         for (let x = ps[0] + 0.9 * t; x < ps[1] - 0.3 * t; x += 0.9 * t) box(snap(x), ry - P, snap(x) + P, ry + P, PAL.black, 1, 0, 10, 0);
-      }
-      if (hang && wl !== wr && r.x1 - r.x0 >= 3 * t) {   // a charm on a string off its free end: an orange bead, a grey paper omamori written on in purple
+      });
+      if (hang && wl !== wr && r.x1 - r.x0 >= 3 * t) thin(() => {   // a charm on a string off its free end: an orange bead, a grey paper omamori written on in purple
         const cx = snap(wl ? r.x1 - 0.18 * t : r.x0 + 0.18 * t), by = snap(r.y1 + 0.55 * t), c0 = snap(cx - 0.13 * t), c1 = snap(cx + 0.13 * t) + P, cy0 = by + 3 * P, cy1 = snap(by + 0.62 * t);
         box(cx, r.y1, cx + P, by, PAL.gray, 1, 0, 10, 0); box(cx - P, by, cx + 2 * P, by + 2 * P, PAL.orange, 1, 0, 10, 0);
         box(c0, cy0, c1, cy1, PAL.gray, 1, 0, 10, 0); for (const k of [2, 5]) box(c0 + P, cy0 + k * P, c1 - P, cy0 + (k + 1) * P, PAL.purple, 1, 0, 10, 0);
-      }
+      });
       box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;

@@ -2212,31 +2212,31 @@ function px(text, max = Infinity, left = false) {
 }
 // Story cards (owner, 2026-10-22, the narrative «Mochi to the Moon»; his answers: wordless cards over the game, 2:3, each once; round 5: one
 // to each world, with the story's start and end, К5–К8 «А»): `n` the numeral on the frame (in the story's order; the bonus world a star like
-// its number; the end none till the last worlds are built), `still` the art, `cells` its own pixel grid (each card cut on the grid its art
+// its number; the end none till the last worlds are built), `still` the art (the world cards drawn out finer as the bosses' since К18 «А»), `cells` its own pixel grid (each card cut on the grid its art
 // was drawn on, К7), `ink` its world's colours for the frame (К6), `boss` the world whose boss beaten brings it (II and VI come after their own
 // episodes: the crow in 1-3, the treat in Tokyo), `title` under the card. Game.story shows one, the game held under it till Next.
 const STORY = {
-  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [168, 252], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
+  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [173, 258], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
   village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', cells: [192, 288], ink: 'village', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
-  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [159, 239], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
-  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [136, 203], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
-  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [162, 243], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
-  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [171, 256], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
-  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [167, 251], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
-  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [143, 214], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
-  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [192, 288], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
-  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [175, 263], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
+  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [181, 270], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
+  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [168, 254], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
+  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [170, 256], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
+  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [179, 268], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [171, 256], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
+  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [157, 235], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
+  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [205, 307], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
+  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [192, 288], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
   // A card for Mochi's coming to each world, before its first level (owner, 2026-10-23: «историю с карточками нужно дополнить, например, сначала показываем
   // падение с луны, потом что герой упал в деревню – т.е. везде добавить +1 карточку перехода»; the scheme of the others, drawn out as the bosses' were:
-  // «у карточек тоже используй подход с детализацией»): drafts till his «да» to their art
-  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [189, 284], ink: 'village', draft: true, title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
-  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [191, 286], ink: 'cave', draft: true, title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
-  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [186, 279], ink: 'ice', draft: true, title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
-  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [128, 192], ink: 'sea', draft: true, title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
-  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [173, 260], ink: 'tokyo', draft: true, title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
-  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [204, 305], ink: 'blocks', draft: true, title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
-  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [146, 219], ink: 'sky', draft: true, title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
-  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [192, 288], ink: 'skazka', draft: true, title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
+  // «у карточек тоже используй подход с детализацией»): for everyone since his К17 «А»
+  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [189, 284], ink: 'village', title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
+  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [191, 286], ink: 'cave', title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
+  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [186, 279], ink: 'ice', title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
+  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [128, 192], ink: 'sea', title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
+  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [173, 260], ink: 'tokyo', title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
+  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [204, 305], ink: 'blocks', title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
+  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [146, 219], ink: 'sky', title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
+  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [192, 288], ink: 'skazka', title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
   // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
   // boss is, in its world's ink and its own: for all since his К13 «А» (2026-10-23; the tram face-on, as he asked)
   boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', title: BOSSES.probka.name },

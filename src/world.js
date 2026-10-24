@@ -560,10 +560,11 @@ const SPRITE_EYES = {}, spriteEyes = (id) => SPRITE_EYES[id] || (SPRITE_EYES[id]
 // and in its sight (in the hero's light: the Mine is dark), it flashes red `warn` s (b.warn), letting go `drop` R, then dives `dive` s in a U through where
 // he was as it woke (move away, and it misses) and up the far side, flies back to its perch in `back` s and hangs `rest` s before it can wake again. Red,
 // on its way down to that spot, it hurts and is not stomped; grey (asleep, rising, flying back) it never hurts and is stomped from over it (Вр4: one look,
-// one meaning). It flies through nothing: its dive the first way `pad` R clear of blocks (a U, half of one, straight down at him and slowly back), else
-// none. A lamp lit within `lamp` R of its perch keeps it asleep; a bump from under it wakes it. It touches nothing but the hero, by its own circle `hit` R
-// (Game.komoriTouch); `flap` its frames a second, diving and flying back.
-const KOMORI = { see: 5.5, low: 1.5, warn: 0.8, drop: 0.3, dive: 0.9, back: 1.2, rest: 2, lamp: 4, hit: 0.6, pad: 0.4, flap: [8, 5] };
+// one meaning). It flies through nothing: its dive the first way `pad` clear of blocks (a U, half of one, straight down at him and slowly back), else
+// none. A lamp lit within `lamp` R of its perch keeps it asleep; a bump from under it wakes it. It touches nothing but the hero, by its own circle `hit`
+// (Game.komoriTouch); `hit` and `pad` in its drawing's pixels (1:1, the owner's Д66 «А»: the circle holds about 70% of a flying frame's ink, its thin
+// wingtips out); `flap` its frames a second, diving and flying back.
+const KOMORI = { see: 5.5, low: 1.5, warn: 0.8, drop: 0.3, dive: 0.9, back: 1.2, rest: 2, lamp: 4, hit: 12, pad: 12, flap: [8, 5] };
 // The worm (user's video: dithered tubes flowing over each other, ball tips): its knot is stomped, its tubes hurt. Four tubes,
 // two to a side, waving up and out (the knot's top is clear: the way to stomp it); `len` theirs, R, in discs `seg` apart, `w`
 // half-wide, `tip` the balls at their ends. On a ledge it `wait`s, then, on screen, reaches a tube out (`reach` s, the warning)
@@ -2748,7 +2749,8 @@ class Level {
       } else if (ENEMY[type].move === 'swoop') {   // a komori under a steady ledge with room under it, three tiles clear (KOMORI)
         const ok = rects.filter((r) => !r.cap && !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 2 * t && !taken(r) &&
           !this.rects.some((q) => q !== r && !q.cap && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 3 * t));
-        if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y1 + eR, ledge: r }); }
+        const hang = FOE_SPRITES['komori-' + KOMORI_V + '-1'];   // (its feet on the ledge's underside: half its hanging drawing under it)
+        if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y1 + (hang ? 0.5 * hang.length * PIX.base : eR), ledge: r }); }
       } else if (ENEMY[type].move === 'round') {
         const ok = rects.filter((r) => !r.plank && !r.crumble && !r.spring && r.x0 > this.l + t && r.x1 < this.r - t && !taken(r) &&
           !rects.some((s) => s.spring && Math.abs(s.y1 - r.y0) < 1 && s.x1 > r.x0 && s.x0 < r.x1));   // not one with a spring on top, in its way round

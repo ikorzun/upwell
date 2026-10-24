@@ -392,11 +392,11 @@ class Foe {
     if (this.cs === 'hang') {
       this.atkCool = Math.max(0, this.atkCool - dt);
       if (!this.atkCool && H.cy > b.cy + K.low * R && Math.hypot(H.cx - b.cx, H.cy - b.cy) < K.see * R && b.cy > lv.cam + (view.hudB || 0) && b.cy < lv.cam + view.h
-        && clearWay(lv, (u) => [b.cx + (H.cx - b.cx) * u, b.cy + (H.cy - b.cy) * u], K.pad * R)) this.rouse(g);   // (in the hero's light, and in sight of him)
+        && clearWay(lv, (u) => [b.cx + (H.cx - b.cx) * u, b.cy + (H.cy - b.cy) * u], K.pad * PIX.base)) this.rouse(g);   // (in the hero's light, and in sight of him)
     } else if (this.cs === 'warn') {
       if (this.lamped(lv, R)) { this.cs = 'hang'; this.ct = 0; }   // a lamp lit near it: back to sleep
       else if (this.ct > K.warn) this.pounce(g);
-      else y += K.drop * R * Math.sin(((this.ct / K.warn) * Math.PI) / 2);   // letting go
+      else y += this.lift() + K.drop * R * Math.sin(((this.ct / K.warn) * Math.PI) / 2);   // letting go (at once its open wings' clear of its ledge)
     }
     if (this.cs === 'dive' || this.cs === 'back') {
       const dive = this.cs === 'dive', T = dive ? K.dive * (this.span < 0 ? 0.5 : 1) : K.back, u = Math.min(1, this.ct / T), v = 1 - u, p = this.way(dive, R, lv);
@@ -413,12 +413,16 @@ class Foe {
   // Its way, a curve [from, its pull, to]: diving, from where it let go down through where the hero was (ax, ay) and up as far past him (`span` of that
   // way across; a shorter swoop where blocks are in the way), or (span < 0) straight down to there; back, home from where the dive ended
   way(dive, R, lv) {
-    const y0 = this.home + KOMORI.drop * R, x1 = clamp(2 * this.ax - this.homeX, lv.l + R, lv.r - R), x2 = this.homeX + (x1 - this.homeX) * Math.max(0, this.span);
-    if (this.span < 0) return dive ? [this.homeX, y0, (this.homeX + this.ax) / 2, (y0 + this.ay) / 2, this.ax, this.ay] : [this.ax, this.ay, (this.ax + this.homeX) / 2, (this.ay + this.home) / 2, this.homeX, this.home];
-    return dive ? [this.homeX, y0, 2 * this.ax - (this.homeX + x2) / 2, 2 * this.ay - y0, x2, y0] : [x2, y0, (x2 + this.homeX) / 2, y0 + 1.5 * R, this.homeX, this.home];
+    const top = this.home + this.lift(), y0 = top + KOMORI.drop * R, x1 = clamp(2 * this.ax - this.homeX, lv.l + R, lv.r - R), x2 = this.homeX + (x1 - this.homeX) * Math.max(0, this.span);
+    if (this.span < 0) return dive ? [this.homeX, y0, (this.homeX + this.ax) / 2, (y0 + this.ay) / 2, this.ax, this.ay] : [this.ax, this.ay, (this.ax + this.homeX) / 2, (this.ay + top) / 2, this.homeX, top];
+    return dive ? [this.homeX, y0, 2 * this.ax - (this.homeX + x2) / 2, 2 * this.ay - y0, x2, y0] : [x2, y0, (x2 + this.homeX) / 2, y0 + 1.5 * R, this.homeX, top];
+  }
+  lift() {   // how far under its perch it flies, wings open: the open drawing's half height over the hanging one's (its wings clear of its ledge)
+    const up = FOE_SPRITES['komori-' + KOMORI_V + '-2'], hang = FOE_SPRITES['komori-' + KOMORI_V + '-1'];
+    return up && hang ? Math.max(0, (up.length - hang.length) / 2) * PIX.base : 0;
   }
   pounce(g) {   // the warning over: the way it dives, the first clear one (a swoop, half of one, straight down at him); none, it settles back
-    const R = g.R, lv = g.lv, pad = KOMORI.pad * R;
+    const R = g.R, lv = g.lv, pad = KOMORI.pad * PIX.base;
     this.ct = 0;
     const clear = (dive) => { const p = this.way(dive, R, lv); return clearWay(lv, (u) => { const v = 1 - u; return [v * v * p[0] + 2 * v * u * p[2] + u * u * p[4], v * v * p[1] + 2 * v * u * p[3] + u * u * p[5]]; }, pad); };
     for (const k of [1, 0.5, -1]) { this.span = k; if (clear(true) && clear(false)) { this.cs = 'dive'; sound.play('airjump', 0.6, 1.5); return; } }
@@ -428,7 +432,7 @@ class Foe {
   rouse(g) {   // a komori woken (not while it rests, nor with a lamp lit near it): it marks where the hero is now, to dive through when its warning is over
     const H = g.hero, R = g.R, lv = g.lv;
     if (this.cs !== 'hang' || this.atkCool > 0 || this.lamped(lv, R)) return;
-    this.cs = 'warn'; this.ct = 0; this.ax = clamp(H.cx, lv.l + R, lv.r - R); this.ay = Math.max(H.cy, this.home + (KOMORI.drop + 1.2) * R); sound.play('bubble', 0.5, 1.9);
+    this.cs = 'warn'; this.ct = 0; this.body.translate(0, this.home + this.lift() - this.body.cy); this.ax = clamp(H.cx, lv.l + R, lv.r - R); this.ay = Math.max(H.cy, this.home + (KOMORI.drop + 1.2) * R); sound.play('bubble', 0.5, 1.9);
   }
   lamped(lv, R) {   // a Mine lamp lit within KOMORI.lamp R of its perch
     for (const r of lv.tended.keys()) { const k = kitThing(lv, r); if (k && k.kind === 'lamp' && Math.hypot(k.x - this.homeX, k.y - this.home) < KOMORI.lamp * R) return true; }
@@ -1534,7 +1538,7 @@ class Game {
   komoriTouch(e) {   // a komori's own circle (KOMORI): red on its way down it hurts; grey it never does (Вр4: one look, one meaning): stomped from
     // over it, a bump wakes one asleep, anything else nothing
     const H = this.hero, b = e.body;
-    if (Math.hypot(H.cx - b.cx, H.cy - b.cy) > 0.8 * H.R * H.growth + KOMORI.hit * this.R) return;
+    if (Math.hypot(H.cx - b.cx, H.cy - b.cy) > 0.8 * H.R * H.growth + KOMORI.hit * PIX.base) return;   // (its circle the drawing's, in its pixels)
     const rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;
     if (e.canStomp() && stompable(H, b, rel)) this.stomp(e);
     else if (this.power('rainbow') || this.power('grow') || this.power('swarm')) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);

@@ -5965,7 +5965,10 @@ Renderer.prototype.draw = function (g, alpha) {
       // (its stretch asleep too: it flickers as a warning, so no wider than what will hurt)
       const s2 = PIX.base, n = Math.floor((FIREWALL.reach * t) / s2), at = (rows) => (d > 0 ? snap(wx) : snap(wx) - rows[0].length * s2);
       const fit = (B) => (B[0].length <= n ? B : ((m) => Array.from({ length: m }, (_, j) => B[Math.floor((j * B.length) / m)]).map((r) => Array.from({ length: n }, (_, i) => r[Math.floor((i * r.length) / n)]).join('')))(Math.max(1, Math.round((B.length * n) / B[0].length))));
-      if (!WS.fit || WS.fit.n !== n) WS.fit = { n, A: GUIDE ? pxClean(fit(WS.asleep)) : fit(WS.asleep), Bu: GUIDE ? pxClean(fit(WS.burst)) : fit(WS.burst) };   // (made smaller: its new specks cleaned, the cluster rule)
+      // (its stretch asleep cut, not made smaller: the sheet's pixels kept one for one, from a pixel off the wall out to the reach, so its boards and embers stay
+      // whole, the guide's clusters; nearest-pixel picking broke them into specks)
+      const cut0 = (B) => { if (B[0].length <= n) return B; let c0 = 0; while (c0 < B[0].length - 1 && B.every((r) => r[c0] === '.')) c0++; c0 = Math.max(0, c0 - 1); return B.map((r) => r.slice(c0, c0 + n).padEnd(n, '.')); };
+      if (!WS.fit || WS.fit.n !== n) WS.fit = { n, A: GUIDE ? pxClean(cut0(WS.asleep)) : fit(WS.asleep), Bu: GUIDE ? pxClean(fit(WS.burst)) : fit(WS.burst) };   // (made smaller: its new specks cleaned, the cluster rule)
       const A = WS.fit.A, Bu = WS.fit.Bu;
       const cut = (rows, y, k) => (k % 2 ? rows.slice().reverse() : rows).slice(0, Math.min(rows.length, Math.ceil((fw.y1 - y) / s2)));   // (every other copy upside down: no repeat shows)
       // Its warning a glow swelling and ebbing twice a second (blinking past 3 a second is the digest's limit); its burst thrust out of the wall in 0.12 s (slow out)

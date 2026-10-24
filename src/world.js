@@ -66,6 +66,7 @@ const DOOR = { w: 2.4, h: 2.8 };   // in R: a way into a shop or a stash, and th
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
 // ledges (at a crawler on them, say) passes under it, a full one up from the top ledge gets in.
 const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
+const EXIT_TRAIL = { n: 4, from: 1.7, step: 1.25 };   // worlds 1-3's coins up into the way out (Level.finish): how many, R under its middle the first, R between them
 // The hero is kept at `anchor` of the view height going up, and going down at least `keep`
 // hero heights over the touch keys (or the screen's bottom): a fall is followed, down to the
 // floor, and caught by a ledge or the fire. The ceiling over an exit stops the camera `top` px
@@ -2778,10 +2779,15 @@ class Level {
   }
   // The end of a shaft: the portal out, and a ceiling over it the camera stops at.
   finish() {
-    const R = this.R;
+    const R = this.R, cw = CAMPAIGN.findIndex((c) => c.world === this.world);
     this.portal = { x: (this.l + this.r) / 2, y: this.top - PORTAL.rise * R, r: 1.35 * R };
     this.capY = this.portal.y - 3.2 * R;
     this.rects.push(this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true }));
+    if (this.rc && cw >= 0 && cw < 3 && this.kind === 'well') {   // worlds 1-3: a trail of coins up the open air into the way out (owner, К7 «А»: the exit found from a jump
+      // below), their twinkles in turn (not off the level's generator: nothing after it moves)
+      for (let k = 0; k < EXIT_TRAIL.n; k++) this.coins.push({ x: this.portal.x, y: this.portal.y + (EXIT_TRAIL.from + EXIT_TRAIL.step * k) * R, v: 1, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: k * 1.3 });
+      this.coinTotal += EXIT_TRAIL.n;
+    }
     this.top = -Infinity;
   }
   near(y0, y1) {

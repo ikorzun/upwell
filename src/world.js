@@ -5531,6 +5531,7 @@ Renderer.prototype.draw = function (g, alpha) {
       const S = HAZ_SPR[th.hazard], P = PIX.size, s = 2 * PIX.base, sn = (x) => Math.round(x / P) * P;
       if (!S.body) { const n = {}; for (const r of S.band.slice(-8)) for (const ch of r) if (ch !== '.' && ch !== 'k') n[ch] = (n[ch] || 0) + 1; S.body = Object.keys(n).sort((a, b) => n[b] - n[a])[0] || 'k'; }   // its ground's own ink
       const band = S.band, bw = band[0].length * s, y0 = sn(fy + 0.3 * R - S.front * s), yf = y0 + S.front * s, fl = (Math.floor(T * 8) % 2) * s;
+      const E = Math.round((lv.fire.rush || 0) * 0.6 * S.front), FR = S.front + E;   // (its front's rows, E more as it speeds up)
       const row = (r, x0, y, flip, k) => {   // a row's runs of one ink ('.' clear; 'k' left to the black under the front unless k)
         for (let i = 0; i < r.length;) { const ch = r[i]; let e = i + 1; while (r[e] === ch) e++;
           if (ch !== '.' && (k || ch !== 'k')) { const a = flip ? x0 + (r.length - e) * s : x0 + i * s, c0 = Math.max(a, lv.l), c1 = Math.min(a + (e - i) * s, lv.r); if (c1 > c0) box(c0, y, c1, y + s, PAL[ICON_INK[ch]], 1, 0, 10, 0); }
@@ -5540,7 +5541,9 @@ Renderer.prototype.draw = function (g, alpha) {
       const drift = T * 0.25 * R, start = sn(lv.l - (((drift % (2 * bw)) + 2 * bw) % (2 * bw)));
       for (let k = 0, x = start; x < lv.r; k++, x += bw) {
         if (x + bw <= lv.l) continue;
-        band.forEach((r, j) => { const y = y0 + j * s; if (y < bot && y + s > top) row(r, x + (j < S.front ? (k % 2 ? -fl : fl) : 0), y, k % 2 === 1, j < S.front); });
+        for (let i = 0; i < FR; i++) { const y = y0 - E * s + i * s; if (y < bot && y + s > top) row(band[Math.floor((i * S.front) / FR)], x + (k % 2 ? -fl : fl), y, k % 2 === 1, true); }   // its front, taller
+        // as it speeds up (К2 «А»: lv.fire.rush; whole sheet rows, stretched as the nearest row, so it stays pixel for pixel)
+        band.forEach((r, j) => { const y = y0 + j * s; if (j >= S.front && y < bot && y + s > top) row(r, x, y, k % 2 === 1, false); });
         for (let y = y0 + band.length * s, j = 0; y < bot && j < 2 * band.length; y += s, j++) {   // its ground on down, its embers thinning out into the black
           if (y + s <= top) continue;
           const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), k + 50) * q.length), keep = 1 - j / (2 * band.length);
@@ -5563,7 +5566,7 @@ Renderer.prototype.draw = function (g, alpha) {
           const a = steady(i, k), f = 5 + 2 * steady(i, k + 3), x = lv.l + ((((i + 0.5 + off) / n) * W + T * drift * R) % W + W) % W;
           const hw = Math.min((w0 + (w1 - w0) * a) * R, x - lv.l, lv.r - x);   // and narrower by a wall
           if (hw < 0.5) continue;
-          const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3))) / 2;
+          const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3)) * (1 + 0.5 * (lv.fire.rush || 0))) / 2;   // (taller as it speeds up: К2)
           F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
         }
       }
@@ -5583,6 +5586,11 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     const w = lv.fire.warn;
     if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, th.hazard === 'avalanche' ? (u > 0.5 ? INK.spike : PAL.white) : u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
+  }
+  if (lv.fire && lv.fire.rush > 0) {   // the fire speeding up out of sight (К2 «А»: «красноватый край снизу»): the screen's bottom edge red, in four steps fading up
+    // to over the keys, pulsing; not over the fire (in sight, its taller front says it)
+    const P = PIX.size, yb = cam + H, hh = (view.keep || 0) + 1.6 * R, a = lv.fire.rush * (0.8 + 0.2 * Math.sin(T * 7)), y1 = Math.min(yb, lv.fire.y), at = (k) => Math.round((yb - (k / 4) * hh) / P) * P;
+    for (let k = 4; k >= 1; k--) { const y0 = at(k), y2 = Math.min(y1, at(k - 1)); if (y2 > y0) box(lv.l, y0, lv.r, y2, INK.spike, a * (0.75 - 0.15 * k), 0, 10, 0); }   // (each step its own, denser down: the dither's dots don't add up)
   }
   for (const f of lv.folk) if (f.kind === 'cage' && !f.open && f.body && seen(f.body.minY - R, f.body.maxY)) {   // a cage: white bars, a yellow lock (yellow: touch it)
     const b = f.body, P = PIX.size, x0 = b.cx - 0.95 * R, x1 = b.cx + 0.95 * R, y1 = b.maxY + 1, y0 = y1 - 1.9 * R;

@@ -21,7 +21,7 @@ const SAVE = args.includes('--save'), BASE = opt('--base', join(here, 'sweep-bas
 if (SAVE) args.splice(args.indexOf('--save'), 1);
 
 const ALL = [];
-for (let w = 1; w <= 8; w++) for (let s = 1; s <= 10; s++) ALL.push(`c${w}-${s}`);   // one level a tier (campHas: the middle ids)
+for (let w = 1; w <= 8; w++) for (let s = 1; s <= 10; s++) ALL.push(`c${w}-${s}`);   // one level a tier (campOpen: only the middle ids)
 const unknown = args.filter((a) => !ALL.some((n) => n === a || n.startsWith(a + '-')));
 if (unknown.length) { console.error(`not on the map: ${unknown.join(' ')} (a world is c1…c8, a level c1-1 … c8-10)`); process.exit(2); }
 const levels = args.length ? ALL.filter((n) => args.some((a) => n === a || (/^c\d$/.test(a) && n.startsWith(a + '-')))) : ALL;

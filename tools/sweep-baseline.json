@@ -1,5 +1,5 @@
 {
- "commit": "94b6ad8+changes",
+ "commit": "a7055ea+changes",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -239,7 +239,7 @@
   },
   "c3-10": {
    "result": "won",
-   "time": 42.5,
+   "time": 37,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
@@ -313,12 +313,13 @@
   },
   "c4-10": {
    "result": "won",
-   "time": 36,
-   "heartsLost": 2,
+   "time": 35.5,
+   "heartsLost": 3,
    "stuck": [],
    "hits": [
     "shot@hover",
-    "shot@hover"
+    "boss@dive",
+    "boss@hover"
    ],
    "boss": "Onamazu",
    "dealt": "5/5"
@@ -396,13 +397,10 @@
   },
   "c5-10": {
    "result": "won",
-   "time": 49.5,
-   "heartsLost": 2,
+   "time": 29.5,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "shot@dazed",
-    "shot@dazed"
-   ],
+   "hits": [],
    "boss": "Tsukumo Tram",
    "dealt": "5/5"
   },

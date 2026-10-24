@@ -596,24 +596,12 @@ const RUBBER = { x: 9, up: 0.55, min: 2 };
 // `calm`: in 1-1 the fire waits that many s before it rises, and an idle hero does not speed it up (the digest §6: no losing while learning).
 const FIRE = { calm: 15, lag: 0.5, idle: 3, boost: 3, ramp: 2, launch: 1.7, back: 0.3, spit: [3, 6], warn: 0.5, blob: 0.34 };
 const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
-// The boss fight goes round (user: there was no way onto it under the ceiling): it hovers (`hover` s, `fast` of that when
-// angry or half beaten) `high` R over the floor (in sight under the HUD; clear of a hero standing on a ledge), swaying
-// `sway` of the width, dropping goo and calling crawlers; shakes over the hero `warn` s; dives at `dive` R/s into
-// the middle of the arena (no planks there); lies there `dazed` s, flat, a yellow arrow over it — then a stomp hurts it and
-// its side does not; then it rises again. A stomp bounces at `bounce` of a jump's speed.
-const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9,
-  hover: 3.6, fast: 0.65, high: 12, sway: 0.15, warn: 0.8, dive: 40, dazed: 2.8 };
-// The Puck (BOSSES.puck, Fuji's): it slides the ice at `slide` R/s, flicking a shell out every `every` s (as many as
-// `shells` by phase); rests `rest` s, winds up `wind` s (backing off, flat, flashing) and dashes wall to wall at `dash`
-// R/s, its wall shaking `icicles` down by phase: one, and only in its last (owner, 2026-10-20: worlds 1-3 not hard; the
-// icicles were most of the hearts it took). Its top is hard; a shell rolled into it turns it belly up for `flip` s.
-// It keeps still its first `calm` s, while its name is up (the plan: an encounter starts safe).
-// The Minecart (BOSSES.cart, the Cave's): `size` R, rides its rail end to end in `pass` s by phase, lobs blobs (two from its
-// second phase) every `spit` s after winding up `wind` s, creaks `creak` s at an end and tips three rocks (`rock` R) down.
-// From its second phase the bridges go in `crumble[0]` s and come back in `crumble[1]`; in its third the lifts run `lifts` times as fast.
-// In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it. It keeps still its first `calm` s.
-const CART = { size: 2.2, pass: [4, 3.4, 2.6], spit: 2.5, wind: 0.6, creak: 0.8, rock: 0.35, crumble: [0.35, 4.5], lifts: 1.5, hold: 2, calm: 2.5 };
-const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 0, 1], flip: 2.5, calm: 2.5 };
+// A boss's defaults (BOSSES has its own): its body's `size` R, its hearts, `angry` s red after a hit (it only pushes then), its
+// `coins`, the win's `winDelay` s, a stomp's `bounce` of a jump's speed, where it starts, `high` R over the floor, and the
+// minions it calls (Koschei's skulls): one every `spawnEvery` s, `maxMinions` at most. Its fight is its own (BOSSES: hang, glide, quake, street, sky, bone).
+const BOSS = { size: 2.1, hp: 6, angry: 2.0, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9, high: 12 };
+// The Tsuchigumo's and the Tram's body (`size` R), and a falling rock's R (`rock`: Onamazu's quake).
+const CART = { size: 2.2, rock: 0.35 };
 // Tsurara-onna (BOSSES.puck, Fuji's, world 3; owner 2026-10-24: all bosses redone, the difficulty's curve kept): she creeps over the ice
 // at the hero at `creep` R/s, to `keep` R off it, her moves taking turns. Icicles: her arms up, red, a chime, `cast` s; then `n` icicles `gap` R apart
 // shake over the hero `shake` s and fall. A slide: she backs off flashing with a scrape, `wind` s, then dashes at `dash` R/s to the far wall and sticks
@@ -2754,20 +2742,6 @@ class Level {
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
       if (this.rc && this.rc.street) { this.rects.push(this.box(cx - W * 0.18, at(0.3), cx + W * 0.18, at(0.3) + p, { plank: true })); return; }   // the Tram's: one ledge in the middle, away from its stops at the ends
       if (!this.rc || this.rc.hang || this.rc.bare) return;   // a hanging boss's (Boss.hang; the random run's Lid too, with no recipe), or a bare arena: the floor and the walls; what does nothing in the fight is not there (the plan)
-      if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
-        const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
-        for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));
-        this.rail = { x0: this.l + end, x1: this.r - end, y: top + 3.05 * R + 1.6 * cr };   // a hero hanging under the moss clears it
-        const A = this.floor - this.rail.y;
-        for (const [f0, f1] of [[0.06, 0.36], [0.64, 0.94]]) this.rects.push(this.box(this.l + W * f0, this.floor - 0.5 * A, this.l + W * f1, this.floor - 0.5 * A + p, { plank: true, crumble: true }));
-        this.rects.push(this.box(this.l, this.floor - 0.2 * A, this.l + 0.26 * W, this.floor - 0.2 * A + p, { plank: true, move: { a: this.l, b: this.r - 0.26 * W, v: 1.8 * R } }));
-        this.rects.push(this.box(this.r - 0.26 * W, this.floor - 0.34 * A, this.r, this.floor - 0.34 * A + p, { plank: true, move: { a: this.l, b: this.r - 0.26 * W, v: -2.2 * R } }));
-        return;
-      }
-      if (this.rc && this.rc.ice) {   // the Puck's: the floor all ice, four icicles under the ceiling (it shakes them down)
-        this.rects.push(this.box(this.l, this.floor - 0.3 * R, this.r, this.floor, { slick: true }));
-        for (const f of [0.2, 0.4, 0.6, 0.8]) this.icicles.push({ x: this.l + W * f, y: this.capY, state: 'hang', t: 0 });
-      }
       this.rects.push(this.box(this.l, at(0.32), this.l + W * 0.3, at(0.32) + p, { plank: true }));
       this.rects.push(this.box(this.r - W * 0.3, at(0.32), this.r, at(0.32) + p, { plank: true }));
       return;
@@ -4024,10 +3998,6 @@ Renderer.prototype.draw = function (g, alpha) {
         F(ex + (e * l) / 2, y, 0, 0.1 * R, (-e * l) / 2, 0, th.moss, 1, 6, 0.1 * R, l / 2, 0.2 * R); if (k % 2) box(ex + e * 0.06 * R - PIX.size / 2, y - PIX.size / 2, ex + e * 0.06 * R + PIX.size / 2, y + PIX.size / 2, PAL.white, 1, 0, 10, 0); }   // out of its edge, a glint here and there
       else for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
     }
-  }
-  if (lv.rail && seen(lv.rail.y - R, lv.rail.y + R)) {   // the Minecart's rail: a white line from wall to wall, ties under it
-    box(lv.l, lv.rail.y, lv.r, lv.rail.y + 2.5, th.lip, 1, 0);
-    for (let x = lv.l + 0.6 * R; x < lv.r; x += 1.3 * R) box(x - 1.5, lv.rail.y + 2.5, x + 1.5, lv.rail.y + 0.35 * R, th.wall, 1, 0);
   }
   for (const u of lv.runes) if (seen(u.y - R, u.y + R)) {   // a world's runes on the back wall (RUNE): a faint cloth, the rune knitted on it in the world's ink
     const h = 8 * PIX.base; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, PIX.keep, th.wall);   // (its size kept on a finer grid: PIX.keep)
@@ -5954,7 +5924,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // round it, behind it, only what its setting hangs it on: the tram's wire, the spider's thread, the crane's cable and hook.
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
-    const d = df.rail || df.slide || df.glide || df.quake || df.street || df.bone ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    const d = df.glide || df.quake || df.street || df.bone ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
     if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
       const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
       F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);

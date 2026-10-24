@@ -600,7 +600,9 @@ const kitThing = (lv, r) => {
   const clear = (x0, y0, x1, y1) => !lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1) && !lv.rects.some((q) => !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
   const steady = (min) => !(r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.crack || r.cage || r.slick || r.magnet) && (wl || wr) && !(wl && wr) && w >= min * t   // (a row across the shaft is a way through: the tutorial's helmet breaks one)
-    && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
+    && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))
+    && !lv.icicles.some((c) => c.x > r.x0 && c.x < r.x1 && c.y > r.y0 - t && c.y < r.y1 + 2 * t);   // (nor over the icicles that fall, a hazard's ledge busy enough: UPwell,
+    // Fuji 3-7's screen at 3615 boxes, the density rule)
   // Each world's things by a hash of its height (so that two ledges a beat apart are not alike), a slot k of six: [k, kind, its room, where its task is]. The
   // owner's rule (2026-10-24: «Животные или объекты не должны встречаться друг за другом: миру нужно разнообразие в расположении… во всех мирах»): never the
   // kind of the thing next under it, nor of one across at its height; a repeat gives way to the next slot's kind that fits, an empty slot stays empty

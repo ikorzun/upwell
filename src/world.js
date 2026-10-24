@@ -5515,6 +5515,14 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const w of lv.winds) if (seen(w.y0, w.y1)) {   // a gust's way (WIND): its koinobori; sakura petals drifting its way before it, flying through it, tumbling, white streaks with them
     const u = (T + w.ph) % (WIND.on + WIND.off), s = u - (WIND.off - WIND.warn), d0 = w.dir, sc = lv.tile;   // (the kit's carp's size)
     const k = u < 0.6 ? 1 - u / 0.6 : s < 0 ? 0 : s < WIND.warn ? (0.6 * s) / WIND.warn : 0.6 + 0.4 * Math.min(1, (s - WIND.warn) / 0.25);   // how full: limp, filling, flying, then falling back
+    if (th.village) {   // the Village's (Д89 «А», Д106 «F»: koinobori on a rope across the shaft, off the sheet): the rope at the pole's height, its carps hanging limp,
+      // then leaning down the wind as it fills (each row of a carp shifted the more the lower: a shear, its pixels kept), flying out with the gust
+      const q = PIX.base, Wd = lv.r - lv.l, P = PIX.size, sn = (v) => Math.round(v / P) * P, yr = w.py, ry = (x) => sn(yr + 0.35 * lv.tile * (1 - Math.pow((2 * (x - lv.l)) / Wd - 1, 2)));
+      for (let x = lv.l; x < lv.r; x += P) box(sn(x), ry(x), sn(x) + P, ry(x) + P, PAL.gray, DIM, 0, 10, 0);
+      VIL2.rope.carps.forEach((c, i) => { const n = c.rows[0].length, cx2 = lv.l + (0.06 + 0.88 * c.u) * Wd, x0 = sn(cx2 - (n * q) / 2), y0 = ry(cx2) + sn(c.hang * q), wv = 1 + 0.15 * Math.sin(T * 9 - i * 1.3) * k;
+        c.rows.forEach((r, j) => { const sh = sn(d0 * k * wv * j * 0.85 * q); for (let a = 0; a < n;) { const ch = r[a]; let e = a + 1; while (r[e] === ch) e++;
+          if (ch !== '.') { const lc = ch === 'd' ? 's' : ch.toLowerCase(); box(x0 + sh + a * q, y0 + j * q, x0 + sh + e * q, y0 + (j + 1) * q, PAL[ICON_INK[lc]], lc !== ch ? 1.5 : 1, 0, 10, 0); } a = e; } }); });
+    } else {
     let cx = w.px + d0 * 0.55 * lv.tile, cy = w.py;
     const tilt = (i) => (1 - k) * (Math.PI / 2) * (0.9 + 0.05 * i) + k * (0.08 + Math.sin(T * 9 - i * 1.3) * (0.06 + 0.07 * i));   // a part's slope: down, or along the wind, waving
     line(w.px, cy, cx, cy, PAL.gray, 1, 2);   // the pole, the mouth's hoop; then the kit's blue carp (scales dotted) down its length: hanging, or along the wind
@@ -5525,6 +5533,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (i === 0) { const ex = cx + d0 * Math.cos(a) * 0.55 * L * sc + d0 * Math.sin(a) * 0.08 * sc, ey = cy + Math.sin(a) * 0.55 * L * sc - Math.cos(a) * 0.08 * sc; disc(ex, ey, 0.2 * sc, PAL.gray, 1); disc(ex, ey, 0.09 * sc, PAL.black, 1); }   // its eye
       if (i === 2) for (const e of [-0.45, 0.45]) line(nx, ny, nx + d0 * Math.cos(a + e) * 0.5 * sc, ny + Math.sin(a + e) * 0.5 * sc, PAL.blue, 1, (0.2 * sc) / kitP, 1);   // its tail, forked
       cx = nx; cy = ny;
+    }
     }
     if (s < 0) continue;   // the petals, since they set off
     const Wd = lv.r - lv.l, P = PIX.size, sn = (v) => Math.round(v / P) * P, gust = s >= WIND.warn;

@@ -408,12 +408,15 @@ const vil2 = (el) => VIL2[el];
 // the method Sprite Normals', MIT © 2026 Hugo Duprez, github.com/Hugo-Dz/spritefusion-sprite-normals, redone here on a sheet's ink letters): a cut sprite's pixels
 // lit by a light from the top left `L`, the guide's few steps: a deep shadow (`deep`), a shadow (`lo`), its own ink, a sheen (`hi`) and a glint (`top`). On Fuji's
 // 3-4 (`at`: world, stage); ?vol on every level, ?novol on none. Its height a dome over the distance to its edge (`dome`) and its inks' lightness (`detail`)
-const VOL = { at: ['ice', 3], L: [-0.52, -0.7, 0.49], dome: 1.0, detail: 0.15, deep: 0.22, lo: 0.5 };
-const volOn = (lv) => !!lv && lv.kind === 'well' && (/[?&]vol\b/.test(location.search) || (!/[?&]novol\b/.test(location.search) && !!lv.world && lv.world.id === VOL.at[0] && lv.stage === VOL.at[1]));
+const VOL = { L: [-0.52, -0.7, 0.49], dome: 1.0, detail: 0.15, deep: 0.22, lo: 0.5 };
+const VOL_ON = !/[?&]novol\b/.test(location.search);   // volume on every sheet thing and animal (vsp's `vol`, fspr), Mochi's glint, the cards' figures: everywhere since the
+// owner's «Выбираю блик, обновляй движок и все остальное» (2026-10-24; the try was Fuji 3-4's); ?novol: none, to compare
+const shadeTint = (th) => (th && th.shade) || (!th || [PAL.gray, PAL.white, PAL.black].includes(th.wall) ? PAL.blue : th.wall);   // the ink a white's or a grey's shadow
+// takes (SHADE_GLSL): the world's own (its walls'), a cool blue where its walls are grey; a theme's `shade` over it (the Dark Forest's grey: black and white there)
 const VOL_LUM = { k: 0, w: 1, s: 0.75, g: 0.6, d: 0.45, b: 0.55, c: 0.8, o: 0.7, y: 0.9, r: 0.45, p: 0.55, a: 0.8, G: 0.4 };
-const VOL_BANDS = new Map();
+const VOL_BANDS = new WeakMap(), VOL_RECTS = new WeakMap();
 const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 shadow, 0 its own ink, and black's always), once a sprite and a side
-  const key = rows.join('/') + (flip ? '<' : '>'); if (VOL_BANDS.has(key)) return VOL_BANDS.get(key);
+  let C = VOL_BANDS.get(rows); if (!C) VOL_BANDS.set(rows, (C = {})); const key = flip ? 'l' : 'r'; if (C[key]) return C[key];
   const H = rows.length, W = rows[0].length, at = (i, j) => (flip ? rows[j][W - 1 - i] : rows[j][i]), inside = new Uint8Array(W * H), d = new Float32Array(W * H);
   for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const q = j * W + i; inside[q] = at(i, j) !== '.' ? 1 : 0; d[q] = inside[q] ? 1e4 : 0; }
   for (let pass = 0; pass < 2; pass++) for (let n = 0; n < W * H; n++) {   // the distance to its edge (a chamfer, both ways)
@@ -438,8 +441,20 @@ const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 sh
     for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { if (!x && !y) continue; const X = i + x, Y = j + y; if (X < 0 || Y < 0 || X >= W || Y >= H || !inside[Y * W + X] || at(X, Y) === 'k') continue; const v = out[Y * W + X]; cnt[v]++; if (v === out[q]) same++; }
     if (!same) out[q] = +Object.keys(cnt).reduce((a, b) => (cnt[b] > cnt[a] ? b : a));
   }
-  VOL_BANDS.set(key, out); return out;
+  C[key] = out; return out;
 };
+const volRects = (rows, flip) => {   // its boxes in volume, once a sprite and a side: [i0, i1, j0, j1, ink, step] by sixes (as seen, mirrored if flip), a run of one ink
+  // and one step a box, merged down where the next row has the same (as vspRects: a sprite in volume costs few more boxes than flat)
+  let C = VOL_RECTS.get(rows); if (!C) VOL_RECTS.set(rows, (C = {})); const key = flip ? 'l' : 'r'; if (C[key]) return C[key];
+  const H = rows.length, W = rows[0].length, B = volBands(rows, flip), at = (i, j) => (flip ? rows[j][W - 1 - i] : rows[j][i]), R = []; let open = new Map();
+  for (let j = 0; j < H; j++) { const cur = new Map();
+    for (let i = 0; i < W;) { const c = at(i, j), v = B[j * W + i]; let e = i + 1; while (e < W && at(e, j) === c && B[j * W + e] === v) e++;
+      if (c !== '.') { const k = i + ',' + e + c + v, o = open.get(k); if (o != null) { R[o + 3] = j + 1; cur.set(k, o); } else { cur.set(k, R.length); R.push(i, e, j, j + 1, c, v); } }
+      i = e; }
+    open = cur; }
+  return (C[key] = R);
+};
+const volTone = (v) => (v === -2 ? 26 : v === -1 ? 24 : 0);   // a step's box tone: deep all of it in its shade, shadow its shade a cell in two (SHADE_GLSL, tone 20 + k)
 // An animal on a ledge notices the hero (owner, 2026-10-24: «Нужно, чтобы эти и подобные им объекты/животные в мирах как-то просто реагировали на героя»): the
 // hero within `reach` tiles, it crouches `crouch` s (anticipation), hops `hop` tiles in `air` s and lands with a give in `land` s, and turns to him; it watches
 // him while he is near and `look` s after, then faces as it was; not again for `cool` s. With reduced motion it only turns (POKE.still). Returns its lift
@@ -875,7 +890,7 @@ const THEMES = {
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
   blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { danchi: true }),   // the Danchi (world 6; was the Tower Blocks): raw concrete (see BLOCKS)
   sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true, hazard: 'tide', wallHaz: 'blowhole', holder: 'sea' }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
-  skazka: Object.assign(theme(PAL.gray, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
+  skazka: Object.assign(theme(PAL.gray, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true, shade: PAL.gray }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
   // crumbles or flies tells itself by its shape (a rotten log, Baba Yaga's mortar); colour only for the hero, lights, coins, danger and the doors' marks
   sky: Object.assign(theme(PAL.purple, { mover: PAL.blue, spring: PAL.blue, rubber: PAL.blue, crumble: PAL.white }), { dots: PAL.gray, win: 'clouds', glass: true }),   // the Skyscraper (see SKY)
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
@@ -3960,7 +3975,16 @@ const rampOf = (th) => {
   });
   return out;
 };
-const FEAT_FS = GLSL + PIX_GLSL + `in vec2 vL; in vec4 vCol; flat in vec4 vP; out vec4 o;
+// A shadow in its own colour (owner, 2026-10-24: «Для теней возьми не просто серый цвет, а подмешивай основной цвет, чтобы не было грязных цветов»): its ink
+// darker with its hue kept and fuller; an ink with no hue (white, grey) toward the world's own (uShade, shadeTint), so no shadow is a grey
+const SHADE_GLSL = `uniform vec3 uShade;
+vec3 shadeOf(vec3 c, float w) {   // (w: how far a hueless ink goes toward the world's; a thing's a little, the hero's white most)
+  float mx = max(c.r, max(c.g, c.b)), sat = mx > 0.0 ? (mx - min(c.r, min(c.g, c.b))) / mx : 0.0;
+  vec3 s = c * 0.6; s = clamp(mix(vec3(dot(s, vec3(0.299, 0.587, 0.114))), s, 1.35), 0.0, 1.0);
+  return mix(s, mix(c * 0.72, uShade, 0.5), (1.0 - sat) * w);   // (a hueless one half its own a step down, half the world's: a white's shade light and clean)
+}
+`;
+const FEAT_FS = GLSL + PIX_GLSL + SHADE_GLSL + `in vec2 vL; in vec4 vCol; flat in vec4 vP; out vec4 o;
 uniform float uPix;
 float aa(float d) { float w = fwidth(d); return clamp(0.5 - d / max(w, 1e-4), 0.0, 1.0); }
 float sdArc(vec2 p, vec2 sc, float ra, float rb) {
@@ -3993,7 +4017,7 @@ void main() {
   }
   else if (t == 7) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 2.0)); if (fract((p.x + p.y) / vP.w) < 0.35) col = PAL[8]; }   // striped box
   else if (t == 8) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 2.0)); if (fract(p.y / vP.w) < 0.5) col = PAL[0]; }   // box ribbed across in black
-  else if (t == 10) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 0.0)); int tn = int(vP.w + 0.5); if (tn >= 10) { if (tone(tn - 10, g) > 0.5) col = mix(PAL[0], col, 0.5); } else if (tone(tn, g) > 0.5) col = PAL[0]; }   // square box in a tone of black (0: flat; 10 + k: tone k its darker half, a sheet's two-tone dither)
+  else if (t == 10) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 0.0)); int tn = int(vP.w + 0.5); if (tn >= 20) { if (tone(tn - 20, g) > 0.5) col = shadeOf(col, 0.35); } else if (tn >= 10) { if (tone(tn - 10, g) > 0.5) col = mix(PAL[0], col, 0.5); } else if (tone(tn, g) > 0.5) col = PAL[0]; }   // square box in a tone of black (0: flat; 10 + k: tone k its darker half, a sheet's two-tone dither; 20 + k: tone k its shade, VOL)
   else if (t == 9) {                                                          // ellipse lit from the top left: ink p1 in tones down to the right
     a = aa(length(vL) - 1.0);
     float v = dot(vL, vec2(0.6, 0.8));
@@ -4012,7 +4036,7 @@ const FEAT_FS_PAL = FEAT_FS.replace('flat in vec4 vP;', 'flat in vec4 vP; flat i
 // flat, shade as black tones stepping in toward the back and the bottom, a hard white
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
 // black outline. Its patterns ride with the body (uOrigin is its centre in game pixels).
-const BODY_FS_PIX = GLSL + PIX_GLSL + `in vec3 vN; in float vAO; in float vA; in vec2 vUV; out vec4 o;
+const BODY_FS_PIX = GLSL + PIX_GLSL + SHADE_GLSL + `in vec3 vN; in float vAO; in float vA; in vec2 vUV; out vec4 o;
 uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin; uniform vec3 uPaint; uniform float uGlint;
 float sdRoundBox(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
 void main() {
@@ -4028,11 +4052,11 @@ void main() {
   bool hot = sin(vUV.x * 3.3 + uPaint.y) + sin(vUV.y * 2.9 + uPaint.z) + sin((vUV.x - vUV.y) * 2.1 + 1.7 * uPaint.y) - 2.4 * exp(-5.0 * dot(u, u)) > uPaint.x;
   vec3 col = tone(k, g) > 0.5 ? (hot ? uDeep : uBase) : (hot ? uBase : PAL[8]);
   vec3 R = reflect(vec3(0.0, 0.0, -1.0), n);
-  if (uGlint > 0.5) {   // the try at volume (VOL, the hero only): its shadow side deeper, and a white glint high on its light side
+  if (uGlint > 0.5) {   // the hero in volume (VOL): his dots in his own shade, not black (SHADE_GLSL), more of them on his far side, and a white glint high on his light side
     float dk = dot(n, L);
-    if (dk < -0.05) col = tone(dk < -0.35 ? 5 : 4, g) > 0.5 ? uDeep : col;   // (the far side: its shade in more of it)
-    float ge = length((vUV - vec2(-0.5, -0.42)) / vec2(0.15, 0.1));   // (a glint high on its light side, in its own shape's frame: it bends with it)
-    if (ge < 1.0) col = PAL[8]; else if (min(col.r, col.b) > 0.8) col = mix(PAL[0], PAL[8], 0.92);   // (white only in the glint, its white body a shade off it: white on white would not read)
+    bool dark = tone(k, g) > 0.5 || (dk < -0.05 && tone(dk < -0.35 ? 5 : 4, g) > 0.5);
+    col = dark ? shadeOf(uBase, 1.0) : min(uBase.r, min(uBase.g, uBase.b)) > 0.8 ? mix(uBase, uShade, 0.14) : uBase;   // (a white body a breath of the world's ink: white on white would not read)
+    if (length((vUV - vec2(-0.5, -0.42)) / vec2(0.15, 0.1)) < 1.0) col = PAL[8];   // (the glint, in his own shape's frame: it bends with him)
   } else if (sdRoundBox(R.xy - vec2(-0.36, -0.5), vec2(0.17, 0.1), 0.07) < 0.0) col = PAL[8];
   o = vec4(col, 1.0);
 }`;
@@ -4333,8 +4357,14 @@ Renderer.prototype.draw = function (g, alpha) {
   // over its world's back with no walls, the menu's ink under the colours' row as before (owner, 2026-10-24: «Слишком шумно. Верни как было, оставь
   // анимацию, а вместо градиента за моти используй фон локации»)
   const menu = g.state === 'menu', farR = [];
-  const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
+  const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base, vol = false) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
+    if (vol && VOL_ON) {   // a thing or an animal in volume (VOL; its callers say so): its boxes of one ink and one step (volRects), as seen
+      const R = volRects(rows, flip);
+      for (let k = 0; k < R.length; k += 6) { const ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = x + R[k] * s;
+        box(u, y + R[k + 2] * s, x + R[k + 1] * s, y + R[k + 3] * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, ch === 'k' ? 0 : volTone(R[k + 5])); }
+      return;
+    }
     const P = PIX.size, toned = Math.abs(s - P) < 1e-6 && !window.__vspPlain, n = rows[0].length, R = vspRects(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows, toned);   // (window.__vspPlain: plain boxes, to compare; behind: no specks,
     // the cluster rule; toned: a sheet pixel one game pixel, so a checker can be the engine's tone)
     const par = (Math.round(x / P) + Math.round(y / P) + (flip ? n - 1 : 0)) & 1;   // (the world's checker parity at its corner: tone 4 is (x + y) even, 7 odd)
@@ -4437,14 +4467,12 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const fspr = (id, x0, b, flip, sh, inks = SPR_INK) => {   // a cut sprite (FUJI_SPR), its foot on b, its near edge at x0 (flip: from a right wall, mirrored); sh(u): a row u px up shifted so far
     const rows = sprRows(id); if (!rows) return; const Pk = PIX.base, h = rows.length;
-    if (volOn(lv)) {   // the try at volume (VOL): its runs of one ink and one step, each lit by its step
-      const W = rows[0].length, bands = volBands(rows, flip);
-      for (let j = 0; j < h; j++) for (let i = 0; i < W;) {
-        const c = flip ? rows[j][W - 1 - i] : rows[j][i]; if (c === '.') { i++; continue; }
-        const v = bands[j * W + i]; let e = i + 1; while (e < W && (flip ? rows[j][W - 1 - e] : rows[j][e]) === c && bands[j * W + e] === v) e++;
-        const y = b - (h - j) * Pk, dx = sh ? sh(h - j) : 0, [ink, al] = inks[c] || SPR_INK[c] || SPR_INK.k, xa = onGrid((flip ? x0 - W * Pk : x0) + i * Pk + dx), xb = onGrid((flip ? x0 - W * Pk : x0) + e * Pk + dx), y0 = onGrid(y), y1 = onGrid(y + Pk);
-        box(xa, y0, xb, y1, ink, al, 0, 10, v === -2 ? 16 : v === -1 ? 14 : 0);   // its ink; in shadow its darker half a cell in two, deeper all of it (tone 10+k)
-        i = e;
+    if (VOL_ON) {   // in volume (VOL): its boxes of one ink and one step (volRects), each lit by its step; a swaying one (sh) cut where its sway steps
+      const W = rows[0].length, R = volRects(rows, flip), xl = flip ? x0 - W * Pk : x0;
+      for (let k = 0; k < R.length; k += 6) {
+        const i = R[k], e = R[k + 1], j1 = R[k + 3], c = R[k + 4], tn = volTone(R[k + 5]), [ink, al] = inks[c] || SPR_INK[c] || SPR_INK.k;
+        for (let j = R[k + 2]; j < j1;) { const dx = sh ? sh(h - j) : 0; let je = j + 1; while (je < j1 && sh && sh(h - je) === dx) je++;
+          box(onGrid(xl + i * Pk + dx), onGrid(b - (h - j) * Pk), onGrid(xl + e * Pk + dx), onGrid(b - (h - je) * Pk), ink, al, 0, 10, tn); j = je; }
       }
       return;
     }
@@ -4548,7 +4576,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const cm = flip ? n - cm0 : cm0, x0 = sn(dx - cm * q), y0 = y1 - S.base * q;
     const my = y0 + ((r0 + r1 + 1) / 2) * q, dw = sn(0.7 * t);
     F(dx, my, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
-    vsp(S.rows, x0, y0, flip);
+    vsp(S.rows, x0, y0, flip, 1, q, true);
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
     if (shop) { const ry = sn(my); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
     else { const ry = sn(y1 - 0.5 * t); for (let k = 0; k < 3; k++) disc(dx + (k - 1) * rr * 0.5, ry - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
@@ -4888,7 +4916,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const iwAt = (S, wx, b, d, a = 1, ox = S.dx, base = S.base) => {   // an Iwami thing (IW) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall; its orange and yellow (a
     // flame, a lit window) lights of the dark
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + ox * q : snap(wx) - (ox + n) * q, y0 = snap(b) - base * q;
-    vsp(S.rows, x0, y0, d < 0, a, q);
+    vsp(S.rows, x0, y0, d < 0, a, q, a === 1);
     if (!S.lit) { S.lit = []; const seen2 = new Set(); S.rows.forEach((row, y) => [...row].forEach((ch, x) => { if (!'oy'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
       while (st.length) { const [a2, b2] = st.pop(); cl.push([a2, b2]); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a2 + dx, v = b2 + dy; if (v >= 0 && v < S.rows.length && u >= 0 && u < n && !seen2.has(v * n + u) && 'oy'.includes(S.rows[v][u])) { seen2.add(v * n + u); st.push([u, v]); } } }
       if (cl.length >= 4) S.lit.push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
@@ -5390,14 +5418,14 @@ Renderer.prototype.draw = function (g, alpha) {
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => { const q = SW((v0 + v1) / 2); box(Math.min(X(u0), X(u1)) + q, Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)) + q, Y(Math.min(v0, v1)), c, a, 0, 10, tn); };   // by tiles out from the wall and up from the ledge
       const el = (u, v, ru, rv, c) => { const xu = X(u) + SW(v); if (CINE && CINE.on('vol')) { F(xu + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(xu - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(xu - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(xu, Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume, swaying)
       if (p.kind === 'sakura' || p.kind === 'beast' || p.kind === 'kaya' || p.kind === 'statue' || p.kind === 'koinobori') {   // the Iya valley's, off their sheets (VIL2, round 2)
-        const q = PIX.base, at = (S, dx) => { const n = S.rows[0].length, x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q); vsp(S.rows, x, snap(b - S.base * q), !wl); };
+        const q = PIX.base, at = (S, dx) => { const n = S.rows[0].length, x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q); vsp(S.rows, x, snap(b - S.base * q), !wl, 1, q, true); };
         if (p.kind === 'sakura') { const S = vil2('cherry'); at(S, S.dx); }   // a mountain cherry (Д94 «А»)
         else if (p.kind === 'beast') {   // one of the three (Д90 «В»); it notices the hero (NOTICE): hops, turns to him
           const S = vil2('beast')[p.a || ['macaque', 'deer', 'boar'][((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) >>> 9) % 3]], dx = Math.round((0.6 * t) / q), n = S.rows[0].length;
-          const x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q), nb = notice(g, lv, r, x, b - S.rows.length * q, x + n * q, b); vsp(S.rows, x, snap(b - S.base * q - nb.dy), nb.face === null ? !wl : nb.face);
+          const x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q), nb = notice(g, lv, r, x, b - S.rows.length * q, x + n * q, b); vsp(S.rows, x, snap(b - S.base * q - nb.dy), nb.face === null ? !wl : nb.face, 1, q, true);
         }
         else if (p.kind === 'kaya') at(vil2('kaya'), Math.round((0.4 * t) / q));   // kaya stacks (Д87 «В»)
-        else if (p.kind === 'statue') { const S = vil2('statue'), n = S.rows[0].length, ex = wl ? r.x1 : r.x0; vsp(S.rows, wl ? snap(ex - S.end * q) : snap(ex - (n - S.end) * q), snap(b - S.base * q), !wl); }   // at the ledge's end (Д93 «А»)
+        else if (p.kind === 'statue') { const S = vil2('statue'), n = S.rows[0].length, ex = wl ? r.x1 : r.x0; vsp(S.rows, wl ? snap(ex - S.end * q) : snap(ex - (n - S.end) * q), snap(b - S.base * q), !wl, 1, q, true); }   // at the ledge's end (Д93 «А»)
         else {   // koinobori on a rope across the shaft over the ledge (Д89 «А»), sagging, faint; its carps along it, swaying
           const S = vil2('rope'), Wd = lv.r - lv.l, yr = b - 4.8 * t, sag = 0.5 * t, ry = (x) => snap(yr + sag * (1 - Math.pow((2 * (x - lv.l)) / Wd - 1, 2)));
           for (let x = lv.l; x < lv.r; x += P) box(snap(x), ry(x), snap(x) + P, ry(x) + P, PAL.gray, DIM, 0, 10, 0);
@@ -6882,7 +6910,7 @@ Renderer.prototype.draw = function (g, alpha) {
   gl.enable(gl.BLEND);
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
-  gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
+  gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u); if (pf.u.uShade) gl.uniform3fv(pf.u.uShade, shadeTint(g.lv && g.lv.theme));
   if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
   if (menu) for (let i = 0; i + 1 < farR.length; i += 2) this.drawFeat(farR[i], farR[i + 1] - farR[i]);   // (the main screen: its far view only)
   else this.drawFeat(0, back);
@@ -6892,12 +6920,12 @@ Renderer.prototype.draw = function (g, alpha) {
   gl.bindVertexArray(this.bodyVao);
   for (const r of this.ranges) if (!BOSS_FIT[r.b.look]) gl.drawElements(gl.TRIANGLES, r.sCount, gl.UNSIGNED_INT, r.sStart * 4);   // (a boss its sheet's drawing: no body, no shadow; see below)
   gl.useProgram(pb.p);
-  gl.uniform2f(pb.u.uView, W, H); gl.uniform2f(pb.u.uShake, sx, sy); gl.uniform2f(pb.u.uOffset, 0, 0); grid(pb.u);
+  gl.uniform2f(pb.u.uView, W, H); gl.uniform2f(pb.u.uShake, sx, sy); gl.uniform2f(pb.u.uOffset, 0, 0); grid(pb.u); if (pb.u.uShade) gl.uniform3fv(pb.u.uShade, shadeTint(g.lv && g.lv.theme));
   for (const r of this.ranges) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
     const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
-    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); if (pb.u.uGlint) gl.uniform1f(pb.u.uGlint, r.b === g.hero && volOn(lv) ? 1 : 0); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
+    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); if (pb.u.uGlint) gl.uniform1f(pb.u.uGlint, r.b === g.hero && VOL_ON ? 1 : 0); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
     if (!BOSS_FIT[r.b.look]) {   // the target always has a stencil (a boss its sheet's drawing: only that on its body, the body unseen)
       // Fill by winding number (as in Gum), so a crushed outline that turns back on
       // itself neither folds nor loses lobes.
@@ -6997,18 +7025,18 @@ Renderer.prototype.drawMenu = function (g, alpha) {
   gl.enable(gl.BLEND);
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
-  gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
+  gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u); if (pf.u.uShade) gl.uniform3fv(pf.u.uShade, shadeTint(g.lv && g.lv.theme));
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
   gl.uniform2f(ps.u.uOffset, 0, RENDER.shadowOffset); gl.uniform1f(ps.u.uShadowA, RENDER.shadowA);
   gl.bindVertexArray(this.bodyVao);
   for (const r of this.ranges) gl.drawElements(gl.TRIANGLES, r.sCount, gl.UNSIGNED_INT, r.sStart * 4);
   gl.useProgram(pb.p);
-  gl.uniform2f(pb.u.uView, W, H); gl.uniform2f(pb.u.uShake, sx, sy); gl.uniform2f(pb.u.uOffset, 0, 0); grid(pb.u);
+  gl.uniform2f(pb.u.uView, W, H); gl.uniform2f(pb.u.uShake, sx, sy); gl.uniform2f(pb.u.uOffset, 0, 0); grid(pb.u); if (pb.u.uShade) gl.uniform3fv(pb.u.uShade, shadeTint(g.lv && g.lv.theme));
   for (const r of this.ranges) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
-    gl.uniform3fv(pb.u.uBase, r.b.color.base); gl.uniform3fv(pb.u.uDeep, r.b.color.deep); gl.uniform3fv(pb.u.uLine, PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, PAINT_ALL);
+    gl.uniform3fv(pb.u.uBase, r.b.color.base); gl.uniform3fv(pb.u.uDeep, r.b.color.deep); gl.uniform3fv(pb.u.uLine, PAL.black); if (pb.u.uGlint) gl.uniform1f(pb.u.uGlint, r.b === g.hero && VOL_ON ? 1 : 0); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, PAINT_ALL);
     gl.enable(gl.STENCIL_TEST);   // filled by winding number, as in draw
     gl.colorMask(false, false, false, false);
     gl.stencilFunc(gl.ALWAYS, 0, 0xff);

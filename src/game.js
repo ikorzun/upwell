@@ -2819,10 +2819,19 @@ Object.assign(CARD_MOTION, {
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
 const cardImg = (src, ms = 6000) => new Promise((ok) => { const i = new Image(), t = setTimeout(() => ok(null), ms); i.onload = () => { clearTimeout(t); ok(i); }; i.onerror = () => { clearTimeout(t); ok(null); }; i.src = src; });   // (given up after `ms`: a stalled request held the card for good; review)
-// Volume on the story cards, a try (owner, 2026-10-24: «На карточки тоже примерь»; as the sprites', VOL, the method Sprite Normals', MIT © 2026 Hugo Duprez): each
+// Volume on the story cards (owner, 2026-10-24: «На карточки тоже примерь», then «Выбираю блик, обновляй движок и все остальное»; as the sprites', VOL, the method Sprite Normals', MIT © 2026 Hugo Duprez): each
 // figure's normals (Mochi's, a boss's plane; the plate none: it went to grain) once from its shape (a low dome over the distance to its edge) and a little of its
-// lightness; a light from the top left that the tilt moves; its far side the darker half, its turn the darker half in a checker, a white glint. ?novol: none
-const CARD_VOL = !/[?&]novol\b/.test(location.search), CARD_LIT = { dome: 1.0, detail: 0.4, deep: -0.05, lo: 0.25, glint: 0.985, shade: 110 };
+// lightness; a light from the top left that the tilt moves; its far side in its shade, its turn its shade in a checker, a white glint. Its shade as the game's
+// (SHADE_GLSL: «не просто серый… подмешивай основной цвет»): each pixel's own colour darker and fuller, a hueless one toward the card's own ink. ?novol: none
+const CARD_VOL = !/[?&]novol\b/.test(location.search), CARD_LIT = { dome: 1.0, detail: 0.4, deep: -0.05, lo: 0.25, glint: 0.985 };
+const cardTint = (ink) => (ink === 'skazka' ? [200, 200, 200] : ((h) => (h === '#c8c8c8' ? [91, 184, 255] : [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))))((STORY_INK[ink] || STORY_INK.moon).L));   // (a grey world's
+// card: a cool blue, as shadeTint; the Dark Forest's grey, black and white)
+function cardShade(d, i, tint, w, o) {   // SHADE_GLSL's shadeOf in 0–255: the pixel d[i..] into o[i..]
+  const r = d[i], g = d[i + 1], b = d[i + 2], mx = Math.max(r, g, b), sat = mx ? (mx - Math.min(r, g, b)) / mx : 0, f = (1 - sat) * w;
+  const s = [r * 0.6, g * 0.6, b * 0.6], l = 0.299 * s[0] + 0.587 * s[1] + 0.114 * s[2];
+  for (let c = 0; c < 3; c++) { const v = Math.min(255, Math.max(0, l + (s[c] - l) * 1.35)); o[i + c] = Math.round(v + ((d[i + c] * 0.72 + tint[c]) / 2 - v) * f); }
+  o[i + 3] = 255;
+}
 function cardNormals(im, w, h) {
   const t = document.createElement('canvas'); t.width = w; t.height = h; const g = t.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, w, h).data;
   const n = w * h, ins = new Uint8Array(n), dist = new Float32Array(n), hgt = new Float32Array(n), out = new Float32Array(n * 3);
@@ -2839,7 +2848,7 @@ function cardNormals(im, w, h) {
     const gx = (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x - 1, y) - at(x - 1, y + 1)) / 8, gy = (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x, y - 1) - at(x + 1, y - 1)) / 8;
     let nx = -gx * 1.5, ny = -gy * 1.5, nz = 1; const m = Math.hypot(nx, ny, nz); out[q * 3] = nx / m; out[q * 3 + 1] = ny / m; out[q * 3 + 2] = nz / m;
   }
-  return { n: out, ins };
+  return { n: out, ins, px: d };
 }
 function cardLight(p, tx, ty) {   // a plane's light for this tilt (in steps of a tenth): its overlay drawn again only when the light moved
   const qx = Math.round(tx * 10) / 10, qy = Math.round(ty * 10) / 10, key = 'L' + qx + ',' + qy; if (key === p.volKey) return key; p.volKey = key;
@@ -2848,9 +2857,8 @@ function cardLight(p, tx, ty) {   // a plane's light for this tilt (in steps of 
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const q = y * w + x; if (!p.nrm.ins[q]) continue;
     const L = N[q * 3] * lx + N[q * 3 + 1] * ly + N[q * 3 + 2] * lz;
-    let c = -1;   // -1 nothing; 0 black; 255 white
-    if (L < CARD_LIT.deep) c = 0; else if (L < CARD_LIT.lo) c = (x + y) & 1 ? 0 : -1; else if (L > CARD_LIT.glint) c = 255;   // (its far side the darker half, its turn the darker half in a checker, its glint white: the game's own tones 16/14)
-    if (c < 0) continue; const i = q * 4; o[i] = o[i + 1] = o[i + 2] = c; o[i + 3] = c ? 230 : CARD_LIT.shade;
+    const i = q * 4;   // (its far side its shade, its turn its shade in a checker, its glint white: the game's own steps, VOL)
+    if (L < CARD_LIT.deep || (L < CARD_LIT.lo && (x + y) & 1)) cardShade(p.nrm.px, i, p.tint, p.w, o); else if (L > CARD_LIT.glint) { o[i] = o[i + 1] = o[i + 2] = 243; o[i + 3] = 255; }
   }
   g.putImageData(img, 0, 0); return key;
 }
@@ -2882,7 +2890,7 @@ function cardLive(c, card, tilt, clip, title, next) {
         const t = document.createElement('canvas'); t.width = w; t.height = h; const tg = t.getContext('2d'); tg.drawImage(im, 0, 0); const d = tg.getImageData(0, 0, w, h).data;
         pl.mask = new Uint8Array(w * h); for (let q = 0; q < w * h; q++) pl.mask[q] = d[q * 4 + 3] > 0 ? 1 : 0;
       }
-      if (CARD_VOL && i > 0) { pl.nrm = cardNormals(im, w, h); pl.vol = document.createElement('canvas'); pl.vol.width = w; pl.vol.height = h; pl.volKey = ''; }   // (the try at volume, CARD_VOL)
+      if (CARD_VOL && i > 0) { pl.nrm = cardNormals(im, w, h); pl.vol = document.createElement('canvas'); pl.vol.width = w; pl.vol.height = h; pl.volKey = ''; pl.tint = cardTint(c.ink); pl.w = pl.id === 'hero' ? 1 : 0.35; }   // (its volume, CARD_VOL)
       planes.push(pl);
       if (i === 0 && def && def.threads) { thread = document.createElement('canvas'); thread.className = 'spl'; clip.append(thread); }   // over the plate, under what it holds
     });

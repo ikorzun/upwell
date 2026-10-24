@@ -404,6 +404,42 @@ const VIL2 = {   // the Village from the Iya valley, its owner's picks of round 
     right: ['......dwwwdw', '......wwwwoo', '......wooooo', '......oooooo', '......oooooo', '...doddoooo.', '...oookdookw', 'oookoookodww', 'oookooookooo', 'oookooodooko', 'oo.doodookdo', '...dokookdo.', '.....wooowoo', '...d..oooooo', '...oo...ooo.', '..oo..o.....', '.do...ooood.', '.oo...ooooo.', 'oo....oooo..', 'o....doood..', 'o....oookoo.', '........ooo.', '...doodoood.', '...ooookdoo.', '.ddkooooo...', 'ooookookkoo.', '.ooodokoooo.', '.oo...ooooo.', '.....dooooo.', '......ooo...'] },
 };
 const vil2 = (el) => VIL2[el];
+// Volume, a try on one level (owner, 2026-10-24: «Добавь объем для вещей и животных только на 1 уровне любого мира и дай сыграть. Блик на моти тоже добавь»;
+// the method Sprite Normals', MIT © 2026 Hugo Duprez, github.com/Hugo-Dz/spritefusion-sprite-normals, redone here on a sheet's ink letters): a cut sprite's pixels
+// lit by a light from the top left `L`, the guide's few steps: a deep shadow (`deep`), a shadow (`lo`), its own ink, a sheen (`hi`) and a glint (`top`). On Fuji's
+// 3-4 (`at`: world, stage); ?vol on every level, ?novol on none. Its height a dome over the distance to its edge (`dome`) and its inks' lightness (`detail`)
+const VOL = { at: ['ice', 3], L: [-0.52, -0.7, 0.49], dome: 1.0, detail: 0.15, deep: 0.22, lo: 0.5 };
+const volOn = (lv) => !!lv && lv.kind === 'well' && (/[?&]vol\b/.test(location.search) || (!/[?&]novol\b/.test(location.search) && !!lv.world && lv.world.id === VOL.at[0] && lv.stage === VOL.at[1]));
+const VOL_LUM = { k: 0, w: 1, s: 0.75, g: 0.6, d: 0.45, b: 0.55, c: 0.8, o: 0.7, y: 0.9, r: 0.45, p: 0.55, a: 0.8, G: 0.4 };
+const VOL_BANDS = new Map();
+const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 shadow, 0 its own ink, and black's always), once a sprite and a side
+  const key = rows.join('/') + (flip ? '<' : '>'); if (VOL_BANDS.has(key)) return VOL_BANDS.get(key);
+  const H = rows.length, W = rows[0].length, at = (i, j) => (flip ? rows[j][W - 1 - i] : rows[j][i]), inside = new Uint8Array(W * H), d = new Float32Array(W * H);
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const q = j * W + i; inside[q] = at(i, j) !== '.' ? 1 : 0; d[q] = inside[q] ? 1e4 : 0; }
+  for (let pass = 0; pass < 2; pass++) for (let n = 0; n < W * H; n++) {   // the distance to its edge (a chamfer, both ways)
+    const q = pass ? W * H - 1 - n : n, i = q % W, j = (q / W) | 0; if (!inside[q]) continue; const s = pass ? 1 : -1;
+    for (const [di, dj, c] of [[s, 0, 1], [0, s, 1], [s, s, 1.4], [-s, s, 1.4]]) { const x = i + di, y = j + dj; const v = x < 0 || y < 0 || x >= W || y >= H ? 0 : d[y * W + x]; if (v + c < d[q]) d[q] = v + c; }
+  }
+  const h = new Float32Array(W * H);
+  for (let q = 0; q < W * H; q++) if (inside[q]) { const c = at(q % W, (q / W) | 0); h[q] = VOL.dome * 4 * Math.log(1 + Math.max(d[q] - 0.5, 0) / 4) + VOL.detail * ((VOL_LUM[c] ?? VOL_LUM[c.toLowerCase()] ?? 0.6) - 0.5); }
+  const hs = new Float32Array(W * H), get = (a, i, j) => (i < 0 || j < 0 || i >= W || j >= H ? 0 : a[j * W + i]);
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { let t = 0, n = 0; for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { t += get(h, i + x, j + y) * (x || y ? 1 : 2); n += x || y ? 1 : 2; } hs[j * W + i] = t / n; }
+  const out = new Int8Array(W * H), [lx, ly, lz] = VOL.L;
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+    const q = j * W + i; if (!inside[q] || at(i, j) === 'k') continue;
+    const gx = (get(hs, i + 1, j - 1) + 2 * get(hs, i + 1, j) + get(hs, i + 1, j + 1) - get(hs, i - 1, j - 1) - 2 * get(hs, i - 1, j) - get(hs, i - 1, j + 1)) / 8;
+    const gy = (get(hs, i - 1, j + 1) + 2 * get(hs, i, j + 1) + get(hs, i + 1, j + 1) - get(hs, i - 1, j - 1) - 2 * get(hs, i, j - 1) - get(hs, i + 1, j - 1)) / 8;
+    let nx = -gx * 1.5, ny = -gy * 1.5, nz = 1; const m = Math.hypot(nx, ny, nz); nx /= m; ny /= m; nz /= m;
+    const L = nx * lx + ny * ly + nz * lz;
+    out[q] = L < VOL.deep ? -2 : L < VOL.lo ? -1 : 0;
+  }
+  for (let pass = 0; pass < 2; pass++) for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {   // no lone step (the guide's clusters): a pixel like none of its eight takes theirs
+    const q = j * W + i; if (!inside[q] || at(i, j) === 'k') continue; const cnt = { '-2': 0, '-1': 0, 0: 0 }; let same = 0;
+    for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { if (!x && !y) continue; const X = i + x, Y = j + y; if (X < 0 || Y < 0 || X >= W || Y >= H || !inside[Y * W + X] || at(X, Y) === 'k') continue; const v = out[Y * W + X]; cnt[v]++; if (v === out[q]) same++; }
+    if (!same) out[q] = +Object.keys(cnt).reduce((a, b) => (cnt[b] > cnt[a] ? b : a));
+  }
+  VOL_BANDS.set(key, out); return out;
+};
 // An animal on a ledge notices the hero (owner, 2026-10-24: «Нужно, чтобы эти и подобные им объекты/животные в мирах как-то просто реагировали на героя»): the
 // hero within `reach` tiles, it crouches `crouch` s (anticipation), hops `hop` tiles in `air` s and lands with a give in `land` s, and turns to him; it watches
 // him while he is near and `look` s after, then faces as it was; not again for `cool` s. With reduced motion it only turns (POKE.still). Returns its lift
@@ -3977,7 +4013,7 @@ const FEAT_FS_PAL = FEAT_FS.replace('flat in vec4 vP;', 'flat in vec4 vP; flat i
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
 // black outline. Its patterns ride with the body (uOrigin is its centre in game pixels).
 const BODY_FS_PIX = GLSL + PIX_GLSL + `in vec3 vN; in float vAO; in float vA; in vec2 vUV; out vec4 o;
-uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin; uniform vec3 uPaint;
+uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin; uniform vec3 uPaint; uniform float uGlint;
 float sdRoundBox(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
 void main() {
   if (vA < 0.04) discard;
@@ -3992,7 +4028,12 @@ void main() {
   bool hot = sin(vUV.x * 3.3 + uPaint.y) + sin(vUV.y * 2.9 + uPaint.z) + sin((vUV.x - vUV.y) * 2.1 + 1.7 * uPaint.y) - 2.4 * exp(-5.0 * dot(u, u)) > uPaint.x;
   vec3 col = tone(k, g) > 0.5 ? (hot ? uDeep : uBase) : (hot ? uBase : PAL[8]);
   vec3 R = reflect(vec3(0.0, 0.0, -1.0), n);
-  if (sdRoundBox(R.xy - vec2(-0.36, -0.5), vec2(0.17, 0.1), 0.07) < 0.0) col = PAL[8];
+  if (uGlint > 0.5) {   // the try at volume (VOL, the hero only): its shadow side deeper, and a white glint high on its light side
+    float dk = dot(n, L);
+    if (dk < -0.05) col = tone(dk < -0.35 ? 5 : 4, g) > 0.5 ? uDeep : col;   // (the far side: its shade in more of it)
+    float ge = length((vUV - vec2(-0.5, -0.42)) / vec2(0.15, 0.1));   // (a glint high on its light side, in its own shape's frame: it bends with it)
+    if (ge < 1.0) col = PAL[8]; else if (min(col.r, col.b) > 0.8) col = mix(PAL[0], PAL[8], 0.92);   // (white only in the glint, its white body a shade off it: white on white would not read)
+  } else if (sdRoundBox(R.xy - vec2(-0.36, -0.5), vec2(0.17, 0.1), 0.07) < 0.0) col = PAL[8];
   o = vec4(col, 1.0);
 }`;
 // Their shadow: black dots, thinning out with Gum's soft falloff.
@@ -4374,6 +4415,17 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const fspr = (id, x0, b, flip, sh, inks = SPR_INK) => {   // a cut sprite (FUJI_SPR), its foot on b, its near edge at x0 (flip: from a right wall, mirrored); sh(u): a row u px up shifted so far
     const rows = sprRows(id); if (!rows) return; const Pk = PIX.base, h = rows.length;
+    if (volOn(lv)) {   // the try at volume (VOL): its runs of one ink and one step, each lit by its step
+      const W = rows[0].length, bands = volBands(rows, flip);
+      for (let j = 0; j < h; j++) for (let i = 0; i < W;) {
+        const c = flip ? rows[j][W - 1 - i] : rows[j][i]; if (c === '.') { i++; continue; }
+        const v = bands[j * W + i]; let e = i + 1; while (e < W && (flip ? rows[j][W - 1 - e] : rows[j][e]) === c && bands[j * W + e] === v) e++;
+        const y = b - (h - j) * Pk, dx = sh ? sh(h - j) : 0, [ink, al] = inks[c] || SPR_INK[c] || SPR_INK.k, xa = onGrid((flip ? x0 - W * Pk : x0) + i * Pk + dx), xb = onGrid((flip ? x0 - W * Pk : x0) + e * Pk + dx), y0 = onGrid(y), y1 = onGrid(y + Pk);
+        box(xa, y0, xb, y1, ink, al, 0, 10, v === -2 ? 16 : v === -1 ? 14 : 0);   // its ink; in shadow its darker half a cell in two, deeper all of it (tone 10+k)
+        i = e;
+      }
+      return;
+    }
     for (const [i, e, j, c, tone] of sprOps(id)) {
     const y = b - (h - j) * Pk, dx = sh ? sh(h - j) : 0, [ink, al] = inks[c] || SPR_INK[c] || SPR_INK.k, xa = flip ? x0 - e * Pk : x0 + i * Pk, xb = flip ? x0 - i * Pk : x0 + e * Pk;
       box(onGrid(xa + dx), onGrid(y), onGrid(xb + dx), onGrid(y + Pk), ink, al, 0, 10, tone);
@@ -4752,7 +4804,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (!seen(r.y0 - 2 * t, r.y0) || (kitThing(lv, r) || {}).kind !== 'bonsai') continue;   // (where: kitThing's, never twice in a row, the owner's rule)
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
       if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
-      const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
+      const sw = cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0), SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
       for (const [hw, a0, a1] of [[0.5, 0, 0.07], [0.45, 0.07, 0.17], [0.38, 0.17, 0.25]]) box(snap(cx - hw * t), snap(by + a0 * t), snap(cx + hw * t), snap(by + a1 * t), PAL.gray, 1, 0, 10, 0);
       for (const f of [-0.27, 0.27]) box(snap(cx + f * t) - P, snap(by + 0.25 * t), snap(cx + f * t) + P, r.y0, PAL.gray, 1, 0, 10, 0);
       const trunk = (q) => [X(0.16 * Math.sin(q * Math.PI * 1.8) - 0.03) + SB(0.95 * q), Y(0.95 * q)];
@@ -4831,7 +4883,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const mnThing = (kind, wx, b, d, r) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
     if (IW[kind]) { iwAt(IW[kind], wx, b, d); return; }   // (Iwami's, IW)
     const rt = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork: thin parts flat, the bodies small, what is under the ledge behind)
-    const roll = kind === 'cart' && CINE && r ? cinePoke(g, lv, r, 'cart', Math.min(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b - 1.1 * kitT, Math.max(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b) : 0;
+    const roll = kind === 'cart' && r ? cinePoke(g, lv, r, 'cart', Math.min(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b - 1.1 * kitT, Math.max(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b) : 0;
     const t = kitT, P = kitP, px = P / t, G = PAL.gray, K = PAL.black, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t), R = (u) => X(u) + snap(roll * 3 * t);   // (a cart rocked: its body)
     const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const ln = (u0, v0, u1, v1, c = G, wd = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wd);
@@ -4973,7 +5025,7 @@ Renderer.prototype.draw = function (g, alpha) {
           for (const e of [-1, 1]) box(snap(ux + e * 0.22 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.22 * t) + 2 * P, snap(b - 0.62 * uh) + 3 * P, PAL.orange, 1, 0, 10, 0);
         }
       } else if (k === 'snowman') {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
-        L(4); const sw = CINE ? cinePoke(g, lv, r, 'snowman', Math.min(X(0.3), X(1.9)), b - 2.8 * t, Math.max(X(0.3), X(1.9)), b) : 0, SH = (v) => (sw ? snap(sw * v * t) : 0);   // (poked: he
+        L(4); const sw = cinePoke(g, lv, r, 'snowman', Math.min(X(0.3), X(1.9)), b - 2.8 * t, Math.max(X(0.3), X(1.9)), b), SH = (v) => (sw ? snap(sw * v * t) : 0);   // (poked: he
         // sways, his bucket the most)
         const sx = X(1.1);
         disc(sx + SH(0.68), snap(b - 0.68 * t), 0.75 * t, PAL.gray, 1); disc(sx + SH(1.72), snap(b - 1.72 * t), 0.5 * t, PAL.gray, 1);
@@ -4996,7 +5048,7 @@ Renderer.prototype.draw = function (g, alpha) {
           for (const e of [-1, 0, 1]) rod(sx, snap(b - 1.4 * t), sx + e * 0.14 * t, snap(b - 1.12 * t), PAL.purple);   // its tassel
         }
       } else if (k === 'larch') {   // a bare larch of the tree line, bent by the wind, snow on its boughs (d56 E; d49 «Б»: no green)
-        const id = 'larch', SW = CINE ? cinePoke(g, lv, r, 'pine', Math.min(X(0.2), X(4.6)), b - 4.7 * t, Math.max(X(0.2), X(4.6)), b) : 0;   // (poked, it sways, its top the most)
+        const id = 'larch', SW = cinePoke(g, lv, r, 'pine', Math.min(X(0.2), X(4.6)), b - 4.7 * t, Math.max(X(0.2), X(4.6)), b);   // (poked, it sways, its top the most)
         L(0); fspr(id, X(0.2), b, !wl, SW ? (u) => snap(SW * u * kitP / t * t) : null);   // (flat: its boughs thin)
       }
     }
@@ -5111,7 +5163,7 @@ Renderer.prototype.draw = function (g, alpha) {
           else bx(u0 + 0.1, v0 + 0.12, u1 - 0.2, v1 - 0.12, PAL.gray, 1);   // dots
         };
         L(0); bx(0.6, 0, 0.6 + 2 * px, 4.4, PAL.gray); L(4);   // the pole
-        const fl = CINE ? cinePoke(g, lv, r, 'flags', Math.min(X(0.6), X(2.8)), Y(4.4), Math.max(X(0.6), X(2.8)), b) : 0;   // (poked, they flutter, the top one the most)
+        const fl = cinePoke(g, lv, r, 'flags', Math.min(X(0.6), X(2.8)), Y(4.4), Math.max(X(0.6), X(2.8)), b);   // (poked, they flutter, the top one the most)
         [[PAL.green, 'fish'], [th.mover, 'dots'], [PAL.blue, 'check']].forEach(([c, pat], i) => { sx = fl ? snap(fl * (3.9 - 0.85 * i) * t) : 0; flag(3.55 - 0.85 * i, c, pat); sx = 0; });
         el(0.62, 4.5, 0.12, 0.12, PAL.gray);   // its top, a ball
       }
@@ -5175,7 +5227,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (!p || p.kind !== 'fence') continue;
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, b = r.y0;
       if (CINE) this.route = 4;
-      const sw = CINE ? cinePoke(g, lv, r, 'fence', Math.min(wx + d * 0.2 * t, wx + d * 3.2 * t), b - 3 * t, Math.max(wx + d * 0.2 * t, wx + d * 3.2 * t), b, [snap(wx + d * 2.8 * t), snap(b - 2.63 * t)]) : 0;
+      const sw = cinePoke(g, lv, r, 'fence', Math.min(wx + d * 0.2 * t, wx + d * 3.2 * t), b - 3 * t, Math.max(wx + d * 0.2 * t, wx + d * 3.2 * t), b, [snap(wx + d * 2.8 * t), snap(b - 2.63 * t)]);
       const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its pole the most; a raven off its skull, back later)
       const X = (u, v = 0) => snap(wx + d * u * t) + SW(v), Y = (v) => snap(b - v * t);   // tiles out from its wall end, up from its top
       const ln = (u0, v0, u1, v1, c, wp = 1, a = 1) => line(X(u0, v0), Y(v0), X(u1, v1), Y(v1), c, a, wp);
@@ -5311,7 +5363,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (!p) continue;
       if (CINE) this.route = 4;   // (the cinematic fork: a sakura, a scarecrow, a lantern, a koinobori: small things in depth, whole)
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
-      const pk = CINE && { sakura: [0.4, 4.2, 4.6], scarecrow: [0.2, 2.9, 3.8], koinobori: [0.7, 4.4, 5.3] }[p.kind], sw = pk ? cinePoke(g, lv, r, p.kind, Math.min(X(pk[0]), X(pk[1])), Y(pk[2]), Math.max(X(pk[0]), X(pk[1])), b, p.kind === 'scarecrow' ? [X(2.75), Y(2.55)] : null) : 0;
+      const pk = { sakura: [0.4, 4.2, 4.6], scarecrow: [0.2, 2.9, 3.8], koinobori: [0.7, 4.4, 5.3] }[p.kind], sw = pk ? cinePoke(g, lv, r, p.kind, Math.min(X(pk[0]), X(pk[1])), Y(pk[2]), Math.max(X(pk[0]), X(pk[1])), b, p.kind === 'scarecrow' ? [X(2.75), Y(2.55)] : null) : 0;
       const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its top the most; see cinePoke)
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => { const q = SW((v0 + v1) / 2); box(Math.min(X(u0), X(u1)) + q, Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)) + q, Y(Math.min(v0, v1)), c, a, 0, 10, tn); };   // by tiles out from the wall and up from the ledge
       const el = (u, v, ru, rv, c) => { const xu = X(u) + SW(v); if (CINE && CINE.on('vol')) { F(xu + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(xu - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(xu - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(xu, Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume, swaying)
@@ -5888,7 +5940,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     if (r.plank) {   // a gnarled dead branch off a trunk that climbs the wall: thick at the wall, bark split, its free end in twigs like a clawing hand, thorns and a dim cobweb under it
       if (r.bouncy) return false;
-      const c = th.plank, sw = CINE ? cinePoke(g, lv, r, 'branch', r.x0, r.y0, r.x1, r.y1) : 0, dip = sw ? snap(sw * r.poke.d * t) : 0, xe = E(0.7);   // (the cinematic
+      const c = th.plank, sw = cinePoke(g, lv, r, 'branch', r.x0, r.y0, r.x1, r.y1), dip = sw ? snap(sw * r.poke.d * t) : 0, xe = E(0.7);   // (the cinematic
       // fork: under the hero its free end gives a little and springs back, bark falling, its cobweb swaying)
       const spans = dip ? (d > 0 ? [[r.x0, xe, 0], [xe, r.x1, dip]] : [[xe, r.x1, 0], [r.x0, xe, dip]]) : [[r.x0, r.x1, 0]];
       for (const [x0, x1, o] of spans) { box(x0, r.y0 + o, x1, r.y1 + o, c, 1, 0, 10, 0); box(x0, r.y1 - 2 * P + o, x1, r.y1 + o, c, 1, 0, 10, 4); }   // its wood, its underside in shade
@@ -6018,7 +6070,7 @@ Renderer.prototype.draw = function (g, alpha) {
         const dir = wl ? 1 : -1, sx = snap(bell.x), top = snap(r.y0 - 2.1 * t), on = lv.tended.get(r), u = on != null ? T - on : 1e9;
         const c = on != null ? PAL.orange : PAL.gray, wood = PAL.orange, K = PAL.black, Xs = (q) => snap(sx + dir * q * t), Ys = (q) => snap(r.y0 - q * 1.27 * t);   // (its marks laid out on 1.65, the staff 2.1 tiles tall)
         const bx = Xs(0.18), by = Ys(1.1);
-        const nud = CINE && on != null && u > 1.6 ? cinePoke(g, lv, r, 'bell', bx - 0.4 * t, by - 0.3 * t, bx + 0.4 * t, by + 0.5 * t) : 0;   // (2.5D: rung, a nudge swings it again, less)
+        const nud = on != null && u > 1.6 ? cinePoke(g, lv, r, 'bell', bx - 0.4 * t, by - 0.3 * t, bx + 0.4 * t, by + 0.5 * t) : 0;   // (2.5D: rung, a nudge swings it again, less)
         const sw = u < 1.6 ? snap(Math.sin(u * 13) * 0.12 * t * (1 - u / 1.6)) : nud ? snap(nud * 1.2 * t) : 0;
         if (CINE) this.route = 0;   // (its staff, its cord, its cloth flat: thin things)
         box(sx - P, top, sx + 2 * P, r.y0, wood, 1, 0, 10, 0);   // the staff, three game px thick
@@ -6823,7 +6875,7 @@ Renderer.prototype.draw = function (g, alpha) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
     const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
-    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
+    gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); if (pb.u.uGlint) gl.uniform1f(pb.u.uGlint, r.b === g.hero && volOn(lv) ? 1 : 0); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
     if (!BOSS_FIT[r.b.look]) {   // the target always has a stencil (a boss its sheet's drawing: only that on its body, the body unseen)
       // Fill by winding number (as in Gum), so a crushed outline that turns back on
       // itself neither folds nor loses lobes.

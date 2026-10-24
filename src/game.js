@@ -2819,6 +2819,41 @@ Object.assign(CARD_MOTION, {
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
 const cardImg = (src, ms = 6000) => new Promise((ok) => { const i = new Image(), t = setTimeout(() => ok(null), ms); i.onload = () => { clearTimeout(t); ok(i); }; i.onerror = () => { clearTimeout(t); ok(null); }; i.src = src; });   // (given up after `ms`: a stalled request held the card for good; review)
+// Volume on the story cards, a try (owner, 2026-10-24: «На карточки тоже примерь»; as the sprites', VOL, the method Sprite Normals', MIT © 2026 Hugo Duprez): each
+// figure's normals (Mochi's, a boss's plane; the plate none: it went to grain) once from its shape (a low dome over the distance to its edge) and a little of its
+// lightness; a light from the top left that the tilt moves; its far side the darker half, its turn the darker half in a checker, a white glint. ?novol: none
+const CARD_VOL = !/[?&]novol\b/.test(location.search), CARD_LIT = { dome: 1.0, detail: 0.4, deep: -0.05, lo: 0.25, glint: 0.985, shade: 110 };
+function cardNormals(im, w, h) {
+  const t = document.createElement('canvas'); t.width = w; t.height = h; const g = t.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, w, h).data;
+  const n = w * h, ins = new Uint8Array(n), dist = new Float32Array(n), hgt = new Float32Array(n), out = new Float32Array(n * 3);
+  const lum = (q) => { const f = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return Math.cbrt(0.2126 * f(d[q * 4]) + 0.7152 * f(d[q * 4 + 1]) + 0.0722 * f(d[q * 4 + 2])); };   // (about Oklab's L)
+  for (let q = 0; q < n; q++) { ins[q] = d[q * 4 + 3] > 0 ? 1 : 0; dist[q] = ins[q] ? 1e4 : 0; }
+  for (let pass = 0; pass < 2; pass++) for (let k = 0; k < n; k++) {   // the distance to its edge (a chamfer, both ways)
+    const q = pass ? n - 1 - k : k, x = q % w, y = (q / w) | 0, s = pass ? 1 : -1; if (!ins[q]) continue;
+    for (const [dx, dy, c] of [[s, 0, 1], [0, s, 1], [s, s, 1.4], [-s, s, 1.4]]) { const X = x + dx, Y = y + dy, v = X < 0 || Y < 0 || X >= w || Y >= h ? 0 : dist[Y * w + X]; if (v + c < dist[q]) dist[q] = v + c; }
+  }
+  for (let q = 0; q < n; q++) if (ins[q]) hgt[q] = CARD_LIT.dome * 4 * Math.log(1 + Math.max(dist[q] - 0.5, 0) / 4) + CARD_LIT.detail * (lum(q) - 0.5);
+  const at = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : hgt[y * w + x]);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const q = y * w + x; if (!ins[q]) continue;
+    const gx = (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x - 1, y) - at(x - 1, y + 1)) / 8, gy = (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x, y - 1) - at(x + 1, y - 1)) / 8;
+    let nx = -gx * 1.5, ny = -gy * 1.5, nz = 1; const m = Math.hypot(nx, ny, nz); out[q * 3] = nx / m; out[q * 3 + 1] = ny / m; out[q * 3 + 2] = nz / m;
+  }
+  return { n: out, ins };
+}
+function cardLight(p, tx, ty) {   // a plane's light for this tilt (in steps of a tenth): its overlay drawn again only when the light moved
+  const qx = Math.round(tx * 10) / 10, qy = Math.round(ty * 10) / 10, key = 'L' + qx + ',' + qy; if (key === p.volKey) return key; p.volKey = key;
+  const w = p.vol.width, h = p.vol.height, g = p.vol.getContext('2d'), img = g.createImageData(w, h), o = img.data, N = p.nrm.n;
+  let lx = -0.52 - 0.5 * qx, ly = -0.7 - 0.5 * qy, lz = 0.49; const m = Math.hypot(lx, ly, lz); lx /= m; ly /= m; lz /= m;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const q = y * w + x; if (!p.nrm.ins[q]) continue;
+    const L = N[q * 3] * lx + N[q * 3 + 1] * ly + N[q * 3 + 2] * lz;
+    let c = -1;   // -1 nothing; 0 black; 255 white
+    if (L < CARD_LIT.deep) c = 0; else if (L < CARD_LIT.lo) c = (x + y) & 1 ? 0 : -1; else if (L > CARD_LIT.glint) c = 255;   // (its far side the darker half, its turn the darker half in a checker, its glint white: the game's own tones 16/14)
+    if (c < 0) continue; const i = q * 4; o[i] = o[i + 1] = o[i + 2] = c; o[i + 3] = c ? 230 : CARD_LIT.shade;
+  }
+  g.putImageData(img, 0, 0); return key;
+}
 function cardLive(c, card, tilt, clip, title, next) {
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
   const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
@@ -2847,6 +2882,7 @@ function cardLive(c, card, tilt, clip, title, next) {
         const t = document.createElement('canvas'); t.width = w; t.height = h; const tg = t.getContext('2d'); tg.drawImage(im, 0, 0); const d = tg.getImageData(0, 0, w, h).data;
         pl.mask = new Uint8Array(w * h); for (let q = 0; q < w * h; q++) pl.mask[q] = d[q * 4 + 3] > 0 ? 1 : 0;
       }
+      if (CARD_VOL && i > 0) { pl.nrm = cardNormals(im, w, h); pl.vol = document.createElement('canvas'); pl.vol.width = w; pl.vol.height = h; pl.volKey = ''; }   // (the try at volume, CARD_VOL)
       planes.push(pl);
       if (i === 0 && def && def.threads) { thread = document.createElement('canvas'); thread.className = 'spl'; clip.append(thread); }   // over the plate, under what it holds
     });
@@ -2865,9 +2901,9 @@ function cardLive(c, card, tilt, clip, title, next) {
   });
   const rgb = RAINBOW_INK.map((v) => v.map((q) => Math.round(q * 255)));
   function drawPlane(p, level, f, blink) {   // its picture, its live cells this step, through the coming-in's dither (only when either changed)
-    const key = level + ':' + (p.live.length ? f + (blink ? 'b' : '') : '');
+    const lk = p.nrm ? cardLight(p, st.tx, st.ty) : '', key = level + ':' + (p.live.length ? f + (blink ? 'b' : '') : '') + lk;
     if (key === p.key) return; p.key = key;
-    const g = p.g; g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, w, h); g.drawImage(p.im, 0, 0);
+    const g = p.g; g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, w, h); g.drawImage(p.im, 0, 0); if (p.nrm) g.drawImage(p.vol, 0, 0);   // (its light over it: CARD_VOL)
     const fill = (cells, col) => { g.fillStyle = col; for (const [x, y] of cells) g.fillRect(x, y, 1, 1); };
     p.live.forEach((e, i) => {
       if (e.kind === 'eye' && blink) {   // the eye white, a lid across it, its ends a cell up
@@ -4040,6 +4076,8 @@ function start() {
   layout();
   started = true;
   game.toMenu();
+  { const lm = location.search.match(/[?&]level=(\d+)-(\d+)/); if (lm) window.__up.camp((+lm[1] - 1) * 30 + (+lm[2] - 1) * 3 + 1); }   // straight into a campaign level, to try it (e.g. ?level=3-4)
+  if (/[?&]cards\b/.test(location.search)) { const ids = Object.keys(STORY), show = (k) => { if (k < ids.length) game.story(ids[k], () => show(k + 1), true); }; show(0); }   // every story card in turn, seen or not
   if (/[?&]play=crypt\b/.test(location.search)) window.__up.go(CRYPT.at[0], CRYPT.at[1]);   // the Crypt by itself, to look at
   if (/[?&]play=tokyo\b/.test(location.search)) { game.preview = TOKYO; window.__up.go(1, 0); }   // Tokyo by itself, to look at (a run in it)
   if (/[?&]play=blocks\b/.test(location.search)) { game.preview = BLOCKS; window.__up.go(2, 0); }   // the Tower Blocks by themselves

@@ -570,7 +570,7 @@ const DEPTH = { lit: 0.6, back: 0.25 }, DIM = 1 + DEPTH.back, LIT = 1 + DEPTH.li
 const RAINBOW_INK = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'].map((id) => PAL[id]);   // the one thing in all the inks at once
 const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
-  boss: { id: 'boss', base: PAL.purple, deep: PAL.black },
+  boss: { id: 'boss', base: PAL.blue, deep: PAL.black },   // (never the stash's purple: an ink one meaning, owner 2026-10-24 via Worlds, К6 «А»)
   goo: { id: 'goo', base: PAL.black, deep: PAL.gray },   // a skull's black goo (the user's picture)
   gray: { id: 'gray', base: PAL.gray, deep: PAL.black },   // the Dark Forest's enemies (black and white, their eyes lit)
 };
@@ -901,7 +901,7 @@ const BOSSES = {
     hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },
     how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dele e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },
   // The random run's summit: the Lid (the plan's last boss, its first look): goo from the start, then helpers, then twice the goo.
-  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
+  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, ink: 'blue', hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
     intro: [{ en: 'Nothing up there. I checked.', es: 'Arriba no hay nada. Lo comprobé.', pt: 'Lá em cima não tem nada. Eu vi.', ja: 'うえには なにも ないよ。' },
       { en: 'The sky? Just a story.', es: '¿El cielo? Solo un cuento.', pt: 'O céu? Só uma história.', ja: 'そら？ ただの おはなし。' },
       { en: 'Climb all you like. I stay shut.', es: 'Trepa cuanto quieras. Sigo cerrada.', pt: 'Suba o quanto quiser. Fico fechada.', ja: 'いくら のぼっても あかないよ。' }],
@@ -1365,7 +1365,7 @@ function portrait(design, ink, n = 16) {
   return rows;
 }
 for (const k in ENEMY) ICONS['foe_' + k] = portrait(ENEMY[k].design, 'r');
-for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', Object.keys(ICON_INK).find((c) => ICON_INK[c] === (BOSSES[k].ink || 'purple')));   // in its own ink
+for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', Object.keys(ICON_INK).find((c) => ICON_INK[c] === (BOSSES[k].ink || 'blue')));   // in its own ink
 // The bosses with a look (LOOKS) drawn by hand as their looks are, 16 pixels square (owner, 2026-10-20): its body, its parts, its face.
 ICONS.boss_probka = ['......gg........', '.....ggg........', '.bb...g.....bb..', '.bkb.bbbbb.bkb..', '..bbbbbbbbbbb...', '.bbbbbbbbbbbbb..', '.kkkkkbbbkkkkk..', '.kwwkkkkkkkwwk..', '.kwkkkkkkkkkwk..', '.bkkkbbkbbkkkb.b', '.bbbbbbbbbbbbbkb', '.bbbwwwwwwwbbbbk', '.bbwwwwwwwwwbbb.', '..bwwwwwwwwwb...', '...bbwwwwwbb....', '....bb...bb.....'];   // a Bake-danuki, its mask and leaf
 ICONS.boss_cart = ['................', '.....oooooo.....', '...oooooooooo...', 'o.oooooooooooo.o', '.ookoooooooooko.', '.oookkoooookkoo.', 'ooowwkoooookwwoo', 'o.wkkoooookkwo.o', '.o.oooooooooooo.', 'o..oooookoooo..o', '.o..ooowkwooo.o.', '.o..oooooooo..o.', 'o.o..oooooo..o.o', 'o..o........o..o', '.o..o......o..o.', '.o..........o...'];   // Tsuchigumo, eight legs

@@ -157,6 +157,11 @@ const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro:
 // on a wire of `crowP` of its beats (WIRE), flying off as the hero comes near (owner).
 // Laid by a generator of their own, so the shaft is laid as before; none in a bonus level.
 const FOLK = { cage: [0.3, 0.55], cageP: 0.75, trader: [0.6, 0.85], traderP: 0.5, critterP: 0.3, crowP: 0.5, coins: 8, flee: 3 };
+// Tokyo's crows dive (owner, 2026-10-24, Вр2 «Б»: «вороны Токио начинают бросаться, если стоять под ними»): a crow on screen with the hero under it (within `x`
+// R across, `y` R down) for `wait` s blinks red (2.5 times a second: the digest's three at most) `warn` s, then dives where the hero was at `speed` R/s, `r` R
+// of it hurting; past it, it flies off (gone from its wire: the task counts it, as a crow scared). Coming near it first scares it off, as before. From a
+// world's second level (Game.folkStep)
+const CROW = { x: 1.6, y: 9, wait: 0.9, warn: 0.7, speed: 11, r: 0.55, flight: 1.4 };
 // The lore's lines (the plan: under eight words, in turn): what one set free says, balls of your kind the sour ones
 // caught on their way up; and Aunt Moti's word at each sale, in her shop or on a ledge.
 const SAY = {
@@ -300,7 +305,7 @@ const kitThing = (lv, r) => {
     k = m === 2 ? -1 : m; opts = [[0, 'vending', () => base && w >= 3 * t && !door(vx - 0.15 * t, b - 2.4 * t, vx + 1.55 * t, b)],
       [1, 'bonsai', () => base && w >= 2 * t && !acNear && !door(cx - 0.9 * t, b - 1.7 * t, cx + 0.9 * t, b) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))]];
   } else if (th.fuji && r.plank) {   // Fuji's bell on one boardwalk in three, up on a pilgrim's staff at its free end by the hero standing there (d45 «Б», d52 E; the task)
-    if (!r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t && ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3)
+    if (!r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t && (r.kitWant === 'bell' || ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3))
       { k = 0; opts = [[0, 'bell', () => true, () => ({ x: wl ? r.x1 - 0.3 * t : r.x0 + 0.3 * t, y: r.y0 - 1.4 * t })]]; }
   } else if (th.fuji) {   // Fuji's things on its ledges' wall ends (the owner's letters d51-d61, FUJI_SPR): a tent (its snow rabbit by it), a snowman, a serow or a fox, the
     // pilgrims' stones, persimmons drying, a bare larch
@@ -309,6 +314,8 @@ const kitThing = (lv, r) => {
       [3, 'stelae', () => w >= 4.0 * t && room(0, 4.0, 3.6)], [4, 'persimmons', () => w >= 3.4 * t && room(0.3, 3.5, 4.3)], [5, 'larch', () => w >= 3.6 * t && room(0, 4.8, 4.9)]];
     if (!steady(2.4)) opts = null;
   }
+  const want = r.kitWant && opts && opts.find((q) => q[1] === r.kitWant && q[2]());   // one its level must have (kitAtLeast): there, its slot's hash aside
+  if (want) return (r.kit = Object.assign({ kind: want[1] }, want[3] ? want[3]() : {}));
   if (opts && k >= 0) {
     r.kit = null;   // (deciding it: what is under it is decided first and never asks back)
     const avoid = kitAvoid(lv, r, new Set(opts.map((q) => q[1])).size >= 4 ? 2 : 1), fits = (q) => q[2]() && !avoid.has(q[1]);
@@ -321,6 +328,17 @@ const kitThing = (lv, r) => {
     if (used.has(band)) out = null; else used.add(band);
   }
   return (r.kit = out);
+};
+// Every level of its world shows its task (owner, 2026-10-24, У5 «А»: «хотя бы один колокол и маяк на каждый уровень своего мира, первый тоже»): a level with
+// none gets one on its lowest ledge that would take it but for kitThing's hash (r.kitWant, as the Village's lantern a chunk asks for)
+const kitAtLeast = (lv, kind) => {
+  const got = (r) => { const k = kitThing(lv, r); return k && k.kind === kind && k.y > lv.capY && k.y < lv.floor; };
+  if (lv.rects.some(got)) return;
+  for (const r of lv.rects.filter((q) => !q.cap && q.y0 > lv.capY && q.y0 < lv.floor).sort((a, b) => b.y0 - a.y0)) {
+    const was = r.kit; r.kit = undefined; r.kitWant = kind;
+    if (got(r)) return;
+    r.kit = was; r.kitWant = undefined;
+  }
 };
 const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ CANDIES.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
@@ -817,19 +835,19 @@ const CAMPAIGN = [
 // the air conditioners come in from the fourth level (aircons: false before). Its runes: a lattice, a lantern, a lit window (the city's lights hid
 // the Moon, a friend helped find it: Mochi's story since fedc427; the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'The city\'s lights hid the Moon.\nA friend helped find it again.', es: 'Las luces de la ciudad ocultaron la Luna.\nUn amigo ayudó a encontrarla.', pt: 'As luzes da cidade esconderam a Lua.\nUm amigo ajudou a encontrá-la.', ja: 'まちの あかりが つきを かくした。\nともだちが また みつけて くれた。' }, levels: [
-  { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0.35, candy: [], safe: true, aircons: false, seed: 3111,
+  { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, aircons: false, seed: 3111,
     news: { en: 'neon signs light up as you pass', es: 'los neones se encienden al pasar', pt: 'os neons acendem quando você passa', ja: 'ネオンは ちかよると つく' } },
-  { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], aircons: false, seed: 2101,
-    news: { en: 'crows: come close to scare them', es: 'cuervos: acércate para espantarlos', pt: 'corvos: chegue perto para espantar', ja: 'カラス: ちかづくと にげる' } },
-  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler'], foes: 0.55, candy: [], aircons: false, seed: 5101,
+  { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler', 'shell'], foes: 0.6, candy: [], aircons: false, seed: 2101,
+    news: { en: 'crows: scare them, never wait under them', es: 'cuervos: espántalos, no esperes debajo', pt: 'corvos: espante, não espere embaixo', ja: 'カラス: おどかそう。したで またないで' } },
+  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,
     news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
-  { role: 'apply', len: 46, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
+  { role: 'apply', len: 40, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, crumble: 2 }, intro: ['crumble'], enemies: ['crawler', 'tofu', 'spitter', 'shell'], foes: 0.6, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
     },
-  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2, crumble: 1 }, intro: [], enemies: ['crawler', 'shell', 'spitter', 'tofu'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 5106 },
-  { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
+  { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler', 'tofu'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
     news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' }, tip: true },
-  { role: 'peak', len: 37, gate: 'gate3', fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2 }, intro: [], enemies: ['crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], crossing: true, seed: 5102,
+  { role: 'peak', len: 37, gate: 'gate3', fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2, crumble: 1 }, intro: [], enemies: ['crawler', 'climber', 'spitter', 'shell'], foes: 0.75, pair: 0.3, candy: ['smash'], crossing: true, seed: 5102,
     news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
   { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
     },
@@ -845,12 +863,12 @@ const CAMPAIGN = [
   { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], dark: true, enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
   { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
     news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' }, tip: true },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2, crumble: 2 }, intro: ['crumble'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
   { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
   { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
-  { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
+  { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
   { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends
 ] },
@@ -859,11 +877,11 @@ const CAMPAIGN = [
 { world: WORLDS[1], runes: 'gyI', lore: { en: 'From the summit the Moon looked near.\nA bell opened the first step.', es: 'Desde la cima la Luna parecía cerca.\nUna campana abrió el primer escalón.', pt: 'Do cume a Lua parecia perto.\nUm sino abriu o primeiro degrau.', ja: 'ちょうじょうから つきは ちかく みえた。\nかねが さいしょの だんを ひらいた。' }, levels: [
   { role: 'teach', len: 29, fire: 0.33, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, icewall: 3, iceblocks: 2, mosswall: 1 }, intro: ['icewall', 'iceblocks'], enemies: ['crawler'], foes: 0.35, candy: [], shop: 0.5, safe: true, seed: 4101,
     news: { en: "ice: you slide, walls don't hold", es: 'hielo: resbalas y las paredes no sujetan', pt: 'gelo: você desliza e as paredes não seguram', ja: 'こおり: すべるし かべに くっつけない' } },
-  { role: 'apply', len: 36, sides: [13004, 0], gate: 'gate', fire: 0.41, maxD: 2, chunks: { ...GLACIER, rubberwall: 1 }, intro: [], enemies: ['crawler'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 4108,
+  { role: 'apply', len: 36, sides: [13004, 0], gate: 'gate', fire: 0.41, maxD: 2, chunks: { ...GLACIER, rubberwall: 1 }, intro: ['crumble'], enemies: ['crawler'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 4108,
     news: { en: 'rainbow candy', es: 'caramelo arcoíris', pt: 'bala arco-íris', ja: 'にじの キャンディ' } },
   { role: 'teach', len: 32, fire: 0.4, maxD: 2, chunks: GLACIER, intro: [], enemies: ['shell', 'crawler'], foes: 0.55, candy: ['rainbow'], seed: 4105,
     news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' }, tip: true },
-  { role: 'apply', len: 40, gate: 'gate2', fire: 0.41, maxD: 2, chunks: GLACIER, intro: [], enemies: ['climber', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 4103,
+  { role: 'apply', len: 40, gate: 'gate2', fire: 0.41, maxD: 2, chunks: { ...GLACIER, crumble: 2 }, intro: [], enemies: ['climber', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 4103,
     news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' }, tip: true },
   { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'bonus', len: 36, bonus: 1, time: 40, seed: 4104 },
@@ -5075,7 +5093,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
-    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, PIX.keep, false);   // a game pixel a dot: about a tile and a half long
+    else if (f.kind === 'crow') spr(CRITTER[(f.dive ? 'crowDown' : f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly || f.dive ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y,
+      f.dive || (f.wait > CROW.wait && Math.floor((f.wait - CROW.wait) * 5) % 2 === 0) ? PAL.red : th.wall, PIX.keep, false);   // (red as it warns, blinking, and as it dives: CROW)   // a game pixel a dot: about a tile and a half long
     else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
       const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'rcrowUp' : 'rcrowDown') : f.t % 1.6 < 0.24 ? 'rcrowUp' : 'rcrow';
       spr(CRITTER[wing + L], f.x, f.y, th.wall, PIX.keep, false);

@@ -368,6 +368,12 @@ const VDROP_SPR = {   // village-drop E (owner, Д79 «E»: a pine cone), path A
 };
 const VSLICK_SPR = ['wkrkrkrrrrrrrrrrrrrwrrr', 'wrrrrrrrkrrrrrrrrrrwrrr', 'wrrkrkrkrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wkrkrkrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wkrkrkrkrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wkrrrkrkrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrkrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'kkrkrkrrrrrrrrrrrrrwrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrkrkrrrrrrrrrrrrrwrrr', 'krrrkrrrkrrrrrrrrrrwrrr', 'rkrkrkrkrrrkrkrkrrrrrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'rkrkrkrkrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrkrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrkrrrrrrrrrrrrrrrr', 'rrrkrkrrrrrrrrrrrrrwrrr', 'krrrkrrrkrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'krrrkrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrrrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrkrrrrrrrrrrrrrrrrrr', 'krrkrkrrrkrrrrrrrrrrrrk', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrrrkrrrrrrrrrrrrrwrrr', 'krkkkrkkkrkkkrrkrkkskkk', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkskkk', 'kkrkrkkrkkrkrrrrkrrwrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrkkkkkkkrkkkrkrkkkkkk', 'krrrrrrrrrrrrrrrrrrwrrr', 'kkrkrkrkrrrkrrrkrkkokrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrkrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrkrkrkrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrkrkrkrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrkrkrkrrrrrrrrrrrrrrr', 'rrrrkrrrrrrrrrrrrrrrrrr'];   // village-slick D (owner, Д80 «D»: a lacquered red pillar), path A off research/variants/village-slick-1-px.png: a strip of its
 // surface, laid over a slick rect at a sheet pixel a game pixel, tiled down and across
+// How each world's hazard from below moves (the object first: owner, 2026-10-24): kind (flame: tongues rising and sinking each at its own beat; wave: waves
+// travelling along; roll: billows rolling forward), amp (its front's stand in sheet pixels), rush (more as it speeds up, К2), len (its wavelength, sheet
+// pixels), speed (beats a second, or a tongue's rad a second)
+const HAZ_MOVE = { noyaki: { kind: 'flame', amp: 4, rush: 4, len: 9, speed: 5.2 }, cityfire: { kind: 'flame', amp: 4, rush: 4, len: 11, speed: 4.6 },
+  flood: { kind: 'wave', amp: 2.5, rush: 2.5, len: 42, speed: 0.3 }, tide: { kind: 'wave', amp: 3.5, rush: 3, len: 52, speed: 0.22 },
+  avalanche: { kind: 'roll', amp: 5, rush: 4, len: 34, speed: 0.28 } }, HAZ_LIFT = [];
 const HAZ_SPR = {   // cut from research/variants/<sheet>-1-px.png, path A (each cell's own pixels): band (from its top down the cell, wall to wall), front (the
   // row it covers most of), burst (what it throws up), foot (the burst's bottom in the band's rows); ICON_INK letters, '.' clear; the sheets' yellow orange here
   noyaki: {   // village-noyaki A (owner, Д67 «A»: a ragged front over the grass)
@@ -5469,7 +5475,8 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const IC = icicleSpr(th), sn2 = (v) => Math.round(v / PIX.size) * PIX.size;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
-    : IC ? (x, y, falling) => { const r = falling ? IC.fall : IC.hang; sprAt(r, sn2(x - (r[0].length * PIX.base) / 2), sn2(y), false, 1, PIX.base); }   // the world's own icicle off its sheet
+    : IC ? (x, y, falling, sw = 0) => { const r = falling ? IC.fall : IC.hang, x0 = sn2(x - (r[0].length * PIX.base) / 2), y0 = sn2(y);
+      if (!sw) sprAt(r, x0, y0, false, 1, PIX.base); else r.forEach((row, j) => sprAt([row], x0 + Math.round((sw * (j + 1)) / r.length) * PIX.base, y0 + j * PIX.base, false, 1, PIX.base)); }   // the world's own icicle off its sheet
     // (ICE_SPR), its root at y; a sheet pixel one game pixel, so it is as wide as what hurts (ICICLE.r; at 2x it was three times as big)
     : (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
   // Where an arena's (or an ambush's) wave waits (К8 «А», the Level Design Book: an ambush is fair when it can be seen first): the world's own thing just over
@@ -5478,16 +5485,24 @@ Renderer.prototype.draw = function (g, alpha) {
   const HO = HOLD_SPR[th.holder];
   if (HO) for (const a of lv.arenas || []) if (seen(a.y - (ARENA.drop + 12) * R, a.y)) {
     const shaking = a.warnAt >= 0 && !(a.dropAt >= a.warnAt) && !a.done, rows = shaking ? HO.shake : a.done || a.dropAt >= 0 ? HO.empty : HO.full, q = 2 * PIX.base;
-    const x = sn2(a.x - (rows[0].length * q) / 2 + (shaking ? Math.round(Math.sin(T * 40)) * q : 0)), y = sn2(a.y - (ARENA.drop + 1) * R - rows.length * q);
+    const x = sn2(a.x - (rows[0].length * q) / 2), y = sn2(a.y - (ARENA.drop + 1) * R - rows.length * q);
+    // It swings as a weight on a rope does, about its top (owner: «вся анимация подчиняется объекту… дисней и пиксар»): idly a pixel now and then; harder and
+    // faster as its wave is about to drop (anticipation); after, its swing dying away (follow-through). Each row shifted by its depth: a pendulum, not a shake
+    const gw = shaking ? clamp((lv.t - a.warnAt) / ARENA.warn, 0, 1) : 0, since = a.dropAt >= 0 ? lv.t - a.dropAt : 1e9;
+    const sw = shaking ? (1 + 2 * gw) * Math.sin(T * (6 + 5 * gw)) : since < 3 ? 3 * Math.exp(-1.6 * since) * Math.sin(since * 8) : 0.7 * Math.sin(T * 2.2 + a.x * 0.01);
+    const swing = (rs, j0, yy) => rs.forEach((r, j) => sprAt([r], x + Math.round((sw * (j0 + j + 1)) / rows.length) * q, yy + j * q));
     let n = 0; while (HOLD_ROPE[th.holder] && n < 8 && n < rows.length && rows[n].replace(/\./g, '').length <= 3) n++;   // (its top a rope: those rows on up, a row at a time,
     // to the ledge over it, or out of sight)
     let rope = n; while (n && rope < rows.length && rows[rope].replace(/\./g, '').length <= 3) rope++;   // (all its rope, as drawn)
     const cx = x + (rows[0].length * q) / 2, body = y + rope * q, over = lv.rects.reduce((m, r) => (!r.gone && r.x0 < cx && r.x1 > cx && r.y1 <= body && r.y1 > m ? r.y1 : m), top);
     if (n >= 4) for (let yy = y - q, j = n - 1; yy >= over; yy -= q, j = (j + n - 1) % n) sprAt([rows[j]], x, yy);
     const k0 = n && over > y ? Math.min(rope, Math.ceil((over - y) / q)) : 0;   // (a ledge over it cutting into its rope: the rope from the ledge down)
-    sprAt(k0 ? rows.slice(k0) : rows, x, y + k0 * q);
+    swing(k0 ? rows.slice(k0) : rows, k0, y + k0 * q);
   }
-  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5 * PIX.keep) * PIX.size : 0), c.y);
+  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) {   // shaking loose: it sways about its root, harder as it goes (a pine cone more, ice a little), then falls
+    const g = c.state === 'shake' ? 1 - clamp((c.t || 0) / ICICLE.shake, 0, 1) : 0, amp = th.ice === 'village' ? 3 : 1.5;
+    icicle(c.x, c.y, false, g ? amp * (0.4 + 0.6 * g) * Math.sin(T * (9 + 6 * g)) : 0);
+  }
   const xg = lv.crossing;
   if (xg && seen(xg.y0 - R, xg.y1 + R)) {   // a level crossing: rails along the band's foot, the lights by the walls, and the train
     box(lv.l, xg.y1 - 0.12 * R, lv.r, xg.y1, th.lip, 1, 0, 10, 0); box(lv.l, xg.y1 - 0.42 * R, lv.r, xg.y1 - 0.3 * R, th.lip, 0.6, 0, 10, 0);
@@ -5543,8 +5558,17 @@ Renderer.prototype.draw = function (g, alpha) {
       if (!WS.fit || WS.fit.n !== n) WS.fit = { n, A: fit(WS.asleep), Bu: fit(WS.burst) };
       const A = WS.fit.A, Bu = WS.fit.Bu;
       const cut = (rows, y, k) => (k % 2 ? rows.slice().reverse() : rows).slice(0, Math.min(rows.length, Math.ceil((fw.y1 - y) / s2)));   // (every other copy upside down: no repeat shows)
-      for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(A, y, k), at(A), snap(y), d < 0, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.55) : on ? 1 : 0.8, s2);
-      if (on) for (let y = fw.y0, k = 0; y < fw.y1; y += Bu.length * s2, k++) sprAt(cut(Bu, y, k), at(Bu) + d * (Math.floor(T * 12 + k) % 2) * s2, snap(y), d < 0, 1, s2);
+      // Its warning a glow swelling and ebbing twice a second (blinking past 3 a second is the digest's limit); its burst thrust out of the wall in 0.12 s (slow out)
+      // and drawn back into it at the end (slow in), the wall hiding what is in it; out, each stretch licks a pixel further now and then, each at its own beat
+      const wa = warn ? 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(T * 2 * Math.PI * 2 - Math.PI / 2)) : on ? 1 : 0.8;
+      for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(A, y, k), at(A), snap(y), d < 0, wa, s2);
+      if (on) {
+        const tin = u - FIREWALL.off, tout = FIREWALL.on - tin, ein = Math.min(1, tin / 0.12), eout = Math.min(1, tout / 0.12), e = Math.min(1 - (1 - ein) * (1 - ein), eout * eout), W0 = Bu[0].length;
+        for (let y = fw.y0, k = 0; y < fw.y1; y += Bu.length * s2, k++) {
+          const o = Math.max(0, Math.min(W0, Math.round((1 - e) * W0) + (e >= 1 && Math.sin(T * 7 + k * 1.9) > 0.55 ? 1 : 0))), rows = cut(Bu, y, k), cutR = o ? rows.map((r) => r.slice(o)) : rows;
+          if (o < W0) sprAt(cutR, d > 0 ? snap(wx) : snap(wx) - (W0 - o) * s2, snap(y), d < 0, 1, s2);
+        }
+      }
       continue;
     }
     box(snap(Math.min(wx, wx + d * 0.18 * t)), snap(fw.y0), snap(Math.max(wx, wx + d * 0.18 * t)), snap(fw.y1), INK.fire, warn || on ? 1 : 0.5, 0, 10, 0);   // its seam, smouldering red (seen
@@ -5653,7 +5677,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (s.icicle) { icicle(s.x, IC ? s.y + s.r - IC.fall.length * PIX.base : s.y - 0.3 * R, true); continue; }   // (the sheet's: its tip at the bottom of what hurts, its streaks over it)
     if (s.bone) { const an = T * 7 + s.x * 0.05, ca = Math.cos(an) * s.r, sa = Math.sin(an) * s.r; F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); line(s.x - ca, s.y - sa, s.x + ca, s.y + sa, INK.spike, 1, 2); for (const q of [-1, 1]) for (const p of [-1, 1]) disc(s.x + q * ca + p * 0.35 * sa, s.y + q * sa - p * 0.35 * ca, 0.32 * s.r, INK.spike, 1); continue; }   // Koschei's: a bone, spinning, red
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1);
-    if (s.fire && HB) { hazBlob(s.x, s.y, Math.floor(T * 6 + s.x * 0.01) % 2 === 1); continue; }   // (tumbling: turned over now and then)
+    if (s.fire && HB) { hazBlob(s.x, s.y, (s.vx || 0) < 0); continue; }   // (facing the way it flies: no flipping to and fro, the owner's «рваная»)
     disc(s.x, s.y, s.r, INK.spike, 1);
     if (s.fire) { if (th.hazard === 'avalanche') { disc(s.x, s.y, s.r * 0.8, PAL.white, 1); disc(s.x + s.r * 0.2, s.y + s.r * 0.2, s.r * 0.35, PAL.gray, 1); } else disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1); }   // (an avalanche's: a snowball in its red rim)
   }
@@ -5715,33 +5739,72 @@ Renderer.prototype.draw = function (g, alpha) {
       // down to the keys; its burst rising out of the front and falling back as the fire throws a jet
       const S = HAZ_SPR[th.hazard], P = PIX.size, s = 2 * PIX.base, sn = (x) => Math.round(x / P) * P;
       if (!S.body) { const n = {}; for (const r of S.band.slice(-8)) for (const ch of r) if (ch !== '.' && ch !== 'k') n[ch] = (n[ch] || 0) + 1; S.body = Object.keys(n).sort((a, b) => n[b] - n[a])[0] || 'k'; }   // its ground's own ink
-      const band = S.band, bw = band[0].length * s, y0 = sn(fy + 0.3 * R - S.front * s), yf = y0 + S.front * s, fl = (Math.floor(T * 8) % 2) * s;
-      const E = Math.round((lv.fire.rush || 0) * 0.6 * S.front), FR = S.front + E;   // (its front's rows, E more as it speeds up)
-      const row = (r, x0, y, flip, k) => {   // a row's runs of one ink ('.' clear; 'k' left to the black under the front unless k)
-        for (let i = 0; i < r.length;) { const ch = r[i]; let e = i + 1; while (r[e] === ch) e++;
-          if (ch !== '.' && (k || ch !== 'k')) { const a = flip ? x0 + (r.length - e) * s : x0 + i * s, c0 = Math.max(a, lv.l), c1 = Math.min(a + (e - i) * s, lv.r); if (c1 > c0) box(c0, y, c1, y + s, PAL[ICON_INK[ch]], 1, 0, 10, 0); }
+      // How it moves is how its thing moves (owner, 2026-10-24: «вся анимация подчиняется объекту, а базово правилам дисней и пиксар»; «опасность некрасиво сверху
+      // обрезается, анимация рваная»). Its sheet's band is laid along the shaft without mirroring (that made a Rorschach of it), each copy over the next by
+      // D sheet pixels in a checker, so no seam shows; it drifts with the wind. Its front (the rows over S.front) stands up column by column (lift, whole sheet
+      // pixels, its gap filled with its body's ink): fire in tongues that rise and sink each at its own beat, water in waves travelling along, snow billowing
+      // forward; higher as it speeds up (К2: lv.fire.rush). So its top is never a straight line. Its bursts: the front swells where one is coming
+      // (anticipation), it is thrown up out of it in an arc (slow at the top: gravity), falls back in, and the front dips where it lands
+      const band = S.band, n = band[0].length, D = 6, st = n - D, y0 = sn(fy + 0.3 * R - S.front * s), yf = y0 + S.front * s, rush = lv.fire.rush || 0;
+      const mv = HAZ_MOVE[th.hazard] || HAZ_MOVE.noyaki, Amp = mv.amp + mv.rush * rush, TAUv = 2 * Math.PI;
+      const drift = T * 0.25 * R, start = sn(lv.l - D * s - (((drift % (st * s)) + st * s) % (st * s))), cols = Math.ceil((lv.r - start) / s) + 1;
+      const jets = [];   // (its bursts now: where, and how far into their throw)
+      for (let k = 0; k < 3; k++) {
+        const cyc = T * 0.45 + k / 3, tt = (cyc % 1) / 0.45;   // (seconds into its turn of 2.2)
+        if (tt > 1.3) continue;
+        const xc = sn(lv.l + (0.2 + 0.6 * steady(Math.floor(cyc), k + 7)) * W);
+        jets.push({ xc, tt });
+      }
+      const L = HAZ_LIFT.length >= cols ? HAZ_LIFT : (HAZ_LIFT.length = cols, HAZ_LIFT);
+      for (let g = 0; g < cols; g++) {
+        const X = start + g * s, u = X / s;
+        let h;
+        if (mv.kind === 'wave') h = 0.5 + 0.5 * (0.65 * Math.sin(TAUv * (u / mv.len - T * mv.speed)) + 0.35 * Math.sin(TAUv * (u / (0.57 * mv.len) + T * 0.6 * mv.speed) + 1.3));
+        else if (mv.kind === 'roll') { const b = 0.5 + 0.5 * Math.sin(TAUv * (u / mv.len - T * mv.speed)); h = b * b * (0.75 + 0.25 * Math.sin(TAUv * (u / (2.1 * mv.len) + T * 0.4 * mv.speed))); }
+        else h = (0.5 + 0.5 * Math.sin(T * mv.speed + u * 0.37 + 2 * Math.sin(u * 0.071))) * (0.55 + 0.45 * Math.sin(u / mv.len + T * 0.8));   // (a tongue's own beat)
+        let lf = Amp * h;
+        for (const j of jets) {   // the swell before a burst, the dip where it lands
+          const dx = (X - j.xc) / (6 * s), gs = Math.exp(-dx * dx);
+          if (j.tt < 0.25) lf += 0.6 * Amp * gs * (j.tt / 0.25) * (2 - j.tt / 0.25);   // (slow out)
+          else if (j.tt > 1.1) lf -= Amp * gs * Math.sin(((j.tt - 1.1) / 0.2) * Math.PI);
+        }
+        L[g] = Math.max(0, Math.round(lf));
+      }
+      const KT = 12;   // (the body's first KT rows lifted less and less under it: no straight line where the front meets the body)
+      const put = (ch, g0, g1, y, lift) => {   // a run of one ink over global sheet columns g0…g1 at row y (lift: 1 its front's, each column lifted its own; less, a share)
+        if (!lift) { const a = Math.max(start + g0 * s, lv.l), b = Math.min(start + g1 * s, lv.r); if (b > a) box(a, y, b, y + s, PAL[ICON_INK[ch]], 1, 0, 10, 0); return; }
+        for (let g = g0; g < g1;) { const l = Math.round(L[g] * lift); let e = g + 1; while (e < g1 && Math.round(L[e] * lift) === l) e++;
+          const a = Math.max(start + g * s, lv.l), b = Math.min(start + e * s, lv.r); if (b > a) box(a, y - l * s, b, y - l * s + s, PAL[ICON_INK[ch]], 1, 0, 10, 0); g = e; }
+      };
+      const row = (r, k, y, j, lift, keepK) => {   // copy k's row j: its runs, its first and last D columns a checker (the cross-fade with its neighbours)
+        const g0 = k * st;
+        for (let i = 0; i < n;) { const ch = r[i]; let e = i + 1; while (e < n && r[e] === ch) e++;
+          if (ch !== '.' && (keepK || ch !== 'k')) {
+            const m0 = Math.max(i, D), m1 = Math.min(e, st);
+            if (m1 > m0) put(ch, g0 + m0, g0 + m1, y, lift);
+            for (let q = i; q < Math.min(e, D); q++) if ((g0 + q + j) % 2 === 1) put(ch, g0 + q, g0 + q + 1, y, lift);
+            for (let q = Math.max(i, st); q < e; q++) if ((g0 + q + j) % 2 === 0) put(ch, g0 + q, g0 + q + 1, y, lift);
+          }
           i = e; }
       };
+      for (const j of jets) if (j.tt >= 0.25 && j.tt <= 1.15) {   // a burst thrown up in an arc out of the front (behind it: the front and its black come over it)
+        const b = S.burst, p = (j.tt - 0.25) / 0.9, hgt = (b.length + 6) * s * 4 * p * (1 - p), x = sn(j.xc - (b[0].length * s) / 2), yb = y0 + S.foot * s + b.length * s;
+        sprAt(b, x, sn(yb - hgt) - b.length * s, false, 1, s);
+      }
       box(lv.l, yf, lv.r, fy + H + 200, PAL.black, 1, 0, 10, 0);   // black under its front
-      const drift = T * 0.25 * R, start = sn(lv.l - (((drift % (2 * bw)) + 2 * bw) % (2 * bw)));
-      for (let k = 0, x = start; x < lv.r; k++, x += bw) {
-        if (x + bw <= lv.l) continue;
-        for (let i = 0; i < FR; i++) { const y = y0 - E * s + i * s; if (y < bot && y + s > top) row(band[Math.floor((i * S.front) / FR)], x + (k % 2 ? -fl : fl), y, k % 2 === 1, true); }   // its front, taller
-        // as it speeds up (К2 «А»: lv.fire.rush; whole sheet rows, stretched as the nearest row, so it stays pixel for pixel)
-        band.forEach((r, j) => { const y = y0 + j * s; if (j >= S.front && y < bot && y + s > top) row(r, x, y, k % 2 === 1, false); });
+      for (let g = 0; g < cols;) { const l = L[g]; let e = g + 1; while (e < cols && L[e] === l) e++;   // under a lifted front, its body's ink
+        if (l > 0) { const a = Math.max(start + g * s, lv.l), b = Math.min(start + e * s, lv.r); if (b > a) box(a, yf - l * s, b, yf + KT * s, PAL[ICON_INK[S.body]], 1, 0, 10, 0); }
+        g = e; }
+      for (let k = 0, x = start; x < lv.r; k++, x += st * s) {
+        if (x + n * s <= lv.l) continue;
+        band.forEach((r, j) => { const y = y0 + j * s; if (y - Amp * 2 * s < bot && y + s > top) row(r, k, y, j, j < S.front ? 1 : j < S.front + KT ? 1 - (j - S.front + 1) / (KT + 1) : 0, j < S.front); });
         for (let y = y0 + band.length * s, j = 0; y < bot && j < 2 * band.length; y += s, j++) {   // its ground on down, its embers thinning out into the black
           if (y + s <= top) continue;
-          const G = (S.ground || (S.ground = []))[k] || (S.ground[k] = []);   // (its rows the same every frame: made once, not a string a row a frame)
-          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), k + 50) * q.length), keep = 1 - j / (2 * band.length);
+          const G = (S.ground || (S.ground = []))[k % 2] || (S.ground[k % 2] = []);   // (its rows the same every frame: made once)
+          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), (k % 2) + 50) * q.length), keep = 1 - j / (2 * band.length);
             G[j] = [...q.slice(o) + q.slice(0, o)].map((ch, i) => (ch === S.body && steady(i, j + 60) < keep ? ch : 'k')).join(''); }   // (its body's ink only: no crystal or sign repeated)
-          row(G[j], x, y, k % 2 === 1, false);
+          row(G[j], k, y, band.length + j, false, false);
         }
-      }
-      for (let k = 0; k < 3; k++) {   // its bursts up the shaft now and then (where the fire threw its jets), out of its front and back
-        const u = (T * 0.45 + k / 3) % 1;
-        if (u > 0.16) continue;
-        const b = S.burst, n = Math.ceil(b.length * Math.sin((u / 0.16) * Math.PI)), x = sn(lv.l + (0.2 + 0.6 * steady(Math.floor(T * 0.45 + k / 3), k + 7)) * W - (b[0].length * s) / 2), yb = y0 + S.foot * s;
-        for (let j = b.length - n; j < b.length; j++) row(b[j], x, yb - (b.length - j) * s, false, true);
       }
     } else {
       box(lv.l, fy, lv.r, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
@@ -5772,10 +5835,11 @@ Renderer.prototype.draw = function (g, alpha) {
       }
     }
     const w = lv.fire.warn;
-    if (w && HB) { const u = 1 - w.t / FIRE.warn; if (Math.floor(T * 10) % 2 === 0) hazBlob(w.x, fy + 0.3 * R - u * 1.2 * R, false); }   // where a blob is coming: it peeks out of the front, blinking
+    if (w && HB) { const u = 1 - w.t / FIRE.warn, e = u * u * (3 - 2 * u); hazBlob(w.x, fy + 0.6 * R - e * 1.2 * R, false); }   // where a blob is coming: it rises out of the front,
+    // slow in and slow out, and is thrown from there (no blinking)
     else if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, th.hazard === 'avalanche' ? (u > 0.5 ? INK.spike : PAL.white) : u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
   }
-  if (lv.fire && lv.fire.rush > 0) {   // the fire speeding up out of sight (К2 «А»: «красноватый край снизу»): the screen's bottom edge red, in four steps fading up
+  if (lv.fire && lv.fire.rush > 0 && lv.fire.y > cam + H) {   // the fire speeding up out of sight (in sight its front stands higher: no red band over it) (К2 «А»: «красноватый край снизу»): the screen's bottom edge red, in four steps fading up
     // to over the keys, pulsing; not over the fire (in sight, its taller front says it)
     const P = PIX.size, yb = cam + H, hh = (view.keep || 0) + 1.6 * R, a = lv.fire.rush * (0.8 + 0.2 * Math.sin(T * 7)), y1 = Math.min(yb, lv.fire.y), at = (k) => Math.round((yb - (k / 4) * hh) / P) * P;
     for (let k = 4; k >= 1; k--) { const y0 = at(k), y2 = Math.min(y1, at(k - 1)); if (y2 > y0) box(lv.l, y0, lv.r, y2, INK.spike, a * (0.75 - 0.15 * k), 0, 10, 0); }   // (each step its own, denser down: the dither's dots don't add up)

@@ -4749,7 +4749,9 @@ Renderer.prototype.draw = function (g, alpha) {
       vsp(A.rows, ax0, ay0, d < 0, lit ? 1 : DIM, q);
       if (!lit) continue;
       const B = gaiSpr('lighton'), m = B.rows[0].length, ch = s.ink === PAL.aqua ? 'c' : s.ink === PAL.blue ? 'b' : s.ink === PAL.white ? 'w' : 'p';
-      if (!B.face) { const cnt = {}; for (const r of B.rows) for (const c of r) if ('wpcb'.includes(c)) cnt[c] = (cnt[c] || 0) + 1; B.face = Object.keys(cnt).sort((u, v) => cnt[v] - cnt[u])[0] || 'w'; B.sw = {}; }
+      if (!B.face) { const cnt = {}; B.rows.forEach((r, j) => { if (Math.abs(j - B.cy) <= 6) [...r].forEach((c, i) => { if (Math.abs(i - B.cx) <= 4 && 'wpcb'.includes(c)) cnt[c] = (cnt[c] || 0) + 1; }); });   // (its face: the
+        // ink most of its middle is)
+        B.face = Object.keys(cnt).sort((u, v) => cnt[v] - cnt[u])[0] || 'w'; B.sw = {}; }
       const swp = (c) => c === B.face ? ch : c === ch ? B.face : c === B.face.toUpperCase() ? ch.toUpperCase() : c === ch.toUpperCase() ? B.face.toUpperCase() : c;
       const rows = B.sw[ch] || (B.sw[ch] = B.rows.map((r) => [...r].map(swp).join('')));   // (once a take and an ink)
       F(bcx, cy, 1.5 * t, 0, 0, 1.6 * t, s.ink, 1.3, 1);   // its glow

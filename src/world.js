@@ -626,7 +626,7 @@ const TRAMRUN = { warn: 0.8, again: 0.45, rush: [16, 18, 20, 22], stop: 1.5, clo
 // streaks across the sky. Feathers: a flick `fwarn` s, then `fn` feathers fanned at the hero, fast. Its swoop: a screech, red, `swarn` s
 // (it stops following the hero its last `lock` s), then a dive along a straight line through where the hero was, into the floor, where
 // its beak sticks `stuck` s, the only time a stomp hurts it. Its last heart swoops twice. Six hearts. Still its first `calm` s.
-const TENGU = { high: 12, sway: 0.2, rest: [1.4, 1.3, 1.2, 1.1], fan: 0.7, gust: 2.0, push: 9, fwarn: 0.6, fn: [2, 2, 3, 3], swarn: 0.7, lock: 0.4, speed: 30, stuck: 1.8, reel: 0.7, twice: 3, calm: 2.5 };
+const TENGU = { high: 12, sway: 0.2, rest: [1.4, 1.3, 1.2, 1.1], fan: 0.7, gust: 2.0, push: 9, fwarn: 0.7, fn: [2, 2, 2, 3], swarn: 0.7, lock: 0.4, speed: 30, stuck: 1.8, reel: 0.7, twice: 3, calm: 2.5 };
 // Koschei (BOSSES.koschei, the Dark Forest's, world 8, the last and the hardest; owner 2026-10-24): he walks his arena's floor in his cloak,
 // keeping `keep` R off the hero, his moves taking turns. Bones: an arm raised, red, `twarn` s, then `bones` thrown in arcs at the hero.
 // His sword: raised, red, a scrape, `swarn` s, then a low sweep along the floor in front of him, `reach` R past his drawing, `sweep` s

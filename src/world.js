@@ -634,6 +634,13 @@ const TRAMRUN = { warn: 0.8, again: 0.45, rush: [16, 18, 20, 22], stop: 1.5, clo
 // (it stops following the hero its last `lock` s), then a dive along a straight line through where the hero was, into the floor, where
 // its beak sticks `stuck` s, the only time a stomp hurts it. Its last heart swoops twice. Six hearts. Still its first `calm` s.
 const TENGU = { high: 12, sway: 0.2, rest: [1.4, 1.3, 1.2, 1.1], fan: 0.7, gust: 2.0, push: 9, fwarn: 0.6, fn: [2, 2, 3, 3], swarn: 0.7, lock: 0.4, speed: 30, stuck: 1.8, reel: 0.7, twice: 3, calm: 2.5 };
+// Koschei (BOSSES.koschei, the Dark Forest's, world 8, the last and the hardest; owner 2026-10-24): he walks his arena's floor in his cloak,
+// keeping `keep` R off the hero, his moves taking turns. Bones: an arm raised, red, `twarn` s, then `bones` thrown in arcs at the hero.
+// His sword: raised, red, a scrape, `swarn` s, then a low sweep along the floor in front of him, `reach` R past his drawing, `sweep` s
+// (jump it); after it he is off balance `stagger` s, the only time a stomp hurts him. A stomp breaks him into a heap of bones that rattles
+// and flies together again `heap` s later. From phase `skulls` he calls the forest's skulls; on his last heart (the needle over his crown)
+// he sweeps twice. Six hearts. Still his first `calm` s.
+const KOSCH = { keep: 3.5, walk: 2.4, rest: [1.4, 1.3, 1.2, 1.1], twarn: 0.6, bones: [2, 2, 3, 3], swarn: 0.6, reach: 3, sweep: 0.3, stagger: 1.4, heap: 1.6, again: 0.4, skulls: 2, twice: 3, calm: 2.5 };
 // The Tsuchigumo (BOSSES.cart, the Cave's; owner 2026-10-23: «Очень легкий босс… Зачем вагонетки внизу не понятно», the fight redone
 // to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
 // the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
@@ -1049,13 +1056,16 @@ const BOSSES = {
   // The Dark Forest's (owner, 2026-10-21: boss-koschei A, the bony king with his sword; «Бой b»): Koschei the Deathless on the Lid's dive. Lying
   // dazed he is a heap of bones, and rising his bones fly together again, with a rattle first (bones); he drops bones and calls the forest's
   // skulls (minion); on his last heart the needle his death is in shows over his crown, and the last blow snaps it (needle).
-  koschei: { name: { en: 'Koschei', es: 'Koschéi', pt: 'Koschei', ja: 'コシチェイ' }, ink: 'gray', hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3), bones: true, needle: true, minion: 'skull',
+  koschei: { name: { en: 'Koschei', es: 'Koschéi', pt: 'Koschei', ja: 'コシチェイ' }, ink: 'gray', bone: KOSCH, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3), bones: true, needle: true, minion: 'skull',
     intro: [{ en: 'My death is far from here.', es: 'Mi muerte está lejos de aquí.', pt: 'Minha morte está longe daqui.', ja: 'わしの しは とおくに ある。' },
       { en: 'Kill me? Find my needle first.', es: '¿Matarme? Primero busca mi aguja.', pt: 'Me matar? Ache minha agulha primeiro.', ja: 'わしを たおす？ まず はりを さがせ。' },
       { en: 'Roll away, little bun.', es: 'Rueda lejos, panecillo.', pt: 'Role pra longe, pãozinho.', ja: 'ころがって にげな、パンぼうや。' }],
     quip: [{ en: 'Deathless. And you?', es: 'Inmortal. ¿Y tú?', pt: 'Imortal. E você?', ja: 'わしは しなぬ。おまえは？' },
       { en: 'Bones remember. Bones return.', es: 'Los huesos recuerdan. Y vuelven.', pt: 'Os ossos lembram. E voltam.', ja: 'ほねは おぼえてる。ほねは もどる。' }],
-    defeat: { en: '…The needle… broke.', es: '…La aguja… se rompió.', pt: '…A agulha… quebrou.', ja: '…はりが… おれた。' } },
+    defeat: { en: '…The needle… broke.', es: '…La aguja… se rompió.', pt: '…A agulha… quebrou.', ja: '…はりが… おれた。' },
+    top: { en: 'Not now. Wait till he swings!', es: '¡Ahora no! Espera a que dé el tajo.', pt: 'Agora não! Espere ele golpear.', ja: 'いまは だめ。ふりおろすまで まて！' },   // the first stomp that clangs off him
+    hint: { en: 'Off balance! Stomp him!', es: '¡Desequilibrado! ¡Písalo!', pt: 'Desequilibrado! Pise nele!', ja: 'よろけた！ ふみつけろ！' },   // the first time he staggers
+    how: { en: 'Jump his sword, then stomp him', es: 'Salta su espada y písalo', pt: 'Pule a espada e pise nele', ja: 'けんを とんで、ふみつけろ' } },   // after three losses
 };
 // The bosses' looks (owner, 2026-10-20: each boss a yokai of its world, picked from tools/variants.py's sheets boss-<id>, A to F, as the
 // game's code draws them): its body's design (and size, where its drawing is in whole game pixels on it: BOSS_FIT); the renderer draws the rest round it (look) and on
@@ -1190,7 +1200,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...FOREST, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], dark: true, enemies: ['leshy', 'kikimora', 'skull', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7107 },
   { role: 'rest', len: 22, fire: 0.3, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
-  { role: 'boss', boss: 'koschei', dark: true },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
+  { role: 'boss', boss: 'koschei', dark: true, par: 70 },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
 ] },
 // World 1, the Village (the Mine's world until 4084599; at first world 3): how to climb, crumbling blocks, spitters, the pit's waves and a fat
 // spitter, a peak, the bonus, moving planks, a peak, Moti's shop; the Cork's dive. Its runes the story's first (since 2026-10-21, when the old
@@ -4653,9 +4663,9 @@ Renderer.prototype.draw = function (g, alpha) {
         let x0 = u, y0 = v; for (let i = 1; i <= 4; i++) { const x1 = u + 0.15 * s * Math.sin(i * 1.7 + n), y1 = v + (h * i) / 4; fl(x0, y0, x1, y1, G, DIM, Math.max(1, 4 - i)); x0 = x1; y0 = y1; }
         for (const [q, du, dv] of [[0.4, -1.1, 0.6], [0.55, 1.0, 0.75], [0.75, -0.7, 0.55], [0.9, 0.6, 0.6]]) { const bu = u + 0.15 * s * Math.sin(q * 4 * 1.7 + n), bv = v + h * q;
           fl(bu, bv, bu + du * s, bv + dv * s, G, DIM, 2); fl(bu + du * s, bv + dv * s, bu + du * s * 1.35, bv + dv * s * 1.1, G, DIM, 1); fl(bu + du * s, bv + dv * s, bu + du * s * 1.1, bv + dv * s * 1.6, G, DIM, 1); } };
-      const mu = ar ? -3.8 : 3.8, mv = ar ? (lv.floor - cam - 0.24 * H) / t : 5.0;   // (in the arena high on the left, over the planks)
+      const mu = ar ? -3.8 : 3.8, mv = ar ? (lv.floor - cam - 0.13 * H) / t : 5.0, mr = ar ? 1.0 : 1.5;   // (in the arena high on the left, small and up under the HUD: off the fight, owner 2026-10-23 «убери лишние визуальные элементы»)
       if (ar) skOak(U, Vv);   // Koschei's oak, under the moon on the left of his arena
-      fe(mu, mv, 1.5, 1.5, G, LIT); vlamps.push([U(mu), Vv(mv), 1.5 * 1.05, 1.5 * 1.6]);   // the moon, a light in the dark
+      fe(mu, mv, mr, mr, G, LIT); vlamps.push([U(mu), Vv(mv), mr * 1.05, mr * 1.6]);   // the moon, a light in the dark
       row(-7.4, -3.0, 1.2, 0.3, [3.0, 3.8, 3.2]); dead(5.8, 0.3, 4.8, 1.0, 6); fe(5.9, 2.8, 0.32, 0.42, K, 1);   // a dead tree, a hollow in it,
       for (const e of [-0.12, 0.12]) fb(5.9 + e, 2.85, 5.9 + e + 2 * px, 2.85 + 2 * px, PAL.orange, LIT); vlamps.push([U(5.9), Vv(2.85), 0.15, 0.45]);   // eyes glowing in it
       row(-1.6, 4.2, 1.15, 0.3, [2.8, 3.6, 3.0, 3.8]);
@@ -5764,10 +5774,14 @@ Renderer.prototype.draw = function (g, alpha) {
   // round it, behind it, only what its setting hangs it on: the tram's wire, the spider's thread, the crane's cable and hook.
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
-    const d = df.rail || df.slide || df.glide || df.quake || df.street ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    const d = df.rail || df.slide || df.glide || df.quake || df.street || df.bone ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
     if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
       const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
       F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);
+    }
+    if (front && df.bone && bs.state === 'sweep') {   // Koschei's sweep (KOSCH): his blade's white arc low along the floor in front of him
+      const [sw] = bossSize(bs), x0 = x + d * 0.3 * sw, x1 = x + d * (0.5 * sw + df.bone.reach * R), y = lv.floor - 0.5 * R, u = Math.min(1, bs.st / df.bone.sweep);
+      line(x0, y - 1.0 * R, x0 + (x1 - x0) * u, y - 0.1 * R, PAL.white, 1, 3); line(x0, y - 0.55 * R, x0 + (x1 - x0) * u, y + 0.25 * R, PAL.white, 0.8, 2); line(x0, y - 0.2 * R, x0 + (x1 - x0) * u * 0.85, y + 0.4 * R, PAL.gray, 1, 1);
     }
     if (front) {   // the Tsuchigumo tangled in its own thread (SPIDER): loops of it across its drawing while a stomp hurts it
       if (k === 'cart' && bs.state === 'dazed') { const [w, h] = bossSize(bs), y = b.maxY - 0.55 * h; for (let i = -1; i <= 1; i++) line(x - 0.42 * w, y + i * 0.16 * h - 0.1 * h, x + 0.42 * w, y + i * 0.16 * h + 0.1 * h, PAL.white, 0.85, 1); }

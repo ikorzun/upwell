@@ -167,6 +167,7 @@ function score(base, st) {
 //   slide (the Puck, the Rat King): a rolling shell is a flip to come (it slides into its own shells: Game.rolling); behind a
 //     shell from it, to stomp it its way; at it while it lies belly up.
 //   ride (the Tram, the Minecart): up, as high as over it (open from above only), then over it.
+//   bone (Koschei): off the floor in front of him as he sweeps; at him while he is off balance.
 //   sky (the Karasu-tengu): off the line of its swoop; at it while its beak is stuck in the floor.
 //   street (the Tram): up off the floor while it rings and runs; at its roof while it stands at a stop.
 //   quake (Onamazu): up off the floor when it rears (its waves), off its leap's way; at it while it lies flopped.
@@ -185,6 +186,10 @@ function bossScore(base) {
       const sh = lv.enemies.filter((e) => e.type === 'shell' && e.state !== 'shell').sort((p, q) => Math.abs(p.body.cx - H.cx) - Math.abs(q.body.cx - H.cx))[0];
       if (sh) s -= (Math.abs(H.cx - (sh.body.cx - Math.sign(b.cx - sh.body.cx) * (sh.body.R + H.R))) / T) * 150;
     }
+  } else if (d.bone) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at him, best over him, while he is off balance
+    else if (bs.state === 'warn' || bs.state === 'sweep') s += Math.min(h, 4) * 300 - (Math.sign(H.cx - b.cx) === bs.dir && dx < 5 && h < 1.5 ? 3000 : 0);   // up off the floor in front of him
+    else s -= Math.abs(dx - 3) * 60;
   } else if (d.sky) {
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while its beak is stuck
     else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - bs.tx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // off its swoop's line

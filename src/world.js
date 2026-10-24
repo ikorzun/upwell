@@ -4531,7 +4531,7 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const [u0, v0, u1, v1] of [[0.8, 1.6, 0.95, 1.1], [0.95, 1.1, 0.85, 0.7], [1.6, 1.9, 1.5, 1.35], [1.5, 1.35, 1.65, 0.9], [1.2, 0.5, 1.3, 0.1]]) ln(u0, v0, u1, v1, c, 1);   // its cracks, glowing purple
     bx(1.1, 0.8, 1.4, 1.15, G); bx(1.22, 0.86, 1.28, 1.05, K);   // its lock, its keyhole
     F(X(1.25), Y(dh + 0.42), 0.26 * t, 0, 0, 0.24 * t, G, 1, 0); F(X(1.25), Y(dh + 0.42), 0.15 * t, 0, 0, 0.13 * t, K, 1, 4);   // a keystone with its mark
-    mnLamp(X(2.7), Y(2.2), true, 0.85);   // a lamp
+    mnDish(X(2.7), Y(2.2), 0.85);   // an oil dish
     skInside(d, 'stash', c, dx, dw, dh);
   };
   const pech = (d) => {   // a crooked Russian stove (the stash, E), tall and lumpy and cracked, its mouth the door, its chimney bent, a bench step off it with a shelf over it
@@ -4701,13 +4701,19 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const v of [0.55, 0.69]) bx(-0.14, v, 0.14, v + 0.03, G);   // the bars across it
     if (lit) bx(-0.04, 0.54, 0.04, 0.68, PAL.yellow);   // its flame
   };
+  const mnDish = (x, y, s = 1) => {   // an Edo miner's oil dish lit, on a peg from (x, y) (Д117 «А»: no caged lamp in Iwami's mine), its glow a light of the dark
+    const t = kitT, U = (u) => snap(x + u * s * t), V = (v) => snap(y + v * s * t), bx = (u0, v0, u1, v1, c, a = 1) => box(U(u0), V(v0), U(u1), V(v1), c, a, 0, 10, 0);
+    F(U(0), V(0.55), 0.8 * s * t, 0, 0, 0.8 * s * t, PAL.orange, 0.3 + 0.06 * Math.sin(T * 5 + x * 0.1), 1); vlamps.push([U(0), V(0.55), 0.6 * s, 1.8 * s]);
+    bx(-0.03, 0, 0.03, 0.62, PAL.gray); bx(-0.22, 0.62, 0.22, 0.72, PAL.gray); bx(-0.15, 0.72, 0.15, 0.78, PAL.gray);   // its peg, its dish
+    bx(-0.06, 0.38, 0.06, 0.62, PAL.orange); bx(-0.03, 0.46, 0.03, 0.6, PAL.yellow);   // its flame
+  };
   const mnOre = (wx, b, d, n) => {   // a vein of silver ore in the wall over a ledge, behind (DIM): a timber frame's corner, a lamp hung off it, a little ore glinting
     const t = kitT, P = kitP, G = PAL.gray, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
     const bx = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const glint = (u, v, i) => { const on = Math.sin(T * 2.2 + i * 2.1 + n) > 0.45, x = X(u), y = Y(v); box(x - P, y, x + 2 * P, y + P, PAL.white, on ? 1 : DIM, 0, 10, 0); if (on) box(x, y - P, x + P, y + 2 * P, PAL.white, 1, 0, 10, 0); };   // a glint: a cross when it catches the light
     const gem = (u, v, w, h) => { F(X(u), Y(v + h * 0.5), w * 0.5 * t, 0, 0, h * 0.5 * t, G, 1.5, 0); bx(u - w * 0.08, v + h * 0.1, u + w * 0.12, v + h * 0.85, PAL.white, 1.5); };   // a crystal, a facet lit on it
     bx(0.05, 1.95, 1.9, 2.12, G, 1.5, 3); line(X(0.1), Y(1.25), X(0.75), Y(1.95), G, 1.5, 3); bx(0.05, 0, 0.2, 2.1, G, 1.5, 3);   // the frame's cap, its brace, its post
-    mnLamp(X(1.45), Y(1.95), true, 0.8); gem(0.5, 0.35, 0.22, 0.45); [[0.45, 1.0], [0.9, 0.55], [0.3, 0.75]].forEach(([u, v], i) => glint(u, v, i));
+    mnDish(X(1.45), Y(1.95), 0.8); gem(0.5, 0.35, 0.22, 0.45); [[0.45, 1.0], [0.9, 0.55], [0.3, 0.75]].forEach(([u, v], i) => glint(u, v, i));
     vlamps.push([X(0.9), Y(0.9), 0.2, 0.8]);   // its faint glow
   };
   const mnBatsAt = (r) => {   // under one ledge in five that has room under it: not a moving or crumbling one, nothing a tile and a half under it
@@ -5725,7 +5731,7 @@ Renderer.prototype.draw = function (g, alpha) {
       bx(-hw, 0, hw, ht, c);   // its roof
       for (const u of [-hw, -0.07, hw - 0.15]) bx(u, ht, u + 0.15, ht + 1.85, c); bx(-hw, ht + 1.7, hw, ht + 1.85, c);   // its posts, its floor
       line(X(-hw + 0.15), Y(ht), X(-0.07), Y(ht + 1.7), c, 1, 2); line(X(-0.07), Y(ht), X(-hw + 0.15), Y(ht + 1.7), c, 1, 2);   // braced across
-      if (CINE) this.route = 4; mnLamp(X(hw * 0.55), r.y1, true, 0.75); if (CINE) this.route = 2;   // a lamp in it (small, as on the walls)
+      if (CINE) this.route = 4; mnDish(X(hw * 0.55), r.y1, 0.75); if (CINE) this.route = 2;   // an oil dish in it (small, as on the walls)
       { const bx0 = X(hw * 0.55), by = Y(ht + 1.38); box(snap(bx0 - 0.18 * t), by, snap(bx0 + 0.18 * t), snap(by + 0.29 * t), G, 1, 0, 10, 4); box(snap(bx0 - 0.21 * t), by, snap(bx0 + 0.21 * t), by + P, G, 1, 0, 10, 0); }   // a basket on its floor
       if (CINE) this.route = 0; for (const u of [-0.4, 0.4]) { F(X(u), Y(-0.3), 0.17 * t, 0, 0, 0.17 * t, c, 1, 4); line(X(u), Y(-0.45), X(u), Y(-3), G, 1, 1); } if (CINE) this.route = 2;   // its pulleys, their ropes up (flat)
       lip(); return true;

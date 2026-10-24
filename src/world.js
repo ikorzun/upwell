@@ -506,6 +506,12 @@ const FUJI_DOOR = { shop: [15, 33, 29, 45], stash: [40, 40, 28, 42] };   // [col
 // (the shop's red noren, the stash's purple crack): what is inside bobs in it
 // The station post's numeral (d47 «Б»: level n is station n, the tenth the summit's arena): 一 to 九, 7 x 7 game px, cut over its sheet's 八 (rows 30-36,
 // columns 7-13 of FUJI_SPR.post; its 合目 under it kept)
+// Fuji's bonus caves after the real Narusawa Ice Cave (owner Д97 «А»; his picks Д170 A, Д171 A, Д172 «Перерисуй с листа вариант Е», Д173 «А»): a temple bell's
+// outline, its half width at v (0 its crown, 1 its lip) as a part of BELLS.w (UPwell's size kept): a round crown, straight, a flared lip
+const bellHw = (v) => (v < 0.22 ? 0.5 + 0.5 * Math.sqrt(v / 0.22) : v < 0.8 ? 1 : 1 + 0.18 * ((v - 0.8) / 0.2));
+// The gate of kept ice, off research/variants/fuji-cavegate-1-px.png E (path A, scratchpad fcave/cutgate.py): round lumps of ice stacked, coins in them; shrunk
+// to the gate's height by the nearest sheet pixel where it is lower than the sheet's (fcGate)
+const FC_GATE = { rows: ['.......................wwwwwwwwwww.................', '.....................wwwwwwwwwwwwwwb...............', '...................dswwwwwwwwwwwwwwwd..............', '...................wwwwwwwwwwwwwwwwww..............', '..................wwwwwwwwwwbbwwwwwwww.............', '..................wwwwwwwbbbbbbwwwwwwwdd...........', '..................wwwbbbbbbbbbbbbbbwwwbb...........', '................dbwwbbbwbbbbbbbwbbbbbwbb...........', '................dbwwbbbbbbbbbbbbbbbbbwwd...........', '................dbwbbbbbbbbbbbbbbbsbbwww...........', '................dbbbbbbbbbbbbbbbbbwbbbww...........', '................dbbbbbbbbbbbbbbbbbbbbbww...........', '................dbbbbbbbbbbbbbbbbbbbbbww...........', '................dbbbbbbbbbbbbbdbbbbbbbww...........', '................dbbbbbbbbbbbbbbbbbbbbbbd...........', '................dbbbbbbbbbbbbbbbbbbbbbbb...........', '................dbbbbbbbbbbbbbbbbbbbbbbb...........', '.........sswwwwwwbbbbbbbbbbbbbbbbbdbbbbb...........', '........wwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbb...........', '........wwwwwwwwwwwwbbdbbbbbbbbbbbbbbbd............', '......wwwwwwwwwwwwwwwwwwwbbbbbbbbbbbbb.............', '......wwwwwwwwwwwwwwwwwwwwwwbbdbbbbbbb.............', '......wwwwwwwwwwwwwwwwwwwwwwbbbbbbbbbd.............', '......wwwbbbbbbbbbbbbbbbbbbbwwwwdbdbd..............', '.....bwwbbbbbdbbbbbbbbbbbbbbbbbwwwwwwbbb...........', '.....bbbbbbbbbbbbbbbbbbbbbbbbbbwbwwwwwbbddd........', '.....bbbbbbbbbbbbsssssbbbbbbbbbbbbbbwwwwwwb........', '.....bbbbbbbbbbssbssscsbbbbbbbbbbbbbbbbbwwwb.......', '.....bbbbbbbbbbbssssscssbbbbbbbbbbbbbbbbbbwwbb.....', '.....bbbbbbbbbbsbsbssccssbbbbbbbbbbbbbbbbbwwwb.....', '.....bbbbbbbbbssscbsssscssbbbbbbbbbbbbbbcbbwww.....', '.....bbbbbbbbbsbssbsssscssbbbbbbbbbbbbbbbbwbbw.....', '.....bbbbbbbbbsbssbsscscsybbbbbbbbbbbbbbbbwbww.....', '.....bbbbbbbbbssssbsscccssbbbbbbbbbbbbbbbbwbbw.....', '.....bbbbbbbbbssssbsssscssbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbssssbbsssssybbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbssssbssssssbbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbbssbcccccsbbbbbbbbbbbbbbbbbbbbbw.d...', '.....bbbbbbbbbbbbssssssbbbbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbw.....', '..wwwwwwwwwwbbbbbbbbbbbbbbdbbbbbbbbbbbbbbbbbbw.....', 'dwwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbbbbbbbbbbw.....', 'wwwwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbbbbbbbbbw.....', 'wwwwwwwwwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbbbbw.....', 'wwwwwwbbbwsbwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbb.....', 'wwwwwwbbbbbbbwwwwbwwwwwwwwbbbbbbbbbbbbbbbbbbbb.....', 'bbbbbbbbbbbbbbbbbbbbbbwwwwwwwbddbbbbbbbbbbbbbb.....', 'bbbwwbbbbbbbbbbbbbbbbbbwwbbwwwwbbkbbbbbbbbbbb......', 'bbbbwbbbbbbbbbbbbbbbbbbbbbbbwbbbbbdbkbbbbbbb.......', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbkkkbbbbb........', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbkkbbbwwwwwwww......', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdbbwwwwwwbbwwww.....', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbdbdkbbwwwwwwbbwwww.....', 'bbbbbbbbbbbbbbbbbbbbbbbbbdkdbbbwwwbbbbbwbbbwwwww...', 'bbbbbbbbbbbbbbbbbbbbbbkbbbwwwbbbbbbbbbbwbbbbbbww...', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbwwbbbbbbbbbbbbbbbbwwwd..', 'bbbbbbbbbbbbbbbbbbkddbbwwbbbbbbbbbbbbbbbbbbbbbwwb..', 'bbbbbbbbbbbbbbbkbbbbwbbbbbbbbbbbbbbbbbbbbbbwbbwwb..', 'bbbbbbbbbbbbbbbddbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', 'bbbbbbbbbbbkbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', 'bbbbbbdbkbbwsbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', '..bbbbbbwbbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbb..', '..bbdbbbbbbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbb..', '..bwwwbbbbbbbbbbbbbbsbsssbssbbbbbbbbbbbbbbbbbbbbwbb', 'dwbbbbbbbbbbbbbbbbssbsbssssssbbbbbbbbbbbbbbbbbbbwww', 'bwbbbbbbbbbbbbbbbbsscbbsssccbbbbbbbbbbbbbbbbbbbbwww', 'bwbbbbbbbbbbbbbbbbsscbbssccssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsscbbssccssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsssbbssccssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsssssssscssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsscsbssscssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsssbssssccsbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbdbbbbbbbbbbbsssccssssssbbbbbbbbbbbbbbbbbdbbws', 'bbbbbbbdbbbbbbbbbbssbsccccssbbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbdbbbbbbbbbbbscsscsbbbbbbbbbbbbbbbbbbbbbbbws', 'bbbbbbbbbbbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbbbw', 'bbbbbbbbbbdbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbdbbbb', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbdbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdbbbbbbbd', 'bbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.b', 'bbbbbbbbbbd...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', 'bbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdb..'] };
 const POST_NUM = { 1: '......./......./......./#######/......./......./.......', 2: '......./.#####./......./......./......./#######/.......', 3: '#######/......./.#####./......./......./#######/.......', 4: '#######/#..#..#/#..#..#/#.#.#.#/##...##/#.....#/#######', 5: '#######/...#.../...#.../.#####./..#..#./..#..#./#######', 6: '...#.../....#../#######/......./..#.#../.#...#./#.....#', 7: '..#..../..#..../#######/..#..../..#..../..#...#/...####', 9: '..#..../#####../..#.#../..#.#../.#..#../.#..#.#/#...###' };
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
@@ -4110,7 +4116,7 @@ const pxVote = (rows, from) => {
 };
 if (GUIDE) {
   for (const k in HAZ_SPR) if (k !== 'tide') { const S = HAZ_SPR[k]; S.band = pxVote(S.band, Math.min(S.band.length, S.front + 3)); }
-  for (const T of [WALL_SPR, ICE_SPR, HOLD_SPR, VDOOR, VIL2, VDROP_SPR, VSLICK_SPR, HAZ_SPR, FOE_SPRITES, MFAR.cell, IW]) pxWalk(T);   // (K9_SPR's and UME_SPR's arrays are FOE_SPRITES')
+  for (const T of [WALL_SPR, ICE_SPR, HOLD_SPR, VDOOR, VIL2, VDROP_SPR, VSLICK_SPR, HAZ_SPR, FOE_SPRITES, MFAR.cell, IW, FC_GATE]) pxWalk(T);   // (K9_SPR's and UME_SPR's arrays are FOE_SPRITES')
   for (const id in FUJI_SPR) if (typeof FUJI_SPR[id] === 'string' && FUJI_SPR[id].includes('/')) FUJI_SPR[id] = pxClean(FUJI_SPR[id].split('/')).join('/');   // (its own form: rows by '/')
 }
 for (const id of [...Object.keys(K9_SPR), ...Object.keys(UME_SPR)]) LOOK_FACE[id] = () => true;   // (drawn crisp in the world by crispLook, not warped over the soft body)
@@ -4739,6 +4745,12 @@ Renderer.prototype.draw = function (g, alpha) {
   const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon
   // The Mine's shared pieces: an oil dish lit (Iwami Ginzan's, Д117 «А»; the wall lamps the hero lights are IW's, see iwLamp), its ore glinting in the wall over
   // a ledge (the owner's pick of 2026-10-21, research/variants/mine-*-game.png C), its things on ledges, its bats, the mine far off
+  const fcGate = (r) => {   // Fuji's cave's gate (caveBells 'G'): the sheet's lumps of kept ice (FC_GATE), standing on its foot; it melts (UPwell's crumbleFx)
+    const q = PIX.base, S = FC_GATE.rows, n = Math.max(1, Math.min(S.length, Math.floor((r.y1 - r.y0) / q))), key = 'h' + n;
+    if (!FC_GATE[key]) { const m = Math.max(1, Math.round((S[0].length * n) / S.length)); FC_GATE[key] = Array.from({ length: n }, (_, j) => S[Math.floor((j * S.length) / n)]).map((row) => Array.from({ length: m }, (_, i) => row[Math.floor((i * row.length) / m)]).join('')); }
+    const rows = FC_GATE[key], w = rows[0].length * q;
+    vsp(rows, Math.round((r.x1 - w) / PIX.size) * PIX.size, r.y1 - rows.length * q, false, 1, q);   // (its right edge the gate's, the side the hero comes from: he never walks into the ice)
+  };
   const mnDish = (x, y, s = 1) => {   // an Edo miner's oil dish lit, on a peg from (x, y) (Д117 «А»: no caged lamp in Iwami's mine), its glow a light of the dark
     const t = kitT, U = (u) => snap(x + u * s * t), V = (v) => snap(y + v * s * t), bx = (u0, v0, u1, v1, c, a = 1) => box(U(u0), V(v0), U(u1), V(v1), c, a, 0, 10, 0);
     F(U(0), V(0.55), 0.8 * s * t, 0, 0, 0.8 * s * t, PAL.orange, 0.3 + 0.06 * Math.sin(T * 5 + x * 0.1), 1); vlamps.push([U(0), V(0.55), 0.6 * s, 1.8 * s]);
@@ -5198,6 +5210,23 @@ Renderer.prototype.draw = function (g, alpha) {
     line(X(6), Y(1), X(7), Y(3.2), G, WD, 2); line(X(6.4), Y(3), X(7.6), Y(3.4), G, WD, 3);   // a pickaxe leaning
     for (const u of [10.5, 12.6]) { bx(u - 0.8, 0, u + 0.8, 1.0); for (const du of [-0.45, 0.05, 0.5]) el(u + du, 1.15, 0.38, 0.3); bx(u - 0.9, 0.9, u + 0.9, 1.0, PAL.black, WD); }   // baskets of ore
     bx(1.95, 13, 2.45, 13.5); F(X(2.2), Y(13.25), 1.2 * t, 0, 0, 1.2 * t, PAL.orange, 0.3, 1); bx(2.1, 13.1, 2.3, 13.35, PAL.orange, LT);   // a lamp on the post
+  }
+  if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.fuji) {   // Fuji's stash room: the Narusawa Ice Cave at the foot of the mountain (Д97 «А»;
+    // a lava tube of 864, its ice pillars of February and March, icicles to 90 cm, ice and food kept in it since Edo, wet steps with bamboo rails, entered by a fall of
+    // its roof), as the cellar is drawn: big flat shapes at a quarter on a quiet black, lava grey, ice blue a step lighter, wood orange
+    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32, G = PAL.gray, B = PAL.blue, O = PAL.orange;
+    const bx = (u0, v0, u1, v1, c = G, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
+    const el = (u, v, ru, rv, c = G, a = WD) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
+    const tube = () => {   // the lava tube's walls and roof, lumps along a U
+      for (let v = 0; v <= 20; v += 1.4) { el(0.3, v, 0.9, 0.8); el(15.7, v + 0.7, 0.9, 0.8); }
+      for (let u = 0.5; u <= 15.5; u += 1.3) el(u, 20.6 - 0.35 * Math.sin(u * 0.9), 1.0, 0.8);
+    };
+    const icicle = (u, v, len) => { for (let k = 0; k < 4; k++) { const f = 1 - k / 4; bx(u - 0.16 * f, v - (k + 1) * len / 4, u + 0.16 * f, v - (k * len) / 4, B, LT); } };   // hanging from v down
+    const pillar = (u, hgt, wd = 0.5) => { for (let k = 0; k < 5; k++) { const f = 1 - k / 6; bx(u - wd * f, (k * hgt) / 5, u + wd * f, ((k + 1) * hgt) / 5, B, LT); } el(u, hgt, 0.3 * wd, 0.25, B, LT); };   // up from the floor
+    const shelf = (u0, u1, v, n) => { bx(u0, v - 0.2, u1, v, O); for (const u of [u0 + 0.1, u1 - 0.3]) bx(u, 0, u + 0.2, v, O); for (let k = 0; k < n; k++) { const u = u0 + 0.4 + (k * (u1 - u0 - 0.8)) / Math.max(1, n - 1); bx(u - 0.35, v, u + 0.35, v + 0.6, B, LT); } };   // a shelf of kept ice
+    tube();
+    for (const [u, len] of [[3, 1.4], [5.5, 2.2], [8.3, 1.2], [11, 1.8], [13.2, 1.1]]) icicle(u, 20.2, len);
+    pillar(4, 3.5); pillar(9.5, 2.4, 0.4); pillar(13.5, 4.2); shelf(10.5, 14.5, 9, 3);   // three pillars of ice, a shelf of kept blocks (Д170 A)
   }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter
@@ -6168,7 +6197,8 @@ Renderer.prototype.draw = function (g, alpha) {
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 31) * 1.8 * u; a = 1 - 0.5 * u * u; }
     const own = (!r.slick || th.fuji || th.village) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
-      if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
+      if (r.gate && lv.world && lv.world.theme && lv.world.theme.fuji) fcGate(r);   // (Fuji's cave's gate of ice, by take)
+      else if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
       else if (r.crumble) box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, 0, 10, 4);
       else box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, rad);
@@ -6314,9 +6344,11 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = lv.tile, q = PIX.size, i = b.n - 1, w = BELLS.w[i] * t, h = BELLS.h[i] * t, u = T - b.t, top = sn2(b.y + BELLS.rope * t);
     const sw = u < 1.6 ? sn2(Math.sin(u * 11) * 0.14 * t * (1 - u / 1.6)) : 0, x = sn2(b.x) + sw, c = u < 0.12 ? PAL.white : b.rung ? PAL.orange : PAL.gray;
     box(sn2(b.x) - q / 2, sn2(b.y), sn2(b.x) + q / 2, top, PAL.gray, 1, 0, 10, 0);   // the rope (straight: the swing is the bell's)
-    box(x - sn2(0.62 * w), top, x + sn2(0.62 * w), top + sn2(0.3 * h), c, 1, 0, 10, 0);   // its shoulder
-    box(x - sn2(w), top + sn2(0.3 * h), x + sn2(w), top + sn2(0.82 * h), c, 1, 0, 10, 0);   // its waist
-    box(x - sn2(1.18 * w), top + sn2(0.82 * h), x + sn2(1.18 * w), top + sn2(h), c, 1, 0, 10, 0);   // its lip
+    {   // its body (bellHw), row by row, three bands across it in its darker half
+      const rows = Math.max(4, Math.round(h / q));
+      for (let j = 0; j < rows;) { const f = bellHw((j + 0.5) / rows); let e = j + 1; while (e < rows && Math.abs(bellHw((e + 0.5) / rows) - f) * w < q / 2) e++; box(sn2(x - f * w), sn2(top + (j * h) / rows), sn2(x + f * w), sn2(top + (e * h) / rows), c, 1, 0, 10, 0); j = e; }
+      for (const v of [0.3, 0.62, 0.92]) { const f = bellHw(v); box(sn2(x - f * w), sn2(top + v * h), sn2(x + f * w), sn2(top + v * h) + q, PAL.black, 1.6, 0, 10, 0); }
+    }
     const gl = POST_NUM[b.n].split('/'), p = gl.length * 2 * q < 0.7 * h ? 2 * q : q, gx = x - (gl[0].length * p) / 2, gy = top + sn2(0.55 * h) - (gl.length * p) / 2;   // (its glyph's pixel two game px where it fits)
     gl.forEach((row, j) => { for (let k = 0; k < row.length; k++) if (row[k] === '#') box(gx + k * p, gy + j * p, gx + (k + 1) * p, gy + (j + 1) * p, PAL.black, 1, 0, 10, 0); });
     for (let k = 0; k < 2; k++) { const f = (u - k * 0.25) / 1.1; if (f > 0 && f < 1) F(x, top + 0.6 * h, (0.6 + 2.2 * f) * t, 0, 0, (0.6 + 2.2 * f) * t, PAL.orange, 1 - f, 4); }
@@ -6485,7 +6517,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const b = e.body, t = e.type, V = FOREST_V[t];
     b.look = t + '-' + V; b.lookDir = t === 'kikimora' ? (b.cx < (lv.l + lv.r) / 2 ? 1 : -1) : Math.sign(g.hero.cx - b.cx) || 1;
   };
-  try { drawKept = [F, disc, box, onGrid, icon, iconSpin, seen, door, hut, farmhouse, funaya, skEyes, skDoorAt, skInside, izba, mnStash, pech, brace, aircon, rod, line, mnDish, iwAt, iwLamp, mnOre, mnBatsAt, mnBats, mnThing, mnFar, skOak, junkRect, skyRect, panelsRect, villageRect, seaRect, skazkaRect, mineRect, fujiRect, townRect, vaultSpan, spr, look, forestFoe]; } catch (err) { if (drawKept !== false) console.warn('drawKept:', err.message); drawKept = false; }   // (see drawKept; a helper gone
+  try { drawKept = [F, disc, box, onGrid, icon, iconSpin, seen, door, hut, farmhouse, funaya, skEyes, skDoorAt, skInside, izba, mnStash, pech, brace, aircon, rod, line, mnDish, iwAt, iwLamp, fcGate, mnOre, mnBatsAt, mnBats, mnThing, mnFar, skOak, junkRect, skyRect, panelsRect, villageRect, seaRect, skazkaRect, mineRect, fujiRect, townRect, vaultSpan, spr, look, forestFoe]; } catch (err) { if (drawKept !== false) console.warn('drawKept:', err.message); drawKept = false; }   // (see drawKept; a helper gone
   // from draw and still named here: warned, not a broken frame)
   if (lv.boss && !lv.boss.dead && lv.boss.look) look(lv.boss, false);   // its look's parts behind it
   for (const e of lv.enemies) if (FOREST_V[e.type]) forestFoe(e); else if (e.type === 'komori') e.body.look = 'komori-' + KOMORI_V + '-' + (e.body.frame || 1); else if (e.type === 'tofu' || e.type === 'tofuMini' || e.type === 'tumbler' || e.type === 'nurikabe') { e.body.look = k9Look(e); e.body.lookDir = e.dir || 1; }   // (К9)

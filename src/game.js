@@ -1552,10 +1552,27 @@ class Game {
     const H = this.hero, R = this.R, lv = this.lv, d = H.cx < (lv.l + lv.r) / 2 ? 1 : -1;
     this.trail = Array.from({ length: 12 }, (_, k) => [H.cx + d * (12 - k) * 0.4 * R, H.cy]);
   }
+  // A cave bell rung (BELLS): the next in their order (一 二 三) lights up; a wrong one and all fall quiet, to start again; one already lit only sounds. All
+  // three: the room's ice gate ('G') melts
+  ringBell(b) {
+    const lv = this.lv, next = lv.bells.filter((q) => q.rung).length + 1, open = !lv.rects.some((r) => r.gate && !r.gone);
+    b.t = lv.t; sound.play('chime', 0.8, BELLS.rate[b.n - 1]);
+    if (b.rung || open) return;
+    if (b.n !== next) { for (const q of lv.bells) q.rung = false; sound.play('deny', 0.6, 0.7); shake.add(2); haptics.buzz(20); return; }
+    b.rung = true; haptics.buzz(15);
+    if (next < lv.bells.length) return;
+    for (const r of lv.rects) if (r.gate && !r.gone) { r.gone = true; crumbleFx(r, lv.theme.slick, true); fx.ring((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 2.2 * this.R, INK.coin); }
+    sound.play('chime', 1, 1.3); sound.play('crumble', 0.8, 1.2); shake.add(5); haptics.buzz(35);
+  }
   // Set pieces at work: a stalactite over the hero shakes and falls (a blob of lv.shots, so it hurts and breaks on what it
   // meets); an arena starts as the hero comes to its middle, sends its waves down, pays in big coins once they are all gone.
   setStep(dt) {
     const lv = this.lv, H = this.hero, R = this.R;
+    for (const b of lv.bells) {   // Fuji's cave bells (BELLS): one the hero bumps into rings (once each time it comes into it)
+      const t = lv.tile, i = b.n - 1, y0 = b.y + BELLS.rope * t, inn = H.maxX > b.x - BELLS.w[i] * t && H.minX < b.x + BELLS.w[i] * t && H.minY < y0 + BELLS.h[i] * t && H.maxY > y0;
+      if (inn && !b.in && lv.t > BELLS.calm) this.ringBell(b);
+      b.in = inn;
+    }
     for (const fw of lv.fireWalls || []) {   // fire on a wall (FIREWALL): burning, it burns the hero touching it, or in its flames
       if (fw.y1 > lv.cam && fw.y0 < lv.cam + view.h) this.hint('fireWall');
       if ((lv.t + fw.ph) % (FIREWALL.on + FIREWALL.off) < FIREWALL.off || H.maxY < fw.y0 || H.minY > fw.y1) continue;

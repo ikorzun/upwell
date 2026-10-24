@@ -6,7 +6,7 @@ The key comes from ELEVENLABS_API_KEY or the macOS keychain (service "elevenlabs
 anywhere. Credits are shared with CriminalRussia, which keeps RESERVE of them for its voice-over: nothing here runs
 if it would dip below that.
 
-Effects land in assets/sfx/<name>.mp3 (mono), music loops in assets/music/<name>.mp3 (stereo). Raw takes stay in
+Effects land in assets/sfx/<name>.mp3 (mono), music loops in assets/music/<name>.mp3 (mono, 32 kHz, 64 kbps: the game decodes them at that rate, MUSIC_RATE). Raw takes stay in
 assets/_raw (out of git). Each effect is made in TAKES takes; the one that starts at once and fills its length wins,
 then silence is cut off its ends, it is levelled to −16 LUFS and given a 30 ms fade so it cannot click.
 
@@ -111,7 +111,6 @@ SFX = {
     'click': (0.5, 'A tiny soft click of a game menu button, short and clean.' + NO),
     'bosshit': (0.8, 'A heavy wet squelch hitting a big jelly monster, with a low rubbery wobble.' + NO),
     'burn': (0.6, 'A short hot sizzle and crackling hiss with a soft squishy pop: a small jelly blob touching fire. Cartoon.' + NO),
-    'shot': (0.5, 'A tiny soft fizzy pop: a cute jelly blob shooting a small sparkling bubble. Very short, light, retro game.' + NO),
     'spit': (0.6, 'A quick fiery whoosh and a soft pop: flames spitting a blob of burning lava up into the air. Cartoon, short.' + NO),
 }
 SR = 44100
@@ -189,35 +188,20 @@ MUSIC = {
     'boss': (60, 'intense, urgent, driving, steady, no ending',
              ['chiptune', 'driving pulsing bass', 'fast arpeggios', 'tense and urgent', 'video game boss battle', 'steady 150 BPM']),
     # owner 2026-10-16: more variety — a climb of its own for each world after the cave, the bonus levels, the stash
-    'ice': (75, 'airy, sparkling, light, gently bouncy, steady, no ending',
-            ['lo-fi chiptune', 'glassy bell arpeggios', 'soft shimmering synth pads', 'light steady beat with soft hi-hats',
-             'crisp and wintry, full of wonder', 'cute video game platformer, icy cavern', 'steady 104 BPM']),
     'mine': (75, 'busy, plucky, chugging, steady, no ending',
              ['lo-fi chiptune', 'plucky square-wave bass', 'woodblock and shaker percussion', 'mechanical rhythmic groove',
               'determined and playful', 'cute video game platformer, old mine with carts', 'steady 112 BPM']),
     'void': (75, 'mysterious, floating, spacey, steady, no ending',
              ['chiptune', 'deep soft synth bass', 'dreamy detuned arpeggios', 'spacey reverb pads', 'mysterious and curious',
               'cute video game platformer, outer space', 'steady 96 BPM']),
-    # owner 2026-10-19: music for the campaign's worlds 5-7 (the Tower Blocks, the Skyscraper, the Junkyard)
+    # 2026-10-19: Tokyo's own night-time climb
     'tokyo': (75, 'nostalgic, neon-lit, gently bouncy, steady, no ending',
               ['lo-fi chiptune', 'city pop inspired chords on a warm electric piano', 'soft round synth bass', 'gentle steady beat with soft brushes',
                'a pentatonic Japanese melody on a soft square lead', 'cute video game platformer, a Tokyo suburb at night with train crossings', 'steady 98 BPM']),
-    'blocks': (75, 'wistful, nostalgic, determined, steady, no ending',
-               ['lo-fi chiptune', 'soft square-wave lead with a nostalgic minor-key melody', 'warm synth bass', 'gentle steady beat with a soft snare',
-                'a hint of an old Eastern European folk tune', 'cute video game platformer, concrete apartment blocks in winter', 'steady 100 BPM']),
-    'sky': (75, 'soaring, breezy, uplifting, steady, no ending',
-            ['lo-fi chiptune', 'airy shimmering synth pads', 'bright soaring arpeggios', 'light steady beat with soft claps',
-             'windy, open and hopeful', 'cute video game platformer, top of a skyscraper above the clouds at dusk', 'steady 108 BPM']),
-    'junk': (75, 'funky, gritty, playful, steady, no ending',
-             ['chiptune', 'funky square-wave bass line', 'laid-back hip-hop drum groove', 'jazzy electric piano chords',
-              'streetwise and cheeky', 'cute video game platformer, a New York back-alley junkyard', 'steady 92 BPM']),
     # owner 2026-10-20: the whole game in Japan, and every world its own music: the five worlds built so far (Tokyo keeps 'tokyo')
     'village': (75, 'peaceful, warm, gently bouncy, steady, no ending',
                 ['lo-fi chiptune', 'a plucked koto-like pentatonic melody on a soft square lead', 'an airy bamboo flute pad', 'light taiko and woodblock percussion',
                  'spring in the Japanese countryside, rice terraces and cherry blossoms', 'cute video game platformer, a village in spring', 'steady 100 BPM']),
-    'shrine': (75, 'mysterious, serene, cozy, steady, no ending',
-               ['lo-fi chiptune', 'a soft temple bell and wind chimes', 'slow koto arpeggios in a Japanese in-scale', 'a soft low drone pad',
-                'a gentle steady beat with soft woodblocks', 'cute video game platformer, a mossy mountain shrine with stone lanterns and a big Buddha', 'steady 92 BPM']),
     'fuji': (75, 'crisp, bright, determined, steady, no ending',
              ['lo-fi chiptune', 'a shamisen-like plucked lead with a pentatonic melody', 'glassy bell arpeggios like falling snow', 'a soft taiko pulse',
               'Mount Fuji in winter, snowy pines and an onsen with snow monkeys', 'cute video game platformer, climbing a snowy mountain', 'steady 104 BPM']),
@@ -315,10 +299,12 @@ def music(names: list[str]) -> None:
         peak = np.abs(y).max() + 1e-9
         rms = np.sqrt(np.mean(y ** 2)) + 1e-9
         y *= min(10 ** (-16 / 20) / rms, 10 ** (-1.5 / 20) / peak)   # about −16 dBFS RMS, peak under −1.5 dBFS, no limiter
+        pad = int(0.1 * SR)   # the loop's last 0.1 s before it and its first 0.1 s after it: the codec's edges outside the loop (game.js MUSIC_PAD)
+        y = np.concatenate([y[-pad:], y, y[:pad]])
         out = os.path.join(ROOT, 'assets/music', f'{name}.mp3')
         os.makedirs(os.path.dirname(out), exist_ok=True)
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', '-c:a', 'libmp3lame',
-                        '-b:a', '128k', out], input=y.astype(np.float32).tobytes(), check=True)
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', '-ac', '1', '-ar', '32000', '-c:a', 'libmp3lame',
+                        '-b:a', '64k', out], input=y.astype(np.float32).tobytes(), check=True)   # (mono at 32 kHz: owner 2026-10-24, «100 мб это очень много»)
         print(f'{name}: {out}', flush=True)
 
 

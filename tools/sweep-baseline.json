@@ -1,204 +1,210 @@
 {
- "commit": "226db88",
- "made": "2026-10-22",
+ "commit": "94b6ad8+changes",
+ "made": "2026-10-24",
  "levels": {
   "c1-1": {
    "result": "clear",
-   "time": 13.5,
+   "time": 12.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-2": {
    "result": "clear",
-   "time": 27,
+   "time": 22,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-3": {
    "result": "clear",
-   "time": 24.5,
-   "heartsLost": 2,
-   "stuck": [
-    "rubberwall@50"
-   ],
-   "hits": [
-    "shot@stairs",
-    "fire@pocket"
-   ]
+   "time": 23,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c1-4": {
    "result": "clear",
-   "time": 25.5,
+   "time": 21,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-5": {
    "result": "clear",
-   "time": 27,
-   "heartsLost": 1,
-   "stuck": [],
-   "hits": [
-    "shot@icicles"
-   ]
+   "time": 48.5,
+   "heartsLost": 0,
+   "stuck": [
+    "mosswall@72",
+    "iciclerun@135"
+   ],
+   "hits": []
   },
   "c1-6": {
    "result": "clear",
-   "time": 11.5,
+   "time": 12,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-7": {
    "result": "clear",
-   "time": 31,
+   "time": 39.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "fork@35"
+   ],
    "hits": []
   },
   "c1-8": {
    "result": "clear",
-   "time": 26,
+   "time": 19.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "spitter@crumble"
+    "crawler@gate3w"
    ]
   },
   "c1-9": {
    "result": "clear",
-   "time": 15.5,
+   "time": 20.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-10": {
    "result": "won",
-   "time": 16,
-   "heartsLost": 0,
+   "time": 24.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "shot@hover"
+   ],
    "boss": "Bake-danuki",
-   "dealt": "5/5"
+   "dealt": "3/3"
   },
   "c2-1": {
    "result": "clear",
-   "time": 8.5,
+   "time": 6,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-2": {
    "result": "clear",
-   "time": 14.5,
+   "time": 36.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "overhang@149"
+   ],
    "hits": []
   },
   "c2-3": {
    "result": "clear",
-   "time": 24,
+   "time": 21,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-4": {
    "result": "clear",
-   "time": 36,
+   "time": 28.5,
    "heartsLost": 0,
-   "stuck": [
-    "gate2@154"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c2-5": {
    "result": "clear",
-   "time": 18,
+   "time": 21,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-6": {
    "result": "clear",
-   "time": 10,
+   "time": 23,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "mosswall@15"
+   ],
    "hits": []
   },
   "c2-7": {
    "result": "clear",
-   "time": 47.5,
+   "time": 49,
    "heartsLost": 0,
    "stuck": [
-    "rubberwall@17",
-    "rubberwall@111"
+    "rubberwall@111",
+    "comb@163"
    ],
    "hits": []
   },
   "c2-8": {
    "result": "clear",
-   "time": 37.5,
+   "time": 39.5,
    "heartsLost": 0,
    "stuck": [
-    "overhang@127"
+    "mosswall@163"
    ],
    "hits": []
   },
   "c2-9": {
    "result": "clear",
-   "time": 15.5,
+   "time": 16.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-10": {
    "result": "won",
-   "time": 26,
-   "heartsLost": 0,
+   "time": 33,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "shot@hover"
+   ],
    "boss": "Tsuchigumo",
-   "dealt": "5/5"
+   "dealt": "4/4"
   },
   "c3-1": {
    "result": "clear",
-   "time": 8.5,
+   "time": 11,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c3-2": {
    "result": "clear",
-   "time": 39.5,
+   "time": 30.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c3-3": {
    "result": "clear",
-   "time": 37.5,
+   "time": 38.5,
    "heartsLost": 0,
    "stuck": [
-    "overhang@136"
+    "comb@172"
    ],
    "hits": []
   },
   "c3-4": {
    "result": "clear",
-   "time": 33.5,
-   "heartsLost": 1,
-   "stuck": [],
-   "hits": [
-    "shell@iceblocks"
-   ]
+   "time": 48.5,
+   "heartsLost": 0,
+   "stuck": [
+    "icewall@173"
+   ],
+   "hits": []
   },
   "c3-5": {
    "result": "clear",
-   "time": 22,
+   "time": 34,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "rubberwall@66"
+   ],
    "hits": []
   },
   "c3-6": {
@@ -217,74 +223,69 @@
   },
   "c3-8": {
    "result": "clear",
-   "time": 48,
-   "heartsLost": 1,
+   "time": 47.5,
+   "heartsLost": 0,
    "stuck": [
-    "icicles@110"
+    "rubberwall@146"
    ],
-   "hits": [
-    "spikes@gate3"
-   ]
+   "hits": []
   },
   "c3-9": {
    "result": "clear",
-   "time": 20,
+   "time": 16,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c3-10": {
    "result": "won",
-   "time": 38.5,
-   "heartsLost": 2,
+   "time": 42.5,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "boss@dive",
-    "shot@rise"
-   ],
+   "hits": [],
    "boss": "Tsurara-onna",
-   "dealt": "5/5"
+   "dealt": "4/4"
   },
   "c4-1": {
    "result": "clear",
-   "time": 9,
+   "time": 9.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-2": {
    "result": "clear",
-   "time": 31,
+   "time": 32,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-3": {
    "result": "clear",
-   "time": 39.5,
-   "heartsLost": 0,
-   "stuck": [
-    "mosswall@89"
-   ],
-   "hits": []
-  },
-  "c4-4": {
-   "result": "clear",
-   "time": 33,
+   "time": 31,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
+  "c4-4": {
+   "result": "clear",
+   "time": 31.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "circler@comb"
+   ]
+  },
   "c4-5": {
    "result": "clear",
-   "time": 29,
+   "time": 24.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-6": {
    "result": "clear",
-   "time": 12.5,
+   "time": 10,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -298,47 +299,42 @@
   },
   "c4-8": {
    "result": "clear",
-   "time": 37,
+   "time": 36,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-9": {
    "result": "clear",
-   "time": 29.5,
-   "heartsLost": 1,
-   "stuck": [
-    "stairs@53"
-   ],
-   "hits": [
-    "fire@stairs"
-   ]
+   "time": 9,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c4-10": {
    "result": "won",
-   "time": 56.5,
-   "heartsLost": 1,
+   "time": 36,
+   "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "shot@warn"
+    "shot@hover",
+    "shot@hover"
    ],
    "boss": "Onamazu",
-   "dealt": "6/6"
+   "dealt": "5/5"
   },
   "c5-1": {
    "result": "clear",
-   "time": 11,
+   "time": 8,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c5-2": {
    "result": "clear",
-   "time": 33,
+   "time": 21,
    "heartsLost": 0,
-   "stuck": [
-    "stairs@102"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c5-3": {
@@ -346,26 +342,28 @@
    "time": 42,
    "heartsLost": 0,
    "stuck": [
-    "overhang@206"
+    "comb@189"
    ],
-   "hits": []
+   "hits": [
+    "crawler@pillars"
+   ]
   },
   "c5-4": {
    "result": "clear",
-   "time": 37,
+   "time": 42,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "spring@114"
+   ],
    "hits": []
   },
   "c5-5": {
    "result": "clear",
-   "time": 38.5,
+   "time": 32,
    "heartsLost": 1,
-   "stuck": [
-    "spring@67"
-   ],
+   "stuck": [],
    "hits": [
-    "crawler@overhang"
+    "crawler@comb"
    ]
   },
   "c5-6": {
@@ -377,84 +375,77 @@
   },
   "c5-7": {
    "result": "clear",
-   "time": 29.5,
-   "heartsLost": 1,
+   "time": 23.5,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "crawler@pillars"
-   ]
+   "hits": []
   },
   "c5-8": {
    "result": "clear",
-   "time": 40.5,
+   "time": 27.5,
    "heartsLost": 0,
-   "stuck": [
-    "spring@187"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c5-9": {
    "result": "clear",
-   "time": 12,
+   "time": 17,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c5-10": {
    "result": "won",
-   "time": 26.5,
-   "heartsLost": 0,
+   "time": 49.5,
+   "heartsLost": 2,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "shot@dazed",
+    "shot@dazed"
+   ],
    "boss": "Tsukumo Tram",
-   "dealt": "8/8"
+   "dealt": "5/5"
   },
   "c6-1": {
    "result": "clear",
-   "time": 9.5,
+   "time": 10.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c6-2": {
    "result": "clear",
-   "time": 35.5,
+   "time": 25,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c6-3": {
    "result": "clear",
-   "time": 38.5,
+   "time": 22,
    "heartsLost": 0,
-   "stuck": [
-    "flight@56"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c6-4": {
    "result": "clear",
-   "time": 81,
+   "time": 39.5,
    "heartsLost": 0,
-   "stuck": [
-    "flight@57",
-    "shelves@145",
-    "gate2@186"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c6-5": {
    "result": "clear",
-   "time": 51,
-   "heartsLost": 0,
-   "stuck": [
-    "flight@206"
-   ],
-   "hits": []
+   "time": 39.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "shot@comb"
+   ]
   },
   "c6-6": {
    "result": "clear",
-   "time": 27,
+   "time": 27.5,
    "heartsLost": 0,
    "stuck": [
     "planks@9"
@@ -463,42 +454,43 @@
   },
   "c6-7": {
    "result": "clear",
-   "time": 65.5,
+   "time": 53.5,
    "heartsLost": 0,
    "stuck": [
-    "crumble@118",
     "icicles@125"
    ],
    "hits": []
   },
   "c6-8": {
    "result": "clear",
-   "time": 48.5,
+   "time": 36,
    "heartsLost": 1,
    "stuck": [
-    "comb@98"
+    "flight@87"
    ],
    "hits": [
-    "fire@icicles"
+    "spikes@shelves"
    ]
   },
   "c6-9": {
    "result": "clear",
-   "time": 41.5,
-   "heartsLost": 0,
+   "time": 25.5,
+   "heartsLost": 1,
    "stuck": [
-    "shelves@85"
+    "flight@72"
    ],
-   "hits": []
+   "hits": [
+    "fire@stairs"
+   ]
   },
   "c6-10": {
    "result": "won",
-   "time": 24.5,
+   "time": 55,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
    "boss": "Nuppeppo",
-   "dealt": "8/8"
+   "dealt": "5/5"
   },
   "c7-1": {
    "result": "clear",
@@ -513,150 +505,158 @@
   },
   "c7-2": {
    "result": "clear",
-   "time": 30.5,
+   "time": 36.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "chimney@165"
+   ],
    "hits": []
   },
   "c7-3": {
    "result": "clear",
-   "time": 46,
+   "time": 22.5,
    "heartsLost": 0,
-   "stuck": [
-    "icicles@125"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c7-4": {
    "result": "clear",
-   "time": 32.5,
+   "time": 34,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c7-5": {
    "result": "clear",
-   "time": 48,
+   "time": 36.5,
    "heartsLost": 0,
-   "stuck": [
-    "arena@147"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c7-6": {
    "result": "clear",
-   "time": 14,
+   "time": 12.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c7-7": {
    "result": "clear",
-   "time": 27,
-   "heartsLost": 0,
+   "time": 20,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": []
+   "hits": [
+    "crawler@pillars"
+   ]
   },
   "c7-8": {
    "result": "clear",
-   "time": 41.5,
-   "heartsLost": 0,
-   "stuck": [],
-   "hits": []
+   "time": 50,
+   "heartsLost": 1,
+   "stuck": [
+    "icicles@172"
+   ],
+   "hits": [
+    "shot@pillars"
+   ]
   },
   "c7-9": {
    "result": "clear",
-   "time": 30,
+   "time": 19.5,
    "heartsLost": 0,
-   "stuck": [
-    "shelves@57"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c7-10": {
    "result": "won",
-   "time": 22,
-   "heartsLost": 1,
+   "time": 59,
+   "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "shot@hover"
+    "shot@hover",
+    "boss@dive"
    ],
    "boss": "Karasu-tengu",
-   "dealt": "8/8"
+   "dealt": "6/6"
   },
   "c8-1": {
    "result": "clear",
-   "time": 9.5,
+   "time": 7,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-2": {
    "result": "clear",
-   "time": 27,
-   "heartsLost": 0,
-   "stuck": [],
-   "hits": []
+   "time": 45,
+   "heartsLost": 1,
+   "stuck": [
+    "comb@136"
+   ],
+   "hits": [
+    "skull@stairs"
+   ]
   },
   "c8-3": {
    "result": "clear",
-   "time": 25,
+   "time": 23.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-4": {
    "result": "clear",
-   "time": 18.5,
+   "time": 19.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-5": {
    "result": "clear",
-   "time": 26,
-   "heartsLost": 1,
+   "time": 24.5,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "crawler@crumble"
-   ]
+   "hits": []
   },
   "c8-6": {
    "result": "clear",
-   "time": 10.5,
+   "time": 11,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-7": {
    "result": "clear",
-   "time": 30,
-   "heartsLost": 0,
-   "stuck": [],
-   "hits": []
-  },
-  "c8-8": {
-   "result": "clear",
-   "time": 31.5,
+   "time": 29.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "crawler@gate3"
+    "skull@pocket"
+   ]
+  },
+  "c8-8": {
+   "result": "clear",
+   "time": 32.5,
+   "heartsLost": 1,
+   "stuck": [],
+   "hits": [
+    "spikes@gate3"
    ]
   },
   "c8-9": {
    "result": "clear",
-   "time": 10.5,
+   "time": 9.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-10": {
    "result": "won",
-   "time": 23.5,
-   "heartsLost": 1,
+   "time": 53,
+   "heartsLost": 2,
    "stuck": [],
    "hits": [
+    "boss@hover",
     "boss@hover"
    ],
    "boss": "Koschei",

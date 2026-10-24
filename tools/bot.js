@@ -40,7 +40,7 @@ const random = () => {
 };
 
 // ── saving and restoring everything a step can change ──
-const GAME_KEYS = ['hp', 'maxHp', 'invuln', 'sinceContact', 'queueT', 'air', 'hitstop', 'touch', 'queued', 'rising', 'combo', 'coins',
+const GAME_KEYS = ['hp', 'maxHp', 'invuln', 'sinceContact', 'queueT', 'air', 'hitstop', 'touch', 'rising', 'combo', 'coins',
   'kills', 'bestCombo', 'levelM', 'idleT', 'gunT', 'gunMax', 'fallV', 'landV', 'landT', 'landUsed', 'missed', 'rebounded', 'flatT', 'harmed', 'dashT', 'dashCD', 'mantleCD', 'airDash', 'pow', 'ram', 'climbed', 'state', 'stateT', 'winT', 'lv', 'well', 'door', 'startY', 'freed', 'crouch', 'noteK', 'noteT', 'bonusT', 'lastBy', 'kept', 'swarm'];   // (a bonus level's clock too: tries ran it out)
 const copyItem = (e) => (e && typeof e === 'object' && !('x0' in e) ? Object.assign({}, e) : e);   // boxes stay shared
 function snapBody(b) {
@@ -133,7 +133,9 @@ function play(p, st) {
     input.set('jump', jumped && t < p.jumpAt + p.hold);
     step();
     if (g.state === 'play' && g.onFloor()) st.stand = Math.max(st.stand, heightOf(g.hero.floorY));
-    if (live && run) { run.frames++; if ((g.hero.wallMask & 3) && !(g.hero.wallMask & 8)) run.wallFrames++; if (g.flatT > 0 && !run.flat) run.flats++; run.flat = g.flatT > 0; }   // the moves really played: how much of it on a wall, off any floor; flattened by a pestle (MOCHI)
+    if (live && run) { run.frames++; if ((g.hero.wallMask & 3) && !(g.hero.wallMask & 8)) run.wallFrames++; if (g.flatT > 0 && !run.flat) run.flats++; run.flat = g.flatT > 0; }   // the moves really played: how much of it on a wall, off any
+    if (live && run) { const on = g.state === 'play' && g.onFloor(); if (on && !run.wasOn) run.out.landings.push([chunkAt(g.hero.cy), Math.floor((g.hero.cx - g.lv.l) / tileOf()), +heightOf(g.hero.floorY).toFixed(1)]); run.wasOn = on; }   // each landing
+    // really played, for the landing map (owner, К10 «А»): [its chunk, its column, its height] floor; flattened by a pestle (MOCHI)
   }
 }
 // The jumps really played, and how many were off a wall (the hero's own surface: a climb that never needs one is a ladder)
@@ -160,28 +162,42 @@ function score(base, st) {
 }
 // A boss fight: a heart lost costs what it costs on a climb, a heart dealt pays a little less (no trading one for one), the boss
 // beaten is the level cleared. Between hits the hero is drawn to where the boss's way of being beaten wants it (BOSSES; Boss):
-//   dive (the Cork, the Crane, the Pigeon): up on a plank, never under it as it shakes over the hero and drops (the shaking and
-//     the drop outlast a try's second); at it while it lies dazed. Hovering, it can be stomped too: the tries find that.
-//   slide (the Puck, the Rat King): a rolling shell is a flip to come (it slides into its own shells: Game.rolling); behind a
-//     shell from it, to stomp it its way; at it while it lies belly up.
-//   ride (the Tram, the Minecart): up, as high as over it (open from above only), then over it.
+//   bone (Koschei): off the floor in front of him as he sweeps; at him while he is off balance.
+//   sky (the Karasu-tengu): off the line of its swoop; at it while its beak is stuck in the floor.
+//   street (the Tram): up off the floor while it rings and runs; at its roof while it stands at a stop.
+//   quake (Onamazu): up off the floor when it rears (its waves), off its leap's way; at it while it lies flopped.
+//   glide (Tsurara-onna): off the floor in her slide's way (a ledge, or over her); at her while she sticks to the wall.
+//   hang (the Tsuchigumo, the Bake-danuki): never under it as it shakes over the hero and drops; near it, to be at it while it lies on the floor.
 function bossScore(base) {
   const lv = g.lv, bs = lv.boss, d = bs.def || {}, H = g.hero, b = bs.body, T = tileOf();
   if (bs.dead) return 1e9;
   let s = -(base.hp - g.hp) * 5000 + (base.bossHp - bs.hp) * 4000 + (g.coins - base.coins) * 3 + (g.kills - base.kills) * 40;
   const dx = Math.abs(H.cx - b.cx) / T, h = heightOf(H.cy);
-  if (d.rail) s += h * 80 + (H.maxY < b.minY ? 800 - Math.min(dx, 6) * 120 : 0);
-  else if (d.slide) {
-    s += lv.enemies.filter((e) => e.state === 'shell').length * 2500;
-    if (bs.state === 'dazed') s += 3000 - dx * 400;
-    else {   // the nearest shell still walking: from its far side, a stomp rolls it at the boss (shellUp: away from the hero)
-      const sh = lv.enemies.filter((e) => e.type === 'shell' && e.state !== 'shell').sort((p, q) => Math.abs(p.body.cx - H.cx) - Math.abs(q.body.cx - H.cx))[0];
-      if (sh) s -= (Math.abs(H.cx - (sh.body.cx - Math.sign(b.cx - sh.body.cx) * (sh.body.R + H.R))) / T) * 150;
-    }
-  } else if (bs.state === 'dazed') s -= dx * 400;
-  else {
-    s += Math.min(h, 8) * 100;
-    if ((bs.state === 'warn' || bs.state === 'dive') && H.cy > b.cy && Math.abs(H.cx - b.cx) < b.R + H.R + 0.5 * T) s -= 4000;
+  if (d.bone) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at him, best over him, while he is off balance
+    else if (bs.state === 'warn' || bs.state === 'sweep') s += Math.min(h, 4) * 300 - (Math.sign(H.cx - b.cx) === bs.dir && dx < 5 && h < 1.5 ? 3000 : 0);   // up off the floor in front of him
+    else s -= Math.abs(dx - 3) * 60;
+  } else if (d.sky) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while its beak is stuck
+    else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - bs.tx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // off its swoop's line
+    else s -= Math.abs(Math.abs(H.cx - (g.lv.l + g.lv.r) / 2) / T - 2) * 60;   // near the middle, not against a wall
+  } else if (d.street) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over its roof, while it stands at a stop
+    else if (bs.state === 'warn' || bs.state === 'dive') s += Math.min(h, 6) * 150;   // up, out of its way
+    else s -= Math.abs(dx - 3) * 60;
+  } else if (d.quake) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while it lies flopped
+    else if (bs.state === 'crouch' || bs.state === 'dive') s -= Math.max(0, 4 - dx) * 500;   // off its leap's way
+    else s -= Math.abs(dx - 4) * 60;   // near enough to be at it once it flops
+  } else if (d.glide) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at her, best over her, while she sticks
+    else if (bs.state === 'warn' || bs.state === 'dive') s += Math.min(h, 6) * 150;   // up, out of her slide's way
+    else s -= Math.abs(dx - 3) * 60;   // near enough to be at her once she sticks
+  } else if (d.hang) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while it lies tangled
+    else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - b.cx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // never under it as it drops
+    else if (bs.state === 'windup' || bs.state === 'sweep') s -= Math.max(0, h - 0.5) * 600;   // low on the floor under its swing
+    else s -= Math.abs(dx - 3) * 60;   // near enough to be at it once it falls
   }
   return s;
 }
@@ -210,7 +226,7 @@ function decide(best) {
 }
 // What cost a heart and what got stomped, counted on the moves really played (not the tries).
 let live = false, cause = '', causeAt = '', killed = {};
-for (const [k, what] of [['meet', (e) => (e === g.lv.boss ? 'boss' : e.type)], ['spikes', () => 'spikes'], ['fireTouch', () => 'fire'], ['shots', () => 'shot'], ['fall', () => 'fall'], ['crossStep', () => 'train']]) {
+for (const [k, what] of [['meet', (e) => (e === g.lv.boss ? 'boss' : e.type)], ['spikes', () => 'spikes'], ['fireTouch', () => 'fire'], ['shots', () => 'shot'], ['fall', () => 'fall'], ['crossStep', () => 'train'], ['komoriTouch', () => 'komori'], ['wormTouch', () => 'worm'], ['folkStep', () => 'crow']]) {   // (a komori's, a worm's tubes', a Tokyo crow's dive: their own touches)
   const f = g[k];
   g[k] = function (...a) { const hp = this.hp, r = f.apply(this, a); if (live && this.hp < hp) { cause = what(...a); causeAt = this.lv.boss ? this.lv.boss.state : ''; } return r; };   // (at a boss: what it was doing)
 }
@@ -227,9 +243,12 @@ let run = null;
 function start(world, stage = 0, s = 1, opts = {}) {
   seed = opts.order != null ? opts.order : s;   // (`order`: a seed of its own for the parts' order and the play's chances, the level still laid on `s`)
   const real = Math.random; Math.random = random;   // built on the bot's seed too: a tier's three parts in an order of their own (campMerge), a boss's arena
-  try { if (opts.daily) __up.daily(s, stage); else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s); }   // a campaign level (its recipe; the map's column, see campAt) or a random run's
+  try { if (opts.daily) __up.daily(s, stage); else if (opts.camp && opts.parts) { g.playLevel(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s, opts.parts); ui.hideAll(); } else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s); }   // (`parts`: a tier's
+  // three parts in this order, [0, 2, 1] the calm, the fierce, the plain from the bottom: К10's every order)   // a campaign level (its recipe; the map's column, see campAt) or a random run's
   finally { Math.random = real; }
   g.makeHero();   // a fresh body, so a level plays the same whatever was played before it
+  seed = opts.order != null ? opts.order : s;   // and the play's chances from the seed again: the build makes a new hero (its Face: 2 Math.random) only when R
+  // changed, after the menu, so a level's run hung on what came before it in the page (a bonus 10 s alone, 10.5 after another; review)
   g.mods = MODS(); g.taken = []; g.maxHp = HEALTH.start; g.hp = g.maxHp; g.coins = 0; g.kills = 0; g.bestCombo = 0; g.applyMods();   // a fresh run's state for every level
   if (opts.god) g.invuln = 1e9;
   const lv = g.lv;
@@ -242,8 +261,8 @@ function start(world, stage = 0, s = 1, opts = {}) {
   killed = {};
   const spawned = {};
   for (const e of lv.spawns) spawned[e.type] = (spawned[e.type] || 0) + 1;
-  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, frames: 0, wallFrames: 0, jumps: 0, wallJumps: 0, floorJumps: 0, rebounds: 0, flats: 0, flat: false, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
-    out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [], boss: bs ? { name: bs.def ? bs.def.name.en : 'Lid', max: bs.max, dealt: [] } : null } };
+  run = { opts, spawned, wasOn: true, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, frames: 0, wallFrames: 0, jumps: 0, wallJumps: 0, floorJumps: 0, rebounds: 0, flats: 0, flat: false, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
+    out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [], landings: [], order: (g.rc && g.rc.order) || null, boss: bs ? { name: bs.def ? bs.def.name.en : 'Lid', max: bs.max, dealt: [] } : null } };
   return { started: true, foes: run.foes };
 }
 function advance(ms = 30000) {

@@ -9,72 +9,72 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
+    hintKeys: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', dark: 'darkness',
-    seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
+    continue: 'Continue', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', tip: 'Tip: {n}', dark: 'darkness',
+    seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks', seen_slick: 'Slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_rebound: 'Jump as you land: bounce higher!', rebound_ok: 'Boing! Right on the beat', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge', seen_wind: 'When the carp flag fills, a gust blows you aside', seen_mochi: 'The pestle flattens you: then you fit under low beams', seen_fork: 'Two ways up: the risky one pays more', seen_fireWall: 'Fire bursts out of some walls: wait for it to die down',
-    seen_splitter: 'A splitter breaks in two', seen_tumbler: 'A tumbler: stomp it between its somersaults', seen_tofu: 'Stomp a tofu and it falls into four', seen_nurikabe: 'A nurikabe drops on you: stomp it once it lands', seen_chaser: 'A chaser follows you on its wall',
+    seen_splitter: 'A splitter breaks in two', seen_tumbler: 'A tumbler: stomp it between its somersaults', seen_tofu: 'Stomp a tofu and it falls into four', seen_nurikabe: 'A nurikabe drops on you: stomp it once it lands', seen_komori: 'Bats dive when they flash red: dodge, then stomp', seen_chaser: 'A chaser follows you on its wall',
     got_smash: 'Helmet! Jumps smash blocks · {s} s', got_bubble: 'Bubble gum! Float up · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', depth: '2.5D', on: 'on', off: 'off',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', bookTap: 'Tap one to read it', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', station: 'Station {n}', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_water: 'Soaked!', dead_snow: 'Snowed under!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
   },
   es: {
-    hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
+    hintKeys: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', dark: 'oscuridad',
-    seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
+    continue: 'Continuar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', tip: 'Consejo: {n}', dark: 'oscuridad',
+    seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega', seen_slick: 'Resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_rebound: '¡Salta al aterrizar: rebotas más alto!', rebound_ok: '¡Boing! Justo a tiempo', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva', seen_wind: 'Cuando se infla la carpa, una ráfaga te empuja de lado', seen_mochi: 'El mazo te aplasta: así cabes bajo las vigas bajas', seen_fork: 'Dos caminos: el arriesgado paga más', seen_fireWall: 'De algunas paredes sale fuego: espera a que se apague',
-    seen_splitter: 'El divisor se parte en dos', seen_tumbler: 'Volteretas: písalo entre salto y salto', seen_tofu: 'Pisa un tofu y se parte en cuatro', seen_nurikabe: 'La nurikabe cae sobre ti: písala al aterrizar', seen_chaser: 'El perseguidor te sigue por su pared',
+    seen_splitter: 'El divisor se parte en dos', seen_tumbler: 'Volteretas: písalo entre salto y salto', seen_tofu: 'Pisa un tofu y se parte en cuatro', seen_nurikabe: 'La nurikabe cae sobre ti: písala al aterrizar', seen_komori: 'Los murciélagos bajan al ponerse rojos: esquiva y pisa', seen_chaser: 'El perseguidor te sigue por su pared',
     got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_bubble: '¡Chicle! Flotas hacia arriba · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
-    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
+    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', depth: '2.5D', on: 'sí', off: 'no',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', bookTap: 'Toca uno para leerlo', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', station: 'Estación {n}', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_water: '¡Empapado!', dead_snow: '¡Bajo la nieve!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
   },
   pt: {
-    hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
+    hintKeys: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', dark: 'escuridão',
-    seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
+    continue: 'Continuar', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', tip: 'Dica: {n}', dark: 'escuridão',
+    seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda', seen_slick: 'Escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_rebound: 'Pule ao pousar: quica mais alto!', rebound_ok: 'Boing! Bem na hora', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie', seen_wind: 'Quando a carpa enche, uma rajada te empurra de lado', seen_mochi: 'O pilão te achata: aí você passa sob as vigas baixas', seen_fork: 'Dois caminhos: o arriscado paga mais', seen_fireWall: 'Algumas paredes soltam fogo: espere ele baixar',
-    seen_splitter: 'O divisor se parte em dois', seen_tumbler: 'Cambalhota: pise entre um salto e outro', seen_tofu: 'Pise num tofu e ele vira quatro', seen_nurikabe: 'A nurikabe cai em você: pise quando ela pousa', seen_chaser: 'O perseguidor segue você pela parede',
+    seen_splitter: 'O divisor se parte em dois', seen_tumbler: 'Cambalhota: pise entre um salto e outro', seen_tofu: 'Pise num tofu e ele vira quatro', seen_nurikabe: 'A nurikabe cai em você: pise quando ela pousa', seen_komori: 'Os morcegos mergulham ao ficar vermelhos: desvie e pise', seen_chaser: 'O perseguidor segue você pela parede',
     got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_bubble: 'Chiclete! Flutue para cima · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
-    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
+    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', depth: '2.5D', on: 'sim', off: 'não',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', bookTap: 'Toque em um para ler', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', station: 'Estação {n}', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_water: 'Encharcado!', dead_snow: 'Soterrado na neve!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
   },
   ja: {
-    hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
+    hintKeys: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', dark: 'くらやみ',
-    seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
+    continue: 'つづきから', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', tip: 'ヒント: {n}', dark: 'くらやみ',
+    seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない', seen_slick: 'すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_rebound: 'ちゃくちの しゅんかんに ジャンプ: たかく はねる！', rebound_ok: 'ボヨン！ ぴったり', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ', seen_wind: 'こいのぼりが ふくらむと とっぷう: よこへ ながされる', seen_mochi: 'きねに つぶされると ひくい はりの したを とおれる', seen_fork: 'みちは ふたつ: あぶない ほうが たくさん もらえる', seen_fireWall: 'かべから ひが ふきだす: おさまるまで まとう',
-    seen_splitter: 'ブンレツは ふたつに わかれる', seen_tumbler: 'ゴロゴロようかん: とまった すきに ふもう', seen_tofu: 'とうふを ふむと よっつに わかれる', seen_nurikabe: 'ぬりかべが おちてくる: おちたら ふもう', seen_chaser: 'オイカケは かべを つたって おってくる',
+    seen_splitter: 'ブンレツは ふたつに わかれる', seen_tumbler: 'ゴロゴロようかん: とまった すきに ふもう', seen_tofu: 'とうふを ふむと よっつに わかれる', seen_nurikabe: 'ぬりかべが おちてくる: おちたら ふもう', seen_komori: 'コウモリは あかく なると とっしん: よけて ふもう', seen_chaser: 'オイカケは かべを つたって おってくる',
     got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_bubble: 'ガム！ ふわふわ うく · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
-    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
+    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', depth: 'りったい', on: 'オン', off: 'オフ',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', bookTap: 'さわって よもう', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', station: '{n} ごうめ', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_water: 'びしょぬれ！', dead_snow: 'ゆきに うもれた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
   },
 };
 let lang = 'en';
@@ -90,7 +90,7 @@ const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || na
 const SAVE_KEY = 'upwell.save', LOCAL_KEY = 'upwell.local';   // (LOCAL_KEY: the browser's copy of a visit without the Bridge, a key no Bridge storage takes over)
 // Kept through the Playgama Bridge's storage (its checklist: never localStorage itself), the whole of it under one key in
 // one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
-const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: true, camp: null };   // seen: hints shown once; stick: touch by a stick, not the keys
+const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: true, camp: null, caves: {} };   // seen: hints shown once; stick: touch by a stick, not the keys
 // The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
 // purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
 // run's progress stays in save.run, for the random run.
@@ -114,11 +114,10 @@ const daySeed = (day, w, s, b) => (Math.imul((day ^ 0x9e3779b9) >>> 0, 265443576
 const DAY_W = CAMPAIGN.findIndex((c) => c.world === TOKYO);   // the daily well's world: Tokyo (owner), wherever it stands in the order
 const dayPlan = (day) => { const r = mulberry32(daySeed(day, 9, 9, true)); return DAY_TIERS.map(([a, b]) => DAY_W * 30 + (r() < 0.5 ? a : b) * 3 + ((r() * 3) | 0)); };   // the daily well's three levels of the map (see campAt)
 const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += dayAt(i).len)); };   // its medals: where each of them ends
-// The campaign's map (the user: each world a grid of 3 × 10, a route up it to choose, as in Slay the Spire): a world's first level
-// alone at its foot, eight tiers of three over it, then its boss. Level i is world w, tier s, column c (i = w·30 + s·3 + c; the first
-// and the boss in the middle). The middle one is the tier's recipe; the left the same calmer, the right richer and fiercer (SIDE:
-// its enemies and fire by so much, a stash, a bonus race's time), each on a seed of its own. A level leads up to the one over it;
-// tier by tier in turn, the middle one out to both sides or the sides in to the middle (ups). A world opens with the last one's boss.
+// The campaign's levels by id: level i is world w, tier s, column c (i = w·30 + s·3 + c; a save keeps its stars, losses, medals and
+// last level by it). Ten tiers a world: its first level at the foot, its boss on top. The middle column is the tier's recipe; the left
+// the same calmer, the right richer and fiercer (SIDE: its enemies and fire by so much, a stash, a bonus race's time), each on a seed
+// of its own. A world opens with the last one's boss.
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
@@ -147,33 +146,32 @@ const campAt = (i) => {
 // numbers when the Village became the first world: Tokyo's own of before, for the tiers it plays (DAY_TIERS)
 const DAY_NUMS = { 1: { len: 31, fire: 0.35, foes: 0.5, pair: 0, safe: true }, 2: { len: 28, fire: 0.35, foes: 0.45, pair: 0, safe: true }, 3: { len: 34, fire: 0.38, foes: 0.55, pair: 0.1, safe: false },
   4: { len: 25, fire: 0.42, maxD: 2, foes: 0.75, pair: 0.3, safe: false }, 6: { len: 30, fire: 0.38, foes: 0.55, pair: 0.1, safe: false }, 7: { len: 30, fire: 0.42, maxD: 2, foes: 0.7, pair: 0.25, safe: false } };
-const dayAt = (i) => { const s = Math.floor((i % 30) / 3); return sideOf(i % 3, Object.assign({}, CAMPAIGN[DAY_W].levels[s], DAY_NUMS[s])); };
+const dayAt = (i) => { const s = Math.floor((i % 30) / 3); return sideOf(i % 3, Object.assign({}, CAMPAIGN[DAY_W].levels[s], DAY_NUMS[s], { episode: null })); };   // (no story episode: UME)
 // One level a tier (owner, 2026-10-20: no map between levels, the sides in the middle one, three times as long): its middle id; the way up
 // is a line. The calm and fierce sides (SIDE) are parts of it now, in a new order each time (campMerge); the daily well still plays them alone.
-const campHas = (i) => i % 3 === 1;
-const ups = () => [1];   // the columns a level leads up to
 const campOpen = (i) => {
-  const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, below = (d) => w * 30 + (s - 1) * 3 + d;
-  if (i >= CAMP_LEN || !campHas(i)) return false;   // (a world past the open ones: shut, whatever a save says)
+  const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3;
+  if (i >= CAMP_LEN || c !== 1) return false;   // (a side's id, or a world past the open ones: shut, whatever a save says)
   if (gated(w) ? lineStars() < CAMP_STARS[CAMPAIGN[w].world.id] : lineBefore(w) >= 0 && !(st[lineBefore(w) * 30 + 28] > 0)) return false;   // its stars, or the boss before it on the line
-  return s === 0 || [0, 1, 2].some((d) => campHas(below(d)) && st[below(d)] > 0 && ups(s - 1, d).includes(c));
+  return s === 0 || st[i - 3] > 0;   // the first, or the one under it cleared
 };
-const campNextId = () => {   // where Continue goes: the last one played again if lost, else on up from it (its column, else the middle),
-  // else the highest open one not cleared in the last world open (on that column, else the middle): always on, never back down
-  const st = save.camp.stars, L = save.camp.last | 0, a = campAt(L), pref = (x) => (x.c === a.c ? 0 : x.c === 1 ? 1 : 2);
-  if (campHas(L) && campOpen(L) && !(st[L] > 0)) return L;
-  if (a.s < 9) { const up = ups(a.s, a.c).map((c) => a.w * 30 + (a.s + 1) * 3 + c).filter((i) => campOpen(i) && !(st[i] > 0)).sort((i, j) => pref(campAt(i)) - pref(campAt(j))); if (up.length) return up[0]; }
+const campNextId = () => {   // where Continue goes: the last one played again if lost, else the one over it, else the highest open one not
+  // cleared in the last world open: always on, never back down
+  const st = save.camp.stars, L = save.camp.last | 0, a = campAt(L);
+  if (campOpen(L) && !(st[L] > 0)) return L;
+  if (a.s < 9) { const i = a.w * 30 + (a.s + 1) * 3 + 1; if (campOpen(i) && !(st[i] > 0)) return i; }
   let best = null, id = CAMP_END;
   for (let i = 0; i < CAMP_LEN; i++) if (campOpen(i) && !(st[i] > 0) && !gated(Math.floor(i / 30))) {   // (on the line: a bonus world is gone into from its map)
     const x = campAt(i);
-    if (!best || x.w > best.w || (x.w === best.w && (x.s > best.s || (x.s === best.s && pref(x) < pref(best))))) { best = x; id = i; }
+    if (!best || x.w > best.w || (x.w === best.w && x.s > best.s)) { best = x; id = i; }
   }
   return id;
 };
 const campMerge = (w, s, rc, order) => {   // a tier's level: its calm, plain and fierce versions one over another, in a new order each time (or
   // `order`, a level under way's: Game.resume), all as long
   if (s === 0 || rc.boss || rc.bonus != null) return rc;   // (the first and the boss alone; a bonus race stays one race)
-  order = order || shuffled(Math.random, [0, 1, 2]);
+  order = order || (w < 3 ? [0, ...shuffled(Math.random, [1, 2])] : shuffled(Math.random, [0, 1, 2]));   // (worlds 1-3: the calm part first, at the bottom, the plain and the
+  // fierce over it in either order; owner, К1 «А»: a level starts slow. From world 4, any order)
   const parts = order.map((c) => campAt(w * 30 + s * 3 + c).rc);
   return Object.assign({}, rc, { order, len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })) });
 };
@@ -185,6 +183,9 @@ const shakeAdd = shake.add.bind(shake);
 shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
+  const obj = (o) => o && typeof o === 'object' && !Array.isArray(o), num = (v) => typeof v === 'number' && Number.isFinite(v);
+  for (const k of ['book', 'seen', 'caves']) if (!obj(save[k])) save[k] = {};   // (a hand-edited or broken store: «book: 3» stopped the boot, «seen: null» every step; QA)
+  if (save.cur != null && !(obj(save.cur) && num(save.cur.ci) && num(save.cur.m) && num(save.cur.seed))) delete save.cur;   // (a level under way that cannot go on: «Continue · NaN m»)
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
   if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = []; if (!c.medals || typeof c.medals !== 'object') c.medals = {};   // (v6 to v7: the medals, MEDAL)
   if ((save.v | 0) < 3) {   // v2 to v3: a world's ten levels in a row onto its map, each the middle of its tier (a boss's losses with it)
@@ -263,6 +264,13 @@ function glueSide(b) {
 }
 const foeColor = (id) => FOE_COLOR[id] || colorById(id);
 
+// Whether a komori's way f(u), u from 0 to 1, keeps `pad` clear of every block (it flies through nothing: KOMORI)
+const clearWay = (lv, f, pad, n = 20) => {
+  const pts = []; let y0 = Infinity, y1 = -Infinity;
+  for (let k = 1; k < n; k++) { const p = f(k / n); pts.push(p); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }
+  const near = lv.near(y0 - pad, y1 + pad);   // (the blocks at its heights only)
+  return !pts.some(([x, y]) => near.some((r) => !r.cap && x > r.x0 - pad && x < r.x1 + pad && y > r.y0 - pad && y < r.y1 + pad));
+};
 // An enemy: a red squishy crawling its round (see ENEMY).
 class Foe {
   constructor(s, lv) {
@@ -275,7 +283,8 @@ class Foe {
     this.dir = s.dir || (Math.random() < 0.5 ? -1 : 1); this.t = 0; this.stall = 0; this.ph = Math.random(); this.lastPh = this.ph;
     this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
     this.s = this.rect ? (this.rect.x1 - this.rect.x0) / 2 + 1.05 * this.body.R : 0;   // a circler starts on top, in the middle
-    this.atk = ''; this.atkT = 0; this.atkCool = 0; this.lap = 0; this.ax = 0; this.ay = 0;   // a Kikimora's leap, a Leshy's whirl (leap, whirl): its stage, time in it, rest after
+    this.atk = ''; this.atkT = 0; this.atkCool = 0; this.lap = 0; this.ax = 0; this.ay = 0; this.span = 1;   // a Kikimora's leap, a Leshy's whirl (leap, whirl): its stage, time in it, rest after
+    loosen(this, 't', 'stall', 'state', 'shellT', 'wind', 's', 'atk', 'atkT', 'atkCool', 'lap', 'ax', 'ay', 'span'); loosen(this.body, 'gScale');   // (see loosen)
   }
   // Soft bodies moving as the hero does, by pushes and their own give rather than gliding on rails: each one inches
   // along in pulses (every `step` s), stretching along its way at each push and settling in between, and keeps upright.
@@ -292,6 +301,7 @@ class Foe {
     if (def.move === 'flow') { this.flow(dt, g); return; }
     if (def.move === 'tumble') { this.tumble(dt, g); return; }   // (it turns itself up between its somersaults)
     if (def.move === 'crush') { this.crush(dt, g); return; }
+    if (def.move === 'swoop') { this.swoop(dt, g); return; }
     if (def.move === 'crawl') {   // back and forth along its ledge (or the floor, between the walls)
       if (this.state === 'shell') { this.roll(dt, g); return; }
       if (!(b.wallMask & 8)) return;
@@ -325,7 +335,7 @@ class Foe {
       steer((p[0] + jx - b.cx) * 8, (p[1] - b.cy) * 8, 10);
     }
   }
-  canStomp() { return !!this.def.stomp && !(this.flip > 0) && !(this.type === 'nurikabe' && this.cs !== 'down'); }   // (a tumbler in the air, a nurikabe not lying down: no)
+  canStomp() { return !!this.def.stomp && !(this.flip > 0) && !(this.type === 'nurikabe' && this.cs !== 'down') && !(this.type === 'komori' && (this.cs === 'warn' || this.fierce())); }   // (a tumbler in the air, a nurikabe not lying down, a komori red: no)
   // A tumbler (TUMBLE): it sits on its ledge, crouches, then somersaults a hop ahead (spun round once, up and over), turning before it would leave its ledge;
   // it lands with a thud
   tumble(dt, g) {
@@ -370,6 +380,64 @@ class Foe {
       b.gScale = 0; goTo(this.homeX, this.home, CRUSH.rise * R / Math.max(R, Math.abs(this.home - b.cy)));
       if (Math.abs(b.cy - this.home) < 0.25 * R) this.cs = 'hang';
     }
+  }
+  // A komori (KOMORI): asleep under its ledge (frame 1, facing the hero); the hero near and under it, it flashes red (b.warn) and lets go, its wings open (2),
+  // then dives in a U through where he was and up the far side (red, its wings beating: 2 and 3), flies back up to its perch and rests there. Its state
+  // drives its body (a bot's restored branch too): it floats and touches nothing, the hero only by its circle (Game.komoriTouch). [home, homeX: its perch;
+  // ax, ay: where it dives through; atkCool: its rest]
+  swoop(dt, g) {
+    const b = this.body, H = g.hero, R = g.R, lv = g.lv, K = KOMORI;
+    if (this.home == null) { this.homeX = b.cx; this.home = b.cy; this.cs = 'hang'; this.ct = 0; }
+    this.ct += dt; b.gScale = 0; b.thread = true; b.wake();
+    let x = this.homeX, y = this.home, vx = 0, vy = 0;
+    if (this.cs === 'hang') {
+      this.atkCool = Math.max(0, this.atkCool - dt);
+      if (!this.atkCool && H.cy > b.cy + K.low * R && Math.hypot(H.cx - b.cx, H.cy - b.cy) < K.see * R && b.cy > lv.cam + (view.hudB || 0) && b.cy < lv.cam + view.h
+        && clearWay(lv, (u) => [b.cx + (H.cx - b.cx) * u, b.cy + (H.cy - b.cy) * u], K.pad * PIX.base)) this.rouse(g);   // (in the hero's light, and in sight of him)
+    } else if (this.cs === 'warn') {
+      if (this.lamped(lv, R)) { this.cs = 'hang'; this.ct = 0; }   // a lamp lit near it: back to sleep
+      else if (this.ct > K.warn) this.pounce(g);
+      else y += this.lift() + K.drop * R * Math.sin(((this.ct / K.warn) * Math.PI) / 2);   // letting go (at once its open wings' clear of its ledge)
+    }
+    if (this.cs === 'dive' || this.cs === 'back') {
+      const dive = this.cs === 'dive', T = dive ? K.dive * (this.span < 0 ? 0.5 : 1) : K.back, u = Math.min(1, this.ct / T), v = 1 - u, p = this.way(dive, R, lv);
+      x = v * v * p[0] + 2 * v * u * p[2] + u * u * p[4]; y = v * v * p[1] + 2 * v * u * p[3] + u * u * p[5];
+      vx = (2 * (v * (p[2] - p[0]) + u * (p[4] - p[2]))) / T; vy = (2 * (v * (p[3] - p[1]) + u * (p[5] - p[3]))) / T;   // (its pace along it: it keeps to it)
+      if (u >= 1) { if (dive) this.cs = 'back'; else { this.cs = 'hang'; this.atkCool = K.rest; } this.ct = 0; }
+    }
+    setVel(b, vx + (x - b.cx) * 12, vy + (y - b.cy) * 12);
+    const fly = this.cs === 'dive' || this.cs === 'back', d = fly ? vx : H.cx - b.cx;
+    b.frame = fly ? 2 + (Math.floor(this.ct * K.flap[this.cs === 'dive' ? 0 : 1]) % 2) : this.cs === 'warn' ? 2 : 1;
+    b.warn = this.fierce() || (this.cs === 'warn' && Math.floor(this.ct * 5) % 2 === 0);
+    if (Math.abs(d) > (fly ? 0.5 : 0.3) * R) b.lookDir = Math.sign(d); else if (!b.lookDir) b.lookDir = 1;
+  }
+  // Its way, a curve [from, its pull, to]: diving, from where it let go down through where the hero was (ax, ay) and up as far past him (`span` of that
+  // way across; a shorter swoop where blocks are in the way), or (span < 0) straight down to there; back, home from where the dive ended
+  way(dive, R, lv) {
+    const top = this.home + this.lift(), y0 = top + KOMORI.drop * R, x1 = clamp(2 * this.ax - this.homeX, lv.l + R, lv.r - R), x2 = this.homeX + (x1 - this.homeX) * Math.max(0, this.span);
+    if (this.span < 0) return dive ? [this.homeX, y0, (this.homeX + this.ax) / 2, (y0 + this.ay) / 2, this.ax, this.ay] : [this.ax, this.ay, (this.ax + this.homeX) / 2, (this.ay + top) / 2, this.homeX, top];
+    return dive ? [this.homeX, y0, 2 * this.ax - (this.homeX + x2) / 2, 2 * this.ay - y0, x2, y0] : [x2, y0, (x2 + this.homeX) / 2, y0 + 1.5 * R, this.homeX, top];
+  }
+  lift() {   // how far under its perch it flies, wings open: the open drawing's half height over the hanging one's (its wings clear of its ledge)
+    const up = FOE_SPRITES['komori-' + KOMORI_V + '-2'], hang = FOE_SPRITES['komori-' + KOMORI_V + '-1'];
+    return up && hang ? Math.max(0, (up.length - hang.length) / 2) * PIX.base : 0;
+  }
+  pounce(g) {   // the warning over: the way it dives, the first clear one (a swoop, half of one, straight down at him); none, it settles back
+    const R = g.R, lv = g.lv, pad = KOMORI.pad * PIX.base;
+    this.ct = 0;
+    const clear = (dive) => { const p = this.way(dive, R, lv); return clearWay(lv, (u) => { const v = 1 - u; return [v * v * p[0] + 2 * v * u * p[2] + u * u * p[4], v * v * p[1] + 2 * v * u * p[3] + u * u * p[5]]; }, pad); };
+    for (const k of [1, 0.5, -1]) { this.span = k; if (clear(true) && clear(false)) { this.cs = 'dive'; sound.play('airjump', 0.6, 1.5); return; } }
+    this.cs = 'hang'; this.atkCool = KOMORI.rest;
+  }
+  fierce() { return this.cs === 'dive' && (this.span < 0 || this.ct < 0.5 * KOMORI.dive); }   // a komori on its way down to where the hero was: red, it hurts
+  rouse(g) {   // a komori woken (not while it rests, nor with a lamp lit near it): it marks where the hero is now, to dive through when its warning is over
+    const H = g.hero, R = g.R, lv = g.lv;
+    if (this.cs !== 'hang' || this.atkCool > 0 || this.lamped(lv, R)) return;
+    this.cs = 'warn'; this.ct = 0; this.body.translate(0, this.home + this.lift() - this.body.cy); this.ax = clamp(H.cx, lv.l + R, lv.r - R); this.ay = Math.max(H.cy, this.home + (KOMORI.drop + 1.2) * R); sound.play('bubble', 0.5, 1.9);
+  }
+  lamped(lv, R) {   // a Mine lamp lit within KOMORI.lamp R of its perch
+    for (const r of lv.tended.keys()) { const k = kitThing(lv, r); if (k && k.kind === 'lamp' && Math.hypot(k.x - this.homeX, k.y - this.home) < KOMORI.lamp * R) return true; }
+    return false;
   }
   // A Kikimora (KIKI): the hero near and level with her, she shivers on her wall, flashing red (b.warn), leaps out at him with her broom
   // and crawls back. True while she does.
@@ -465,17 +533,17 @@ class Foe {
     });
     return out;
   }
-  // A spitter, now and then while the hero is near and on screen, swells up for SPIT.wind s and
-  // lobs a blob that comes down where the hero was. True while it stands to do it.
   lunge(dt, g) {   // a skull (SKULL): the hero close on its level, it rushes at it a moment, rattling; its goo drips all along
     const b = this.body, H = g.hero, R = g.R;
-    if (Math.random() < 3 * dt) bits.push({ x: b.cx + rand(-0.5, 0.5) * b.R, y: b.maxY - 2, vx: 0, vy: 40, s: rand(1.5, 2.5), c: INK.dark, t: 0, life: rand(0.6, 1.2), g: 0.5, drag: 1 });
+    if (fxRand(0, 1) < 3 * dt) bits.push({ x: b.cx + fxRand(-0.5, 0.5) * b.R, y: b.maxY - 2, vx: 0, vy: 40, s: fxRand(1.5, 2.5), c: INK.dark, t: 0, life: fxRand(0.6, 1.2), g: 0.5, drag: 1 });
     if ((this.rush = Math.max(0, (this.rush || 0) - dt)) > 0) return true;
     if ((this.cool = Math.max(0, (this.cool || 0) - dt)) > 0) return false;
     if (Math.abs(H.cx - b.cx) > SKULL.reach * R || Math.abs(H.cy - b.cy) > 1.5 * R) return false;
     this.dir = Math.sign(H.cx - b.cx) || this.dir; this.rush = SKULL.rush; this.cool = SKULL.every;
     sound.play('crumble', 0.6, 1.9); b.kickSquash(this.dir, 0, -1.2); return true;
   }
+  // A spitter, now and then while the hero is near and on screen, swells up for SPIT.wind s and
+  // lobs a blob that comes down where the hero was. True while it stands to do it.
   spit(dt, g) {
     const b = this.body, H = g.hero, lv = g.lv;
     if (this.wind > 0) {
@@ -502,145 +570,328 @@ class Foe {
 // for a moment: then it hurts to touch.
 class Boss {
   constructor(lv, def) {   // def: a campaign boss's (BOSSES); the random run's summit boss has none
-    const lk = def && def.look, R = lv.R * ((lk && lk.size) || (def && def.size) || BOSS.size), slide = !!(def && def.slide), rail = def && def.rail && lv.rail;   // lk: its look (LOOKS)   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
+    const lk = def && def.look, R = lv.R * ((lk && lk.size) || (def && def.size) || BOSS.size), ground = !!(def && (def.glide || def.quake || def.street || def.bone));   // lk: its look (LOOKS)   // a boss on the floor: to one side of the hero
     this.ink = def && def.ink ? { id: 'boss', base: PAL[def.ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink)
-    this.body = new Body(designById((lk && lk.design) || (def && def.design) || 'cat'), this.ink, rail ? rail.x1 : slide ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, rail ? rail.y - 0.75 * R : slide ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
-    this.body.gScale = slide ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
+    this.body = new Body(designById((lk && lk.design) || (def && def.design) || 'cat'), this.ink, ground ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, ground ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
+    this.body.gScale = ground ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
     this.look = this.body.look = lk ? lk.id : null;   // drawn round it by the renderer (look), on it by writeFace (LOOK_FACE)
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
     this.state = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // rattled: Koschei's bones have shaken to say he rises
+    this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
+    const [sw, sh] = bossSize(this); this.halfW = sw / 2; this.minGrowth = Math.min(1, (4 * lv.R) / Math.max(sw, sh));   // its drawing's half width; its shrink stops at 2:1 against the hero's 2R
+    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
-  open() { return (this.def && this.def.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(this.def && this.def.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
+  open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)
   to(s) { this.state = s; this.st = 0; }
   think(dt, g) {
-    if (this.def && this.def.slide) { this.slide(dt, g); return; }
-    if (this.def && this.def.rail) { this.ride(dt, g); return; }
-    const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
-    this.t += dt * k; this.st += dt; b.wake();   // never asleep: lying dazed it would doze off, and then not get up
-    if (this.def && this.def.bones) {   // Koschei: a heap of bones while he lies dazed (the renderer's drawSprite), rebuilt as he rises
-      const end = BOSS.dazed * this.help;
-      b.heap = this.state === 'dazed' ? Math.min(1, this.st / 0.12) : this.state === 'rise' ? Math.max(0, 1 - this.st / 0.4) : 0;
-      b.rattle = this.state === 'dazed' && this.st > end - 0.5; b.heapT = this.t;
-      if (b.rattle && !this.rattled) { this.rattled = true; sound.play('crumble', 0.6, 1.5); }   // the warning: his bones rattle, then fly together
-    }
-    if (this.state !== 'dazed') turnUp(b, 6, dt);   // upright in the air, as the crawlers on their walls
-    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
-    if (this.state === 'warn' || this.state === 'dive' || this.state === 'dazed') {
-      if (this.state === 'warn') {   // over the hero (kept to the middle, clear of the ledges), shaking, flashing
-        const tx = clamp(g.hero.cx, cx - 0.2 * W + b.R, cx + 0.2 * W - b.R), q = Math.min(1, 6 * dt);
-        addVel(b, ((tx - b.cx) * 4 - b.rigVx) * q, -b.rigVy * q);
-        if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.12);
-        b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
-        if (this.st > BOSS.warn) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
-      } else if (this.state === 'dive') {
-        setVel(b, 0, BOSS.dive * R);
-        for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > b.minX && q.minX < b.maxX && q.minY < b.maxY + 4 && q.maxY > b.minY) g.kill(e, false); }   // its own helpers squashed under it
-        if ((b.wallMask & 8) || this.st > 1.5) {   // down: the floor shakes
-          this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2.2); b.sqAx = 0; b.sqAy = 1; b.squeezeIn = 0.7;
-          shake.add(9); haptics.buzz(40); sound.play('stomp', 1, 0.45); sound.play('crumble', 0.8, 0.6);
-          fx.dust(b.cx - b.R, lv.floor, IMPACT.puffSpeed + 900); fx.dust(b.cx + b.R, lv.floor, IMPACT.puffSpeed + 900); fx.ring(b.cx, lv.floor, 2 * b.R, INK.white);
-          if (!this.dazes++) ui.toast(t('bossHint'), 2600);   // the first time: what to do now
-        }
-      } else {
-        addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
-        if (this.st > BOSS.dazed * this.help) this.rise();
-      }
-      return;
-    }
-    const ph = this.def ? this.def.phase(this.hp) : 2;   // a boss with a def adds things as it loses hearts (BOSSES)
-    if (this.state === 'hover' && this.st > BOSS.hover * (this.angry > 0 || this.hp < this.max / 2 || ph >= 3 ? BOSS.fast : 1)) { this.to('warn'); return; }
-    const tx = cx + Math.sin(this.t * 0.55) * W * BOSS.sway, ty = lv.floor - R * BOSS.high + Math.sin(this.t * 1.2) * R * 0.5, q = Math.min(1, 2.4 * dt);
-    addVel(b, ((tx - b.cx) * 2 - b.rigVx) * q, ((ty - b.cy) * 2 - b.rigVy) * q);
-    if (this.state === 'rise' && Math.abs(ty - b.cy) < b.R) this.to('hover');
-    if (this.state !== 'hover') return;
-    if (ph >= 1 && (this.drop -= dt * k) <= 0) {   // its goo, then its helpers; at phase 3 twice the goo
-      this.drop = BOSS.dropEvery;
-      for (let i = -1; i <= 1; i += ph >= 3 ? 0.5 : 1) lv.shots.push({ x: b.cx + i * b.R * 0.5, y: b.maxY, vx: i * 120, vy: 60, r: 0.32 * lv.R, bone: !!(this.def && this.def.bones) });
-    }
-    if (ph >= 2 && (this.call -= dt) <= 0) {
-      this.call = BOSS.spawnEvery;
-      if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: (this.def && this.def.minion) || 'crawler', x: b.cx, y: b.cy + b.R * 0.6 }, lv));   // it drops onto a plank or the floor (Koschei's: skulls)
-    }
+    if (this.def && this.def.hang) { this.hang(dt, g); return; }
+    if (this.def && this.def.glide) { this.glide(dt, g); return; }
+    if (this.def && this.def.quake) { this.quake(dt, g); return; }
+    if (this.def && this.def.street) { this.street(dt, g); return; }
+    if (this.def && this.def.sky) { this.sky(dt, g); return; }
+    if (this.def && this.def.bone) { this.bone(dt, g); return; }
   }
   rise() {
-    const b = this.body, slide = this.def && this.def.slide; this.to('rise'); b.gScale = slide ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); this.rattled = false;
-    if (slide) { turnOver(b); b.up.fails = 0; setVel(b, 0, -3 * b.R); }   // the Puck: back on its feet with a hop
+    const b = this.body, d = this.def || {}, flop = d.quake; this.to('rise'); b.gScale = flop || d.glide || d.street || d.bone ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); this.rattled = false;
+    if (flop) { turnOver(b); b.up.fails = 0; setVel(b, 0, -3 * b.R); }   // Onamazu: back on its belly with a hop
   }
-  // The Puck (BOSSES.puck, PUCK): slides the ice to and fro flicking out shells, winds up (backing off, flat, flashing)
-  // and dashes over to the far wall, which shakes icicles down from its second phase. Only a rolling shell turns it (flip).
-  slide(dt, g) {
-    const b = this.body, lv = g.lv, R = lv.R, ph = this.def.phase(this.hp), H = g.hero;
-    b.wake();
-    if ((this.t += dt) < PUCK.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first
-    this.st += dt;
-    if (this.state !== 'dazed') turnUp(b, 6, dt);   // the dome up (on its back, Gum's own righting is held off: flip)
+  // Tsurara-onna (BOSSES.puck, ICE): she creeps over the ice at the hero, her moves taking turns: icicles called down over the hero after
+  // her arms go up, red, with a chime; a slide after she backs off flashing with a scrape, across to the far wall, where she sticks frozen,
+  // the only time a stomp hurts her. Her wall shakes icicles down from her second phase; her last heart slides her back once before she sticks.
+  glide(dt, g) {
+    const F = this.def.glide, b = this.body, lv = g.lv, R = lv.R, H = g.hero, ph = this.def.phase(this.hp);
+    b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
-    if (this.state === 'dazed') { addVel(b, -b.rigVx * Math.min(1, 4 * dt), 0); if (this.st > PUCK.flip * this.help) this.rise(); return; }
-    if (this.state === 'rise') { if (this.st > 0.5) this.to('hover'); return; }
-    if (this.state === 'warn') {
+    if (this.t < F.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first, while her name is up
+    if (ph > this.phSeen) { this.phSeen = ph; shake.add(5); sound.play('bubble', 0.8, 0.5); }   // a new phase: a cold chime and a shake
+    const icicle = (x) => lv.icicles.push({ x: clamp(x, lv.l + R, lv.r - R), y: Math.max(lv.capY, lv.cam + CAM.top), state: 'shake', t: F.shake });   // shaking `shake` s first: time to step from under it
+    if (this.state === 'hover') {   // creeping over the ice to `keep` R off the hero (she never runs into it but in her slide), her next move after her rest
+      this.dir = Math.sign(H.cx - b.cx) || 1;
+      const off = H.cx - this.dir * (this.halfW + F.keep * R) - b.cx;
+      addVel(b, (clamp(off * 2, -F.creep * R, F.creep * R) - b.rigVx) * Math.min(1, 3 * dt), 0);
+      if (this.st > F.rest[ph]) { const cast = this.next !== 'dash'; this.to(cast ? 'cast' : 'warn'); sound.play(...(cast ? ['bubble', 0.7, 1.7] : ['crumble', 0.6, 0.5])); }   // a chime, or a scrape
+    } else if (this.state === 'cast') {   // her arms up, red: icicles to come over the hero
+      addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0);
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, -0.12);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (this.st > F.cast) {
+        const n = F.n[ph];
+        for (let k = 0; k < n; k++) icicle(H.cx + (k - (n - 1) / 2) * F.gap * R);
+        b.color = this.ink; sound.play('crumble', 0.7, 1.4); this.next = 'dash'; this.to('hover');
+      }
+    } else if (this.state === 'warn') {   // backing off, flashing, a scrape: the slide to come
       addVel(b, (-this.dir * 1.2 * R - b.rigVx) * Math.min(1, 6 * dt), 0);
       if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, 0.14);
-      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
-      if (this.st > PUCK.wind) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
-      return;
-    }
-    if (this.state === 'dive') {
-      addVel(b, (this.dir * PUCK.dash[ph] * R - b.rigVx) * Math.min(1, 10 * dt), 0);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;
+      if (this.st > (this.drops ? F.again : F.wind)) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
+    } else if (this.state === 'dive') {   // across the ice to the far wall
+      addVel(b, (this.dir * F.dash[ph] * R - b.rigVx) * Math.min(1, 10 * dt), 0);
       if (!(b.wallMask & (this.dir > 0 ? 2 : 1)) && this.st < 2.5) return;
       shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); sound.play('crumble', 0.7, 0.8); fx.dust(this.dir > 0 ? lv.r : lv.l, lv.floor, IMPACT.puffSpeed + 900);   // the wall: it shakes
-      for (let k = 0; k < PUCK.icicles[ph]; k++) {   // icicles down, the nearest over the hero first (more grow back where it is)
-        const c = lv.icicles.filter((q) => q.state === 'hang').sort((p, q) => Math.abs(p.x - H.cx) - Math.abs(q.x - H.cx))[0];
-        if (c) { c.state = 'shake'; c.t = ICICLE.shake; } else lv.icicles.push({ x: clamp(H.cx + (k ? 2.5 : -2.5) * R, lv.l + R, lv.r - R), y: Math.max(lv.capY, lv.cam + CAM.top), state: 'shake', t: ICICLE.shake });
-      }
-      this.dir = -this.dir; this.to('hover'); return;
-    }
-    if (b.wallMask & 1) this.dir = 1; else if (b.wallMask & 2) this.dir = -1;
-    addVel(b, (this.dir * PUCK.slide * R - b.rigVx) * Math.min(1, 3 * dt), 0);
-    if ((this.drop -= dt) <= 0) {   // a shell flicked out in front of it, as many as the phase allows
-      this.drop = PUCK.every;
-      if (lv.enemies.filter((e) => e.type === 'shell').length < PUCK.shells[ph]) { lv.enemies.push(new Foe({ type: 'shell', x: clamp(b.cx + this.dir * 1.2 * b.R, lv.l + R, lv.r - R), y: b.cy }, lv)); sound.play('bubble', 0.6, 1.4); }
-    }
-    if (this.st > PUCK.rest[ph] * (this.angry > 0 ? 0.6 : 1)) { this.dir = Math.sign(H.cx - b.cx) || 1; this.to('warn'); sound.play('crumble', 0.6, 0.5); }   // at the hero, after a scrape
+      for (let k = 0; k < F.wallIce[ph]; k++) icicle(b.cx - this.dir * (this.halfW + (1.2 + 2.4 * k) * R));   // over the way to her: wait for them to fall, then go
+      if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // her last heart: back the other way first
+      this.drops = 0; this.next = 'cast'; this.to('dazed'); setVel(b, 0, 0); b.kickSquash(1, 0, 1.6);
+      if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+    } else if (this.state === 'dazed') {   // frozen to the wall: open to a stomp
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (Math.floor(this.st * 6) % 2) b.kickSquash(1, 0, 0.05);
+      if (this.st > F.stun * this.help) this.to('rise');
+    } else if (this.state === 'rise' && this.st > 0.5) this.to('hover');   // off the wall again
   }
-  // The Minecart (BOSSES.cart, CART): rides its rail under the ceiling end to end, lobbing blobs at the hero; at an end it
-  // creaks and tips three rocks down. Open from above only: off a ledge high enough, or let go from the moss over a rail's
-  // end as it comes under (a ▼ then). Its second phase hurries the bridges and lobs two; its third, faster lifts and a spitter.
-  ride(dt, g) {
-    const b = this.body, lv = g.lv, R = lv.R, ph = this.def.phase(this.hp), H = g.hero, rail = lv.rail, k = (this.angry > 0 ? 1.5 : 1) / (this.def.slow || 1);   // angry (hit): faster; a gentle one (slow) slower
-    b.wake(); turnUp(b, 6, dt);
-    if ((this.t += dt) < CART.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), ((rail.y - 0.75 * b.R - b.cy) * 6 - b.rigVy) * Math.min(1, 6 * dt)); return; }   // still at first, while its name is up
-    this.st += dt;
+  // Onamazu (BOSSES.namazu, QUAKE): the earthquake catfish keeps off the hero, its moves taking turns. A quake: reared up on its tail, red,
+  // rumbling, then a slam: waves along the floor both ways and rocks over the hero (their shadows show where). A leap: crouched in a splash,
+  // then up and over onto where the hero was, landing flopped on its back, the only time a stomp hurts it (its stone is hard).
+  quake(dt, g) {
+    const F = this.def.quake, b = this.body, lv = g.lv, R = lv.R, H = g.hero, ph = this.def.phase(this.hp);
+    b.wake(); this.t += dt; this.st += dt;
+    if (this.state !== 'dazed') turnUp(b, 6, dt);   // (flopped, its belly stays up: flop)
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
-    if (ph >= 1 && !lv.crumbleTime) { lv.crumbleTime = CART.crumble[0]; lv.crumbleBack = CART.crumble[1]; }
-    if (ph >= 2 && !this.called) { this.called = true; for (const r of lv.rects) if (r.move && r.move.v) r.move.v *= CART.lifts; lv.enemies.push(new Foe({ type: 'spitter', x: (lv.l + lv.r) / 2, y: lv.floor - 2 * R }, lv)); }
-    let vx = 0;
-    if (this.state === 'hover') {
-      vx = (this.dir * (rail.x1 - rail.x0) / CART.pass[ph]) * k;
-      if ((this.dir > 0 && b.cx >= rail.x1) || (this.dir < 0 && b.cx <= rail.x0)) { this.to('warn'); sound.play('crumble', 0.6, 0.45); }
-    } else if (this.state === 'warn') {   // the creak at an end, then three rocks down and back the other way
-      if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.1);
-      if (this.st > CART.creak) {
-        for (const d of [-0.6, 0, 0.6]) lv.shots.push({ x: b.cx + d * b.R, y: rail.y + 0.4 * R, vx: d * 40, vy: 60, r: CART.rock * R, rock: true });
-        shake.add(4); sound.play('crumble', 0.9, 0.7); this.dir = -this.dir; this.to('hover');
+    if (this.t < F.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first, while its name is up
+    if (ph > this.phSeen) { this.phSeen = ph; shake.add(6); sound.play('crumble', 0.9, 0.4); }   // a new phase: a rumble and a shake
+    const flash = () => { b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink; };   // 2.5 flashes a second: under WCAG's 3
+    if (this.state === 'hover') {   // keeping `keep` R off the hero, its next move after its rest
+      this.dir = Math.sign(H.cx - b.cx) || 1;
+      const off = H.cx - this.dir * (this.halfW + F.keep * R) - b.cx;
+      addVel(b, (clamp(off * 2, -F.creep * R, F.creep * R) - b.rigVx) * Math.min(1, 3 * dt), 0);
+      if (this.st > F.rest[ph]) { const rear = this.next !== 'leap'; this.to(rear ? 'warn' : 'crouch'); sound.play(...(rear ? ['crumble', 0.8, 0.35] : ['bubble', 0.8, 0.5])); }   // a rumble, or a splash
+    } else if (this.state === 'warn') {   // reared up on its tail, red, rumbling: a quake to come
+      addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0);
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, -0.14);
+      flash();
+      if (this.st > (this.drops ? F.again : F.rear)) {   // the slam: its waves both ways along the floor, rocks over the hero
+        b.color = this.ink; b.kickSquash(0, 1, 1.8); shake.add(10); haptics.buzz(40); sound.play('stomp', 1, 0.4); sound.play('crumble', 1, 0.5);
+        for (const d of [-1, 1]) lv.shots.push({ x: b.cx + d * this.halfW, y: lv.floor - 0.45 * R, vx: d * F.wave * R, vy: 0, r: 0.75 * R, wave: true });
+        for (let k = 0; k < F.rocks[ph]; k++) lv.shots.push({ x: clamp(H.cx + (k - (F.rocks[ph] - 1) / 2) * 3.2 * R, lv.l + R, lv.r - R), y: lv.capY + R, vx: 0, vy: 0, r: CART.rock * R, rock: true });
+        if (this.drops + 1 < F.waves[ph]) { this.drops++; this.st = 0; return; }   // another slam yet
+        this.drops = 0; this.next = 'leap'; this.to(ph >= F.combo ? 'crouch' : 'hover');
+        if (this.state === 'crouch') sound.play('bubble', 0.8, 0.5);
       }
-    }
-    addVel(b, (vx - b.rigVx) * Math.min(1, 6 * dt), ((rail.y - 0.75 * b.R - b.cy) * 6 - b.rigVy) * Math.min(1, 6 * dt));   // in its seat on the rail
-    if (this.wind > 0) {   // a blob (two from its second phase) at the hero, as a spitter lobs one
-      if ((this.wind -= dt) > 0) b.kickSquash(0, 1, 0.05);
-      else if (H.cy > b.minY) {   // (not up at a hero over it: that one is on its way down onto it)
-        const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = ph >= 1 ? 2 : 1;
-        for (let i = 0; i < n; i++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (i ? 70 : -70) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R });
-        b.kickSquash(0, 1, -1.6); sound.play('spit', 0.6, 1.1);
+    } else if (this.state === 'crouch') {   // crouched in a splash: its leap to come
+      addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0);
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, 0.16);
+      flash();
+      if ((this.dustT -= dt) <= 0) { this.dustT = 0.08; sparkFx(b.cx + fxRand(-1, 1) * this.halfW, lv.floor - 0.2 * R, 2, -Math.PI / 2, 0.6, [120, 300], [1.5, 2.5], [0.4, 0.7], [PAL.white, PAL.aqua], 1); }   // its splash (a look only)
+      if (this.st > F.crouch) {   // up and over, onto where the hero is
+        const hgt = F.leap * R, vy = Math.sqrt(2 * WORLD.gravity * hgt), T = 2 * vy / WORLD.gravity, tx = clamp(H.cx, lv.l + this.halfW, lv.r - this.halfW);
+        b.color = this.ink; this.dir = Math.sign(tx - b.cx) || this.dir; setVel(b, (tx - b.cx) / T, -vy); this.to('dive'); sound.play('airjump', 0.9, 0.45);
       }
-    } else if ((this.drop -= dt * k) <= 0) { this.drop = CART.spit; this.wind = CART.wind; }
-    this.mark = !!(H.wallMask & 4) && H.stuck > 0 && H.cy < b.minY && Math.abs(H.cx - b.cx) < 0.8 * b.R;   // the hero hanging right over it: let go now
-    if (this.mark && !this.marked) { this.marked = true; ui.toast(L2(this.def.hint), 2200); }
+    } else if (this.state === 'dive') {   // in the air; down, flopped on its back
+      if (this.st > 0.2 && (b.wallMask & 8)) {
+        shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx - this.halfW, lv.floor, IMPACT.puffSpeed + 800); fx.dust(b.cx + this.halfW, lv.floor, IMPACT.puffSpeed + 800);
+        this.next = 'quake'; this.to('dazed'); turnOver(b); b.up.on = false; b.up.fails = BODY.upFails; b.kickSquash(0, 1, 1.6); setVel(b, b.rigVx * 0.2, -2 * b.R);
+        if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+      }
+    } else if (this.state === 'dazed') {   // flopped belly up, flapping: open to a stomp
+      addVel(b, -b.rigVx * Math.min(1, 4 * dt), 0);
+      if (Math.floor(this.st * 8) % 2) b.kickSquash(1, 0, 0.06);
+      if (this.st > F.flop * this.help) this.rise();
+    } else if (this.state === 'rise' && this.st > 0.5) this.to('hover');   // back on its belly with a hop
   }
-  flip() {   // a rolling shell has turned the Puck over: belly up, a stomp hurts it now
-    const b = this.body; this.to('dazed'); b.color = this.ink; turnOver(b); b.up.on = false; b.up.fails = BODY.upFails; b.kickSquash(0, 1, 1.6); setVel(b, b.rigVx * 0.3, -3 * b.R);   // over, with a hop, and kept so
-    shake.add(7); haptics.buzz(30); sound.play('bosshit', 0.8, 1.3);
-    if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+  // The Tsukumo Tram (BOSSES.tram, TRAMRUN): at a stop it rings twice with its headlight red, then rushes along the floor to the other end
+  // (jump it, or be up on a ledge); there its doors open, the only time a stomp on its roof hurts it, its pantograph throwing sparks at
+  // the hero. Its last heart runs it back once more before it stops.
+  street(dt, g) {
+    const F = this.def.street, b = this.body, lv = g.lv, R = lv.R, H = g.hero, ph = this.def.phase(this.hp);
+    const x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;
+    b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
+    if (this.t < F.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first, while its name is up
+    if (ph > this.phSeen) { this.phSeen = ph; shake.add(5); sound.play('chime', 0.9, 0.6); }   // a new phase: a low bell and a shake
+    if (this.state === 'hover' || this.state === 'rise') {   // at a stop, doors shut: its bell next
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (this.st > (this.state === 'rise' ? F.close : 0.2)) { this.to('warn'); this.dir = b.cx > (lv.l + lv.r) / 2 ? -1 : 1; sound.play('chime', 0.8, 1.6); }
+    } else if (this.state === 'warn') {   // ding-ding, its headlight red: the rush to come
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (this.st > 0.25 && this.st - dt <= 0.25) sound.play('chime', 0.8, 1.6);
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.06);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (this.st > (this.drops ? F.again : F.warn)) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.4); }
+    } else if (this.state === 'dive') {   // along the floor to the other end
+      addVel(b, (this.dir * F.rush[ph] * R - b.rigVx) * Math.min(1, 8 * dt), 0);
+      if ((this.dir > 0 ? b.cx < x1 : b.cx > x0) && !(b.wallMask & (this.dir > 0 ? 2 : 1)) && this.st < 2.5) return;
+      shake.add(6); sound.play('stomp', 0.8, 0.6); fx.dust(this.dir > 0 ? b.maxX : b.minX, lv.floor, IMPACT.puffSpeed + 700);
+      if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // its last heart: straight back once more
+      this.drops = 0; this.to('dazed'); setVel(b, 0, 0); b.kickSquash(1, 0, 1.2); sound.play('chime', 0.7, 1.2);
+      const x = b.cx, y = b.minY, n = F.sparks[ph];
+      for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 1.6 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R, fire: true }); }   // the pantograph's sparks at the hero
+      if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+    } else if (this.state === 'dazed') {   // at the stop, doors open: open to a stomp on its roof
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (this.st > F.stop * this.help) this.to('rise');   // (rise: its doors shut, `close` s)
+    }
+  }
+  // The Karasu-tengu (BOSSES.pigeon, TENGU): it flies swaying over the arena, its moves taking turns: its fan's gust, blowing the hero toward
+  // the far wall; a fan of feathers at the hero; a swoop along a straight line through where the hero was, into the floor, where its beak
+  // sticks, the only time a stomp hurts it. Its last heart swoops twice. (The gust's streaks are a look only: fxRand.)
+  sky(dt, g) {
+    const F = this.def.sky, b = this.body, lv = g.lv, R = lv.R, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, H = g.hero, ph = this.def.phase(this.hp);
+    const high = lv.floor - R * F.high, seat = (tx, ty, k) => { const q = Math.min(1, k * dt); addVel(b, ((tx - b.cx) * 3 - b.rigVx) * q, ((ty - b.cy) * 3 - b.rigVy) * q); };
+    const sway = () => seat(cx + Math.sin(this.t * 0.6) * W * F.sway, high + Math.sin(this.t * 1.3) * 0.4 * R, 2.4);
+    const flash = () => { b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink; };   // 2.5 flashes a second: under WCAG's 3
+    b.wake(); this.t += dt; this.st += dt;
+    if (this.state !== 'dazed') turnUp(b, 6, dt);
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
+    if (this.t < F.calm) { seat(cx, high, 4); return; }   // still at first, while its name is up
+    if (ph > this.phSeen) { this.phSeen = ph; shake.add(5); sound.play('airjump', 0.9, 0.6); }   // a new phase: a caw and a shake
+    if (this.state === 'hover') {   // swaying, its next move after its rest: the fan, the feathers, the swoop
+      sway();
+      if (this.st > F.rest[ph]) {
+        const m = this.next === 'feathers' ? 'feathers' : this.next === 'swoop' ? 'swoop' : 'fan';
+        this.to(m === 'fan' ? 'fan' : m === 'feathers' ? 'flick' : 'warn'); this.tx = H.cx; this.wind = H.cx < b.cx ? -1 : 1;
+        sound.play(...(m === 'fan' ? ['airjump', 0.7, 0.4] : m === 'feathers' ? ['spit', 0.6, 1.4] : ['airjump', 0.9, 1.8]));
+      }
+    } else if (this.state === 'fan') {   // its fan raised, red: a gust to come
+      sway(); flash();
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.08);
+      if (this.st > F.fan) { this.to('gust'); b.color = this.ink; sound.play('airjump', 0.9, 0.3); }
+    } else if (this.state === 'gust') {   // the wind: the hero blown toward the far wall, streaks across the sky
+      sway();
+      addVel(H, this.wind * F.push * R * dt * (g.onFloor() ? 0.5 : 1), 0);
+      if ((this.dustT -= dt) <= 0 && bits.length < 300) { this.dustT = 0.035; const x = fxRand(lv.l, lv.r), y = lv.capY + fxRand(0.05, 0.98) * (lv.floor - lv.capY), v = this.wind * fxRand(600, 800); for (let k = 0; k < 6; k++) bits.push({ x: x - this.wind * k * 3, y, vx: v, vy: 0, s: 1.2, c: k ? PAL.gray : PAL.white, t: 0, life: 0.45, g: 0, drag: 0.2 }); }   // a streak across the sky now and then (a look only)
+      if (this.st > F.gust) { this.next = 'feathers'; this.to('hover'); }
+    } else if (this.state === 'flick') {   // a flick: feathers to come at the hero
+      sway(); flash();
+      if (this.st > F.fwarn) {
+        const x = b.cx, y = b.cy, n = F.fn[ph];
+        for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.4 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 520, 0.5, 0.8); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R }); }
+        b.color = this.ink; sound.play('spit', 0.8, 1.3); this.next = 'swoop'; this.to('hover');
+      }
+    } else if (this.state === 'warn') {   // a screech, red; over the hero's line, still its last `lock` s
+      flash();
+      if (this.st < (this.drops ? F.swarn * 0.6 : F.swarn) - F.lock) this.tx = H.cx;
+      seat(clamp(this.tx - 4 * R * (this.tx < cx ? -1 : 1), lv.l + this.halfW, lv.r - this.halfW), high, 4);   // up to one side of its line
+      if (this.st > (this.drops ? F.swarn * 0.6 : F.swarn)) { const dx = this.tx - b.cx, dy = lv.floor - b.cy, d = Math.hypot(dx, dy) || 1; this.to('dive'); b.color = this.ink; setVel(b, (dx / d) * F.speed * R, (dy / d) * F.speed * R); sound.play('airjump', 1, 0.5); }
+    } else if (this.state === 'dive') {   // along its line into the floor
+      if ((b.wallMask & 8) || b.maxY >= lv.floor - 1 || this.st > 1.5) {
+        shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx, lv.floor, IMPACT.puffSpeed + 800);
+        if (ph >= F.twice && !this.drops) { this.drops = 1; this.to('warn'); setVel(b, 0, -8 * R); return; }   // its last heart: up and at the hero once more
+        this.drops = 0; this.next = 'fan'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 1.8);
+        if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+      }
+    } else if (this.state === 'dazed') {   // its beak stuck in the floor, flapping: open to a stomp
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (Math.floor(this.st * 10) % 2) b.kickSquash(1, 0, 0.06);
+      if (this.st > F.stuck * this.help) this.rise();
+    } else if (this.state === 'rise') {   // pulled free, back up
+      seat(b.cx, high, 3);
+      if (this.st > F.reel) this.to('hover');
+    }
+  }
+  // Koschei (BOSSES.koschei, KOSCH): he walks his floor keeping off the hero, his moves taking turns: bones thrown in arcs at the hero; his
+  // sword's low sweep along the floor in front of him (jump it), after which he is off balance, the only time a stomp hurts him. A stomp
+  // breaks him into a heap of bones that rattles and flies together again. He calls skulls later; his last heart (the needle) sweeps twice.
+  bone(dt, g) {
+    const F = this.def.bone, b = this.body, lv = g.lv, R = lv.R, H = g.hero, ph = this.def.phase(this.hp);
+    const flash = () => { b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink; };   // 2.5 flashes a second: under WCAG's 3
+    b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
+    b.heap = this.state === 'rise' ? (this.st < F.heap - 0.4 ? Math.min(1, this.st / 0.12) : Math.max(0, (F.heap - this.st) / 0.4)) : 0;   // broken by a stomp: a heap, then together again
+    b.rattle = this.state === 'rise' && this.st > F.heap - 0.9 && this.st < F.heap - 0.4; b.heapT = this.t;
+    if (b.rattle && !this.rattled) { this.rattled = true; sound.play('crumble', 0.6, 1.5); }   // the warning: his bones rattle, then fly together
+    if (this.t < F.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first, while his name is up
+    if (ph > this.phSeen) { this.phSeen = ph; shake.add(6); sound.play('crumble', 0.9, 0.5); }   // a new phase: a rattle and a shake
+    if (ph >= F.skulls && (this.call -= dt) <= 0) { this.call = BOSS.spawnEvery; if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: this.def.minion, x: (lv.l + lv.r) / 2, y: lv.capY + 2 * R }, lv)); }
+    if (this.state === 'hover') {   // walking to `keep` R off the hero, his next move after his rest
+      this.dir = Math.sign(H.cx - b.cx) || 1;
+      const off = H.cx - this.dir * (this.halfW + F.keep * R) - b.cx;
+      addVel(b, (clamp(off * 2, -F.walk * R, F.walk * R) - b.rigVx) * Math.min(1, 3 * dt), 0);
+      if (this.st > F.rest[ph]) { const sw = this.next === 'sweep'; this.to(sw ? 'warn' : 'throw'); sound.play(...(sw ? ['deny', 0.6, 0.6] : ['crumble', 0.5, 1.8])); }   // a scrape, or a rattle of bones
+    } else if (this.state === 'throw') {   // an arm raised, red: bones to come
+      addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0); flash();
+      if (this.st > F.twarn) {
+        const x = b.cx, y = b.minY + 0.3 * (b.maxY - b.minY), n = F.bones[ph];
+        for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.2 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 450, 0.55, 1.0); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: 0.32 * R, bone: true }); }
+        b.color = this.ink; sound.play('spit', 0.6, 0.7); this.next = 'sweep'; this.to('hover');
+      }
+    } else if (this.state === 'warn') {   // his sword raised, red, a scrape: its sweep to come
+      this.dir = Math.sign(H.cx - b.cx) || this.dir;
+      addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0); flash();
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, -0.1);
+      if (this.st > (this.drops ? F.again : F.swarn)) { this.to('sweep'); b.color = this.ink; sound.play('airjump', 0.9, 0.7); }
+    } else if (this.state === 'sweep') {   // the blade low along the floor in front of him: a hero on the floor there is cut
+      const x0 = b.cx, x1 = b.cx + this.dir * (this.halfW + F.reach * R);
+      if (H.maxY > lv.floor - 1.1 * R && (H.cx - Math.min(x0, x1)) * (H.cx - Math.max(x0, x1)) < 0) g.hurt(this.dir, -0.5, 'boss');
+      if (this.st > F.sweep) {
+        if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // his last heart: a second sweep, the other way
+        this.drops = 0; this.next = 'throw'; this.to('dazed'); b.kickSquash(1, 0, 1.2);
+        if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+      }
+    } else if (this.state === 'dazed') {   // off balance after his sweep: open to a stomp
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (Math.floor(this.st * 6) % 2) b.kickSquash(1, 0, 0.05);
+      if (this.st > F.stagger * this.help) this.to('hover');
+    } else if (this.state === 'rise') {   // a heap of bones after a stomp, then together again (and a moment after: he only pushes, angry)
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      this.angry = Math.max(this.angry, F.heap + 0.8 - this.st);
+      if (this.st > F.heap) { this.to('hover'); this.rattled = false; }
+    }
+  }
+  // A boss that hangs over the arena and drops (def.hang, its numbers: the Tsuchigumo's SPIDER, the Bake-danuki's TANUKI): it sways under
+  // the ceiling, lobs `webs` at the hero after its spit's warning, then drops onto it and lies on the floor (tangled in its thread, or
+  // dizzy), the only time a stomp hurts it; it goes back up. A move's warning is a pose and a sound together. A new phase calls `lings`
+  // down; from phase `twice` it drops twice running. (Its dust is a look only: fxRand, not the game's chances.)
+  hang(dt, g) {
+    const F = this.def.hang;
+    const b = this.body, lv = g.lv, R = lv.R, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, H = g.hero, ph = this.def.phase(this.hp);
+    const hang = lv.floor - R * F.high, x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;
+    const seat = (tx, ty, k) => { const q = Math.min(1, k * dt); addVel(b, ((tx - b.cx) * 3 - b.rigVx) * q, ((ty - b.cy) * 3 - b.rigVy) * q); };   // pulled to (tx, ty) on its thread
+    const mid = cx + (F.follow || 0) * (clamp(H.cx, x0, x1) - cx);   // its sway's middle: the arena's, or drawn `follow` of the way over the hero
+    const swing = () => seat(mid + Math.sin(this.t * 0.55) * W * F.swing, hang + Math.sin(this.t * 1.1) * 0.3 * R, 2.4);
+    b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);   // upright always: lying tangled too, its eyes up at the hero
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
+    if (this.t < F.calm) { seat(cx, hang, 4); return; }   // still at first, while its name is up
+    if (ph > this.phSeen) {   // a heart lost into a new phase: its sound and a shake, so the fight is seen to change; and its helpers down
+      this.phSeen = ph; shake.add(5); sound.play(...F.snd.phase);
+      for (let k = 0; k < (F.lings[ph] || 0); k++) lv.enemies.push(new Foe({ type: F.ling, x: lv.l + (k % 2 ? 0.78 : 0.22) * W, y: lv.capY + 2 * R }, lv));
+    }
+    if (this.state === 'hover') {   // swinging, its next move after its rest
+      swing();
+      if (this.st > F.rest[ph]) {   // its next move: a swing (if it has one), a spit (if this phase has any), a drop
+        if (F.sweep && (this.next === 'sweep' || (this.next === 'spit' && !F.webs[ph]))) { this.to('windup'); this.tx = H.cx < cx ? x1 : x0; sound.play(...F.snd.sweep); }
+        else { const drop = this.next === 'drop' || !F.webs[ph]; this.to(drop ? 'warn' : 'spit'); this.tx = b.cx; sound.play(...(drop ? F.snd.warn : F.snd.spit)); }   // its drop's sound, or its spit's
+      }
+    } else if (this.state === 'spit') {   // its belly pulses, then the web(s) at the hero, lobbed as a spitter's
+      swing();
+      if (Math.floor(this.st * 10) % 2) b.kickSquash(0, 1, 0.08);
+      if (this.st > F.spit) {
+        const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = F.webs[ph];
+        for (let i = 0; i < n; i++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (i ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R });
+        b.kickSquash(0, 1, -1.6); sound.play('spit', 0.7, 1); this.next = 'drop'; this.to('hover');
+      }
+    } else if (this.state === 'windup') {   // wound back away from the hero, red, creaking: its swing to come
+      seat(this.tx, hang, 5);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (this.st > F.sweep.warn) { this.to('sweep'); b.color = this.ink; sound.play('airjump', 0.8, 0.4); }   // (tx: where its swing sets off)
+    } else if (this.state === 'sweep') {   // across like a wrecking ball, its middle low: under it on the floor is the way through
+      const u = Math.min(1, this.st / F.sweep.dur), xe = this.tx < cx ? x1 : x0;
+      seat(this.tx + (xe - this.tx) * u, hang + (lv.floor - F.sweep.low * R - hang) * Math.sin(Math.PI * u), 12);
+      if (u >= 1) { this.next = F.webs[ph] ? 'spit' : 'drop'; this.to('hover'); }
+    } else if (this.state === 'warn') {   // over the hero, its eyes red, dust off the ceiling where it will fall; held still its last `lock` s
+      const end = this.drops ? F.again : F.warn;
+      if (this.st < end - F.lock) this.tx += clamp(clamp(H.cx, x0, x1) - this.tx, -F.track * R * dt, F.track * R * dt);   // after the hero no faster than `track` R/s: a hero who runs gets clear
+      seat(this.tx, hang + (this.drops ? 4 * R : 0), 5);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (F.dust && (this.dustT -= dt) <= 0) { this.dustT = 0.07; sparkFx(this.tx + fxRand(-0.4, 0.4) * this.halfW, lv.capY + 0.2 * R, 2, Math.PI / 2, 0.25, [60, 160], [1.5, 2.5], [0.5, 0.9], [PAL.gray, PAL.gray, INK.white], 1); }
+      if (this.st > end) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
+    } else if (this.state === 'dive') {   // down its thread to the floor, squashing its own spiderlings under it
+      setVel(b, 0, F.dive * R);
+      for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > b.minX && q.minX < b.maxX && q.minY < b.maxY + 4 && q.maxY > b.minY) g.kill(e, false); }
+      if ((b.wallMask & 8) || b.maxY >= lv.floor - 1 || this.st > 1.5) {
+        shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx - this.halfW, lv.floor, IMPACT.puffSpeed + 700); fx.dust(b.cx + this.halfW, lv.floor, IMPACT.puffSpeed + 700);
+        if (ph >= F.twice && !this.drops) { this.drops = 1; this.to('warn'); this.tx = b.cx; setVel(b, 0, -6 * R); return; }   // its last heart: straight back up a way, and a second drop
+        this.drops = 0; this.next = F.sweep ? 'sweep' : 'spit'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2);
+        for (let k = 0; k < ((F.splat && F.splat[ph]) || 0) && lv.enemies.length < 4; k++) lv.enemies.push(new Foe({ type: F.ling, x: b.cx + (k % 2 ? 1 : -1) * (this.halfW + 0.6 * R), y: lv.floor - 1.2 * R }, lv));   // blobs out of its splat
+        if (!this.dazes++) ui.toast(this.def.hint ? L2(this.def.hint) : t('bossHint'), 2400);   // the first time: what to do now
+      }
+    } else if (this.state === 'dazed') {   // tangled in its own thread on the floor, struggling: open to a stomp
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (Math.floor(this.st * 8) % 2) b.kickSquash(1, 0, 0.06);
+      if (this.st > F.tangle * this.help) this.rise();
+    } else if (this.state === 'rise') {   // reeled back up its thread
+      seat(b.cx, hang, 3);
+      if (this.st > F.reel) this.to('hover');
+    }
   }
 }
 
@@ -651,6 +902,14 @@ const RAINBOW_BODY = RAINBOW_INK.map((c) => ({ id: 'rainbow', base: c, deep: PAL
 // bonked or soured, with the world still, then its burst (Game.pop). A fall ends below the screen: no beat there.
 const DIE = { beat: 0.3, body: { fire: { id: 'die', base: PAL.orange, deep: PAL.red }, spikes: { id: 'die', base: PAL.red, deep: PAL.black },
   icicle: { id: 'die', base: PAL.blue, deep: PAL.black }, enemy: { id: 'die', base: PAL.green, deep: PAL.black }, train: { id: 'die', base: PAL.yellow, deep: PAL.black } } };
+// A world's own rising hazard that is no fire (К13): what dies in it is soaked or snowed under, held a beat in its colour, and what it throws,
+// what falls in and what it sheds splat in that colour (its thrown piece's main one, HAZ_SPR blob), not the flame's. The Village's grass fire and
+// Tokyo's burn as before.
+const WET = { flood: { why: 'water', ink: PAL.blue, body: { id: 'die', base: PAL.blue, deep: PAL.black } }, tide: { why: 'water', ink: PAL.white, body: { id: 'die', base: PAL.aqua, deep: PAL.black } },
+  avalanche: { why: 'snow', ink: PAL.white, body: { id: 'die', base: PAL.white, deep: PAL.blue } } };
+const hazInk = (th) => (WET[th.hazard] ? WET[th.hazard].ink : INK.flame);
+const dieBody = (why, th) => (why === 'fire' && WET[th.hazard] ? WET[th.hazard].body : DIE.body[why]);
+const deadKey = (why, th) => 'dead_' + (why === 'fire' && WET[th.hazard] ? WET[th.hazard].why : why);
 const MODS = () => ({ bounce: 1, slide: 1, hold: 0, magnet: 1, invuln: 0, airJumps: 1, blast: false, coinMul: 1, comboShift: 0, jump: 1, discount: 1, iron: false, fire: 1, gun: 0, plaster: 0, ceil: false, dive: false, dashes: 1, meteor: false, fireFree: 0 });
 let lastOffer = [];   // the cards offered last time: not again in the next three (a bag, the digest §7: fair-feeling chance)
 const SPIKE_PUSH = [[0, -1], [0, 1], [1, -0.35], [-1, -0.35]];
@@ -659,13 +918,16 @@ class Game {
   constructor() {
     this.lv = new Level(); this.well = null; this.door = null; this.hero = null; this.state = 'boot'; this.paused = 'play';
     this.R = 30; this.vjump = 1; this.builtW = 0; this.list = []; this.look = { x: 0, y: 0, t: 0 }; this.heroLook = { x: 0, y: 0, t: -1e9 };
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.queued = null; this.rising = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.rising = false;
     this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = [];
     this.pow = null; this.ram = false; this.tail = []; this.rocket = null;   // the candy at work, a ram on its way up, a rainbow's tail, a boost ring's flight
     this.warns = [];   // where threats come down into view (see threats)
     this.followers = []; this.trail = [];   // the freed, following the hero along its way (see followStep)
     this.swarm = [];   // the swarm candy's crowd (swarmUp)
     this.newRun();
+    this.kept = 0; this.first = false; this.seed = 0; this.downWas = false; this.hintAt = 0; this.curAt = 0;   // (set as a level starts or in play, given here: see loosen)
+    this.dieT = this.hang = this.dashT = this.dashCD = this.mantleCD = this.noteK = this.noteT = this.rubT = this.rubY = this.oweThen = this.stars = this.medals =
+      this.bonusGot = this.bonusWhy = this.markSay = this.synSay = this.storyOn = this.adBusy = this.menuR = this.menuBack = undefined;   // (and those set only on some turns: a death, a dash, a bonus...)
   }
   newRun() {
     this.world = 0; this.stage = 0; this.mods = MODS(); this.taken = [];
@@ -678,7 +940,7 @@ class Game {
     if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
   }
   applyMods() {
-    STICK.slide = BASE_STICK.slide * this.mods.slide; STICK.hold = BASE_STICK.hold + this.mods.hold + (this.lv.rail ? CART.hold : 0); CEIL.any = !!this.mods.ceil;
+    STICK.slide = BASE_STICK.slide * this.mods.slide; STICK.hold = BASE_STICK.hold + this.mods.hold; CEIL.any = !!this.mods.ceil;
     this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump;
   }
   get b() { return this.hero && Number.isFinite(this.hero.floorY) ? this.hero.floorY : this.lv.floor; }   // where Body.endStep puts landing dust
@@ -695,8 +957,8 @@ class Game {
     return a;
   }
   makeHero() {
-    const bs = this.lv.boss, x = bs && bs.def && bs.def.slide ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
-    this.hero = new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6);
+    const bs = this.lv.boss, x = bs && bs.def && (bs.def.glide || bs.def.quake || bs.def.street || bs.def.bone) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
+    this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
     this.hero.isHero = true;
     this.startY = this.hero.cy;
   }
@@ -712,8 +974,22 @@ class Game {
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
     this.builtW = view.w; this.R = this.menuR || MENU_HERO.k * MENU_HERO.w * view.w; this.well = null; this.door = null; this.lv = new Level();
     this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
+    this.menuBack = this.menuBackdrop(); menuTouch.idleAt = performance.now(); menuTouch.hopAt = 0; menuTouch.hops = 0;
+    menuInk = '#' + this.menuBack.theme.top.map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');   // (the bar over the page: its back's top, menuTop)
     this.makeHero(); this.levelReset();
     ui.hideAll(); ui.menu();
+  }
+  // The menu's backdrop (owner, 2026-10-24: «На главном экране используй фон того мира, в котором сейчас игрок или первого»): the level Continue goes
+  // to (a new player's the first), with nothing of play in it; a boss's or a bonus level's tier shows its world's first. Of it the main screen draws its
+  // back and its far view only, over and round the hero, not its walls and ground (owner: «Слишком шумно. Верни как было, оставь анимацию, а вместо
+  // градиента за моти используй фон локации»; Renderer.draw's `menu`). Its floor is the menu's, where the hero stands, the far view's foot on it.
+  menuBackdrop() {
+    const { w, s, rc } = campAt(campNextId()), cw = CAMPAIGN[w], r = rc.boss || rc.bonus != null ? cw.levels[0] : rc, lv = new Level(), R = clamp((view.w - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
+    lv.reset({ kind: 'well', w: view.w, h: view.h, R, seed: r.seed || 1, world: cw.world, stage: r === rc ? s : 0, theme: cw.world.theme, recipe: r, height: (r.len || 30) * R_PER_M * R });
+    lv.ensure(lv.floor - 2 * view.h);
+    for (const k of ['coins', 'spawns', 'enemies', 'bubbles', 'arenas', 'icicles', 'winds', 'kines', 'wheels', 'seesaws', 'fireWalls', 'pickups', 'shots', 'spots', 'rings', 'runes', 'folk', 'signs', 'spikes', 'coats', 'fizz']) if (Array.isArray(lv[k])) lv[k].length = 0;
+    lv.rects = lv.rects.filter((q) => q.cap); lv.fire = null; lv.dark = false; lv.portal = null; lv.crossing = null; lv.tasks = [];
+    return lv;
   }
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
   // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
@@ -737,9 +1013,9 @@ class Game {
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
-      height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: wd.theme, keep: this.room() });
+      height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: (this.bonus && this.mode === 'camp' ? this.wd : wd).theme, keep: this.room() });   // (a campaign's bonus
+    // in its world's look: the Sea's and Tokyo's coin rain were the Mine's grey, the kind's own theme from the days a bonus was its world's)
     this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
-    if (rc && rc.ice) for (const c of this.lv.icicles) c.y = Math.max(c.y, this.lv.cam + CAM.top);   // the Puck's icicles in sight, under the HUD (the keys push the arena's ceiling up off the screen)
     if (boss) { this.lv.boss = new Boss(this.lv, BOSSES[rc ? rc.boss : 'lid']); if ((save.camp.fails[this.failKey()] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
@@ -756,11 +1032,14 @@ class Game {
   // followers): the timers, the powers, the landing count, the effects
   levelReset() {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
-    this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
-    this.winT = 0;   // a beaten boss's win still to come is the old level's
+    this.touch = 0; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
+    this.winT = 0; this.rushed = false;   // a beaten boss's win still to come is the old level's (rushed: the fire's speed-up heard, К2)
+    this.thrown = 0; this.wallHold = 0;   // (a throw out of a room, or its hold on the wall, the old level's: the next hero stuck to a wall; review)
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
-    fx.n = 0; aimCancel(); ui.comboEnd();
+    fx.n = 0; ui.comboEnd();
+    loosen(this, 'R', 'vjump', 'builtW', 'sinceContact', 'queueT', 'hitstop', 'invuln', 'stateT', 'pruneT', 'winT', 'startY', 'world', 'climbed', 'levelM', 'bonusT',
+      'idleT', 'gunT', 'fallV', 'landV', 'dizzyT', 'joyT', 'flatT', 'wallHold', 'seed', 'hintAt', 'curAt', 'rushed');   // (fractions in play: see loosen)
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
@@ -771,8 +1050,11 @@ class Game {
     lv.ensure(-Infinity);
     lv.coins.forEach((c, i) => { c.id = i; }); lv.folk.forEach((f, i) => { f.id = i; }); lv.rects.forEach((r, i) => { r.id = i; });   // each its number (Game.saveCur): taken
     lv.taken = []; lv.gone = []; lv.sig = [lv.rects.length, lv.coins.length, lv.folk.length].join();   // and gone kept by them; the level's measure, to know it again
+    if (lv.theme.fuji) kitAtLeast(lv, 'bell'); else if (lv.theme.sea) kitAtLeast(lv, 'lighthouse');   // a bell, a lighthouse on every level of their worlds (owner, У5 «А»)
     const kits = (kind) => lv.rects.filter((r) => { const k = kitThing(lv, r); return k && k.kind === kind && k.y > lv.capY && k.y < lv.floor; }).length;   // the kits' (kitThing): the ones the hero can get to
-    for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0], ['lantern', kits('lantern')], ['bell', kits('bell')], ['lamp', kits('lamp')], ['lighthouse', kits('lighthouse')]]) if (of) lv.tasks.push({ id, n: 0, of });
+    for (const [id, of] of [['cage', folk('cage')], ['crow', Math.min(5, folk('crow'))], ['neon', lv.theme.town ? Math.min(5, neonSigns(lv).length) : 0],   // (Tokyo's: five crows and five
+      // signs for the star, the rest there for fun: owner, 2026-10-24, У4 «А»; they were 3-13 and 4-18 a level)
+      ['lantern', kits('lantern')], ['bell', kits('bell')], ['lamp', kits('lamp')], ['lighthouse', kits('lighthouse')]]) if (of) lv.tasks.push({ id, n: 0, of });
   }
   task(id) {   // one more of task `id` done (in the shaft only: the flip side's crows are not its); the last of it rings, and says so with its picture
     const q = !this.well && this.lv.tasks && this.lv.tasks.find((o) => o.id === id);
@@ -787,6 +1069,7 @@ class Game {
     if (this.state === 'menu' || this.state === 'boot') { const o = ui.open === 'map' ? ui.mapAt : null, set = ui.open === 'settings'; this.toMenu(); if (o === 'book') ui.book(); else if (o != null) ui.map(o); else if (set) ui.settings(); return; }   // (the map, the book or the settings stay open)
     const k = (view.w - 2 * LEVEL.wall) / Math.max(1, this.builtW - 2 * LEVEL.wall);
     this.builtW = view.w; this.rescale(k); this.applyMods();
+    if (ui.open === 'story' && ui.storyArgs) ui.story(...ui.storyArgs);   // a story card up: fitted to the new screen (it kept its size, off the top, its Next squeezed: QA)
   }
   rescale(k) {
     const X = (x) => LEVEL.wall + (x - LEVEL.wall) * k, Y = (y) => y * k, num = (v) => Number.isFinite(v);
@@ -805,13 +1088,15 @@ class Game {
       for (const wh of lv.wheels || []) { wh.cx = X(wh.cx); for (const key of ['cy', 'y0', 'y1']) wh[key] = Y(wh[key]); wh.rad *= k; wh.hang *= k; }   // (a mill, MILL: its boards are boxes, above)
       for (const kn of lv.kines || []) { kn.x = X(kn.x); kn.px = X(kn.px); for (const key of ['yUp', 'yHit', 'foot', 'y0', 'y1']) kn[key] = Y(kn[key]); }   // (a pestle, MOCHI)
       for (const o of [lv.coins, lv.shots, lv.icicles, lv.arenas, lv.pickups, lv.fizz, lv.rings, lv.runes, lv.signs, lv.folk, lv.spawns].flat()) if (o) xy(o);
+      for (const a of lv.arenas || []) for (const d of a.drops || []) xy(d);   // (an arena's wave about to drop)
       for (const sp of lv.spots || []) { const r = sp.r; xy(sp); sp.r = r; }   // (a pit's size is in R: it grows with R)
       const walls = new Set(), wall = (w) => { if (!w || walls.has(w)) return; walls.add(w); w.y0 = Y(w.y0); w.y1 = Y(w.y1); };   // (a wall can be a spawn's and its climber's both)
       for (const s of lv.spawns) wall(s.wall);
-      for (const e of lv.enemies) { body(e.body); wall(e.wall); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); if (e.ax || e.ay) { e.ax = X(e.ax); e.ay = Y(e.ay); } }
+      for (const e of lv.enemies) { body(e.body); wall(e.wall); if (num(e.s)) e.s *= k; if (e.from) e.from = [X(e.from[0]), Y(e.from[1])]; if (e.to) xy(e.to); if (e.ax || e.ay) { e.ax = X(e.ax); e.ay = Y(e.ay); } if (num(e.home)) e.home = Y(e.home); if (num(e.homeX)) e.homeX = X(e.homeX); }   // (a nurikabe's
+      // perch with its ledge: it hung under it on a wider window; review)
       for (const f of lv.folk) body(f.body);
       if (lv.boss) body(lv.boss.body);
-      for (const o of [lv.crossing, lv.portal, lv.exit, lv.rail]) if (o) { xy(o); for (const key of ['x0', 'x1']) if (num(o[key])) o[key] = X(o[key]); for (const key of ['y0', 'y1']) if (num(o[key])) o[key] = Y(o[key]); }
+      for (const o of [lv.crossing, lv.portal, lv.exit]) if (o) { xy(o); for (const key of ['x0', 'x1']) if (num(o[key])) o[key] = X(o[key]); for (const key of ['y0', 'y1']) if (num(o[key])) o[key] = Y(o[key]); }
       if (lv.fire) { lv.fire.y = Y(lv.fire.y); lv.fire.v *= k; if (lv.fire.warn) xy(lv.fire.warn); }
       for (const o of [...(lv.plan || []), ...(lv.folkAt || []), ...(lv.runeAt || [])]) o.y = Y(o.y);
       lv.fizzAt = (lv.fizzAt || []).map(Y); for (const key of ['ringAt', 'spotAt', 'gateAt', 'setAt']) if (num(lv[key])) lv[key] = Y(lv[key]);
@@ -853,42 +1138,34 @@ class Game {
   // ── Jumping ──
   contact() { const b = this.hero; return (b.wallMask & 15) !== 0 || b.stuck > 0; }
   onFloor() { const b = this.hero; return (b.wallMask & 8) !== 0 && b.stuck === 0; }
-  // The way out of what the hero is on, for a slingshot aimed off it; null in the air.
-  surfaceNormal() {
-    if (this.sinceContact > JUMP.coyote) return null;
-    const t = this.touch;
-    return t === 1 ? [1, 0] : t === 2 ? [-1, 0] : t === 4 ? [0, 1] : [0, -1];
-  }
   // From a surface (or just off one) a jump goes at once; in the air it spends an air jump
   // if there is one (every landing gives one back, so does a stomp), or waits a moment for
-  // a surface. `aimed` is a slingshot launch { vx, vy } from the mouse, null for the button.
-  requestJump(aimed = null) {
+  // a surface.
+  requestJump() {
     if (this.state !== 'play') return;
-    if (this.sinceContact <= JUMP.coyote) this.jump(false, aimed);
-    else if (this.power('bubble')) this.jump(true, aimed);   // in a bubble: popped by a jump, a hop out of it (no air jump spent)
-    else if (this.air > 0) { this.air--; this.jump(true, aimed); }
-    else { this.queueT = JUMP.buffer; this.queued = aimed; }
+    if (this.sinceContact <= JUMP.coyote) this.jump(false);
+    else if (this.power('bubble')) this.jump(true);   // in a bubble: popped by a jump, a hop out of it (no air jump spent)
+    else if (this.air > 0) { this.air--; this.jump(true); }
+    else this.queueT = JUMP.buffer;
   }
   // Off a floor: up, keeping the run. Off a wall: up and away. Off a ceiling: pushed down,
-  // or with a side pressed a dash that way. In the air: up again, with a puff under it. A slingshot
-  // launch goes where it was aimed, and letting go of a button cannot cut it.
-  jump(inAir, aimed) {
+  // or with a side pressed a dash that way. In the air: up again, with a puff under it.
+  jump(inAir) {
     if (this.power('bubble')) { this.gunT = 0; this.powerEnd(); }   // a jump pops the bubble, and is a jump
-    const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || (!aimed && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
-    const flat = this.flatT > 0, sup = !flat && !inAir && !aimed && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it (flat: not, MOCHI)
-    const reb = !flat && !inAir && !aimed && !sup && side === 0 && !ram && this.landT <= REBOUND.after && this.landV >= REBOUND.min * v, q = reb ? clamp(this.landV / v, 0, 1) : 0;   // in the beat of a hard landing
-    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : reb ? Math.sqrt(1 + REBOUND.k * q) : 1), rise = !aimed && !sup;
+    const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || this.over(SMASH.look * this.R).some((r) => this.smashable(r))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
+    const flat = this.flatT > 0, sup = !flat && !inAir && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it (flat: not, MOCHI)
+    const reb = !flat && !inAir && !sup && side === 0 && !ram && this.landT <= REBOUND.after && this.landV >= REBOUND.min * v, q = reb ? clamp(this.landV / v, 0, 1) : 0;   // in the beat of a hard landing
+    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : reb ? Math.sqrt(1 + REBOUND.k * q) : 1), rise = !sup;
     this.rebounded = reb;
     if (reb) { this.landUsed = true; this.missed = 0; H.face.surprise = Math.max(H.face.surprise, 0.7); if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
-    if (aimed) { vx = aimed.vx; vy = aimed.vy; }
-    else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
+    if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
       if (input.dir) { vx = input.dir * JUMP.dash * this.R; vy = JUMP.dashDown * v; this.dashT = 0.15; fx.dust(H.cx - input.dir * H.R, H.minY, IMPACT.puffSpeed + 600); }   // the ceiling's friction off for a moment, or it drags the dash
       else { vx = 0; vy = JUMP.ceil * v; }
       rise = false;
     }
-    if (flat && !aimed && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
-    { const fr = H.floorRect; if (!inAir && !aimed && side === 0 && fr && fr.move && (fr.move.wheel || fr.move.seesaw) && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board or a seat: its way along with it (it carried the hero, with no pace of its own)
+    if (flat && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
+    { const fr = H.floorRect; if (!inAir && side === 0 && fr && fr.move && (fr.move.wheel || fr.move.seesaw) && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board or a seat: its way along with it (it carried the hero, with no pace of its own)
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
     if (reb) {   // a rebound: the squash let go, a white ring as big as the leap, sparks up
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 700); fx.ring(H.cx, foot, (1 + 0.8 * q) * R, INK.white); fx.ring(H.cx, foot, 0.7 * R, hc);
@@ -905,7 +1182,7 @@ class Game {
     H.kickSquash(vx / sp, vy / sp, -JUMP.stretch * Math.min(1, sp / v));   // stretch along the leap
     haptics.buzz(8);
     const thru = ram && this.over(JUMP.height * this.R).some((r) => this.smashable(r));   // a block to break within a jump: no tap may cut it short of it
-    this.rising = rise && !thru; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.queued = null; this.ram = ram;
+    this.rising = rise && !thru; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.ram = ram;
   }
   // The solid ledges just over the hero (planks are jumped through anyway), and which of them a ram breaks: a shaft ledge one tile
   // thick, not the exit's ceiling or a spring, with nothing on it or under it that would be left hanging in the air.
@@ -1111,9 +1388,6 @@ class Game {
       this.invuln -= dt;
       if (this.invuln <= 0 && playing && (this.blinkHold || 0) < HEALTH.hold && this.insideFoe()) { this.blinkHold = (this.blinkHold || 0) + dt; this.invuln = 0.5 * dt; }
     } else this.blinkHold = 0;
-    const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
-    if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
-    if (hang) setVel(hero, 0, 0);
     if (this.thrown && (hero.wallMask & (this.thrown > 0 ? 2 : 1))) { this.thrown = 0; this.wallHold = ROOM_THROW.hold; hero.kickSquash(1, 0, 1.6); shake.add(5); haptics.buzz(20); sound.play('land', 0.9, 0.7); }   // splat on the far wall,
     if (this.wallHold > 0) { this.wallHold -= dt; setVel(hero, 0, 0); }   // and held there a moment, no bounce back (then the wall as ever)
     if (playing) for (const r of lv.near(hero.cy - MAGNET.range * this.R, hero.cy + MAGNET.range * this.R)) if (r.magnet && hero.cx > r.x0 - this.R && hero.cx < r.x1 + this.R) {   // a magnet ledge pulls the hero in, more the nearer
@@ -1123,7 +1397,7 @@ class Game {
     if (playing) { this.ringStep(dt); this.crossStep(dt); }
     if (playing) { this.move(dt); if (this.ram) this.ramUp(); if (this.power('grow')) this.plough(dt); if (this.power('swarm')) this.swarmStep(); if (hero.rigVy < -40) this.cracks(); }
     this.warns = playing ? this.threats(dt) : [];
-    const bs = this.bodyList(), puck = lv.boss && !lv.boss.dead && lv.boss.def && lv.boss.def.slide ? lv.boss.body : null;
+    const bs = this.bodyList();
     this.heroVy0 = hero.rigVy;   // as it came in: the contact below may already have bounced it (see meet)
     for (const b of bs) { if (b.stickCD > 0) b.stickCD -= dt; b.stepMaxY = b.maxY; b.stepFloor = (b.wallMask & 8) ? b.floorRect : null; b.touchHero = false; b.blinkHero = false; b.beginStep(dt); }   // (stepFloor: the plank it stands on holds it, see collideLevel)
     hero.springHit = null; hero.rubber = 0;
@@ -1132,10 +1406,9 @@ class Game {
       for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
         const A = bs[i], B = bs[j];
         if (A.thread || B.thread) continue;   // a follower touches nothing
-        if (puck && (A === puck || B === puck) && A !== hero && B !== hero) continue;   // the Puck slides through its own shells (a rolling one turns it over: rolling)
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
-        const solid = lv.boss && !(lv.boss.def && (lv.boss.def.slide || lv.boss.def.rail)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
+        const solid = lv.boss && !(lv.boss.def && (lv.boss.def.glide || lv.boss.def.quake || lv.boss.def.street || lv.boss.def.bone)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
         if (withHero && this.invuln > 0 && !solid && playing && !A.ghost && !B.ghost) {   // a hit hero passes through for a moment, but a stomp from over one still counts (Game.blinkMeet)
           const o = A === hero ? B : A; if (o.maxX > hero.minX && o.minX < hero.maxX && o.maxY > hero.minY && o.minY < hero.maxY) o.blinkHero = true; continue;
         }
@@ -1155,7 +1428,7 @@ class Game {
       this.fallV = 0;
       this.sinceContact = 0; this.air = this.mods.airJumps; this.airDash = 0; this.diving = false;
     } else { this.sinceContact += dt; this.fallV = Math.max(this.fallV, hero.rigVy); }
-    if (this.queueT > 0) { this.queueT -= dt; if (this.sinceContact === 0) this.jump(false, this.queued); }
+    if (this.queueT > 0) { this.queueT -= dt; if (this.sinceContact === 0) this.jump(false); }
     if (hero.springHit && hero.rigVy > -0.5 * SPRING.v * this.vjump) this.spring(hero.springHit);
     if (playing && hero.rubber && !(hero.wallMask & 8)) this.rubberHit(hero.rubber);   // standing, rubber is just a wall
     if (playing && lv.kind === 'well' && this.onFloor() && !hero.springHit) this.markSafe(hero.floorRect);
@@ -1172,11 +1445,15 @@ class Game {
       if (s.y < lv.cam + view.h || lv.under) lv.enemies.push(new Foe(s, lv));
     }
     if (!lv.under) for (let i = lv.enemies.length - 1; i >= 0; i--) if (lv.enemies[i].body.cy > far) lv.enemies.splice(i, 1);
-    for (const f of lv.folk) if (!f.body && (f.kind === 'cage' || f.kind === 'trader') && f.y > lim && f.y < lv.cam + view.h + this.R) this.folkUp(f);
+    for (const f of lv.folk) if (!f.body && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ume') && f.y > lim && f.y < lv.cam + view.h + this.R) this.folkUp(f);
   }
   folkUp(f) {   // a cage's blob (a hero's colour, not this one's) or the trader (purple), standing on its ledge; the hero passes through them
     const lv = this.lv, R = this.R, cage = f.kind === 'cage', cols = PALETTE.filter((c) => c.id !== save.color), r = (cage ? 0.7 : 0.95) * R;
-    const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(Math.random() * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
+    if (f.kind === 'ume') {   // Ume (UME): red, an ume's leaf on him, a kind face
+      const b = (f.body = new Body(designById('round'), { id: 'ume', base: PAL.red, deep: PAL.black }, f.x, f.y - 1.05 * UME.r * R, UME.r * R, 0.9));
+      b.gScale = 1; b.sticky = false; b.ghost = true; b.helmet = 'umeLeaf'; b.face.frown = false; return;
+    }
+    const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(fxRand(0, 1) * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
     b.gScale = 1; b.sticky = false; b.ghost = true; b.face.frown = cage;   // locked in: glum
     if (!cage) { f.p = { x: f.x, y: f.y - 3 * R, r: 0.6 * R, item: SHOP_ITEMS[(Math.random() * SHOP_ITEMS.length) | 0], sold: false, near: false, trader: f }; lv.pickups.push(f.p); }
   }
@@ -1190,14 +1467,27 @@ class Game {
       if (f.kind === 'cage' && b) {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
+      else if (f.kind === 'ume' && b) { if (!f.given && Math.abs(H.cx - f.x) < UME.reach * R && H.maxY > f.y - 2.5 * R && H.minY < f.y) this.treat(f); }   // Ume (UME): the hero by him
       else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a touch frees it; then off it flies
         f.t += dt;
         if (!f.fly && Math.abs(H.cx - f.x) < RIBBON.reach * R && H.maxY > f.y - 2 * R && H.minY < f.y) this.untangle(f);
         if (f.fly) { f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R) lv.folk.splice(i, 1); }
       }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
-        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
-        if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
+        if (!f.fly && !f.dive && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
+        else if (f.kind === 'crow' && !f.fly && !f.dive && lv.theme.town && this.stage > 0) {   // Tokyo's: one waited under dives (CROW)
+          f.wait = Math.abs(H.cx - f.x) < CROW.x * R && H.cy > f.y && H.cy < f.y + CROW.y * R && f.y > lv.cam + (view.hudB || 0) ? (f.wait || 0) + dt : 0;
+          if (f.wait > CROW.wait + CROW.warn) {
+            const dx = H.cx - f.x, dy = H.cy - f.y, l = Math.hypot(dx, dy) || 1;
+            f.dive = true; f.t = 0; f.vx = (dx / l) * CROW.speed * R; f.vy = (dy / l) * CROW.speed * R; sound.play('airjump', 0.7, 0.6);
+            this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id);   // (off its wire: as one scared)
+          }
+        }
+        if (f.dive) {
+          f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt;
+          if (Math.hypot(H.cx - f.x, H.cy - f.y) < H.R + CROW.r * R) this.hurt(H.cx - f.x, H.cy - f.y, 'crow');
+          if (f.t > CROW.flight || f.y > lv.cam + view.h + R || f.x < lv.l - R || f.x > lv.r + R) { f.dive = false; f.fly = true; f.vx = (f.vx < 0 ? -1 : 1) * 120; f.vy = -200; }   // past: off it flies
+        } else if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
       } else if (f.kind === 'bug') {
         const r = f.rect;
         if (r.gone) { lv.folk.splice(i, 1); continue; }
@@ -1207,6 +1497,18 @@ class Game {
       }
     }
     this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
+  }
+  treat(f) {   // Ume treated (UME): a can out of the machine for him, half for Mochi (a heart back, else coins), he hops for joy and comes along; card VI a moment after
+    const R = this.R, lv = this.lv, b = f.body, i = lv.folk.indexOf(f);
+    f.given = true; b.face.surprise = 1; b.kickSquash(0, 1, 1.4); setVel(b, 0, -0.55 * this.vjump);
+    sparkFx(f.x, b.minY - 0.5 * R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red, INK.coin], 0.6); fx.ring(b.cx, b.cy, 1.6 * R, INK.white);
+    sound.play('click', 0.8, 0.7); sound.play('bubble', 0.9, 1.3); haptics.buzz(16);
+    if (this.hp < this.maxHp) { this.heal(1); ui.hurt(); ui.toast(L2(UME.thanks) + '\n' + t('freedHeart'), 2400); sound.play('buy'); }
+    else { this.drop(f.x, f.y - 2 * R, FOLK.coins); ui.toast(L2(UME.thanks) + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400); }
+    if (i >= 0) lv.folk.splice(i, 1);
+    if (lv.gone && !this.well) lv.gone.push(f.id);
+    b.thread = true; b.gScale = 0; this.followers.push(f);   // and along he comes after the hero (followStep)
+    this.cardDue = { id: 'city_friendship', t: UME.card };
   }
   untangle(f) {   // the crow with the red ring set free (RIBBON): sparks, its thanks and coins, off up it flies with the ring on it, and the story's card II
     const R = this.R, lv = this.lv;   // a moment after
@@ -1219,7 +1521,7 @@ class Game {
   }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
     const H = this.hero, lv = this.lv;
-    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * rand(80, 140); f.vy = -rand(140, 220);
+    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * fxRand(80, 140); f.vy = -fxRand(140, 220);
     if (f.kind === 'crow') { this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id); }
   }
   // Tokyo's neon (neonSign) and the kits' things (kitThing: a Village lantern lit, a Fuji bell rung, a Mine lamp lit) between y0 and
@@ -1286,7 +1588,7 @@ class Game {
     for (let i = lv.icicles.length - 1; i >= 0; i--) {
       const c = lv.icicles[i];
       if (c.state === 'hang' && Math.abs(H.cx - c.x) < ICICLE.reach * R && H.minY > c.y && H.minY - c.y < ICICLE.below * R) { c.state = 'shake'; c.t = ICICLE.shake; sound.play('crumble', 0.4, 1.6); }
-      else if (c.state === 'shake' && (c.t -= dt) <= 0) { lv.icicles.splice(i, 1); lv.shots.push({ x: c.x, y: c.y + 0.3 * R, vx: 0, vy: 0, r: ICICLE.r * R, icicle: true }); }
+      else if (c.state === 'shake' && (c.t -= dt) <= 0) { lv.icicles.splice(i, 1); const tip = icicleTip(lv.theme); lv.shots.push({ x: c.x, y: c.y + (tip ? tip - ICICLE.r * R : 0.3 * R), vx: 0, vy: 0, r: ICICLE.r * R, icicle: true }); }   // (from its drawn tip: Worlds' icicleTip)
     }
     for (const a of lv.arenas) {
       if (a.done) continue;
@@ -1294,26 +1596,26 @@ class Game {
       if (!a.on) { if (Math.abs(H.cx - a.x) < ARENA.reach * R && Math.abs(H.cy - a.y) < 2 * R && this.onFloor()) { a.on = true; if (!a.small) ui.toast(t('arena'), 1600); sound.play('bubble', 1, 0.6); this.arenaWave(a); } continue; }   // (an ambush: its rings and the sound)
       if (a.drops) { if ((a.dropT -= dt) <= 0) this.arenaDrop(a); continue; }
       if (a.foes.some((e) => lv.enemies.includes(e))) continue;
-      if (a.wave < (a.small ? AMBUSH : ARENA).waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
+      if (a.wave < a.waves.length) { ui.toast(tf('arenaWave', { n: a.wave + 1 }), 1200); this.arenaWave(a); continue; }
       if (this.rc && this.rc.mini && !a.mini && !a.small) {   // the last wave a mini-boss (MINI): a big spitter, dropping in, shown first as the waves are
-        const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
-        a.mini = true; a.foes = []; a.drops = [{ type: 'spitter', big: true, x: a.x, y: a.y - ARENA.drop * R, ledge: floor }]; a.dropT = ARENA.warn; ui.toast(t('miniSpit'), 1600); sound.play('bubble', 1, 0.5); continue;
+        const floor = a.floor && !a.floor.gone ? a.floor : lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
+        a.mini = true; a.warnAt = lv.t; a.foes = []; a.drops = [{ type: 'spitter', big: true, x: a.x, y: a.y - ARENA.drop * R, ledge: floor }]; a.dropT = ARENA.warn; ui.toast(t('miniSpit'), 1600); sound.play('bubble', 1, 0.5); continue;
       }
       const n = (a.small ? AMBUSH : ARENA).coins; a.done = true; this.drop(a.x, a.y - R, n, 5); ui.toast(tf('arenaWon', { n: 5 * n }), 2000); sound.play('combo', 1, 1.1); if (!a.small) shake.add(4);
     }
   }
   arenaWave(a) {   // the next wave drops in over the arena's floor: crawling enemies of this world that can be stomped, each where it will come shown first (arenaDrop)
-    const lv = this.lv, R = this.R, n = (a.small ? AMBUSH : ARENA).waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini' && k !== 'tofu' && k !== 'tofuMini');   // (not a tofu: its four each would crowd the arena)
-    const floor = lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];
-    a.foes = []; a.drops = []; a.dropT = ARENA.warn;
-    for (let k = 0; k < n; k++) a.drops.push({ type: kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor });
+    const lv = this.lv, R = this.R, tbl = a.kinds && a.kinds[a.wave], n = a.waves[a.wave++], wd = this.wd, kinds = ((this.rc && this.rc.enemies) || Object.keys(wd.enemies || {})).filter((k) => ENEMY[k].move === 'crawl' && ENEMY[k].stomp && k !== 'mini' && k !== 'tofu' && k !== 'tofuMini');   // (not a tofu: its four each would crowd the arena)
+    const floor = a.floor && !a.floor.gone ? a.floor : lv.rects.filter((r) => !r.gone && r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0];   // (its floor, Level: К8)
+    a.foes = []; a.drops = []; a.dropT = ARENA.warn; a.warnAt = lv.t;   // (warnAt, dropAt: when its wave was shown and when it fell, for a world's prop to tip it: К8)
+    for (let k = 0; k < n; k++) a.drops.push({ type: tbl ? tbl[k] : kinds.length ? kinds[(Math.random() * kinds.length) | 0] : 'crawler', x: a.x + (k - (n - 1) / 2) * 2.4 * R, y: a.y - ARENA.drop * R, ledge: floor });   // (its world's table, WAVES: К4)
   }
   // A wave's enemies come ARENA.warn s after the places they come to are shown (the renderer's red rings), not out of the air on the hero
   // (owner: «иногда враги появляются сверху из пустоты и это сложно. Нужно показывать на пару секунд, что в этом месте появится враг»)
   arenaDrop(a) {
     const lv = this.lv;
     for (const s of a.drops) { const f = new Foe(s, lv); lv.enemies.push(f); lv.foeTotal++; a.foes.push(f); fx.ring(f.body.cx, f.body.cy, (s.big ? 2 : 1.2) * this.R, INK.spike); }
-    a.drops = null;
+    a.drops = null; a.dropAt = lv.t;
   }
   free(f) {
     const b = f.body, R = this.R, i = this.lv.folk.indexOf(f);
@@ -1330,7 +1632,7 @@ class Game {
     const lv = this.lv, H = this.hero;
     for (const e of lv.enemies.slice()) if (e.body.touchHero) this.meet(e);
     for (const e of lv.enemies.slice()) if (e.body.blinkHero && lv.enemies.includes(e)) this.blinkMeet(e);
-    for (const e of lv.enemies.slice()) if (e.type === 'worm') this.wormTouch(e);
+    for (const e of lv.enemies.slice()) if (e.type === 'worm') this.wormTouch(e); else if (e.type === 'komori' && lv.enemies.includes(e)) this.komoriTouch(e);
     this.rolling(dt);
     for (const s of lv.signs || []) if (Math.abs(s.y - H.cy) < 2.5 * this.R) this.hint('tut' + s.id, 'seen_tut' + s.id + (s.id === 1 ? (coarse ? (save.stick ? 'S' : 'T') : 'K') : ''));   // the tutorial's words where they are needed, before any other
     for (const e of lv.enemies) if (e.body.cy > lv.cam && e.body.cy < lv.cam + view.h) { if (!(save.book && save.book.foe && save.book.foe[e.type])) met('foe', e.type); if (STR.en['seen_' + e.type]) this.hint(e.type); }   // a new kind of enemy: told once, and into the book
@@ -1357,22 +1659,26 @@ class Game {
       if (lv.exit.armed && inDoor(lv.exit, -0.3 * H.R)) { this.leaveRoom(); return; }
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
-    if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (!this.gated()) this.idleT += dt; }   // no new height: the fire speeds up
-    if (!lv.exit && H.minY > lv.cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
+    if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (this.world < 3 && lv.arenas.some((a) => a.on && !a.done)) this.idleT = 0; else if (!this.gated()) this.idleT += dt; }   // no new height:
+    // the fire speeds up (not under a gate, nor in worlds 1-3 while an arena or an ambush is fought: owner, К2 «А»)
+    const rush = lv.fire && lv.fire.rush > 0; if (rush && !this.rushed) sound.play('burn', 0.45, 0.6); this.rushed = rush;   // its speed-up heard as it starts (К2: a roar; its look each world's)
+    const cam = !lv.exit && (lv.under || lv.kind === 'well') ? Math.max(lv.cam, Math.min(H.maxY + view.keep + this.R - view.h, lv.floor + this.room() - view.h)) : lv.cam;   // where the frame's
+    // clamp will hold the camera (Game.frame; the camera itself left to it): at a low frame rate a long fall passed the screen's bottom between two frames and counted as off it, a heart gone (review: 30 fps, 1250 px)
+    if (!lv.exit && H.minY > cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)
   }
   // From above it is a stomp; anything else is a hit.
   meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
     if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < (e.def.safe || 0.35))) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
-    const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
+    const H = this.hero, b = e.body, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
     const above = stompable(H, b, rel);   // from over it (its whole top half), or falling onto it
     const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
     if (e.type === 'nurikabe' && !can && above) { this.bounceOff(e); return; }   // its hard top, hanging or going: a bounce, nothing more (CRUSH)
     if (boss && e.def && e.def.top && !can && H.cy < b.cy - 0.2 * b.R && dx < b.R) { this.bounceOff(e); return; }   // the Puck's hard dome: a bounce, nothing more
-    if (boss && e.def && e.def.rail && e.angry > 0) return;   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
+    if (boss && e.angry > 0) return;   // just hit, red: a boss only pushes (the stomp's high bounce passes it on the way back up)
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
     if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow') || this.power('swarm')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
-    else if (boss && e.state === 'dive' && e.def && e.def.slide) this.hurt(-e.dir * 0.4, -1, 'boss');   // the Puck's dash: thrown up and back over it
+    else if (boss && e.state === 'dive' && e.def && (e.def.glide || e.def.street)) this.hurt(-e.dir * 0.4, -1, 'boss');   // a slide or a rush: thrown up and back over it
     else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
   }
@@ -1397,6 +1703,18 @@ class Game {
     for (const tube of e.tubes(this.R, this.lv.t)) for (const [x, y, w] of tube) if (Math.hypot(H.cx - x, H.cy - y) < hr + w) { hit(x, y); return; }
     if (b.thread && Math.hypot(H.cx - b.cx, H.cy - b.cy) < hr + b.R) hit(b.cx, b.cy);
   }
+  komoriTouch(e) {   // a komori's own circle (KOMORI): red on its way down it hurts; grey it never does (Вр4: one look, one meaning): stomped from
+    // over it, a bump wakes one asleep, anything else nothing
+    const H = this.hero, b = e.body;
+    if (Math.hypot(H.cx - b.cx, H.cy - b.cy) > 0.8 * H.R * H.growth + KOMORI.hit * PIX.base) return;   // (its circle the drawing's, in its pixels)
+    const rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;
+    if (e.canStomp() && stompable(H, b, rel)) this.stomp(e);
+    else if (this.power('rainbow') || this.power('grow') || this.power('swarm')) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
+    else if (e.cs === 'hang') e.rouse(this);
+    else if (!e.fierce()) return;
+    else if (this.ram && b.cy < H.cy) this.kill(e, true);
+    else this.hurt(H.cx - b.cx, H.cy - b.cy, 'komori');
+  }
   zap(e, inks) {   // a rainbow hero's touch: the enemy pops, in all the inks (a giant's: in its own)
     const b = e.body;
     this.kill(e, true);
@@ -1419,7 +1737,7 @@ class Game {
     this.diving = false;
     unstick(H, 0.08); H.kickSquash(0, 1, 1.4);
     this.air = Math.max(this.air, 1); this.sinceContact = JUMP.coyote + 1; this.rising = false;
-    if (this.queueT > 0) { this.queueT = 0; this.air--; this.jump(true, this.queued); }   // pressed just before landing on it
+    if (this.queueT > 0) { this.queueT = 0; this.air--; this.jump(true); }   // pressed just before landing on it
     this.hitstop = STOMP.hitstop; shake.add(3.5); haptics.buzz(14);
     const bx = e.body.cx, by = e.body.minY;   // squashed flat: a spray of its colour and white, and a ring
     sparkFx(bx, by, 18, -Math.PI / 2, 1.4, [200, 650], [1.6, 3.6], [0.35, 0.75], [e.body.color.base, INK.white, e.body.color.base], 0.85);
@@ -1441,8 +1759,6 @@ class Game {
         const q = o.body;
         if (o !== e && q.maxX > b.minX - 3 && q.minX < b.maxX + 3 && q.maxY > b.minY - 3 && q.minY < b.maxY + 3) { this.kill(o, true); shake.add(2); }
       }
-      const bs = lv.boss, q = bs && bs.body;   // into the Puck: it turns over (Boss.flip), and the shell is spent
-      if (q && !bs.dead && bs.def && bs.def.slide && bs.state !== 'dazed' && bs.state !== 'rise' && q.maxX > b.minX - 3 && q.minX < b.maxX + 3 && q.maxY > b.minY - 3 && q.minY < b.maxY + 3) { this.kill(e, true); bs.flip(); continue; }
       if ((e.shellT -= dt) <= 0) this.kill(e, true);
     }
   }
@@ -1475,8 +1791,8 @@ class Game {
   hitBoss() {
     const bs = this.lv.boss, b = bs.body;
     bs.hp--; this.drop(b.cx, b.cy, 5); shake.add(5); sound.play('bosshit', 1, bs.hp > 0 ? 1 : 0.7); splatFx(b.cx, b.maxY - b.R * 0.3, b.R * 0.5, b.color.base, 6);
-    this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo);
-    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = 1 - 0.06 * (bs.max - bs.hp); ui.toast(tf('bossLeft', { n: bs.hp })); if (bs.state === 'dazed') bs.rise(); return; }
+    this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo);   // (no ×n over a fight, nor «N more!»: the pips say it, owner 2026-10-23)
+    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = Math.max(1 - 0.06 * (bs.max - bs.hp), bs.minGrowth); if (bs.state === 'dazed') bs.rise(); return; }   // smaller each heart, never under 2:1 against the hero
     bs.dead = true; this.kills++; met('boss', this.rc && this.rc.boss ? this.rc.boss : 'lid'); delete save.camp.fails[this.failKey()];
     if (bs.def) ui.toast(L2(bs.def.defeat), 2200);
     splatFx(b.cx, b.cy, b.R * 1.4, bs.ink.base, 24); shake.add(9); haptics.buzz(60);
@@ -1490,7 +1806,7 @@ class Game {
   drop(x, y, n, v = 1) {
     for (let k = 0; k < n; k++) {
       const a = -Math.PI / 2 + rand(-1.2, 1.2), sp = COIN.burst * rand(0.6, 1.25);
-      this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: rand(0, TAU) });
+      this.lv.coins.push({ x, y, v, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drop: true, moving: true, t: 0, ph: fxRand(0, TAU) });
     }
   }
   // What is about to come down into view over its top edge, by where (x) it comes in, for a sign there (the market review:
@@ -1529,12 +1845,12 @@ class Game {
     if (this.hp <= 0) this.die();
     return true;
   }
-  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; the last one too, in every level (owner,
-  // 2026-10-23: «почему герой не умирает? Осталось 1 сердце, я падаю в огонь и ничего. Нужно это поменять»: a teaching level kept the last). False: none was lost.
   parOf() {   // a campaign level's par for its time medal (MEDAL)
     const lv = this.lv, m = lv.portal ? (lv.floor - lv.portal.y) / (R_PER_M * this.R) : 0;
     return (this.rc && this.rc.par) || Math.max(MEDAL.min, MEDAL.step * Math.ceil((m * MEDAL.perM) / MEDAL.step));
   }
+  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; the last one too, in every level (owner,
+  // 2026-10-23: «почему герой не умирает? Осталось 1 сердце, я падаю в огонь и ничего. Нужно это поменять»: a teaching level kept the last). False: none was lost.
   loseHeart() {
     if (this.bonus) return false;
     if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
@@ -1601,13 +1917,13 @@ class Game {
     }
     return { x: (lv.l + lv.r) / 2, y: lv.floor - 1.1 * R };
   }
-  // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
-  // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
   failKey() { return this.mode === 'camp' ? this.ci : 'lid'; }   // whose losses running (save.camp.fails): a campaign boss's by its level, the summit's as one
-  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
+  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall costs no heart (the digest §6; the fire does, owner)
+  // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
+  // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
   fall() {
     if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
@@ -1652,10 +1968,10 @@ class Game {
       f.warn = { x: clamp(H.cx + rand(-2.5, 2.5) * R, lv.l + R, lv.r - R), t: FIRE.warn };
       f.spitT = rand(FIRE.spit[0], FIRE.spit[1]);
     }
-    if (f.y < lv.cam + view.h + R && Math.random() < dt * 14) fx.add(rand(lv.l, lv.r), f.y + rand(0, 6), rand(-25, 25), rand(-150, -50), rand(2, 3.5), rand(0.5, 0.9), Math.random() < 0.5 ? INK.fire : INK.flame, 1, 0);
+    if (f.y < lv.cam + view.h + R && fxRand(0, 1) < dt * 14) fx.add(fxRand(lv.l, lv.r), f.y + fxRand(0, 6), fxRand(-25, 25), fxRand(-150, -50), fxRand(2, 3.5), fxRand(0.5, 0.9), fxRand(0, 1) < 0.5 ? (WET[lv.theme.hazard] ? INK.white : INK.fire) : hazInk(lv.theme), 1, 0);
     for (let i = lv.enemies.length - 1; i >= 0; i--) {
       const b = lv.enemies[i].body;
-      if (b.cy > f.y) { splatFx(b.cx, f.y, b.R, INK.flame, 8); lv.enemies.splice(i, 1); }   // marmalade burns: no coins for it
+      if (b.cy > f.y) { splatFx(b.cx, f.y, b.R, hazInk(lv.theme), 8); lv.enemies.splice(i, 1); }   // marmalade burns: no coins for it
     }
   }
   // Fire burns: a heart, and a throw back up even through a hit's safe moment; then it sinks a little.
@@ -1668,7 +1984,7 @@ class Game {
     sound.play('burn');
     if (this.state !== 'play') return;
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;
-    splatFx(H.cx, f.y, this.R * 0.7, INK.flame, 6);
+    splatFx(H.cx, f.y, this.R * 0.7, hazInk(this.lv.theme), 6);
     f.y = Math.max(f.y, H.maxY + FIRE.back * view.h); f.warn = null;   // and sinks back: a throw into a ceiling must not land in it again
   }
   power(k) { return this.gunT > 0 && this.pow === k; }   // a candy at work
@@ -1708,11 +2024,12 @@ class Game {
     const lv = this.lv, H = this.hero, sh = lv.shots;
     for (let i = sh.length - 1; i >= 0; i--) {
       const s = sh[i];
-      s.vy += SHOT_G * dt; s.x += s.vx * dt; s.y += s.vy * dt;
-      let gone = s.y > lv.floor || s.y > lv.cam + view.h + 100 || (s.vy > 0 && lv.fire && s.y > lv.fire.y);   // a blob falls into the fire
-      for (const r of lv.near(s.y, s.y)) if (!r.plank && s.x > r.x0 && s.x < r.x1) gone = true;
+      if (!s.wave) s.vy += SHOT_G * dt;   // (a quake's wave runs along the floor: no fall, gone at a wall)
+      s.x += s.vx * dt; s.y += s.vy * dt;
+      let gone = s.wave ? s.x < lv.l || s.x > lv.r : s.y > lv.floor || s.y > lv.cam + view.h + 100 || (s.vy > 0 && lv.fire && s.y > lv.fire.y);   // a blob falls into the fire
+      if (!s.wave) for (const r of lv.near(s.y, s.y)) if (!r.plank && s.x > r.x0 && s.x < r.x1) gone = true;
       if (Math.hypot(H.cx - s.x, H.cy - s.y) < H.R * H.growth * 0.8 + s.r) { this.hurt(H.cx - s.x, H.cy - s.y, s.icicle || s.rock ? 'icicle' : s.fire ? 'fire_blob' : 'shot'); gone = true; }
-      if (gone) { splatFx(s.x, s.y, s.r * 2, s.fire ? INK.flame : INK.spike, 4); sh.splice(i, 1); }
+      if (gone) { splatFx(s.x, s.y, s.r * 2, s.fire ? hazInk(lv.theme) : INK.spike, 4); sh.splice(i, 1); }
     }
   }
   collect(dt) {
@@ -1745,15 +2062,16 @@ class Game {
     this.drop(H.cx, H.minY, pay / 5, 5);   // out of the hero as big coins that fly back in: the reward seen (every reward is a multiple of 5)
     sparkFx(H.cx, H.minY, Math.min(36, 6 + 3 * n), -Math.PI / 2, 0.9, [250, 650], [1.5, 3.5], [0.4, 0.8], [INK.coin, INK.coinD, INK.white], 1); shake.add(rw.hp ? 6 : 3);
     if (rw.hp) this.heal(rw.hp);
-    ui.toast(tf('comboPay', { n, c: pay }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);
+    if (!this.lv.boss) ui.toast(tf('comboPay', { n, c: pay }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);   // (not over a boss fight: owner 2026-10-23)
     haptics.buzz(18); sound.play('combo');
   }
   // The first touch of each kind of surface, and the first sight of the fire, told once ever.
   notice() {
     const H = this.hero, lv = this.lv, m = H.wallMask, fr = H.floorRect;
     const coat = m & 1 ? lv.coatAt(1, H.cy) : m & 2 ? lv.coatAt(2, H.cy) : null;
-    if (coat) this.hint(coat);
-    if (fr && (m & 8)) { if (fr.crumble) this.hint('crumble'); else if (fr.slick) this.hint('ice'); }
+    const ice = lv.theme.village ? 'slick' : 'ice';   // (the Village's slick walls are lacquer, not ice: owner, Д77, Д80)
+    if (coat) this.hint(coat === 'ice' ? ice : coat);
+    if (fr && (m & 8)) { if (fr.crumble) this.hint('crumble'); else if (fr.slick) this.hint(ice); }
     if (lv.fire && lv.fire.y < lv.cam + view.h) this.hint('fire');
     const how = coarse ? (save.stick ? 'S' : 'T') : 'K';   // the words for the controls in use
     if (H.stuck && (glueSide(H) === 1 || glueSide(H) === 2)) this.hint('wall', 'seen_wall' + how);   // stuck to a wall the first time: how to let go
@@ -1792,7 +2110,7 @@ class Game {
   enterRoom(bub) {
     if (!bub.room) {
       const room = new Level();
-      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor() });
+      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor(), cave: bub.kind === 'treasure' ? this.caveNext(this.lv.world) : undefined });
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
@@ -1800,7 +2118,16 @@ class Game {
     this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false; this.lv.cam = this.lv.floor + this.roomFloor() - view.h;   // (as it was built, the view as it is now)
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
-    aimCancel(); ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
+    this.hero.squeezeIn = 0; ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
+  }
+  // A world's next bonus cave (CAVES; owner, З1 «В»): two gift rooms, then a puzzle, counted per world from play to play (save.caves); of each kind not the
+  // one it had last
+  caveNext(wd) {
+    const c = CAVES[wd.id]; if (!c) return undefined;
+    const s = save.caves[wd.id] || (save.caves[wd.id] = { n: 0, gift: '', puzzle: '' }), kind = s.n % 3 === 2 ? 'puzzle' : 'gift', opts = c[kind].filter((id) => id !== s[kind]);
+    const id = opts.length ? opts[(Math.random() * opts.length) | 0] : c[kind][0];
+    s.n++; s[kind] = id; persist();
+    return id;
   }
   // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in the dark, with coins as rain and no
   // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).
@@ -1818,7 +2145,7 @@ class Game {
     this.well = this.lv; this.door = sp; this.lv = lv;
     this.placeHero((lv.l + lv.r) / 2, lv.capY + 1.6 * R); this.regroup(); this.safes = [];
     lv.cam = this.hero.cy - 0.35 * view.h;
-    aimCancel(); ui.flash(); ui.toast(t('under'), 1600); sound.play('bubble', 1, 0.6); haptics.buzz(20);
+    this.hero.squeezeIn = 0; ui.flash(); ui.toast(t('under'), 1600); sound.play('bubble', 1, 0.6); haptics.buzz(20);
   }
   leaveUnder() {   // back up the level, UNDER.lift m over where it went in, on the highest steady ledge there
     const sp = this.door, well = this.well, R = this.R, ys = Math.max(sp.y - UNDER.lift * R_PER_M * R, well.endY + 6 * R);
@@ -1828,7 +2155,7 @@ class Game {
     const r = well.rects.filter((q) => !q.cap && !q.plank && !q.crumble && !q.move && !q.spring && !q.crack && !q.gone && q.x1 - q.x0 > 2 * R && q.y0 >= ys && q.y0 < sp.y).sort((a, b) => a.y0 - b.y0)[0];
     if (r) { this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }]; } else this.placeHero(sp.x, sp.y);
     well.cam = Math.max(this.hero.cy - CAM.anchor * view.h, well.capY - CAM.top); well.ensure(well.cam - view.h * LEVEL.ahead);
-    this.regroup(); aimCancel(); ui.flash(); ui.toast(t('back'), 1400); sound.play('portal', 0.8, 1.2); haptics.buzz(20);
+    this.regroup(); this.hero.squeezeIn = 0; ui.flash(); ui.toast(t('back'), 1400); sound.play('portal', 0.8, 1.2); haptics.buzz(20);
   }
   trialStep(dt) {   // a trial room's clock and goal (TRIAL): on a moment after coming in; done in time, its pay dropped in; out of time, its coins go
     const lv = this.lv, tr = lv.trial, R = this.R;
@@ -1848,7 +2175,7 @@ class Game {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
     this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R); this.regroup();   // beside the door, on its ledge
-    bub.cd = 1.2; aimCancel(); ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
+    bub.cd = 1.2; this.hero.squeezeIn = 0; ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
     if ((bub.kind === 'treasure' && !room.coins.length) || bub.kind === 'trial') {   // a stash with all its coins taken, or a trial (TRIAL: one try, left halfway or not): its way in closes behind the hero
       this.lv.bubbles.splice(this.lv.bubbles.indexOf(bub), 1);
       sparkFx(bub.x, bub.y, 14, -Math.PI / 2, Math.PI, [80, 240], [1.5, 3], [0.3, 0.6], [this.lv.theme.wall, INK.white], 0.6); fx.dust(bub.x, bub.y1, IMPACT.puffSpeed + 500);
@@ -1876,6 +2203,7 @@ class Game {
   levelClear() {
     joyEnd();   // a stick held into the hole lets go
     this.markDay();
+    if (this.cardDue) { const id = this.cardDue.id; this.cardDue = null; this.story(id); }   // a card due (the crow's, RIBBON) as the level ends: now, before what follows (QA: it was lost)
     if (!this.bonus) { pmsg('level_completed', this.lvl()); track('level_stats', { level_id: this.levelId(), seconds: Math.round(this.lv.t), coins_taken: this.lv.coinsTaken, coins_total: this.lv.coinTotal, hp: this.hp }); }   // (a bonus level is done in endBonus, by its hole or not)
     this.state = 'clear'; this.stateT = 0;
     const H = this.hero;
@@ -1936,8 +2264,9 @@ class Game {
     if (m.days.includes(today)) return;
     m.days.push(today);
     const n = m.days.length, k = MARKS.at.indexOf(n);
-    if (k >= 0) { this.coins += MARKS.pay[k]; setTimeout(() => ui.toast(tf('markPay', { n, c: MARKS.pay[k] }), 2200), 900); }   // after the hole's moment
-    else setTimeout(() => ui.toast(tf('mark', { n }), 1800), 900);
+    if (k >= 0) this.coins += MARKS.pay[k];
+    this.markSay = { text: k >= 0 ? tf('markPay', { n, c: MARKS.pay[k] }) : tf('mark', { n }), pay: k >= 0 };   // said on the screen after the level (ui.markLine), not in a toast:
+    // the toast, timed in real time, lay over the stars coming in or was put out by the panel (QA, 2026-10-23)
     persist();
   }
   // An enemy's coins still on their way to the hero as a level or the run ends get there all the same.
@@ -2001,7 +2330,7 @@ class Game {
     delete save.cur;   // a level begun (Game.resume puts back the one it goes on with)
     this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
     for (const id of save.camp.builds[w] || []) { if (id === 'maxhp') { this.maxHp++; continue; } const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }   // (maxhp: a heart bought in its shops)
-    this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = ![0, 1, 2].some((d) => save.camp.stars[w * 30 + s * 3 + d] > 0);   // its tier's first clear (an upgrade then: one a tier, whichever way up)
+    this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = !(save.camp.stars[w * 30 + s * 3 + 1] > 0);   // its tier's first clear (an upgrade then: one a tier)
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
@@ -2033,8 +2362,8 @@ class Game {
   }
   pop() {   // the burst, each death its own: where it can be seen (a fall ends below the screen), in the colour it was held in
     const H = this.hero, lv = this.lv, R = this.R, x = H.cx, y = clamp(H.cy, lv.cam + R, lv.cam + view.h - R), why = this.deathWhy();
-    burstFx(x, y, R, why === 'fall' ? H.color.base : DIE.body[why].base); shake.add(12); sound.play('die');
-    if (why === 'fire') sparkFx(x, y - 0.3 * R, 24, -Math.PI / 2, 0.6, [60, 220], [2.5, 5], [0.9, 1.6], [PAL.gray, PAL.gray, INK.flame], -0.2);   // toasted: smoke and embers going up
+    burstFx(x, y, R, why === 'fall' ? H.color.base : dieBody(why, lv.theme).base); shake.add(12); sound.play('die');
+    if (why === 'fire') sparkFx(x, y - 0.3 * R, 24, -Math.PI / 2, 0.6, [60, 220], [2.5, 5], [0.9, 1.6], WET[lv.theme.hazard] ? [hazInk(lv.theme), INK.white, hazInk(lv.theme)] : [PAL.gray, PAL.gray, INK.flame], -0.2);   // toasted: smoke and embers going up (soaked, snowed under: a splash)
     else if (why === 'spikes') { fx.ring(x, y, 1.6 * R, INK.spike); sparkFx(x, y, 20, -Math.PI / 2, 1.2, [350, 800], [2, 3.5], [0.35, 0.7], [INK.spike, INK.spike, INK.white], 0.8); }   // popped like a balloon
     else if (why === 'fall') { splatFx(x, y, R, H.color.base, 14); fx.ring(x, y, 2.6 * R, H.color.base); fx.ring(x, y, 1.6 * R, INK.white); shake.add(6); }   // splat
     else if (why === 'icicle') { fx.ring(x, y, 1.8 * R, INK.white); sparkFx(x, y - R, 10, -Math.PI / 2, 1.4, [150, 380], [2.5, 4], [0.5, 0.9], [PAL.yellow, PAL.white], 0.2); }   // bonk: stars over the head
@@ -2089,7 +2418,7 @@ class Game {
   // A story card (STORY) once a play-through, the game held under it till Next; `then` after it, or at once when none is due (`again`: shown seen or not)
   story(id, then, again) {
     const c = id && STORY[id];
-    if (!c || (c.draft && !STORY_LIVE) || (save.seen['card_' + id] && !again)) { if (then) then(); return; }   // (a draft, till the owner's «да» to its art: ?story only)
+    if (!c || (save.seen['card_' + id] && !again)) { if (then) then(); return; }
     this.storyOn = true; this.paused = this.state; this.state = 'pause'; input.clear();
     ui.story(c, () => { save.seen['card_' + id] = 1; persist(); this.storyOn = false; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); if (then) then(); });
   }
@@ -2114,7 +2443,7 @@ class Game {
   frame(dt, alpha, now) {
     const lv = this.lv, b = this.hero;
     const rb = this.power('rainbow') && this.state !== 'dead', tl = this.tail, last = tl[tl.length - 1];   // frame runs on under the revive dialog, gun() does not
-    b.color = this.state === 'dead' && this.dieT > 0 ? DIE.body[this.deathWhy()] : rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
+    b.color = this.state === 'dead' && this.dieT > 0 ? dieBody(this.deathWhy(), lv.theme) : rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
     b.helmet = this.rocket && this.rocket.astro ? 'astro' : this.power('smash') && this.state !== 'dead' && !(this.gunT < 1 && Math.floor(this.gunT * 6) % 2 === 0) ? 'moto' : null;   // the smash's helmet (user: in place of its pips), blinking in its last second
     if (last && Math.hypot(b.cx - last[0], b.cy - last[1]) > 4 * this.R) tl.length = 0;   // a respawn or a door: no streak across the screen
     else if (rb && (!last || Math.hypot(b.cx - last[0], b.cy - last[1]) > RAINBOW.gap * this.R)) tl.push([b.cx, b.cy]);
@@ -2167,8 +2496,8 @@ class Game {
 }
 
 // ── UI ───────────────────────────────────────────────────────
-// The HUD, toasts and the four panels (menu, upgrade cards, pause, result) are DOM over
-// the canvas column, and so is the touch pad.
+// The HUD, toasts and the seven panels (menu, settings, upgrade cards, pause, result, the map with the book, a story card) are
+// DOM over the canvas column, and so is the touch pad.
 const $ = (id) => document.getElementById(id);
 const rgb = (c) => 'rgb(' + c.map((v) => Math.round(v * 255)).join(',') + ')';
 // ── Type ──
@@ -2197,7 +2526,7 @@ function inkPath(rows, x, y) {
   rows.forEach((row, ry) => { for (let k = 0; k < row.length;) { if (row[k] !== '#') { k++; continue; } let e = k; while (e < row.length && row[e] === '#') e++; d += `M${x + k} ${y + ry}h${e - k}v1h${k - e}z`; k = e; } });
   return d;
 }
-const pxSvg = (W, H, paths) => `<svg aria-hidden="true" viewBox="0 0 ${W} ${H}" style="--w:${W};--h:${H}" shape-rendering="crispEdges">${paths}</svg>`;
+const pxSvg = (W, H, paths, f = 1) => `<svg aria-hidden="true" viewBox="0 0 ${W} ${H}" style="--w:${W / f};--h:${H / f}" shape-rendering="crispEdges">${paths}</svg>`;   // (f: a picture drawn f times as fine, the same size)
 // Text, centred line under line (or `left`); `max` (--p CSS px each, the old pixel font's measure) wraps it at spaces, as
 // a '\n' does. Sized by --p too: its capitals as tall as that font's 7 pixels (see .tx in index.html).
 function px(text, max = Infinity, left = false) {
@@ -2251,7 +2580,7 @@ const STORY = {
   boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', title: BOSSES.koschei.name },
 };
 for (const k in STORY) STORY[k].id = k;
-const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows the drafts too, and card I before
+const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows card I before
 let storyLook = STORY_LIVE;   // the first level of the load, seen or not)
 // A card's colours (К6): its world's ink over black as the game draws the world (DEPTH: the frame's band a quarter of the way from black to
 // the ink, the corners the ink), white, red and yellow as everywhere; the Moon's cards in the pack's own lavender; the Dark Forest grey.
@@ -2280,7 +2609,7 @@ function storyFrame(f, w, h) {   // the card's medallion (owner, К16 «Б»: «
 // and settle, secondary action out of phase); the card tilts (±8°) toward the finger, else in a slow sweep, its planes parting by depth, a dithered
 // band of the six inks across it as far as it is tipped. The eyes blink, specks twinkle, lights flicker (assets/cards/live.json, scratchpad
 // cards8/live8.py over the art), each on the plane under it. Under «reduce motion» only those.
-const LIVE = { step: 125, blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
+const LIVE = { blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
 const CARD = { tilt: 8, par: 8, step: 0.09, each: 0.32, rise: 24, riseT: 0.56, title: 0.32, next: 0.44, fade: 0.25, w0: 9, z: 0.62, idle: 2500 };   // degrees; the
 // nearest plane's parallax at the most (device px); the coming-in (s: each plane's start after the last's, its dither's length, the rise (CSS px) and
 // its length, the title's and Next's starts and fades); the tilt's spring (rad/s, damping: one small overshoot); the sweep after so long untouched
@@ -2297,6 +2626,15 @@ const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png 
     { ink: '#808080', pts: [[120.5, 74.5, 0.25], [121.5, 96.5, 1]] }, { ink: '#808080', pts: [[120.5, 74.5, 0.25], [130.5, 98.5, 1]] }] },
   boss_pigeon: { planes: [['boss', 0.6], ['hero', 1]] },
   boss_koschei: { planes: [['boss', 0.6], ['hero', 1]] },
+  arrive_mine: { planes: [['hero', 1]] }, arrive_cave: { planes: [['hero', 1]] }, arrive_ice: { planes: [['hero', 1]] }, arrive_tokyo: { planes: [['hero', 1]] },
+  arrive_blocks: { planes: [['hero', 1]] }, arrive_skazka: { planes: [['hero', 1]] },
+  arrive_sea: { planes: [['boss', 0.7], ['hero', 1]] }, arrive_sky: { planes: [['boss', 0.7], ['hero', 1]] },   // (what the hero rides: the boat, the lift's car)
+  moon_fall: { planes: [['boss', 0.45], ['hero', 1]] }, village_crow: { planes: [['boss', 0.6], ['hero', 1]] }, city_friendship: { planes: [['boss', 0.9], ['hero', 1]] },   // (the
+  // world cards: the rabbit on the Moon's rim, the crow, Ume; the lantern on its chain; Ume with hers; Mochi alone where it stood on what is as white
+  // as it, the snow, the clouds, the lighthouse's foot; the two at home together)
+  mine_lamp: { planes: [['boss', 0.7], ['hero', 1]], threads: [{ ink: '#808080', pts: [[75.5, 57, 0], [76.5, 76, 1]] }, { ink: '#e0e0e0', pts: [[78.5, 57, 0], [78.5, 76, 1]] }] },
+  fuji_bell: { planes: [['boss', 1]] }, sea_lighthouse: { planes: [['boss', 1]] }, danchi_lantern: { planes: [['boss', 0.9], ['hero', 1]] },
+  sky_clouds: { planes: [['boss', 1]] }, forest_path: { planes: [['hero', 1]] }, moon_home: { planes: [['boss', 1]] },
 };
 const cardEase = {
   io: (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2),   // slow in, slow out
@@ -2350,9 +2688,88 @@ const CARD_MOTION = {
     return { boss: [-1.2 * k, -0.4 * k], hero: [hx, cardHop(u - 1.6, 0.8, 0.12, 0.23)], blink: u > 4.4 && u < 4.55 };
   },
 };
+// The arrivals' (owner, К17 «А»: «тоже анимируй как карточки боссов»): Mochi (Kolobok in the Forest) come to the world, each in its own way
+Object.assign(CARD_MOTION, {
+  arrive_mine(t) {   // Mochi in the straw it fell into: it sinks, pops up and drops back with a little give, then sits
+    const u = t % 3.2, y = u < 0.3 ? 0.5 * cardEase.io(u / 0.3) : u < 0.7 ? 0.5 - 1.6 * cardEase.out(seg(u, 0.3, 0.7)) : u < 1.05 ? -1.1 * (1 - cardEase.in(seg(u, 0.7, 1.05))) : u < 1.3 ? 0.25 * Math.sin(Math.PI * seg(u, 1.05, 1.3)) : 0;
+    return { hero: [0, y], blink: u > 2.2 && u < 2.35 };
+  },
+  arrive_cave(t) {   // Mochi peers into the tunnel: leans in, holds, leans back, breathing
+    const u = t % 4.2, k = u < 1.2 ? cardEase.io(u / 1.2) : u < 2 ? 1 : u < 3.2 ? 1 - cardEase.io(seg(u, 2, 3.2)) : 0, b = (1 - Math.cos((2 * Math.PI * t) / 2.1)) / 2;
+    return { hero: [0.7 * k, -0.3 * cardEase.io(b)], blink: u > 3.4 && u < 3.55 };
+  },
+  arrive_ice(t) {   // Mochi on the shrine's steps, readying to climb: a crouch, a hop, a landing with a give
+    const u = t % 2.8, y = u < 0.25 ? 0.4 * cardEase.io(u / 0.25) : u < 0.85 ? 0.4 * (1 - seg(u, 0.25, 0.4)) + cardHop(u - 0.25, 1.4, 0.25, 0.35) : u < 1.05 ? 0.25 * Math.sin(Math.PI * seg(u, 0.85, 1.05)) : 0;
+    return { hero: [0, y], blink: u > 1.8 && u < 1.95 };
+  },
+  arrive_sea(t) {   // the boat rides the swell, rolling a little, Mochi in it a beat behind
+    const w = (2 * Math.PI * t) / 2.6, bx = 0.35 * Math.sin(w + 1.2), by = 0.8 * Math.sin(w);
+    return { boss: [bx, by], hero: [bx, by + 0.3 * Math.sin(w - 0.7)] };
+  },
+  arrive_tokyo(t) {   // the train's rhythm: a bump at each rail joint, Mochi swaying on its seat
+    const u = t % 0.9, y = u < 0.06 ? 0.3 * cardEase.out(u / 0.06) : u < 0.36 ? 0.3 * (1 - cardEase.back(seg(u, 0.06, 0.36))) : 0;
+    return { hero: [0.3 * Math.sin((2 * Math.PI * t) / 1.8), y] };
+  },
+  arrive_blocks(t) {   // Mochi on the top of the climbing dome: a crouch and a hop, a landing with a give
+    const u = t % 2.4, y = u < 0.2 ? 0.3 * cardEase.io(u / 0.2) : u < 0.85 ? 0.3 * (1 - seg(u, 0.2, 0.32)) + cardHop(u - 0.2, 1.4, 0.25, 0.4) : u < 1.05 ? 0.2 * Math.sin(Math.PI * seg(u, 0.85, 1.05)) : 0;
+    return { hero: [0, y], blink: u > 1.6 && u < 1.75 };
+  },
+  arrive_sky(t) {   // the lift's car goes up the tower and down again, easing in and out; Mochi in it sinks as it starts, and rises on as it stops
+    const u = t % 6, k = u < 2.2 ? cardEase.io(u / 2.2) : u < 3 ? 1 : u < 5.2 ? 1 - cardEase.io(seg(u, 3, 5.2)) : 0, cy = -2.5 * k;
+    const lag = 0.35 * Math.sin(Math.PI * seg(u, 0, 0.5)) - 0.3 * Math.sin(Math.PI * seg(u, 1.9, 2.5)) - 0.35 * Math.sin(Math.PI * seg(u, 3, 3.5)) + 0.3 * Math.sin(Math.PI * seg(u, 4.9, 5.5));
+    return { boss: [0, cy], hero: [0, cy + lag], blink: u > 2.4 && u < 2.55 };
+  },
+  arrive_skazka(t) {   // Kolobok on the forest path, uneasy: rocking side to side, and now and then a start
+    const u = t % 3.6;
+    return { hero: [0.4 * Math.sin((2 * Math.PI * t) / 2.2), cardHop(u - 2.4, 1, 0.15, 0.3)], blink: u > 1 && u < 1.15 };
+  },
+});
+// The world cards' (owner, К16 «Б»: «остальные карточки делай»), each its scene's own small story
+Object.assign(CARD_MOTION, {
+  moon_fall(t) {   // I: Mochi falls as a feather does, swinging side to side and slow at each end; the rabbit on the rim bobs, waving after it
+    const w = (2 * Math.PI * t) / 3.6;
+    return { hero: [1.2 * Math.sin(w), 0.5 * Math.sin(2 * w)], boss: [0, -0.4 * Math.abs(Math.sin((Math.PI * t) / 1.2))], blink: t % 3.6 > 1.7 && t % 3.6 < 1.85 };
+  },
+  village_crow(t) {   // II: the crow beats its wings, up quick and sinking slower; Mochi leans in to nudge the cord and back
+    const u = t % 1.1, y = u < 0.3 ? -0.6 * cardEase.out(u / 0.3) : -0.6 * (1 - cardEase.io(seg(u, 0.3, 1.1))), v = t % 2.2, k = v < 0.5 ? cardEase.io(v / 0.5) : v < 0.8 ? 1 : v < 1.3 ? 1 - cardEase.io(seg(v, 0.8, 1.3)) : 0;
+    return { boss: [0, y], hero: [-0.5 * k, 0], blink: v > 1.6 && v < 1.75 };
+  },
+  city_friendship(t) {   // VI: a hop each in turn, Ume's and then Mochi's (call and answer)
+    const u = t % 2.4;
+    return { boss: [0, cardHop(u - 0.2, 1, 0.2, 0.3)], hero: [0, cardHop(u - 1, 1, 0.2, 0.3)], blink: u > 1.8 && u < 1.95 };
+  },
+  mine_lamp(t) {   // III: the lantern swings on its chain off the beam, a pendulum slow at each end; Mochi watches it, breathing
+    const th = 0.05 * Math.sin((2 * Math.PI * t) / 3.2), L = 46, b = (1 - Math.cos((2 * Math.PI * t) / 2.4)) / 2;
+    return { boss: [L * Math.sin(th), L * (1 - Math.cos(th))], hero: [0, -0.3 * cardEase.io(b)] };
+  },
+  fuji_bell(t) {   // IV: Mochi by the summit's bell, glad: a crouch and a hop, a landing with a give
+    const u = t % 2.6, y = u < 0.2 ? 0.3 * cardEase.io(u / 0.2) : u < 0.8 ? 0.3 * (1 - seg(u, 0.2, 0.32)) + cardHop(u - 0.2, 1.2, 0.22, 0.35) : u < 1 ? 0.2 * Math.sin(Math.PI * seg(u, 0.8, 1)) : 0;
+    return { boss: [0, y], blink: u > 1.7 && u < 1.85 };
+  },
+  sea_lighthouse(t) {   // V: Mochi on the rock under the beam, breathing, and now and then up on its toes to look
+    const u = t % 3, b = (1 - Math.cos((2 * Math.PI * t) / 1.5)) / 2;
+    return { boss: [0, -0.3 * cardEase.io(b) + cardHop(u - 2, 0.8, 0.2, 0.35)], blink: u > 0.8 && u < 0.95 };
+  },
+  danchi_lantern(t) {   // VII: Ume bobs, glad to give the lantern; Mochi hops a beat after
+    const u = t % 1.6;
+    return { boss: [0, -0.5 * (1 - Math.cos((2 * Math.PI * u) / 1.6)) / 2], hero: [0, cardHop(u - 0.6, 0.9, 0.18, 0.3)], blink: t % 3.2 > 2.6 && t % 3.2 < 2.75 };
+  },
+  sky_clouds(t) {   // VIII: Mochi on the roof's ridge under the parting clouds: breathing, a look up on its toes
+    const u = t % 3.4, b = (1 - Math.cos((2 * Math.PI * t) / 1.7)) / 2;
+    return { boss: [0, -0.3 * cardEase.io(b) + cardHop(u - 2.2, 0.7, 0.2, 0.35)], blink: u > 1 && u < 1.15 };
+  },
+  forest_path(t) {   // ★: Kolobok on the path, the eyes in the dark on him: rolling a little this way and that, and a start
+    const u = t % 3.8;
+    return { hero: [0.6 * Math.sin((2 * Math.PI * t) / 3.8), cardHop(u - 2.6, 1, 0.15, 0.3)], blink: u > 1.2 && u < 1.35 };
+  },
+  moon_home(t) {   // Home: Mochi and the rabbit in their hug, rocking gently together
+    const w = (2 * Math.PI * t) / 3;
+    return { boss: [0.5 * Math.sin(w), -0.2 * (1 - Math.cos(2 * w)) / 2] };
+  },
+});
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
-const cardImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+const cardImg = (src, ms = 6000) => new Promise((ok) => { const i = new Image(), t = setTimeout(() => ok(null), ms); i.onload = () => { clearTimeout(t); ok(i); }; i.onerror = () => { clearTimeout(t); ok(null); }; i.src = src; });   // (given up after `ms`: a stalled request held the card for good; review)
 function cardLive(c, card, tilt, clip, title, next) {
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
   const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
@@ -2360,15 +2777,17 @@ function cardLive(c, card, tilt, clip, title, next) {
   const planes = [], L0 = { eyes: [], twinkle: [], lights: [], pal: [] };
   let L = L0, thread = null, sheen = null, sg = null, img = null, masks = null;
   const show = (a, b) => { title.style.opacity = a; title.style.transform = `translateY(${8 * (1 - cardEase.out(a))}px)`; next.style.opacity = b; next.style.transform = `translateY(${8 * (1 - cardEase.out(b))}px)`; next.style.pointerEvents = b < 0.5 ? 'none' : ''; };
-  show(still ? 1 : 0, still ? 1 : 0);
+  show(0, 0);   // (under «reduce motion» at once once the art is in: before it, Next skipped a card unseen; QA)
+  const failSafe = setTimeout(() => { if (st.alive && !st.ready) { st.forced = true; show(1, 1); } }, 3000);   // the art late: Next all the same (review)
   const move = (e) => { const r = card.getBoundingClientRect(); st.gx = ((e.clientX - r.left) / r.width - 0.5) * 2; st.gy = ((e.clientY - r.top) / r.height - 0.5) * 2; st.lastIn = performance.now(); };
   const leave = () => { st.gx = 0; st.gy = 0; };
   card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
   Promise.all([cardImg(def ? `assets/cards/planes/${c.id}-plate.png` : c.still), ...(def ? def.planes.map(([id]) => cardImg(`assets/cards/planes/${c.id}-${id}.png`)) : []),
-    liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})))]).then((got) => {
+    Promise.race([liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({}))), new Promise((ok) => setTimeout(() => ok({}), 6000))])]).then((got) => {   // (the wait
+    // a card's: a slow first answer kept as none left every later card without its motion)
     if (!st.alive) return;
     const ims = got.slice(0, -1), j = got[got.length - 1];
-    if (!ims[0]) return;   // (no art: the card's ground only)
+    if (!ims[0]) { show(1, 1); return; }   // (no art: the card's ground only, and its Next: a card that did not load held the game for good; review)
     L = (j && j[c.id]) || L0;
     const specs = [['plate', 0.25], ...(def ? def.planes : [])];
     ims.forEach((im, i) => {
@@ -2393,7 +2812,7 @@ function cardLive(c, card, tilt, clip, title, next) {
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (CARD_BAYER[y & 3][x & 3] < n) d.data[(y * w + x) * 4 + 3] = 255;
       mg.putImageData(d, 0, 0); masks.push(m);
     }
-    st.ready = true;
+    st.ready = true; if (still) show(1, 1);
   });
   const rgb = RAINBOW_INK.map((v) => v.map((q) => Math.round(q * 255)));
   function drawPlane(p, level, f, blink) {   // its picture, its live cells this step, through the coming-in's dither (only when either changed)
@@ -2426,7 +2845,7 @@ function cardLive(c, card, tilt, clip, title, next) {
   function drawThread(off, K) {   // what it hangs by, from the plate to the figure, a cell wide, in whole device px (each point moved its part of the way)
     const r = card.getBoundingClientRect(), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
     if (thread.width !== W || thread.height !== H) { thread.width = W; thread.height = H; }
-    const g = thread.getContext('2d'), pa = off[0], pb = off[1], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
+    const g = thread.getContext('2d'), pa = off[0], pb = off[1] || off[0], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
     g.clearRect(0, 0, W, H);
     for (const th of def.threads) {
       g.fillStyle = th.ink;
@@ -2457,10 +2876,10 @@ function cardLive(c, card, tilt, clip, title, next) {
     });
     if (thread) { drawThread(off, K); thread.style.opacity = still ? 1 : clamp01((a - CARD.step) / CARD.each); }
     if (sheen) drawSheen(st.tx, st.ty);
-    show(still ? 1 : clamp01((a - CARD.title) / CARD.fade), still ? 1 : clamp01((a - CARD.next) / CARD.fade));
+    show(still || st.forced ? 1 : clamp01((a - CARD.title) / CARD.fade), still || st.forced ? 1 : clamp01((a - CARD.next) / CARD.fade));
   }
   st.raf = requestAnimationFrame(step);
-  return { stop() { st.alive = false; cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
+  return { stop() { st.alive = false; clearTimeout(failSafe); cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;
 // English by the Japanese). `k` is the STR key it says.
@@ -2470,15 +2889,45 @@ function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
   e.classList.add('capped'); e.append(c);
   return e;
 }
-// An ICONS picture as pixel SVG, a path per ink in the page's palette colours.
+// A map's backdrop: a picture filling the panel, its pixels whole screen pixels (the smallest whole scale that covers it), low on it, opaque.
+function mapBack(p, src) {
+  const img = new Image(); p.classList.add('wmap'); p.dataset.bg = src;
+  img.onload = () => { if (p.dataset.bg !== src) return;   // (another screen took the panel meanwhile)
+    const d = devicePixelRatio || 1, k = Math.ceil(Math.max((p.clientWidth * d) / img.width, (p.clientHeight * d) / img.height));
+    p.style.backgroundImage = `url("${src}")`; p.style.backgroundSize = `${(img.width * k) / d}px ${(img.height * k) / d}px`; };
+  img.src = src;
+}
+// A boss's figure off its story card (its plane, the card's cells, cropped to them; a tall one to its upper part) into `cv`, as big as `cell` holds at
+// whole screen pixels (a map's boss level).
+const BOSS_FIG = {};
+function bossFig(id, cv, cell) {
+  const put = (f) => {
+    const d = devicePixelRatio || 1, r = cell.getBoundingClientRect(), room = [Math.max(1, r.width - 12), Math.max(1, r.height - 34)], k = Math.min((room[0] * d) / f.w, (room[1] * d) / f.h), K = k >= 1 ? Math.floor(k) : k;
+    cv.width = f.w; cv.height = f.h; cv.getContext('2d').drawImage(f.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+    cv.style.width = (f.w * K) / d + 'px'; cv.style.height = (f.h * K) / d + 'px';
+  };
+  if (BOSS_FIG[id]) { requestAnimationFrame(() => put(BOSS_FIG[id])); return; }
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+    const a = g.getImageData(0, 0, img.width, img.height).data; let x0 = img.width, y0 = img.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) if (a[(y * img.width + x) * 4 + 3] > 0) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return;
+    const w = x1 - x0 + 1, h = Math.min(y1 - y0 + 1, Math.round(1.15 * w));   // (Koschei, tall: his head and shoulders)
+    put((BOSS_FIG[id] = { img, x: x0, y: y0, w, h }));
+  };
+  img.src = 'assets/cards/planes/boss_' + id + '-boss.png';
+}
+// An ICONS picture as pixel SVG, a path per ink in the page's palette colours (the finer one, ICONS2, on a computer's Retina screen: its
+// half dot whole screen pixels at any size the page gives it).
 function iconEl(id) {
-  const rows = ICONS[id], e = document.createElement('i');
+  const rows = devicePixelRatio >= 2 ? iconRows(id) : ICONS[id], e = document.createElement('i');
   let paths = '';
   for (const c in ICON_INK) {
     const d = inkPath(rows.map((r) => r.replace(/./g, (q) => (q === c ? '#' : '.'))), 0, 0);
     if (d) paths += `<path fill="var(--${ICON_INK[c] === 'black' ? 'ink' : ICON_INK[c]})" d="${d}"/>`;
   }
-  e.className = 'px ico'; e.innerHTML = pxSvg(rows[0].length, rows.length, paths);
+  e.className = 'px ico' + (rows[0].length / (rows.x2 || 1) > 12 ? ' wide' : ''); e.innerHTML = pxSvg(rows[0].length, rows.length, paths, rows.x2);   // (wide: a portrait's 16)
   return e;
 }
 const HEART = { full: '.##.##./#######/#######/.#####./..###../...#...'.split('/'), empty: '.##.##./#..#..#/#.....#/.#...#./..#.#../...#...'.split('/') };
@@ -2494,28 +2943,34 @@ const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 const goOwed = (f) => { if (!game.owed(f)) f(); };   // into a campaign level: a card owed first (Game.owed)
-const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys');   // the first floor's words: how to run and jump
+const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : 'hintKeys');   // the first floor's words: how to run and jump
 function button(text, cls, fn) {
   const b = el('button', cls, text);
   b.addEventListener('click', (e) => { e.stopPropagation(); if (performance.now() - ui.openT < 300) return; sound.unlock(); sound.play('click', 0.6); fn(); });   // (a double tap's second: not into the next screen)
   if (/\bbig\b/.test(cls)) queueMicrotask(() => fitBig(b));   // once it is in its panel
   return b;
 }
-// A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
-// ("×2 con un anuncio", a world's name after Continue on a small phone).
-// The bar over the page the menu's backdrop's top ink (owner, 2026-10-23: «градиент должен уходить под остров»): #topTint for iOS 26 Safari, theme-color for the browsers that read it.
+// The bar over the page the menu's backdrop's top ink (owner, 2026-10-23: «градиент должен уходить под остров»): #topTint for iOS 26 Safari, theme-color for the browsers that read it;
+// over a world's background (Game.menuBackdrop) its back's top ink, not the old gradient's grey-blue (a grey line over the screen's dark top otherwise)
 const themeMeta = document.querySelector('meta[name="theme-color"]'), themeInk = themeMeta ? themeMeta.content : '';
-function menuTop(on) { document.documentElement.classList.toggle('menuTop', on); if (themeMeta && coarse) themeMeta.content = on ? MENU_BG.inks[0] : themeInk; }   // (a phone's: a desktop's tab bar left as it is)
+let menuInk = '';   // (Game.toMenu)
+function menuTop(on) {
+  const ink = menuInk || MENU_BG.inks[0];
+  document.documentElement.classList.toggle('menuTop', on); $('topTint').style.background = ink; if (themeMeta && coarse) themeMeta.content = on ? ink : themeInk;   // (a phone's: a desktop's tab bar left as it is)
+}
 function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
   for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
 }
+// A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
+// ("×2 con un anuncio", a world's name after Continue on a small phone).
 function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
   const tx = b.querySelector('.tx');
   for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > min;) { p -= 0.5; b.style.setProperty('--p', p); }
 }
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
-  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
+  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); p.classList.remove('wmap'); p.style.backgroundImage = p.style.backgroundSize = ''; delete p.dataset.bg;   // (the book shares the map's panel: not its backdrop)
+    this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
   hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story']) $(id).classList.remove('on'); this.open = null; menuTop(false); if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
     const p = this.panel('menu'); menuTop(true);
@@ -2586,7 +3041,7 @@ const ui = {
   },
   cards(list) {
     const p = this.panel('cards');
-    this.starRow(p);
+    this.starRow(p); this.stationLine(p);
     p.append(cap(el('div', 'head', t('pick')), 'pick'));
     for (const u of list) {
       const [name, desc] = L2(u.name), c = button('', 'card', () => game.pick(u)), d = el('span');
@@ -2597,16 +3052,21 @@ const ui = {
   },
   cleared() {   // a campaign level played again: its stars, then on (an upgrade is for the first time only)
     const p = this.panel('cards');
-    this.starRow(p);
+    this.starRow(p); this.stationLine(p);
     p.append(cap(el('div', 'head', t('cleared')), 'cleared'), cap(button(t('next'), 'big thumb', () => game.campNext()), 'next'));
   },
+  stationLine(p) {   // Fuji's levels its trail's stations, 1 to 9 (owner, К12 «А»: its far view a compass of the climb, and the station said at each end)
+    const g = game, n = Math.floor((g.ci % 30) / 3) + 1;
+    if (g.mode === 'camp' && g.lv && g.lv.theme && g.lv.theme.fuji && n >= 1 && n <= 9) p.append(el('div', 'label station', tf('station', { n })));
+  },
+  markLine(p) { const m = game.markSay; if (!m) return; game.markSay = null; const e = el('div', 'label mark' + (m.pay ? ' pay' : ''), m.text); p.append(e); },   // the week's mark (Game.markDay), once
   starRow(p) {
     const st = game.stars;
     if (st) {   // the level's stars, what they paid and what they were for
       const row = el('div', 'stars');
       for (let k = 0; k < 3; k++) {   // one after another, popping in; each earned one rings higher, then twinkles
         const s = iconEl(k < st.n ? 'star' : 'starOff');
-        s.classList.add(k < st.n ? 'won' : 'lost'); s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : '');
+        if (k < st.n) s.classList.add('won'); s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : '');
         row.append(s);
         if (k < st.n) setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k);
       }
@@ -2624,11 +3084,12 @@ const ui = {
       }
       p.append(row);
     }
+    this.markLine(p);
   },
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
     const p = this.panel('result'), g = game, price = g.revivePrice(), boss = !!(g.rc && g.rc.boss), why = g.deathWhy();
     const def = g.lv.boss && g.lv.boss.def;
-    p.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t('dead_' + why)), 'dead_' + why));   // a boss has a word of its own
+    p.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t(deadKey(why, g.lv.theme))), deadKey(why, g.lv.theme)));   // a boss has a word of its own
     if (!boss && g.coins >= price) p.append(cap(button(tf('reviveHere', { n: price }), 'big thumb alt', () => g.revive()), 'revive'));
     p.append(cap(button(t('menu'), 'big thumb alt', () => { pmsg('level_failed', g.lvl()); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
   },
@@ -2636,14 +3097,16 @@ const ui = {
     const p = this.panel('result'), cw = CAMPAIGN[game.world], cloth = el('div', 'cloth');
     for (const [k, ch] of [...cw.runes].entries()) { const r = document.createElement('span'); r.className = 'rune r' + k; r.textContent = ch; cloth.append(r); }
     cloth.setAttribute('aria-hidden', 'true');
-    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore)), cap(button(t('next'), 'big thumb', () => game.story((Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
+    p.append(cloth, el('div', 'label', t('motiReads')), el('div', 'lore', L2(cw.lore))); this.markLine(p);
+    p.append(cap(button(t('next'), 'big thumb', () => game.story((Object.values(STORY).find((c) => c.boss === cw.world.id) || {}).id, () => this.worldDone())), 'next'));   // then its world's story card, once (STORY.boss)
   },
   worldDone() {   // its boss beaten, after its tapestry: on into the next world on the line, or word of it coming (a bonus world: back to its map)
     let nw = game.world + 1; while (nw < CAMPAIGN.length && gated(nw)) nw++;
     const p = this.panel('result'), bonus = gated(game.world), n = nw + 1, next = !bonus && n <= CAMP_OPEN, on = CAMPAIGN.slice(0, nw).filter((_, k) => !gated(k)).length + 1;   // on: its number on the line
     p.append(cap(el('div', 'head', t('worldDone')), 'worldDone'));
     if (!bonus) p.append(el('div', 'label', tf(next ? 'worldNext' : 'soon', { n: on })));   // (a bonus world's end says nothing of the line's next one)
-    const go = save.camp.stars[(n - 1) * 30 + 1] > 0 ? campNextId() : (n - 1) * 30 + 1, at = campAt(go);   // (a boss beaten again: on where Continue goes, not back)
+    const go = !next ? 0 : save.camp.stars[(n - 1) * 30 + 1] > 0 ? campNextId() : (n - 1) * 30 + 1, at = next ? campAt(go) : null;   // (a boss beaten again: on where Continue goes, not back; the
+    // last world's: no next one to look up, it threw past CAMPAIGN's end and left the screen with no buttons: review)
     if (next) p.append(cap(button(t('map'), 'big thumb alt', () => this.map(at.w)), 'map'), cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1), 'big thumb', () => game.playLevel(go)), 'continue'));
     else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('map'), 'big thumb', () => this.map(bonus ? game.world : undefined)), 'map'));
   },
@@ -2670,13 +3133,13 @@ const ui = {
     }
     p.append(cap(el('div', 'head', t('book')), 'book'), feed, cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
   },
-  // The campaign's map (see campAt): a world's levels up its tiers, the first at the foot and the boss on top, the paths between
-  // them (lit where a cleared one leads); each its tier's number, a side's its mark instead (a heart on the calm left, an enemy on
-  // the fierce right; a bonus race a coin, the boss its face), over its stars; the open ones to tap, the next one yellow; it scrolls
-  // by touch to the next one, and on to that one under the thumb.
-  map(w = campAt(campNextId()).w) {
-    const p = this.panel('map'), c = save.camp, ni = campNextId(), next = campAt(ni), done = c.stars[CAMP_END] > 0, worlds = campWorlds();
+  // The campaign's map (see campAt): a world's ten levels, the first at the foot and the boss on top, the path between them lit where
+  // a cleared one leads; each its tier's number (a bonus race a coin, the boss its figure) over its stars, the open ones to tap.
+  map(w = campAt(campNextId()).w) {   // a world's ten levels at one look (owner, 2026-10-23: no scroll, the screen filled to the buttons' edges, its world's
+    // backdrop and no see-through, Menu alone, where the player stopped lit, each world's boss): a path up the screen, three a row and back, the boss on top
+    const p = this.panel('map'), c = save.camp, ni = campNextId(), worlds = campWorlds(), wid = CAMPAIGN[w].world.id;
     this.mapAt = w;
+    mapBack(p, 'assets/cards/planes/arrive_' + wid + '-plate.png');   // the world's own scene (its arrival card's, the figures off it), whole
     p.append(cap(el('div', 'head', tf('world', { n: wNo(w) }) + ' · ' + L2(CAMPAIGN[w].world.name)), 'world', { n: wNo(w) }));
     if (worlds.length > 1) { const tabs = el('div', 'duo'); for (const k of worlds) {   // the worlds open so far, a tab each; a bonus world's shut one its stars so far
       const shut = !campOpen(k * 30 + 1), need = CAMP_STARS[CAMPAIGN[k].world.id];
@@ -2684,35 +3147,28 @@ const ui = {
       if (shut) { const row = el('span', 'inl'); row.append(iconEl('starOff'), px(lineStars() + '/' + need)); b.append(row); }   // (one line: a small button's one height)   // (the pixel font has no star: its picture)
       tabs.append(b);
     } p.append(tabs); }
-    if (CAMP_OPEN < CAMPAIGN.length) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet
-    const tree = el('div', 'tree'), inner = el('div', 'in'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), X = (col) => 50 + col * 100, Y = (s) => 960 - s * 102;
-    svg.setAttribute('viewBox', '0 0 300 1000'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-    for (let s = 0; s < 9; s++) for (let col = 0; col < 3; col++) {
-      const i = w * 30 + s * 3 + col;
-      if (campHas(i)) for (const u of ups(s, col)) {
-        const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        for (const [k, v] of [['x1', X(col)], ['y1', Y(s)], ['x2', X(u)], ['y2', Y(s + 1)]]) ln.setAttribute(k, v);
-        if (c.stars[i] > 0) ln.setAttribute('class', 'on');
-        svg.append(ln);
-      }
-    }
-    inner.append(svg);
-    let nextEl = null;
-    for (let s = 9; s >= 0; s--) for (let col = 0; col < 3; col++) {
-      const i = w * 30 + s * 3 + col;
-      if (!campHas(i)) continue;
-      const { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, icon = rc.boss ? 'boss' : rc.bonus != null ? 'coin' : col === 0 ? 'heal1' : col === 2 ? 'foe_crawler' : null;
-      const b = button(icon ? '' : String(s + 1), 'chip lvl' + (i === ni && !n ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) goOwed(() => game.playLevel(i)); });
-      if (icon) b.append(iconEl(icon));
+    if (CAMP_OPEN < CAMPAIGN.length && w === worlds[worlds.length - 1] && w === CAMP_OPEN - 1) p.append(el('div', 'label', tf('soon', { n: CAMP_OPEN + 1 })));   // the next one, not on the site yet: under the last open one
+    const grid = el('div', 'mapg'), svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), cells = [];
+    svg.setAttribute('aria-hidden', 'true'); grid.append(svg);
+    const at = (s) => (s === 9 ? [1, 0] : [Math.floor(s / 3) % 2 ? 2 - (s % 3) : s % 3, 3 - Math.floor(s / 3)]);   // [column, row from the top]: 1 2 3 along the bottom, 4 5 6 back, 7 8 9, the boss over the middle
+    for (let s = 0; s < 10; s++) {
+      const i = w * 30 + s * 3 + 1, { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, [col, row] = at(s);
+      const b = button(rc.boss || rc.bonus != null ? '' : String(s + 1), 'chip lvl' + (i === ni ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) goOwed(() => (save.cur && save.cur.ci === i ? game.resume() : game.playLevel(i))); });   // (a level under way goes on where it was)
+      if (rc.boss) { const cv = document.createElement('canvas'); cv.className = 'fig'; b.append(cv); bossFig(rc.boss, cv, b); }   // its world's boss off its card
+      else if (rc.bonus != null) b.append(iconEl('coin'));
       if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
-      b.style.left = (X(col) / 3) + '%'; b.style.top = (Y(s) / 10) + '%';
-      b.setAttribute('aria-label', wNo(w) + '-' + (s + 1) + ['L', '', 'R'][col]); inner.append(b);
-      if (i === ni) nextEl = b;
+      b.style.gridColumn = col + 1; b.style.gridRow = row + 1;
+      b.setAttribute('aria-label', wNo(w) + '-' + (s + 1)); grid.append(b); cells.push({ b, on: n > 0 });
     }
-    tree.append(inner); p.append(tree);
-    if (nextEl) requestAnimationFrame(() => { tree.scrollTop = nextEl.offsetTop - tree.clientHeight / 2; });
-    if (done) p.append(cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
-    else p.append(cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('continue') + ' · ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => (save.cur && save.cur.ci === ni ? game.resume() : game.playLevel(ni)))), 'continue'));
+    p.append(grid, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'));
+    requestAnimationFrame(() => {   // the path between them, from each one's middle to the next's (under the cells: it shows in the gaps), lit from a level cleared
+      const g = grid.getBoundingClientRect(), m = cells.map(({ b }) => { const r = b.getBoundingClientRect(); return [r.left - g.left + r.width / 2, r.top - g.top + r.height / 2]; });
+      svg.setAttribute('viewBox', `0 0 ${g.width} ${g.height}`);
+      for (let s = 0; s < 9; s++) {
+        const [x0, y0] = m[s], [x1, y1] = m[s + 1], d = s === 8 ? `M${x0} ${y0}V${y1}H${x1}` : `M${x0} ${y0}L${x1} ${y1}`;   // (to the boss: up, then across)
+        for (const k of ['u', 'l' + (cells[s].on ? ' on' : '')]) { const ln = document.createElementNS('http://www.w3.org/2000/svg', 'path'); ln.setAttribute('d', d); ln.setAttribute('class', k); svg.append(ln); }
+      }
+    });
   },
   pause() {
     const p = this.panel('pause');
@@ -2722,12 +3178,12 @@ const ui = {
     p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), ...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
-    const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink];
+    const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink]; this.storyArgs = [c, done];   // (laid again on a resize: Game.resized)
     const box = Math.min(view.w - 16, (view.h - 180) * 2 / 3), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // (the view as
     card.style.width = w * k + 'px'; card.style.height = h * k + 'px';   // layout measured it: a CSS 100vh is taller than the page under iOS Safari's bar) whole pixels: a whole number of the
     // screen's to each of the art's cells, the most that fits a 2:3 box (cards drawn on finer grids a little smaller), unless that loses over 30% of it (then as it fits)
     for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
-    const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); done(); }), 'next');
+    const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); this.storyArgs = null; done(); }), 'next');
     clip.setAttribute('role', 'img'); clip.setAttribute('aria-label', L2(c.title));
     tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); card.append(tilt);
     if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);
@@ -2736,6 +3192,7 @@ const ui = {
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');
     p.append(cap(el('div', 'head', t(why)), why), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
+    this.markLine(p);
     if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'big thumb alt', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
     else p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'));
   },
@@ -2748,12 +3205,12 @@ const ui = {
     const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons
     const cuts = [], fit = () => { cuts.sort((a, b) => a[0] - b[0]); while (cuts.length && box.firstElementChild.getBoundingClientRect().top < p.getBoundingClientRect().top + 8) cuts.shift()[1].remove(); };   // a short screen: the least of it goes, till the top shows (touch scrolls nothing here)
     const def = !r.won && game.lv.boss && game.lv.boss.def;   // a loss: a word on what did it (a boss has its own, as in ui.campDead),
-    box.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[game.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', r.won ? t('won') : t('dead_' + r.why)), r.won ? 'won' : 'dead_' + r.why));
+    box.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[game.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', r.won ? t('won') : t(deadKey(r.why, game.lv.theme))), r.won ? 'won' : deadKey(r.why, game.lv.theme)));
     if (!r.won) { const l = el('div', 'label', t('dead')); box.append(l); cuts.push([3, l]); }   // and that the run is over
     const rows = [[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]];
     const tb = el('div', 'rows');
     rows.forEach(([k, v], i) => { const row = el('div', 'row'); row.append(el('span', null, k), el('b', null, String(v))); tb.append(row); if (i > 1) cuts.push([3 - i / 10, row]); });   // the combo first, then the enemies, the coins
-    box.append(tb);
+    box.append(tb); this.markLine(box);
     if (r.daily) {
       const row = el('div', 'medals');
       dayMedals(r.daily.day).forEach((m, k) => { const c = el('div', 'medal'); c.append(iconEl(r.daily.best >= m ? ['medalB', 'medalS', 'medalG'][k] : 'medalOff'), px(m + ' ' + t('m'))); row.append(c); });
@@ -2793,10 +3250,12 @@ const ui = {
     const bs = game.lv.boss;
     if (bs && bs.def) { const n = save.camp.fails[game.failKey()] || 0; this.toast(L2(bs.def.name) + '\n' + (n >= 3 ? (bs.def.how ? L2(bs.def.how) : t('bossHow')) : L2(bs.def.intro[n % bs.def.intro.length])), 2200); return; }   // a boss: its name and a line
     if (game.mode !== 'camp' && game.world >= WORLDS.length) { this.toast(L2(SUMMIT.name), 1800); return; }
-    const intro = game.rc || (game.wd.intro && game.wd.intro[game.stage]) || {}, news = [intro.news && L2(intro.news), game.lv.dark && t('dark')].filter(Boolean).join(', ');   // (a recipe's: the campaign's, the daily well's)
-    this.toast((game.daily != null ? t('daily') : tf('world', { n: game.mode === 'camp' ? wNo(game.world) : game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf('news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
+    const intro = game.rc || (game.wd.intro && game.wd.intro[game.stage]) || {}, dark = game.lv.dark && game.stage === 0 && !intro.news && t('dark');   // (a recipe's: the campaign's, the daily well's; the dark
+    // news once, on a world's first level: it said «New: darkness» on all nine of the Mine's)
+    const news = [intro.news && L2(intro.news), dark].filter(Boolean).join(', ');   // a tip (intro.tip): a thing met before, in this world's look (the worlds' order since 2026-10-21)
+    this.toast((game.daily != null ? t('daily') : tf('world', { n: game.mode === 'camp' ? wNo(game.world) : game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf(intro.tip ? 'tip' : 'news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
-  comboPop(n) { const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
+  comboPop(n) { if (game.lv && game.lv.boss) return; const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
   comboEnd() { $('combo').classList.remove('show'); },
   hurt() { const e = $('hearts'); e.classList.remove('hit'); void e.offsetWidth; e.classList.add('hit'); },
   coinBump() { const e = $('purse'); e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); },
@@ -2816,7 +3275,7 @@ const ui = {
     });
   },
   frame(g) {
-    const playing = g.state !== 'menu' && g.state !== 'boot';
+    const playing = g.state !== 'menu' && g.state !== 'boot' && !(g.lv && g.lv.kind === 'menu');   // (the owed cards over the menu: no level's HUD)
     $('hud').classList.toggle('on', playing);
     if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children, $('tasks')].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
@@ -2836,9 +3295,11 @@ const ui = {
       for (let i = 0; i < g.maxHp; i++) { const k = i < g.hp ? 'full' : 'empty', s = el('i', k); s.innerHTML = pxSvg(7, 6, `<path fill="currentColor" d="${inkPath(HEART[k], 0, 0)}"/>`); h.append(s); }
     }
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
+    $('hud').classList.toggle('tight', g.coins >= 1000 && view.w < 375);   // (four figures on a narrow screen: the purse and the height a size
+    // smaller, clear of each other; review: 27 px over at 320. Each frame: a narrower window with the same purse too)
     const bh = $('bossHp'), bs = g.lv.boss, bon = !!bs && !bs.dead && playing;   // a boss's hearts, under the HUD (Lucky Tower's players asked for them)
     bh.classList.toggle('on', bon);
-    if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax || bs !== this.bboss)) { this.bhp = bs.hp; this.bmax = bs.max; this.bboss = bs; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); bh.style.setProperty('--pip', `var(--${(bs.def && bs.def.ink) || 'purple'})`); }   // in its colour
+    if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax || bs !== this.bboss)) { this.bhp = bs.hp; this.bmax = bs.max; this.bboss = bs; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); bh.style.setProperty('--pip', `var(--${(bs.def && bs.def.ink) || 'blue'})`); }   // in its colour
     if (bon) bh.style.top = Math.round(view.hudB + 6) + 'px';
     const gun = $('gun'), left = g.gunT > 0 && g.state === 'play' ? Math.ceil((g.gunT / g.gunMax) * 10) : 0;   // the fizz left, in tenths, blinking near the end
     gun.classList.toggle('on', left > 0);
@@ -2869,7 +3330,7 @@ const input = {
     else if (what === 'down' && on) game.pressDown();
   },
   clear() {
-    aimCancel();
+    if (game.hero) game.hero.squeezeIn = 0;   // (a crouch held into a pause or a card: not left squeezed)
     for (const k of ['left', 'right', 'down', 'jump']) this.set(k, false);
     this.swipe = false; joyEnd();
     for (const e of document.querySelectorAll('#pad .on')) e.classList.remove('on');
@@ -2877,6 +3338,7 @@ const input = {
 };
 const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', Space: 'jump' };
 document.addEventListener('keydown', (e) => {
+  if ((e.code === 'Escape' || e.code === 'KeyP') && !e.repeat && (game.state === 'play' || (game.state === 'pause' && ui.open === 'pause'))) { e.preventDefault(); game.togglePause(game.state === 'play'); return; }   // a computer's pause (QA: only its button)
   const k = KEYS[e.code];
   if (!k) return;
   if (game.state !== 'play') { const f = document.activeElement; if (!f || f.tagName !== 'BUTTON') e.preventDefault(); return; }   // (off play: not the portal page's scroll; Space still presses a button in focus)
@@ -2910,11 +3372,6 @@ const dpad = $('dpad');
 dpad.children[0].append(px('◀')); dpad.children[1].append(px('▶')); $('jumpBtn').append(px('▲'));
 let lastTap = { d: 0, t: -1e9 }, padDir = 0;   // the last press of a side, for a double tap (keys and pad alike)
 padPart(dpad, (e) => {
-  if (aim.on && aim.hyb) {   // ▲ aiming: the finger on ◀ ▶ is the aim's stick, from where it is now
-    if (e) aimStick('pad', e.clientX, e.clientY); else if (aim.stk && aim.stk.id === 'pad') aim.stk.id = -1;
-    padDir = 0; input.set('left', false); input.set('right', false); dpad.children[0].classList.remove('on'); dpad.children[1].classList.remove('on');
-    return;
-  }
   const r = dpad.getBoundingClientRect(), right = !!e && e.clientX > r.left + r.width / 2, d = e ? (right ? 1 : -1) : 0;
   if (d && !padDir) { if (lastTap.d === d && e.timeStamp - lastTap.t < 280) game.dash(d); lastTap = { d, t: e.timeStamp }; }   // a fresh press: a second one quick is a dash
   padDir = d;
@@ -2922,35 +3379,11 @@ padPart(dpad, (e) => {
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
 const act = $('act'), jumpBtn = $('jumpBtn');
-// ▲ (either scheme) tells a tap from a long press on the first press, as UIKit does (a tap counts as the finger
-// lifts, a long press once held `hold` s): let go before that, the plain jump, a quick second tap another; held on
-// (or moved past `slop` px: a pull), that very jump is aimed: the hero hangs where it is (or stands) and the dots show
-// the arc, the plain jump's to begin with; a second finger anywhere leans it like a stick (see aimStick), or ▲ pulled
-// back like a slingshot (the further, the stronger: `min` of a jump to all of it at `full` of the width); let go of ▲
-// and it goes. `hold` is half UIKit's 0.5 s: a jump must not wait long to be told apart. `on`: the aim is put away
-// for now (user); off, ▲ is the plain key: a jump as it goes down, higher the longer it is held.
-const HYB = { on: false, hold: 0.25, slop: 10, full: 0.18, min: 0.6 };
-let hyb = null;   // ▲ down, not yet told apart: since when, where
+// ▲ (either scheme) is the plain key: a jump as it goes down, higher the longer it is held.
 padPart(act, (e) => {
   jumpBtn.classList.toggle('on', !!e);
-  if (!HYB.on) { input.set('jump', !!e); return; }
-  const g = game, x = e ? e.clientX - view.left : 0;
-  if (e && aim.on && aim.hyb) { aim.x = x; aim.y = e.clientY; return; }   // pulling
-  if (!e) {   // let go: an aimed jump goes where aimed; a tap is the plain jump
-    if (aim.on && aim.hyb) { const p = aim.p, vx = aim.vx, vy = aim.vy; aimCancel(); g.requestJump(p > 0 ? { vx, vy } : null); }
-    else if (hyb) { hyb = null; g.requestJump(); }
-    return;
-  }
-  if (!hyb) hyb = { t0: performance.now(), x0: x, y0: e.clientY, x, y: e.clientY };
-  hyb.x = x; hyb.y = e.clientY;
-  if (Math.hypot(x - hyb.x0, e.clientY - hyb.y0) > HYB.slop) hybAim(performance.now());   // pulled at once: a slingshot
+  input.set('jump', !!e);
 });
-function hybCheck(now) { if (HYB.on && hyb && !aim.on && now - hyb.t0 >= HYB.hold * 1000) hybAim(now); }   // held: a long press
-function hybAim(now) {   // ▲ held or pulled: aim the jump it is (off what the hero touches, or one left in the air)
-  const g = game;
-  if (aim.on || g.state !== 'play' || (g.sinceContact > JUMP.coyote && g.air <= 0)) return;
-  Object.assign(aim, { on: true, hyb: true, sx: hyb.x0, x: hyb.x, sy: hyb.y0, y: hyb.y, p: 0, t0: now - HYB.hold * 1000 });   // the plain arc shows at once
-}
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick), a quick
 // swipe to a side dashes (as soon as it is fast enough, or on letting go of a quick one); a quick flick up jumps (held, it goes higher), a quick flick down lets go; a
@@ -2959,16 +3392,11 @@ const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, 
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel') || game.state === 'menu') return;
-  if (aim.on && aim.hyb) { aimStick(e.pointerId, e.clientX, e.clientY, true); return; }   // ▲ aiming: a finger anywhere is the aim's stick
   if (gest || joy) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
   if (save.stick) { joyStart(e); return; }
   gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false, dashed: false };
 });
 document.addEventListener('pointermove', (e) => {
-  if (aim.on && aim.hyb && ((aim.stk && aim.stk.id === e.pointerId) || (gest && gest.id === e.pointerId))) {   // the aim's stick (the running finger turns into it)
-    if (gest && gest.id === e.pointerId) { gest = null; input.swipe = false; input.set('left', false); input.set('right', false); }
-    aimStick(e.pointerId, e.clientX, e.clientY); return;
-  }
   if (joy && e.pointerId === joy.id) { joyMove(e); return; }
   const g = gest;
   if (!g || e.pointerId !== g.id) return;
@@ -2984,7 +3412,6 @@ document.addEventListener('pointermove', (e) => {
   if (!g.dashed && t < GEST.quick && Math.abs(ox) > GEST.swipe && Math.abs(ox) > Math.abs(dy) && Math.abs(ox) > (GEST.fast * t) / 1000) { g.dashed = true; game.dash(Math.sign(ox)); }   // a fast swipe: a dash now, not on letting go
 });
 const gestEnd = (e) => {
-  if (aim.stk && aim.stk.id === e.pointerId) { aim.stk.id = -1; if (joy && joy.id === e.pointerId) joyEnd(); return; }   // the aim's stick let go: it keeps its aim
   if (tap2 && e.pointerId === tap2.id) {   // a second finger's tap
     if (e.type === 'pointerup' && e.timeStamp - tap2.t < GEST.tap && Math.hypot(e.clientX - tap2.x, e.clientY - tap2.y) < GEST.still) game.requestJump();
     tap2 = null; return;
@@ -3027,11 +3454,6 @@ function joyStart(e) {
 function joyMove(e) {
   const j = joy, R = JOY.reach, x = e.clientX, y = e.clientY;
   padUsed = performance.now();   // the ▲ key stays bright while the stick is in use
-  if (aim.on && aim.hyb) {   // ▲ aiming: the stick leans the arc, from its base
-    if (!aim.stk || aim.stk.id !== j.id) aim.stk = { id: j.id, sx: j.bx, sy: j.by, x, y }; else { aim.stk.x = x; aim.stk.y = y; }
-    if (j.dir) { j.dir = 0; input.set('left', false); input.set('right', false); }
-    j.x = x; j.y = y; stkShow(); return;
-  }
   let dx = x - j.bx, dy = y - j.by;
   const d = Math.hypot(dx, dy);
   if (d > GEST.still) j.moved = true;
@@ -3061,12 +3483,12 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // Effects and music made with ElevenLabs (tools/audio.py). One Web Audio context, made on the first key press or
 // touch (browsers keep sound off until then). Effects play with a little random pitch; music loops and cross-fades:
 // calm in the menu and the shop, a climb of each world's own in the shaft, the bonus levels', the stash's, boss at the
-// summit, quieter while paused or over (each fetched when first wanted, the last four kept: all of them decoded are ~170 MB). It sleeps
+// summit, quieter while paused or over (each fetched when first wanted, the last four kept: mono at 32 kHz and decoded at that rate, ~7 MB each). It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
-const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
-const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', junk: 'junk', skazka: 'skazka', sea: 'sea' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
+const MUSIC_VOL = 0.4, MUSIC_RATE = 32000, MUSIC_PAD = 0.1, FX_VOL = 0.7, PENTA = [0, 2, 4, 7, 9];
+const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', skazka: 'skazka', sea: 'sea', void: 'void' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {
@@ -3081,12 +3503,16 @@ const sound = {
     for (const n of SOUNDS) this.load(n, 'assets/sfx/' + n + '.mp3');
     for (const n of ['calm', WORLD_MUSIC[game.wd.id] || 'climb']) this.fetchMusic(n);   // the menu's, and its world's climb
   },
-  load(name, path) { return fetch(path).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then((a) => this.ctx.decodeAudioData(a)).then((b) => { this.bufs[name] = b; return true; }).catch(() => false); },
+  load(name, path, rate) { return fetch(path).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then((a) => this.decoder(rate).decodeAudioData(a)).then((b) => { this.bufs[name] = b; return true; }).catch(() => false); },
+  decoder(rate) {   // the music decoded at its own rate, in an offline context: not resampled up to the device's 48 kHz (owner: «100 мб это очень много»: four
+    // kept tracks were ~90 MB at 44.1 kHz stereo made 48, ~28 now mono at 32); the device's own context where there is no offline one
+    try { return (rate && window.OfflineAudioContext && (this.dec || (this.dec = new OfflineAudioContext(1, 1, rate)))) || this.ctx; } catch (e) { return this.ctx; }
+  },
   fetchMusic(name) {
     const a = this.asked[name];
     if (a === true || (a && performance.now() < a)) return;   // in hand or on its way (a failed one: again in a while)
     this.asked[name] = true;
-    this.load('m:' + name, 'assets/music/' + name + '.mp3').then((ok) => {   // over four kept: the longest unplayed one goes (fetched again if wanted)
+    this.load('m:' + name, 'assets/music/' + name + '.mp3', MUSIC_RATE).then((ok) => {   // over four kept: the longest unplayed one goes (fetched again if wanted)
       if (!ok) { this.asked[name] = performance.now() + 15000; return; }   // (cut off, by the network or the page going to the back: tried again)
       const kept = Object.keys(this.bufs).filter((k) => k.startsWith('m:')).map((k) => k.slice(2));
       if (kept.length <= 4) return;
@@ -3124,7 +3550,8 @@ const sound = {
     s.buffer = b; s.playbackRate.value = rate * (0.96 + 0.08 * Math.random()); g.gain.value = vol;
     s.connect(g); g.connect(this.fx); s.start();
   },
-  // A loop starts and ends where its sound does (an MP3 has a little silence padded at both ends).
+  // A loop starts and ends where its sound does (an MP3 has a little silence padded at both ends), less the MUSIC_PAD it carries on each side: its
+  // last 0.1 s before it and its first after it (tools/audio.py), so the codec's edges lie outside the loop and the seam does not click.
   music(name) {
     const b = this.bufs['m:' + name];
     if (this.track === name) return;
@@ -3136,7 +3563,7 @@ const sound = {
     while (a < z && Math.abs(d[a]) < 1e-4) a++;
     while (z > a && Math.abs(d[z]) < 1e-4) z--;
     const src = c.createBufferSource(), gain = c.createGain();
-    src.buffer = b; src.loop = true; src.loopStart = a / b.sampleRate; src.loopEnd = z / b.sampleRate;
+    src.buffer = b; src.loop = true; src.loopStart = a / b.sampleRate + MUSIC_PAD; src.loopEnd = (z + 1) / b.sampleRate - MUSIC_PAD;
     gain.gain.value = 0; gain.gain.setTargetAtTime(1, t, 0.4);
     src.connect(gain); gain.connect(this.mus); src.start(t, src.loopStart);
     this.track = name; this.src = src; this.gain = gain;
@@ -3145,7 +3572,7 @@ const sound = {
   frame(g) {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const kind = g.lv.kind;
-    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' || kind === 'trial' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
+    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' || kind === 'trial' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || 'climb');   // the Crypt to the Void's drone
     const duck = g.state === 'play' || g.state === 'menu' ? 1 : 0.35;
     if (duck !== this.duck) { this.duck = duck; this.mus.gain.setTargetAtTime(MUSIC_VOL * duck, this.ctx.currentTime, 0.2); }
   },
@@ -3174,7 +3601,8 @@ const ads = {
     return new Promise((done) => {
       const t0 = performance.now();
       const go = () => {
-        if (!window.bridge) { if (performance.now() - t0 < BRIDGE_WAIT) setTimeout(go, 50); else done(false); return; }
+        if (!window.bridge) { if (performance.now() - t0 < BRIDGE_WAIT && !window.bridgeFailed) setTimeout(go, 50); else done(false); return; }   // (its script failed: at once, not
+        // after 4 s of a blank screen: perf)
         const late = setTimeout(() => { this.late = true; done(false); }, BRIDGE_WAIT);
         bridge.initialize().then(() => {
           clearTimeout(late); this.ok = true;
@@ -3217,76 +3645,6 @@ const ads = {
   },
 };
 
-// ── Slingshot ────────────────────────────────────────────────
-// With a mouse, as well as the keys: press anywhere, pull back, let go, and the squishy
-// leaps the other way, off whatever it is on (a floor, a wall, a ceiling — never into it)
-// or with its jump in the air. The pull sets the power, up to a full jump; one inside the
-// dead zone is a cancel. While aiming, the body is squeezed along the launch line, it
-// looks where it is going and dots show the arc. Touch keeps the pad.
-const aim = { on: false, id: -1, sx: 0, sy: 0, x: 0, y: 0, p: 0, ux: 0, uy: -1, vx: 0, vy: 0 };
-const dots = new Float32Array(JUMP.dots * 2);
-let nDots = 0;
-function aimUpdate() {
-  const k = aim.stk, byStk = !!k && Math.hypot(k.x - k.sx, k.y - k.sy) >= JUMP.deadZone;   // a stick points where to go; ▲ pulled back points the other way
-  const dx = byStk ? k.x - k.sx : aim.sx - aim.x, dy = byStk ? k.y - k.sy : aim.sy - aim.y, len = Math.hypot(dx, dy);
-  if (len < JUMP.deadZone) {   // not pulled: no dots, but in the hybrid after a moment the plain jump's
-    aim.p = 0;
-    if (aim.hyb && performance.now() - aim.t0 > HYB.hold * 1000) {   // off a wall up and away from it, in the air straight up
-      const t = game.touch, wall = game.sinceContact <= JUMP.coyote && (t === 1 || t === 2);
-      aim.p = 1; aim.ux = 0; aim.uy = -1; aim.vx = wall ? (t === 1 ? 1 : -1) * JUMP.wallX * game.R : game.hero.rigVx; aim.vy = -game.vjump * (wall ? JUMP.wallUp : 1);
-    }
-    return;
-  }
-  let ux = dx / len, uy = dy / len;
-  const n = game.surfaceNormal();
-  if (n) {   // at least `minUp` out of the surface, still to the side it was aimed
-    const tx = -n[1], ty = n[0], out = ux * n[0] + uy * n[1], along = ux * tx + uy * ty;
-    if (out < JUMP.minUp) { const s = (along < 0 ? -1 : 1) * Math.sqrt(1 - JUMP.minUp * JUMP.minUp); ux = JUMP.minUp * n[0] + s * tx; uy = JUMP.minUp * n[1] + s * ty; }
-  }
-  aim.ux = ux; aim.uy = uy;
-  aim.p = Math.min(1, (len - JUMP.deadZone) / (byStk ? JOY.reach - JUMP.deadZone : (aim.hyb ? HYB.full : JUMP.dragFrac) * view.w));
-  const lo = aim.hyb ? HYB.min : JUMP.minPower, v = game.vjump * (lo + (1 - lo) * aim.p);
-  aim.vx = ux * v; aim.vy = uy * v;
-}
-function aimCancel() { aim.on = false; aim.hyb = false; hyb = null; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; if (aim.stk) { aim.stk = null; stkShow(); } }
-// The hybrid's other finger while ▲ aims: a stick from where it came down (or where it was), drawn as the stick
-// is, all of the jump at its reach; let go, it keeps its aim till ▲ is let go.
-function aimStick(id, x, y, fresh) {
-  if (fresh || !aim.stk || aim.stk.id !== id) aim.stk = { id, sx: x, sy: y, x, y }; else { aim.stk.x = x; aim.stk.y = y; }
-  stkShow();
-}
-function stkShow() {
-  const k = aim.stk;
-  if (!k) { if (!joy) joyEl.classList.remove('on'); return; }
-  const dx = k.x - k.sx, dy = k.y - k.sy, d = Math.hypot(dx, dy), s = d > JOY.reach ? JOY.reach / d : 1;
-  joyEl.style.transform = 'translate(' + k.sx + 'px,' + k.sy + 'px)'; joyKnob.style.transform = 'translate(' + dx * s + 'px,' + dy * s + 'px)';
-  joyKnob.classList.toggle('on', d >= JUMP.deadZone); joyEl.classList.add('on');
-}
-function aimFrame(now) {
-  hybCheck(now);
-  if (!aim.on) return;
-  if (game.state !== 'play') { aimCancel(); return; }
-  aimUpdate();
-  const b = game.hero, look = game.heroLook;
-  b.squeezeIn = JUMP.squeeze * aim.p;
-  if (aim.p > 0) { b.sqAx = aim.ux; b.sqAy = aim.uy; look.x = b.cx + aim.ux * 240; look.y = b.cy + aim.uy * 240; look.t = now; }
-}
-// The arc as dots, from just outside the body until it meets a wall, a block or the floor.
-function aimPreview() {
-  nDots = 0;
-  if (!aim.on || aim.p <= 0 || game.state !== 'play') return;
-  const b = game.hero, lv = game.lv, g = WORLD.gravity, T = JUMP.preview / JUMP.dots, r2 = (1.2 * b.R) ** 2;
-  for (let k = 1; k <= JUMP.dots; k++) {
-    const s = k * T, x = b.cx + aim.vx * s, y = b.cy + aim.vy * s + 0.5 * g * s * s;
-    if (x < lv.l || x > lv.r || y > lv.floor) break;
-    let hit = false;
-    for (const r of lv.near(y, y)) if (!r.plank && x > r.x0 && x < r.x1) { hit = true; break; }
-    if (hit) break;
-    if ((x - b.cx) ** 2 + (y - b.cy) ** 2 < r2) continue;
-    dots[2 * nDots] = x; dots[2 * nDots + 1] = y; nDots++;
-  }
-}
-
 // ── Setup ────────────────────────────────────────────────────
 const canvas = $('gl');
 const uiEl = $('ui');
@@ -3306,8 +3664,10 @@ function layout() {
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
   PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
-  const W0 = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), W = coarse ? W0 : Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
-  // (a computer's column a whole number of game pixels across, so each is as many of the screen's as the next)
+  const d = window.devicePixelRatio || 1, W0 = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), W = Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = Math.floor(vh / PIX.size + 1e-6) * PIX.size;   // a phone
+  // held upright: all of its width; a whole number of game pixels across and down, on the screen's own pixels (left), so each is as many of them as the next
+  // (owner: «пиксель в пиксель на всех устройствах»; a phone's was its full width and height, a game pixel 4.5 of an iPhone's, lines 4 and 5 by turns)
+  const left = Math.round(((vw - W) / 2) * d) / d;
   view.w = W; view.h = H; view.left = left; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
@@ -3322,23 +3682,6 @@ function layout() {
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
 // start of the next frame, right before drawing.
 function queueLayout() { layoutQueued = true; }
-
-canvas.addEventListener('pointerdown', (e) => {
-  if (!JUMP.mouse || e.pointerType === 'touch' || !started || paused || e.button > 0 || game.state !== 'play' || aim.on) return;
-  try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
-  aim.on = true; aim.id = e.pointerId; aim.sx = aim.x = e.clientX - view.left; aim.sy = aim.y = e.clientY; aim.p = 0;
-});
-canvas.addEventListener('pointermove', (e) => { if (aim.on && e.pointerId === aim.id) { aim.x = e.clientX - view.left; aim.y = e.clientY; } });
-function aimRelease(e, cancel) {
-  if (!aim.on || e.pointerId !== aim.id) return;
-  aim.x = e.clientX - view.left; aim.y = e.clientY;
-  aimUpdate();
-  const p = aim.p, vx = aim.vx, vy = aim.vy;
-  aimCancel();
-  if (!cancel && p > 0) game.requestJump({ vx, vy });
-}
-canvas.addEventListener('pointerup', (e) => aimRelease(e, false));
-canvas.addEventListener('pointercancel', (e) => aimRelease(e, true));
 
 // The menu's hero in the hand (owner, 2026-10-23: «главного героя можно таскать и жать на него, он такой же сквиш»): Gum's own touch (its Input,
 // for the one body). A quick tap pokes it (a dent, a puff, a startled face); a press held squeezes it flatter till let go, and it hops; a drag
@@ -3365,12 +3708,18 @@ class MenuPtr {
     return dt < 0.004 ? [0, 0] : [(x1 - x0) / dt, (y1 - y0) / dt];
   }
 }
+// The menu's hero hops a little now and then while nobody touches it (owner, 2026-10-24: «Моти на экране чуть подпрыгивает, чтобы игрок понял, что на
+// него можно нажимать»): `first` s after the menu shows, then every `every` s of quiet; squeezed (`squash`) for `ready` s, then off the ground,
+// stretching, as Gum's own hop off a released squeeze (its landing squash the body's own): thrown as for `up` R, it rises about 0.3 R (the soft body
+// gives the rest to its stretch)
+const MENU_HOP = { first: 1.2, every: 3.6, ready: 0.12, squash: 0.5, stretch: 0.8, up: 0.5 };
 const menuTouch = {
-  ptrs: new Map(), lastT: 0, lastPoke: null,
+  ptrs: new Map(), lastT: 0, lastPoke: null, idleAt: 0, hopAt: 0, hops: 0,
   on() { return game.state === 'menu' && ui.open === 'menu' && game.lv && game.lv.kind === 'menu' && !!game.hero; },
   local(e) { return [e.clientX - view.left, e.clientY + game.lv.cam]; },   // in the world
   look(x, y, now) { const l = game.heroLook; l.x = x; l.y = y; l.t = now; },
   down(e) {
+    this.idleAt = performance.now(); this.hopAt = 0;   // (a touch: no hop on its way, the quiet counted from now)
     if (this.ptrs.has(e.pointerId)) this.up(e, true);
     const now = performance.now(), [x, y] = this.local(e), b = game.hero, touch = e.pointerType !== 'mouse', tol = touch ? GRAB.pickTouch : GRAB.pickMouse, lp = this.lastPoke;
     const hit = (x > b.minX - tol && x < b.maxX + tol && y > b.minY - tol && y < b.maxY + tol && (pointInPoly(b.x, b.y, b.n, x, y) || distToPoly(b.x, b.y, b.n, x, y) < tol))
@@ -3423,6 +3772,7 @@ const menuTouch = {
     if (!p) return;
     this.ptrs.delete(e.pointerId);
     const now = performance.now(), b = p.body;
+    this.idleAt = now;
     if (b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
     if (!this.on()) cancel = true;   // (the menu shut under it, the settings say: let go where it is, not flung)
     if (p.mode === 'press') {
@@ -3447,11 +3797,16 @@ const menuTouch = {
     this.lastPoke = { x: p.x, y: p.y, t: performance.now() };
   },
   cancelAll() { for (const id of [...this.ptrs.keys()]) this.up({ pointerId: id }, true); },
+  hop(now, b) {   // squeezed a moment on the ground, then off it (MENU_HOP)
+    if (this.hopAt) { if (now - this.hopAt >= MENU_HOP.ready * 1000) { this.hopAt = 0; this.idleAt = now; this.hops++; b.wake(); unstick(b, 0.25); b.kickSquash(0, 1, -MENU_HOP.stretch); b.hop(Math.sqrt(2 * WORLD.gravity * MENU_HOP.up * b.R)); } return; }   // (off its stick to the floor first, as a jump is)
+    if ((b.wallMask & 8) && (b.asleep || b.calmT > 0.25) && now - this.idleAt > 1000 * (this.hops ? MENU_HOP.every : MENU_HOP.first)) { this.hopAt = now; b.wake(); b.kickSquash(0, 1, MENU_HOP.squash); }   // (on the ground and come to rest: Gum's calm)
+  },
   update(now) {   // each frame: the squeeze of a press held, a dragging finger's target (inside the walls, under the top, over the floor)
     const dt = Math.min(0.1, Math.max(0, (now - this.lastT) / 1000)), b = game.hero, lv = game.lv, sk = WORLD.skin;
     this.lastT = now;
     if (!this.on()) { if (this.ptrs.size) this.cancelAll(); return; }
     b.squeezeIn = 0;
+    if (!this.ptrs.size) this.hop(now, b);   // nobody touching it: now and then a little hop (MENU_HOP)
     for (const p of this.ptrs.values()) {
       if (p.body !== b) { p.mode = 'done'; continue; }
       if (p.mode === 'press') {
@@ -3500,20 +3855,21 @@ canvas.addEventListener('pointerdown', (e) => { if (menuTouch.on() && e.button <
 canvas.addEventListener('pointermove', (e) => menuTouch.move(e));
 canvas.addEventListener('pointerup', (e) => menuTouch.up(e, false));
 canvas.addEventListener('pointercancel', (e) => menuTouch.up(e, true));
-canvas.addEventListener('lostpointercapture', (e) => aimRelease(e, false));
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.togglePause(true); });
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 // Safari (user: it got in the way): a finger anywhere over the game, the stick and swipes included, must never start a
 // selection, the loupe or a callout. Only buttons keep their default: their click needs it. Pointer events still come.
-for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed, .tree'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
+for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
 for (const type of ['selectstart', 'contextmenu']) document.addEventListener(type, (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
   paused = document.hidden; loop.last = performance.now(); sound.sleep(document.hidden || ads.quiet);
   if (paused) { if (perf.active >= 5000) perfSend(loop.last); perf.last = 0; }
   if (paused) { input.clear(); game.togglePause(true); }
+  renderer.still = null;   // (a paused frame drawn again on the way back: a browser may have let its buffer go while hidden)
 });
+window.addEventListener('pageshow', () => { renderer.still = null; });   // (the same, back from the back-forward cache)
 window.addEventListener('blur', () => input.clear());
 window.addEventListener('pagehide', () => game.saveCur(true));   // (a phone's browser may drop the page after this without a word)
 window.addEventListener('resize', queueLayout);
@@ -3573,7 +3929,7 @@ function pixGuard(dt) {
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.
 function runFrame(now, fixedDt) {
   if (window.devicePixelRatio !== loop.dpr) { loop.dpr = window.devicePixelRatio; layoutQueued = true; }   // moved to another screen
-  if (CINE_ON) cineSync(game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for)
+  if (CINE_ON) cineSync(game.state === 'menu' ? null : game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for; the menu's backdrop 2D)
   if (layoutQueued) { layoutQueued = false; layout(); }
   menuTouch.update(now);   // (the menu's hero in the hand, before the physics: Gum's order)
   let dt = fixedDt != null ? fixedDt : (now - loop.last) / 1000;
@@ -3589,11 +3945,12 @@ function runFrame(now, fixedDt) {
   const alpha = loop.acc / STEP;
   game.frame(dt, alpha, now);
   sound.frame(game);
-  aimFrame(now);
-  aimPreview();
   fx.update(dt); updateBits(dt);
   shake.update(dt);
-  renderer.draw(game, alpha, dots, nDots);
+  const still = game.state === 'pause' ? [game.lv.cam, canvas.width, canvas.height, CINE ? 1 : 0, perf.ctxLoss].join() : null;   // paused (the pause menu, a story card over
+  // the game): nothing in the shaft moves, so its frame stands as drawn till the level, the view, the look or the context changes (perf: 1.5 ms a frame on a phone, and the GPU's)
+  if (!still || still !== renderer.still || game.lv !== renderer.stillLv) renderer.draw(game, alpha);
+  renderer.still = still; renderer.stillLv = game.lv;
   if (!firstFrame) { firstFrame = true; canvas.classList.remove('wait'); }
 }
 
@@ -3608,7 +3965,8 @@ async function boot() {
   const s = !b ? l : !l ? b : progress(l) !== progress(b) ? (progress(l) > progress(b) ? l : b) : (l.at || 0) > (b.at || 0) ? l : b;   // the one further on (a visit without the Bridge may have begun from nothing), then the newer, then the Bridge's
   cloud = br && got;
   loadSave(s);
-  if (save.flat) cineUse(false);   // (the cinematic fork: 2D, as the player set it)
+  if (!/[?&]cine\b/.test(location.search)) cineUse(cinePref && save.flat === false);   // (the cinematic fork: 2D unless the player set 2.5D in the settings; owner, 2026-10-24:
+  // «По умолчанию игра в 2d». ?cine shows it anyway, ?plain never)
   if (br) bridge.platform.getServerTime().then((ms) => { today = Math.floor(ms / 86400000); }).catch(() => {});
   ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen
@@ -3634,10 +3992,11 @@ function start() {
   if (/[?&]play=tokyo\b/.test(location.search)) { game.preview = TOKYO; window.__up.go(1, 0); }   // Tokyo by itself, to look at (a run in it)
   if (/[?&]play=blocks\b/.test(location.search)) { game.preview = BLOCKS; window.__up.go(2, 0); }   // the Tower Blocks by themselves
   if (/[?&]play=sky\b/.test(location.search)) { game.preview = SKY; window.__up.go(2, 0); }   // the Skyscraper by itself
-  if (/[?&]play=junk\b/.test(location.search)) { game.preview = JUNK; window.__up.go(2, 0); }   // the Junkyard by itself
   if (/[?&]play=sea\b/.test(location.search)) { game.preview = SEA; window.__up.go(1, 0); }   // the Sea by itself (not in the campaign yet)
   if (/[?&]play=skazka\b/.test(location.search)) { game.preview = SKAZKA; window.__up.go(1, 0); }   // the Dark Forest by itself (not in the game yet)
   loop.last = performance.now();
+  const ds = DESIGNS.filter((d) => !SHAPES.has(d.id)), warm = () => { const d = ds.shift(); if (d) { shapeOf(d); setTimeout(warm, 30); } };   // the bodies' shapes worked out in the
+  setTimeout(warm, 300);   // menu, one at a time (shapeOf: up to 16 ms the first time a kind came on in a climb, its worst frames; perf)
 }
 
 // Debug handle for automated checks (read-only state and a few helpers).
@@ -3669,15 +4028,6 @@ window.__up = {
   story(id) { game.story(id, null, true); return !!STORY[id]; },   // a story card shown, seen or not (for a look)
   // Press or let go of a control as a player would: 'left', 'right', 'down' or 'jump'.
   key(what, on = true) { input.set(what, !!on); return { dir: input.dir, down: input.down, jump: input.jump }; },
-  // A slingshot pull (dx, dy) in CSS px from where the mouse went down, let go at once.
-  pull(dx, dy) {
-    aim.on = true; aim.sx = 0; aim.sy = 0; aim.x = dx; aim.y = dy;
-    aimUpdate();
-    const p = aim.p, vx = aim.vx, vy = aim.vy;
-    aimCancel();
-    if (p > 0) game.requestJump({ vx, vy });
-    return { p: +p.toFixed(2), vx: Math.round(vx), vy: Math.round(vy) };
-  },
   // Headless checks: freeze the real-time loop, advance by fixed frames even when the
   // page is hidden or paused, and grab the canvas as a JPEG.
   freeze(on = true) { loop.frozen = !!on; return loop.frozen; },

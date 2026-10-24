@@ -7,6 +7,18 @@
 
 const VERSION = '0.3.0';
 const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; this is where it starts
+// V8 (the browser's engine) gives a field the kind of the first value put in it, for all the objects made the same way: a timer begun at 0 (a small
+// integer) that later holds a fraction, or a flag first set and later changed, has it remake that family of objects and throw away the optimised
+// code built on them, to compile it again; in play, the first time each such field changes (perf, 2026-10-24: most of the recompilations, ~80-120 a
+// climb). loosen gives the named fields that wider kind at once, their values kept (another value put in, then theirs back): on the first object of a
+// make it is enough, the later ones are made the wider way (doing it again costs nothing).
+function loosen(o, ...keys) {
+  for (const k of keys) {
+    const v = o[k], t = typeof v;
+    if (t === 'number' || t === 'boolean' || t === 'string') { o[k] = t === 'number' ? 0.5 : t === 'boolean' ? !v : v + '.'; o[k] = v; }
+  }
+  return o;
+}
 
 // ── Tuning ───────────────────────────────────────────────────
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
@@ -31,13 +43,9 @@ const MOVE = { speed: 7.8, accel: 10, air: 8, slip: 0.06, cling: 40, ceil: 5 }; 
 // go of anything, for `dropAfter` s and for as long as it is held. `coyote`: a jump still
 // counts this long after leaving a surface; `buffer`: a press in the air waits this long for
 // one; `stickAfter`: no sticking right after a jump, or a leap along a wall would glue
-// straight back on. The mouse is a slingshot (press, pull back, let go): a pull of
-// `dragFrac` of the view's width is a full jump, the shortest `minPower` of one, a pull under
-// `deadZone` px nothing; off a surface it never goes into it (at least `minUp` away from it);
-// while it is held the body is squeezed by `squeeze` and `dots` show `preview` s of the arc.
-// `mouse` turns the slingshot on (off for now: keys and the touch pad only).
+// straight back on.
 const JUMP = { height: 7.4, cut: 0.45, wallX: 10, wallUp: 0.95, ceil: 0.6, dash: 16, dashDown: 0.12, dashCD: 0.35, mantleCD: 0.35, dropAfter: 0.3, stretch: 2.2,
-  coyote: 0.1, buffer: 0.14, stickAfter: 0.16, dragFrac: 0.36, minPower: 0.22, deadZone: 14, minUp: 0.2, squeeze: 0.8, preview: 0.8, dots: 16, mouse: false };
+  coyote: 0.1, buffer: 0.14, stickAfter: 0.16 };
 // Down held on a floor (↓, or the stick pulled down): the hero squashes; a jump from there goes `height` times as high, and
 // the air jump is still there after it (user).
 const CROUCH = { squeeze: 1, height: 2 };
@@ -58,6 +66,7 @@ const DOOR = { w: 2.4, h: 2.8 };   // in R: a way into a shop or a stash, and th
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
 // ledges (at a crawler on them, say) passes under it, a full one up from the top ledge gets in.
 const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
+const EXIT_TRAIL = { n: 4, from: 1.7, step: 1.25 };   // worlds 1-3's coins up into the way out (Level.finish): how many, R under its middle the first, R between them
 // The hero is kept at `anchor` of the view height going up, and going down at least `keep`
 // hero heights over the touch keys (or the screen's bottom): a fall is followed, down to the
 // floor, and caught by a ledge or the fire. The ceiling over an exit stops the camera `top` px
@@ -146,7 +155,7 @@ function forkSign(lv, p) {   // a campaign fork's sign (see the renderer): under
 function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): the height of its foot, whether it is on its way down or down, its shake
   const u = (t + (kn.ph || 0)) % MOCHI_P, a = MOCHI.up, b = a + MOCHI.hold, c = b + MOCHI.slam;
   if (u < a) { const e = u / a; return { y: kn.yHit + (kn.yUp - kn.yHit) * e * e * (3 - 2 * e), down: false, shake: 0 }; }
-  if (u < b) return { y: kn.yUp, down: false, shake: u > b - MOCHI.shake ? Math.round(Math.sin(u * 90)) * PIX.size : 0 };
+  if (u < b) return { y: kn.yUp, down: false, shake: u > b - MOCHI.shake ? Math.round(Math.sin(u * 90) * PIX.keep) * PIX.size : 0 };
   if (u < c) { const e = (u - b) / MOCHI.slam; return { y: kn.yUp + (kn.yHit - kn.yUp) * e * e, down: true, shake: 0 }; }
   return { y: kn.yHit, down: true, shake: 0 };
 }
@@ -157,6 +166,11 @@ const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro:
 // on a wire of `crowP` of its beats (WIRE), flying off as the hero comes near (owner).
 // Laid by a generator of their own, so the shaft is laid as before; none in a bonus level.
 const FOLK = { cage: [0.3, 0.55], cageP: 0.75, trader: [0.6, 0.85], traderP: 0.5, critterP: 0.3, crowP: 0.5, coins: 8, flee: 3 };
+// Tokyo's crows dive (owner, 2026-10-24, Вр2 «Б»: «вороны Токио начинают бросаться, если стоять под ними»): a crow on screen with the hero under it (within `x`
+// R across, `y` R down) for `wait` s blinks red (2.5 times a second: the digest's three at most) `warn` s, then dives where the hero was at `speed` R/s, `r` R
+// of it hurting; past it, it flies off (gone from its wire: the task counts it, as a crow scared). Coming near it first scares it off, as before. From a
+// world's second level (Game.folkStep)
+const CROW = { x: 1.6, y: 9, wait: 0.9, warn: 0.7, speed: 11, r: 0.55, flight: 1.4 };
 // The lore's lines (the plan: under eight words, in turn): what one set free says, balls of your kind the sour ones
 // caught on their way up; and Aunt Moti's word at each sale, in her shop or on a ledge.
 const SAY = {
@@ -182,21 +196,26 @@ const CRITTER = {   // '#' the world's ink, 'w' white, 'k' black; a bat hangs an
   // the world's ink all round it, a white glint of an eye, a heavy beak, a wing, legs to its wire; then two strokes of its wings
   crow: ['........................', '................###.....', '...............#kkk#....', '..............#kkwkk##..', '...........###kkkkkkk##.', '........###kkkkkkkkk#...', '.......#kkkkkkkkkkk#....', '......#kkkkkkkkkkk#.....', '.....#kkkkkkkk#kkk#.....', '.....#kkkkkk##kkk#......', '.....#kkkk##kkkkk#......', '.....#kkk#kkkkk##.......', '...##kkkkkkkkk#.........', '..#k#######k##..........', '.###.......#.#..........', '...........#.#..........'],
   crowUp: ['...####.................', '....#kk###..............', '.....#kkkk##............', '......##kkkk##...####...', '........#kkkkk###kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.###kkkkk###.###...', '.........#####..........', '........................', '........................', '........................'],
-  crowDown: ['........................', '........................', '........................', '.................####...', '........#########kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.#kkkkkkkkk#.###...', '.......#kkkkkk##........', '......#kkkkk##..........', '.....#kkk###............', '...######...............'] };
-// Fuji's cranes (the owner's pick, research/variants/fuji-cranes-1-px.png A): a crane flying, its neck out, its legs trailing, wings up and down
-CRITTER.craneUp = ['........#####...................', '.........######.................', '.....###########................', '.......#########................', '........#########...............', '......###########...............', '........#########........#####..', '.........#########.##########.##', '.........##############.........', '......#############.............', '.######...#######...............', '................................', '................................', '................................', '................................', '................................', '................................', '................................'];
-CRITTER.craneDown = ['................................', '................................', '................................', '................................', '................................', '................................', '.........................#####..', '...........#######.##########.##', '.........##############.........', '......#############.............', '.######..#########..............', '........#########...............', '......###########...............', '........#########...............', '.......#########................', '.....###########................', '.........######.................', '........#####...................'];
+  crowDown: ['........................', '........................', '........................', '.................####...', '........#########kkkk##.', '.#######kkkkkkkkkkkwkkk#', '#kkkkkkkkkkkkkkkkkkkkk#.', '#kkkk#kkkkkkkkkkk#kkk#..', '.####.#kkkkkkkkk#.###...', '.......#kkkkkk##........', '......#kkkkk##..........', '.....#kkk###............', '...######...............'],
+  // its warn (the owner's Вр2 «Б», UPwell's dive from 5-2: under it too long, it rears, a wing up and its beak open) and its dive (wings swept back,
+  // beak first, down at you): UPwell tints them red
+  crowWarn: ['..##....................', '..#k#...........###.....', '..#kk#.........#kkk#....', '...#kk#.......#kkwkk###.', '...#kkk#...###kkkkk#....', '....#kkk###kkkkkkkkk###.', '....#kkkkkkkkkkkkkk#....', '.....#kkkkkkkkkkkk#.....', '.....#kkkkkkkk#kkk#.....', '.....#kkkkkk##kkk#......', '.....#kkkk##kkkkk#......', '.....#kkk#kkkkk##.......', '...##kkkkkkkkk#.........', '..#k#######k##..........', '.###.......#.#..........', '...........#.#..........'],
+  crowDive: ['##......................', '#k#.....................', '#kk##...................', '.#kkk##.................', '..#kkkk##...............', '...#kkkkk###............', '....##kkkkkk###.........', '...#kk#kkkkkkkk##.......', '..#k##.#kkkkkkkkk##.....', '..##....#kkkkkkkkkk#....', '.........#kkkkkkkwkk#...', '..........##kkkkkkkkk##.', '............##kkkkkkkkk#', '..............#####kk##.', '...................##...', '........................'] };
 // The crow with the red ring, the story's friend (RIBBON; owner, 2026-10-23: «ворона с красной лентой сделай крупнее и детализированнее, так как он важный
 // сюжетный персонаж»): its own frames, half again as big as Tokyo's crows, cut on their grid from its sheet (research/variants/ribbon-crow/sheet.png;
 // scratchpad cards3/crowcut.py), aligned by the ring: sitting, wings up, wings down; 'd' and 'm' the world's ink in its dark and mid tones, 'r' the ring
 CRITTER.rcrow = ["........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", ".............................#####......", "............................#ddddm#.....", "...........................#kkkkwkkk#...", "..........................#dkkkkwkkmm##.", "..........................dkkkkkkkkmmm#.", ".........................#kkkkkkkkkkkmm.", "........................#krkkkkkkkk.#...", ".....................##mmkrrrrkkkd......", "....................#dkkkkk#rrrkk#......", "...................mdkkkkkkdkrrkm#......", "..................#kkkkkkkkdkkkkm#......", "................#kkkkkkkkdkdkkdkkm......", "...............#kdkkkkkkdkdkkkkdm#......", ".............##kdkdkkkmmkkk#kkkkm#......", ".............mkdkdkkkkkkkkk#kkdkm#......", "...........#mkkkkkkkkdkkkkkkkkkm#.......", "...........#kkdkkkkkdkdkkkkkkkkm........", "..........#kkdkkdmkkkkkkkmkkkkm.........", ".........kk##kdd#kdmkkkk#kkkk#..........", "........##kkkkmmkkmkkkk#kkkdk...........", ".......#mkkmkmkkkkkkkkdkkkdk#...........", ".....##kk#mkkkkdkkkkkdkkkdk#............", "....#kkkkmkkkdkkk#kkkk#kddk.............", "...#mkkdkkkddkkk#.#kk#.kkk..............", ".....#dkkkdmkkk#....k...k#..............", "....#dkkkdmkkm......km#.kk#.............", "....#m#kkmkkm#.....#kkm#..k##...........", ".....#kkm#km#.....#kkkkk#kkdk#..........", ".......##..#.........kkkkkkkkkk.........", ".......................k.k#.k.k........."];
 CRITTER.rcrowUp = [".....#mk................................", ".....#mk..#.............................", "....##mdk#mm............................", "....mk#dmk#mm...........................", "....#dkkmkk#m#..........................", "..#.#dddkkkkmm#.........................", "..#mk#mddkkkkkm#........................", "...mdkkdddkkdkkm#.......................", "...#ddkkmddkkkkkm#......................", "....mddkkkkkkkkkm#......................", "..#mkkmdkkkkmkkkkm#.....................", "...#m#kddkkkmmddkkm#....................", "...#dddkkdkkkddkkkk#....................", "....#mddkkkkmddkkkk#....................", "...#k#mddkkkkmdddkkk....................", "...#mkkkkkdkkkddkkkk#...................", "....mddddkkkkkdddkkkm#..................", ".....mddddkkkddkkkkkk#.......#dd###.....", "......kk#kkkkkddkdkkk#.....##kkkkk##....", ".....#mk#ddkkkkdddkkkk....#kkdkkwkkk#...", ".....#mddkkkkmdkkkkkkk#...kkdkkkwkkmm#..", ".......kkddkkkkddkkkkkk..kkkkkkkkkmmmm#.", ".......kdkkkkkkkkkkkkkk#krrkkkkkkkk##.#.", ".......mddkdkkmkkkkkkkkm#rrrkkkkk##.....", ".......##mkkkkkmkkkkkkddmkrrkkkkm.......", ".........mmddkkkkkkkkkkkdmkrrrkd........", ".........##dkkkkkkkkkkkkdd#kkkkm#.......", "...........kmmkkkkkkdkkkddkkkdkm#.......", "...........#mkkkdkkkkkkkkkkkkkkm........", "............#kkmmkkkkkkkkkkkkkd#........", "..........###kkkkkkkkkkkkkkkkk#.........", ".........#ddkkkkkdkkkkkkkkkkm#..........", ".......##kkkkkkkdkkkkkkkkkkd#...........", "...##dkkkkkkkkdkkkkkkkkkkkk#............", "..#mkkkkmkkkkkkkkkkkkdkkm#..............", "..##kkkkkdkkkkkk#kmkkkk##...............", "...#mdkkdkddkk...km..k#.................", "..#mdkkmkkdkdk....kk#.k#................", "...#kkmkkmkkk#....kk#kkkk...............", ".....#dk#kmm#.....kkkkkd#k..............", ".......#kkm#.....k.km.kk#k..............", "........#.#........k#..k#...............", "........................................", "........................................"];
 CRITTER.rcrowDown = ["........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "........................................", "..............................####......", ".............................#dddm#.....", "..........................##kkkkwkk##...", "..........................#kkdkkwwkm###.", ".........................#kkkkkkkwkkmm#.", "...................##mdddkrrrkkkkkkkkm##", ".................#.#mmdddmkrrkkkkkk##...", "................##mddkkkkkdkrrrkkm#.....", "..............#dmkdkkkkkkkdmkkkkm#......", "............##mkkkkkkkkkkkmmkkkm#.......", "...........#mdkkkkkkkkkkkkddmkkm#.......", "..........#kkmmkkkddkkkkkkkdk#k#........", "........#mkkdkkkmdkkkkkkkkkkkmkkm.......", ".......#dkk#kkkkkkkmkmkkdkkkkkmkkm......", "......#mkkk#dk#dkkkmmkdkdkkkkmmkkd#.....", "...###kkkkkkkmdkkdkkkmdmkkkkkkm#kd#.....", "..#mkkdkkkdkk##kdkkdkkkkdkkkkkkm#kd#....", "#mdkkdkkkdkkkkkmkkdkkkkkkkmkkkkkmkkm....", ".#kmmkkddkk.kk#kkmkkdkkkkkkmkmkkkmkk#...", "..kmdkddkdk..kk#kmkkdkkdkkkkkkkkkk#k#...", ".##kkddkdk#...kk##k#mkkdkkkkdkmkkkk#km..", "..k#ddkmm#.....k#k#kmk#mkkdkddk#mkkk#km.", "...##mkm#.....kkkk#km##mmkddkdkk#dkkm#..", "....#k#......kkkkkk#k#kmmkddkmdkk#ddkd#.", "................k#k#...#mk#dk#ddk#mmdkm#", "................#.k#....#.#mm.#ddk##dd##", "............................#..#mm..###.", "........................................"];
-for (const id of ['crow', 'crowUp', 'crowDown', 'craneUp', 'craneDown', 'rcrow', 'rcrowUp', 'rcrowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
+for (const id of ['crow', 'crowUp', 'crowDown', 'crowWarn', 'crowDive', 'rcrow', 'rcrowUp', 'rcrowDown']) CRITTER[id + 'L'] = CRITTER[id].map((row) => [...row].reverse().join(''));
 // The crow with the red ring (owner, 2026-10-22, the story's card II «A Small Kindness»; n9: the friend is a crow with a red ribbon): on a quiet ledge
 // (the chunk 'ribbon', 1-3's set piece), flapping there now and then; a touch frees it, coins and its thanks, off it flies with the ring on it,
 // and `card` s later the card (STORY village_crow; owner, 2026-10-23: «Как только его коснулся, карточка появляется сразу за секунду»), its thanks read first
 const RIBBON = { card: 1, reach: 1.8, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
+// Ume, Mochi's friend in Tokyo (owner, 2026-10-24: У1 «Б», the treat now; У6 «Б», red with an ume leaf, a kind face): by a vending machine on 5-3's ledge
+// at a wall (the chunk 'umeVend', u). The hero comes to him: a can for him, half for Mochi (a heart back if one is missing, else coins), he hops for joy
+// and comes along after the hero; `card` s later the story's card VI. [R his size, R of reach]
+const UME = { card: 1, r: 0.92, reach: 1.8, thanks: { en: 'Thanks, Mochi! Half for you', es: '¡Gracias, Mochi! La mitad para ti', pt: 'Valeu, Mochi! Metade pra você', ja: 'ありがとう、モチ！ はんぶんこ' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the shaft (DEPTH), the beams' and gondolas' cables too
@@ -209,7 +228,8 @@ const NEON_SIGNS = [[['ラ', 'ー', 'メ', 'ン'], 'neonBowl'], [['ス', 'シ'],
 const neonSign = (lv, k) => {
   const mod = (a, n) => ((a % n) + n) % n;
   if (mod(k, 3) === 2) return null;
-  const t = lv.tile, P = PIX.size, kk = Math.max(1, Math.round((0.9 * lv.R) / (16 * P))), gw = 16 * kk * P, sw = gw + 6 * P, [word, pic] = NEON_SIGNS[mod(k - Math.floor(k / 3), 3)];
+  const t = lv.tile, P = PIX.size, kk = Math.max(1, Math.round((0.9 * lv.R) / (16 * PIX.base))) * PIX.keep, gw = 16 * kk * P, sw = gw + 6 * PIX.base, [word, pic] = NEON_SIGNS[mod(k - Math.floor(k / 3), 3)];   // (its size by the
+  // levels' grid: on a computer's finer one it came out half, and its lighting reach with it; review)
   const left = mod(k, 2) === 0, x0 = left ? lv.l + 0.7 * t : lv.r - 0.7 * t - sw, y0 = k * 11 * t + 3.5 * t, y1 = y0 + (word.length + 0.9) * gw + 6 * P;
   const ax0 = left ? lv.l : x0, ax1 = left ? x0 + sw : lv.r;
   if (lv.bubbles.some((b) => b.x1 + t > ax0 && b.x0 - t < ax1 && b.y1 > y0 - 0.3 * t && b.y0 - t < y1 + 0.2 * t)) return null;   // nothing covers a door (owner)
@@ -223,12 +243,233 @@ const YAEN = { frame: 2.3, wheel: 0.62 };   // the Village's yaen (a moving plan
 // little shrine whose stone lantern the hero lights, koinobori), the Mine's (a lamp on the wall the hero lights, a vein of ore, a cart, tools, a winch), Mount Fuji's bell
 // off a boardwalk's free end (the hero rings it). kitThing(lv, r) is { kind, x, y } (x, y: where the hero tends it) or null, worked out once from the level
 // as laid, on steady ledges' wall ends where nothing laid stands in front (what crumbles away for a while does not count: nothing comes and goes).
+// Fuji from the real mountain (owner 2026-10-23/24, his letters on the Worlds page; research/fuji/fuji-attributes.md): its props and doors cut off their GPT
+// sheets pixel for pixel (path A, the owner's rule: the cell's own pixels; scratchpad fujiR/cut.py over research/variants/fuji-<el>-1-px.png), an art px a game
+// px, rows from the top, its foot the last row: k black, w the sheet's white snow (grey here: the midground has no white), g the sheet's grey (a tone darker, so
+// snow on stone still reads), b blue, o orange, p purple, r red (the shop's mark), y yellow (a window's light). The tent (d53 B), the serow and the fox (d54 E),
+// the pilgrims' stones (d55 F), the bare larch (d56 E), the station post (d57 E), the shop's hut (d58 A) and the stash's, shut for the winter (d59 D)
+// Each world's hazard on its walls (FIREWALL) and its icicles, the owner's picks (2026-10-24, Д72–Д78; the Village has none: «В деревне не должно быть
+// элементов холода»)
+const WALL_SPR = {   // cut from research/variants/<sheet>-1-px.png, path A: asleep (its stretch of wall quiet, from the wall's inner edge out), burst (bursting out)
+  grassfire: {   // village-wallfire F (owner, Д72 «F»)
+    asleep: ['......s.s............', '.......s.s...........', '......s.s............', '.........s...........', '......s.s............', '......ssss...........', '......s.s............', '...s...sss...........', '....o.sss............', '.......sss...........', '......s.s............', '.....................', '......sss............', '......ssss...........', '......s.s............', '.......sss...........', '.......ss............', '......ssss...........', '.....................', '.......s.............', '......sss............', '.s....ssss.....s.s...', '......s.s.....s......', '.......sss...s.......', '........s............', '......sss..oos.......', '.......ss............', '......ssss...........', '......sss............', '......ssss.......s.s.', '......sss............', '.......sss.....s...rr', '.......ss..........r.', '.......sss...s.......', '.......ss............', '.......sssooos.......', '.......ss.oor........', '.......sss.o.........', '.......ss.o..........', '.......sss...........', '......sss............', '......ssss...........', '.....................', '.......sss...........', '......sss............', '......ssss...........', '........s............', '......ssss...........', '.......ss............', '.s.....sss.r.s.......', '..r....ss............', '...s...sss...........', '......sss............'],
+    burst: ['......ssss..........................', '......sss...........................', '....................................', '....................................', '....................................', '....................................', '....................................', '.r..................................', '.rr.r.....rr........................', '.r.rr......rr.......................', '..r........r........................', '..r.rrrrr....rrrrr..................', '.r.rrrrrrr..rrrrrrr.................', '..r.rrrrr...rrrrrrr..rr.............', '...rrrrrrrrrrrrrrrr..rr.............', '..r.rorrrrrrrooorrr.................', '.r.ooooooroorooorr...rr.............', '..r.oooooroooorrrr..rrrrrr..........', '.r.ooorroooooooorrrrrorrrr..........', '..r.oorrooooooooorrrooorrr..........', '...rooooooooooooorrrooorrr..........', '..r.ooooooorrrooorrrooorrr..........', '...roooooooorroorrrroorrrr..rrrrr...', '..r.rooooooororrrrrrrrrrr...rrrrrr..', '.r.rrrrooooroorrrooorrrrrr.rrrrrrr..', '..r.rrrroooroooooooooororrrrooorrrr.', '.r.rrrrrooooooooooooooorrrrrooorrr..', '..rrroroooooooooooooooooorrrooorrr..', '..r.ooroooorooooooooroooorrrrorrrr..', '...rroooooooooooooooooooorrrrrrrr...', '..r.rroorrrooooooooooorrrrrr.r......', '..rrrrrrrooooooooooorrrrrrrr........', '..rrrroooooooooorrrrrrrrrrrr.....r..', '....rroooorrooooorrrooorrr......rrrr', '..rrroroooooooooorrrooorrrrrrrr..rrr', '.rr.ooooooooooooorrooooorrrrrrr.....', '..rooooooooooooooroooooorroorrr..r..', '..r.oorroooooroooooooooorooorrr.....', '.r.rrrrroooooooooooorrrrrrrrr.......', '..r.oooooooooooooooorrrrrrrrr.......', '...roooooooooroooooooorrrooorrr.....', '..r.oooooroooooooooooorrrooorrr.....', '..rrrrrorroooroooooorrrrrooorrr.....', '..r.oooooooooorroorrrr..rrrrrrr.....', '...oooorooooorrrrrrrrr...rrrrrr.....', '..r.ooorooooorrrrrr.r.....r.r.r.....', '...roorrooorrorrrrr.................', '..r.ooooooorrooorrr..rr.............', '..rooorooooroooorrr..rr.............', '..r.oorooorroooorrr..rr.............', '.rrrrrrrrrrrrorrrrr.................', '...rrrrrrrrrrrrrrrr.................', '..r.rrrrrr..........................', '...rr.rrr...........................', '.r.rr..rr...........................'],
+  },
+  firedamp: {   // mine-firedamp D (owner, Д73 «D»: a ragged jet)
+    asleep: ['ww.................', 'ww.................', 'ww.................', 'ww.................', 'ww.................', 'ww.................', 'ws.................', 'w..................', 'ww.................', 'ww.................', 'ww.................', 'ww.................', 'ww.................', 'sw...b.............', 'ws.......bb........', '.s...s.............', 'ss..ss..b..........', '....ss.....b.......', '...ssbbb...bb......', '...s.sbb...........', '..ssbb..bb...bbb...', '..ssbb..bb...bbb...', '..sss.bb...bb......', '..ss..bb...bb......', '..sssbb..b........b', '....sb..bbb......bb', '....ss...b.........', '.....sbb...bb..b...', '....ssbb...bb......', '..ssss...b...bb....', '..ssss..bbb..bb....', '...sssbb.b.b..b....', '....ssbbb..bb......', '....ssbb...bb......', 'ss....ss...........', 'ss....bb...........', 'ss....ssbb...bb....', 'ss.....ss....bb....', '....ssb....bb......', '.....sb....bb......', '....ssb............', '..ss.s.bb....bb....', '..sss...b....bb....', '....ss.............', '..s.bb.............', 'ss...s.............', 'ss..s..............', 'sw.................', 'ww.................', 'ww.................', 'ww.................', 'ww.................', 'ww.................', 'ww.................', 'w..................', 'w..................', 'w..................', 'ww.................'],
+    burst: ['sw..........................................', 'sw..........................................', 'sw..........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................', 'sww.........................................', 'sww.........................................', '.ww....................rr...................', 'sww....................rr...................', 's.....................rr....................', 's.............rrrrr.........................', 's..ss........rrrrrrrr.......................', 's...s.......rrrrrrrrr.......................', 's..ss.......rrrrrrrrr.......................', '...bboorrr..rrrrooorrrr..rrrrrr.............', '...bboorrr.rrrrrooorrrr..rrrrrr.............', '..ssbbbbbbrrrrooobboorrrrrrrrrrr............', '.ssssbbbbbrrrroobbboorrrrrrrrrrr............', '...bbbbbbbbboobbbbbssrrrrroooorrr..rrrr.....', '...bbbbbbbbboobbbbboooorrooooorrrrrrrrr.....', 's...bbbbbbbbbbbbbbbbbooooobbbooorrrrrrrrr...', 's..sbbbbbbbbbbbbbbbbboooobbbbboorrrrrrrrr...', 's..bbbbbbbbbbbbbbbbbboobbbbbbooorrrorrrrr...', 's..ssbbbbbbbbbbbboobbbbbbbsooobbrrooooorrr..', 's..ssbbbbbbbbbbbooobbbbbbooooobbrrooooorrr..', '...ssbbbbbbbbbooorrrrbboooorrrrrccrrrrroorrr', '...ssbbbbbbbbbooorrrrbbbooorrrrrcbrrrrroorrr', '.ssbbbbbbbrroorrrrrrrrrooorrrrrrooorr..rrrrr', '.ssbbbbbbbrroorrrrrrrrrooorrrrrrooorr..rrrrr', '...bbbbb.rrrrrrrr..rrrrrrrrr.rrrrrrrr....rrr', '...bbbb...rrrrrrr..rrrrrrrrr..rrrrrrr....rrr', '...sbbb...rrrrrr...rrrrrrrr...rrrrrr......r.', 's...s.......rr.......rrrrr......rrr..rr.....', '...s.............r...rrrrr......rr...rr.....', 's..............rrrr...............rrr.......', 's..............rrrrr..............rrr.......', 'ssw..............rr..rr.....................', '.ww..............r...rr.....................', 'sww...................r.....................', '.ww.........................................', 'sww.........................................', 'sww.........................................', 'sww.........................................', 'ww..........................................', 'ws..........................................', 'sw..........................................', 'ww..........................................', '.ww.........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................', '.ww.........................................', 'sww.........................................'],
+  },
+  wallice: {   // fuji-wallice B (owner, Д74 «B»: a fan of shards)
+    asleep: ['.....', '.....', '..w..', '..w..', '..w..', 'wwwww', '..w..', '..w..', '..w..', '.....', '.....', 'b....', '.....', '.....', '.....', '...ww', '...ww', '...w.', '.....', '.....', '.....', '.....', '.....', 'b....', '.....', '.....', '.....', '...w.', '...w.', '.....', '.....', '.....', '.....', '.....', '.....', '.....', '..w..', '..w..', '..w..', 'wwwww', '.ww..', '..w..', '.....', '.....', '.....', '.....', '.....', '.....', '...w.', '.....'],
+    burst: ['.........r.................', '........rr.................', '.....rrr...................', '....wwrrr..................', '..wwwwrr...................', 'bswwwrs....................', 'bbsw.r.....................', 'bbwbbr.....................', 'ww.bbb.....................', 'w.bbb..............r.......', '.bbbb.............rr.......', 'bbbbb.........rrrrr........', 'bbb......b..wwwrrr.........', 'bbb....wwbb.wwwrr..........', 'bb...wbbww.wbbbr...........', 'b...wwbbwww.bbbr...........', '..bwwbwwwbb.bbb............', '..wbbwbbbbbbb..............', 'bbwwbbbbbwbb...............', 'bbwbbbbbbwbb...............', 'bbbbbbbbb..................', 'wwbwwwbb..bbb...wwr........', 'wwbwwwb...bb...wwwrrr......', 'bbwbbb.bbbb.wwwwwwwwwrwrrrr', 'bb.b..bbwbbb.bbbbbbb.r.r...', 'bbbbbbbbwbbbbbbbbbbbbrr....', 'bb.bbbbbbbbb.bbbbbbr.......', 'wwwbbb..bbbbbbbbb..........', 'wwwwww...bbbbbb............', 'bbbwwwwwb..................', 'wbbbbb.bbbbb...............', 'bbbbbbbbbbbb...............', 'bbb..bwwbbbbww.............', '..bbbbbbbwww.wwww..........', 'w..bbbbbbbw..wwwww.........', 'ww..bbbbbbb.wwwwww.........', 'bbb....bbbbb.bbbbrww.......', 'bb..bb..bbbbsbbbsrrrr.r....', '.b.bbb......bbbr...r.rr....', '.wwbbwbb...................', '.bwb..bbs..................', '.bbww.bbw..................', '.bbbbwsbbww................', '..bbbb..wbss...............', '..bbbb...wsw...............', '...bbbwwbbwwrr.............', 'b.....bbwbrrwrr............', 'b.....bbwbrrrrr............', 'ww..........rrrr...........', 'www.............rr.........', 'www........................', 'rww........................', 'rrwr.......................', 'rrrrr......................', '...rr......................', '....rr.....................', '.....r.....................'],
+  },
+  blowhole: {   // sea-blowhole E (owner, Д75 «E»: a fan of foam)
+    asleep: ['..ss..........', '.s..ss........', '.ssss.........', '..sss.........', '.....s...ss...', '.ss..ss.ss.s..', 'sssssg..s.ss..', 's.sss.g..sss..', 'sss.....s.s...', 'ss......sg....', 's........g....', '..........gss.', '..........ggss', '..........ggs.', '..........gsss', '..........gss.', 's........gg...', 'sg.......g....', '.gg.....ggss..', '.gggg.sgggss..', '..gg....g.s...', '..g..g..gss...', '..g..g..gg....', '.gg.....g.....', '.gg.....gg....', '.gg......g....', '..gg....g.....', '..g.....g.....', '..gg....g.....', '..g...........', '..............', '.....s........', '.....cc.......', '.....c........'],
+    burst: ['..gg................................................', '..gg................................................', '.gg.................................................', '.gg...g.............................................', '.gg...gg............................................', '.g.....g............................................', '.g.....g.....c......................................', '..g...gg....cc...................cc.................', '..gg.gg......c..........b.b......c..................', '..gg.gg....c......cc...cbbb..................rr.....', '..g..gg....cc.........bbbbbb...c.........rrrrr......', '..gggg.g......cc.....bbbbbw...ccc.......ccsrrrr.....', '..sg..g.......cc....ccbbbwbc.cc.c....wswcb.bbrrr.cc.', '..ss..g.......c....cccbbcbc.......swbcbbbbb.wrrr....', '..sss.g..cc......bccbbbccc.....wbcwbbbbbsbbbrr......', '.......g.cc.....bbcbbbccc...cbbwsbbbbsbsbbbsrrr.....', '..sgg.gg......bbbcbccccbbbbbwcbbbbbwwbbbbbsr........', '......g...c..bbbbcccb.bbb.bcbbbbccccccbssrrrr...c...', '..gg.b.bcccccccccccbbbccccccbccccccwcbss.r....cc....', '..ggccccccccccbbbbb.ccccccccsccccccbc.........c...cc', '..ggbbbbbbbbbbbbbcccccccccccccbbbcb....w............', '..ggcccccccccccccccccccbbbbbbbbs..bwcbwsr.wcr.r....w', '..gssbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbwwrr..r...', '.gggbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbcrrr...', '.ggsccccccccccccccccccccccccccccccccbccbbsbbbcbrrrr.', '..g.ccccccccccccccccccccccccccccccccbcccbbbbbbbcrrr.', '..gg.bbbbbbbbbbbbbbbccccccccccccccccbbcbbbbbbccrrr..', '..gggccccccccccccccbbbbbbbbbbbbbbbbbbbbswbbcsrrrr...', '..ggbbbbbbbbbbcccccccccwccccssbbbbwbswbw.crrrr.r..s.', '..ggccccccbbb.bbbcccbcccccccccsss.ss..............c.', '.g.gcbbcccbccbbccbbbccbbbbccccccccbwbbwr......c...cc', '.g..s....bbbbccbccccbbbbcbbbbbbbwccbbbwbc.rr......c.', '.ggg..g.....bbbcbbbcbbbbbbbbsbbbbcswbbbwbsbrrrr.....', '..gg.g...c....bbbbbbbbbb..bbccwbbbbsbsbbbsbbr.......', '..gg.g...ccc.....bbcbbbcc....ccwbbbbbcbbbbbbrrrr....', '..ggggg..cc......cbbbbbccs.....w.bbbbcbbwbbbcrrr....', '..ggggg.....c.....bbbbbbsbb....w...sbcbbbbbccsrsr...', '..gg.gg........c...bwbbbbbb....cc.....w.ssbcc.r.rr..', '..gggg...ccc.........bbbbbbc..cccc......rrsrrrrr....', '..ggggg..c......cc....bbbbb...c.c.........r..rr.r...', '..gg.g..........cc.....bbb.b...cc....cc........r....', '.gg........cc...........b........cc..cc.............', '..gg.......c.......c......c..........ccc............', '.gg....................c..............c.............', '.gg..............cc....c............................', '.gg..............ccc................................', '.gg...............c.................................', '..gg................................................', '..g.................................................'],
+  },
+  boardfire: {   // tokyo-wallfire F (owner, Д76 «F»)
+    asleep: ['....ss.s...s.s...s.s', '....s......s.....ss.', '....ss.s...s.s...s.s', '....s......s........', '....ss.sr..s.s...s.s', '....s...r..s......s.', '....s..sr..s.s...s.s', '...ss.....ss....s...', '...s.s.s..ss.s..ss.s', '....s...r.s.....s...', '....ss.s...s.s...s.s', '....s......s........', '....ss.s...s.s...s.s', '....s......s..r..s..', '....ss.s...s.s...s.s', '....s......s........', '....ss.s...s.sr..s.s', '....s......s.....s..', '....ss.s...s.s...s.s', '....s......s........', '....ss.sr..s.sr..s.s', '....s..rr..s..r..s..', '....s..sr..s.sr..s.s', '....s......s..r.....', '....ss.sr..s.s...s.s', '....s......s.....ss.', '....ss.s...s...r.s.s', '....s......s........', '....ss.....s.s...s.s', '....s......s.....s..', '....s......s.s...s.s', '....s......s........', '....ss.....s.s...s.s', '....s...r...........', '...sss.s..ss.s..ss.s', '...ss...........s...', '....ss.s.....s...s.s', '....s............ss.', '....ss.sr..s.s...s.s', '....s......s........', '....ss.s...s.s...s.s', '....s.....ss.....s..', '....ss.s...s.....s.s', '....s...............'],
+    burst: ['....s.s....s....rrrrr...............', '....ss.sr..s.srrrrrrrrr.............', '....s......s..rrrorrrrr.............', '....ss.s...s.srooooorrrrr...........', '....s...r..s..ooooooooorrr..........', '....ss.rr..s.soooo..ooorrr..........', '....s..rr.....ooo....ooroo..........', '...sss.sr.ss...oo.oo.oorro..........', '...ss...r.s....oo.ooooorr...........', '........r.....roo.ooooorr...........', '....s..r......roooo.oorrr...........', '....ss.s...s..oooooorrr.............', '....s...r.....oooooorrr.............', '....ss.s...s.soooorrrrr....roooo....', '....s...r.....ooorrrr....rrrrooorrr.', '....s..sr..s.sooorrrr..rrroooooorrr.', '....s......s..ooorrrr..rrrooorrrrrr.', '....ss.s...s.soooorrrrrrrooorrrrooor', '....s...r..s..ooooorrrrrooorrrrrooor', '....ss.sr..s..oooooorrrooorrr...ooor', '....s...r..s..ooooooooooorr......oor', '....ss.rr..s.soooooooooorrr..o...oor', '....s...r.....ooooooooorrrr..o..oorr', '....ss.s...s.soooooooorrrrr..rrrrrr.', '....s......s..oooooorrrrrrr...rrrr..', '....ss.r...s.soooooorrrrrr.....rr...', '....s...r..s..oooooorrrrr...........', '....s..s...s..oooooorrrrr....r......', '....s......s..oooooorrrr.....r......', '....ss.s...s.soooooorrr....rr.rr....', '....s......s..oooooorrr.......rr....', '....ss.s...s.sooooooorrrrrr....r....', '....s......s..oooooooorrrrr.........', '....s..sr..s..oooooooooorrrrr.......', '....s...r.s...ooooooooooorrrr.......', '...s.s.s...s.soooooorrroooorrr......', '...ss...r.....ooooorrrr.ooooor......', '....ss.sr..s.soooorrrrr..oooor......', '....s...r..s..ooorrrr.....ooor......', '....s..s...s.sooorrr.oooo.ooor......', '....s...r..s..oorrrr.oooooooor......', '....ss.s...s.sorrrrr.ooooooor.......', '....s.s....s..rrrrr....ooor.........', '....ss.s...s..rrrr..................', '....s.........rrr...................'],
+  },
+
+};
+const ICE_SPR = {   // cut the same way: hang (under its ledge), fall (falling),
+  fuji: {   // fuji-icicles A (owner, Д78 «A»)
+    hang: ['www.wwwwwbww', '..bbbwwsbbbb', '.bbbbb.bbbb.', '.bbwbbbbbbb.', '..bwbbbbbbs.', '..bwbbbbbbw.', '..bwwbbbbbs.', '..sbwbbbbb..', '...bwbbbbb..', '..sbbbbbbw..', '...bbwbbb...', '....bbbbb...', '...sbbbbb...', '....wbbbb...', '....sbbb....', '....sbbs....', '.....rwr....', '.....rrr....', '.....rr.....', '......r.....', '......r.....'], fall: ['....wwwww...', '..wwwwwwwww.', '.wwwwwwwwwww', 'wwwwwwwwwwww', 'wwwwwwwwwwww', 'ww.bwwwwbbww', '..bbbwwbbbbb', '.bbbbbbbbbbb', '.bbwbbbbbbbb', '.bbwbbbbbbb.', '.sbwbbbbbbw.', '.sbwbbbbbbw.', '.sbwbbbbbbb.', '.sbwbbbbbbb.', '.sbwbbbbbbb.', '..bbwbbbbb..', '..bbwbbbbb..', '..bbwbbbbb..', '..bbwbbbbw..', '..bbwbbbbw..', '...bwbbbbb..', '...bbbbbbb..', '...bbbbbb...', '...bbbbbb...', '...bbbbbb...', '....bbbbb...', '....wbbbb...', '....wbbbs...', '....bbbbb...', '....swbb....', '....sbbb....', '.....wbb....', '.....rwr....', '.....rrr....', '.....rr.....', '.....rr.....', '......r.....'],
+  },
+
+};
+// Each world's rising hazard (К13 «А»; owner: «Обнови все природные опасности исходя из нового принципа построения»), the owner's picks (Д67–Д71)
+const HOLD_ROPE = { village: true, sea: true };   // where an arena's wave waits (К8 «А»): a world's own thing (HOLD_SPR); ROPE: it hangs on a rope from out of sight
+const HOLD_SPR = {   // cut from research/variants/<world>-holder-1-px.png, path A: full (still), shake (the wave shown), empty (it dropped); the owner's picks (Д81–Д84)
+  village: {   // village-holder A (owner, Д81 «A»: a round woven basket)
+    full: ['............o...........', '............o...........', '............oo..........', '............o...........', '...........oo...........', '............o...........', '............oo..........', '............o...........', '...........oo...........', '............o...........', '............oo..........', '............o...........', '............o...........', '............o...........', '............oo..........', '............o...........', '...........oo...........', '............o...........', '............o...........', '...........oo...........', '...........oo...........', '............o...........', '...........oo...........', '...........oo...........', '............o...........', '............o...........', '...........oo...........', '...........oo...........', '...........oko..........', '...........oo...........', '..........o..o..........', '........................', '........ooooooo.........', '......oooooooooooo......', '.....ookookookookoo.....', '....oookookkokkokoo.....', '...ooo.oooooooooooo.....', '...ooo.oooooooooo.oooo..', '..oo...............o.o..', '.........o.ww...........', '.ooooooooo.ww.ooooooooo.', '.ooooooooo....oooooooko.', '.oooooo.oooooooooo.ooooo', 'oooo.oo.oo.ookoooo.oo.oo', '.o.o.o...o..okkooo.o..o.', '............okkko.......', 'oo.o.oo.oooooooooo.oo.oo', 'oooo.oo.ookookoooo.ooooo', '.oooooooooooooooooooooo.', '.ooo.o..ooo.oo..o..oo.o.', '........................', '..oooooooooooooooooooo..', '..oooookoooooooooooooo..', '......okookkokkokooko...', '...oooooooooooooooooo...', '....o.ookokkokokkko.....', '......ookooookoooo......', '........ooooooo.o.......'],
+    shake: ['...........o...........', '............o..........', '...........oo..........', '...........oo..........', '...........o...........', '............o..........', '...........oo..........', '...........oo..........', '...........o...........', '............o..........', '...........oo..........', '...........oo..........', '...........o...........', '............o..........', '...........oo..........', '...........oo..........', '...........o...........', '............o..........', '...........oo..........', '...........o...........', '...........o...........', '...........oo..........', '...........oo..........', '...........o...........', '...........o...........', '..........oo...........', '..........ooo..........', '..........ooo..........', '.........o...o.........', '.......................', '........ooooooo........', '......oookooooooo......', '.....okooooooooooo.....', '....oooo........ooo....', '...ooo............oo...', '..oo.....rrrrrr.....o..', '..o.....rrrrrwr.....oo.', '.oo.....rwkrrwrr.....o.', '.......rrrrrrrrr.......', '..oooo...........oo.oo.', '.oooooooooooooooooooooo', '.oooooooooooooooooooooo', '.okoookookooooooookokoo', 'oooookooooooooooooooooo', 'oo.ooooooooo.ooo.o.oooo', '.......................', 'oo..o.oo..ooo.oo.o.oo.o', 'oo.oo.ooo..okookoo.oooo', 'ooooooooooooooooooooooo', 'oo.oo.ooooooooooo.ooooo', '.o..o..oo..o..o...o....', '....................oo.', '.ooooo.ooooooooooooooo.', '..okoo.oooookkookooko..', '..oooo.ookookkookokoo..', '...oooooooooooooooko...', '.....ookokkokookooo....', '.....oooooookooooo.....', '.......oooooooo........'],
+    empty: ['.........oo.............', '..........o.............', '.........oo.............', '.........oo.............', '.........oo.............', '..........o.............', '.........oo.............', '.........oo.............', '.........oo.............', '..........o.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '.........oo.............', '........ooo.............', '.........oo.............', '........oo.o............', '........................', '.........oooo.o.........', '.......oookoooooo.......', '.....ooooookkoookoo.....', '....ookkokkokkokoooo....', '...ookookooookkoooooo...', '..oooookkookkokkooo.....', '..okookoookkooooo...o...', '.ookokkookkooooo....o...', '.oookkookookooo.....o...', 'oookkookookwo......o....', 'ookokoooooow.......o....', '..ookoookoo.......o.....', 'oookkookoo.......o......', '.okokkkoo.......oo....oo', '.ooookoo.......oo.....o.', '.oooooo......oo.......o.', '.ookoo.....ooo.......oo.', '..ooo....ooo.........o..', '..ooooooo..........ooo..', '...o.o............oo....', '................o.o.....', '.....ooo......ooo.......', '......ooooooooo.........', '.........oooo...........'] },
+  fuji: {   // fuji-holder A (owner, Д82 «A»: a snow lump, its red eyes seen from the start)
+    full: ['.......wwwwwwwwws......', '....wwwwwwwwwwwwswww...', '...wwwwwwwwwwwwswwwww..', '.wwwsswwswwswwwwwswwww.', '.wswwswwwwwwwwwwwwswsw.', 'wwwswwswwwwswwwswssswsw', 'wwwwwswwwwswwwwwwwwwwsw', 'wwwwssswwsswwsswb.bssww', 'wwww.b.ww..w........b.w', 'wb.....................', 'bkb.b.............b.b..', '.bbb...............bbb.', 'wbbb.....r...rr....bbbb', 'bbbw.....r...rr....wbbb', 'bbbbs..............bbbb', 'bbbbb....w...w.w..wbbbb', 'bbbbb.wwwwwbwwwwb.bbbbb', 'bbbbb.bbbbbbbbbbb.bbbb.', '..bbb.bbbbbbbbbbb.bkbkb', '.bkb..bbbkbbbbkbb..bkb.', '..bkb..bbbbbbkb.b.bkb..', '...b...bbbkbbb.....b...', '......b.b.b............'],
+    shake: ['.......wwwwwwwwws......', '....wwswwwwwwwwwwwww...', '.swwwwwwwwwwwwwwwwww...', '.swwwswwswwwwwswwwswsw.', '.wwwwwwswwwwwswsswwwwww', 'wswsswswsswsswswwwswsww', 'wwwwwswwwwwwswwwwwwswsw', 'wwwwswwwwswwsswsssbwwww', 'wwwbb..wwbb.....b....bw', 'w......................', 'w.b.b.............b.b..', '.bkb......rrrr.....bbbb', 'bbbb....rrrrrrr.....bb.', 'bbbw....rrkrrkrr...bbbb', 'bbbb....rkrrrkrr...bbbb', 'bbbbb...bbrbkbrr...bbbb', 'bbbbb.bbbbbbbbbbb.bbbbb', 'bbbbb.bbbbbbbbbbbb.bbb.', '.bbbb.bbbbbbbbbbb..b..b', '.bkbb.bbbbbbbbkbb.b.b..', '..bkb.bbbbbb.bbbb...bb.', '...b...bkbkb..b........', '......b.b.b.b..........'],
+    empty: ['.........swwwwwwww........', '......wwwswwwwwwwwww......', '.....wwwwwwwwwwwsswwww....', '....wwwsswwwwsswswsswww...', '...wwswswwswswsswswsssww..', '..wswswwwswwwswwswwwswwsws', '..wwwwwswwwwswsswswswswwss', '.wwwbbb...bwbwwwswssssswss', '.wwbkb........wwbwssssssws', '.wkbkb...........bsbksssws', 'bbbbb...............b..wsb', 'bwbbs...................b.', 'bbbbbs............b.......', '.bbbbkw...................', '.bkb.bbbb.........b.......', '..bb...bb........s........', '..bbb.b.b.b......s........', '...b.....b...sbbb.........', '...b....b...sbbbb.........', '...........bsbbs..........', '..........bkssb...........', '...........w..............'] },
+  sea: {   // sea-holder A (owner, Д83 «A»: a round net with floats)
+    full: ['................oo...........', '................oo...........', '................o............', '................oo...........', '................oo...........', '................oo...........', '................oo...........', '................oo...........', '................oo...........', '................o............', '................oo...........', '................o............', '................oo...........', '................o............', '...............ooo...........', '...............ooo...........', '...............ooo...........', '...............ooo...........', '................o............', '...............o.o...........', '..............oo.o...........', '.............o....o..........', '............oo....oo.........', '...........oo......o.........', '...........o........o........', '..........o.........o........', '.........o...........o.......', '.....oooo.......o......o.....', '.....oooo......ooo....ooo....', '.....oooo.ss..ooooo..orroo...', '.....oooo..sssooooks.ooroo...', '......o...s....oookkskooo....', '....ss...s........ss.s.......', '....s...................ss...', '...s...s...s.......s...s.s...', '..s...s...s.......s.......s..', '.s.s....ss...ss..........s.s.', '.s..o....s...s..s..........s.', '...o.s...s.......s...s..o..s.', 's.o...s...s.............g..ss', 's..o...s.......s...s...s..s.s', 's..o....s...s.....s.....g...s', 's.ooo...ss...s...s...s.go..rs', 's.......rrrr..r.rkr....go...s', 's.s......r.r..rskkks...g....s', 'ss..ro.o...rrrrkrrr....oo..ss', 's..ror.rrr.rrrrkkrr..s...r.s.', '..rrrrr..r.orrrkrrr.......rs.', '.skrrrso...rkrks...r.......s.', '..srrrs...srkkko........o.s..', '..sskrsrrrkkrrrrrro.rrsskrs..', '...skkkorrrkrrrkrrr.rrrkoo...', '....sksrrrrrkrkrkrrorrros....', '.....ssrkrssrkssrkrsrrrs.....', '......sskksrkororrkssss......', '........sssksskkoksss........', '...........sssssss...........'],
+    shake: ['............oo............', '.............o............', '............oo............', '............oo............', '............oo............', '.............o............', '.............o............', '.............o............', '.............o............', '.............o............', '............oo............', '............oo............', '.............o............', '.............o............', '............oo............', '...........oooo...........', '............ooo...........', '...........oooo...........', '............oo............', '............oo............', '...........o..o...........', '..........o....o..........', '.........oo....o..........', '.........o......o.........', '........o.......o.........', '.......o.........o........', '......o...........s.......', '.....o....................', '...wooo............ooo....', '..ooooo.ssssosssss.woro...', '..ooooo.....o....sorrro...', '...ooo.s.ss.oo..ss.ooo....', '........s..oooo.s...o.....', '...s.s.............sks....', '..ssskss...rrrr..ssssss...', '..sskkks...rrrr.skskksss..', '.sskkkkks.rrrrrrkskkskks..', '.skkkskkkrrkrrkrkkkkskkks.', 'sskkskskkkrrrrrrkkskkksss.', 'sskkkskkkkrrrrrrkkkkkksks.', 'skskkskkskkrssrkskkkkskks.', 'skkskkkskkkskkkkkkkkskkkks', 'ssskksskkkskkksskksskkssss', 'skkkkskkkskksskkkkskkks..s', 'skksskkkskkkskkkkkkkks..ss', 'skkokkkskskkkskksskkks....', 'ssooksskkkrkkksskkskkks.s.', 'skokkkskkskokkkskkkskkkss.', '.skkskkkskkkskkksskkskkks.', '.skkkkkkskkkkkkkkkkkkkks..', '.ssskkskkskkkkkkkkskkkss..', '..sssssskkkkkkkskkskkks...', '...sksskksskkkskskkssss...', '....skskkskkskkkkkkkss....', '.....sssskskskksksss......', '......sssskskksksss.......', '..........ssssss..........'],
+    empty: ['............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '............o.............', '...........oo.............', '...........oo.............', '...........ooo............', '...........oo.............', '...........oo.............', '...........oo.............', '..........ooko............', '..........okkoo...........', '.........okkkko...........', '........ookkkko...........', '........okkkkkko..........', '.......ookkkkkkoo.........', '.....orrkkkkkkrroo........', '.....orrokoookrrro........', '....oooookkokkoooo.s......', '.....oookkskkskoo...ss....', '....skokksssssskkssssss...', '...skkskskkkkkkksskskkks..', '.ssskksskkskkskskskssssks.', 's...ssskksskkksskkskskksks', 'ss....sssskksskkkksskkssss', '........sssksskksskssksks.', 's.s......sksskskssksskssss', 's..s......sksskksksssks...', '.sss..s....sskssksskkks..s', '.s.s..s......skksssksks.s.', '...sss.......ssssksskks..s', '..skks.s.......skkskkks.ss', '...sks..s.......ssskssksks', '....s...s........ssskkkko.', '.....s...s........sskkks..', '......s..s..........skks..', '.......ss.s.........ooo...', '........s...........oooo..', '..........oo.......ooooo..', '..........ooo..k....ooo...', '..........ooo.............', '...........o..............'] },
+  tokyo: {   // tokyo-holder B (owner, Д84 «B»: a roller shutter)
+    full: ['sssssssssssssssssssssssss', 'sksksssssssssssssssssssks', '.ssksssssssssssssssssssss', '...ssssssssssssssssssss..', '.ssssssssssssssssssssss.s', 'sskssksssssssssssssssss.s', '.skssssssssssssssssssss.s', 'sssssssssssssssssssssss.s', 'ss......................s', 'sssssssssssssssssssssss.s', '.skssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', 'sssssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', 'sssssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', '.ssssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', 'sssssssssssssssssssssss.s', 'sskkkkkkkskskskskskkks..s', 'sssssssssssssssssssssss.s', 'sssssssssssssssssssssss.s', 'ss......................s', 'sssssssssssssssssssssss.s', 'sskssssssssssssssssssss.s', 'ssksssssssssksssssssss..s', 'sssssssssssssssssssssss.s'],
+    shake: ['sssssssssssssssssssssssss.', '...ssssssssssssssssssss..s', '.ssssssssssssssssssssss.s.', '...ssssssssssssssssssss...', '.ssssssssssssssssssssss.s.', '.skskskskskskskskskskss.s.', '.ssssssssssssssssssssss.s.', '.ssssssssssssssssssssss.s.', '.s......................s.', '.ssssssssssssssssssssss.s.', 'sskssssssssssssssssssss.s.', '.sksssssssssssssssssss..s.', '.ssssssssssssssssssssss.s.', '.skssssssssssssssssssss.s.', '.skssssssssssssssssssss.s.', '.ssssssssssssssssssssss.s.', '.ssssssssssssssssssssss.s.', '.s......................s.', '.ssssssssssssssssssssss.s.', '.skssssssssssssssssssss.s.', '.sksssssssssssssssssss..s.', '.ssssssssssssssssssssss.s.', 'sskksksksksksksksks.....s.', '.ssssssssssssssssssssss.s.', '.s.ssssssssssssssssssss.s.', '.s......................s.', 'sss......rrrrr.rr.....s.s.', '.ss......rrrrr.rr.....s.s.', '.ss......rrrrrrrr.....s.s.', '.s........rrrrr.........s.', '.s.sssssssssssssssssss..s.', '........................s.'],
+    empty: ['ssssssssssssssssssssss.s', 's.sssssssssssssssssssss.', 's.ssssssssssssssssssss.s', '........................', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s'] },
+};
+const VSP_RECTS = new WeakMap(), vspRects = (rows) => {   // a picture's boxes for vsp, once: [i0, i1, j0, j1, ink] by fives, each row's runs merged down
+  let R = VSP_RECTS.get(rows); if (R) return R;
+  R = []; let open = new Map();
+  rows.forEach((r, j) => { const cur = new Map();
+    for (let i = 0; i < r.length;) { const ch = r[i]; let e = i + 1; while (r[e] === ch) e++;
+      if (ch !== '.') { const key = i + ',' + e + ch, o = open.get(key); if (o != null) { R[o + 3] = j + 1; cur.set(key, o); } else { cur.set(key, R.length); R.push(i, e, j, j + 1, ch); } }
+      i = e; }
+    open = cur; });
+  VSP_RECTS.set(rows, R); return R;
+};
+// The cluster rule (owner, 2026-10-24, the pixel-art guide he sent, its first rule: «Случайный шум — отдельные точки без общей структуры … почти всегда
+// выглядит как грязная текстура», and «Фоны в подарочных комнатах выглядят грязно»): a sheet drawn behind (DIM) loses its specks. Every cluster of one
+// ink, its pixels touching by sides or corners (so a checker's strands hold together) and either of its tones (a capital is its darker half: a river
+// drawn in both is one shape, its ripples kept), of at most VSP_SPECK pixels takes the ink most of its eight neighbours have: the clear, or the shape
+// round it: a lone pixel, none of its ink round it. Yellow and red keep theirs (a light, a mark; white has no place behind, DEPTH), and so does a
+// cluster at a side of the picture (a vspCut piece's may go on in the next). Once a picture (VSP_CLEAN); ?speck=N another size, 0 none, to compare.
+const VSP_SPECK = (() => { const q = new URLSearchParams(location.search).get('speck'); return q != null && q !== '' && +q >= 0 ? +q : 1; })();   // (1: a lone pixel; at 2 a river's short ripples and the wisteria's sparks went too)
+const VSP_CLEAN = new WeakMap(), vspClean = (rows) => {
+  let out = VSP_CLEAN.get(rows); if (out) return out;
+  const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H), fill = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ch = g[y][x]; if (ch === '.' || seen[y * W + x]) continue;
+    const cells = [[x, y]], st = [[x, y]]; seen[y * W + x] = 1; let side = false;
+    while (st.length) { const [a, b] = st.pop(); if (a === 0 || a === W - 1) side = true;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[v * W + u] && g[v][u].toLowerCase() === ch.toLowerCase()) { seen[v * W + u] = 1; st.push([u, v]); cells.push([u, v]); } } }
+    if (cells.length > VSP_SPECK || side || 'yr'.includes(ch.toLowerCase())) continue;
+    const own = new Set(cells.map(([a, b]) => b * W + a)), n = {};
+    for (const [a, b] of cells) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+      if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !own.has(v * W + u)) n[g[v][u]] = (n[g[v][u]] || 0) + 1; }   // (the exact letter: a shape's own tone)
+    let best = '.', most = -1; for (const k in n) if (n[k] > most) { most = n[k]; best = k; }
+    fill.push(cells, best);
+  }
+  for (let k = 0; k < fill.length; k += 2) for (const [a, b] of fill[k]) g[b][a] = fill[k + 1];
+  out = fill.length ? g.map((r) => r.join('')) : rows; VSP_CLEAN.set(rows, out); return out;
+};
+const VSP_CUT = new Map(), vspCut = (rows, c0, c1, tag) => {   // a picture's columns c0…c1, the same array each time (so its boxes are worked out once)
+  const key = tag + ':' + c0 + ':' + c1; let r = VSP_CUT.get(key); if (!r) VSP_CUT.set(key, (r = rows.map((q) => q.slice(c0, c1)))); return r;
+};
+const VDOOR = {   // the Village's doors from the Iya valley, off research/variants/village-soba/cellar-1-px.png, path A, a sheet pixel one game pixel: base, its rows
+  // over the ledge; mark, its doorway's [c0, c1, r0, r1] (owner's picks: Д108 «A», Д109 «B»)
+  shop: { base: 75, mark: [35, 51, 43, 56], rows: ['...........................dsds.dds.sdsssdsdsd...........................', '...........................ddkkdddd.dsdodddddd...........................', '...........................dskkdsdd.sosdsdsds............................', '............................dkkkd...dsds.................................', '............................oskdsd..sds..dso.............................', '...........................odsdsod.d....dddd.............................', '.........................dodsdsoodoodooddoodoo...........................', '........................doooosoodooooooodoooooo..........................', '........................oooooooosooooooooooooooo.........................', '.......................doodooooooooooooooooooooo.........................', '......................sdodoosooooooooooooooooooooo.......................', '.....................ddddsodoodoooookkkdooodoooodo.......................', '....................dosoodsoodooooodkkkkddsosoodsdd......................', '....................oooooooooooooodsdddsddooosoodood.....................', '..................doooooooooooooooodsdkdsoooooooooooo....................', '..................ooosoooooooooododdkkkddsdoooooooooo....................', '.................doooooooooooooosdsdkkkksdsdsooooosood...................', '................dsdooooooooooooooodkkkkkdsdoooooooooooo..................', '...............dsosdsosoodoooososdkkdkdkddsdoooosdoosoooo................', '...............oosdooooodoooooddddkkdddkkkdsdododsoodooo.................', '..............oooooosdodsoooooodskdksdskkkkdsdsdoosoodooo................', '.............ooooooodooooodoooosdddkdddkddksdodooooooooooo...............', '............osoooooooooooosdsdsdkddksddkdkddsosoooooooodooo..............', '............dooooooooooooooodsdkkkkkdddkkkdkdsdooooodoooooo..............', '...........dsossoosoodoooooosdkkkkkkkkdkkkkkkosdsdooodoosooo.............', '..........dsdodoosoododoooosddkddddkdddkdddddddsdddsosooooooo............', '.........ooooosdododsooosdsdkdddddddsdddsdddskkdsooooosoooooo............', '........doooooooooddooooooosdddddddddddddddddddddsdoooodoooooo...........', '.......dodoooooooosoooooooskkkkkkkkkskskkkkkkkkkddsdooooooooooo..........', '.......sdooooodoosoooodsdskdkdkdkddkdddkdkkdkdkkksdodoosooooooo..........', '.......dsdodoooosooooooosdkdsdkddddksddkddddkddkkdsoooooodoosoodd........', '.....doodoososoodoooosooddkdddkddddkdddkddddkddkkddoosooooooosooo........', '....dooosooosdodooooodsdkdkdsdkddddkddskddddkdskkkkdsdsoooooodooo........', '....dodooodoooosoododddkddkdkdkddddkdddkddddkddkkdkkdsdsdoooooosoo.......', '...oooooodoosoooooooodskkkkkkkkkkkkkskskkkkkkkdkkkkkkssoooooooooooo......', '..ososoooooooooooododddddddddddddddddddddddddddddddkksddoooooooooooo.....', '..sdodooooooodooodsdsksdddsdddsdddsdddsdddsdddsdddsds.sdsdooodoooooo.....', '.oosoodsoooodoooooooddddddddddddddddddddddddddddddddd..sdsoooodoodooo....', 'oosdododsoodoooososo.dddsdddsdddsdddsdddddddddddsdddd..dsdoooosoodoosd...', 'oodooodoosdoooooddd.....................................dsdddooddsdodo...', 'sooooooooooooosdsd.......................................dsooooooooosoo..', 'dooooooooooooooodd..dd.dd.ddd.dddd...................d...ddsoooooooooooo.', 'oooosoodoooosoods...d..dd.dd..ddsd...................dd...sdsoooooooooooo', 'dddododooooodsdd.d.dddddddddd.dddo.r...rrrdd.rr...dr.dkd...ddsdoodooooooo', 'sdsdsdsoooodsdsd.dsdddsdddsdddsddd.r...rr....rr....r.dsd...dsdsoodoodosoo', 'd.dsdd.sdsdsddd...............dddd.rrrrrrrrrrrrrrrrr.ddd....dddsdddsddd..', '....d..dsdsds...ooooooooooooo.ddsd.rrrrrrrrrrrrrrrrr.dddd......ds.sd.ds..', '..............d.owowwwowwoowo.dddd.rrrrrrrrrrrrrrrrr.dddd.d..............', '.............ds.owoowwowwoowo.odsd.rrrrrrrrrrrrrrrrr.dsdddsd.d...........', '...........dddd.ooooooooooooo.dddd.rrrrwwwwwwwwwrrrr.dddkkdddd...........', '...........dsdo.wwowwwowwowwo.sdsd.rrrrrrrrrrrrrrrrr.dddskdddd...........', '.......d.d.dddd.ooooooooooooo.dddd.rrrrrwwwwwwrrrrrr.dddkkdddd...........', '.......ddd.dsdo.owowwwowwowwo.odsd.rrrrrrwwwwwrrrrrr.dsdddsddd...........', '........d..dddd.ooooooooooooo.dddd.rrrrrrrwwwrrrrrrr.dddkkdddd...........', '...ds..dsd.dsdo.owowwwowwowwo.sdsd.rrrr.rrrrrrrrrrrr.dddkdddsd...........', '...dd..ddd.dddd.wwowwwowwowwo.dddd.rrrr.rrrrrrkrrrrr.dddkddddd...........', '...dd...d.......ooooooooooooo.sddd.rrrr.rrrrrrrrrrrr.dsdkdsddd...........', '..ddd..d..dsdsss..............dddd...................dddkkdkdd...........', '..ddo...dsssssssss.dsdddsdddd.ddsd...................dsdsdddsd...........', '..ddd..dssdsssdsssd.ddddddddd.dddd...................ddddddddd...........', '...ds..ssssssssssss...........sddd...................dsd..sddd...........', '.dddd.dsssssssssdsss.dddd.d.d.dddd...................ddd..dddd...........', '.ddds.ssssssssssssss.ddds.d.d.ddsd...................dddd.ddsd...........', '...d..dssssskkksssds..ddd.d...dddd...................ddd..dddd...........', '...dd.ssssssskssssss..sds.s...sdsd...................dsd..sddd...........', '.dddd.ssssssssssdsss..ddddddd.dddd...................ddd..dddd...........', '..ddo..ssssssssssss...dds.ddd.dddd...................ddd..dddd...........', '...dd..sssdsssdsssd......................................................', '..sdo.dksssssssssskd..ssdss...ssss...................ssss..ssss..........', '.ddsd.dd..ssssssd.ds.sssdsss.ssssss.................ssssdsssssss.........', '..ddd.................skssss.ssssss.................ssssssssssss.........', '.sddd.dododddsdododod.dodsds.sdsssd..sdsdsdsds.sdsd.ssdss.dsssds.........', '.skds.sdsdkdsksdsdsdd.ooddsdd.sdsdd.sdsssssssdsssss.sssss..dsdsd.........', '.sddd.dsdddsddds.dddd.dd..d.d..d....ddddddddddddddd...dd...dd.d..........', '.d.......................................................................'] },   // an Iya soba shop: a tall thatch, a red noren, a stone mill, a lit window
+  stash: { base: 92, mark: [21, 22, 79, 91], rows: ['.....................................dd...................................', '.....................................dd...................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '.doo.ooooooooooooooooooooooooooooooooooooooooooooooodo.oood...............', 'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooo................', 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo.............', 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooookdod..........', 'oodooooooodooodooooooooooooooodooodooooooooooooooooodooooooodooo..........', 'ooooooooooooodooodoooooooooooooooooooooooooooooooooooooooooooo............', 'oooooooooooodooodooooooooooodooooooooooooooooooooodooooooooooooood........', 'ooooooooooooooooooooooooooooooooooooooooooooooooooodooooooooooooo.........', 'oooooooooooooooooodooooooooooooooooooooooooooooooodooooooooooooooood......', 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo...o...', 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooood.....', 'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooood....', 'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooodo....', 'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo....', 'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo..', 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo.', 'ooooooo.oodooodooooooooooooo.ooooooo.ooooooooooooooooooooooooooodooodokooo', '.oo.odo.oo.oo..ookododo.oooo.o.ooo.o.oo.o.oooo.ooo.oo.okoo.oodo.oooo.oooo.', '.oo.o...oo.o...o.o.o..o.oodo.o.odo.o.oo.o.dooo..o..o..oooo.oooo.oodo.o..oo', '..........................................................................', 'ddd.....................................................dddd..............', 'ddd.ddsdddsdddsdddsdddsdddsdddsdddsdddsdddsdddsdddsddds.ddsd.dsddd.ddd....', 'ddd.ddddddddddddddddddddddddddddddddddddddddddddddddddd.ddds.ddddd.ddd....', 'sds.sdddsdddsdddddddddddddddddddsdddsdddsdddsdddsdddddd.sddd.dddsdsdsds...', 'ddd.ddddddddddddddddddddddddddddddddddddddddddddddddddd.dddo.ddddddddd....', '...................................................dd..............ds.....', '.dd.................................................dd..dd.d.......sd.....', 'ddd..................................................dd.sddd.....dskkd....', 'ddd...................................................d.dddo....dsdddsd...', 'sds.....................................................sdso..............', 'ddd.....................................................dddo....d.dood....', 'sdo.....................................................sdso....ssdooo....', 'ddd.....................................................dsdo....dsdyoo....', 'sdo.....................................................sdso....ssdyoy....', 'dod.....................................................dddo....dsdyyo....', 'sdd.....................................................sdso....sdsdsds...', '.sds..ds................................................dsdo..............', '.dss.dss................................................sdso..............', '..dsdsd.........................d.d.........dooodooo....dddo..............', 's.......................................................sdso..............', '.ddsdsd...ds..ds...p.dd.d....p.dd.dd........dodooodo....dsdo..............', 'ddsdsdss...ssdss.................d.........dooooooooo...sdso..............', 'dsdsdsdsd...dsd....p.d.dd.dp.p.ddkdd......dooooooooooo..dddo..............', 'sssdsssds....s......dkdkp........d........dooksooookoo..sdso..............', 'dsdsdsdsd.dddsdd...dkdkdd.dd.p.dd..d......ddkddkddkdkd..dsdo..............', 'sdsssdsss.sssdss...pdpkdp.pp.p.ppdpp......ddkoddodkokd..sdso..............', 'dsdsdsds.ssddsdsd...dpkpdddp.p.pkpd.......dddkkokodkd...dddo..............', 'sdsdsdsd.ssksssds..ppppdpppdppdppkpp......ooooodoooooo..sdso..............', 'dsdsdsd..sdddsdsd..ppppppppwpppppppp.......ododododod...dsdo..............', 'sdsssdss.dddsssss..ppppppppppppppppp.......dooooooood...sdso..............', 'dsdsdsd...dsdsds.............................odododo....dddo..............', '...................d.dp........ds.dd....................sdsd..............', 'ddddddddddddddddd.ds.pd........dd.dsddddddddddddddddddd.dddo..............', 'sdsdsdsdsdsdsdsds.ss.dp.ddpdpdddp.dsddsdsdsdsdsdsdsdsds.sdso..............', 'dddddddsdddddddsd.ds.pdddpdpdpddd.ds.ddddddsdddsddddddd.dddo..............', '..d...............sd.dp.pppdppdkp.dd....................sdso..............', 'ddd.ddddddddddddd.ds.pd........pd.ds.dddddddddddddddddd.dddd..............', 'sds.ddsdsdsdddsdd.ss.dp........pp.dd.dsdsdsdddsdddsddds.sdsd..............', '..................ds.pd........pd.ds....................ddds..............', 'ddd.sdddsdddddddd.dd.dp.ppppppddp.dd.dddddddsdddddddddd.sdsd..............', 'ddd.ddddddddddddd.ds.pd.dpdpdp.dd.ds.dddddddddddddddddd.dddd..............', 'sds.ddsdddsdddsd..sd.dp.pppppp.dp.dsddsdddsdddsdddsddds.sdsd..............', 'ddd.ddddddddddddd.ds.pd........pd.ds.dddddddddddddddddd.ddds..............', '...................d.dp........pp..d......................................'] },   // the cellar under a farmhouse, its boards lifted, a lantern, purple light up
+};
+const VMIST = ['...s............................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '..............................................................................................ss................', '..............................................................................................ss.s..............', 's....................................................ssss.................................ssssss................', '...ss.............................................ssssss...............................sssssss..................', '..............................................ssssssssss............................sssssssss...................', '.......s......................................ssssssssss............................sssssssss...................', '........s..s...............................ssssss.s..s..........................sssssss..sss....................', '............sss.......................ssssss..s..ss.s.........................ssssss...sss......................', '..............ss.....................ssssss......s...........................sss.ss....ss.......................', '...............sss.................ssssssss......s........................ssssss..s...sss.......................', '....................s...........sssssss.................................sssss...................................', '.....................ss......sssssss.s...............................ssss.ss....................................', '.....................sss.....sssss...................................ssss.ss....................................', '.......................ssssssss....................................sssss.s......................................', '.........................sss..s.ss.s..s.ss.s....s................sssss..........................................', '..............................sssssssssssss.ssss.s.s.ss...s....ssss.......................................ssss..', '..............................ssssssssss..s.s.ssss.s.ss.ss.s..sssss.......................................ssss..', '.................................ssssssssssssss..ssss..sss.sssssss....................................sssss.....', '............................s......ssssssssssssssssssssssssssssss...................................ssss........', '....................................ssss.sssssssssssssssssssss..................s................sssss..........', '.....................................ss...ssssssssssssss........................................ssss............', '.....................................ss...ssssssssssssss........................................ssss............', '.......................................s......sssssssssssss....ss..ss.ss......................sss.s.............', '................................................sssssssssssssss..ss..s..s...s.s.ss..s..ss...ssss.s..............', '.................................................ssssssssssssssssssssssssssssss.s.ssss.ss.ssssss................', '...........................s.....................sssssssssssssssssssssssssss.sss..ss..s..sssss..................', '.....................................................ssssssssssssssssssssssssssssssssssss.sss...................', '.......................................s..s.ssss.s.sssssssssssssssssssssssssssssssss.....sss....................', '....................................s..s..sssss..sssssssssssssssssssssssssssssss.sss.....sss....................', '...............................sss.s.ss.sssssssssssssssssssssssssssssssssssss...ss.....sssss....................', '................................sssssssssssssssssssssssssssssssssssssssss....ss.......ssss......................', '....................................ssssssssssssssssssssssssssssssssssss...s........sssss.......................', '....................................ssssssssssssssssssssssssssssssssssss..ss........sssss.......................', '.......................................ssssssssssssssssssssssssss..sss...s.........ssss...sss...................', '..........................................ssssssssssssssssss..s.....s.............ssss.sss......................', '............................................sssssssssssss.s.....................ssss............................', '............................................ssssssssssss..s.....................ssss............................', '................................................sssssssssss.ss.ss..............ssss.............................', '..................................................sssssssssssss..s.ss.ss.s...sssss..............................', '....................................................ssssssssssssss.ss.ssss..ssss................................', '.....................................................sssssssssssssssss..s.s.ssss...s............................', '.......................................................sssssssssssssssssss.ssss.sss.............................', '............................................sss..s.ssssssssssssssssssssss.sss..s................................', '..........................................s.ssssss.ssssssssssssssssssssss.ssssss................................', '.......................................s...s...ss.ssssssssssssssssssss...sss.ss.................................', '.......................................s.ssssssssssssssssssssssssssss...s.......................................', '.......................................s..ssssssssssssssssssssssss..............................................', '.......................................s..ssssssssssssssssssssssss..............................................', '..........................................ss.ssssssssssssssssss.................................................', '..........................................s...ssssssssssssss....................................................', '...............................................ssssssssssss.....................................................', '...............................................ssssssssssss.....................................................', '................................................s.ssssssssss..s..s.s.s..ss.....s................................', '...................................................ss..ssssssssss.sss.sss...s...ss.s..s..s......................'];   // the Iya gorge's morning mist (owner: Д112 «А»), the lighter grey between the ridges of research/variants/village-far3-1.png D, path A
+const VMIST_M = VMIST.map((r) => [...r].reverse().join(''));   // (mirrored: every other copy)
+const VFAR = {   // the Village's far view by level, up the Iya valley from the river to the summit of Tsurugi (owner, Д86 «А»; research/variants/village-far2/far3-1.png,
+  // path A off the raw sheets: a pixel's ink by its hue, an uppercase letter its darker half; drawn at a quarter, DIM, two game pixels a sheet pixel). By the
+  // owner's pixel-art guide (meaningful clusters, no dust: «Прогони все миры… по новому руководству»): a pixel with under two of its ink round it gone, a
+  // cluster under 4 pixels taken into what is round it (scratchpad iya2/flatfar.py): its lines and masses kept, 30-50% fewer specks
+  stage: [
+    ['........................................................................................................S.......', '....................................................................................................SSSSSSSS....', '...................................................................................................SSSSSSSSSS...', 'SS.................................................................................................SSSSSSSSSSSS.', 'SS..................................................................................................SSSSS...SS..', '..............S...............................................................................SSSSS...SSSSSSS...', '..........SSSSS...............................................................................S.SSSSSSSSSSSSS...', '.........SSSSSSSS............................................................................SSSSSSS...SSSSS...S', '........SSS.SSSSSS.............................................................................SSSSSSS..SSSSSSSS', '.......SSS...SSSS..........................................................................SS...SSSSSS.....SSSSS', '.....SSSSSSSSSSS.........................................................................SSSSSSSSSSSSSSSSSSSSSS.', '....SSSSSSSSSSSS...S.S...................................................................SSSSSSSSSSSSSSSSSSSSSSS', '....SSSSSSSSSSSSSSSSSS...................................................................SSSSSSSSSSSSSSSSSSSSSSS', '......SSSSSSSSSSSSSSSSS....................................................................S....S...S.SSSSSSSSS.', '........SSSSSSSSSSSSSS........................................................................S..SS....SSSSS....', '........S.....SSSSSSSS.......................................................................SSSSSSS...SSSSS....', '.........SSSS.SSSSSSS.........................................................................SSSSSSSSSS........', '............S...SSSS...........................................................................S...SSSSS........', '.........SSSSSSSSSSSS..................................................................................SS.......', '..........SSSSSSSSSSS..................................................................................SS.......', '..........SSSS...SSS...................................................................................S........', '...........S...........................................................................................S........', '..........SSS..........................................................................................S........', '.....................................................................................OOOO.......................', '.....................................................................................OOOO.......................', '...........................YY........................................................OYY........................', '..........................YY..OO.....................................................OYY........................', '..........................YY...O.....................................................OOY........................', '..........................Y....OOOO...............................................OOOOYY........................', '................SS........Y....O...........................................OOOO...OOOO..O.......................', '................SSSS......Y....O......Y................................OOOO.......OOOO..O......SS...............', '.................SSSS......Y..........YY.....OOOOOOO.....OOOOOOOOOOOO...OOOO......OOOOOOOOO...SS................', '..................SSS..YYYYYYYY.......Y...YY.........................OOOOOOO.........O.OOOO...SS........SSSSS...', '..................SSS..Y...OOYO.......YYYYY..........................OOOO..........OO.OOOOO...SS........S...S...', '....................S.......OOOO.OOOO.........................................OO..OOO..O.....SS.......SSS.......', '....................SS..........OOOOOOOOOOOOO.........................OOOOOOOOOO.....................SSSS.......', '....................SSS................OOOOOOOOOOOOOOOOOOOOO...OOOOOOOOO...O............................S.......', '.....................SSS........................OOOO....OOOO...O...........................SS...................', '....S................SSS...................................................................SSS..................', '....S................SSS..................................................................SSS...................', '..SSSSSS............SSSS..................................................................SS....................', '......SSS..............S..................................................................SS....................', '......SSSS.............SSS................................................................SS....................', '.........S....S..........S..............................................................................S.......', '......SSSSSSSSS..........S.........................................................S...................SS.......', '.....SS...SSSSS..........S.....SS...............................................SSSSS..................S........', '.......SSSSSSSS...........SSSSSSSSS............................................SSSS.............................', '.......SSSSS.............SSSSSSSSSS............................................SSSS.....SS..........SSSS........', '...........SSSS................SSSSSS......................................SSSSSS.......S...........SSS.........', '.............SSSS.........S...SSSSSSSSS................................S...SSSSS........S...........S...........', '...........SSSSSSS........SS.......SSSSSS.............................SSS....SS........SS.......................', '.........SSSSSSSSS.........S....S...SSSSSSSS.......................SSSSSSSSSSS.........S........................', '............SSS.................SS.......SSS.....................SSSSSSSS...S........SSS........................', '............SSS...SS.............S......SSSSS....................SSSSS...............SSS.......S................', '.............SS...SS........S....SS.....SSSSSS..................SSSSSSS..............SSSSSSSSSSS................', '............................S..........................................................S.....SSS................', '............................SSS.......................................................SS....SSS.................', '..............................SSSSS......................................SSSSSS......SSSSSSSSS...........SSSS...', '........................................C.C.........S...C.C..C.C.CCC.C...SSSS.......SSSSSSSS...........SSSSSSS..', '........................................CCC........SSSS.CCCCCCCCCCCCCC..............SS.................SSSSS....', '....................................................................................SS...............SSSSSSS....', '............................SSS......................CCCC..........................SS...............SSSSS.......', '............................SSSS....................CC.CCC.........................SSS..............SSSSSSS.....', '...............................S.................................................SSSSS.............SSSSSSSSS....', '.................................................................................SS................SSS..........', '............................SSSSS................................................SS................SS...........', '..........................SSSSSSS................................................SS...............SS............', '..........................SSSSSSSS........................cccccc..................S...............SS............', '...........................S....................................................................SSS.............', '...............................S................................................................SSS.............', '............................SSSSS.......CC..cc.................................................SS...............', '............................SSSSS.......CC..cc......cccccccccccccccCCCCC...cc..................SS...............', '................................SS...................S................C....cc..................S................', '................................SS..................SSSSS.........................CCCC..C.....SS................', '.....................................................S.....................S.......CCCCCC.....SS................', '..........................................................................SSSSS..............SSS................', '.....................................................c.c..c..cc..........SSSSS...............SSS................', '.................................SSSS...........cccccccccccc.ccccccccc.......................SS.................', '................................SSSSSSSS........................................................................', '...................................SSSSSS...................................C...................................', '....................................SSSSS.........CCCCCCCCCCCCCCCC..C...CCCCC...................................', '....................................SSSSSS..........CCCCCCCCCCCCCCCCC...........................................', '.......................................SSS................................................SSSSSS................', '........................................SS...............................................SSS...SSSS.............', '.........................................SS.............................................SSS.....................', '...........................................................cccccccc.cccccccc...........SS.......................', '......................................................................................SS........................', '.....................................................................................SSS........................', '...........................................................CCCCCCCcccccccCCCC.........SS........................', '................................................................................................................', '............................cc................CCCCC.............................................................', '...........................ccc..................................................................................', '.............................................C..................................................................', '............................................CCCCCCCCCCCCC.............CCCCC......C..............................', '...........................SSSSS.................................................C..............................', '...........................SSSSS.......c....c...................................CC..............................', '...........................SSSSSS......cccccccccccccccccccccccccccccccc...cccc..................................', '................................SSS.............................................................................', '................................SSS.............................cccccc..........................................', '.................................SS.............................................................................', '................................................................................................................'],   // 1-1 the emerald river and a vine bridge
+    ['............................SSSS................................................................................', '......................SSSSSSSSSSS...............................................................................', '.......................SS...SSSSSS..............................................................................', '.......................SS...SSSSSS..............................................................................', '........................SS...SSSSSS...SSS.......................................................................', '.......................SSSSSSSSSSSSS...SSS......................................................................', '..SS.....................SSSSSSSSSSS....S.......................................................................', '.SSSS.......................SSSSSSSS............................................................................', 'S...S......SSSS.........SS.....SSSSSS...........................................................................', 'S...S......SSSS.......SSSS.....SSSSSS...........................................................................', 'SS...S.....SSSSS....SSSSSS......SSSSS...SSS.....................................................................', '..SSSS......SSSS....S...SSS....SSSSSS....S........SSS...........................................................', '..SSS........SSS.....S...SS.....S...S.............SS............................................................', '.....SS.....SSSS.....SSSSSS.....SSSSSS..........................................................................', '......SS.....SSS......SSSSS.....SSSSSS.........S................................................................', '......SSSSSSSSSS.....SSSSSSS....SSSSSSSS......SS................................................................', '......SSSSSSSSSS........SSSS...SS...SSSS.......S................................................................', '...........SSSSS.........SSS...S....SSSS.......SSSS.............................................................', '.......S...S..............SSS...SSSSSSSSSS......................................................................', '...SSSSSSSSSSS.....S......SSS...SSSSSSSSSS......................................................................', '....S...SSSSSSSS...SS............SSSSSSSSSS.....................................................................', '........SSSSSSSS....SS............SSSSSSSSS.....................................................................', '...............SSSSSSSS........S...SS....SSS....................................................................', '...............SSSSSSSS........SSSSSSSSSSSSS....................................................................', '...............SSSSSSSS.........SSSSSSSSSSSS....................................................................', '................SSSSSSS..........SSSSS....SS....................................................................', '..SSS............S...............S.......SSSS...............SS..................................................', '..SSS............SSSSS...................SSSS.............SSS...................................................', '....S...........SSSSSS....SSSS..........SSSSSS..................................................................', '....................SS....SSSSSS.........SSSSS..................................................................', '..........................SSSSSS.........SSSSS..................................................................', '..........................SSSSSSS........SSSSSSS................................................................', '..........................SSSSSSS....S.....SSSSS............................SS..................................', '........SSS..................SSSSS...SSSSSSSSSSS............................SS..sss.............................', '.........S..................SSSSSS....SSSSSSSSSSS............................SS.ssssssss........................', '.........S.....................SSSS....SSSSSSSSSS...SSSSS..............................s.sss....................', '...............................SSSS....SSSSSSSSSS...SSSSS..............................sssss....................', '...............................SSSS....SSSSSSSSSSS......Sssssssss..................s...s..ss....................', '...............................SSSSS.........SSSSS.........s.sssssssssssssssssssssssssssss.S....................', '...................................S.......................s....s......s....s..s...s...s...S....................', '....s...............s........ss.......ss.....ssss.ssssSSsssssssSS....sss....s......sss.s...SSS..................', '.sssssssSSSSSssssssssssssssssssssSSSssssssssssssssssssSsssss.sssSSSSSSSS.SSSSSSS...SSS.....SSSS.................', '.sssssssSSSSSssssssssssssssssssssSSSssssssssssssssssssSs...s.....SSSSSSSSSSSSSSS...S....SSSSSSS.................', '....s..........s....s....s...ss.......ss.....ss...SS..SSS..S....S..SSSSS....S......SSSSSSSSSSSS.................', '....s..........s....s....s...ss.......ss.....ssSSSSS...SS..S....S....SSSSSSSSSSSSSSSSSSSSSSSSSS.................', '....S..........S....S....S...ss.......SS.........SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS....SSS.................', '....S..SSSSSSSSS...SSSSSSS...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.......SSSSSSS.................', 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS..................SSSSSSSSSSS..................', 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS..........S.................................SSSSSSSS...SSSS..................', 'SSSSSSSSSSSSSSSSSSSSSS..............SS..........SSSS........SSSSSSSSS...........SSSSSS....SSS...................', 'S...S......S...S...SSS.............SSSSS.........SSS........SSSSSSSSS...........SSSSSS.....SS...................', '..........................SSSSSS...SSSSSSS.......SSS........SSSSSSSSS............SSSSS.....SS...................', '.........................SSSSSSS....SSSS.........SSS..........SSSSSSS............SSSSSSSSSSSS...................', '..........................SSSSSSSSSSSSSS..........SS............SSSSS...........SSSSSS....SS....................', '.............................SSS...SSSSS...........S............SSSS.............SSSS......S....................', '...............................SS...SS........SS.................SS.............SSSSSSSSSSSS....................', '...............................SS...SS........SS.................SS............SSSSSSSSSSSSS....................', '...........................S...SSSSSSSSS.............................S.........SSSSSSSSSSSSS....................', '..........................SSS....S......S............................SS........SSSSS...SSSS.....................', '...............................SSS.....SSSS.......SS............SSSSSSS..........SSS...SSSS.....................', '................................SS.......S.......SSSSS..........SSSSSSSSSSS.....SSSSSSSSSS......................', '.................................................SSSS...........S...SSSSSSS.....S...SSSSSS......................', '.............................SSS.....................SSS..............SSSSSS...SS...SSSSSS......................', '.............................SSS......................SS..............SSSSSS...SS...SSSSSS......................', '...........................SSSSS....................SSSSS.............SSSSSSSSSSS...SSSSS.......................', '............................SSSSS.................SSSSSS..............SSSSSS...S...SSSSS........................', '.............................SSSS..................SSS................SSSSSS...S...SSSSS.....SS.................', '............................SSSSSS.....................................SSSSS...SSSSSSSS.....SS..................', '..............................S...SS...................................SSSSS...SSSSSSSS.........................', '..............................SSSSSSS..............................SSSSSSSSS.....SSSSSS.........................', '...............................SS...S.....................SSS......SSSSSSSSS....SSSSSS..........................', '................................SSSSSS..................SSSS.......SSSSSSSSS....SSSSSS..........................', '...................................SSS..................SSSSSSS.....SSSSSSSS....SSSSSS..........................', '...................................SSS....S..............SSSSSS......S...SSS....SSSS............................', '....................................SSSSSSSS.......S.....SSSSSS..........SSSSSSSSSSS..............S.............', '....................................SSSSSSSSS.....SSSS...SSSS.........SSSSSSSSSSSSSS.............SS.............', '........................................SSSSSS.......SSSSSSSS.........SSSSSSS....SSS..............S.............', '........................................SSSSSS...........SSSSS........SSSSSSS...SSSS............................', '........................................SSSSSS...........SSSSSS.......SSSSSSS...SSS.............................', '.........................................SSSSS.............S..............SSSSSSSSSSSSS.........................', '.........................................SSSSS.............................SSSSSSS....SS........................', '..........................................SSSSSS................SS..........SSSSSSSSSSSS........................', '...........................................SSSSS................SSS.........SSSSSSSSSSSS........................', '...........................................SSSSS.................SS.........SS...SS...SS........................', '.......................................SS...SSSS...........SSSSSSSSS......SSSSS.......SSSS......................', '......................................SSSSSSSSSS............SSS...SS....SSSSSSS.......SSSS......................', '........................................SSSSSSSSS........SSSSSS...SSSS...S...SSS...S....SS......................', '........................................SSSSSSSSS.........SSSSSSSSSSSS...SSSSSSS...SSSSSSS......................', '..................................S.....SSSSSSSSS...........SSSSSSSSSS......SSSS...SSSSSSS......................', '..................................SS....SSSSSSSSS.............SSSSSSSS.....SSSSS...S....SSS.....................', '..................................SS......SSSSSSSS...............SSSSS.....SSSSS...S...SSSS.....................', '...........................................SSSSSSSSS...........SSSSSSSS.....SSSS........SSSS.......SSS..........', '...........................................SSSSSSSSS...........SSSSSSSS.....SSSS........SSSS.......SSSSS........', '...........................................SSSSSSSSSS..........SSSSSSSS......SSS.........SSSS........SSS........', '...........................................SSSSSSSSSS..............SSSSSS...SSSSS....S...SSSSS...SS...SS........', '...........................................SSSSSSSSSSS..............SSSSS....SSSS....S....SSS.....SSSSSSS.......', '...........................................SSSSSSSSSSS..............SSSSS.....SSS....SSSSSSSSS....SSSSSSS.......', '.............................................SSSSSSSSSS............SSSSSS.....SSSSSSSSSS...SSSS....SSSSSS.......'],   // 1-2 the cliff road and its white rail
+    ['............S...................................................................................................', '...........SSSSSS...............................................................................................', '...............S................................................................................................', '................................................................................................................', '................................................................................................................', '.....................SSSSSSYYYYYYYYYYYSS........................................................................', '....................YSSSSSSSYYYYYYYYYSSSS.......................................................................', '....................YYYYYYYY..S.....SSSSYY......................................................................', '...................YYSSSS.YS.SS.SS..SS.YYYY.....................................................................', '...................YSSSSSSSSSSSSSSSSSS..YYY.....................................................................', '...................SSSSSSSSSSSSSSSSSSYYYYYY.....................................................................', '..................SSSSSSSSSSSSSS.S.SSY....Y.....................................................................', '.................SSSSSSSSSSSSSSSSSSSS.....YY....................................................................', '.................SSSSSSSSSSSSSSSSSSS......YY....................................................................', '.................SS..S..SSSS.SSSSSS........YY...................................................................', '................S....SSSSSSSSSSSSSS........YYY..................................................................', '...............SSS...S..SSSSSSSSSY..........YYY.................................................................', '..............YSSSSSSSSSS.SSSSSSSY....SSSS..YYY.................................................................', '..............YYSYYS.SSSSYSSSSSSYY....SSSS..YYY.................................................................', '...............YYY...SS.SYYY..SSS............YYY................................................................', '...........................Y..SSSSSSSSSSSS...YYY................................................................', '................................................................................................................', '................................................................................................................', '...............SSSSSSSSSSSSSSSSSSSSSS.....SSSS..................................................................', '...............SSSSSSSSSSSSSSSS....SS........S..................................................................', '...............SS...SSSSSSSSSSSSSSSSSS..SSSSSS..................................................................', '...............SS...SSSSSSSSSSSSSSSSS....SSSSS..................................................................', '...............SSSSSSSSSSSSSSSSSSS.......S...S.............YYYSSSSSSSSSSSYY...SSYY..............................', '..........................................................YYYYSSSSSSSSSSYYYYYSSSYYY.............................', '.........SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS............Y......SSSSSSYYYYYYSYYYY.............................', '..........SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.....YYSSSS.SSSSSSSYYSSSYY..YY.............................', '..........SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS....SSSSSSSSSSSSSSSSSSSYYYYYYY.............................', '............S......S.......SSSS.........................YSSSSSSSSSSSSSSSSSSSSSY...YY............................', '.............SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...YYSSSSSSSSSSSSSSSSSSSYY...YY............................', '...............SSSSSSSSSSSSSSS...SSSSSSSSSSSS...SSSS....YSSSSSSSSSSSSSSSSSSSS......YY...........................', '..........................S...SSSSSSSSSS................SSSSSSSSSSSSSSSSSSSSS......YYY..........................', '.....................SSSSS......S...SS..................SS.SSSSSSSSSSSSSSSSSS..SSS..YY..........................', '.....................SSSSSSS........SS..................SSYSYSSSSSSSSS.SSSSS...SSS..YY..........................', '.........................SSSS.........................Y.SYYYYY......S..YSSS...........Y.........................', '.....................SSSSSSSSSSSSSSS.................YYYSSSYYYS.SSSSS.YYYSS..........YYY........................', '.....................SSSS...SSSSSSSSS................SSSSSSSSSSSSSSSSSSSSSS...........YY........................', '......................SSSSSSSSSSS..................SSSSSSSSSSSSSSSS.SSSSYY............Y..........YYYYYYYYYYYYY..', '......................S............................SSY.S....YYYYYSS....SYY........S...............YYYYYYYSSYYY..', '....................................................YYY.....YYYYYYY..........SSSSSSS................Y.YYYSSYYYY.', '...........................................SS......................................................YYYYYYYSYYYY.', '.........................SS.................SSSS..................................................YY.YYYYSSS..Y.', '.........................SSS...............SSSSSS....SSSSSSSSSSSSSSSSSSS...SSS....SSSSSS.........YYYYYSYSSS...YY', '...........................S.............SSSSSSSSS...SSS....S...SSSSSSSS...SSS.....SSSSS..........YYSYSSSS.....Y', '..........................................SSSSSSSSSSSSSSSSSSSSSSS...SSSS...SSS....SSSSSS............SSSSS...SS..', '.....................................SSSSSSSSS.......SSSSSSSSSSSSSSSSSSS...SSS....SSSSSS............SSSSS...S...', '.....................................................S...........SSS...S....S......SSSSSSSS...........SS....SS..', '......................................................................................SSSSS.....................', '................................................................................................................', '................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...S...SSSSSSS.', '.................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...SSSSSSS..SS.', '.......................................................S....S....SSS...S....SSSS......SSSSSSS...S....SSSSSSS....', '........................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS......S.......', '........................................................SSSSSSSSSS...SS...SS.....SSSSSSS...SSS...S..............', '.................................................................................................S....SSSSSSSSS.', '............................................................SSSSSSSS....SSSSSSSSSSSSSSSSSSSSSSSSSSS......SSSSSSS', '..............................................................SS...SSS...SSSSSSSSSS....SSSSSS...SSS...........S.', '.............................................................SSSSSSSSSSSSSSSSSSS...SS....SS...SSSSSS.....SSSSSSS', '.............................................................S...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS......SSS...', '...................................................................SS.......................SSSSSSSS........S...', '...................................................................S........................S...SSSS............', '................................................................................................................', '...............................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS..........', '...............................................................SSSSS...S...SSSSSSSSSSSSSSSSSSSSSSS...S..........', '.................................................................SSSSSSSSS...S.........S.............SS.........', '...................................................................SSSSSSSS.....SSSSSSSSSSSSSSSSSSSSSSS.........', '......................................................................SSSSSSS...SSSSSSSSSSSSSS....SSSSS.........', '.............................................................................SSSSS......S...SS....S.............', '....................................................................SSSSSSS....SSS.....S...SSSSSSS...SSSS.......', '...................................................................SSSSSSSSSS...SSSS...SSSSSSSSSSSSSSSSSS.......', '...................................................................S...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.......', '................................................................................................................', '................................................................................................................', '.......................................S....SSSSS......................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.......................................SSSSSSSSSSS......................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '..........................................SS...SSSSS....................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...S', '...........................................S...SSS....S.....................S....SSSSSSSSSSSSSSS....SSSS...SSSS.', '........................................SSSSSSSSS....SS....................SSSSSSS...SS.....SSSSSSSS........S...', '....................................SSSSSSSSSSSSS...SS...................................SSSSS..................', '....................................SSSSSSSSSSS..........................................SSSSS..................', '.....................................SS.........................................................................', '.....................................SS.........SSS.............................................................', '....................................SSS........SSSS...SSSSS.....................................................', '.....................................................SSSSSS.....................................................', '................................................S...SSSS..........S.............................................', '................................................SSSSSSSS..........SS............................................', '...................................................................SSSSSSS......................................', '...................................................................SSSSSSS......................................', '.............................................................S.....SS...........................................', '.............................................................SSS................................................', '............................................................SSS.........SS......................................', '........................................................................SS....S.................................', '..............................................................................SS................................', '.............................................................................SSS................................', '................................................................................................................'],   // 1-3 old farmhouses across the valley
+    ['.........S......................................................................................................', '........SSS.....................................................................................................', '.........S......................................................................................................', '................................................................................................................', '..SS............................................................................................................', '..SSS...........................................................................................................', '................................................................................................................', '..........................S.....................................................................................', '.......S.................SSSSS..................................................................................', '...SSSSSS.......SSS.............................................................................................', '..SSSSSSSS.....SSSS............S...S............................................................................', '.SSSSSSSSSSS....SSS....S.......SSSSSS...........................................................................', 'SSSSSS...SSSSSSSSSS....SS.....S.....S...........................................................................', 'S............SSSSSSSSSSS......SSSS..............................................................................', '..SSS....SSSSSSSSSSSSSSS......SSSS..............................................................................', 'SSSS..........SSSSSSSS..........SSSSS..........S................................................................', 'S.................SSSS..........SSSSSS........SSS...............................................................', '..................SSSS..........SSSS...........SS...............................................................', '..................SSS...........SSSS............SS..............................................................', '........SS...........SSS....................SS..................................................................', '.........S............SSSS...................SS.....S...........................................................', '.........S...............S..................SSSSSSSSS...........................................................', '................................................SSSSSS..........................................................', '.........................................SS.....SSSS............................................................', '.SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS..............................................................', '..SSSSSSSSSSSS...SSSSSSSSSSSSSSSSSSSSS.....SSSSSS...............................................................', '..........S..............S......S............S..................................................................', '.SSSSSSSSSSS........S....SSSS....SSS............................................................................', '...SSSSSSSSSSSSS....SSSSSSSS......S.............................................................................', '.....................................YY.........................................................................', '....................................YYYY..........................S.............................................', '.....................................YYY.........................SSS............................................', '.....................................YYY.......SS...............................................................', '......................S..............YYYY...SSSSS...............................................................', '....................SSSS............Y.YYYY..SSSSSS....S........SSS..............................................', 'SS...................S............YYYYYYYY....S.....SSSS.......SSS..............................................', 'SSS..............................YYYYYYY.YY........S......S.....................................................', '..SS.............................OO.YYYYYYYY.......SSSSSSSS.....................................................', '.................................O.YYYYYYYYY........SSS...SS....................................................', '..SS............................OOOYYYYYY.Y.....................................................................', '..S.............................................................................................................', '..SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...........................................', '.....SSSSSSSSSSSSSSSSSSSSSSSSSSSS...SS...SSSSSSSSSSSSSSSSSSSSSSSS...S...........................................', '.......S.....S........S.........SSS........SSS......S.....SSSS...SSSS...........................................', '.......S.....S...S....S...SSSSSSSSSSSSSSSSSSSS......S....SSSSS...SSSS...........................................', '........SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.......SSSSSSSSSSS..........................................', '......................................................YY........................................................', '......................................................YSS.......................................................', '......................................................YS........................................................', '.....................................................YSSS.......................................................', '....................................................YYYSSS...SSSSS....S....SSSSSS...............................', '...................................................OO.YYYSY...SS....SSSSS...S...S...............................', '...................................................OY.YYSSYY.SSS....S...SS......................................', '...................................................OYYYYSYY....S........SSS.....................................', '..................................................OO.YYSSSSS..............SS....................................', '.................................................OOO..YYYYYY....................................................', '................................................................................................SS..............', '.................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.......SS..............', '.................S...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...S...............', '.....................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS....SSSSSSSSSSSS...SSSSSSSSSS...................', '.............................................S...SSSSSSSSSS..............SS.......SSSS...........S...SS.........', '........................SSS........SSSS.....SSSSSSSSSSSSSSSSSSSSSS.........SSSSS......SSSS......SSSSSSS.........', '..........................S........SSSS........S........SS....SSSS.........SSS....................S.............', '....................................................................................Y...........................', '....................................................................................Y...........................', '...................................................................................YY...........................', '...................................................................................YY...........................', '.................................................................................YYYYYY...............SS........', '.................................................................................YYYYYYY.......S.....SSS........', '..................................................................................YYYYY........SSS....SSS.......', '....................................SS..........................................OY.YYY.YY........SS....SSSS.....', '...................................SSSSS.......................................OOYYYYYYYY...............SSSS....', '..................................SSSSSSSS.....................................O..YYY...Y.................SSS...', '.................................SSS...SSSS...................................OO.YYYYYYYY...................SS..', '....................................S...........................................................................', '....................................S...........................................................................', '...................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '........................................S...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................S.......SSS.........S.................S...................S........', '............................................SSSSSSSSSSS...SSSSSSSSSSS.......SS....SSSSSSSSS.....SSSSS....SSSSSS.', '.................................................SSSS....S...SSSSSSSS...S...SSSSSSSSS....SS........SSSSSSS...SSS', '....................................................SSSSSS...SSSS...SSSSS....SSSSSSSSSSSSS.........SSSSSSSSSSSSS', '................................................................................................................', '................................................................................................................', '................................................................................................................', '............................................................................................S...................', '...........................................................................................SSSY.................', '...................................S.....S.................................................SSYYY................', '..................................SSSSSSSS.................SS..............................YYYYY................', '...................................SSSSSS.................SSSS..........................YY.Y.YYY................', '....................................SSSS..................SSSS..........................YYYYYYYY................', '.........................................................SSSSSS........................OYYYYYYSS................', '........................................................SSSSSSSS......................OO.YYYYY.SSS..............', '........................................................SSSSSSSSS.....................O.YYYYYYY.SS..............', '.........................................................S......................................................', '................................................................................................................', '............................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '................................................................SSSSSSSSSSSSSSSSSSSSS.....SSSSSSSSS....SS...SSS.', '....................................................................S.........SSSSS............SS...............', '.................................................................SS....SS...S....SSSS....SSSSS...S...SS.....S...', '..................................................................SS....SSSSS....SSSSSSSSSSSSSSSSS...SS....SSS..', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................'],   // 1-4 terraces and kaya stacks
+    ['....................................S...........................................................................', '......SS........................SSSSSS..........................................................................', '......SS.........................SSSSS..........................................................................', '......SSSS................SS......SSSSS.................S....SS.................................................', '.....SSSSSS.............SSSSS.....SSSS....S.........SSSSSS...SSS................................................', '......SSSS.............SSSS......SSSSSSSSSSS.........S...SSS....................................................', '.......SSS................S.......S....SSSS.........S.......SSSS.........SS.....................................', '....S..................SSS..............S...........S.......SSSS...S....SSS.....................................', '...SSSS............S....SS..........................SSS.......S....SSSSSSSSS..............S.....................', '.....SS...........SS.....S...........................SSSSSSS.....SSSSS...SSSS..........SSSSS....................', '............SSSSSSSSS..................................SSSSS.........SSSSS....SSSSSSSSSSSSS.......S.............', '................SSSS..................SS................S........SSSS...SSSSSSSS...S...SSSSS...SSSS.............', '...................S.................S.S................S.......SSSS..SSSSS....S...SS...SSSS...SSSS.............', '...............................p....SSSS........................PPPP..PSSSSSSSSSSSSS............................', '...............................pp....S.SS........................PPPPPP.S..PPPP..SSS....YY...........SSSS.......', '................................pp...SSS........................PPPPS.PP.SPPPP..........YY..S.......SSSSSS......', '............................SSSSSSSSSSSSSSS.....p................P.SSSSP.SP..PP.SSSP....Y..SSSS.....S....S......', '............................SSS..SSp.SppSS.....ppp...............P....SPSSS..P.SSSPP.......SS......SS...SSSS....', '.............................SSS..ppp.SppSp..pppSS...............P.......S.PPP.....P.......SSS.........SSSSSS...', 'YYYYYYYYYYYYYYYYYYYYYYYYY......pp..p...Spppp.pppS.............................P..S.........PP....SSS....SS......', 'YYYYYY.YYYYYYYYYYYYYYYYYY.......ppp...SSSSSpSSSSSS...........................PPP.SS........PPPP...S...SSSSS.....', '....Y.....YYY....Y...YYYY.......p.....SS..SSSSSS..............................P..SS........PP.....SSSSSPPPPP....', 'SSSSYSS.SSY.SSS.YYYY.YYYYS.....p.....SSSSSSSSSSSS.PP...........................SSS..........P.SSSSSSSSSPPPPP....', 'SSSSS.SSSSSSSSSSSSYYYYYSSSSS.pppp...SSSSSSSS.SS..PP.........................................P......SS...PPP.....', 'S.SSSSSSSSSS.SSSSSSSSSSSSS...ppp.....S......SSS....................................................SSSS...PP....', 'SSSYSS.SS.SSSSSSS.SSSSSSSYY...........SSS..SSS....S.p.p............................................S......SS....', 'SSYYSSS.SSSSSSSSSSSSSSS.YYY....SSSS..SSSSSSSSSSSSSSpppp.......................................SSSSSS.......S....', 'SSYYS.SSSSSSSSSSSSS.SS.SS.Y....S.S..SSSS..SSSppSPS..pppp.......................................SSSS........S....', '.SSS.SSSSSSSSSSSSSSS.S.SSSYY..............S.pppPP...p.p....................................................S....', '.SSS.SSSSSSSSSSSSSSSSSSSSSYS.................SSP.........................................................SSS....', '..SSSSSSSSSSSSSSSSSSSSSSSSSSS.........SSS...ppS.................................................................', '..SSSSYYS.SSSSSSSSSSSSSSSSSS........SSSSSSSpp.SS................................................................', '..YYYYY.SSSS...SSSSSS....OOOO.............p.p....................SSSSSSSSSSSSSSSSS..............................', '..YY.YYY.SSSSSSSSSSYSSY..O.O.YYY.........p....SSSSSSSSS..........S..............S...............................', '...YYYYYYSSSSSSSYSYYSYYYYYYSYYYY........pp..SSSPP.S..............S..............S...............................', '...YYYYYYYYSSSSSYYYYYSSY.YSSYY.YY...S...p....SPPPpp...............SSSSSSSSSSSSSSSSS.............................', '....Y..YYYYSYSYYYYYYYSSS...S.YYYY...SS..........P.pp............SSSSSSS...SSSSSSSSS.............................', '...........YYY....Y..SS........Y.....S.............p..........SS...SSSSSSSSSSSSSSSSSS...........................', '..............................................................SS...SSSSSSSSSSSSSSSSSS...........................', '................................................................................................................', '....S.......................SS..........SS.........................O.....OO.....................................', '....SSSSSSSSSSSSSSSSS...SSSSSS...........SSS.......................OOO...OO.....O...............................', '.SSSSSSSSSSSSSSSSSSSS...SSSSSS...................................OOOO.OOOOOOOOOOOOO.........SS..................', '.SSSSSSSSSSSSSSSSSSSS...SSSSSS...................................OOOO.OOOOOOOOOOOOO.........SS..................', '....SSSSSSSSSSSSSSSSSSSSSSSSSS...........................SSS.......OO...........O..........SSSS.................', '....SSSSSSSSSSSSSSSSS.......SS.........................SSSSSS......O.O..........O.........SSSSSS................', '....................................................SSSSSS.........OOO..........O..........SSS..................', 'S...SSSSSSS........SSSSSSSSSSSSS.................SSSS..............OSS.....................SSSS.................', 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS................SS.................OSSSS...................SSSS.................', '.SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...................................OO.......................SS..................', 'SSSSS.......................S......................................O........................SS..................', 'S...S..............SSSSSSSSSSSSS...................................OO......................SSSS.................', '....S................S.....................................................................SSSS.................', '...SSSSS..................................SSSS.............................................SSSS............SS...', '.........................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS......SSSSS.', '.........................S...SSSSSSSSSS...S.............S...S...S....S...........SSSS.......SS...SSSS.......SSS.', '..........................SSSSSSSSSSSS...SSS............SSSSSSSSSSSSSSSSSSSSSSSS...S......SSS.......SS.....SSSSS', '..........................S......SSSSS.......................SS.......S.........SSSSS....SSS...........SSSSSSSSS', '.................................SSSS........................S.....SSSSSSSSSSSSSS...S..................SSSS.....', '.............................................SSSSSS.............SSSSSSSSSSSSSSSSS.........................S.....', '.............................................SSSSSS...SS...SSSSSSSSSSSSS........................................', '..................................................SSSSSS...SSSSSSSSS...SSSSSSSSSSSSS............................', '.................................................SSSSS....SSSSSSS....SSS............S...........................', '.................................................SSSSS....SSSSSSS....SSSSSSSSSSSSSSSSS..........................', '.................................................S.....................SS.......................................', '.......................................................................SS.......................................', '............................................................................SSSSSSSSSSS.........................', '................................................................................................................', '............................................................................SSSSSSSSSSSSSSSSSSS.................', '................................................................................................................', '................................................................................................................', '............................................................................SSSSSSSSSSSSSSSSSSS.................', '.............................................................................SSSS.............S.................', '...............................................................................SSSSSSSSSSSSSSSSS................', '.................................................................................SS.............................', '.........................................................SS.....................................................', '.....................................................S...S..........................SSSSSSSSSSSSSS..............', '.....................................................SSSSS...........................S..........................', '........................................................S..................................SSSSSSSSSS...........', '............................................................................................SS..................', '................................................................................................................', '.............................................................................................SSSSSSSSSSSS.......', '............................................................................................................S...', '...............................................................................................SSSSSSSSSSSSSS...', '................................................................................................................', '................................................................................................................', '.....................................................................................................SSSSSSSSSSS', '.......................................................................................................SSSSSSSSS', '................................................................................................................', '......................................................................................................SSSSSSSSSS', '.....................................................................................................SSSSSSSSSS.', '................................................................................................................', '..........................................................................................................SSSSSS', '.............................................................................................................SSS', '.............................................................................................................SSS', '............................................................................................................SSSS', '................................................................................................................', '................................................................................................................', '................................................................................................................'],   // 1-5 farmhouses, a shrine, cherry and wisteria
+    ['......................................SSSS......................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '.......................................S...S....................................................................', '..................................SSSSSSSSSSS...................................................................', '..................................SSSSSS....S...................................................................', '......................................SSSSS..................................SS.................................', '.........................................SS..................................S..................................', '....................................S.....SS................................SS..................................', '..................................SSS......SS.........SS.........S..............................................', '..................................S....................SS........SS................S............................', '............................SSS.........SSS.............S........SS...............SS........S...................', '.............................S.......SSSSSS.....................SSS...............S......SSSSSSS................', '....................................SSSSSS..............................................SSSSSS..................', '...................................SSSSSSSS..................................SSSS..........SSSSSS...............', '..................................SSSSS....S...........SS....................SSS................SS..............', '.....................................S.....S............SS......................................................', '.........................................SSS..........SSS.......................................................', '...................................................SSS..........................................................', '....................................................SS....................................S.....................', '.......................................S.........SSSSSSS................................SSSS....................', '......................................SS.........S...SSSS................................S......................', '......................................SS..............SSSS................................SSSSS.................', '..S...................................SS...............SS...................................SSSS.........S......', '.SS...................................SS................SS...................................SSSSSS.....SS......', '.SS............S......................SS.......................................S.................S.....SS.......', '.SS...........SS......................SS......................................SS................................', '.SS...........SS......................SS...........SSSSS..............S......SSS................................', '.SS..........SSS......................SS..........SSSSS.............SSS......SSS........SSS.....................', '.SS..........SSS......................SS............SSS..............SSS.....SSS.........S......................', '.SS..........SSS......................SS..............................S......SS.................................', '.SS..........SSS...........S..........SS........................S............SSS................................', '.SS..........SSS..........SS..........SS.......................SSS...........SSS...........SS...................', '.SS..........SSS..........SS..........SS.....................................SSS...........SS...................', '.SS..........SSS..........SS..........SS.....................................SSS...........SS...................', '.SS..........SSS..........SS..........SS.....................................SSS...........SS...................', '.SS..........SSS..........SS..........SS.............S............S..........SSS...........SS...................', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS...................', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS.............S.....', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.SS..........SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.............SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.........SS...SS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.........SS...SS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '.............SSS..........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '...........SSSS...........SS..........SS............SS...........SS..........SSS...........SS............SS.....', '..........SS..............SS..........SS............SS...........SS..........SSS...........SS............SS.....', '..........................SS..........SS............SS...........SS..........SSS...........SS............SS.....', '..........................SS..........SS............SS...........SS..........SSS...........SS............SS.....', '..........................SS..........SS............SS...........SS..........SSS...........SS............SS.....', '...........................S..........SS............SS...........SS..........SSS...........SS............SS.....', '......................................SS............SS...........SS..........SSS...........SS............SS.....', '......................................SS............SS...........SS..........SSS...........SS............SS.....', '............................SSS.....................SS...........SS..........SSS...........SS............SS.....', '..............................S.....................SS...........SS..........SSS...........SS............SS.....', '....................................SSSS............SS...........SS..........SSS...........SS............SS.....', '..................................SSSSSSS...........SS...........SS..........SSS...........SS............SS.....', '..................................SSSSSSS...........SS...........SS..........SSS...........SS............SS.....', '.................................SSSSSSSSSSSS.......SS...........SS..........SSS...........SS............SS.....', '..................................SSSSSSSSSSSS.......S............S..........SSS...........SS............SS.....', '.......................................SSSSS.....S............SSSS...........SSS...........SS............SS.....', '.......................................SSSS.....SS...........SSSSS...........SSS...........SS............SS.....', '.......................................SSSS....SSSSSS......SSSSSS............SSS...........SS............SS.....', '............................................SSSSSSSSSSSS....SSSSSSS..........SSS...........SS............SS.....', '...........................................SSSSS.....SSS.......SSSSS.........SSS........S...S............SS.....', '.....................................................SSSS........S.............S......SSSS...............SS.....', '......................................................SS..............................SSSS...............SS.....', '......................................................S..............................SSSSSSS.............SS.....', '....................................................................................SSSSSSSSSSSSS........SS.....', '.........................................................................................SSSSSSSS........SS.....', '..........................................................SS............................SSSSSSSSSS.......SS.....', '..........................................................SS.............................SSSSSS..........SS.....', '.......................................................SSSSSS...........S....................SSSS........SS.....', '...........................................S..........SS...SSSS........SSSSS...................S....SS...SS.....', '..........................................SSS.........SS....SSSSS........SSSS.................SSSSSSSS....S.....', '.........................................SSSS.....SSSSSSSSSSSSSSSSS.............................SSSSSSS.........', '..................................................SSS...SSSSSSS...S.............................................', '...................................................SS.....SSSS....SS.....................S..................S...', '..........................................................SSSS...SSSSS...............SSSSSS................SSS..', '..........................................................SS.......SSS..............SSSSSSS.....................', '............................................................SSS...SSSSS................SSSS.....................', '..............................................................SSSSSSSSS................SS.......................', '...........................................................SSSSSSSSSSSSS.........S........S...S.................', '............................................................S......SSSSS........SSSSSS....SSSSSSS...............', '.................................................................................SS.......SSSSSSSS..............', '.........................................................................................SSSSSSSSS..............', '...........................................................................................SSSSSSSS........S....', '............................................................................................S...SSS......SSS....', '.................................................................................................S.......SSSSSS.', '..............................................................................S............................SSS..', '.............................................................................SSS.....................SSSSSSSSSS.', '...........................................................................SSSS.....................SSSSSSSSSS..', '............................................................................SS.....................SSS.....SSS..', '....................................................................................................SSS...SSS...', '................................................................................................................'],   // 1-6 cedars in rows
+    ['....SSSS........................................................................................................', '...SSSSS........................................................................................................', '...SSS..........................................................................................................', '..............S..S..............................................................................................', '............SSSSSS..............................................................................................', '............SSSSS...............................................................................................', '......SS........................................................................................................', '...SSSS.........................................................................................................', '...SSSS.........................................................................................................', '.SS.S....S........SS............................................................................................', 'SSSS....SS..SSSSS.S..............S..............................................................................', 'S.......SSSSSSSSSSS............SSS..............................................................................', 'SSS.SSSSS......SSS.............SSS..............................................................................', 'SSSSSSS.S.....SSS...............................................................................................', 'SSSSSSSSSS....S......SSS........................................................................................', 'SSSSSSSSSS.SSSS.....SSSSS.......................................................................................', 'S..SSSS.SSSSSSSSSSSS..SS........................................................................................', '.SSSSSSSSSSSSSSSS.SSSSSSS..........SSSSS.......SSS..............................................................', '.SSS...SSSSSSSSSSSSSSS..S..S......SSSSSS......SSSSS.............................................................', 'SSS...SSSSSSSSSSSSSSSSSSS..S...SSSSSSSS....SSSSSS...............................................................', '.SSSSSS...S..SSSS.SSSSSS.SSSSSS.................................................................................', '....SSSSSS.SSSSSSSSSSSSSSSSSSSSS.S..............................................................................', '....SSSSSS.SSSSSSSSS.SSSSSSSSSSSSS..............................................................................', '......SSSSSSSS...SSSSSSSSSSSSSSSSSSS............................................................................', '...SSSSSSSSS...SSSS.SSSSSSSSSSSSSSSSSSSS....SSSSS...............................................................', '....S...SS....SSSSSSSSSSSSSSSSSSSSSSSSSS...SSSSSS.....S.........................................................', '.S.....S.....SSSSSSSSSSSSSSSSS.S.SSSSSSSSS...S....SSSSSS......ss................................................', 'SSS...SS....SSS...SSSSSSS...SSSSSSSSSSSSSSSSS....SSSSSS........ss...............................................', 'S...SSS...SS.....S...SSSSSSSSSSSSSSSSSSSSSSSSSSSS..SS...........................................................', '....SSS...S...SSSS...SSS..SSSSSSSSSSSSSSSSSSSSSSS..SS...........................................................', '...SS...SSSSSS...SSSSS...SS...SSSSSSSSSSSSSSSSSSSSS.............................................................', '.SSS...S.SSSSSSSSSSSS...SSSSSSS...SSSSSS...SSSSSSSSSSSS.S.....SSS........SS.....................................', '.SS....SSSS....SSSSS...S......S...SSSSSSSSSSSSSSSSSSSSS.SSS...SSS......SSSSSS...................................', '.....SSS..........SSSSSS.....SS...S.SSS..SSSSSSSSSSSSSSSSSS............SSSSSSS..................................', '.SSSSSSSS.....SS....SSSS...SSSSSSSSS...SSSSSSSSSSSSSSSSSSSSS................S...................................', 'SSSS.........SS...SSSS....SS........SSSSSSSSSSSSS.SSSSSSSSSSSSSSS...............................................', 'SSSS.........SS...SS.....SSS........SSSSSSSSSSSSSSSSSSSSSSSSSSS.S...............................................', 'SSSSSSS..........SSS.....SS........SSSSSSS....SSSS..SSSSSSSSSSSSSSSS....SS......................................', '....SSSSS.....SSS...S..................SSSSSSSSSS......SSSSSSSSSSSSSS.SSSSSSS...SSSSS...........................', '...SSSSS.....SSSSSSSSSSS...SSSSSS.............SS.....SSSSSSSSSSSSSSSSSSSSSSS...SSSSSSS......SSSS................', '...SSSSS....SS...S....SSSSSSSSSS...........SSSSSSS...SSSSSSSSSSSSSSSSSSS.SS....SSSSSSS......SSS.................', '.SS...SSSSSSSSSSSS...SSSSSSSSSS............SSSSSS....SSSSSS...S...SSSSSSSSSS......SSS.....SSS...................', 'SSSSS...SS.S...SS...SSSSSSSSSS......SSSS.........SSSS...SSSSSS.SSS.SSSSSSSSSSS..SSS.....SS......................', 'SSSSS...SSSS...SS...SSSSSSSSSS......SSSS.........SSSS...SSSSSS.SSSSSSSSSSSSSSSSSSSS.....SS......................', '....SSSS.............SSS...S.........SS...........SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.............................', '...SSSS...............SS...SSSSSS...SSSS.........SSSS....S....SSSSSSS.SSSSSSSSSSSSSS..S.........................', '...S....SS.................SSSSSS...SSSS.........S............SSSSS...SS..SSSSSSSSSSSSS.........................', '...S....SS.....SS........SSSSS.S...SSSS.....SSSSSS...SS....SSSS...S..S...SSSSSSSSSSSSSSSSSS.....................', '.SS....SSS....SSS.................SSS.........SSS...SSS.....SS.......SSSSS...SSSSSSSSSSSSS..S....SSSS...........', 'SSSSS.........S.................................SSSSS......S.......SSS...SSSSSSSSSSSSSSSSSSSS....SS.............', 'S...S.........S.........................SSSS....SSSS...SSSSS......SS....S...SSSSSSSSSSSSSSSSSSSS................', '.............S.........................S...SS.....S...SS..........S...SSSSSSSSSSSSSSSS.SSSSSSSSSSSS...SSS.......', '.............SSSS....SS..............SSSSSS..........SSSSSS....SSS........SSS...SSSS..SSSSSSSSSSSSSSSSS.........', '............SSSSS....SS..............SSSSSS..........SSSSSS...SSSS........SS....SSSSSSSSSSSSSSSSSSS.SS..........', '...............S.....S..................................S....SSSSSSSS...SS.....SSSSSSSS...SSSSSSSSSSSSSSSS......', '.......................................................SS.........S....SS.......SSSSSS....SSSSS.S..SSSSSSSSS....', '...............................................................................SSSSSS....S...SSSS..SSSSSSSS.....', '.............................................................................SSSSSSSSSSSSSSSSS...SS..SSSSSSSSS..', '.............................................................................SS.....SSSSS...SSSSSSSSSSSSSSSSSSSS', '....................................................................................................SSSSSSSSSSSS', '..................................................................................................SSSSSSSSSSSSSS', '.......................................................................................................S...SSSS.', '...........................................................................................................SSSSS', '..................................................................................SSSS...................SSSSSS.', '................................................................................SSSSSSSSS..............SSSSSSSSS', '................................................................................SS....................SS...SSSS.', '................................................................................SS..................SSS....S....', '.......................................................................................SSSS...SSSSSSSSSSSSS.....', '......................................................................................SSSS...SS...S...SSSSSS....', '......................................................................................S......S...........S......', '.............................................................................................S...........S......', '.......................................................................................................SSS...S..', '......................................................................................................SS...SSSS.', '......................................................................................................SS...SSSS.', '......................................................................................................S....SS...', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................'],   // 1-7 a slope of silver grass
+    ['.........................OO.....................................................................................', '.........................OO.....................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................SSSSSSSSSS......................................................................', '.............................SSSSSSSSSSSSSSSS...................................................................', '............................SSSSSSSSSSSSSSSSSS..................................................................', '...........................SSSSSSSSSSSSSSSSSSS..................................................................', '........................SSSSSSSSSSSSSSSSSSSSS...................................................................', '.....................SSSSSSSSSSS......SSSSSSSSSS................................................................', '.....................SSSSSSSSSSS......SSSSSSSSSS................................................................', '..................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS..............................................................', '...................SSSSSSSSSSSSS....SSSSSSSSSSSSS....................SSSSS......................................', '.......................SSSSSS...........SSSSSS......................SSSSSS......................................', '...........................S.............S.........................SSSSSSSSSSS..................................', '...........................S.....SS....SS......................SSSSSSSSSSSSSSSS.................................', '............................SSSSSSSSSSSSSSS...................SSSSSSSSSSSSSSSSSS................................', '............................SSSSSSSSSSSSSSS...................SSSSSSSSSSSSSSSSSS................................', '...............................SSSS....SS.................SSSSSS....S...SSSS...SSSSS............................', '.SS............................SSS....................SSSSSSSSSSSS.....S....SSSSSSSSSS..........................', 'SSS..........S...............SSSSS....................SSSSSSSSSSSSS....SSSSSSSSSSSSSSS..........................', 'SSSSS......SSS...............SSS....................SSSSSSSSSSSSSSSS...SSSSSSSSSSSSSSSSS........................', '...SSSS...SSSSS.....S.......SSSS.....................SSSSSSSSSSSS....SS.....SSSSSSSSSSS.........................', '.SS...S...S...S...SSSS.....SSSS.....................................SSS.........................................', '.SS...S...S...S...SSSS.....SSSS.............................S.......SSS........S................................', 'S...SSSSSSSSSS...SSSS....SSSS..............................SS......SS.........SS................................', 'SSSSSSSSSSSSSSSSSS..SSSSSSSSS...............................SSSSSSSSS.....SSSSS.................................', 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSS................................SSSSSSS.....SSSSSSSS...............................', '.SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS..............................SSSSSSSSSSSSSSSSS...............................', '...SSSSSSSSSSSSSSSSS.SSSSSSSSSSSSSSSSSS........................SSSS.......SSSSSSS.....SSSSS.....................', '.SSSSSSSSSSSSSSSSS..S...SSSSSSSSSSSSSSSSSSS...................SSS..................SSSSSSSSSSS..................', '.SS...SSSSSSSSSSSSSSS...SSSSS..S.SSSSSSSSSS...................SSS..................SSSSSSSSSSS..................', '.......S......S...SSSSSSSSSSS....SSS.SS..SSSSSSS.............SSS...............SSSSSSSSSSSSSSSSS................', '............SS...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS......SSSS..............SSSSSSSSSSSSSS...SSS..............', '............SS...SSSSS...SSSSSSSS...SSSSSSSSSSSSSSSSSSSSSSSSSSSS...................SSSSSSSSSSSSSSSSS............', '............SS...S...S...SSSSSSSSSSSSSSSSS...SSSSSSSSSSSSSSSSSSS...................S....SSSSSSSSSSSSS...........', '...........SSSS.........SSSSSSSSS...SSSSSSSSSSS..SSS...SSSSSSSSSS...................SSSSS...SSSSSSSSSS..........', '........SS..........SSSSSSS.....SSSSSSSSS....SSSSSSSSSSS..S.SSSSSSSSS.................S...SS....................', '........SS..........SSSSSSS.....SSSSSSSSS....SSSSSSSSSSSSSSSSSSSSSSSS.................SSSSS.....................', 'S............S.......S.....SSSS...S...S.......SSSSSSSSSSSSSSSSSSSSSSSSSSSS............S.........................', 'SSSS........SSSSS..........SSSSS....SS....SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.......S..........................', 'S...S...........S..........S...S.....S....SSS...SSSSS...........SSSSSSSSSSSSSSSSS...SS..........................', '.SSSS........S...........SSSSSSSSSSSSSSSSSSSSSSSSSSSS.......SSSSSSSSSSS.SSS.SSSSSSSSS...........................', '.SS........SSSS.........SSSSS.....S..........S.......SS....SSS...SSSS..SSSSSSSSSSSSSSSSS........................', '...........SS........SSSSSSS.........................SSS....S........SSSSSSSSSS...SSSSSSS.......................', '...........SS...........S...S....................SSSSSSS....S........SS...SSSSSSSSSSSSSSSSSSS...................', '...........S.............SSSS...................SSSSSSSSSSSSSS...SSSS...SSSSSSSSSSSSSSSSSSSSSSSS................', '.........................SS......................SSSS.......S.......SSSSSSS.......SSSSSSSSSSSSSSSSSS............', '.........................SS........S.............SSSS.......S.......SSSSSSS.........SSSS.S..SSSSSSSSS...........', '................................SSSSSS......................S........SS................SSSSSSSSSSSSSSSSSS.......', '................................SSSSSS...................................................SSSSSSSSSSSSS.SSSSSS...', '........................................................................................SSSSSSSSSSSSSSSSSSSSS...', '...................................................................................SSSSSSSSSSSS....SSSS...SSSSSS', '.......................................................................................SS.....SSSS...S...SSSSSSS', '.............................................................................SS.........S.....SSSS.....SSSSSSSSS', '.............................................................................SS..............SS........SSSSSSS..', '.........................................................................................S..................SSS.', '................................................................................SS.......SS...................S.', '...............................................................................SSS.....SSSSS........SSSSS....S..', '...............................................................................SS.....SS..........SSSSSSSSSSSSSS', '...............................................................................S......S.........SSSS.....S...SSS', '................................................................................................SSSS.....S...SSS', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................'],   // 1-8 the ridge of low bamboo grass
+    ['...........................................ssssssssspp..........................................................', '...................................................sp...........................................................', '............................................p.......p...........................................................', '...........................................ppp.....ppp................sss.......................................', '............................................p.......p..................s........................................', '............................................p.......p................ssss.......................................', '............................................p..SSS..p................s.ss.......................................', '............................................p..SSS..p................Ssss.......................................', '.....................................S...s..p..SSS..p..s.............S.s........................................', '..................................SSSS...s.....SSS.....s.............SSS........................................', '.................................SSSSSSSSssssSSSSSSSssssssSSSss......SSS........................................', '...............................SSSSS.SSS..ssSSSSSSSS.s..SSSSSSssss...SSSS.......................................', '.............................SSSSSSSSSSSSSSS..S...SSS.SSSSSSSSssssSSSSSSS.......................................', '............................SSSS...SSS...SSSSS....SSSSSS.SSSSSSssssSSSSSS.......................................', '.........................SS.SSS...SSS...SS.........SSSSS...SSSSsssSSSSSS..SS....................................', '.......................S.SSSS...SSS...SSS.............SSS...S.....SSSSSSSSSSS.............................SSSSS.', '.......................SSSSSS...SSS...SSS............SSSS...SSS...SSSSSSSSSSS............................SSSSSS.', '.....................SSSSSS....SSS......................S.....S...SSSS....SSSSSSS..................SSSSSSSSSSSSS', '.................SSSS...S.....SS...................................SSSSS....SSSSS...............SSSSSSSSSSSSSSSS', '...............SSSSS...SS....SSS....................................SSSS.....SSSSSSsss..........SSSSSSSSSSSSSSSS', 'S.............SSSSSSSSSS....SSS.......................................SSS.....SSSSSsSS........SSSSSSSSSSS...SSSS', 'SSSSSSSS...ssSSSSS...S..................................................SS......SSSSSSsss...SSSSSS....SS........', '.SSSSSSSSSsss......................................................................SSSsss.......................', '.SSSSSSSSSSsss.....................................................................SSSSSSSSS....................', '......SSSS..........................................................................SSSSSSSSSSS..............SS.', '....SSS.....................................................SSSS......................SSSSSSSSS.S.S......SSSSSSS', '.SSS.....................................................SSSSSSSSSS.......................SSSSSSSSSSSS...SSSSSSS', '..S......................................................SSSSSSSSSS.......................SS...SS.SSSS..SSSSSSSS', 'SSS....................................................SSSSSSSSSSSSSSS............................SSSSSSSSSSSSSS', 'SSSs........................................................SSSS...SS................................S.....SSSSS', 'SSSss.......................................................SSSS...SS.....................................SSSSS.', 'SSSsss..sssssss.............................................S..........................SSSSSss............SSSSS.', 'SSSssssssssssssss....................................................................sssSsssssss................', 'SSSSssssssssssssss.................................................................sssssssssssss................', 'SSSSssssssssssssSSSS.....SSSSSS.................ssssss.............................ssssssssssssss.ssss..........', 'SSSSSssssssssS.SSSSSSSSSSSSSSSSSSS...........ssssssssssss.....SSSS...........sSSS..sssssssssssssssssssss......ss', 'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...........ssssssssssSSS....SSSS...........ssSSSssssssssssSssssssssssSS...Ssss', 'SSS.SSSSSSSSSSSSS.SSSSSSSSSSSSSSSSSSSS...S...ssssssssssSSS..SSSSSSS.........ssSSSSssssssssSSSSSssssssSSSS...SSSs', 'SSS...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSssssSSSSSSSSSSSSSSSSSSS.....ssssSSSSSSssssSSSSSSSSSSSSSSSSSSSSSSSS', '...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '...SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', 'SSSSSSSSSSSS......SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS........SSSSSSSSSSSSS...SSSSSSSSSSSSSSSSSSS', 'SSSS...SS.....SSSS...SSSSSSSSSSSSSSSSS...SSSSSSSSSSSSSSSSSSSSSSSSSS....SSSSSS...SSSSSSSSSSSS...SSSSSSSSSSSSSSSSS', '................................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSS.SS......SSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSS..SSSS...SSSSSS........SSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSS...SSSSSSSSSSSSSSS.', '.............................................................................SSSSSSSSSSSS.......SSSSSSS...SSSSS.', '.............................................................................SSSSSSSSSSSSS...SSSSSSSSSSSSSSS....', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '.............................................................................SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS', '................................................................................SSS...SSSSSSSSSSSSSSSSSSSSSSSSSS', '...............................................................................SS......SSSSSSSSSSSSS...SSSSSSSSS', '...............................................................................SS......SSSSSSSSSSSSS...SSSSSSSSS', '...............................................................................S..........SSSSSSSS.......SSSSSSS', '............................................................................................SSS.............SSSS', '.............................................................................................SS.............SSSS', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................', '................................................................................................................'],   // 1-9 the summit of Tsurugi
+  ],
+};
+const VIL2 = {   // the Village from the Iya valley, its owner's picks of round 2, cut from research/variants/village-<el>-1-px.png, path A, a sheet pixel one game
+  // pixel (the sheets drew them twice as big as asked); 'd' a dim grey (the sheet's dark grey, which the snap made black): rows; dx, its left from the wall;
+  // base, its rows over the ledge's top (it stands on it)
+  cherry: { dx: 0, base: 74, rows: ['.................................ood...............................................', '.................................ooo...............................................', '..................................ooo..............................................', '..................................ooo.d.dd.........................................', '................................ppdooppdpp..or...ooo...............................', '...............................dppppppppppprrr.dooooo..............................', '...........................ooo.pppppppppppprrrroooood..............................', '............................ooopppppppppppporppoooo................................', '.............................oopppppppppppppppppoppp..ooo....d.....................', '.........................d..pprppppppppppppppppppppppdoo.....ood...................', '........................doodpppppppppppppppppppppppppoo......ooo...................', '........................oooorppppppppppppppppppppppppo.......oooo..................', '........................ookdppoppppppppppppppppppppppkdp.......oo..................', '......................pppoooooopooppprpppppppppprpppppppp.....ppopp................', '......................pprrro.ooro.ppppppppppppppdkdppppppooo.pppppppdo.............', '...........o...........drrr..ooo...ppppppkrpppppookppppppdooopppppppooo............', '...........oo.........dorrr...oo...pppdpppppppppoodppppppdoooppppppporo............', '...........oooo.........rr..........pprpp.dpppppookkppppkppppppppppporr............', '............ooo......................pdp...ppppkkkkkkppkppppppppppppppppp..........', '............doopp.oo....ppdpp..ppdp......dskkkkkkkkkoooorppppppppprppppppo..ooo....', '......d....dppppppooo..pppppppppppppd....dddkkkkdkkdooooppppprpppppppppppkdooo.....', '......o....pppppppoop..pppppppppppppp....dddkkkkookoooooppppppppppppppppokooo......', '.......oo..pppppppoopooppppppppppppp......dddkkkokkooookkpppprrppppppprookooo......', '......doodrpppppppppppppppppppppppppp.o....dddddddddododkdopkdoopppppppppppppp.....', '......pprpppppppppppppppppppprpppppppooo.oodddddddddddddkoookdoopppppppppppppp.....', '.....pppprppppppppppppppppprpppppppprorrokddkddddkkkkkkkkkokkkokkpppppp.pppdp......', '.....dppppppppppppppppppppppppppppppoorrkkkdddkkkkkkkkkkkkkkkkkkkdpppp...pppp......', '.....rppppppppppppppppppppppppppppprpprkkkkddkkkkkkkkkkkkkkkkkkkkkd.d....pdp.......', 'oooodpppppppppoppppppppppppppkoooopppppppodkkkkkkrprookkdpkppkkkkko................', '.ooooppppppoooopprppppppppppppoooopppppppdokkkkdpppprokdpppppkkdroo................', '..oooppppppddoookppppppppdpppokookpppppppkkkokkdpppprrddppppppkrpood...............', '.doo..pppppkookkdpppppprppppkkoookkpppppkkkkookdppppprrppppppporoooo...............', 'do.....pppkoo.dkpppppppprppkkkookkkkppppkkkkdoopppppppppppppppppoppdddd....dd......', '.....d....o...ooopppppppdookkkddkkddkkkkokkdpppppppppppppppppppppppppppp..doo......', '.........o...ooooopppppkkkdddkddkkddkkkkdkkppppppppppppppppppppppppppppppdooo......', '.............oodooppppkkkkkkdkddkdsdkkkkkkkppppppppppppppppppppppppppppppoooo......', '.............oooo..pppkkkkkkddddkddkkkkkkkdppppppppppppppppppppppppppppppoo........', '...dp...ooorpdddd....ddkkkkkkkddkddkkkdooooppppppporpppppppppppppppppppppopp...dooo', '..dpppd.oorppddd......dddkkkkkkddddkkdookookppppppkppro.pppppsppspppppppppppp.doooo', '.ppppppoorpp..........sddddkkkkdsddkkookoookkppppkdprro.ppppppppppppppppppprr.ooooo', '.ppppppporpp...........dddddkkkddddkkkooookkdpppkkdorr...pdppoppppppprpprpppp.ooo..', '.rooo.....................dddkkdsdddkkkookkdskkkdkddddd..oooopppppppooodpppppp.....', '..do......................ddddkddddddddodddddddddddd.....ooo.pppppppkoodpppppp.....', '..........................ddddsdkdsdddsdddsdddsdddd.....ooo..pppppp.oo..dppppp.....', '..........................ddddddddddddddddd.............oo....pppp.......pppp......', '..........................ddddddsddd....................o......pp..................', '.........................dkkddddkd.............................d...................', '......................d..dkdkksdddd................................................', '......................ddddddddddd..................................................', '.....................dddsddddddd...................................................', '.......................dkddd...d.............pp....................................', '....................ddsddddddd...............ppp...................................', '...................dddddddddd................pp....................................', '...............dd.ddsdddsddd......................................ppp..............', '...............od.dddddddddd......................................dpp..............', '...............dddsddkkdddsd.......................................pp..............', '...............ddkdddkkkkd.........................................................', '...............ddkddsdddkd.........................................................', '..............dddkdddkdddd.....................................................pp..', '...........dddsdddsdddsddd.....................................................pp..', '..........ddddddddddddd........................................................d...', '..........ddskddsdkkdd.............................................................', '..........dddkddddkd...............................................................', '.......d..sdddddddsdsd.............................................................', '.......d..ddddddkkdddd.............................................................', '......ddsdddsdddsdddsdd............................................................', '......dkddddddddddddddd............................................................', '....d.skddsdddsdddsdkkd............................................................', '....dddddddkddddddddddd............................................................', '...ddddddd.dsdddsdd.dddddd.........................................................', '...dddddd..dddddddd..dddddd........................................................', 'ddsddddkd.dddds.ddsd..sdddsddd.....................................................', 'ddddddddd.dddd...ddd...ddddddd.....................................................'] },   // a mountain cherry, a wide crown on a leaning trunk (Д102 «C»)
+  beast: {   // Iya's macaque, sika deer and wild boar, by turns (Д103 «B»)
+    macaque: { base: 27, rows: ['........dssssd..', '.......dssssss..', '......dssssssss.', '.....dsssssssss.', '.....soosooooooo', '.....soosokdooko', '.....ssosokoooko', '...dsssssooooooo', '..ssssssssoooooo', '..ssssssssoookoo', '.sssssssdsooooo.', 'dssssssssddooo..', 'sssssssssskkkd..', 'sssssssssdsdss..', 'sssssssssddsss..', 'sdsssdssssdds...', 'sssssddssssskss.', 'ssssssssdssskss.', 'sssssssssdssdss.', 'sdsssssssdsssds.', 'sssssssssdssdss.', 'dsssssssddsdds..', '.sssssssdsssdsd.', '..sssssssddss.sd', '...s.s.s...s....'] },
+    deer: { base: 43, rows: ['.........ds....d.ds.....', '.........ss....s..s.....', '.........ss.ss.s.ss.....', '.........ss.ss.sssd.....', '.........ssss..ss.......', '..........ss...ss.......', '...........sss.ds..d....', '............sss.s.do....', '.........doooss...oo....', '.........oooooss..d.....', '.........oooooooooo.....', '..........dooooooooo....', '............ooooooooo...', '.............ooookooood.', '.............ooookoooooo', '.............oooooooooo.', '.............oooooooooo.', '.............oooooooooo.', '.............oooooo.....', '.............oooooo.....', '............doooooo.....', '............ooooooo.....', '..doooooooooooooooo.....', '..oossoosoooooooooo.....', 'oooooooooooosoooooo.....', 'oooooossooossoooooo.....', '.oosoosssoosooooooo.....', '.ooooooooooooooooo......', '.ooossooossoooooow......', '.ooooooooooooooow.......', '.oooooooooooooooo.......', '.ooooodowwsooooo........', '.ooooooo...oooooo.......', '.oookooo...ooooo........', '.oo.ooo....oooooo.......', '.oo.oo.....ooooo........', '.oo.oo.....oooooo.......', '.oo.oo.....ooooo........', '.oo.oo.....ookooo.......', '.oo..oo....ooo.oo.......', '..o...o.....o...........'] },
+    boar: { base: 21, rows: ['............dsd.ds...............', '.......ddddddddddddddd..d........', '.....ddsdkdskkkkdsksdsd..s.......', '.....ddkkddddddkddkdskdd.d.......', '....dsdddsdddsdsdsksssdsd........', '...ddddddkkkdkkdddkksdddddd......', '..dsdsdkdsdsdsdkksdkkkdsdsd......', '.dddddddsdkksddddddddddddddd.....', 'd.dddsdsdsdddsdddsdddsdsdsds.....', '..ddddddddddddddddddddddwkdd.....', '..dsdsdsdsdsdsdsdsdsdsdsdddsd....', '..dddddddddddddddddddddddddddd...', '..dddsdddsdddsdddsdddsdddsdsdssss', '..dddddddddddddddddddddddd...ssks', '..dsdsdkdsdsdsdsdsdsdsdsddds.ssss', '..ddd.ddd......ddd..dd.......sss.', '..dd..dsd......dds..ds...........', '..dd...ddd.....ddd...dd..........'] },
+  },
+  kaya: { base: 49, rows: ['...............o..........................................', '...........oo..oo..o......................................', '...........oo..oo.oo......................................', '.........o..oo.oodo..oo...................................', '.........oo.oo.oooo.do.................do..o..............', '..........o..ooooos.o...............o..oo..d..............', '..........ds.ssooskoo...............oo.oo.do..............', '..........ds.dsooskoo............d..oo.oo.oo..............', '...........dodsossoo.............oo..ssoo.os..o...........', '............sososss................o.sooooskoo............', '............sssosss................o..ooooskoo............', '............sssosss.................o.ssoskss.............', '........d...sssosss.................sossososs.............', '........o..o........................sossosos..............', '.........ooo.....do..................sssosss..............', '............dd.o.oo..d...............sssosss..............', '............os.o.ds..oo..............sssosss..............', '............os.o..s..dd.....................ooo...........', '...........ookdod.sd.................sd.d.sdooos..........', '...........skksoo.do.................ssdo.ss...ss.........', '..........oskdsossoss............dd..skoo.ss....ds........', '.........dosossossoss.ddd.......o..dssdooddsd.....d.......', '.........oosoosossoss.dooo......o..sskssoskss.............', '.........doosssossosso...o.........dskssososs..o..........', '.....doodssosssosssossd...........dssossossosd..dd........', '.....ooksokksssossskdsd...........oosossossoss..ssd.ooo...', '...sskkksookssoossskooo...........oodossossosss...oo......', '...dskkksoodssoosssdoood.........dookossossosss....o......', '.....doosooosooosssoosso.........oosksssossskss...........', '...dooossdossookssssksss.........ssskssoosssosss..........', '..oooooosoossooosssoosss........ossossooosssosss..........', '..oookkookoosososssoodos........ossossooosssosss..........', 'ooo..ssskkoososooksookos........sssossoosossooksoo.o......', 'ooo..ssskdoosdsooksoskdso.......oskossooskssokksod........', '.....ooskooosksooksoskdooo......oskssoooskdsssksss........', '...oooosksossksskkssskdooo......ooosskosokdossksos........', '..dooooskssskkssdkssskssoo......skosskdsokdossksosd.......', '..o..ssoksssoksssksssksssd......skssokdsokdsssksoos.......', 'oo...sssdssokdsssososkdoss......skssokdsokdsssossos.......', '.....oosdsssdsssoososo.osd.do...okssodssokdssoo.sooo......', '.....oo.ososoossoosooo.soo......oossooososdssso.sooo......', '.....os.ssoooosssdooss.so.......odssooososdssso.sos.oo....', '...d.os.ssosooosokooss.oo.d.....oossooossooosoo.sos..oo...', '.....os.ssosooosooooss.oo.o.....o.osooossooosoo.sos..oo...', '.....oo.ssosooosoososs.ss..od...o.ossoossoososs.sso..oooo.', '...d..o.ssoo.ooso.ssos.o........o.osoooso.dsoss.ooo....ooo', '...d..o.oooo.oooo.sooo.o........o.oooooso.dsooo.oo.....ooo'] },   // kaya stacks, shaggy (Д104 «D»)
+  statue: { end: 22, base: 81, rows: ['dd........................................................................', 'od........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '.............ddd..........................................................', '..........ddsssss.d.......................................................', '..........dsdsdsdss.......................................................', '.........ssdsdsdssss......................................................', '........dsdsdsdsdsdsdo....................................................', '........sssssdsdddsds.....................................................', '.......sdsdsdddsdsdkd.....................................................', '.......dskddssssssss......................................................', '.......ddssddsdddsdo......................................................', '........sksssssdkds.......................................................', '........dsdsdsssdsd.......................................................', '.........dsdsssssyy.......................................................', '..........dddsdsddd.......................................................', '.........dsdsdsdsd........................................................', '.......sdsdsksds..........................................................', '......sdsssds.............................................................', '......dssddsssdss.........................................................', '....sdsskdsssssss.........................................................', '...ddsssdsdsdsds..........................................................', '...dsssksdsdssss.s........................................................', '...ddsdkdsdsdsdods........................................................', '...dsdsskdssssssods.......................................................', '....dsdsskdsdsdsokd.......................................................', '.....dsdssdsssssokss......................................................', '.......ddsdsdsdsskdd......................................................', '.......dkdssddsssdsd......................................................', '.......sdscsykdkddd.......................................................', '.......dsssdsykdso........................................................', '........dsdsdydsdod.......db..............................................', '.........dsssssssss........b.dd...........................................', '..........dsdsssdsd..........bb...........................................', '..........sdcdkdsd..............bb........................................', '.........sdsdkdsd.........................................................', '.........dsssksss.................dd......................................', '.........sdsksds..................db......................................', '.........dsdkds.....................b.....................................', '........dsdyokd...........................................................', '........ddsssdss........................................................dd', '........................................................................dd', '....sssssssssssssso.......................................................', '...sdsdsdsdsdsdsssdo......................................................', '.dsssssssssssssssssss.....................................................', '.ddsdsdsdsdsdsdsdsssdo....................................................', '.dsdsdsdsdsdsssssssds.....................................................', '.ddsdkdkdsdddddsdkddd.....................................................', '..sdsd.dsdsdsdsdsdsds.....................................................'] },   // the Peeing Boy on his rock (Д105 «A»); end: the ledge's end, from its left
+  rope: { carps: [   // koinobori on a rope across the shaft, long carps streaming in the wind (Д106 «F»): where along the rope (u), how far under it (hang)
+    { u: 0.18, hang: 5, rows: ['......bbb...............', 'bbbbbbbbbb..............', 'bbbbkkkbbbb.............', 'bbb.bbbkbbb.............', '.bb.bkkbkbbb............', '.bb.bkkbkbbb............', '.bbkbbbkbbbbb...........', '.bbbbkkbbbbbb...........', '.bbbbbbbbbkbbb..........', '..bbbb.bbkbb............', '..bkbbbbkbbbbb..........', '..bbb.bbbbbbbbb.........', '...bbbbbbbbbbbb.........', '...bb.bbkbbbkkb.........', '...bbbbkbbbbbbb.........', '....bbbbbbbbbbb.........', '....bbbbbkbbbbbb........', '.....bbbbbbbkbb.........', '.....bbbbbbbbbbb........', '......bkbbk.bbb.........', '......bbbkbbkbbbb.......', '.......bkbbbbbkkb.......', '.......bbbbbbbbbbb......', '........bbb..b..bb......', '........bb...bb.bb......', '.........bb...b..bb.....', '.........bb...bb.bbb....', '..........bb...b..bbb...', '..........bb...bb..bb...', '...........bb...bb..bbb.', '...........bbb...bb..bbb', '............bb....bb..bb', '..................b.....'] },
+    { u: 0.342, hang: 2, rows: ['...s.............', '..sks............', '.dkkksd..........', 'dkkkkkkss........', 'dkkkdssss........', 'sssssksdds.......', 'dskkkddkdss......', '.skkwkdwkss......', '.skkdkkwksks.....', '.skdskkwksks.....', '.sskdwwkdkkds....', '..skkkkdsksss....', '..sskkksss..s....', '..s.ssssskd.d....', '......dkdkd......', '...d.skdkdss.s...', '....dkssksdd.d...', '...dkkdddksks....', '....dkdkdkks..s..', '....ssddsdskss...', '......dsksdkdkd..', '......skskkskks..', '.......dksskskks.', '......dskskdkkkd.', '.......sskkdssdks', '.......dkssssssss', '........ss..ds...', '..........s..s...', '..........s..sd..', '.........d.d..s..', '...........s..ds.', '...........ds..ss', '...........sd...s', '................s'] },
+    { u: 0.559, hang: 5, rows: ['......ooo...............', 'oooooooooo..............', 'ooookkkooo..............', 'oookoookooo.............', '.ookok.ooooo............', '.ooko.o.oooo............', '.oooko.kooooo...........', '..ooo..oooooo...........', '..ooooooookoo...........', '..okoooooooooo..........', '..oo.oookooooo..........', '..ooo.oooookoo..........', '...o.oooooooko..........', '....ooo.okoooko.........', '....ooooooookoo.........', '....o.ooooooooo.........', '.....oooooookoo.........', '.....oo.ookooko.........', '......oooooooooo........', '......ooooooo...........', '.......ooooooooo........', '........o..ookkoo.......', '........oo..ookooo......', '........oo...okkoo......', '.........oo..ookooo.....', '.........oo...ookooo....', '.........ooo..oookooo...', '..........oo...ook.ooo..', '...........oo...ook.oooo', '...........oo....oookoo.', '..................ooo...'] },
+    { u: 0.739, hang: 6, rows: ['......bbb...............', 'bbbbbbbbb...............', 'bbbbkkkbbb..............', '.bbbbbbkbbb.............', '.bb.bkkbbbb.............', '.bb.bkb.bbbb............', '.bbb.bbkbbbb............', '.bbbbkkbbbbbb...........', '..bbbbbbbbb.............', '..bbbbbbbbkb.b..........', '..b.kbbbbbbbbb..........', '..bbbbbbbbbbbb..........', '...bbbbbbbbb.bb.........', '...bbbbbbbbbbbb.........', '....bbk.bbkbbbb.........', '....bbbbbbbbbbb.........', '......bbbbbb.b..........', '.....bbbbbbbbbbb........', '......b.bb.bbkbb........', '.......bbbbbbbbb........', '.......bbkbbbbb.b.......', '.........bbbbbkbb.......', '........bbb.bbk.bb......', '.........bb..bbkbb......', '.........bb...bkkbb.....', '.........bbb..bbkbbb....', '..........bb..bbbkbbb...', '..........bbb..bbbkbbb..', '...........bb...bbbkbbbb', '............bb...bbbkbbb', '............bb....bbb...', '...................bb...'] },
+    { u: 0.901, hang: 5, rows: ['.......d.............', '.....dss.............', 'dssssssss............', 'sssskkkks............', 'ssdkwwwkks...........', 'sskwkkkkkks..........', '.skwkkkkdks..........', '.skkwwwkskks.........', '.skkkkkkkdss.........', '.dkkkkkdsssds........', '..ssssssddddd........', '..skdsdkkskds........', '..dsd.ddddskks.......', '...s..dsdksssd.......', '.....sdkdskkdd.......', '....sskddsdd.s.......', '....dkdskkss.........', '.....skdddd.ds.......', '.....ddkss..d........', '......dsdkd..........', '.......sdkd.d........', '.........sssssds.....', '........ds.sskds.....', '........s...skks.....', '........d...dskkd....', '.............skksd...', '.............dskkssd.', '..............sskksss', '...............sskkss', '................sds..', '.................sss.'] },
+  ] },
+  bridge: { deck: 2, tile: ['ssss', 'ssss', 'oooo', 'oooo'],   // the vine bridge of Iya, a thin deck between its posts (Д107 «D»): a tile of it repeated, its deck row at the rect's top; its ends
+    left: ['w...........', 'oo..........', 'wkddd.......', 'okowddod....', 'okoowdooo...', 'okdooo.ooooo', 'od.ooo.oooow', 'oo......oooo', '............', 'dd..........', 'oo..........', '.o..........', '.oo.........', '..o.........', '...o........', '...od.......', '...oo.......', '....oo.....o', 'wo..do..ddoo', 'o.....d.oo..', 'ooo.........', 'ooo.dwww....', '.oo.oooowwww', '....dodooodo', '....oooooooo', '......dododo', '........odod'],
+    right: ['......dwwwdw', '......wwwwoo', '......wooooo', '......oooooo', '......oooooo', '...doddoooo.', '...oookdookw', 'oookoookodww', 'oookooookooo', 'oookooodooko', 'oo.doodookdo', '...dokookdo.', '.....wooowoo', '...d..oooooo', '...oo...ooo.', '..oo..o.....', '.do...ooood.', '.oo...ooooo.', 'oo....oooo..', 'o....doood..', 'o....oookoo.', '........ooo.', '...doodoood.', '...ooookdoo.', '.ddkooooo...', 'ooookookkoo.', '.ooodokoooo.', '.oo...ooooo.', '.....dooooo.', '......ooo...'] },
+};
+const vil2 = (el) => VIL2[el];
+// What hangs and falls in a world (ICE_SPR; the Village's own, VDROP_SPR, without cold), its hang drawn from its top row at the hang point down, a sheet pixel
+// one game pixel: icicleTip is how far under the hang point its tip is (game px), for the game to drop what hurts from there (UPwell); 0 where it has none
+const icicleSpr = (th) => (th.ice === 'village' ? VDROP_SPR : ICE_SPR[th.ice]);
+const icicleTip = (th) => { const IC = icicleSpr(th); return IC ? IC.hang.length * PIX.base : 0; };
+// The Village's falling things and slick walls without cold (owner, Д77: «В деревне не должно быть элементов холода»)
+const VDROP_SPR = {   // village-drop E (owner, Д79 «E»: a pine cone), path A off research/variants/village-drop-1-px.png
+  hang: ['.......o.......', '......o.o......', '...ooo.o..oo...', '..o.o.....o.o..', '...o..ooo..oo..', '.....ooooo.....', '.oo.ooooooo..o.', 'o.o.ooo.oo..o.o', '.o.o.......o.o.', '..o.o.....ooo..', '.ooo...o.oooo..', 'o.oo..ooo.oo..o', 'oo.....oo....oo', '....o.....o....', '..o.oo...ooo.o.', 'ooo.o....oo....', '.ooo.o.o...ooo.', '.....oooo..oo..', '...o..ooo..oo..', '..o.o....oo....', '...oo....oo....', '......r........', '.....rrrr......', '.....rrrr......', '......rr.......'],
+  fall: ['........o.......', '.......o........', '......o.o.o.....', '.......o.o.o....', '....o...o.ooo...', '.......o.....o..', '......ooo...o...', '...o.ooooooo....', '.oo.ooo..ooo..oo', '.oo......oo...oo', '....o.......o...', '...ooo.....ooo..', '.oooo.o.o...o.o.', '.o.....ooo...ooo', 'o....oooo.....o.', '.....o.....o....', '..ooo......o....', '..oo...o.o..ooo.', '......oooo..oo..', '.......ooo......', '....oo..o.oo....', '.....o....oo....', '.......rr.......', '......rrrr......', '......rrrr......', '......rrrr......'],
+};
+const VSLICK_SPR = ['wkrkrkrrrrrrrrrrrrrwrrr', 'wrrrrrrrkrrrrrrrrrrwrrr', 'wrrkrkrkrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wkrkrkrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wkrkrkrkrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wkrrrkrkrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrkrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'kkrkrkrrrrrrrrrrrrrwrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrkrkrrrrrrrrrrrrrwrrr', 'krrrkrrrkrrrrrrrrrrwrrr', 'rkrkrkrkrrrkrkrkrrrrrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'rkrkrkrkrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrkrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrkrrrrrrrrrrrrrrrr', 'rrrkrkrrrrrrrrrrrrrwrrr', 'krrrkrrrkrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'krrrkrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrrrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rkrkrkrkrrrrrrrrrrrwrrr', 'rrrrkrrrrrrrrrrrrrrrrrr', 'krrkrkrrrkrrrrrrrrrrrrk', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrrrkrrrrrrrrrrrrrwrrr', 'krkkkrkkkrkkkrrkrkkskkk', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkskkk', 'kkrkrkkrkkrkrrrrkrrwrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrkkkkkkkrkkkrkrkkkkkk', 'krrrrrrrrrrrrrrrrrrwrrr', 'kkrkrkrkrrrkrrrkrkkokrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrkrkrkrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrkrkrkrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrkrkrkrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrkrkrkrrrrrrrrrrrrrrr', 'rrrrkrrrrrrrrrrrrrrrrrr'];   // village-slick D (owner, Д80 «D»: a lacquered red pillar), path A off research/variants/village-slick-1-px.png: a strip of its
+// surface, laid over a slick rect at a sheet pixel a game pixel, tiled down and across
+// How each world's hazard from below moves (the object first: owner, 2026-10-24): kind (flame: tongues rising and sinking each at its own beat; wave: waves
+// travelling along; roll: billows rolling forward), amp (its front's stand in sheet pixels), rush (more as it speeds up, К2), len (its wavelength, sheet
+// pixels), speed (beats a second, or a tongue's rad a second)
+const HAZ_MOVE = { noyaki: { kind: 'flame', amp: 4, rush: 4, len: 9, speed: 5.2, fps: 12 }, cityfire: { kind: 'flame', amp: 4, rush: 4, len: 11, speed: 4.6, fps: 12 },
+  flood: { kind: 'wave', amp: 2.5, rush: 2.5, len: 42, speed: 0.3, fps: 6 }, tide: { kind: 'wave', amp: 3.5, rush: 3, len: 52, speed: 0.22, fps: 6 },
+  avalanche: { kind: 'roll', amp: 5, rush: 4, len: 34, speed: 0.28, fps: 8 } }, HAZ_LIFT = [];
+const HAZ_SPR = {   // cut from research/variants/<sheet>-1-px.png, path A (each cell's own pixels): band (from its top down the cell, wall to wall), front (the
+  // row it covers most of), burst (what it throws up), foot (the burst's bottom in the band's rows); ICON_INK letters, '.' clear; the sheets' yellow orange here
+  noyaki: {   // village-noyaki A (owner, Д67 «A»: a ragged front over the grass)
+    blob: ['rr...', 'oo...', 'oor..', 'oooo.', '..ooo', '..ooo', '...oo', '....o'],   // what it throws (a piece of its burst)
+    front: 12, foot: 3, band: ['...................ro....................................rr...................................rr.........', '..................roo.................................rr...................................rr............', '..................roo.................................rrr..................................rrr...........', '...........rr...rrr............................rr...rrrrr...........................rr...rrrrr...........', '..........rrr..rrrr....................r.......rr..rrrrrr...................r.......rr..rrrrrr...........', '..........rr..rrrr.....................r.......r..rrrrrrr...................r.......r..rrrrrrr...........', '........rrr..rrrrrr.................rrr......rr...rrrrr......rr..........rrr......rr...rrrrr......rr.....', '.......rrrr..rrrrrr................rrrr......rrr.rrrrrr......r..........rrrr......rrr.rrrrrr......r......', '....r.rrrrkrrrrrrr............rr...rrrr......rrrrrrrrrrrr..rrrr....rr...rrrr......rrrrrrrrrrrr..rrrr....r', '...rr.rrrrrrrrrorr...r.......rr...rrr.......rrrrrrrroorrrrrrr.....rr...rrr.......rrrrrrrroorrrrrrr......r', '...rr.rrrrrrrroorr...rr......rr..rrrr......rrrrrrrrroorrrrrrr.....rr..rrrr......rrrrrrrrroorrrrrrr.....rr', '.rrrr.rrrrrrrooorrr..rrr...rrrr.rrrrr..r..rrrrrroooooorrrrrrr...rrrr.rrrrr..r..rrrrrroooooorrrrrrr....rrr', 'krrrrrrroorrrooorrrrrrrkkkkrrrrrrrorrrrrkkrrrorrroooorrrrooorkkkrrrrrooooooorrrrrrrroorrooorrrrrrkkkkkrrr', 'krrrrrrroorrrooorrrrrrrkkkkrrrrrrroorrrrkkrrroorrroorrrrrooorkkkrrrrrooooooorrrrrrrroorrooorrrrrrkkrkkrrr', 'rrrrrrrroorooooroorrrrrkrkrrrrrrrooorrrrrrroorrroooooorroorrrrrrrrroooorooooroorrroorooooooorroorrrkrrrro', 'kkorrrrooooooooooorrrrrrrrrrrrrroooooorrrrooorooooooorrooorrrrrrrroooooooooooooooooooooooooooooorrrrrrooo', 'koorrroooooooroooorrrrrrrrrrrrrroorooorrrroooooooooorrrooorrrrrrrroooroooooooooooroooooooooroooorrrrrrooo', 'roooorooooooooooorroorrrrrrrroooooooorrrooroooooooooooorrorooooroooorooooooooooroooooooooooroooorrrrrroor', 'oooooooooooooooooooooooorrorroooooooooorooooooooooooooooooooooorooooooooooooooooooooooooooooorooooorooooo', 'oooooooooooooooooooorooorrooroooooooooorooooooooooooooooorooooorooooooooooooooooooooooooooooorroooorooooo', 'ooooooooooooooooooooorrroorooooooooooooooooooooooooooooooorrooooooooooooooooooooooooooooooooooroooorooooo', 'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo', 'koooooooookoooooooooooooooooooooooooooooooookoooooooooooooooooooooooooooookooooksoooooorooooooooroooooooo', 'oooooookookoooookoooooooooooooooooooooooookooookkoooooooooooooooooooooosookooookkoooooooooooooooooooooooo', 'oooooooooksooookooooooooooooooooooooooooookooookooooooooooooooooooooooooookkoookkoooooooooooooooooooooooo', 'kooookookkoookkkooookoooooooooooooooooooookooookooookooooooooooooooookkoookkookoooookoooooooooooooooooooo', 'kooooookkkookkkoookkooooooooooooookooookookookkoookkooooooookooooooooookookkokkoookkoookoookooooooooooooo', 'oookkokkkkokkkooookoooooooooooooookoookkookookkoookkooooooookoookoookookookookkoookkookkkookooooooookkooo', 'kooookookkokkoookkoookoooooooookooookoookkoookkokkooookoookooookoooookkokkooskkookooookkoooooooooookkkook', 'koookokokkokkoookoookoooooooooooooookoookkkookkokkoookoooooooookoooookkkkkookkkkkkoookkoooooooookoooooooo', 'oookookkkkskkookoookkookooooooookkooskooskkookkkkkookkoookoooookooookookkkkkokskkkookkoooookoosoooooookoo', 'kookkokkkkkkkkkkookkoookoooookkoookookkokkookkkkkookkoookskookkkookookkokkkkkokkkokkkookookkoooookkokkkoo', 'kookkookkkskkkkkookkookkoooookooookkokkokkokkkkkookkoookkosookkooooookookkkkkkokkokkoooookkooooookooookko', 'kookkookkkkkkskkkkkookkkookooookokkkkkkskkokkkkkookkoookkokookkokkookkkkkkkrrkkkkskkooookkkokkookookookko', 'kkkkskkkrrkkkkkkkkskskkokkoookkkkkokkkkkkkkkkkkkkkkkskskooookkkookooskkkkkkrrkkkkkkksookokkookookookskkks', 'kkkkkkkkrrkkkkkkkkkkkkkokkookkkkkokokkkkkkkkkkkkkkkkkskkkkookkkokkookkkkkkkkkkkkkkkkkskkookokkkkkookkkkkk', 'skkkkkkokkkkkrkkrrkkskskkkskkookskskkkkkrrkkkrrkkkskkkkkkskkkksskkskkrrkkkrkkkkrrkrrkkskkkskookkkkskkkskk', 'kkkkkokokkkkkrkkkrkkkkkskkkkkokkkkkkkkkrrrkkkrrkkkkkkkkkkskkkkkkkkkkrrkkkkkkkkkrkkrrkkkkkkkskokkkkkskkrkk', 'kkkkkookkkkkkkkkkkrkkkkkskkkkkskskkkkkkrrrkkkkkkkkkkokkkkkskkkskkkkrrkkkkkkkkkkkkkookkkkskkkkkkkskkkkkkkr', 'kkrkkkkkkkkkkkkkkkkrrkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkrkkkkkkkkkkkkkrrkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkrkkkkkkkkkkkkkkkkkrkkkkkkkkkkkkkkkkkkkkkkookkkkkkkrkkkkkkkokkkkkrkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkrkkkkkk', 'kkkkkkkkkkkkkrrkkkkkkkkkkrkkkkkkkkrrkkkkkkookkkkkkkkrrkkkkkrkkkkkkkkkkkkkkkkkookkkkkokkkkkkkkkrrkkkrkkkrr', 'kkkkkrkkkkkkkkkkkkkkrkkrkkkkrkkkkkkkrkkkkkkkkkkrkkkkrkkkkrkrrkkkrkkkkkkkrrkkkkkrrkkkkkrrkkkkrrkkkkkkrrkkk', 'kkkkkrkkkkkkkkkkkkkrkkkrkkkkrkkkkkkrkrkkkkkkkkkrkkkkkkkkkrkkkkkkkrkkkkkkrrkkkkkrrkkkkkkrkkkkkrkkkkkkrrkkk'],
+    burst: ['..........rr.........o...............', '..........rr........o................', '.....................................', '.....................................', '.....................................', '.....................................', '.....................................', '.....................................', '........o......or....................', '........o......or....................', '.........rr....ooo....rr.............', '........o.......o......o.............', '........o..............o.............', '........o............................', '........oo...........................', '.........oo..........................', '.....................................', '.....................................', '............oo...........oo..........', '.............oo.........o............', '.............ooo.......oo............', '......oo..............ooo............', '......ro..............ooo............', '......oo..............ooo............', '......o.........oo...oo..............', '.....o........oo.....oo..............', '.....o........oo.....oo..............', '....rroo....oooo...oooo..............', '.....ooo....oooo...oo................', '......oo....oooo..roo................', '......oor...oookooo..................', '......ooo..oooooooo..................', '......ooo..ooooooo...................', '......ooorrkoooo.....................', '......ooorrooooo.....o...............', '..o...ooorroooo....oo................', '..oo...ooooroooo.....................', '..ooo...oooroooo.....................', '...ooo.oooorooko....o................', '....ooooooooooo...o..................', '.....ooooooooo...oo..................', '......oooooooo..oo...................', '..rr...soooooo..oo.........r.........', '..rrr...oooooo..oo.........r.........', '...roo..oooooooooo.......oo..........', '....ooo.sooookooo....................', '.....oookooooooo.....................', '......oookoooos......................', '.......ooooooo.s.....................', '........oookoo.......................', '.........oooos.......s...............', '........sooos........................', '.rr......ookks.....s...o.............', '.oo......okoo........................', '.oor.....oko.........s...............', '.oooo....oo.........s................', '...ooo.....o.........s...............', '...ooo.....oo........................', '....oo.oo..s....oo.s.................', '.....o..o......oo...s...............r', '.........oo...oo...o................r', '............s.oo..o.................o', '...........s..oo..o................oo', 'o.............o.ooo...............oo.', '...........oo.oooo................oo.', '...........oo.oooo................o..', '...........soooo.......oo............', '..o...o..oo.oooo.....................', '.oo...oo.oooooos.....................'],
+  },
+  flood: {   // mine-flood E (owner, Д68 «E»: bubbles and stones)
+    blob: ['.bbb..', 'bwbkb.', 'bbkbbc', 'bkbbbc', 'bbkbwc', '.cccc.'],   // what it throws (a piece of its burst)
+    front: 7, foot: 3, band: ['..............................................................s...........................s..............', '...................................b...b.....................sss...b.....................sss.....ss......', '...........s..................................................ss..........................ss....ss.......', '...........ss............ssoorrrr........rrrr..rrrr..................rrrr..rrrr..........................', 'rrr.........s........rr.sskkkbrrrr....rrrrksssskrrrrr.............rrrrksssskrrrrr.............r....r.....', '.wrr...............rrrssssssbbbbbwrrrrrsksssssssksbbrr.rr........rrsksssssssksbbrr.rr........rwr.rrrrrrr.', '.bbrrrr.........r.rrrssssbssbkbbbkbrrwbkssssssssskbbbkbrr.......rrbkssssssssskbbbkbrr.......rrbsrrskbsrrr', 'bbbbbrrrrkkkkkkrrrrrkssbbbbssbbbbbbbbwbssssssssssskbbbbbbrrrrrrrrbbbbbbssssssssssssssssssbbbbbbbbrssbbbwr', 'bbbbbbwrrrksrsrrrwbkssbbbbbsssbbbbbbbbbsssssbsssssskbbbbbbwrrrrwbbbbbbssssssssssssssssssssbbbbbbbbssbbbbw', 'bbbbbbbbwrrrsrrrsbbbsssbsbbsswbbbbbbbbssssssssssssssbbbbbbbwbwwbbbbbbbsssssssssksssssbsbsssbbbbbbbbssbbbb', 'bkbsbbbbbwwwssbbbbbbbsssssssbbbbbbbbbbsbssssssssbsskbbbbbbbbbbbbbbbsbbbssssssskbkkssssbbbbbbbbbbbkbbbssbb', 'bbbbbbbbbbbwsbbbbbbbbsswsskbbbbbbbbbbbssssssssssssbbbbbbbbbbbbbbbbbsbbbbbsssskbbbkksssbbbbbbbbbbbbbsbbbbb', 'bbkbbbbbbbbbwbbbbbbssbbkkbkbbbbbbbbbbbssskksssssssbbbbbbbbbbbbbbbbbbbbbbbksskkbkbkbkkkbbbbbbbbbbbbbssbbbb', 'bbbbbssbbbbbbbbbbbbssbkkbbbbbbbbbbbbbbbbkbbkkssskbbbbbsbbbbbbbbbbbbbbbbbbbkbbbbbbbbbkbbbbbbsssskbbbbbbbbb', 'bbbbbbbsbbbbbbbbbbbbbkbbbkbbbkkssskbbbbkbkbbbkkkbbbbbbbbbbsssssbbbbbbbbbbkbbbbbkkbbbbbbbbkssbsssbbbkbbbbb', 'bbkbkbbbbbbbbbbkbbbbbkbbbbbbkssssbskbbbbbbbbbbbbbbbbbbbbsssssssbkbbbbbbbbbbbbbkbbbbbbbbbbssssssssbkbkbbbb', 'bbkbbkbbbbbbbbkkbkbkbkbbbbbkssssssbskbbbbbbbbbbbbbbkbbbsssssskbbkbbbbkssbbbbbbkbbkbbbbbbbsssssssskbbkbbkb', 'bbbbbbbkbbbbssssbbbkbbbbkbkkkssbssbskbbkbbbkbbkkbbkbbbkssssskkkbbbbbkbbbbkbkbbbbbbbbkbkbkssssssskbbbbbbbb', 'bkkbkkbbkkkksssssskkkkbkbkkkbkssssskbkbbkkbbbkbbbkkkbkbkksskbkkbkbbkbkbkkbbkkkbkkwwbbkbkbbssssskbkkkkkbkb', 'kbbkbbbkbbkskssssbbbbbbbkbbbkkkssskbbbssbbbkkbbbkbbbkbkbkkkbkbbkbbkbkbkbbbbkkbkbbssbkbbkkbkkskkbbbkbbbbbk', 'kkbkbbbkbkbkbkssbkbbbkbkbkbkbkkkskbkbbssbbkkkbbkbkbbbbbkbkkkbkbkbkbkbkbkbkbkbkbbbbskkkbkkkbkkkbkbkbkbkbkb', 'kbkbkkkbkbbkbbkbbbkbkbkkbbkbkbkkkkbbkbbbbbkbkbkkbkkbbkbbkbkbbkkbkbkkbkbbkbkbkbkbbbkbbbkbbkkbkbbkkbbbkbkkb', 'kkkkkkbkbkkbkkkkkkkkbkbkkkkkkkkkkkkbbkbkkkbkbkkkkkkkkkkkkkkkkkkkbkkkkbkkkkbkbbkkkkkkkkkkbbkkbkkbkkkkkkkkk', 'kbbbkbkbkbkkbbkbkbkbbbkkkbsbkbkbkbkbkbkkkbkbkbbssbkbkbkbkkbkkbkbkbkbbbkbkbkwkbbbkbsbkbkskbkbkbbbkbbbkbkbk', 'kkbkkkbkkkkkbkbbkkbkbkkkksbbskkkbkbkkkbkkkbkbkbbbkkkkkkkbkbkkkkkkkkkbkkkkkbkkkbkbkbkkkbkkkbkkkbkkkbkkkbkb', 'kbkbkbkkkbkbkbbbkbkbkkkkksbbsbkbkkbbkkkbkbbbkbkbbkkbkkkbkbkbkbkkkkkbkkkbkkbkkkkbbkkbkbkbkbbbkbkbkkkbkbkkb', 'kkkkkkkkkkbkbkkkkkkkkkkkksbbbskkkkkkkkkkkkkbkkbkbkbbkkbkkkbkbkkbkkbkbkbbkkkbkkkkkkkkbkkkkkkkkkkkkkbkkkkkk', 'kbkbkbkbkbkkkbkbkbkkkkkbkkbwkkkbkbkbkokkkbkbkbkbkbkbkbbbkbkbkbkbkbkkkbkbkbbbkbkbkkkbkbkbkkkkoookkbkbkbkbk', 'kkkkkkkkkkkkkkkkkkkkbbkkkkkkkkbkkkkkkkoookkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkookoookkkkkkkkkk', 'kbkbkkkbkkkbkbkbkkcbbbkkkkkkkbbbkbkkookkoookkkkbkbkbkkkbkbkbkkkkkkkbkkkbkbkbkbkbkkkbkkkoookoookokkkbkkkbk', 'kkkkkkkkkkkkkkkkkcckbbbkkkkkkkkkkkkkkkkokkoookkkkkkkkkkkkkkkbkkbbkkkkkkkkkkkkkkkkkkkoooookoookokkkkkkkkkk', 'kkkkkbkbkbkkkbkbkbbbbbckkbkbkkkbkbkokookkookooookkkkkbkbkbkkkkbbbbbbkbkkkbkbkbkkkoooooooooookoookbkbkbkkk', 'kkkkkkbkkkkkkkbkkkcbbkkkkkbkkkkkkkokkkokooookkkkookkkkbkkkkkkkbbkcbkkkkkkkkkkkkoooooooooooooookkkkkkkkkkk', 'kkkbkkkbkkkbkkkbkkkcckkbkkkbkbkbkkokookoookookkkkoookbkbkbkkkbkbkckkkbkbkkkkooooooooookooookkkkbkkkbkkkbk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkookookookookokkkkkkkkkkkkkbkbkkkkkkkkkoookoooooookookkkkkkkkkkkkkkkkk', 'kbkbkbkbkbkbkbkkkkkbkbkbkbkkkbkbkookokooooookookokokkbkbkbkbkbkbkbkbkbkkoooooooooooooookkbkbkbkbkbkbkbkbk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkokkkkokkoooookoookkkkkkkkkkkkkkkkkkkkkokokoooooookkkkkkkkkkkkkkkkkkkkkk', 'kkkbkkkkkkkbkkkkkkkkkkkkkkkkkkkbkkkookokookoookokokkkkkbkbkbkkkkkkkkkkkkkooooooookkkkkkkkkkbkkkkkbkkkbkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkskkbkkkkkokokkookkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkookkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkbkbkbkkkbkkkkkkkkkbkbkbbsskkbkbkkkkkookookkokkbkbkbkkkkkkkkkkkkkkkkkkookkkbkkkbkbkbkkkkkbkkkkkbkbkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkbbkkkkkkkkkkkkoookokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkbkkkkkkkkkkkkkbkkkbkkkkkkkkkbkkkkkkkkkkkkkokkkkkkkbkkkkkbkkkkkkkkkkkkkbkkkkkkkkkkkbkkkbkkkbkbkkkkkkkbk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkbkkkkkkkbkbkkkkkkkkkkkkkbkcbkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkksskkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbbkbkkkkkkkkkkkkkkkkkkkkkkkckkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkksssskskkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkbkbkkkkkkkksssssssskkkbkbkbkkkkkkkbkbkbkkkbkkkbkkkkkbkbkkkbkkkkkbkbkkkkkkkbkbkkkbkbkkkkkkkbkkkkkbkkk', 'kkkkkkkkkkkkkkksssskssksskkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkbksksssssssskkkkkkkkkbkkbkkkkkbkkkkkkkkkkkkkbkkkkkkkkkkkkkbkkkkkkkbkkkkkkkkkkkbkkkkkbkkkkkkk', 'kkkkkkkkkkkkkkkkskskskskskkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkbkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkskssskskkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkbkkkkkkkkkkkbkkkkbkkkkkkkkkkkkkkkkkkkkkk', 'kkbkkkkkkkkkkkkkkkkkksskkkkkkkkkkkbkkkkkbkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkbkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkbkkkkkkcckkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkbkkkkkkkccckkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkcbbcckkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkbkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkcbbckkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkcckkkkkkkkkbkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk'],
+    burst: ['...............cc...........', '.............bcckc..........', '.............cckkc..........', '..............ccc...........', '............................', '............................', '............................', '............................', '............................', '............................', '..........bbb.......ss......', '.........bwbkb..............', '.........bbkbbc.............', '.........bkbbbc.............', '.........bbkbwc.............', '..........cccc..............', '............................', '............................', '............................', '............................', '................bbb.........', '...............wwbbb........', '..............csbkbc........', '.......ss.....cbkbkc........', '........s......cbkc.........', '................ccc.........', '............................', '............................', '............................', '.............sb.............', '..cc..........b.......cc....', '.ckkc................cc.c...', 'cckkc................c..c...', '..cc...................c....', '..c.........bb..............', '...........csbb.............', '..........cwbkbb............', '..........cbkbbc............', '..........cbbkbb............', '....ss.....bbcb.....ss......', '....sss............sbs......', '............................', '............................', '.............b..............', '.......bbb...bb...b.......ss', '.....bbbbbbb.bb.bbbbb.......', '.....bbssbbbbbbbbsbbbs......', '....bbssbbbbbbbbssbbssb.....', '....bssbbbbssbbssbbb.sb.....'],
+  },
+  avalanche: {   // fuji-avalanche C (owner, Д69 «C»: broken slabs, an ice crystal thrown)
+    blob: ['..ww..', '.wwwb.', 'wwwwbb', 'bbbbbb', '.bbbb.', '..bb..'],   // what it throws (a piece of its burst)
+    front: 13, foot: 3, band: ['.........................................................s...............s.................................', '...........................................................................................................', '........................................................w...............w..................................', '........................................................b...............b......r...........................', '............................................................w...............w..r...........................', '...........................................................ww..............wwrrr...........................', '.....................................................r....www........r....wwwrwr...........................', '....................................................rr...wwww.......rr...wwwwwwrrr.................rrrrr..r', '...................................................rrr..wwwww......rrr..wwwwwwws.....r..........rr.rrrw..rr', '........................rrr.................rrrrrrrrwrrwwwwwwrrrrrrrwrrwwwwwwwwsrrrrrrr...rrrrrrrrrrwwr.rrw', '.......................rkrkr...............rrrrrrrwwwrkwwwwwwrrrrrwwwrkwwwwwwwssrrrrkwrr..rrkrrrwwrwwwrrrww', '....................rrrrwkwrrrrr....rr...rrrrwrrwwwwrrwwwwwwwwrrwwwwrrwwwwwwwssssswwwrwrrrwwwrwwwwwwwssswww', '...................rrrwwwkrwwrkr.....w...rkwwwwwwwwwkkwwwwwwwwwwwwwwkkwwwwwwwssssswwwrwwwwrwwwwwwwwwwsksrss', 'kkkkkkkkkkkkkkkkrrrrwwwwrkrwwrwwrkkrwwwrkkwwwwwwwwwssswwwwwwwwwwwsssssssskswssssskwwwsswwwrwwwwwwwwwwsskwsw', 'kkkkkkrkkkkrkkkrrrwwwwwskrrwrwrwwrrkkkkwkwwwwwwwwwsssswwwwwwwwwwwssssskwwkkssssssskwwwwwwwwwwwwwwwwssskskss', 'kkkkkkrkrkrrkkkrwwwwwwwskkrwwwwwwrkkwwkkwwwwwwwwwwsssswwwwwwwwwwwsssssskkkksssssksswwwwwwswwwwsswwwssksskss', 'kkkkkrkrrrkrkrrwwwwwwwwssskwwwwrwkkswwkkwwwwwwwwwsssswwwwwwwwwswwsssssskkskksssskskwwwwwwwsswwwwwwsssskkskk', 'krrrrrwrrwwrrwwwwwwwwsskssssswwwskkkkkkkwwwwwwsswsssswwwswwswwwwsssssskkkssksssksksswswwwwssswwwssssskkkkkk', 'krrwrwwwswwrwwwwswswwsskssssswwwkkkkkkkkwwwwwwssssksswwwswwwwwwssssskskkkskkssskswsswwswwswwwwwwsssskkskkss', 'rwwrwwwwwrwwwwwwwwwwwssskkksswwssskkkkkwwwswwswwsssswwswwswwwwwsssssssskkkskksswwwssswwwwwwwwwwswwskkkkkskk', 'wwwwwwwwwwsswwwwwswwssskkkkkkssskskkkswwwwwwwwsskssssswsswsswwsssssskkkskkkkkwwwwwssswwsswwsbsswssskkkkkwkk', 'wsswbbwwwssswwwwsswsssskwwsswksssssksswwbbwwswsssskbsssswsswsssssssskkkkkbkkkwwwwwssswbbwwsswsswssskkkkkkkk', 'wwsswwwsssswwwwswwwsskkskkwwkkssssksswwwsssswssskskwwswwswwswwsssssksskkkkkswwwwssksssbbsswwssssssssskkkkkk', 'swwssssssswwwwwwwsssskkkskkkskssskswwwwswwssssssskkwsssswssssssssskkbbkkkkwwwwswwssssssbbbbbbbbssssssskkkks', 'swwwsssssbwwwsswssssskkkswkkkkkskwwwwwssswssssssskkwsssswssssssssskkbbkkkwwwwsswssksssssbbbbbbbssssssskkkks', 'wsssssssssswwwwssssskkkkkkkkkkskwwwwwswsssssssssskksssssssssssssskkkkkkwwwwwswswssssssssbbbbbbssssbksssssss', 'ssssssssssssssssssssskkkkkkkkkkwwwwwwwssssssssssskssssssssssssssskkkkkkwwwswswwwssssssssssbbbssssskssssssss', 'sssskkskkswssssskkskskkkkkkkkwwwwwwwwwssksssssssksssssssssssskssskskkkwwwsssswwwssskssksssbbbssssskssksksss', 'sssksskkkwsssssssssssskkkkkwwwwwwwwwwwsssskssbkkssssswwwsssssssskbbkwwwsswwwssssssksssssssssksssksskkssskks', 'sssssskksssssbbssssksssskkwwwwwwwwwwwsssssbbssskssswwwsswsssssskkbkkwwwwswwssssssssssssssssssssssssssssssks', 'ssksssksssswsssssskssksskwwwwwwwwwwwwsswkkbbkskssswwwwswwsssssskkkkwssswbwbbbsssssssksssssksssksssksssskssk', 'sssssssssssssssskkbbbssswwwwwwwwwwwwwswskkkkbbsswwwwwwwsswssskkskkwsssbbwwbwbssssskkkksssssssbsskswssssssss', 'ssssssssssssssssskbbksswwwwwwwwwwwwwsssskkkkkbsswwwwwwwssssssssskwssssbbbbwwbbssskkkkkkssssssskskksssssskss', 'swwswwswwssssssskkbbkkwwwwwwwwwwwwwwssssskkkkswwssswwssswssswwwwwwssssbbbwbbbbssskkkkwkkwsssssskbbbksssksss', 'wsswbbwbbssssssskkkkswwwwwwwwwwwwwwwsssssskkkwsswswsssssssssssswwwwsssbbbwbbbbssskkkksskkssssskskbkkksssssk', 'sswwbbwbbssssssskkksswwwsswwwwwwwwwwsssssskkswsswswssssssssssssswwwsssbbbbbbbsssskkkkkkkksssssssbkkksssssss', 'sssbbbwwbbssksskkkssswwswwswwswwswwssssssssssssssssssssssbsssssssswswssbbbbbsssssskkkkkkwksssssskkkkkssssss', 'sssbbbwbbbbssssssskswswwsswswwsswwsssssssssssssssssssssssssssssssswwwsssbbbbssssssskkkkkkkssssssskkssssssss', 'sssbbbbbbbbssssskssswsswsswsswsswwssssssssksssssbssssssssssssssssswwswwssbkksssssssskkkkkkssssssssksswbwsss', 'ssssbbbbbsssssssssssswsswssssswwswwssssskssssssssskssskssssksssssssswswwwssssssbssssskkkkkkssssssssswwwwbss', 'ssssbbsssssssssssssssssssssssssswsssssssksssssssssssskkkkkkssskssssssswwswsssssssssssskkkkkssssssssbbbwbbbk', 'sssssssssssssssssssssssswwswwsswwssssssssssssssssssskkwsskkssssssssssswsswsssssssssssskkkkkssksssssbbbwwbbk', 'ssssssssssssssskssssssswsssssssssssssskssssksssssskkkkkkkskksssssssssssssssssssssksskssssksssssksssbwbbbbbb', 'ssssssksskkssssssssssssssssssssssssksskssssssssssskkkkkkkkkkkssssksssssssssssssssssssksssssbbssssssssbbbbbs', 'skssssskkskksssskssssssssssssssssssskksssksssksssskkkkkkkkkwkksssksssssssssssssssskssssskskbbkssssssskbbbss', 'kssskkkkkkwsksskssssssssssssssssssksskssksskssskssskkkkkkwwkkkssskkssskssksssssssssssssssssssssksssssssssss', 'ssskkskkkskkskkskssssssssbwsssssssskkssskssssssskssskkkkkkkkkkkssssssssssssksskwsssssssssssksssskssssssssss', 'skkksskkkskkskkssssssssswwbwsssskssksskssskssksskkssskkkkkkkbkkkssssssssssssssssbbssssssskskksskkksssssssss', 'kskkkkskkkkkkkkksssssksswwbwwsskssksskkssksskssksskssskkkkkkkksksskksskssksssksbbsssssssssksssksskkssssskss', 'kkkkkkkwkkkkkkksssssssbbbbbbwbbbsskssssssssksssssssksssskkkkkkkksssssksssskksssswswwwsssssssskkkkkskkssssss', 'kkkkkkkwkkkkkkksssssssbbbbbwwbbbssskssskkssssksskssksssskkkkkkkkksssksskksksssswwwwwwbssssssskkkkskskssssss', 'skkkkkkkkkkkkksskskssbbbbbbbbbwbwbsksskskksskkssksssskssskskkkkkkksksskssksskksbwwbbbwbbksssskkkkkskwwksskk', 'kskkkkkkkkkkkssssssssbbbbbbbbbbbbbkssksksskssskksskksssssssssskkkkkskksskskksssbbbbbbbbsskssskkkkkkkkkkksss', 'ssskkkkkkkkksssssssssbwbbbbbbbbbbbsssksksskssskksskksskssssssskkkkkskksskskksssbbbwbbbbsssssskkkkkkkkkkksss', 'sksskkkkkkkksssksssksssbbbbbbbbbbbsksskskksskksskssssssskssssssskssksskkskkkskksbbbbbbbssksksskkkkkkkkkkskk', 'ssssskkkkkssssssssssssssbbbbbbbbbsksskssssskksssskssskssksssssssssssskkkkkkkssssssbbbbssssssssskskkkkkkksks', 'ksssskkkkksssssssksskkssbbbbbbbbkskskssksskkkskkssksskssskssssssskkskkskkkkkkssksssbbssskssskssssskkkkkskss', 'sksssssssksskssksskssksssskssksskksksskskksssksskssksskkskksssskssskssksskssskkskkssssksskksskssskskkskkskk', 'skkssssssssskskksskksssssskskkkskksskkkskkkskkkskskkkskssssssssssssskskkkkksskkskksssskssskssskskssskkkkskk'],
+    burst: ['.wwb............', 'wwwbb...........', 'wwwbbb..........', 'wwwbbb..........', 'wwwbbbb.........', 'wwwbbwb.........', 'bwwbwbbb....www.', 'bwwbbbbb...wwww.', 'wbwwbbbb...wwbb.', 'bbwbbbbb....b...', 'bbwbbbb.....b...', 'bbwbbb..........', 'bbwbbb.b........', 'bbwbb...........', '.bbb.......ww...', '.bb.......wwwb..', '..b......wwwwbb.', '.........bbbbbb.', '..........bbbb..', 'w..........bb...', '.....ww.........', '....wwb.........', '....wwbb........', '....bbb.........', '.b...b..........', '.............ww.', '.......ws...wbb.', '............wb..', '......b.....b...', '................', '................', 'w...............', 'wbb....ww....sbb', 'wb.....ww.....sb', '.....www.s......', '....wwwws...b...', '...wwwwwss..b...', '..wwwwwss.......'],
+  },
+
+  tide: {   // sea-tide E (owner, Д70 «E»: curls and a tall wave)
+    blob: ['.www..', 'wswws.', 'sswsss', 'swwsss', 'wswwws', '.csbb.'],   // what it throws (a piece of its burst's foam; its black grey: two black dots read as eyes)
+    front: 6, foot: 3, band: ['................rrr.............................................................................s..........', '...........rrrrrrrrrrrr.......................................................................rrrrrr.......', '..........rrrrrrrrrrrrr...................................r.................................rrrrrrrrr......', '.........rrrwwwwsswwwwrrrr..............................rrrr..............................rrrrrrwswrrrrr...', '....rrrrrrwwswssswwkwswswwrr..c.......................rrwwwwrr..c.......................rrwwwswwswsswwrrr..', '...rrrwwrwkswskssckskswwsswr........................rrrwwssswr........................rrrwwsssswkswwwssrwr.', 'krrwwrwssswsscwswcwscwssssssrkkkwkkkkkkkkkkkkkkkkkrrrwwwssssscwcccbkbkbkkccsscbwkkkrrrwsssssssswwsssswsswrr', 'krrwwwwssssscccscccscckcswssrrkkkkkkkkkkkkkkkkkkkrrrrwwskwscccwccckcccckkccscccwkkrrrrwsswbswcccwccsswssssr', 'rwswssswwcbswcccccckccwccssbwrrkkkkkkkkkkkkkkkkkrrwwswsswcccccccbkkccccckkcccsccrrrwwswsccbcwcccccccwcsswss', 'wswsswwccwwbsccckkkbkkkwwbcwkwrrkkkkwkkkkkkrkrrrwwwswsccswccccckkccwwwwwckkcwbsckwwskskskcwccckkkkkkkcwwksw', 'wksccscccsccccckkcccccbkccbcsccrrrrrkkkkrrrrrrwwsssssswwccbkccckccwcckccwkbcbccckwswwsccwcccbkccccccbkcswcw', 'swkcsccccccckckkccccccckkccccccckrrrrrrrrrrrwwwbkssskwcccccccckkcccckkccckccccsskbscbccccccckccwcccckkccccc', 'wbcwccckccccckkkcwwsccckkkcccccckwswrrrrwwwkssbbwcccwwccckccbcbkbwcckcccckcccwcckcbcbsccccckcccwwsscckcccws', 'cbsccckcckccckkcwcckccscckckcccckssswwswswkwsbswccccwccccccccckbccwckccckkcccwckccwccccccckckwccckwccbccbcs', 'ccccckbcccckbkcwccckccckbkbcccccksbsccwbsswsccwbccwcccckccccbcbkwwwcckbkkcccccckwsscccbkccckccwckcccckccccc', 'ccckkccccckckkwwckccwwckcckccccckcccwckcwwkccwbbccccckkckckkckckkwwwcccccwccwckcccccckcccckbwccckcckkkccscc', 'ckkcccckccckckwcccckcckkbcccwckkccccccswccwsccccckccbcckckccbckckkcwcwccwcwcckccckckbkccbcckccwcckkkbccccck', 'kckcckkkkkckkkcwcccckkkccccwcckcccccccccccsckccckckkkccckckkkkckkckccccwcckkkccckccccckkkckkkccccccccccccck', 'bkckckbkkkccbkcwcwcckkcccccwckccccccccccbswccccckcbkckbckkbkckbkckkkcccccckkccccccbcbkbkckbkkccwccccccwcckb', 'kkkbcckccckckkkcwccccccccccckccwcccccwcccckcccckkckkckkkckkckckckkckkkkkkkcccccbckkkkckckcccckccwccwcckckkc', 'ckckbkbkbkckckbkcwccwwcwwcckccccwcccckkkccccbkkkbkccbcckbcckckckcckcckccckccckcckcbcckckccccbckccccccckkbkc', 'kckckkkkkkkkkckkkcccsswccckccckcckkcckkckkkckkkckkkkkkkkckkckckkkkkkkkkkcckcckkckkkkkckkkkkkkckkkkkkkkcckck', 'bkbkckbkckbckkckbkbcccckkkbcccbcckbcccbcckbcccckkcbkckbkckbkbkbcckbkbkbkckccckcckkckbkbcbkbcbcbkckckkkckbkk', 'kkckkckkkkckckkckkkkckkckkckccckkkcbkkckkckkcckkckcckkkkkckkkkckkckckkkkkkkckckkcckbkkkkkkkckkkbcckkkckcckc', 'bckcckckkkckbcckckcckkckcckkbcckcckkbckkkkccbkccbckkbkbkckcckckcbkckckcckckkckckbckkbcckbcbkckckbkbcckckkcb', 'kckkkckckkkckkkckckkkckkkkckkkkcckkckkckkkcckkkkkckkkckckckkckcbkckcckkkckkckkkckkckkckkkckkkckckccckbkbkck', 'bckkckbkbkbkbkbkkkkkckkkkkbckkbkbkbcckckbkckkkbkbkbkkkckckbkbkbkbkbcbkbcckkkkkbkkkbkbkkkkkbkbkbkbcbkbkbkbkb', 'kckckkkbkckkkckkkkkkcbkckkkkkbkkkkkkcckkkckkkkkkkkkckckkckkbkkkckkcbkkkckckkkkkkckkckckckkkckkkkkckkcckckkk', 'bkckbkbkbkbkbkbkkkckkkbkkckkbcbkkcckbkkcckkkbkckkckkbkkkbcbkbcbkbkbkbcckbkbkbkkckkckbkbkbkbkkckkbkckkkbkkck', 'kckkkkkkkkkckkkkckkkckkkkkkkkkkkkkkkkkcbkkckkkkckkkckkkckkkbkbkkkkkkkkkbkkkkkkkkkkkkkckkkkkkkkkkkbkkkkkkkkk', 'bkbkbkkkbkbkkkckckkkcgkkbkcbkkbcbkbkkcckbcbkckkcbkbkkkbkbkkkckkcbkbcbkbkckkkckbkbkbkccbkbkbkbcbkbkbkckbkckb', 'kkkbkkkkkkkkkkkbkkkkkgkkkkkkkkkkkkkbkckkkckkkkkbkkkkkbkkkckkkkkkkkkckkkkkkkkkckkkkkkkkkbkkkkkckkkkkbkkkkkkk', 'bbkckkbcbkkkbkckkcckkgckkkkkbkkkckkcbkbkkbkkbkbkckkkbbkkkkbkbkbkkkckbckkbkbkkkbkbkbkbkbkbkkkkkbkkkbkbkbkbkk', 'kbkkkbkkkkkkkbkkkbkkggkkkkkkkkkbkbkkkckkkbkbkbkckkkckkkbbkkbkkcbkkkbkkkkkkkbkbkkkkkkkbkckbkkkbkkkbkckkkckkk', 'kkbkbkbkbkbkckbkbkkggkgkkkkkbkbkbkbkbkbkbkbkbkbkbkkkbkbkbkkkbkkkbkbkbkbkbkbkbkkoookkbkbkbkbkbkbkbkbkbkkkbkk', 'kkkkkkkbkkkbkkkkkkkgkkgkkkkbkkkbkkkbkkkbkkkkkkkbkkkkkbkkkbkkckkkkbkkkbkkkkkbkkkokokkkbkbkkkbkkkkkkkkkbkckkk', 'kkbkbkbkbkkkgkkkbkggkggkkkbkckbkbkbkbkbkccbkbkbkbkbkbkbkkkbkkkbkbkkkbkkkbkbkbkoksookbkbkkkckbkckkkbkckbkbkb', 'kbkkkbkkkbkkkkkkkkgkkgkkkbkkkbkkkkkbkbkbkkkkkbkkkbkkkbkkkkkbkkkbkkkkkkkkkkkkkookkokkkbkkkkkkkbkkkkkkkkkkkbk', 'kkkkbkkkkkbgkkbkkkgkggkkbkkcgkbkkkbkkkbkbkbkkkkkbkbbbkbkkkkkbkbkkkbkbkbkkooookbkokkkbkkkbkkkkbkkbkbkbkbkkkk', 'kkkbckkbkkkgkkkbkggkgkkbkkkkgkkbkkkkkckkkkkbkkkbkkkbkkkbkckbkbkkkkkkkbkkookkkkkookkbkkkkkkkkkbkkkkkbkkkkkkk', 'kkbkbkbkbkckckkkkgkkgkbkbkcggkkkbkbkkkbkbkbkkkbkbkbkbkbkbkbkbkbkkkbkbkbkokckckkokkbkbkbkbkbkkkbkkkbkbkbkbkb', 'kbkbkkkkkkkckkkkkgkgkkkkkkkgkkkkkkkkkkkbkkkkkbkkkkkkkbkkkkkkkkkkkkkkkkkokcccskkokbkkkkkkkkkkkkkbkkkkkkkbkkk', 'kkbbbkbkbkgkkkbkkgkggkbkkkggkkbkbkbkbkbkbkkkbkbkbkbkbkbkbkbkbkbkbkbkkkokccckcbbokkkkbkbkbkbkbkbkbkkkbkbkbkb', 'kkkbkkkkkkgkkkkbkggkgkkkkggkkkkbkkkbkkkbkkkkkkkbkkkbkkkkkbkbkkkkkkkbkokcckkkkbkokkkbkbkkkkkbkbkkkkkkkbkkkbk', 'kkbkbkkkkkgkkkkkbkggggkkcggkbkkkbkbkkkbkkkbkbkbkkkbkbkkkkkkkbkbkkkbkkokkkkkkckokbkkkbkbkkkbkbkbkkkbkbkbkbkb', 'kbkkkkkkkggkkkkbkkkgkgkkkkgkkbkkkkkkkbkkkkkkkkkkkbkkkbkkkkkkkkkbkkkbkookkckckokkkkkkkkkkkkkkkbkkkbkkkkkkkkk', 'kkkkbkkkggckbkbkkggkggkkkkggkkbkkkkkbkbkbkbkkkkkkkkkbkkkbkbkbkkkkkbkbkookkckookkbkkkbkkkbkkkbkbkkkkkbkkkbkb', 'kkkkkkkgggkkkkkkkggkggkkkkggkkkbkkkkkkkkkbkkkkkkkkkkkbkkkkkbkbkkkbkkkkkookkokkkbkbkkkkkkkkkbkkkbkkkbkbkkkkk', 'bkbkbkbkggkkbkkkbkgkgkbkkkkggkkkbkbkkkbkkkbkkkkkbkbkkkbkkkbkkkbkbkbkbkkkoookkkkkbkkkbkbkkkbkbkbkbkbkbkbkbkk', 'kkkkkkkkkggkkkkkkkkgkgkkkbkkggkkkkkkkbkbkkkkkkkkkbkkkkkkkkkbkkkkkkkkkkkbkkkkkkkkkkkkkbkkkkkkkkkkkbkkkkkkkkk', 'kkkkkkbkkgkkkkckkkkgkkkkkkkkgkkkkkkkkkkkkkkkkkbkkkkkbkkkbkkkkkkkkkkkbkkkbkbkkkbkkkkkbkkkbkkkkkkkbkkkbkkkkkk', 'kkkkkbkkkgkbkkkkkkkgkkgkkkkgkkkbkkkbkbkkkbkkkkkbkkkkkkkkkbkkkkkkkkkkkbkkkkkkkkkkkbkbkkkkkkkbkkkbkkkkkbkkkbk', 'kkkkbkkkbkgkbkkgbkkkkgkkckgkgkbkbkbbbkkkkkbkbkkkkkkkbkkkkkkkbkkkbkkkbkkkbkkkbkkkbkkkbkbkkkbkkkbkkkkkkkbkbkk', 'kkkckkkkkkgkkkkgkkkggkkkkgkgkkkkkbkkkkkkkkkkkkkkkkkkkbkkkkkkkkkbkkkkkkkkkkkkkkkbkkkkkbkkkbkkkkkkkbkkkkkkkkk', 'kkkkkkkkkggkbkckkkcgkgckggggkkkkbkkkkkkkbkkkkkkkbkkkbkkkkkkkbkbkkkbkkkkkkkbkbkbkkkkkkkbkkkkkbkbkbkbkbkkkkkb', 'kkkkkkkkkggkkkkkkkkkkgkkgkgkkkkkkkkbkbkkkkkkkkkkkkkkkkkbkkkkkkkbkkkkkkkkkkkbkkkkkkkbkkkkkkkbkkkkkkkkkkkkkkk', 'kkkkbkkkckgkbkkkkkckgkkkgkgkkkbkkkbkkkbkkkbkkkbkkkbkkkbkkbbkkkkkkkbkkkkkkkkkkbkkbkbkbkbkkkbkkkkkbkkkbkkkbkk', 'kkkkkkkkkgkkkbkkkgkkgkkkkkgkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkbkkkbkkkkkkkbkkkkkkkkkbkkkbkkkbkkkkkkkkk', 'kkkkkkkkbkkkbkkkbkkkbkkkbkkkbkkkbkkkkkkkbkkkkkkkbkkkbkkkkkkkbkkkkkbkkkbkkkbkkkbkkkkkbkkkbkkkbkkkbkkkkkbkkkk', 'kkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkbkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk'],
+    burst: ['.............c....................', '..................................', '................www...............', '................css...............', '.................c................', '.......................w..........', '..................................', '.w..........wwwww.................', 'wcc.....wwwskwswws.w..............', '......wswwssskswskss......w.......', '.....wsswswwwswwssssww....cw......', '....wwwwkwwwcwkwwwssww.....ww.....', '...wkwwswccccccsbbwwssss...c......', '...ssskccckkccccccccwkww..........', '..sssscccccccccccccccswww.........', '..wkwcc.c.cckcckcccccccsw.....w...', '..wws.......ckccccckccccww....w...', '..skc........ckkckkccwccc.........', '...wc........ckbcckcccccs.........', '...wss..w....cckccckccccw.........', '....cwww.....ccccbcckccccws.......', '.............cckccckccccccw.......', '.............wcccccbcccccww.......', '.c...........wccckckccccbww.......', '.............wckkbcckbcccww.......', '............ccckccckckkkccc...ww..', '............wccccckbcckccc...csww.', '............wcckccbkcccccc....ccc.', '............wckcckcckccbcc........', '...........cccccckckkcckc.........', '...........wcccccckbcckccc........', '..........ccckckccckckkcw.........', '..........cccccccckccbccw.........', '..........cwccccckcckkccw......c..', '.........cwccccbkbcbkccwc.........', '.........wckwckkckckcccw..........', '.........wccbckccbkccwsw.....c....', '........wcccckckkkc..ccc..........', '.......wwccccccckb.b.cccw.........', '.......wcccckc..c.....ccww........', '.......wckcckc...c..cbkccww.....c.', '......cckkbkkkc.......bccww.......', '.....ccccbkbcb.bcb.bcb.cccc......w', '....ccccckkkb.......c...cccw.....c', '....cbkckbkbkb...b...b...ccw.....c', '..ccbkckkkbkkkb.b.........cscc....', '..cc.b.......b.....b...b.b.cw.....', '.c......................b....c....', '........w..ww....c...b...b...b....', '.....wwww.www.....................', '..ssswwwswsswwwss......b...b......'],
+  },
+  cityfire: {   // tokyo-fire E (owner, Д71 «E»: a fallen blue sign, a tail of smoke and sparks)
+    blob: ['rr...', '.o...', 'oo...', '..o..', '..oo.', '..o..', '...oo'],   // what it throws (a piece of its burst)
+    front: 33, foot: 3, band: ['..............................s...s.....................................s...s..................', '...............................................................................................', '............................s...s...s.................................s...s...s................', '.........................s.....s...................................s.....s.....................', '....................s...s.......s.s...........................s...s.......s.s..................', '.......................s.....s...s.....s.........................s.....s...s.....s.............', '..................s...s.....s...........s...s...............s...s.....s...........s...s........', '.........................s...........s.............................s...........s...............', '....................s...s.............s...s...................s...s.............s...s..........', '.................s...s...s...............s.....s...........s...s...s...............s.....s.....', '..................s...s...s...............s...s.............s...s...s...............s...s......', '.................s.....s...s.................s.............s.....s...s.................s.......', '..................s.s...ss..................................s.s...ss...........................', '.........................s...s.....................................s...s.......................', '....................s.......s.................................s.......s........................', '......r.........................................r..............................................', '......r...................s...s.s.s.............r...................s...s.s.s.............o....', '......r..................s.....s................r..................s.....s.....................', '..............................s.s...s.........rr........................s.s...s.........rr.....', '.......r.........................s............rr.r.........................s............rr.....', '............................s.s...s...................................s.s...s..................', '.................r.......................rr................r.......................rr........r.', '.................r........................r................r........................r........rr', '...............r.......o......rrrr........o..............r.......o......rrrr........o..........', '.................r....r...rrrrrrrrr........................r....r...rrrrrrrrr...............r..', '.r..............rr....r...rrrrrrrrrr......................rr....r...rrrrrrrrrr............rr...', '..rrrr.........rrrrr....rrrrrrrrrrrrr.........rr.........rrrrr....rrrrrrrrrrrrr.........rrrrr..', '..rrrrr.......rrrrr....rrrrrrorrrrrrrr...rr...rrr.......rrrrr....rrrrrrorrrrrrrr...rr...rrrrrr.', '..rrrrr......rrrrr.....rrrrrroor....rr..rrr...rrr......rrrrr.....rrrrrroor....rr..rrr...rrrrrrr', '.rrrrr.r.....rrrrrrr..rrrrroorrr....r...rr....rr.r.....rrrrrrr..rrrrroorrr....r...rr....rrkkkrr', 'rrrrr.........rrrrrrrrrrrrooorr.....r..rr....rrr........rrrrrrrrrrrrooorr.....r..rr....rrrkkrrr', 'rrrr.....o.....rrrrrrrrrrroorrr...or..rr.....rrr...o.....rrrrrrrrrrroorrr...or..rr.....rrrkkrrr', 'rrrrr........rrroorrrrrroooorrrr.....rr....rrrrr.......rrroorrrrrroooorrrr.....rr....rrrrrrrrrr', 'rrrrrrkkkkkrkrrroorrrrrroooorrrrkkkkkrkkkkrrrrrrrroooooooooorroooooooooooooooooooroorrrrrrrrrrr', 'rorrrrrrkkrrrrroorrrrrrroooorrrrrrkkkkrrrrrrrroorooooooooooooorooooooooooroooooooorrrrrrrrrrroo', 'roorrrrrrrrrrrroorrrroooooooroorrrrrrrrrrrrrrrrrooooooooooooooooooookkooooooooooooorrrorrrrroor', 'roorrrrrrrrrrrooorrrrrrooooororrrrrrrrrrrrrrrrroooooooooooooooooooookkooooooooooooorrrrrrrrrorr', 'oroorrrrrrrroorooooorrroooooorrrrrrrrrrrooroorooooooooookooooooookkkcckoooooooooorooookrkoooroo', 'orooooroorrrrrrooooooooooooooooorrorrrroorrroooooooooooookoooookkgccccckkoooookoooooroorrrrrooo', 'orooooroorrrrrroooooooooooooooorrroorroorrrooooooooooooookoooookkgccccckkoooookoooooooorrrroooo', 'ooooooorroorooooookkoooooooooooorrooooorooooooooroookkrrrrrrrokcccbbbbgcckoooorrokooooooorooooo', 'oooooooooooooooookkrkkkooooooooooooooooooooooorrkrookkkrrrrrkkccckbbbbccckoooorkkkkoooooooooooo', 'ooooooooooooooookkrrrkkooooooooooooooooooooooorrkkrrrkkkrrrrkkccckkbbbbcckoooorkkkkkooooooooooo', 'oooooooooooooookkrkkkrkoooooooooooooooookrooookkkkkkrrrkkkkkccckkbkkbbbbcckkookkkrkkkoooooookrr', 'oooooooooooooookrrkkkkkkoooooooooooooookkrroooookkkkrrrkkccccckcbkkkbbbbbcckrkkkrrrrkooooorkkrr', 'oooooooooooooookkrkkkkkrkoooooooooooookkkkroooookkkrrrkkkccccckcckkkkkbbbccckrkkrkkrkoooookrkrr', 'ooorookkkooorooookkkkkkkrkorroookkrkkkrrkkkrrroookkkkkkcccckkkbkkkcckkbbcckkookkkkkkkoooorkkkkk', 'ooooookkkkooroooookkkkkkkkkkrrooookrkrkrkkkkrrrrorrkkcccckkkkbbcbbkkbbbbkkkooookkkkkkkkokrkkkkk', 'ooooookkkkorrrooookkkkkkkkrkkrrookrrrrrkrkkkrrrrrrkkcccbkkkbkkccbkkkbbkkkroooookkkkkkkkkkkkkooo', 'orrrookkkkrrrrrkkokkkkkkkkkkkrkkkrkrrrkrrrkkrrrrrkkccccbkkkckkccckkbbbkkkrooooorkkkkkkkkkkkkooo', 'rrrkrrokkkkkookrrkookkkkkkkkkkrrrkkkkkrrrrkkrrrkkccccbbbckkkbbkcbbbbkkkkoroorkroorkkkkkkrrrrrrr', 'kkkkkroookkkkkkkkkoookkkkkkkkrkkkkrkkkkkkkkrkrkkcccckkbbbkkbkkkbbbkkkkkskkkokrkkkrrkkkkkkkrrkkk', 'kkkkrroookkkkkrkkkrrokkkkkkkrrkkkkrkkkkkkrrrrkkkcbbbkkbbbkbbkkbbbbkkkrkkskrrrkkkkrrrkkkkkkrkrkk', 'krkkkkkrrrrrkkkrkkkkrkkkkrkrkkkkkkkkkkkkoorkkccbbbbkbbkkbbkkbbbbkkrrrrokkskkkrkrrrkkkookkkkkkrr', 'kkrrkkrkrrrrkkrrrkkkkkkrrrkkkkkkkkkkkrrrrrrkkcbbbkkckkkkbbbbbbkkkkrrrkkookkkkkrrrkrkokkkkkkkkkk', 'kkkrkkkkkrrrkkkkkrkkkkkrkrkkkkkkkkkkkrrrrrrkkcbbbkkckkkkkbbbbbkkkkrrkkkookkpkkrrkkkrkkkrkkkkkkk', 'kkkkkkkkkkrrkkrkkkkkrrrkkkkkkkkkkkkrrrkkkrrkkkbbbbbkbbkkkbbbkkkkkkkkrrrkkrkkrrkkkkrrkkrrrkkkkkk', 'kkkkkkkkkkkrrrkkkkkrkrkrkkkkkkkkkrkrrrkrkrrkkkbbbbkkkkkkkkkkkkkkkkkkkrkkkrkkkrkkkkkkkrkrkkkkkkk', 'kkkkkkkkkkkkrrrkkkrrrkkkkkkkkkkkrrrkkkrrrkkkkkcbbbbkkkbbbkkkkkkkkkkkkkkkrkkkkrrkkkrkrkrkkkrrkkk', 'kkkkkkrrrkkkkkkrkrkkkkkkkkkkkrkkkkkkkkkrkkkkkkkkbbbkbbbbkkkkkkkrkrkkkkkkkkkkkrrrkkkrkkkrrrkkkkk', 'kkkkrrrrrkkkrrrrrrrrkkkkkkkkrrrkkkkkkkkkrkkkrrkkkbbbbbckkkkrrkkkrrrkkkkkkkkkrrrkkkkkkkrrrrrrrkk', 'kkkrkrkkkkkkrrrrkrkrkkkkkkkrrrkkkkkkkkkkkrkrkrkkkbbbbbkkkkkrrrkkkkkkkkkkkkkkkrkkkkkkkrrrkkrrrkk', 'kkkkkkkkkrrrrrrkrrkkkkkkrrrrkkrrrrkkkkkkkkkrrkkkkkkkkkkkrrrkkkrkkkkkrrrkkkkkkkkkkkrrrkkkrrrrkkk', 'kkkkkkkkrrrrkrkrkrkkkkkrkrrrrkkrrkkkkkkkkkkrkkkkkkkkkkkkkrkkkkkkkkkrkrkkkkkkkkkkkrkrkkkkkrkkkkk', 'kkkkkkkkrrrkrrrkkkkkkkkrrkkkrkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkrkkkkkkkkkkkkkkkkkkkkkk'],
+    burst: ['....s...s.s...s...s....................o..', '...................s...................o..', '..............s.....s.........r........r..', '...................s......................', '....................s.s...................', '.................s........................', '..................s...s...........oo....oo', '.................sks.....................o', '..............s...sks.....................', '...........s...s...s......................', '............s.s...s.s.....................', '.s...s...s...s...s........................', 's.....s.s.s.....s......................oo.', '...s...................................o..', '..s.s.....s....................oo......rr.', '.s........................................', 's.s........................r..............', '..........................rrr....ooo......', '..........................rrr....oo.......', '...........................r.....o........', 's.............................r...........', '.......s......................or..........', '..ss..s.....s.................o.......o...', '...s...s.s.....................o.....oo...', '....s...s.....s...............rrr....oo...', '..........................................', '............s...s.........................', '.........s.......s........................', '..........s...s.s.........................', '...........s...s...s.....r................', '............s...s.s.....rr................', '.................s.......r........rr......', '..............s.s.s......r........rro.....', '...............s...s..............rro.....', '..............s..s..s.........o...........', '.................s...........oo...........', '............s...sks...s......oo...........', '...........s.....s........................', '..........s...s.....s.....................', '...........s.......s......................', '................s...s.....rr......rr......', '.................s.........o......rr......', '............s....s........oo..............', '...............s...s........o.............', '..........s.....s...........oo............', '...................s........o.............', '..........s...s...s..........oo.........oo', '.........s...............................o', '............s...s.........................'],
+  },
+
+};
+const FUJI_SPR = {
+  tent: '.................................pp..pp............................/................................ppp....p.........................../...............................pppppp.pkp........................../...............................ppkkpkpkkp........................../.............................ppppppppkpp.........................../.............................ppppppppp...p........................./............................pppppppppp...pp......................../...........................ppppppp.pppp.pkkp......................./..........................ppppppp..pppppkkp.p....................../..........................ppkpppp..pppppkp........................./.........................ppppppp....ppppkpp.pp...................../........................pppppppp....pppppkkpkpp..................../.......................ppppppppp....pppppppppkpp.................../.......................pkpppkppp....pppppppkpkkp.................../.....................gppppppppp......ppppppkkkpkpg................./...................g..ppppppppp......ppppppkppkpkkg................/......................ppppppppp......ppppppppkppkkg................/..................g..pppkpppkpp......pppppppkkpkppkgg............../................gg..ppppppppppp.......pppppkppkpkkp..gg............/...............gkg.ppppppppppp........ppppppppkpkpkp.gg............/...............gg.ppppppppppppp.o.o...ppppppppkkpkkp..g............/..............g...ppkpppkpppkp...oko..ppppppkppkkkp....gg........../.............g...ppppppppppppp..oko...ppppppkppkpkkp....g........../............g....ppppppppppppp...oko...pppppppppkkpkpp...g........./...........g....pppppppppppppp..oooo...pppppppppkkkpkkp...g......../...........g....ppppkpppkpppkp...ooo....ppppppppkkkpkkp............/.........gg....pppppppppppppp...oooo....pppppppppppkpp.....gg....../........g......pkkkkppppppppp...oooo....ppppppppppkpkkp.....gg...../.......gg.....pgkggkppppppppp...oooo....ppppppppppkppkp......g...../......gg.....pggggggkpppkpppp...oooo.....pppppppppp..pkp.....gg..../.....g......ppggggg.g.ppppppp...oooo.....pppppppppp...p.pp....g..../.....g.........g.g.....ppppp....oooo.....ppppppppppp.....p.....g.../...gg..............ggg.ppppp....ooo......ppppppppppp...p..p....gg../..gg.......ggggg.gggkg...ppp.....oko.....ppppppppppp.p...pkp....g../ggg.......gggggg.gggg.g..ppp....oko.......ppppppppppp.p...p.....ggg/.g.......ppggg.g.g.g.....ppp.....oko.......pppppppppp.....p..p...g./g.........p..............pp.......o........ppppppppppp.ppp.pp.....g',
+  serow: '............................g....../.................................../...................ggg..g.ggg....../...................gkgg...gggg.g.../...................ggkggggggggg..../....................gggggkkkgggg.../...................ggkggkkkkkggg.../..............wwww.gggggkkkkkkgg.../...........wwwwwwbggggggggkkkkggg../..........wwwwwwbgggggggggkkkkggg../........wwwwwwwwgggggggggggkkggggg./.......wbbwbbwbgggggggggggggggggggg/......wwbbbbgbggggggggggggggggggg../.....wbbggggggggggggggggggggggggggg/....ggggwgggggggggggggggggkkggggg../....ggggggggggggkggggggggggg......./...gggggggggggggggggggggggggg....../..ggggggggggggggggggggggggggg....../..ggggggggggggggggggggggggggg....../.gggggggggggggggggggggggggggg....../.gggggggggggggggggggggggggggg....../.gggggggggggggggggggggggggggg....../g.gggggggggggggggggggggggggg......./..gggggggggggggggggggggggggg......./..ggggggggggggggggggggggggg......../..ggggggggggggggggggggggggg......../..ggggggggggggggggggggggggg......../..ggggggggggggggggggggggggg......../..ggggggggggggg.gggggggggg........./...gggggggggggg.gggggggg.........../...gggggg.ggggg.ggggg.gkg........../....ggggg.......gggg...gg........../....ggggkggg....ggggg.ggg........../....ggg.ggkg.....ggg..gg.........../....gg..ggg......ggg..gg.........../.................gkg.............../....g...g.........g................/.................gkg.............../..................g................/...................g...............',
+  fox: '.................................oo....o..../.................................oo....o..../..................................oooooo..../..................................ooooooo.../................................ooooooooo.../................................ooooookoo.../................................ooooookkooo./...............................ooooooooooooo/................wwwwwww....ww.oooooooooooooo/..............wwwwwwwwwwwwwwwooooooooooooooo/..........ooooboowgbgwwwwwgoooooooooooooooo./........oooooooooooooogooooooooooooooo....../.......ooooooooooooooooooooooooooooooo....../......oooooooooooooooooooooooooooooooo....../.....oooooooooooooooooooooooooooooooo......./.....oooooooooooooooooooooooooooooooo......./....oooooooooooooooooooooooooooooooo......../...gggooooo.ooooooooooooooooooooooo........./...gggogooo.ooooooooooooooooooooooo........./..ggggggoo...ooooookkooooo.ooooooo........../.gggggggg....oooooooo......ooo..oo........../.ggggggg....oooooooo.......ooo.ooo........../ggggggg....ooooooooo.......ooo.ooo........../.ggggg.....ooo..oo.........oo...oo........../..g........ooo..oo.........oo...oo........../...........ooo...o.........oo...oo........../............g..............oo...............',
+  stelae: '.......wwwwww............................................../.......wwwwww............................................../.....wwwwwwwwwww........................ggg.......gg......./....wwwwwwwwwwwww......................ggg......gg...g...../...wwwwwwwwwwwwww.....................ggg......gg...ggg..../..wwwwwwwwwwwwwwww.....................g.......gg...gggg.../.wwwwwwwwwgwwwwwwww..................ggg....gggggggg......./.www.wgwkkkkkggkgww..................gg...gggg....ggg....../.www..gwgkgkgkgkkww..................gg.ggggg......ggg...../.....gkkgggggkkgkg...................ggggggg.............../..gggkggggggggggg....................gggg................../.ggggggggg.gggggggg.................gggg.................../.ggggggggg..ggggggg................ggg...................../.gkggggg.....gkggg...........g.....ggg..........gg........./.gggggg...g..gggggg...........g...ggg..........gg.....gggg./.gggggg......gggggg............g.gggg........g.g...g.ggggg./.gggggg.gg.gg.ggggg............ggggg........gggggggggggg.../.gkggg..gg.g...ggg..............ggkg.....g.g.....gkg......./.gggggg......gggggg............gggg..ggggggg......ggg....../.ggggggg.....gggggg............gkg..ggggggggg............../.gggggggg...ggggggg............ggggggggg...ggg............./.gkgggkg.g.g.gkggg.............gggkgg........g............./.gggggg.......ggggg............ggggg......................./.ggggg...g.gg.ggggg...........gggg...............g........./.ggggg.ggg.gg.ggggg...........gggg..............gg........./.gkggg.ggg.gg..ggg.............g...............g.........../.ggggg.ggg.gkgggggg...........gkg...........ggg.......ggg.g/.gggggggkg.ggkggggg............g..........gggg......gggg.../.gggggggg..ggkggggg.....................ggggggggggggggg..../.gkgggkg...ggkgggg.....................gkg.ggggggg.ggg...../.ggggggg...gggggggg.........wwwwwwww..g.g......gg.....ggggg/.gggggg..g.ggkggggg........wwwwwwwwww............g........./.gggggg.gg..ggggggg........wwwwwwwwww............g........./.gkggg..gg...gkggg........wwwwwwwwwwww...................../.ggggg.ggg...gggggg......wwwwwkkkwgwww...................../.ggggggggg.g..ggggg......wwkggkgkkkkkw...................../.ggggggggg.gg.ggggg........gkkgggkkkg......g.............../...ggggkgg.gg..ggg.........gkgkg.gkgg......g.............../..gggggggg.gggggggg......ggkggg...ggggg....ggg..gggg......./.gkkkkkgkg.gggggg.g......gkg..................gg.........../gggggkg.g...ggg.g.........g.......g..gg.......gggg..gg...../ggggkgg.......................ggg.gg.gkg.......ggg..gg...../gggggkggggg.ggggg.gg..gg..ggggkgggkkgkgg.................../.gggggkgggggkgggggkgggkgggkgggg..ggg.g...................../..ggggggggggg.ggggg.gggkggg.ggg..gg......................../...g...g.gggg..gggg..gggggg....g.........................../.....ww.....gg....gg..ggg...........ggg..................../.g..www........ww........ww....ggg...gg..................../...wwwwg..g.g.wwww......wwww.gggggg.gggg.................../..gwwwg..gkgkwgwggg....wwwkg.gkgggkgggkg.................../..wwwwg..gggkwwwbgg....wwwkggggkkggggggg.................../....www..gggkkgwgg......wwwkkkkkkkkgggkg.................../...gwwww..gggkwgwww.....wwwwwkkgggkkgggg.................../..wwwwg..gkgkkgwgw......wwgwkkkgggkkkgkg.................../..wwwwg.ggggkwwwg......wwwwkkkggkkggkgggg................../....www..gkgkkwwgg.......wgkkkgkkkkggkggg................../....wwwg..gkgkkwwgw......gwgkkgkkkgggkggg................../...wwwg....gkkgggw......gwggggkkkkgggkkgg................../...wwwg.g.ggkgwgg......wwwgkkkkkgggggkggg................../.g..w..gkgggkkgwkgg.....wwkkkggkkkggkgggg................../.gg...gkgggggkkkggg......gggkkgkgkkkggggg................../.gkg.ggkgggggkkkgg........ggkkkgkkkkgggg.................../.ggggggkggggggggggg.....ggggggkkkkkkggggg................../.gggggggggggggggggg......gkgggggkgggggggkg................./.gggggggggkgggggggg.....ggkggggggggggggggg................./.gkgggkgggkgggkggg......gggkggkgkgkgkgkkkg................./.ggggggggggggkggggg.....gggggggggggggggggg................./.ggg.ggggggg.gggkgg.....g..ggggg.gggkgkg.................../.ggg...g.....gg.g.g.....g..g..g.....g.gg...................',
+  larch: '......................................wwwwwww.................................../.....................................wwwwwwww.................................../...................................wwwwgwgggwwww................................/..................................wwggwggwgggwgww.............................../..................................wwggggggggggggg.............................../.................................wwgggggggggggggg.wwww........................../..................................gggggkogkgggggkgggwwww......................../...................................gggkkkkoggkkkgggggggww......................./......................................oooooooookkggggggg......................../....................................oooo.o....ooo..o.o........................../..............................ww.ooo............................................/.............................wwooo............................................../...................wwwww.....gooo......wwwg...................................../..................wwwwgwwww.oooo......wwgwww.o................................../..................wwggggwwgwooo....wwooogooo..................................../............wwwww.gggwggggggwgg....oo....................wwwww................../...........wwwwwwggggggggggggoooggooo...................wwwwgwwwww............../..........wwgggggggggggggggogoooooo...............wwww.gwggwwwwwgwww............/..........wgggggggggggggoooo.....................wwwwgggggwgggggwwwwww........../..........gggwggggkooooooooo....................wwgggggggggggggggwggwww........./..........ggggggggooooooo.......................ggggggggkggggggggggggggw......../..........gggggkkokooo.o.........................ggggkkkkggggggooggggggg......../............ggokookoo.......................ww.....ookooggokkoo...oo............/...............okkko.......................wwo.ooo.okoooooogoo................../..............ooooo.......................gwgoooo...g...ooooooo................./..............oooo...............wwww...wgoo.o................................../..............wooo..............wwwggwwggooo..................................../............wwggo..............gwwgggggggo....................................../............wggooo.............gggggwggwggo...................................../............ogooo...........wwwggggggggggowwww................................../............goooo...........wggwggggggoggoggggwww.............................../............ooko...........wggggggggkoggoooogggggw........www........www......../............ooooo..........wgggggggooooooooooogggw.......wwwwwwg....wwwww......./............oooo............googkgkooooooooooooooggw....wwwggwww...wwgggwwgwww../............ooooo............ookooooooo....ooooooogww..wgggggwggg.ggwggggggwwww./.............okooww...........oogokoo..........ooog....gggggggggwwgwggwggwwgwwg./.............oooggww....wwwgoggogooo............oooow.....ggkkgggggggggggggwgggw/.............ooggggg...wggowoggooooo...............ooog...ggkooookgggggggggggggw/..............wggggowwwgggooooooooo................oooooooooo..ooooggggggggggggg/..............ggkooggwggggoooooo.......................ooo.........oggkggggg..o./..............goooogggggogooooo........................oo.........oooookgoo.o.o./.................oooggggoooooo.....................................o.oooko..o.../................ooooogoooooo..........................................ooo......./.................okoookooo....................................................../.................ooooooo.o...........www...wwwww................................/.............w..oooooooo...........wwwgwg.gwgwwwwww............................./............www.ooooooooog..wwwoo..gwgggwgggwgwwwwwg............................/...........wwwwwwokooggkkgggwwooo..gggggggggwggwwwgwww........................../..........wwggwwwgoooooooogggooooooooggkggggggggggggggw........................./..........wggggwgooooookoooooo......ookokoggggggggogggg........................./..........wgggggoooooookooooo.......oooogooggggogoo.gg........................../..........ggkgggoooooo.o...............ooo.ogogooo............................../...........gkggooooo.......................ooooo................................/...........okoooooko............................................................/...........oooooooooo.........................................................../...........ooooooggo............................................................/...........oooooooo............................................................./...........ooooooo............................................................../...........oooooooo............................................................./..........goggkooo............................................................../..........wgogooooo............................................................./..........wgoooooooo............................................................/.........oooooooooo............................................................./...........okoooookoww........................................................../...........oooooogggww........................................................../...........ookoooggggww........................................................./...........oooooooggggww......................................................../............ookoookggggw......................................................../............oooooooooogg......................................................../............oooggooooogo......................................................../............oooggoooogko......................................................../...........ooogggoooooo........................................................./..........googgggoooooo........................................................./........wwgggggooooooo........................................................../........wggggggooooooo........................................................../.......wgggggoogooooo.........................................................../.....wwggggoooooooooo.........................................................../....wwggggkoooooookooo........................................................../...gggggoooooooooooooowg......................................................../..gggokkooooooookoooooggw......................................................./.wgggoooooooooooggoooooggg....................................................../wooo.o.ooooooo.ooooooooooooo....................................................',
+  post: '...........ww.............../..........wwww............../..........wwwww............./........wwwwwwww............/........wwwwgwwww.........../.......wwwwgggwwww........../......wwwwggggggwww........./....wwwwgggkkkggggww......../....wwwwgggkokggggwww......./.wwwwwwgggkoookggggwwww...../wwwwggggkkkoookkgggggbwww.../wwwwggggkkkkokkkkgggggwww.../gggg.gkkkkkkkkkkkkgggggg..../......oooooooooooo........../...oooooooooooooooooo......./...oooooooooooooooooo......./............................/....ppppppppppppppp...p...../...pppppppppppppppp...pp..../...pppppppppppppppp.ppppp.../...pppppppppppppppp...ppp.../...pppppppppppppppp..p....../............................/....oooooooooooooo..p.p...../....oooooooooooooo...ppp..../....oooooooooooooo..ppppp.../....oooooooooooooo..ppkpp.../....oooooooooooooo..ppkppp../....oooooooooooooo...pkppp../....oooooooooooooo..ppkppp../....oooookookooooo..ppkppp../....oooookookooooo..ppkppp../....oooookookooooo..ppkppp../....oooookookooooo..ppp..pp./....ooookooookoooo..ppp..ppp/....oookkooookkooo..ppp..ppp/....oookooooookooo..ppp..ppp/....oooooooooooooo..ppp...p./....ooooookkoooooo........../....ooooookkoooooo........../....ooookkookooooo........../....oookkkkkkkkooo........../....ooooooooookooo........../....oooookokkkoooo........../....ooookkookkoooo........../....oooookoookoooo........../....ooookkkkkkoooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....ooookkkkkkoooo........../....oooookoookoooo........../....ooookkkokkoooo........../....oooookkkkkoooo........../....ooookkookkoooo........../....oooookookkoooo........../....ooookkkkkkoooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo........../....oooooooooooooo..........',
+  shop: '......................wwww..................................../....................wgkgkg.w................................../...................wggggggggg................................./...................gkgkgkgkg................................../....................gggggkgkg................................./.......................gkgkkkww.....wwwww...................../..................g.g.g.gkkgbwwww..ggggggw..................../......wwww.....wgg.......wwwwwwww..gkgkgkgw.................../....gggkgggw..wwwwbb..bbwwwwwwwww...gggkggg.................../...wkgkgkgkgw.wwwwwbgwwwwwwwwwwwwwb....gkgkg................../..ggggggggggg..wwbwwwwwwwwwbbwwwwwwgb.g.g.g.................../..ggkgkgkgkgkg.bbwwwwwwwww...bwwwwwwwwb............w........../..g.gggggggkg..wwwwwwwwww...g.bwwwwwwwwbb...w...wgwkww......../.....gkgkkkkkbwwwwwwwwwbb..o...gwwwwwwwwwwwwwww..gkgkgg......./..g.g.g.gkkbbwwwwwwwwbbbg.oog.gkbbbwwwwwwwwwwww.gkgkgkg......./.........gwwwwwwwwbb...g.......g...bgbwwwwwwwwbbkkkgkgkg....../gg.....bwwwwwwwwwbbbg...........g...b..wwwwwwwwwwbkkg.g......./ggg..bgwwwwwwwwg........................bwwwwwwwwwwg........../ggwbwwwwwwwwwgbg..g...g.......g.......g.g.bgwwwwwwwwwb......../ggwwwwwwwwwb...................g...........wbwwwwwwwwwbwww..../gwwwwwwwwbb.g.g...............gg..........g.bkkwwwwwwwwwwww.../gwwwwwwbb....................gkg.g...........gkwbbbwwwwwwwww../gwwww...g.....g...............gggg.gg.g...g...g.g..bbwwwwwwwww/bbb.g........g...............g.g.g.gg..g..............gwwwwwww/bbb.g...............................ggggggg.g.......g.gbbbbwww/.............g.g.g.ggg.g.g.g.g.g.g.......gkgkg.............bbw/g.....g.g.g.o.oookgkgkg.g.gkg.gkgkg.....o.o.g.g...g.....g.gkb./...............o.o.g.o.....g...o.o.........................gb./....g...g...........................g.....g.g.g.g.g.........b./.....g..g......r....rr...rr....r....g......g.g.gg..g........../....gg.gg.gg...rrrrrrrrrrrrrrrrrg...................g...g...../.....g.gg..g.o.rrrrrkrrrrrkrkrrkkr.g.................g.gg...../....gg..g.gg.o.rrrrrrrrrrrrrrrrrgr..g.r..oo.oooro...gg..g...../.....g.gg..g.o.rrrrrrrrrrrrrrrrr.r..g..oooookoorr..gkg..g...../....gg.gg.gg.o.rrrrrrwwwwwrrrrrr....g.rrooo.yooorr.ggg..g...../.....g.gg..g.o.rrrrrwrrrrwwrrrrr.o..g.rooyo.yyyooo.gkg..g...../....gg..g.gg.o.rrrrwwrrrwrwwrrrr....g.oooyy.oyooo..gggo.g...../.....g.gg..g.o.rrrrwrwrrwrrwrrrr....g..............gkg..g...../....gg.gg.gg.o.rrrrwrrrrrrrwrrrr....g.oooyy.yyyoo.gggg..g...../.....g.gg..g.o.rrrrwwrwwwrwrrrrr.r..g.ooooy.yyooor.gkg.gg...../....gg..g.gg.o.rrrrrwrrrrwwrrrrrr...g.ooooo.oooor..ggggkg...../.....g.gg..g.o.rrrrrrwwwwrrrrrrrko..g.orooo.oooor..gkgkkg...../....gg.gg.gg...rrrrrrrrrrrrrrrrrr...g.rorro.oooro..ggggkg...../.....g.gg..g.o.rrrrr.rrrrr.rrrrrro.g.o.o...g.goo.o...gkgg...../....gg..g.gg...rrrrr.rrrrr.rrrrrro..................gggkg...../.....g.gg..g.o.rrrrr.rrrrr.rrrrr.....................gkkg...../....gg.gg.gg..........................ggg.gg.gggg.ggggokg...../.....g.gg..g...........................gg.gg.gggg.ggkgkgg...../....gg..g.gg..........................gkg.gggggkg.ggggkkg...../.....g.gg..g...........................gg..gkgggg..gkgkkg...../.....g.gg.gg..........................ggg.ggggggg.ggg.okg...../.....g.gg..g...........................gg..g.gggg..g...gg...../....g...g.g...........................g.g.gg.gg.g.g.g...g...../............................................................../ggww..www......................wwww....g..wwwg.....g..wwwww.../.gkgw..gkg....................ggkgkg..ggwgkg..gggg.g.gkgkgkw../ggg...ggg.....................ggggg..ggkgkgkg.gkggg...gkgkgg../.gkg...g.......................gkg...gkgkkkg...gkg.....gkgkg../..gkg.g.......................g.g.g...gggkg...gkgkg...ggg.gg../...gkg.................................gkg.....gkkkg.gkg....../gggkg...........................g.ggg.g.g...g.gkgggkg.g.ggggw./.gkg.............................gkggg.....gg..gkgkg.....gkg../g.g.............................gggkgg....ggg.ggggg.g.g.g.ggg./.................................gkg.g.g.g.g...gkg.........g../................................g.g.............g...........g.',
+  stash: '..................................................................gggg............./................................................................ggggggg............/............wwww....wwww........................................gkgkgkg............/.wwwww.....gkg.g...wwwwwwg......................................ggggggg............/.wwwwwwwww..g.....gkgwwkgkg.....www.............................gkgggkg............/bbbbwwwwwwwwww.....gkgkg.gg...wwwwwww............................gggkg............./bbbbwkbbwwwwwwwwwwwkkkg.......gkgwgkg............................ggkgg............./.bbbbbbbbbbbwwwwwwwwwww..gww.g.gkgkggg.....www...................ggggg............./....bbbbbbbbbbbkbwwwwwwwwwww....gkg.gkg..wwwwww...................gggg............./.........bbbbbbbbbkbbbwwwwwwwww..g...g...gkgwg.g.................ggggg............./.............bbbbbbbbbbkwwwwwwwwwww.......gkg........wwww........ggkgg............./...b.b.b.b.b.....bbbbbbbbbbbbwwwwwwwwwwww..g.g.g....wwwwwww......ggggg............./........b............bbbbbbbbbbkbwwwwwwwwwww......g.gkgwgkg.......gkgg............./...b.b...b.b.b...b.b.....bbbbbbbkbbbkwwwwwwwwww...g..gggkgkg.....ggggg............./...bbb.bbb............b......bbbbbbbbbbkbwwwwwwwwwwwgkgkgkkkg..wwggkgg............./...bbb.bbbbb.bb..b.b.b...b.......bbbbbbbbwbbbwwwwwwwwwwkkkkg..wwwwgggg............./...bbb.bbbbb.bb.bb.bbkb.b............bbbbbbkbbbgbwwwwwwwwwwkwwbbwwwkgkwwww........./...bbb.bbbkb.bb.bb.bbbb..b.b.b.b.b.b.....bbbbbbbbwbkbwwwwwwwwwwwkbbkkggwwww......../...bbb.bbbkb.bb.bb.bbbb.bbb...........b.......bbbbbbbwbkbwwwwwwwwwwgkkgkg........../...bbb.bbbkb.bb.bb.bbbb.bbkbbb.b.b.b...b.b.b.....bbbbbbbbbbbbwwwwwwwwwwwg........../...bbb.bbbbb.bb.bb.bbbb.bbbbbb.bbb.bb...b...b.........bbbbbbbbwbkbwwwwwwwwww......./...bbb.bbbbb.bb.bb.bbbb.bbbbbb.bbb.bb.bbbb.b...b.b........bbbbbbkbbbbbwwwwwww....../...bbb.bb.bb.bb.bb.b..b.bb..bb..bb.bb.bbbb.bb.b.......b......bb.bbbbbkbkbwwww....../...bbb.....b.b...............b..bb.bb.bbbb.bb.bb.b...b...b.b.....bbbbbbbbbbbb....../...bbb.ggg.gggggggggggggggg.ggg.bb.bb.bbb..bb.bb.bb.b...b...b.b.......bbbbbkb....../...bbb.ggggkkgkgkgkgkgkgkgkgggg.bb.bb.bbb..bbbbb.bb.bbb..b.b...b.b.b.......bbb...../...bbb...ggkkggkgggkgggkgkgkgkg.b.b.b.b.b.b.b.b...b.bkb.bb....b..................../...bbb.gggkggkkbkbkgkgkgggggggg.b...................bbb.bb..b..b.b.b.b.b.b.ggg.gg../...bbb.ggkggggkkkkkkkkkgggggg...b.....ggp...g.g.....bkkggggggggggg..b............../...bbb...gggggggkkkkkkggggggg..bbb..g..gp..pkgkg.g..bkggkggggggg...bbb.b.........../...bbb..gkgkgggggkkkkggkgggkkg..b...g.gkp...gkg.....bkkkgkkkkkg..g.bbb.b.........../...bbb.bggkgggggggkgggggggkkgg.bbb.gg..gp..pggkg.g.bbkgggggggggggg.bbb.b.........../...bbb.bgkkkkggggkgggggggkkkgg..b...g.gkp...gkg.....bkggggggg.gggg.bbb.b.........../...bbb.bggkkkkggggggggggkkkkkg.bbb..g.ggp..pggkg.g..bb.............bbb.b.g........./...bbb....gkgkkkgggggggkgggggg..b...g.gkp...gkg.....b...gg..gggg...bbb............./...bbb.bggggggkgggkgggkggggggg.bbb.gg.ggp..gggkg.g..bb.ggkgggggg.b.bbb.b.b........./...bbb.bgkkkkkggggggkkgkkkkkgg..b...g.ggp...gkg.....b..g.ggggggkgg.bbb.bb........../...bbb.bggkkkggggggkkggggkkkgg.bbb.gg.ggp..gggkg.g..bb...gggggkg...bbb.bkb........./...bbb..gkkkgggkgkkkgggkggkkgg..b.....gkp...ggg.....b..ggggggkgkg..bbb.bb........../...bbb.bgggggggggkkpgggggggkgg.bbb.g.gggp..gggkg.g..bb..ggggkgggkb.bbb.b.........../...bbb....gggggkkkpkkkggggggg...b..g..ggp.pkggg.....b..ggkgkgkgggb.bbb.b.........../...bbb..ggkgggkkkkkpkkkggggggg..bb.g.gkgp.pgggkg.g..b.ggggkkkg.....bbb.b.........../...bbb..gggggkgggggkgggkgggkggg.b.....gkp.gggkg.....b.gkg.gkgkgggg.bb..b.........../...bbb.gkgggkgkgggggggggkkggggg.bb.g...gg.ggkkkg.g.bbgggg..gggggkg.bbb.b.b........./...bbb.gkggkgkgggggggggggkkggkg.b..gg..gw.ggkkg.....b.gg..ggggggkg.bbb.bb........../...bbb.ggg.gggggggggggggggg.ggg.bb.g...gg.ggkkgg.g..b.gg.ggggggggg.bbb.bkb........./...bbb..........................b.....gkp.pkgkg.....b..............bbb.bb........../...bbb.bb.bb.bb.bb.bbbb.bb.bbb.bbb.g.g.gp.pggggg.g..bb.bbb.bb.bb.b.bbb.bkb........./...bbb.bb.bb.bb.bb.bbbb.bb.bbb..b..g....p.pkgkg.....bb.bbkbbb.bbbb.bbb.bbkww......./...bkb.bb.bb.bb.bb.bbbb.bb.bbb.bbb.g.g.gp.pggggg.g..bb.bbbbbb.bbkb.bbbwwwwwww....../...bbb.bb.bb.bb.bb.bbbb.bbbbbb..b.....gkp.pkgkg.....bb.bbkbbb.bbkb.bwwwwwwwww....../...bbb.bbbbb.bb.bb.bbbb.bbbbbb.bbb.g.g.gp.pgggkg.g..bb.bbkbbb.bbbb.wwwwwwwwwww...../...bbb.bbbbb.bb.bb.bbbb.bbbbbb.bb..g....p.ppggg.....bkbbbkbbb.bbbbwwwwwwwwwwwww..../...bkb.bbbbb.bb.bb.bbbb.bbbbbb.bbb.g.g.gp..ggggg.g..bbkbbkbbb.bbkwwwwwwwwwwwwwww.../...bbb.bb.bb.bb.bb.bbbb.bbbbbb..b.....gkp.pkggg.....bkkbbkbbb.bbwwwwwbwwwwwwwwww.../...bbb.bb.bb.bb.bb.bbbb.bbbbbb.bbb.g.gkgp..ggggg.g..bbkbbbbbb.wwwwwwwwwwwwwwwwwww../...bbb.bb.bb.bb.bbbbbbb.bbbbbb.bb.....gkp...gkgg...wwwkbbkbbbwwwwwwwwwwwbwwwwwwww../...bbb.bb.bb.bb.bb.bbbb.bbbbbb.bbb.g.g.gp..g.ggg.gwwwwwbbb.wwwwwwwwwwwwwwwbwbwwwwww',
+};
+const FUJI_DOOR = { shop: [15, 33, 29, 45], stash: [40, 40, 28, 42] };   // [col0, col1, row0, row1] of each door's doorway mark in its rows
+// (the shop's red noren, the stash's purple crack): what is inside bobs in it
+// The station post's numeral (d47 «Б»: level n is station n, the tenth the summit's arena): 一 to 九, 7 x 7 game px, cut over its sheet's 八 (rows 30-36,
+// columns 7-13 of FUJI_SPR.post; its 合目 under it kept)
+const POST_NUM = { 1: '......./......./......./#######/......./......./.......', 2: '......./.#####./......./......./......./#######/.......', 3: '#######/......./.#####./......./......./#######/.......', 4: '#######/#..#..#/#..#..#/#.#.#.#/##...##/#.....#/#######', 5: '#######/...#.../...#.../.#####./..#..#./..#..#./#######', 6: '...#.../....#../#######/......./..#.#../.#...#./#.....#', 7: '..#..../..#..../#######/..#..../..#..../..#...#/...####', 9: '..#..../#####../..#.#../..#.#../.#..#../.#..#.#/#...###' };
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
 // The Danchi's kit in Arata Isozaki's concrete, the owner's picks (2026-10-23, the questions page d23–d30): slab E, balcony B, pole D, stairs D, wall A,
 // far F, shop D, stash E; its things his Maekawa picks (d22 «оставить»): spring E, bikes B, mail C, cat C, boxes E; its garden E twice the size (d17, d18; on
 // d10: «too small»): DC_GARDEN
 const DC_GARDEN = 2;
+const kitAvoid = (lv, r, rows = 1) => {   // what r's thing may not be: the kinds in the nearest row of things under it (two rows where a world has four kinds or
+  // more), within a screen: what is seen one after another; and those already decided across at its height (the one to its left at its very height first).
+  // Decided in that order, bottom up, so the same whatever asks first
+  const t = lv.tile, out = new Set(), below = [];
+  for (const q of lv.rects) {
+    if (q === r || q.gone || q.cap) continue;
+    const dy = q.y0 - r.y0;
+    if (dy > 28 * t || dy < -0.5 * t || (Math.abs(dy) <= 0.5 * t && !(q.x0 < r.x0))) continue;
+    const kq = kitThing(lv, q);
+    if (!kq) continue;
+    if (Math.abs(dy) <= 1.5 * t) out.add(kq.kind);
+    if (dy > 0.5 * t) below.push([dy, kq.kind]);
+  }
+  below.sort((a, b) => a[0] - b[0]);
+  let row = 0, top = -Infinity;
+  for (const [dy, kind] of below) { if (dy > top + 1.5 * t) { if (++row > rows) break; top = dy; } out.add(kind); }
+  return out;
+};
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
@@ -237,48 +478,76 @@ const kitThing = (lv, r) => {
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
   const steady = (min) => !(r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.crack || r.cage || r.slick || r.magnet) && (wl || wr) && !(wl && wr) && w >= min * t   // (a row across the shaft is a way through: the tutorial's helmet breaks one)
     && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
-  let out = null;
-  if (th.village) {   // by a hash of its height, so that two ledges a beat apart are not alike
-    const k = Math.floor(((Math.imul(Math.round(b / t), 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    if (r.kitWant === 'lantern' && steady(4) && room(0, 4, 4.4)) out = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t };   // asked for by its chunk (CHUNKS kit)
-    else if (k === 0 && steady(2.6) && room(0, 4.6, 4.9)) out = { kind: 'sakura' };
-    else if (k === 1 && steady(3) && room(0, 3.5, 3.8)) out = { kind: 'scarecrow' };
-    else if (k === 2 && steady(4) && room(0, 4, 4.4)) out = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t };
-    else if (k === 4 && steady(2.2) && room(0, 4.4, 5.3)) out = { kind: 'koinobori' };
-    if (out && out.kind !== 'lantern' && lv.rc && lv.rc.sparse) {   // a `sparse` level's: one a band of about two screens (the shrines, the task, aside)
-      const band = Math.floor((lv.floor - b) / (50 * t)), used = (lv.propBands = lv.propBands || new Set());
-      if (used.has(band)) out = null; else used.add(band);
-    }
-  } else if (th.mines) {   // the Mine's by a hash of its height: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore
-    // in the wall behind it, a cart on its rails, the miners' tools, a winch
-    const k = Math.floor(((Math.imul(Math.round(b / t) + 3, 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5;   // the props but the lamps (a task) on half their ledges: about four in six with
-    // a thing on them, as the Village (the rule book's detail: «Сократить до 4 из 6»)
-    if ((k === 0 || k === 3) && steady(1.8) && room(0, 1.6, 2.6)) out = { kind: 'lamp', x: X(0.5), y: b - 2.0 * t };
-    else if (half && k === 1 && steady(2.6) && room(0, 2.6, 2.0)) out = { kind: 'cart' };
-    else if (half && k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
-    else if (half && k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
-    else if (half && k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
-  } else if (th.danchi) {   // the Danchi's by a hash of its height: bicycles, a balcony garden, a stray cat on the ledge, the block's mailboxes on the wall over it
-    const k = Math.floor(((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    if (k === 0 && steady(3.0) && room(0, 2.8, 1.6)) out = { kind: 'bikes' };
-    else if (k === 2 && steady(2.3 * DC_GARDEN) && room(0, 2.3 * DC_GARDEN, 1.0 * DC_GARDEN)) out = { kind: 'plants' };   // (drawn bigger, DC_GARDEN)
-    else if (k === 3 && steady(2.0) && room(0, 2.1, 2.6)) out = { kind: 'mail' };
-    else if (k === 5 && steady(1.6) && room(0, 1.4, 1.2)) out = { kind: 'cat' };
-  } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
-    const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
-    if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse', x: X(2.3), y: b - 3.5 * t };   // (its lamp's place: the task's, see its drawing)
-    else if (k === 1 && steady(4.2) && room(0, 4.3, 2.9)) out = { kind: 'net' };
-    else if (k === 2 && steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)) out = { kind: 'gull' };
-    else if (k === 3 && steady(2.8) && room(0, 2.7, 2.6)) out = { kind: 'octopus' };
-    else if (k === 4 && steady(3) && room(0, 3, 4.9)) out = { kind: 'flags' };
-  } else if (th.skazka) {   // the Dark Forest's: Baba Yaga's fence (its skulls' eyes the dark's lights) by a hash of its height, on two ledges in six with room
-    const k = Math.floor(((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    if ((k === 0 || k === 3) && steady(3.2) && room(0, 3.2, 3.5)) out = { kind: 'fence' };
-  } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t
-    && ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3) out = { kind: 'bell', x: wl ? r.x1 - 0.2 * t : r.x0 + 0.2 * t, y: r.y1 + 0.4 * t };   // (on one
-    // boardwalk in three: what hangs off a ledge, the rule book's)
+  // Each world's things by a hash of its height (so that two ledges a beat apart are not alike), a slot k of six: [k, kind, its room, where its task is]. The
+  // owner's rule (2026-10-24: «Животные или объекты не должны встречаться друг за другом: миру нужно разнообразие в расположении… во всех мирах»): never the
+  // kind of the thing next under it, nor of one across at its height; a repeat gives way to the next slot's kind that fits, an empty slot stays empty
+  let out = null, k = -1, opts = null;
+  const hk = (salt) => Math.floor(((Math.imul(Math.round(b / t) + salt, 0x9e3779b1) >>> 0) / 4294967296) * 6);
+  if (th.village) {
+    if (r.kitWant === 'lantern' && steady(4) && room(0, 4, 4.4)) return (r.kit = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t });   // asked for by its chunk (CHUNKS kit)
+    const H = lv.floor - lv.endY;   // the Peeing Boy of the Iya gorge: once, on 1-2 (the cliff road, Д86/Д93), on a wall ledge's free end halfway up
+    if (lv.stage === 1 && !lv.statueAt && H > 0 && H < 1e9 && b < lv.floor - 0.35 * H && b > lv.floor - 0.7 * H && steady(2.6) && room(w / t - 1.6, w / t, 2.8)) { lv.statueAt = r; return (r.kit = { kind: 'statue' }); }
+    k = hk(0); opts = [[0, 'sakura', () => steady(2.6) && room(0, 4.6, 4.9)], [1, 'scarecrow', () => steady(3) && room(0, 3.5, 3.8)],
+      [3, 'beast', () => steady(2.6) && room(0, 2.6, 2.6)], [5, 'kaya', () => steady(2.6) && room(0, 2.8, 3.0)],   // (Iya's: Д90 «В», Д87 «В»)
+      [2, 'lantern', () => steady(4) && room(0, 4, 4.4), () => ({ x: X(0.63), y: b - 1.3 * t })], [4, 'koinobori', () => steady(2.2) && clear(lv.l, b - 5.6 * t, lv.r, b - 3.6 * t)]];
+  } else if (th.mines) {   // the Mine's: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore in the wall behind it, a cart on
+    // its rails, the miners' tools, a winch; the props but the lamps on half their ledges: about four in six with a thing on them, as the Village (the rule book's
+    // detail: «Сократить до 4 из 6»)
+    const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, lamp = [() => steady(1.8) && room(0, 1.6, 2.6), () => ({ x: X(0.5), y: b - 2.0 * t })];
+    k = hk(3); opts = [[0, 'lamp', ...lamp], [3, 'lamp', ...lamp], [1, 'cart', () => half && steady(2.6) && room(0, 2.6, 2.0)], [2, 'ore', () => half && steady(2.4) && room(0, 2.2, 2.0)],
+      [4, 'tools', () => half && steady(2.4) && room(0, 2.4, 2.0)], [5, 'winch', () => half && steady(3.0) && room(0, 2.8, 3.4)]];
+  } else if (th.sea) {   // the Sea's (see its back layer)
+    const fx = wl ? r.x1 : r.x0;
+    k = hk(7); opts = [[0, 'lighthouse', () => steady(3.3) && room(0, 3.4, 5.4), () => ({ x: X(2.3), y: b - 3.5 * t })],   // (its lamp's place: the task's, see its drawing)
+      [1, 'net', () => steady(4.2) && room(0, 4.3, 2.9)], [2, 'gull', () => steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)],
+      [3, 'octopus', () => steady(2.8) && room(0, 2.7, 2.6)], [4, 'flags', () => steady(3) && room(0, 3, 4.9)]];
+  } else if (th.danchi) {   // the Danchi's: bicycles, a balcony garden (drawn bigger, DC_GARDEN), the block's mailboxes on the wall over it, a stray cat on the ledge
+    k = hk(5); opts = [[0, 'bikes', () => steady(3.0) && room(0, 2.8, 1.6)], [2, 'plants', () => steady(2.3 * DC_GARDEN) && room(0, 2.3 * DC_GARDEN, 1.0 * DC_GARDEN)],
+      [3, 'mail', () => steady(2.0) && room(0, 2.1, 2.6)], [5, 'cat', () => steady(1.6) && room(0, 1.4, 1.2)]];
+  } else if (th.skazka) {   // the Dark Forest's: Baba Yaga's fence (its skulls' eyes the dark's lights) on two ledges in six with room
+    const fence = () => steady(3.2) && room(0, 3.2, 3.5);
+    k = hk(13); opts = [[0, 'fence', fence], [3, 'fence', fence]];
+  } else if (th.town) {   // Tokyo's: a vending machine in a niche at a ledge's wall end, a bonsai in its pot, by a beat of its height (a third of them neither)
+    const m = ((Math.round(b / t) % 3) + 3) % 3, base = !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key) && (wl || wr);
+    const door = (x0, y0, x1, y1) => lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1), vx = wl ? lv.l + 0.2 * t : lv.r - 1.6 * t, cx = wx + d * 0.85 * t;
+    const acNear = lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < lv.l + lv.r) === wl && q.y0 < b && q.y0 + (AC.h + AC.brace) * t > b - 1.7 * t);
+    k = m === 2 ? -1 : m; opts = [[0, 'vending', () => base && w >= 3 * t && !door(vx - 0.15 * t, b - 2.4 * t, vx + 1.55 * t, b)],
+      [1, 'bonsai', () => base && w >= 2 * t && !acNear && !door(cx - 0.9 * t, b - 1.7 * t, cx + 0.9 * t, b) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))]];
+  } else if (th.fuji && r.plank) {   // Fuji's bell on one boardwalk in three, up on a pilgrim's staff at its free end by the hero standing there (d45 «Б», d52 E; the task)
+    if (!r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t && (r.kitWant === 'bell' || ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3))
+      { k = 0; opts = [[0, 'bell', () => true, () => ({ x: wl ? r.x1 - 0.3 * t : r.x0 + 0.3 * t, y: r.y0 - 1.4 * t })]]; }
+  } else if (th.fuji) {   // Fuji's things on its ledges' wall ends (the owner's letters d51-d61, FUJI_SPR): a tent (its snow rabbit by it), a snowman, a serow or a fox, the
+    // pilgrims' stones, persimmons drying, a bare larch
+    const fox = ((Math.imul(Math.round(b / t) + 11, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, beast = () => w >= 2.9 * t && room(0, 2.9, 2.6);
+    k = hk(0); opts = [[0, 'tent', () => w >= 4.7 * t && room(0, 4.7, 2.8)], [1, 'snowman', () => room(0, 2.2, 2.9)], [2, fox ? 'fox' : 'serow', beast], [2, fox ? 'serow' : 'fox', beast],
+      [3, 'stelae', () => w >= 4.0 * t && room(0, 4.0, 3.6)], [4, 'persimmons', () => w >= 3.4 * t && room(0.3, 3.5, 4.3)], [5, 'larch', () => w >= 3.6 * t && room(0, 4.8, 4.9)]];
+    if (!steady(2.4)) opts = null;
+  }
+  const want = r.kitWant && opts && opts.find((q) => q[1] === r.kitWant && q[2]());   // one its level must have (kitAtLeast): there, its slot's hash aside
+  if (want) return (r.kit = Object.assign({ kind: want[1] }, want[3] ? want[3]() : {}));
+  if (opts && k >= 0) {
+    r.kit = null;   // (deciding it: what is under it is decided first and never asks back)
+    const avoid = kitAvoid(lv, r, new Set(opts.map((q) => q[1])).size >= 4 ? 2 : 1), fits = (q) => q[2]() && !avoid.has(q[1]);
+    let o = opts.filter((q) => q[0] === k).find(fits);
+    if (!o && opts.some((q) => q[0] === k && q[2]())) for (let i = 1; i < 6 && !o; i++) o = opts.filter((q) => q[0] === (k + i) % 6).find(fits);   // a repeat: the next slot's
+    out = o ? Object.assign({ kind: o[1] }, o[3] ? o[3]() : {}) : null;
+  }
+  if (out && th.village && out.kind !== 'lantern' && lv.rc && lv.rc.sparse) {   // a `sparse` level's: one a band of about two screens (the shrines, the task, aside)
+    const band = Math.floor((lv.floor - b) / (50 * t)), used = (lv.propBands = lv.propBands || new Set());
+    if (used.has(band)) out = null; else used.add(band);
+  }
   return (r.kit = out);
+};
+// Every level of its world shows its task (owner, 2026-10-24, У5 «А»: «хотя бы один колокол и маяк на каждый уровень своего мира, первый тоже»): a level with
+// none gets one on its lowest ledge that would take it but for kitThing's hash (r.kitWant, as the Village's lantern a chunk asks for)
+const kitAtLeast = (lv, kind) => {
+  const got = (r) => { const k = kitThing(lv, r); return k && k.kind === kind && k.y > lv.capY && k.y < lv.floor; };
+  if (lv.rects.some(got)) return;
+  for (const r of lv.rects.filter((q) => !q.cap && q.y0 > lv.capY && q.y0 < lv.floor).sort((a, b) => b.y0 - a.y0)) {
+    const was = r.kit; r.kit = undefined; r.kitWant = kind;
+    if (got(r)) return;
+    r.kit = was; r.kitWant = undefined;
+  }
 };
 const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ CANDIES.plus a Long charge; all 3 s longer than at first, user)
 // Combo rewards, paid when the hero lands on a floor; the best one reached counts.
@@ -319,6 +588,7 @@ const GATE = { at: [0.55, 0.65], run: ['gate', 'gate2', 'gate3', 'gate3'] };
 const TRAIN = { p: 0.45, at: [0.3, 0.7], h: 0.11, rest: [4, 7], warn: 1.6, len: 2.5, v: 2.2 };
 const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
 const CRUMBLE = { time: 0.55, back: 3, board: 0.45 };   // gives way `time` s after a touch, is back `back` s later; a rope bridge's board (D) `board` tiles deep
+// (its tremble before it goes, and an air conditioner's, 5 a second, growing: under the 6-12 a second of jitter the owner bans, «вся анимация подчиняется объекту»)
 const SLICK = { fr: 0.03 };
 // Wall coats beside ice: moss takes the hero at a touch and lets it slide at `slide` of the
 // usual speed; rubber takes nothing and throws it back off at `x` R/s and `up` of a jump's
@@ -336,31 +606,82 @@ const RUBBER = { x: 9, up: 0.55, min: 2 };
 // `calm`: in 1-1 the fire waits that many s before it rises, and an idle hero does not speed it up (the digest §6: no losing while learning).
 const FIRE = { calm: 15, lag: 0.5, idle: 3, boost: 3, ramp: 2, launch: 1.7, back: 0.3, spit: [3, 6], warn: 0.5, blob: 0.34 };
 const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
-// The boss fight goes round (user: there was no way onto it under the ceiling): it hovers (`hover` s, `fast` of that when
-// angry or half beaten) `high` R over the floor (in sight under the HUD; clear of a hero standing on a ledge), swaying
-// `sway` of the width, dropping goo and calling crawlers; shakes over the hero `warn` s; dives at `dive` R/s into
-// the middle of the arena (no planks there); lies there `dazed` s, flat, a yellow arrow over it — then a stomp hurts it and
-// its side does not; then it rises again. A stomp bounces at `bounce` of a jump's speed.
-const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9,
-  hover: 3.6, fast: 0.65, high: 12, sway: 0.15, warn: 0.8, dive: 40, dazed: 2.8 };
-// The Puck (BOSSES.puck, Fuji's): it slides the ice at `slide` R/s, flicking a shell out every `every` s (as many as
-// `shells` by phase); rests `rest` s, winds up `wind` s (backing off, flat, flashing) and dashes wall to wall at `dash`
-// R/s, its wall shaking `icicles` down by phase: one, and only in its last (owner, 2026-10-20: worlds 1-3 not hard; the
-// icicles were most of the hearts it took). Its top is hard; a shell rolled into it turns it belly up for `flip` s.
-// It keeps still its first `calm` s, while its name is up (the plan: an encounter starts safe).
-// The Minecart (BOSSES.cart, the Cave's): `size` R, rides its rail end to end in `pass` s by phase, lobs blobs (two from its
-// second phase) every `spit` s after winding up `wind` s, creaks `creak` s at an end and tips three rocks (`rock` R) down.
-// From its second phase the bridges go in `crumble[0]` s and come back in `crumble[1]`; in its third the lifts run `lifts` times as fast.
-// In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it. It keeps still its first `calm` s.
-const CART = { size: 2.2, pass: [4, 3.4, 2.6], spit: 2.5, wind: 0.6, creak: 0.8, rock: 0.35, crumble: [0.35, 4.5], lifts: 1.5, hold: 2, calm: 2.5 };
-const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 0, 1], flip: 2.5, calm: 2.5 };
+// A boss's defaults (BOSSES has its own): its body's `size` R, its hearts, `angry` s red after a hit (it only pushes then), its
+// `coins`, the win's `winDelay` s, a stomp's `bounce` of a jump's speed, where it starts, `high` R over the floor, and the
+// minions it calls (Koschei's skulls): one every `spawnEvery` s, `maxMinions` at most. Its fight is its own (BOSSES: hang, glide, quake, street, sky, bone).
+const BOSS = { size: 2.1, hp: 6, angry: 2.0, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9, high: 12 };
+// The Tsuchigumo's and the Tram's body (`size` R), and a falling rock's R (`rock`: Onamazu's quake).
+const CART = { size: 2.2, rock: 0.35 };
+// Tsurara-onna (BOSSES.puck, Fuji's, world 3; owner 2026-10-24: all bosses redone, the difficulty's curve kept): she creeps over the ice
+// at the hero at `creep` R/s, to `keep` R off it, her moves taking turns. Icicles: her arms up, red, a chime, `cast` s; then `n` icicles `gap` R apart
+// shake over the hero `shake` s and fall. A slide: she backs off flashing with a scrape, `wind` s, then dashes at `dash` R/s to the far wall and sticks
+// there frozen `stun` s, the only time a stomp hurts her (else her top is hard ice). From her second phase the wall shakes `wallIce`
+// icicles down; on her last heart (`twice`) she dashes back the other way after `again` s before she sticks. Still her first `calm` s.
+const ICE = { creep: 2.4, keep: 2.5, rest: [2.0, 1.8, 1.6, 1.5], cast: 1.0, n: [3, 3, 4, 5], gap: 3, shake: 1.0, wind: 1.0, again: 0.6, dash: [13, 15, 17, 19], stun: 2.0, wallIce: [0, 2, 2, 2], twice: 3, calm: 2.5 };
+// Onamazu (BOSSES.namazu, the Sea's, world 4: the curve climbs from here; owner 2026-10-24): the earthquake catfish keeps `keep` R off the
+// hero, creeping `creep` R/s, its moves taking turns. A quake: it rears up on its tail, red, rumbling, `rear` s, and slams: `waves` waves
+// run along the floor both ways at `wave` R/s (jump them, or be up on a ledge) and `rocks` fall from the ceiling over the hero, their
+// shadows on the floor. A leap: it crouches in a splash `crouch` s, then leaps `leap` R high to where the hero was, and lands flopped on
+// its back `flop` s, the only time a stomp hurts it (the gods' stone on its back is hard). From phase `combo` the leap comes straight
+// after the quake. Five hearts. Still its first `calm` s.
+const QUAKE = { keep: 3, creep: 2.2, rest: [2.0, 1.7, 1.5, 1.3], rear: 0.8, waves: [1, 1, 1, 2], wave: 11, rocks: [1, 1, 2, 2], crouch: 0.8, leap: 7, flop: 1.7, combo: 9, again: 0.5, calm: 2.5 };
+// The Tsukumo Tram (BOSSES.tram, Tokyo's, world 5; owner 2026-10-24): a streetcar a hundred years on its route, on the street's floor now
+// (no rail under the ceiling, no lifts or bridges; one ledge, in the middle, far from its stops). At a stop it rings twice, its headlight
+// red, `warn` s, then rushes along the floor to the other end at `rush` R/s (jump it: it is lower than a jump, or be up on the ledge). There its doors open `stop` s, the only time a
+// stomp on its roof hurts it, and its pantograph throws `sparks` at the hero; `close` s to shut. On its last heart (`twice`) it runs
+// back once more after `again` s before it stops. Five hearts. Still its first `calm` s.
+const TRAMRUN = { warn: 0.8, again: 0.45, rush: [16, 18, 20, 22], stop: 1.5, close: 0.3, sparks: [2, 2, 3, 3], twice: 3, calm: 2.5 };
+// The Karasu-tengu (BOSSES.pigeon, the Sky's, world 7; owner 2026-10-24): it flies `high` R up, swaying, its moves taking turns. Its fan:
+// raised, red, a whoosh, `fan` s, then `gust` s of wind blowing the hero toward the far wall (`push`, as WIND's, half on the floor),
+// streaks across the sky. Feathers: a flick `fwarn` s, then `fn` feathers fanned at the hero, fast. Its swoop: a screech, red, `swarn` s
+// (it stops following the hero its last `lock` s), then a dive along a straight line through where the hero was, into the floor, where
+// its beak sticks `stuck` s, the only time a stomp hurts it. Its last heart swoops twice. Six hearts. Still its first `calm` s.
+const TENGU = { high: 12, sway: 0.2, rest: [1.4, 1.3, 1.2, 1.1], fan: 0.7, gust: 2.0, push: 9, fwarn: 0.7, fn: [2, 2, 2, 3], swarn: 0.7, lock: 0.4, speed: 30, stuck: 1.8, reel: 0.7, twice: 3, calm: 2.5 };
+// Koschei (BOSSES.koschei, the Dark Forest's, world 8, the last and the hardest; owner 2026-10-24): he walks his arena's floor in his cloak,
+// keeping `keep` R off the hero, his moves taking turns. Bones: an arm raised, red, `twarn` s, then `bones` thrown in arcs at the hero.
+// His sword: raised, red, a scrape, `swarn` s, then a low sweep along the floor in front of him, `reach` R past his drawing, `sweep` s
+// (jump it); after it he is off balance `stagger` s, the only time a stomp hurts him. A stomp breaks him into a heap of bones that rattles
+// and flies together again `heap` s later. From phase `skulls` he calls the forest's skulls; on his last heart (the needle over his crown)
+// he sweeps twice. Six hearts. Still his first `calm` s.
+const KOSCH = { keep: 3.5, walk: 2.4, rest: [1.4, 1.3, 1.2, 1.1], twarn: 0.6, bones: [2, 2, 3, 3], swarn: 0.6, reach: 3, sweep: 0.3, stagger: 1.4, heap: 1.6, again: 0.4, skulls: 2, twice: 3, calm: 2.5 };
+// The Tsuchigumo (BOSSES.cart, the Cave's; owner 2026-10-23: «Очень легкий босс… Зачем вагонетки внизу не понятно», the fight redone
+// to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
+// the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
+// lobbed at the hero. A drop: over the hero, its eyes red and dust off the ceiling where it will fall, `warn` s with a creak (still
+// its last `lock` s: time to run clear of it; before that it follows the hero no faster than `track` R/s), then down at `dive` R/s to the floor. There, tangled in its own thread, it lies `tangle` s, the only time a
+// stomp hurts it (any other stomp clangs off its back); then it reels back up in `reel` s. `rest` s between moves by phase. Its first
+// hit calls two spiderlings down; on its last heart it drops twice running, the second after `again` s. Still its first `calm` s.
+const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2, lock: 0.7, track: 7, again: 0.9, dive: 34, tangle: 2.5, reel: 0.9, rest: [2.0, 1.8, 1.6, 1.4], calm: 2.5,
+  lings: [0, 2, 0, 0], ling: 'crawler', twice: 3, dust: true, snd: { spit: ['spit', 0.6, 0.5], warn: ['crumble', 0.6, 1.6], phase: ['spit', 0.9, 0.55] } };
+// The Bake-danuki (BOSSES.probka, the Village's, world 1: the first boss teaches the loop, dodge then hit; owner 2026-10-24 «Помни про кривую
+// сложности»): the same hanging boss as the spider (Boss.hang) without a thread. It floats `high` R up, swaying; a leaf on its head, it
+// drops like a stone where its shadow grows on the floor (`warn` s, a rustle), then sits dizzy `tangle` s. From its second phase its
+// belly drum lobs an acorn first (two on its last heart, when it also drops twice). It floats out of a plain jump's reach, its sway drawn over the hero (`follow`): no corner to sit its drop out in. Three hearts, every warning longer than the later bosses'.
+const TANUKI = { high: 13, swing: 0.16, follow: 0.6, spit: 1.2, webs: [0, 1, 1, 2], warn: 1.4, lock: 0.9, track: 5, again: 1.2, dive: 30, tangle: 2.8, reel: 1.0, rest: [2.2, 2.0, 1.8, 1.8], calm: 2.5,
+  lings: [0, 0, 0, 0], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['stomp', 0.6, 1.5], warn: ['bubble', 0.7, 0.6], phase: ['bosshit', 0.6, 0.7] } };
+// Nuppeppo (BOSSES.crane, the Tower Blocks', world 6; owner 2026-10-24): the crane's load, a lump of flesh in its sling, the same hanging
+// boss (Boss.hang) with two moves of its own. A swing: the crane winds it back away from the hero, red, creaking, `sweep.warn` s, then
+// sweeps it across the arena like a wrecking ball, its middle `sweep.low` R over the floor: a hero on the floor passes under it, one on a
+// ledge or in the air is hit (stay low). Drips: it wobbles `spit` s with a gurgle and lobs `webs` of its goo at the hero. Its drop, where
+// its shadow grows, bursts `splat` blobs out of it as it lands; it lies wobbling `tangle` s, the only time a stomp hurts it.
+const NUPPE = { high: 12, swing: 0.18, follow: 0.3, spit: 0.7, webs: [0, 1, 2, 2], warn: 0.75, lock: 0.6, track: 8, again: 0.5, dive: 36, tangle: 1.6, reel: 0.8, rest: [1.5, 1.4, 1.3, 1.2], calm: 2.5,
+  lings: [0, 0, 0, 0], ling: 'crawler', splat: [1, 2, 2, 3], twice: 3, shadow: true, sweep: { warn: 0.7, dur: 1.2, low: 7.2 },
+  snd: { spit: ['bubble', 0.7, 0.4], warn: ['crumble', 0.6, 1.6], sweep: ['crumble', 0.8, 1.1], phase: ['bubble', 0.9, 0.35] } };
+// The Lid (BOSSES.lid, the random run's summit; owner 2026-10-24: all bosses redone): a hanging boss too (Boss.hang), the last of a run
+// that can be long, so on the later bosses' tells. It lobs its goo, then drops where its shadow grows and lies `tangle` s; its second
+// phase on calls a crawler down each phase; its last heart drops it twice.
+const LIDF = { high: 12, swing: 0.24, follow: 0.4, spit: 0.8, webs: [1, 2, 2, 3], warn: 0.9, lock: 0.7, track: 7, again: 0.6, dive: 34, tangle: 1.8, reel: 0.8, rest: [1.6, 1.5, 1.4, 1.3], calm: 2.5,
+  lings: [0, 1, 1, 1], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['spit', 0.6, 0.7], warn: ['crumble', 0.6, 1.2], phase: ['bosshit', 0.6, 0.6] } };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
 // and scaled up with hard edges), the camera moves in whole game pixels, and everything is
 // drawn in the nine inks of the palette sheet (research/refs), flat or as 1-bit patterns
 // of one ink over another.
-const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2, get keep() { return this.base / this.size; } };   // a phone's screen is small and sharp: finer there (1 was too fine)
+// A phone's game pixel a whole number of its screen's (owner, 2026-10-24: «Масштабирование всегда должно попадать пиксель в пиксель на всех устройствах»):
+// 1.5 CSS px was 4.5 of an iPhone's, its lines 4 and 5 by turns; the nearest whole number to 1.5 CSS px (at 3 a tie: PIX_TIE, `?pb=` to try another)
+const PIX_TIE = 4, phonePx = () => { const d = window.devicePixelRatio || 1, q = +new URLSearchParams(location.search).get('pb'), n = q > 0 ? q : Math.abs(1.5 * d - 4.5) < 1e-6 ? PIX_TIE : Math.max(1, Math.round(1.5 * d)); return n / d; };
+const PIX = { size: matchMedia('(pointer: coarse)').matches ? phonePx() : 2, get keep() { return this.base / this.size; } };   // a phone's screen is small and sharp: finer there (1 was too fine)
 PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized to (a phone's 1.5, a computer's 2) whatever the drawing's: a sprite's dot PIX.keep times its pixels
 // A computer's drawing grid (owner, 2026-10-23: «на мониторах ретина на десктопе графика тоже должны быть как на телефоне», his Д1 «А»): a game pixel a whole
 // number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen
@@ -384,14 +705,14 @@ const INK = { spike: PAL.red, coin: PAL.yellow, coinD: PAL.orange, fire: PAL.red
 // no more than a quarter over it). The play, in front, in full ink: all the hero touches or must read (ledges and what is one, an air
 // conditioner, an awning, a gondola; the walls, hazards, coins, doors, the bodies). Props, in the middle: what stands on or hangs off the
 // play and plays no part, solid, no white or yellow but a light's own core; a light lit (a lamp, a neon once passed) `lit` of the way from
-// the black to its ink. Behind the shaft: poles, wires and cables, crossarms, props, posts and pipes up the walls, fire escapes, mullions,
+// the black to its ink. Behind the shaft: poles, wires and cables, crossarms, props, posts and pipes up the walls, mullions,
 // the far layer's windows, clouds and dots: `back` of the way at most, one ink, no white, the least detail. A feature drawn at alpha 1 + x
 // is such a tone, solid (FEAT_FS): DIM for what is behind, LIT for a light.
 const DEPTH = { lit: 0.6, back: 0.25 }, DIM = 1 + DEPTH.back, LIT = 1 + DEPTH.lit;
 const RAINBOW_INK = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'].map((id) => PAL[id]);   // the one thing in all the inks at once
 const FOE_COLOR = {
   red: { id: 'red', base: PAL.red, deep: PAL.black },
-  boss: { id: 'boss', base: PAL.purple, deep: PAL.black },
+  boss: { id: 'boss', base: PAL.blue, deep: PAL.black },   // (never the stash's purple: an ink one meaning, owner 2026-10-24 via Worlds, К6 «А»)
   goo: { id: 'goo', base: PAL.black, deep: PAL.gray },   // a skull's black goo (the user's picture)
   gray: { id: 'gray', base: PAL.gray, deep: PAL.black },   // the Dark Forest's enemies (black and white, their eyes lit)
 };
@@ -418,17 +739,16 @@ const foePaint = (e, H) => {   // uPaint: the level, the field's two phases
 const theme = (ink, o = {}) => ({ top: PAL.black, bot: PAL.black, dots: ink, wall: ink, wallD: PAL.black, lip: PAL.white, block: ink, plank: ink,
   slick: o.ice || PAL.blue, moss: PAL.green, rubber: o.rubber || PAL.purple, crumble: o.crumble || PAL.orange, mover: o.mover || PAL.blue, spring: o.spring || PAL.purple });
 const THEMES = {
-  cave: Object.assign(theme(PAL.gray), { mines: true }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { village: true }),   // the Village's kit (see villageRect; the Mine's world, its id kept)
+  cave: Object.assign(theme(PAL.gray), { mines: true, hazard: 'flood', wallHaz: 'firedamp' }), ice: Object.assign(theme(PAL.blue, { ice: PAL.white, crumble: PAL.gray, mover: PAL.purple }), { fuji: true, moss: PAL.gray, rime: true, hazard: 'avalanche', wallHaz: 'wallice', ice: 'fuji', holder: 'fuji' }), mine: Object.assign(theme(PAL.orange, { crumble: PAL.gray }), { village: true, hazard: 'noyaki', wallHaz: 'grassfire', ice: 'village', holder: 'village' }),   // the Village's kit (see villageRect; the Mine's world, its id kept)
  
   void: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, mover: PAL.gray }), summit: theme(PAL.gray), room: theme(PAL.orange, { crumble: PAL.gray }),
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
-  tokyo: Object.assign(theme(PAL.purple, { ice: PAL.white, crumble: PAL.gray, mover: PAL.blue }), { dots: PAL.black, town: true }),   // Tokyo's town at night (see TOKYO), purple (owner: blue went with Fuji's;
+  tokyo: Object.assign(theme(PAL.purple, { ice: PAL.white, crumble: PAL.gray, mover: PAL.blue }), { dots: PAL.black, town: true, hazard: 'cityfire', wallHaz: 'boardfire', holder: 'tokyo' }),   // Tokyo's town at night (see TOKYO), purple (owner: blue went with Fuji's;
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
   blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { danchi: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
-  sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
+  sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true, hazard: 'tide', wallHaz: 'blowhole', holder: 'sea' }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
   skazka: Object.assign(theme(PAL.gray, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
   // crumbles or flies tells itself by its shape (a rotten log, Baba Yaga's mortar); colour only for the hero, lights, coins, danger and the doors' marks
-  junk: Object.assign(theme(PAL.green, { ice: PAL.gray, mover: PAL.blue, spring: PAL.black, crumble: PAL.orange }), { moss: PAL.gray, plank: PAL.orange, win: 'brick', junk: true }),   // the Junkyard (see JUNK)
   sky: Object.assign(theme(PAL.purple, { mover: PAL.blue, spring: PAL.blue, rubber: PAL.blue, crumble: PAL.white }), { dots: PAL.gray, win: 'clouds', glass: true }),   // the Skyscraper (see SKY)
   crypt: Object.assign(theme(PAL.white, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.gray }), { bot: PAL.gray, grad: true, wall: PAL.gray, drips: true }),   // the Crypt: black above dithering down to grey, white stone, black goo dripping off it (the user's skull picture)
 };
@@ -458,20 +778,36 @@ const ENEMY = {
   mini: { design: 'mochi', color: 'red', size: 0.5, grav: 1, stomp: true, coins: 2, speed: 80, step: 0.4, move: 'crawl' },
   chaser: { design: 'slug', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 5, speed: 70, step: 0.5, move: 'wall', chase: true },
   worm: { design: 'round', color: 'red', size: 0.85, grav: 1, stomp: true, coins: 6, speed: 0, step: 0.9, move: 'flow' },   // a knot of tubes, flowing ledge to ledge (WORM)
+  komori: { design: 'round', color: 'goo', size: 0.72, grav: 0, stomp: true, coins: 4, speed: 0, step: 0.8, move: 'swoop' },   // the Mine's diving bat, its look KOMORI_V (KOMORI)
   skull: { design: 'dome', color: 'goo', size: 1.1, grav: 1, stomp: true, coins: 5, speed: 40, step: 0.8, move: 'crawl' },   // a skull in black goo, dripping (SKULL; the Crypt's)
   // the square ones (owner, 2026-10-22: «еще нужны квадратные враги», all three he picked): jelly cubes ('cube')
-  tumbler: { design: 'cube', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 4, speed: 0, step: 1, move: 'tumble' },   // a yokan somersaulting along its ledge (TUMBLE)
+  tumbler: { design: 'cube', color: 'red', size: 0.65, grav: 1, stomp: true, coins: 4, speed: 0, step: 1, move: 'tumble' },   // a yokan somersaulting along its ledge (TUMBLE); its body
+  // the size of its drawing (handover 19: drawn 27×29 CSS px on a 393 phone, the body 37 across at 0.8 R: hit where nothing was drawn), as the nurikabe's (36×32, 51 at 1.1 R)
   tofu: { design: 'cube', color: 'red', size: 0.95, grav: 1, stomp: true, coins: 2, speed: 32, step: 0.9, move: 'crawl' },   // a soft cube: stomped, it falls into four (TOFU)
   tofuMini: { design: 'cube', color: 'red', size: 0.45, grav: 1, stomp: true, coins: 1, speed: 48, step: 0.45, move: 'crawl', safe: 0.8 },   // (slower, harmless its first 0.8 s: the same; was 70, 0.35 s)
-  nurikabe: { design: 'cube', color: 'red', size: 1.1, grav: 0, stomp: true, coins: 6, speed: 0, step: 1, move: 'crush' },   // a wall yokai hanging over its ledge, it drops on the hero under it (CRUSH)
+  nurikabe: { design: 'cube', color: 'red', size: 0.75, grav: 0, stomp: true, coins: 6, speed: 0, step: 1, move: 'crush' },   // a wall yokai hanging over its ledge, it drops on the hero under it (CRUSH)
 };
 // A tumbler: sits `rest` s on its ledge (crouching its last `crouch`), then somersaults `hop` R ahead, up and over in `air` s, turning at the ledge's end. Sitting it
 // is stomped; in the air its corners hurt. A nurikabe: hangs `up` tiles over its ledge (less if a ceiling is nearer); the hero under it (within `reach` R of its
 // sides), it shakes `warn` s, falls at `fall` times gravity, lies `down` s (stomped only then; from over it before, the hero bounces off its top), rises at
 // `rise` R/s. A tofu stomped: `n` small ones, thrown apart
 const TUMBLE = { rest: 1.8, crouch: 0.45, air: 0.45, hop: 2.0 };   // (owner, 2026-10-23: «квадратных врагов тяжело одолеть, точно нужно проще»: it sits longer, crouches clearer, hops shorter; was 1.1, 0.3, 2.4)
-const CRUSH = { up: 3.6, reach: 1.2, warn: 0.85, fall: 2.2, down: 2.4, rise: 2.2 };   // (the same: it shakes longer, falls slower, lies longer; was 0.55, 3, 1.4)
+const CRUSH = { up: 3.6, reach: 1.55, warn: 0.85, fall: 2.2, down: 2.4, rise: 2.2 };   // (reach 1.55, was 1.2: with its body now 0.75 R the hero under it still within 2.3 R; before that it shook longer, fell slower, lay longer, was 0.55, 3, 1.4)
 const TOFU = { n: 4 };
+const SPRITE_EYES = {}, spriteEyes = (id) => SPRITE_EYES[id] || (SPRITE_EYES[id] = (() => {   // where a sprite's eyes are (its 'o' cells), in game pixels from its middle
+  const rows = FOE_SPRITES[id]; let n = 0, x = 0, y = 0;
+  rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] === 'o') { n++; x += i + 0.5; y += j + 0.5; } });
+  return n ? [x / n - rows[0].length / 2, y / n - rows.length / 2] : [0, 0];
+})());
+// The Mine's komori (owner, 2026-10-24, У3 «Б»: its own diving bats): it hangs asleep under its ledge; the hero within `see` R, `low` R under it or more
+// and in its sight (in the hero's light: the Mine is dark), it flashes red `warn` s (b.warn), letting go `drop` R, then dives `dive` s in a U through where
+// he was as it woke (move away, and it misses) and up the far side, flies back to its perch in `back` s and hangs `rest` s before it can wake again. Red,
+// on its way down to that spot, it hurts and is not stomped; grey (asleep, rising, flying back) it never hurts and is stomped from over it (Вр4: one look,
+// one meaning). It flies through nothing: its dive the first way `pad` clear of blocks (a U, half of one, straight down at him and slowly back), else
+// none. A lamp lit within `lamp` R of its perch keeps it asleep; a bump from under it wakes it. It touches nothing but the hero, by its own circle `hit`
+// (Game.komoriTouch); `hit` and `pad` in its drawing's pixels (1:1, the owner's Д66 «А»: the circle holds about 70% of a flying frame's ink, its thin
+// wingtips out); `flap` its frames a second, diving and flying back.
+const KOMORI = { see: 5.5, low: 1.5, warn: 0.8, drop: 0.3, dive: 0.9, back: 1.2, rest: 2, lamp: 4, hit: 12, pad: 12, flap: [8, 5] };
 // The worm (user's video: dithered tubes flowing over each other, ball tips): its knot is stomped, its tubes hurt. Four tubes,
 // two to a side, waving up and out (the knot's top is clear: the way to stomp it); `len` theirs, R, in discs `seg` apart, `w`
 // half-wide, `tip` the balls at their ends. On a ledge it `wait`s, then, on screen, reaches a tube out (`reach` s, the warning)
@@ -506,6 +842,7 @@ const FOE_DESC = {
   tofuMini: { en: "A quarter of a tofu: small and quick.", es: 'Un cuarto de tofu: pequeño y rápido.', pt: 'Um quarto de tofu: pequeno e rápido.', ja: 'とうふの かけら。はやい。' },
   nurikabe: { en: 'Drops on you from above. Stomp it once it lands.', es: 'Cae sobre ti. Písalo cuando aterriza.', pt: 'Cai em você. Pise quando ele pousa.', ja: 'うえから おちてくる。おちたら ふもう。' },
   skull: { en: 'Creeps in its goo, lunges up close.', es: 'Se arrastra en su baba; se lanza de cerca.', pt: 'Rasteja na gosma; ataca de perto.', ja: 'どろどろ はう。ちかいと とびかかる。' },
+  komori: { en: 'Dives when red. Lamps keep it asleep.', es: 'Rojo, se lanza en picado. Las lámparas lo duermen.', pt: 'Vermelho, ele mergulha. Lâmpadas o fazem dormir.', ja: 'あかく なると とっしん。ランプで ねむる。' },
 };
 const FOE_NAMES = {
   crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
@@ -517,6 +854,7 @@ const FOE_NAMES = {
   skull: { en: 'Skull', es: 'Calavera', pt: 'Caveira', ja: 'ドクロ' },
   tumbler: { en: 'Tumbler', es: 'Volteretas', pt: 'Cambalhota', ja: 'ゴロゴロようかん' }, tofu: { en: 'Tofu', es: 'Tofu', pt: 'Tofu', ja: 'とうふ' },
   tofuMini: { en: 'Tofu bit', es: 'Trocito', pt: 'Pedacinho', ja: 'とうふの かけら' }, nurikabe: { en: 'Nurikabe', es: 'Nurikabe', pt: 'Nurikabe', ja: 'ぬりかべ' },
+  komori: { en: 'Bat', es: 'Murciélago', pt: 'Morcego', ja: 'コウモリ' },
 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
@@ -532,7 +870,7 @@ const MINI = { size: 1.6, hp: 3 };
 const WORLDS = [
   { id: 'cave', name: { en: 'Mine', es: 'Mina', pt: 'Mina', ja: 'こうざん' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4, bouncy: 0.2,   // the Mine since 2026-10-21 (owner: «мир темной пещеры, рудников японии»; the Cave before)
     chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2, fork: 1, vault: 2 },
-    foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
+    foes: 0.55, enemies: { crawler: 3, climber: 2, hedgehog: 1, komori: 2 },   // (climber 2: its levels' one from 2-3, Р1 «А»; at 1 2-4 and 2-8 had none)
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { en: 'moss and springs', es: 'musgo y resortes', pt: 'musgo e molas', ja: 'コケと バネ' } },
       { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'bubble'], news: { en: 'crumbling blocks, rubber and climbers', es: 'bloques que se caen, goma y trepadores', pt: 'blocos que desmoronam, borracha e escaladores', ja: 'くずれる ブロック、ゴム、カベノボリ' } },
       { chunks: ['icewall', 'lift'], news: { en: 'ice, moving planks and hedgehogs', es: 'hielo, tablas móviles y erizos', pt: 'gelo, tábuas móveis e ouriços', ja: 'こおり、うごく いた、ハリネズミ' } }] },
@@ -567,13 +905,6 @@ const CRYPT = Object.assign({}, WORLDS[2], { id: 'crypt', name: { en: 'Crypt', e
 // lines sagging across the shaft, signs up its walls in the game's own kana, vending machines on its ledges (THEMES.tokyo `town`, drawn
 // by the renderer), a level crossing in most of its levels (`crossing`: the chance). It shows by itself at ?play=tokyo, to look at,
 // before it is a world of the map.
-// The Junkyard (user: a New York dump; the campaign's world 7): green brick, lit windows far off, brick walls (BG_FS uWin 4), fire escapes
-// zigzagging up the walls, dumpsters at a ledge's wall end; fire-escape landings for planks off a wall, wooden pallets for free ones, trash
-// bags for springs, greasy steel for ice, chain-link (grey) for the holding moss, a garbage truck through its crossings (THEMES.junk).
-const JUNK = Object.assign({}, WORLDS[2], { id: 'junk', name: { en: 'Junkyard', es: 'Basurero', pt: 'Ferro-velho', ja: 'ゴミすてば' }, theme: THEMES.junk, dark: [], maxD: 2, magnet: 0, crossing: 0.6,
-  chunks: { planks: 2, shelves: 3, stairs: 2, pillars: 2, comb: 2, chimney: 1, spring: 3, iceblocks: 1, crumble: 1, rubberwall: 1, rest: 1, vault: 1 },
-  enemies: { crawler: 3, climber: 2, shell: 2, spitter: 1 },
-  intro: [{ news: { en: 'trash bags bounce', es: 'las bolsas de basura rebotan', pt: 'sacos de lixo quicam', ja: 'ゴミぶくろで はねる' } }, {}, {}] });
 // The Skyscraper (user: a skyscraper and clouds; the campaign's world 6): dusk in purple, banks of cloud far off (BG_FS uWin 3), glass
 // facades up the walls, steel girders for blocks, clouds for the free planks (they dissolve under the hero and gather again; a catwalk
 // off a wall holds), bolts dropped from above for icicles (THEMES.sky `glass`). ?play=sky shows it.
@@ -596,7 +927,7 @@ const TOKYO = Object.assign({}, WORLDS[1], { id: 'tokyo', name: { en: 'Tokyo', e
 // campaign yet (UPwell's CAMP_ORDER), ?play=sea to look at it.
 const SEA = Object.assign({}, WORLDS[1], { id: 'sea', name: { en: 'Sea', es: 'Mar', pt: 'Mar', ja: 'うみ' }, theme: THEMES.sea, dark: [], maxD: 2,
   chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 2, movers: 1, crumble: 2, bridge: 2, mosswall: 1, iceblocks: 1, rest: 1, vault: 1 },
-  enemies: { crawler: 3, climber: 2, circler: 2, shell: 2 }, intro: [{}, {}, {}] });
+  enemies: { crawler: 3, climber: 2, circler: 2, shell: 2, spitter: 2 }, intro: [{}, {}, {}] });
 // The Dark Forest (owner, 2026-10-20: a bonus world of scary Russian fairy tales, a dark forest with skulls, Baba Yaga, Kikimora, Koschei, Leshy, the stove;
 // very gloomy, very scary, very dark; on its levels the hero is a Kolobok): dark on every level, its kit to the owner's picks (research/variants/skazka-*).
 // It opens at 180 stars (CAMP_STARS), off the line; ?play=skazka to look at it.
@@ -642,88 +973,90 @@ const BONUS = [
 // The Cork's dive went to the Village and the Minecart to the Cave (owner, 2026-10-20): the colours stayed with the worlds, the Village's boss blue, the Cave's orange.
 const BOSSES = {
   // The Village's: a Bake-danuki on the Cork's dive, its name and lines its own (owner, 2026-10-20: the yokai of its look).
-  probka: { name: { en: 'Bake-danuki', es: 'Bake-danuki', pt: 'Bake-danuki', ja: 'ばけだぬき' }, ink: 'blue', hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  probka: { name: { en: 'Bake-danuki', es: 'Bake-danuki', pt: 'Bake-danuki', ja: 'ばけだぬき' }, ink: 'blue', hang: TANUKI, hp: 3, phase: (hp) => (hp >= 3 ? 0 : hp >= 2 ? 1 : 3),
     intro: [{ en: "One leaf, and I'm anyone.", es: 'Una hoja, y soy cualquiera.', pt: 'Uma folha, e sou qualquer um.', ja: 'はっぱ いちまいで なんにでも なれる。' },
       { en: 'Pon-poko! Hear my belly drum?', es: '¡Pon-poko! ¿Oyes el tambor de mi panza?', pt: 'Pon-poko! Ouve o tambor da minha barriga?', ja: 'ポンポコ！ おなかの たいこ きこえる？' },
       { en: 'This whole village is my trick.', es: 'Todo este pueblo es mi truco.', pt: 'Esta vila toda é um truque meu.', ja: 'この むら ぜんぶが わたしの いたずら。' }],
     quip: [{ en: 'Fooled you! Pon-poko!', es: '¡Te engañé! ¡Pon-poko!', pt: 'Te enganei! Pon-poko!', ja: 'だまされた！ ポンポコ！' },
       { en: 'A leaf beats a drop.', es: 'Una hoja gana a una gota.', pt: 'Folha vence gota.', ja: 'はっぱは しずくより つよい。' }],
-    defeat: { en: 'Fine… my leaf has wilted.', es: 'Vale… mi hoja se marchitó.', pt: 'Tá bom… minha folha murchou.', ja: 'まいった… はっぱが しおれた。' } },
-  // Fuji's: a Tsurara-onna on the Puck's slide (the plan's §5.4): over the ice, beaten by her own shells (PUCK, Boss.slide). The first three bosses'
+    defeat: { en: 'Fine… my leaf has wilted.', es: 'Vale… mi hoja se marchitó.', pt: 'Tá bom… minha folha murchou.', ja: 'まいった… はっぱが しおれた。' },
+    top: { en: 'Not now. Wait till it lands!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Dizzy! Jump on it!', es: '¡Mareado! ¡Salta encima!', pt: 'Tonto! Pule em cima!', ja: 'めが まわってる！ とびのれ！' },   // the first time it sits dizzy
+    how: { en: 'Dodge its drop, then stomp it', es: 'Esquiva su caída y písalo', pt: 'Desvie da queda e pise nele', ja: 'おちてくるのを よけて、ふみつけろ' } },   // after three losses
+  // Fuji's: a Tsurara-onna over the ice, her icicles and her slide into the wall (ICE, Boss.glide; owner 2026-10-24: all bosses redone; the shells gone).
+  // (Before: the Puck's slide, beaten by her own shells; the first three bosses'
   // five hearts and the Cork's phases (owner, 2026-10-20: her round body kept, the fight softened, worlds 1-3 not hard).
-  puck: { name: { en: 'Tsurara-onna', es: 'Tsurara-onna', pt: 'Tsurara-onna', ja: 'つららおんな' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  puck: { name: { en: 'Tsurara-onna', es: 'Tsurara-onna', pt: 'Tsurara-onna', ja: 'つららおんな' }, ink: 'gray', design: 'dome', size: 2.4, glide: ICE, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'Cold hands. Colder heart.', es: 'Manos frías. Corazón más frío.', pt: 'Mãos frias. Coração mais frio.', ja: 'つめたい て。もっと つめたい こころ。' },
       { en: 'Stay a while. Freeze with me.', es: 'Quédate un rato. Congélate conmigo.', pt: 'Fique um pouco. Congele comigo.', ja: 'ゆっくり していって。いっしょに こおろう。' },
       { en: 'My icicles never melt.', es: 'Mis carámbanos nunca se derriten.', pt: 'Meus pingentes de gelo nunca derretem.', ja: 'わたしの つららは とけない。' }],
     quip: [{ en: 'Frozen solid. How pretty.', es: 'Congelado del todo. Qué bonito.', pt: 'Congelado inteiro. Que lindo.', ja: 'カチコチ。きれいね。' },
       { en: 'Shh. Winter is long here.', es: 'Shh. Aquí el invierno es largo.', pt: 'Psiu. Aqui o inverno é longo.', ja: 'しーっ。ここの ふゆは ながいの。' }],
     defeat: { en: 'Melting… so spring has come.', es: 'Me derrito… llegó la primavera.', pt: 'Derretendo… a primavera chegou.', ja: 'とけていく… はるが きたのね。' },
-    top: { en: 'Hard on top. Roll a shell at her!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
-    hint: { en: 'Flipped! Land on her belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
-    how: { en: 'Roll a shell into her, then stomp her', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
-  // The Cave's: a Tsuchigumo on the Minecart's rail (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
-  // The gentler of the two on a rail, as the earlier (owner, 2026-10-20: it and the Tram traded): the Cork's hits and phases, its passes and spits a quarter slower (slow).
-  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+    top: { en: 'Hard as ice. Wait till she hits the wall!', es: 'Dura como el hielo. ¡Espera a que choque!', pt: 'Dura como gelo. Espere ela bater na parede!', ja: 'こおりで かたい。かべに ぶつかるまで まて！' },   // the first bounce off her
+    hint: { en: 'Frozen to the wall! Stomp her!', es: '¡Pegada a la pared! ¡Písala!', pt: 'Presa na parede! Pise nela!', ja: 'かべに はりついた！ ふみつけろ！' },   // the first time she sticks
+    how: { en: 'Jump her slide, then stomp her', es: 'Salta su embestida y písala', pt: 'Pule o deslize dela e pise nela', ja: 'すべってくるのを とんで、ふみつけろ' } },   // after three losses
+  // The Cave's: a Tsuchigumo hanging by its thread in an empty cave (SPIDER, Boss.hang; owner 2026-10-23: the fight redone, the lifts,
+  // bridges and rail gone): four hearts, each earned while it lies tangled after its drop.
+  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, hang: SPIDER, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'The dark down here is my web.', es: 'La oscuridad aquí es mi telaraña.', pt: 'O escuro aqui é minha teia.', ja: 'この くらやみは わたしの くものす。' },
-      { en: 'Eight legs, one rail, no way out.', es: 'Ocho patas, un riel, sin salida.', pt: 'Oito patas, um trilho, sem saída.', ja: 'あし はっぽん、レール いっぽん、にげみち なし。' },
+      { en: 'Eight legs, one thread, no way out.', es: 'Ocho patas, un hilo, sin salida.', pt: 'Oito patas, um fio, sem saída.', ja: 'あし はっぽん、いと いっぽん、にげみち なし。' },
       { en: 'Nobody leaves my burrow.', es: 'Nadie sale de mi madriguera.', pt: 'Ninguém sai da minha toca.', ja: 'わたしの あなから だれも でられない。' }],
     quip: [{ en: 'Stuck in my web!', es: '¡Atrapado en mi telaraña!', pt: 'Preso na minha teia!', ja: 'くものすに ひっかかった！' },
       { en: 'Too slow for eight legs.', es: 'Muy lento para ocho patas.', pt: 'Lento demais para oito patas.', ja: 'はっぽんあしには おそすぎ。' }],
     defeat: { en: 'Ugh… back into my hole.', es: 'Uf… de vuelta a mi agujero.', pt: 'Ai… de volta pro meu buraco.', ja: 'うう… あなに もどる。' },
-    hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
-    how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
+    top: { en: 'Not now. Wait for its drop!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちてくるのを まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Tangled! Jump on it!', es: '¡Enredada! ¡Salta encima!', pt: 'Enrolada! Pule em cima!', ja: 'からまった！ とびのれ！' },   // the first time it lies tangled
+    how: { en: 'Dodge its drop, then stomp it', es: 'Esquiva su caída y písala', pt: 'Desvie da queda e pise nela', ja: 'おちてくるのを よけて、ふみつけろ' } },   // after three losses
   // The Sea's (world 4): Onamazu, the earthquake catfish under the islands, the gods' stone (kaname-ishi) on its back (owner, 2026-10-21:
-  // «сом изогнутый», boss-sea D): the Rat King's slide over wet rock (rc.ice), its stone the hard top.
-  namazu: { name: { en: 'Onamazu', es: 'Onamazu', pt: 'Onamazu', ja: 'おおなまず' }, ink: 'orange', design: 'dome', size: 2.4, slide: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  // «сом изогнутый», boss-sea D): its quake and its leap (QUAKE, Boss.quake; owner 2026-10-24: all bosses redone), its stone the hard top.
+  namazu: { name: { en: 'Onamazu', es: 'Onamazu', pt: 'Onamazu', ja: 'おおなまず' }, ink: 'orange', design: 'dome', size: 2.4, quake: QUAKE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'Who wakes me under the islands?', es: '¿Quién me despierta bajo las islas?', pt: 'Quem me acorda sob as ilhas?', ja: 'しまの したで ねてたのに。だれだ？' },
       { en: "The gods' stone holds me. Barely.", es: 'La piedra de los dioses me sujeta. Apenas.', pt: 'A pedra dos deuses me prende. Mal.', ja: 'かみの いしが おさえてる。ぎりぎりね。' },
       { en: 'Feel the ground shake!', es: '¡Siente temblar la tierra!', pt: 'Sinta o chão tremer!', ja: 'じめんが ゆれるぞ！' }],
     quip: [{ en: 'Shaken? That was a small one.', es: '¿Temblando? Ese fue pequeño.', pt: 'Tremendo? Esse foi pequeno.', ja: 'ゆれた？ いまのは ちいさいほう。' },
       { en: 'Splash. Back to the shallows.', es: 'Chof. De vuelta a la orilla.', pt: 'Tchibum. De volta pro raso.', ja: 'ザブン。あさせへ おかえり。' }],
     defeat: { en: '…The stone holds. I sleep again.', es: '…La piedra aguanta. Vuelvo a dormir.', pt: '…A pedra aguenta. Volto a dormir.', ja: '…いしが おもい。また ねむろう。' },
-    top: { en: 'Hard stone. Roll a shell at it!', es: 'Piedra dura. ¡Lánzale un caparazón!', pt: 'Pedra dura. Role um casco nele!', ja: 'いしは かたい。こうらを ころがせ！' },
-    hint: { en: 'Flipped! Land on its belly!', es: '¡Volteado! ¡Salta en su panza!', pt: 'Virado! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },
-    how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písalo', pt: 'Role um casco nele e depois pise', ja: 'こうらを ぶつけて、ふみつけろ' } },
-  // World 7's: the Rat King (the Junkyard's): the Puck's slide over a greasy floor (its arena as the Puck's, rc.ice), round ears, a tail.
-  rat: { name: { en: 'Rat King', es: 'Rey Rata', pt: 'Rei Rato', ja: 'ネズミの おう' }, ink: 'purple', design: 'dome', size: 2.4, slide: true, rat: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
-    intro: [{ en: 'Everything here is mine. Even you.', es: 'Todo aquí es mío. Incluso tú.', pt: 'Tudo aqui é meu. Até você.', ja: 'ここの ものは ぜんぶ おれの もの。おまえも。' },
-      { en: 'Finders keepers.', es: 'El que lo encuentra se lo queda.', pt: 'Achado não é roubado.', ja: 'ひろった もの がち。' },
-      { en: 'Squeak. Bow to the king.', es: 'Iiii. Inclínate ante el rey.', pt: 'Iii. Curve-se ao rei.', ja: 'チュー。おうに ひれふせ。' }],
-    quip: [{ en: 'Into the bin with you.', es: 'Al contenedor contigo.', pt: 'Pra caçamba com você.', ja: 'ゴミばこへ どうぞ。' },
-      { en: 'Squeak squeak. Again?', es: 'Iiii iiii. ¿Otra vez?', pt: 'Iii iii. De novo?', ja: 'チューチュー。もう いっかい？' }],
-    defeat: { en: 'Take it… the trash is yours.', es: 'Tómalo… la basura es tuya.', pt: 'Pode levar… o lixo é seu.', ja: 'もってけ… ゴミは おまえの もの。' },
-    top: { en: 'Hard on top. Roll a shell at it!', es: 'Arriba es duro. ¡Lánzale un caparazón!', pt: 'Em cima é duro. Role um casco nele!', ja: 'うえは かたい。こうらを ころがせ！' },
-    hint: { en: 'Flipped! Land on its belly!', es: '¡Volteado! ¡Salta en su panza!', pt: 'Virado! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },
-    how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písalo', pt: 'Role um casco nele e depois pise', ja: 'こうらを ぶつけて、ふみつけろ' } },
+    top: { en: 'Hard stone! Wait till it flops!', es: '¡Piedra dura! Espera a que caiga de espaldas.', pt: 'Pedra dura! Espere ele virar de costas.', ja: 'いしは かたい。ひっくりかえるまで まて！' },   // the first bounce off its stone
+    hint: { en: 'Belly up! Stomp it!', es: '¡Panza arriba! ¡Písalo!', pt: 'De barriga pra cima! Pise nele!', ja: 'おなかが うえ！ ふみつけろ！' },   // the first time it flops
+    how: { en: 'Jump the wave, dodge the leap, stomp', es: 'Salta la ola, esquiva el salto, pisa', pt: 'Pule a onda, desvie do salto, pise', ja: 'なみを とんで、ジャンプを よけて、ふめ' } },   // after three losses
   // The Sky's: a Karasu-tengu on the Cork's dive (hover, warn, dive, dazed, rise), flapping its wings.
-  pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', pigeon: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
+  pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', sky: TENGU, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'The sky has a guard. Me.', es: 'El cielo tiene un guardián. Yo.', pt: 'O céu tem um guardião. Eu.', ja: 'そらには ばんにんが いる。わたしだ。' },
       { en: 'Caw! Climbers fall. Crows fly.', es: '¡Cra! Tú caes. Los cuervos vuelan.', pt: 'Cró! Você cai. Corvos voam.', ja: 'カァ！ のぼる ものは おちる。カラスは とぶ。' },
       { en: 'Show me your wings, climber.', es: 'Enséñame tus alas, escalador.', pt: 'Mostre suas asas, escalador.', ja: 'つばさを みせてみな。' }],
     quip: [{ en: 'Caw-caw! Back to earth.', es: '¡Cra-cra! De vuelta a tierra.', pt: 'Cró-cró! De volta ao chão.', ja: 'カァカァ！ じめんに おかえり。' },
       { en: 'No wings, no sky.', es: 'Sin alas, no hay cielo.', pt: 'Sem asas, sem céu.', ja: 'つばさ なしに そら なし。' }],
-    defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' } },
+    defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' },
+    top: { en: 'Not now. Wait till it crashes!', es: '¡Ahora no! Espera a que se estrelle.', pt: 'Agora não! Espere ele se esborrachar.', ja: 'いまは だめ。つっこむまで まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Beak stuck! Stomp it!', es: '¡Pico atascado! ¡Písalo!', pt: 'Bico preso! Pise nele!', ja: 'くちばしが ささった！ ふめ！' },   // the first time its beak sticks
+    how: { en: 'Brace the wind, dodge the swoop, stomp', es: 'Resiste el viento, esquiva y pisa', pt: 'Aguente o vento, desvie e pise', ja: 'かぜに たえ、きゅうこうかを よけて、ふめ' } },   // after three losses
   // The Tower Blocks': a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
-  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', crane: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
+  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', hang: NUPPE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
       { en: 'Who needs a face anyway?', es: '¿Quién necesita una cara?', pt: 'Quem precisa de rosto?', ja: 'かおなんて いる？' },
       { en: 'Wobble, wobble… splat!', es: 'Tiembla, tiembla… ¡plaf!', pt: 'Treme, treme… plaft!', ja: 'ぷるぷる… べちゃっ！' }],
     quip: [{ en: 'Splat. Flat as a panel.', es: 'Plaf. Plano como un panel.', pt: 'Plaft. Plano como um painel.', ja: 'べちゃっ。パネルみたいに ぺしゃんこ。' },
       { en: "Sticky down there, isn't it?", es: 'Pegajoso ahí abajo, ¿eh?', pt: 'Grudento aí embaixo, né?', ja: 'したは ベタベタでしょ？' }],
-    defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' } },
+    defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' },
+    top: { en: 'Not now. Wait till it drops!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Splat! Stomp it now!', es: '¡Plaf! ¡Písalo ya!', pt: 'Plaft! Pise agora!', ja: 'べちゃっ！ いま ふめ！' },   // the first time it lies splatted
+    how: { en: 'Stay low in its swing, stomp after its drop', es: 'Agáchate en su vaivén y písalo al caer', pt: 'Fique baixo no balanço, pise após a queda', ja: 'ゆれは したで よけ、おちたら ふめ' } },   // after three losses
   // Tokyo's: the Tram, a tsukumogami now (a streetcar come alive after a hundred years: the owner's look and name, 2026-10-20): the Minecart's ride
   // on a rail (CART, Boss.ride), its pantograph up to an overhead wire; the rail at full strength, as the later of the two (the Minecart has its gentleness).
-  tram: { name: { en: 'Tsukumo Tram', es: 'Tranvía Tsukumo', pt: 'Bonde Tsukumo', ja: 'つくもでんしゃ' }, ink: 'green', design: 'loaf', size: CART.size, rail: true, tram: true, slow: 0.8, hp: 8, phase: (hp) => (hp >= 7 ? 0 : hp >= 4 ? 1 : 2),
+  tram: { name: { en: 'Tsukumo Tram', es: 'Tranvía Tsukumo', pt: 'Bonde Tsukumo', ja: 'つくもでんしゃ' }, ink: 'green', design: 'loaf', size: CART.size, street: TRAMRUN, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'Next stop: nowhere.', es: 'Próxima parada: ninguna.', pt: 'Próxima parada: nenhuma.', ja: 'つぎは どこにも とまりません。' },
       { en: 'A hundred years on this route.', es: 'Cien años en esta ruta.', pt: 'Cem anos nesta linha.', ja: 'この せんろで ひゃくねん。' },
       { en: 'No riding on the roof!', es: '¡Nada de subirse al techo!', pt: 'Nada de andar no teto!', ja: 'やねに のらないで ください！' }],
     quip: [{ en: 'Ding ding. You missed it.', es: 'Tilín tilín. Lo perdiste.', pt: 'Blim blim. Perdeu.', ja: 'チンチン。のりおくれ。' },
       { en: 'Please wait for the next one.', es: 'Espera al siguiente, por favor.', pt: 'Espere o próximo, por favor.', ja: 'つぎの でんしゃを おまちください。' }],
     defeat: { en: 'End of the line… go on up.', es: 'Final de trayecto… sube ya.', pt: 'Fim da linha… pode subir.', ja: 'しゅうてんです… のぼって どうぞ。' },
-    hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },
-    how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dele e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },
+    top: { en: 'Not while it runs! Wait for its stop!', es: '¡No mientras corre! Espera su parada.', pt: 'Não enquanto corre! Espere a parada.', ja: 'はしってる あいだは だめ。ていしゃを まて！' },   // the first bounce off its roof
+    hint: { en: 'Doors open! Stomp the roof!', es: '¡Puertas abiertas! ¡Pisa el techo!', pt: 'Portas abertas! Pise no teto!', ja: 'ドアが ひらいた！ やねを ふめ！' },   // the first stop
+    how: { en: 'Jump the tram, stomp it at a stop', es: 'Salta el tranvía y písalo en la parada', pt: 'Pule o bonde e pise na parada', ja: 'でんしゃを とんで、ていしゃで ふめ' } },   // after three losses
   // The random run's summit: the Lid (the plan's last boss, its first look): goo from the start, then helpers, then twice the goo.
-  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
+  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, ink: 'blue', hang: LIDF, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3),
+    top: { en: 'Not now. Wait till it lands!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
     intro: [{ en: 'Nothing up there. I checked.', es: 'Arriba no hay nada. Lo comprobé.', pt: 'Lá em cima não tem nada. Eu vi.', ja: 'うえには なにも ないよ。' },
       { en: 'The sky? Just a story.', es: '¿El cielo? Solo un cuento.', pt: 'O céu? Só uma história.', ja: 'そら？ ただの おはなし。' },
       { en: 'Climb all you like. I stay shut.', es: 'Trepa cuanto quieras. Sigo cerrada.', pt: 'Suba o quanto quiser. Fico fechada.', ja: 'いくら のぼっても あかないよ。' }],
@@ -733,13 +1066,16 @@ const BOSSES = {
   // The Dark Forest's (owner, 2026-10-21: boss-koschei A, the bony king with his sword; «Бой b»): Koschei the Deathless on the Lid's dive. Lying
   // dazed he is a heap of bones, and rising his bones fly together again, with a rattle first (bones); he drops bones and calls the forest's
   // skulls (minion); on his last heart the needle his death is in shows over his crown, and the last blow snaps it (needle).
-  koschei: { name: { en: 'Koschei', es: 'Koschéi', pt: 'Koschei', ja: 'コシチェイ' }, ink: 'gray', hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3), bones: true, needle: true, minion: 'skull',
+  koschei: { name: { en: 'Koschei', es: 'Koschéi', pt: 'Koschei', ja: 'コシチェイ' }, ink: 'gray', bone: KOSCH, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3), bones: true, needle: true, minion: 'skull',
     intro: [{ en: 'My death is far from here.', es: 'Mi muerte está lejos de aquí.', pt: 'Minha morte está longe daqui.', ja: 'わしの しは とおくに ある。' },
       { en: 'Kill me? Find my needle first.', es: '¿Matarme? Primero busca mi aguja.', pt: 'Me matar? Ache minha agulha primeiro.', ja: 'わしを たおす？ まず はりを さがせ。' },
       { en: 'Roll away, little bun.', es: 'Rueda lejos, panecillo.', pt: 'Role pra longe, pãozinho.', ja: 'ころがって にげな、パンぼうや。' }],
     quip: [{ en: 'Deathless. And you?', es: 'Inmortal. ¿Y tú?', pt: 'Imortal. E você?', ja: 'わしは しなぬ。おまえは？' },
       { en: 'Bones remember. Bones return.', es: 'Los huesos recuerdan. Y vuelven.', pt: 'Os ossos lembram. E voltam.', ja: 'ほねは おぼえてる。ほねは もどる。' }],
-    defeat: { en: '…The needle… broke.', es: '…La aguja… se rompió.', pt: '…A agulha… quebrou.', ja: '…はりが… おれた。' } },
+    defeat: { en: '…The needle… broke.', es: '…La aguja… se rompió.', pt: '…A agulha… quebrou.', ja: '…はりが… おれた。' },
+    top: { en: 'Not now. Wait till he swings!', es: '¡Ahora no! Espera a que dé el tajo.', pt: 'Agora não! Espere ele golpear.', ja: 'いまは だめ。ふりおろすまで まて！' },   // the first stomp that clangs off him
+    hint: { en: 'Off balance! Stomp him!', es: '¡Desequilibrado! ¡Písalo!', pt: 'Desequilibrado! Pise nele!', ja: 'よろけた！ ふみつけろ！' },   // the first time he staggers
+    how: { en: 'Jump his sword, then stomp him', es: 'Salta su espada y písalo', pt: 'Pule a espada e pise nele', ja: 'けんを とんで、ふみつけろ' } },   // after three losses
 };
 // The bosses' looks (owner, 2026-10-20: each boss a yokai of its world, picked from tools/variants.py's sheets boss-<id>, A to F, as the
 // game's code draws them): its body's design (and size, where its drawing is in whole game pixels on it: BOSS_FIT); the renderer draws the rest round it (look) and on
@@ -757,11 +1093,8 @@ const LOOKS = {
 for (const k in LOOKS) BOSSES[k].look = { id: k + '-' + LOOKS[k][0], design: LOOKS[k][1], size: LOOKS[k][2] };
 const FOREST_V = { kikimora: 'C', leshy: 'B' };   // the Dark Forest's enemies (owner, 2026-10-20: «1c 2b»): a Kikimora with her broom, a Leshy with fly agarics
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
-const MINE = { crumble: 3, bridge: 3, lift: 2, planks: 2, shelves: 2, spring: 1, comb: 2, chimney: 1, stairs: 1, rubberwall: 1, mosswall: 1 };   // the Mine's, without its spikes and movers
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
-const TOWN = { stairs: 3, planks: 2, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, rubberwall: 1 };   // Tokyo's (shelves off the walls: awnings)
-const STREET = { stairs: 3, planks: 2, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1 };   // Tokyo's first levels': TOWN before its awnings, gondolas and rubber
-const JUNKP = { planks: 2, shelves: 3, stairs: 2, pillars: 2, comb: 2, chimney: 1, spring: 2, crumble: 1, rubberwall: 1 };   // the Junkyard's (planks off walls: fire escapes)
+const STREET = { stairs: 3, planks: 2, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1 };   // Tokyo's first levels': its chunks before its awnings, gondolas and rubber
 const SKYP = { planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, movers: 1, twinshaft: 1 };   // the Skyscraper's (free planks: clouds)
 const PANEL = { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 1 };   // the Tower Blocks' (flights of stairs; shelves: balconies)
 const SEAP = { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 2, crumble: 2, bridge: 2, mosswall: 1, iceblocks: 1 };   // the Sea's (rafts on streams: lifts; driftwood: crumble; wet rock: ice)
@@ -775,84 +1108,86 @@ const CAMPAIGN = [
 // the air conditioners come in from the fourth level (aircons: false before). Its runes: a lattice, a lantern, a lit window (the city's lights hid
 // the Moon, a friend helped find it: Mochi's story since fedc427; the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'The city\'s lights hid the Moon.\nA friend helped find it again.', es: 'Las luces de la ciudad ocultaron la Luna.\nUn amigo ayudó a encontrarla.', pt: 'As luzes da cidade esconderam a Lua.\nUm amigo ajudou a encontrá-la.', ja: 'まちの あかりが つきを かくした。\nともだちが また みつけて くれた。' }, levels: [
-  { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: [], foes: 0.35, candy: [], safe: true, aircons: false, seed: 3111,
-    news: { en: 'jumps and springs', es: 'saltos y resortes', pt: 'pulos e molas', ja: 'ジャンプと バネ' } },
-  { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler'], foes: 0.5, candy: [], aircons: false, seed: 2101,
-    news: { en: 'crawlers: land on them', es: 'reptadores: cae sobre ellos', pt: 'rastejantes: pule neles', ja: 'ハイハイ: うえから ふもう' } },
-  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler'], foes: 0.55, candy: [], aircons: false, seed: 5101,
+  { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, aircons: false, seed: 3111,
+    news: { en: 'neon signs light up as you pass', es: 'los neones se encienden al pasar', pt: 'os neons acendem quando você passa', ja: 'ネオンは ちかよると つく' } },
+  { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler', 'shell'], foes: 0.6, candy: [], aircons: false, seed: 2101,
+    news: { en: 'crows: scare them, never wait under them', es: 'cuervos: espántalos, no esperes debajo', pt: 'corvos: espante, não espere embaixo', ja: 'カラス: おどかそう。したで またないで' } },
+  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], episode: 'umeVend', enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,   // (Ume's treat: UME)
     news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
-  { role: 'apply', len: 46, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.55, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
-    news: { en: 'the helmet', es: 'el casco', pt: 'o capacete', ja: 'ヘルメット' } },
-  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2 }, intro: [], enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'apply', len: 40, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, crumble: 2 }, intro: ['crumble'], enemies: ['crawler', 'tofu', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
+    },
+  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2, crumble: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'spitter', 'tofu'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 5106 },
-  { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
-    news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' } },
-  { role: 'peak', len: 37, gate: 'gate3', fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2 }, intro: [], enemies: ['crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], crossing: true, seed: 5102,
+  { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler', 'tofu', 'tumbler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
+    news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' }, tip: true },
+  { role: 'peak', len: 37, gate: 'gate3', fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, lift: 2, crumble: 1 }, intro: [], enemies: ['crawler', 'spitter', 'tumbler'], foes: 0.75, pair: 0.3, candy: ['smash'], crossing: true, seed: 5102,
     news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
   { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
-    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'tram', rail: true },   // its street rail, moss (ivy) over its ends, as the Minecart's
+    },
+  { role: 'boss', boss: 'tram', street: true, par: 55 },   // the Tram's (owner, 2026-10-24): the street's floor, one ledge in the middle, away from its stops; par: its time medal
 ] },
 // World 2, the Mine (the Cave until 2026-10-21; at first world 1; owner: «мир темной пещеры, рудников японии», and its dark the real one, «Настоящая тьма»):
 // every level but its bonus and its boss dark, lit by the hero, its lanterns and what glows; its moss, rubber walls; the Minecart. The basics are the
 // Village's to teach: its levels do not teach them again. Its runes the old Mine's: crossed picks, a block of ore, a turn (those tired of climbing
 // began to dig sideways). Its kit the owner's picks (see mineRect, mnLamp): timber, lamps the hero lights (a task), ore, carts, bats.
 { world: WORLDS[0], runes: 'LnY', lore: { en: 'In the dark, Mochi lit the lamps.\nEvery one of them looked up.', es: 'En la oscuridad, Mochi encendió las lámparas.\nTodas miraban hacia arriba.', pt: 'No escuro, Mochi acendeu as lâmpadas.\nTodas olhavam para cima.', ja: 'くらやみで モチは あかりを ともした。\nどれも うえを むいていた。' }, levels: [
-  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], dark: true, enemies: [], foes: 0, candy: [], safe: true, seed: 3111 },
-  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], dark: true, enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
-  { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
-    news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' } },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
-  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], dark: true, enemies: [], foes: 0, candy: [], safe: true, seed: 3111,
+    news: { en: 'the dark: light the lamps', es: 'la oscuridad: enciende las lámparas', pt: 'o escuro: acenda as lâmpadas', ja: 'くらやみ: ランプを ともそう' } },
+  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], dark: true, enemies: ['komori', 'crawler'], foes: 0.5, candy: [], safe: true, seed: 2101,
+    news: { en: 'bats: light a lamp and they sleep', es: 'murciélagos: enciende una lámpara y duermen', pt: 'morcegos: acenda uma lâmpada e eles dormem', ja: 'コウモリ: ランプを ともすと ねむる' } },
+  { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], dark: true, set: 'garden', enemies: ['crawler', 'climber'], foes: 0.45, candy: [], safe: true, seed: 2909,
+    news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' }, tip: true },
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2, crumble: 2 }, intro: ['crumble'], dark: true, enemies: ['komori', 'crawler', 'climber'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
+  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['komori', 'crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
-  { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
-    news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },
-  { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
+  { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], dark: true, enemies: ['crawler', 'climber'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
+    news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
+  { role: 'peak', len: 28, gate: 'gate3w', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['komori', 'crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
-  { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends
+  { role: 'boss', boss: 'cart', hang: true, par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
 { world: WORLDS[1], runes: 'gyI', lore: { en: 'From the summit the Moon looked near.\nA bell opened the first step.', es: 'Desde la cima la Luna parecía cerca.\nUna campana abrió el primer escalón.', pt: 'Do cume a Lua parecia perto.\nUm sino abriu o primeiro degrau.', ja: 'ちょうじょうから つきは ちかく みえた。\nかねが さいしょの だんを ひらいた。' }, levels: [
   { role: 'teach', len: 29, fire: 0.33, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, icewall: 3, iceblocks: 2, mosswall: 1 }, intro: ['icewall', 'iceblocks'], enemies: ['crawler'], foes: 0.35, candy: [], shop: 0.5, safe: true, seed: 4101,
-    news: { en: "ice: walls don't hold", es: 'hielo: las paredes no sujetan', pt: 'gelo: as paredes não seguram', ja: 'こおり: かべに くっつけない' } },
-  { role: 'apply', len: 36, sides: [13004, 0], gate: 'gate', fire: 0.41, maxD: 2, chunks: { ...GLACIER, rubberwall: 1 }, intro: [], enemies: ['crawler'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 4108,
+    news: { en: "ice: you slide, walls don't hold", es: 'hielo: resbalas y las paredes no sujetan', pt: 'gelo: você desliza e as paredes não seguram', ja: 'こおり: すべるし かべに くっつけない' } },
+  { role: 'apply', len: 36, sides: [13004, 0], gate: 'gate', fire: 0.41, maxD: 2, chunks: { ...GLACIER, rubberwall: 1 }, intro: ['crumble'], enemies: ['crawler'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 4108,
     news: { en: 'rainbow candy', es: 'caramelo arcoíris', pt: 'bala arco-íris', ja: 'にじの キャンディ' } },
   { role: 'teach', len: 32, fire: 0.4, maxD: 2, chunks: GLACIER, intro: [], enemies: ['shell', 'crawler'], foes: 0.55, candy: ['rainbow'], seed: 4105,
-    news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' } },
-  { role: 'apply', len: 40, gate: 'gate2', fire: 0.41, maxD: 2, chunks: GLACIER, intro: [], enemies: ['climber', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 4103,
-    news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' } },
-  { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
+    news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' }, tip: true },
+  { role: 'apply', len: 40, gate: 'gate2', fire: 0.41, maxD: 2, chunks: { ...GLACIER, crumble: 2 }, intro: [], enemies: ['climber', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 4103,
+    news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' }, tip: true },
+  { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], set: 'arena', enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },   // (an arena: К4 «А»)
   { role: 'bonus', len: 36, bonus: 1, time: 40, seed: 4104 },
-  { role: 'twist', len: 32, sides: [13975, 0], fire: 0.4, maxD: 2, chunks: { ...GLACIER, mosswall: 2 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 4102,
-    news: { en: 'icicles fall', es: 'los carámbanos caen', pt: 'os pingentes caem', ja: 'つららが おちる' } },
-  { role: 'peak', len: 32, sides: [0, 110785], gate: 'gate3', fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, rubberwall: 1, twinshaft: 1 }, intro: [], set: 'icicles', enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
+  { role: 'twist', len: 32, sides: [13975, 0], fire: 0.4, maxD: 2, chunks: { ...GLACIER, mosswall: 2 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler', 'nurikabe'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 4102,
+    news: { en: 'icicles fall', es: 'los carámbanos caen', pt: 'os pingentes caem', ja: 'つららが おちる' }, tip: true },
+  { role: 'peak', len: 32, sides: [0, 110785], gate: 'gate3w', fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, rubberwall: 1, twinshaft: 1 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler', 'nurikabe'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'rest', len: 22, fire: 0.33, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, icewall: 1 }, intro: [], enemies: ['shell'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 4104,
-    news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
-  { role: 'boss', boss: 'puck', ice: true },   // an ice floor, icicles over it
+    },
+  { role: 'boss', boss: 'puck', glide: true, par: 45 },   // Tsurara-onna's (owner, 2026-10-24): packed snow (her slide is hers: a floor of ice made every dodge a slither), two ledges, her icicles only when she calls them; par: its time medal
 ] },
 // World 4, the Sea (owner, 2026-10-20: rivers, the sea and an island between Fuji and Tokyo; its kit in the renderer, see THEMES.sea): where the
 // climb begins to get harder (the owner's 10-15 minute rule keeps worlds 1-3 gentle). One new thing a level: wet rock, rafts riding the streams,
 // circlers (new to the campaign), driftwood that gives way, a peak, the coin rain, a river of rafts, a peak, a cage. First numbers, for the sweep
-// to tune. Its boss Onamazu, the earthquake catfish (the boss chat's, 2026-10-21), on the Junkyard's Rat slide (the Junkyard is dropped), its floor
+// to tune. Its boss Onamazu, the earthquake catfish (the boss chat's, 2026-10-21), on the Puck's slide, its floor
 // wet rock. Its runes: a whirl, a ship's wheel, a star (some put to sea to sail round the climb; the sea only goes round).
 { world: SEA, runes: 'Z8k', lore: { en: 'Lighthouses shine for the ships.\nOne shone for the sky.', es: 'Los faros alumbran a los barcos.\nUno alumbró al cielo.', pt: 'Os faróis iluminam os navios.\nUm iluminou o céu.', ja: 'とうだいは ふねを てらす。\nひとつは そらを てらした。' }, levels: [
   { role: 'teach', len: 30, fire: 0.38, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, iceblocks: 3, mosswall: 1 }, intro: ['iceblocks'], enemies: ['crawler'], foes: 0.4, candy: [], shop: 0.5, safe: true, seed: 6101,
-    news: { en: 'wet rock: you slip', es: 'roca mojada: resbalas', pt: 'pedra molhada: você escorrega', ja: 'ぬれた いわ: すべる' } },
+    news: { en: 'wet rock: you slip', es: 'roca mojada: resbalas', pt: 'pedra molhada: você escorrega', ja: 'ぬれた いわ: すべる' }, tip: true },
   { role: 'apply', len: 36, gate: 'gate', fire: 0.42, maxD: 2, chunks: { ...SEAP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'shell'], foes: 0.5, pair: 0.1, candy: ['rainbow', 'rainbow'], seed: 6108,
-    news: { en: 'rafts ride the streams', es: 'las balsas van con la corriente', pt: 'as jangadas seguem a correnteza', ja: 'いかだが ながれに のる' } },
+    news: { en: 'rafts ride the streams', es: 'las balsas van con la corriente', pt: 'as jangadas seguem a correnteza', ja: 'いかだが ながれに のる' }, tip: true },
   { role: 'teach', len: 33, fire: 0.42, maxD: 2, chunks: SEAP, intro: [], enemies: ['circler', 'crawler'], foes: 0.55, candy: ['smash'], seed: 6105,
     news: { en: 'circlers go round the rocks', es: 'los rondadores rodean las rocas', pt: 'os rondadores rodeiam as pedras', ja: 'グルグルが いわを まわる' } },
-  { role: 'apply', len: 40, gate: 'gate2', fire: 0.44, maxD: 2, chunks: { ...SEAP, crumble: 3 }, intro: ['crumble'], enemies: ['circler', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 6103,
-    news: { en: 'driftwood gives way', es: 'la madera a la deriva cede', pt: 'a madeira à deriva cede', ja: 'ながれぎは くずれる' } },
-  { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], enemies: ['circler', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6102 },
-  { role: 'bonus', len: 36, bonus: 0, time: 40, seed: 6104 },
-  { role: 'twist', len: 34, fire: 0.44, maxD: 2, chunks: { ...SEAP, lift: 4, crumble: 3, bridge: 1 }, intro: ['lift'], enemies: ['climber', 'crawler'], foes: 0.5, candy: ['smash'], stash: 0.3, seed: 6106,
-    news: { en: 'a river of rafts', es: 'un río de balsas', pt: 'um rio de jangadas', ja: 'いかだの かわ' } },
-  { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], enemies: ['circler', 'shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6107 },
+  { role: 'apply', len: 40, gate: 'gate2', fire: 0.44, maxD: 2, chunks: { ...SEAP, crumble: 3 }, intro: ['crumble'], enemies: ['circler', 'spitter', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 6103,
+    news: { en: 'driftwood gives way', es: 'la madera a la deriva cede', pt: 'a madeira à deriva cede', ja: 'ながれぎは くずれる' }, tip: true },
+  { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], set: 'arena', enemies: ['circler', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6102 },
+  { role: 'bonus', len: 36, bonus: 2, time: 40, seed: 6104 },   // the combo ladder (was the coin rain, the Mine's and Tokyo's too: the five open worlds' bonuses now combo, rain, rubber, combo, rain)
+  { role: 'twist', len: 34, fire: 0.44, maxD: 2, chunks: { ...SEAP, lift: 4, crumble: 3, bridge: 1 }, intro: ['lift'], enemies: ['climber', 'spitter', 'crawler'], foes: 0.5, candy: ['smash'], stash: 0.3, seed: 6106,
+    news: { en: 'a river of rafts', es: 'un río de balsas', pt: 'um rio de jangadas', ja: 'いかだの かわ' }, tip: true },
+  { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], enemies: ['circler', 'spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6107 },
   { role: 'rest', len: 22, fire: 0.35, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, iceblocks: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 6109,
-    news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
-  { role: 'boss', boss: 'namazu', ice: true },   // Onamazu (the boss chat, 2026-10-21): the Rat's slide (the Junkyard's, which is dropped), its floor wet rock
+    },
+  { role: 'boss', boss: 'namazu', quake: true, par: 55 },   // Onamazu's (owner, 2026-10-24): rock and two ledges over its waves; par: its time medal
 ] },
 // The Dark Forest (the owner's bonus world, 2026-10-20: scary Russian fairy tales; its kit in the renderer, see THEMES.skazka; last in CAMP_ORDER, it
 // opens at 180 stars, off the line): every level dark, the hero a Kolobok. One new thing a level: the dark itself, skulls that lunge, the Kikimora on the walls, Baba Yaga's mortars, a
@@ -875,7 +1210,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...FOREST, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], dark: true, enemies: ['leshy', 'kikimora', 'skull', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7107 },
   { role: 'rest', len: 22, fire: 0.3, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
-  { role: 'boss', boss: 'koschei', dark: true },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
+  { role: 'boss', boss: 'koschei', dark: true, par: 70 },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
 ] },
 // World 1, the Village (the Mine's world until 4084599; at first world 3): how to climb, crumbling blocks, spitters, the pit's waves and a fat
 // spitter, a peak, the bonus, moving planks, a peak, Moti's shop; the Cork's dive. Its runes the story's first (since 2026-10-21, when the old
@@ -891,17 +1226,17 @@ const CAMPAIGN = [
     // turns up the shaft), with the walls (the towers' channel); enemies more and in pairs, decor less; the walls in the pool (moss, chimneys)
     news: { en: 'falling bridges', es: 'puentes que caen', pt: 'pontes que caem', ja: 'おちる はし' } },   // (short: one line at 320 px; «keep moving» is the crumble hint's)
   { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: { mosswall: 2, chimney: 1, stairs: 2, shelves: 1, planks: 1, rubberwall: 1, crumble: 1 }, intro: [],   // by the
-    motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler', 'tumbler'], foes: 0.4, pair: 0.15, candy: ['bubble'], seed: 4106,   // practice
+    motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler'], foes: 0.4, pair: 0.15, candy: ['bubble'], seed: 4106,   // practice
     // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow with
-    // the red ring midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers and tumblers
+    // the red ring midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers (the tumblers gone to Tokyo: Р1 «А»)
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1, spring: 1 }, intro: [],   // by the
-    motif: ['ambush', 'ambush2'], every: 3, steps: true, sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell', 'tofu'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
+    motif: ['ambush', 'ambush2'], every: 3, steps: true, sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
     // (round 2): its one idea the pit's waves: a small ambush every other chunk, on a floor mid-shaft, then between two towers; the arena and its fat spitter midway
     news: { en: 'waves of enemies', es: 'oleadas enemigas', pt: 'ondas de inimigos', ja: 'てきの ウェーブ' } },   // (short: one line at 320 px; the arena says the rest)
-  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 2, shelves: 1, crumble: 1, spikes: 1 }, intro: [], motif: ['iciclerun', 'nuricross', 'icebridge'],
-    steps: true, sparse: true, enemies: ['spitter', 'climber', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4108,   // by the practice (round 2): its one idea
-    // what falls from above: icicles over the way, the nurikabe over a ledge (n), 1-2's bridge under icicles; the walls in the pool. No comb, nor the icicles' set
+  { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 2, shelves: 1, crumble: 1, spikes: 1 }, intro: [], motif: ['iciclerun', 'icebridge'],
+    steps: true, sparse: true, enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4108,   // by the practice (round 2): its one idea
+    // what falls from above: icicles over the way, 1-2's bridge under icicles (the nurikabe gone to Fuji's icicles, the climber to the Mine: Р1 «А»); the walls in the pool. No comb, nor the icicles' set
     // piece (its icicles are the motif's now): under their ceilings the bot clung to the walls in 4 of 5 orders
     news: { en: 'look up!', es: '¡mira arriba!', pt: 'olhe para cima!', ja: 'うえに ちゅうい！' } },
   { role: 'bonus', len: 42, bonus: 2, time: 46, seed: 4101 },
@@ -909,15 +1244,15 @@ const CAMPAIGN = [
     motif: ['ride', 'ride2', 'mill', 'seesaw'], sparse: true, wind: 0.5, set: 'mochi', intro: ['fork'], trial: { at: 0.7, goal: 'coins' }, enemies: ['spitter', 'crawler'], foes: 0.9, candy: ['bubble'], stash: 0.3, seed: 4101, par: 75,   // the pilot, its par the owner's 75 s (owner, 2026-10-22: «A, D, E на 1-7»):
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'the mill, the seesaw and the pestle', es: 'el molino, el balancín y el mazo', pt: 'o moinho, a gangorra e o pilão', ja: 'すいしゃ、シーソー、きね' } },
-  { role: 'peak', len: 30, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1 }, intro: [], motif: ['iceride', 'icewall'], steps: true,
+  { role: 'peak', len: 30, gate: 'gate3w', fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1 }, intro: [], motif: ['iceride', 'icewall'], steps: true,
     sparse: true, set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4102,   // by the practice (round 2): its one idea the walls of
     // ice, 1-7's walls that held turned slick: a yaen across between them, then the zigzag up between them; the arena midway; moss in the pool, the walls that hold
-    news: { en: 'icy walls', es: 'paredes de hielo', pt: 'paredes de gelo', ja: 'こおりの かべ' } },   // (short: one line at 320 px)
+    news: { en: 'slippery walls', es: 'paredes resbaladizas', pt: 'paredes escorregadias', ja: 'すべる かべ' } },   // (short: one line at 320 px)
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 2, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], motif: ['coinarc', 'garden'], steps: true, sparse: true,   // by the
     enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,   // practice (round 2): the calm before the boss, its one idea the coins: rows along a jump's arc, the
     // moss garden to rest in (the digest §5: a breather after the peak, not an empty one); few enemies
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'probka', moss: true },   // the Cork's dive (owner, 2026-10-20: the first boss's fight); moss on its arena's walls: a place to sit its dive out
+  { role: 'boss', boss: 'probka', hang: true, par: 35 },   // the Bake-danuki's (owner, 2026-10-24: all bosses redone): an empty arena for the first fight; par: its time medal
 ] },
 // World 5, the Tower Blocks (the user's Soviet brutalism; its kit in the renderer, see THEMES.blocks): stairs you walk up, old balconies
 // that give way, old mattresses that bounce, then winter (icicles off the roofs, the twist); the Crane. Its runes: a frame, a tower, two
@@ -937,7 +1272,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 42, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, spikes: 1, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [17935, 0], seed: 9039 },
   { role: 'rest', len: 30, fire: 0.42, maxD: 2, chunks: { flight: 3, stairs: 2, planks: 3, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, sides: [0, 113769], seed: 6109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'crane' },
+  { role: 'boss', boss: 'crane', par: 60 },   // Nuppeppo's (owner, 2026-10-24): two ledges, in its swing's way; par: its time medal
 ] },
 // World 6, the Skyscraper (the user's skyscraper and clouds; its kit in the renderer, see THEMES.sky): clouds that dissolve under you,
 // window-cleaning gondolas, bolts dropped from above, then night over the clouds (the twist: dark); the Pigeon. Its runes: a cross of
@@ -957,27 +1292,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [0, 113791], seed: 7108 },
   { role: 'rest', len: 32, fire: 0.44, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'pigeon' },
-] },
-// World 7, the Junkyard (the user's New York dump; its kit in the renderer, see THEMES.junk): trash bags that bounce, garbage trucks through
-// the crossings, greasy steel that slides, then junk raining off the fire escapes (the twist: icicles); the Rat King on a greasy floor.
-// Its runes: a cross of beads, a diamond, a heap (the ones below kept what the climbers threw away).
-{ world: JUNK, runes: 'krw', lore: { en: 'What the climbers threw away\nthe ones below kept.', es: 'Lo que tiraban los que subían\nlo guardaban los de abajo.', pt: 'O que os que subiam jogavam fora\nos de baixo guardavam.', ja: 'のぼる ものが すてた ものを\nしたの ものが ひろった。' }, levels: [
-  { role: 'teach', len: 38, fire: 0.52, calm: 8, maxD: 2, chunks: { ...JUNKP, spring: 4 }, intro: ['spring'], enemies: ['crawler', 'climber'], foes: 0.45, candy: [], safe: true, seed: 8101,
-    news: { en: 'trash bags bounce', es: 'las bolsas de basura rebotan', pt: 'sacos de lixo quicam', ja: 'ゴミぶくろで はねる' } },
-  { role: 'teach', len: 42, fire: 0.54, maxD: 2, chunks: JUNKP, intro: [], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['bubble'], crossing: true, gate: 'gate', seed: 8102,
-    news: { en: 'garbage trucks: mind the street', es: 'camiones de basura: cuidado con la calle', pt: 'caminhões de lixo: cuidado com a rua', ja: 'ゴミしゅうしゅうしゃ: どうろに ちゅうい' } },
-  { role: 'teach', len: 44, fire: 0.54, maxD: 2, chunks: { ...JUNKP, iceblocks: 3 }, intro: ['iceblocks'], enemies: ['crawler', 'shell', 'spitter'], foes: 0.5, candy: ['smash'], sides: [0, 113809], seed: 8103,
-    news: { en: 'greasy steel: you slide', es: 'acero grasiento: resbalas', pt: 'aço engordurado: você escorrega', ja: 'あぶらの はがね: すべる' } },
-  { role: 'apply', len: 50, fire: 0.56, maxD: 2, chunks: { ...JUNKP, iceblocks: 1 }, intro: [], enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.6, pair: 0.15, candy: ['smash', 'bubble'], crossing: true, shop: 0.4, stash: 0.3, gate: 'gate2', seed: 8104 },
-  { role: 'peak', len: 42, fire: 0.6, maxD: 3, chunks: { ...JUNKP, comb: 3, chimney: 2, spikes: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], sides: [0, 113811], seed: 8105 },
-  { role: 'bonus', len: 50, bonus: 1, time: 55, seed: 8106 },
-  { role: 'twist', len: 44, fire: 0.56, maxD: 2, chunks: JUNKP, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'spitter'], foes: 0.55, candy: ['bubble'], stash: 0.3, crossing: true, sides: [18957, 114790], seed: 9084,
-    news: { en: 'junk falls off the fire escapes', es: 'cae chatarra de las escaleras de incendios', pt: 'cai sucata das escadas de incêndio', ja: 'ひじょうかいだんから ガラクタが おちる' } },
-  { role: 'peak', len: 46, fire: 0.6, maxD: 3, chunks: { ...JUNKP, comb: 3, spikes: 1, rubberwall: 2, iceblocks: 1 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', seed: 9085 },
-  { role: 'rest', len: 34, fire: 0.46, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 8109,
-    news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'rat', ice: true },   // the Puck's arena: its floor all grease, junk hanging under the ceiling
+  { role: 'boss', boss: 'pigeon', bare: true, par: 65 },   // the Karasu-tengu's (owner, 2026-10-24): a bare arena, the floor its swoop ends in (under a ledge was out of its reach); par: its time medal
 ] }];
 
 // Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
@@ -1077,13 +1392,11 @@ ICONS.mark = '....yyyy..../....yyyy..../....yyyy..../....yyyy..../....yyyy..../y
 ICONS.ceiling = 'wwwwwwwwwwww/gggggggggggg/..g..g..g.../....wwww..../...wwwwww.../...wkwwkw.../...wwwwww.../....wwww..../............/............/............/............';
 ICONS.dive = '....wwww..../...wwwwww.../...wkwwkw.../...wwwwww.../....wwww..../.....yy...../.....yy...../.....yy...../...yyyyyy.../....yyyy..../.....yy...../............';
 ICONS.dash2 = '............/.......wwww./......wwwwww/oooo..wkwwkw/......wwwwww/.oooo..wwww./............/.......wwww./......wwwwww/oooo..wkwwkw/......wwwwww/.oooo..wwww.';
-ICONS.foe = '............/....rrrr..../..rrrrrrrr../.rrkkrrkkrr./.rrrkrrkrrr./.rrwkrrwkrr./rrrrrrrrrrrr/rrrrkkkkrrrr/rrrrrrrrrrrr/.rrrrrrrrrr./..rrrrrrrr../............';   // the book's enemies
 ICONS.medalG = '..rr....rr../...rr..rr.../....rrrr..../...yyyyyy.../..yyyyyyyy../.yyywyyyyyy./.yywyyyyyyy./.yyyyyyyyyy./.yyyyyyyyyy./..yyyyyyyy../...yyyyyy.../............';   // the daily well's medals: gold, silver, bronze, one not won
 ICONS.medalS = ICONS.medalG.replace(/y/g, 'w'); ICONS.medalB = ICONS.medalG.replace(/y/g, 'o'); ICONS.medalOff = ICONS.medalG.replace(/[yr]/g, 's');
 ICONS.swarm = '.ooo....bbb./ooooo..bbbbb/ooooo..bbbbb/ooooo..bbbbb/.ooo....bbb./....www...../....www...../.ggg....ppp./ggggg..ppppp/ggggg..ppppp/ggggg..ppppp/.ggg....ppp.';   // five of a kind, in their colours
 ICONS.plaster = '............/............/............/.wwwwwwwwww./wwswwoowwsww/wwwwwoowwwww/wwswwoowwsww/.wwwwwwwwww./............/............/............/............';   // the first hit a level is free
 ICONS.coin = '............/....oooo..../..ooyyyyoo../..oyywyyyo../.oyywyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./..oyyyyyyo../..ooyyyyoo../....oooo..../............';   // the campaign's map: a bonus level
-ICONS.boss = '............/...pppppp.../..pppppppp../.pkkppppkkp./.pppkppkppp./.ppwkppwkpp./.ppwkppwkpp./.pppppppppp./.pppkkkkppp./..pppppppp../...pppppp.../............';   // and a boss's, its face
 ICONS.warn = '.....ww...../....wrrw..../....wrrw..../...wrrrrw.../...wrwwrw.../..wrrwwrrw../..wrrwwrrw../.wrrrrrrrrw./.wrrrwwrrrw./wrrrrrrrrrrw/wwwwwwwwwwww/............';   // a warning sign, at the top edge: something coming down into view here
 ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
 // The runes, as Yarndings 12 knits them (SIL OFL 1.1; printed by tools/fonts.py from its 12-stitch grid)
@@ -1106,7 +1419,6 @@ ICONS.runeO = '..ww...ww.../..www.www.../ww.wwwww.ww./www.www.www./.www.w.www../
 ICONS.runeU = '.....ww...../.ww.wwww.ww./.ww.wwww.ww./...w.ww.w.../.ww.w..w.ww./wwww.ww.wwww/wwww.ww.wwww/.ww.w..w.ww./...w.ww.w.../.ww.wwww.ww./.ww.wwww.ww./.....ww.....';
 ICONS.runed = '............/...ww.ww..../...wwwww..../...wwwww..../www.www.www./wwww.w.wwww./.wwww.wwww../wwww.w.wwww./www.www.www./...wwwww..../...wwwww..../...ww.ww....';
 ICONS.runek = '............/............/....w......./...www....../....w......./.w.www.w..../wwwwwwwww.../.w.www.w..../....w......./...www....../....w......./............';
-ICONS.runer = '............/.....w....../....www...../...ww.ww..../..ww.w.ww.../.ww.www.ww../ww.ww.ww.ww./.ww.www.ww../..ww.w.ww.../...ww.ww..../....www...../.....w......';
 ICONS.runew = '....wwww..../..wwwwwwww../.wwwwwwwwww./.wwwwwwwwww./ww..wwww..ww/ww...ww...ww/www..ww..www/wwwwwwwwwwww/.wwwwwwwwww./..www..www../...wwwwww.../....wwww....';
 ICONS.rune8 = '............/...ww.ww..../.wwww.wwww../.wwww.wwww../www.....www./www.www.www./....www...../www.www.www./www.....www./.wwww.wwww../.wwww.wwww../...ww.ww....';   // the Sea's runes: this a ship's wheel, the next a whirl
 ICONS.runeZ = '............/............/...ww......./...www....../....ww.ww.../..ww..www.../.www..ww..../.ww.ww....../....www...../.....ww...../............/............';
@@ -1136,6 +1448,36 @@ ICONS.neonBowl = '...o..o..o.../...o..o..o.../............./ooooooooooooo/.ooooo
 ICONS.neonFish = '...ooooo...../.ooooooooo..o/oo.oooooooooo/ooooooooooooo/.ooooooooo..o/...ooooo.....';
 ICONS.neonMic = '...ooo.../..ooooo../..ooooo../..ooooo../...ooo.../....o..../....o..../....o..../..ooooo..';
 for (const id in ICONS) ICONS[id] = ICONS[id].split('/');
+// The shop's and the upgrades' pictures twice as fine (owner's Д2 «А», 2026-10-23): 24×24, an AI detail pass (research/icons24) drawn over by
+// hand in the same ten inks (the last five, plaster to dash2, by hand alone), for a screen whose drawing grid is half a game pixel (PIX.keep 2: a computer's, see PIX.fit), at half the dot, so the
+// same size; a phone's grid is the game pixel itself, so it keeps the 12×12 (and the page's pictures keep theirs). On since the owner's Д3 «А».
+const ICONS2 = {
+  bouncy: '......................../......................../.....yyyyyyyyyyyyyy...../....yywwwwyyyyyyyyyy..../....oooooooooooooooo..../.....oooooooooooooo...../........ssssssss......../......sswwwsssssss....../......ssssssssssss....../........ssssssss......../......sswwwsssssss....../......ssssssssssss....../........ssssssss......../......sswwwsssssss....../......ssssssssssss....../........ssssssss......../......sswwwsssssss....../......ssssssssssss....../........ssssssss......../.....sswwwwssssssss...../....ssssssssssssssss..../....ssssssssssssssss..../......................../........................',
+  sticky: '.ss...................../swss..................../.ss.......wwww........../.ss.....wwwwwwww......../.ssgg..wwwwwwwwwww....../.ssgggswwwwwwwwwwww...../.ssgggswwwwwwwwwwwww..../.ssgggswwwwwwwwwwwwww.../.ssgggswwwwwwwwwwwwwww../.ssgggswwwkkwwwwkkwwww../.ssgggswwwkkwwwwkkwwww../.ssgggswwwwwwwwwwwwwww../.ssgggswwwwwwwwwwwwwws../.ssgggswwwwwwwwwwwwws.../.ssgggswwwwwwwwwwwwws.../.ssgggswwwwwwwwwwwws..../.ssgggswwwwwwwwwwws...../.ssgggswwwwwwwwwss....../.ssgggs.wwwwwwss......../.ssggg................../.ssggg................../.ssggg................../.ssgg.................../.ss.....................',
+  magnet: '......................../......................../...wwww..........wwww.../..wwwww..........wwwww../..wwwww..........wwwww../..sssss..........sssss../..rrrrr..........rrrrr../..rwrrr..........rwrrr../..rwrrr..........rwrrr../..rwrrr..........rwrrr../..rrrrr..........rrrrr../..rrrrr..........rrrrr../..rrrrrr........rrrrrr../...rrrrrr......rrrrrr.../...rrrrrrrrrrrrrrrrrr.../....rrrrrrrrrrrrrrrr..../....rrrrrrrrrrrrrrrr..../.....rrrrrrrrrrrrrr...../......rrrrrrrrrrrr....../........rrrrrrrr......../......................../......................../......................../........................',
+  heart: '......................../......................../...rrrrr......rrrrr...../..rrrrrrr....rrrrrrr..../.rrrrrrrrr..rrrrrrrrr.../rrrrwwrrrrrrrrrrrrrrrr../rrrwwrrrrrrrrrrrrrrrrr../rrrwrrrrrrwwrrrrrrrrrr../rrrrrrrrrrwwrrrrrrrrrr../rrrrrrrrrrwwrrrrrrrrrr../rrrrrrrwwwwwwwwrrrrrrr../.rrrrrrwwwwwwwwrrrrrr.../.rrrrrrrrrwwrrrrrrrrr.../..rrrrrrrrwwrrrrrrrr..../...rrrrrrrwwrrrrrrr...../....rrrrrrrrrrrrrr....../.....rrrrrrrrrrrr......./......rrrrrrrrrr......../.......rrrrrrrr........./........rrrrrr........../.........rrrr.........../..........rr............/......................../........................',
+  heal1: '......................../......................../...rrrrr......rrrrr...../..rrrrrrr....rrrrrrr..../.rrrrrrrrr..rrrrrrrrr.../rrrrwwrrrrrrrrrrrrrrrr../rrrwwrrrrrrrrrrrrrrrrr../rrrwrrrrrrrrrrrrrrrrrr../rrrrrrrrrrrrrrrrrrrrrr../rrrrrrrrrrrrrrrrrrrrrr../rrrrrrrrrrrrrrrrrrrrrr../.rrrrrrrrrrrrrrrrrrrr.../.rrrrrrrrrrrrrrrrrrrr.../..rrrrrrrrrrrrrrrrrr..../...rrrrrrrrrrrrrrrr...../....rrrrrrrrrrrrrr....../.....rrrrrrrrrrrr......./......rrrrrrrrrr......../.......rrrrrrrr........./........rrrrrr........../.........rrrr.........../..........rr............/......................../........................',
+  heal2: '......................../......................../...rrrrr......rrrrr...../..rrrrrrr....rrrrrrr..../.rrrrrrrrr..rrrrrrrrr.../rrrrwwrrrrrrrrrrrrrrrr../rrrwwrrrrrrrrrrrrrrrrr../rrrwrrrrrwwwwrrrrrrrrr../rrrrrrrrwwrrwwrrrrrrrr../rrrrrrrrrrrrwwrrrrrrrr../rrrrrrrrrrrwwrrrrrrrrr../.rrrrrrrrrwwrrrrrrrrr.../.rrrrrrrrwwrrrrrrrrrr.../..rrrrrrwwrrrrrrrrrr..../...rrrrrwwwwwwrrrrr...../....rrrrrrrrrrrrrr....../.....rrrrrrrrrrrr......./......rrrrrrrrrr......../.......rrrrrrrr........./........rrrrrr........../.........rrrr.........../..........rr............/......................../........................',
+  apple: '.............oo........./............oo..gggg..../...........oo.gggggg..../...........oo.ggggg...../..........oogggg......../..........oogg........../.....rrrrr..rrrrr......./...rrrrrrrrrrrrrrrr...../..rrrrwwrrrrrrrrrrrr..../..rrrwwrrrrrrrrrrrrr..../..rrwwrrrrrrrrrrrrrr..../..rrwrrrrrrrrrrrrrrr..../..rrwrrrrrrrrrrrrrrr..../..rrrrrrrrrrrrrrrrrr..../..rrrrrrrrrrrrrrrrrr..../..rrrrrrrrrrrrrrrrrr..../..rrrrrrrrrrrrrrrrrr..../...rrrrrrrrrrrrrrrr...../...rrrrrrrrrrrrrrrr...../....rrrrrrrrrrrrrr....../.....rrrrrrrrrrrr......./......rrrr..rrrr......../......................../........................',
+  candle: '...........yy.........../..........yyyy........../..........ywyy........../.........yyooyy........./.........yooooy........./.........yorroy........./.........yorroy........./..........yooy........../...........kk.........../...........kk.........../........wwwwwwws......../........wwwwwwws......../.......wwwwwwwws......../.......wswwwwwws......../........swwwwwws......../........wwwwwwws......../........wwwwwwws......../........wwwwwwws......../........wwwwwwws......../....wwwwwwwwwwwwwwww..../....ssssssssssssssss..../......ssssssssssss....../......................../........................',
+  air: '...........yy.........../..........yyyy........../.........ywyyyy........./........ywyyyyyy......../.......yyyyyyyyyy......./......ooooyyyooooo....../..........yyyo........../..........yyyo........../..........yyyo........../..........yyyo........../..........yyyo........../..........oooo........../......................../......................../.........wwww.........../...wwww.wwwwww..www...../..wwwwwwwwwwwwwwwwwww.../.wwwwwwwwwwwwwwwwwwwww../wwwwwwwwwwwwwwwwwwwwww../wwwwwwwwwwwwwwwwwwwwws../.sssssssssssssssssssss../...ssssssssssssssss...../......................../........................',
+  blast: '..........rr............/..........oo............/..........oo............/...or.....rr.....ro...../...rr....roor....rr...../........roooor........../.......rooyyoor........./......rooyyyyoor......../.....rooyywwyyoor......./....rooyyywwyyyoor....../roorooyywwwwwwyyooroor../roorooyywwwwwwyyooroor../....rooyyywwyyyoor....../.....rooyywwyyoor......./......rooyyyyoor......../.......rooyyoor........./........roooor........../...rr....roor....rr...../...or.....rr.....ro...../..........oo............/..........oo............/..........rr............/......................../........................',
+  greed: '......................../......................../..........oooo........../........ooyyyyoo......../.......oyyyyyyyyo......./.......oywwyyyyyo......./......oyywyyyyyyyo....../......oyyyyyyyyyyo....../......oyyyyyyyyyyo....../.......oyyyyyyyyo......./.......ooyyyyyyoo......./........oooooooo......../....oooo........oooo..../..ooyyyyoo....ooyyyyoo../.oyyyyyyyyo..oyyyyyyyyo./.oywwyyyyyo..oywwyyyyyo./oyywyyyyyyyooyywyyyyyyyo/oyyyyyyyyyyooyyyyyyyyyyo/oyyyyyyyyyyooyyyyyyyyyyo/.oyyyyyyyyo..oyyyyyyyyo./.ooyyyyyyoo..ooyyyyyyoo./..oooooooo....oooooooo../......................../........................',
+  combo: '......................../......................../......................../......................../yyy........yyy...wwwwww./ywyy......yywy...wwwwwww/yyyy......yyyy........ww/.yyyy....yyyy.........ww/..yyyy..yyyy..........ww/...yyyyyyyy...........ww/....yyyyyy.........wwww./....yyyyyy.........wwww./...yyyyyyyy...........ww/..yyyy..yyyy..........ww/.yyyy....yyyy.........ww/yyyy......yyyy........ww/ywyy......yywy...wwwwwww/yyy........yyy...wwwwww./......................../......................../......................../......................../......................../........................',
+  legs: '.....yy................./....yyyy................/...ywyyyy.....bbbbbb..../..ywyyyyyy....bcbbbb..../.yyyyyyyyyy...bcbbbb..../ooooyyyooooo..bcbbbb..../....yyyo......bcbbbb..../....yyyo......bcbbbb..../....yyyo......bcbbbb..../....yyyo......bcbbbbb.../....yyyo......bcbbbbbb../....oooo......bcbbbbcbb./.............bbbbbbbbbbb/............bbbbbbbbbbbb/............wwwwwwwwwwww/.............sssssssssss/......................../......................../......................../......................../......................../......................../......................../........................',
+  member: '......................../......................../......................../......................../.pppppppppppppppppppppp./pppppppppppppppppppppppp/pppppppppppppppppppppppp/pppppppppppppppppppppppp/kkkkkkkkkkkkkkkkkkkkkkkk/kkkkkkkkkkkkkkkkkkkkkkkk/pppppppppppppppppppppppp/pppppppppppppppppppppppp/ppyyyyoppppppppppppppppp/ppyyyyoppppppppppppppppp/ppyyyyopppwwwwwpwwwwwwpp/ppoooooppppppppppppppppp/pppppppppppppppppppppppp/.pppppppppppppppppppppp./......................../......................../......................../......................../......................../........................',
+  iron: '......................../......................../......ssssss............/......swssss............/......swssss............/......swssss............/......swssss............/......swssss............/......swssssssss......../......swssssssssss....../....ssssssssssssssss..../....ssssssssssssssss..../....wwwwwwwwwwwwwwww..../.....ssssssssssssss...../......................../......................../...rr......rr......rr.../...rr......rr......rr.../..rrrr....rrrr....rrrr../.rrrrrr..rrrrrr..rrrrrr./rrrrrrrrrrrrrrrrrrrrrrrr/rrrrrrrrrrrrrrrrrrrrrrrr/......................../........................',
+  cool: '...........bb.........../...........bb.........../...........bb.........../..........bbbb........../..........bbbb........../.........bbbbbb........./........bbbbbbbb......../........bbwbbbbb......../.......bbwbbbbbbb......./......bbwwbbbbbbbb....../......bbwwbbbbbbbb....../.....bbwwbbbbbbbbbb...../....bbbwbbbbbbbbbbbb..../....bbbwbbbbbbbbbbbb..../....bbbbbbbbbbbbbbbb..../....bbbbbbbbbbbbbbbb..../....bbbbbbbbbbbbbbbb..../.....bbbbbbbbbbbbbb...../.....bbbbbbbbbbbbbb...../......bbbbbbbbbbbb....../.......bbbbbbbbbb......./.........bbbbbb........./......................../........................',
+  upgrade: '......................../......................../...pppppppppppppppppp.../..pppppppppppppppppppp../..ppkppppppppppppppkpp../..pppppppwwwwwwppppppp../..ppppppwwwwwwwwpppppp../..pppppwwwppppwwwppppp../..pppppwwwppppwwwppppp../..ppppppppppppwwwppppp../..pppppppppppwwwpppppp../..ppppppppppwwwppppppp../..pppppppppwwwpppppppp../..pppppppppwwwpppppppp../..pppppppppwwwpppppppp../..pppppppppppppppppppp../..pppppppppppppppppppp../..pppppppppwwwpppppppp../..pppppppppwwwpppppppp../..ppkppppppppppppppkpp../..pppppppppppppppppppp../...pppppppppppppppppp.../......................../........................',
+  plaster: '......................../......................../......................../......................../......................../......................../...wwwwwwwwwwwwwwwwww.../.wwwwwwwwwwwwwwwwwwwwww./wwwwwwwwwoooooowwwwwwwww/wwwswwswwoooooowwswwswww/wwwwwwwwwoooooowwwwwwwww/wwwwwwwwwoooooowwwwwwwww/wwwswwswwoooooowwswwswww/wwwwwwwwwoooooowwwwwwwww/.wwwwwwwwwwwwwwwwwwwwww./...ssssssssssssssssss.../......................../......................../......................../......................../......................../......................../......................../........................',
+  long: '..wwwwwwwwwwwwwwwwwwww../..ssssssssssssssssssss../..s.w..............w.s../..s.w..............w.s../..s.w..............w.s../..s..wyyyyyyyyyyyow..s../..s...wyyyyyyyyyow...s../..s....wyyyyyyyow....s../..s.....wyyyyyow.....s../..s......wyyyow......s../..s.......wyyw.......s../..s.......wyyw.......s../..s......w.yy.w......s../..s.....w..yy..w.....s../..s....w...yy...w....s../..s...w....yy....w...s../..s..w....yyyo....w..s../..s.w...yyyyyyyo...w.s../..s.wyyyyyyyyyyyyyow.s../..s.wyyyyyyyyyyyyyow.s../..wwwwwwwwwwwwwwwwwwww../..ssssssssssssssssssss../......................../........................',
+  ceiling: 'wwwwwwwwwwwwwwwwwwwwwwww/ssssssssssssssssssssssss/gggggggggggggggggggggggg/gggggggggggggggggggggggg/.ggg..gg.gggggggg..ggg../.........wwwwww........./.......wwwwwwwwww......./......wwwwwwwwwwww....../......wwwwwwwwwwww....../......wwkkwwwwkkww....../......wwkkwwwwkkww....../......wwwwwwwwwwww....../......wwwwwwwwwwww....../.......wwwwwwwwww......./.........ssssss........./......................../......................../......................../......................../......................../......................../......................../......................../........................',
+  dive: '.........wwwwww........./.......wwwwwwwwww......./......wwwwwwwwwwww....../......wwkkwwwwkkww....../......wwkkwwwwkkww....../......wwwwwwwwwwww....../.......wwwwwwwwww......./.........ssssss........./......................../......................../..........yyyo........../..........yyyo........../..........yyyo........../..........yyyo........../..........yyyo........../..........yyyo........../......yyyyyyyyyyyo....../.......yyyyyyyyyo......./........yyyyyyyo......../.........yyyyyo........./..........yyyo........../...........yo.........../......................../........................',
+  dash2: '......................../......................../...............wwwwww.../.....ooooo...wwwwwwwwww./............wwwwwwwwwwww/oooooooooo..wwwkkwwwwkkw/............wwwkkwwwwkkw/...ooooooo..wwwwwwwwwwww/.............wwwwwwwwww./...............ssssss.../......................../......................../......................../......................../...............wwwwww.../......oooo...wwwwwwwwww./............wwwwwwwwwwww/.ooooooooo..wwwkkwwwwkkw/............wwwkkwwwwkkw/....oooooo..wwwwwwwwwwww/.............wwwwwwwwww./...............ssssss.../......................../........................',
+};
+ICONS2.maxhp = ICONS2.heart; ICONS2.gift = ICONS2.heal1;
+for (const id in ICONS2) { ICONS2[id] = ICONS2[id].split('/'); ICONS2[id].x2 = 2; }
+const iconRows = (id) => (PIX.keep >= 2 && ICONS2[id]) || ICONS[id];   // a picture's rows for this screen's grid (its x2: drawn at half the dot)
 const ICON_SPIN = 0.3;   // a turning icon's least width, of its own (see iconSpin)
 const ICON_INK ={ k: 'black', r: 'red', b: 'blue', y: 'yellow', g: 'green', p: 'purple', o: 'orange', s: 'gray', w: 'white', c: 'aqua' };
 // The hero is a ball (Gum's shapes stay, as looks to unlock); firm enough to stay round
@@ -1181,7 +1523,7 @@ function portrait(design, ink, n = 16) {
   return rows;
 }
 for (const k in ENEMY) ICONS['foe_' + k] = portrait(ENEMY[k].design, 'r');
-for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', Object.keys(ICON_INK).find((c) => ICON_INK[c] === (BOSSES[k].ink || 'purple')));   // in its own ink
+for (const k in BOSSES) ICONS['boss_' + k] = portrait(BOSSES[k].design || 'cat', Object.keys(ICON_INK).find((c) => ICON_INK[c] === (BOSSES[k].ink || 'blue')));   // in its own ink
 // The bosses with a look (LOOKS) drawn by hand as their looks are, 16 pixels square (owner, 2026-10-20): its body, its parts, its face.
 ICONS.boss_probka = ['......gg........', '.....ggg........', '.bb...g.....bb..', '.bkb.bbbbb.bkb..', '..bbbbbbbbbbb...', '.bbbbbbbbbbbbb..', '.kkkkkbbbkkkkk..', '.kwwkkkkkkkwwk..', '.kwkkkkkkkkkwk..', '.bkkkbbkbbkkkb.b', '.bbbbbbbbbbbbbkb', '.bbbwwwwwwwbbbbk', '.bbwwwwwwwwwbbb.', '..bwwwwwwwwwb...', '...bbwwwwwbb....', '....bb...bb.....'];   // a Bake-danuki, its mask and leaf
 ICONS.boss_cart = ['................', '.....oooooo.....', '...oooooooooo...', 'o.oooooooooooo.o', '.ookoooooooooko.', '.oookkoooookkoo.', 'ooowwkoooookwwoo', 'o.wkkoooookkwo.o', '.o.oooooooooooo.', 'o..oooookoooo..o', '.o..ooowkwooo.o.', '.o..oooooooo..o.', 'o.o..oooooo..o.o', 'o..o........o..o', '.o..o......o..o.', '.o..........o...'];   // Tsuchigumo, eight legs
@@ -1193,6 +1535,7 @@ ICONS.boss_namazu = ['................', '.oo.............', '.ooo............',
 ICONS.boss_koschei = ['.....r.r.r......', '.....sssss......', '....swwwwws.....', '....wowwwow.....', '....wwwkwww.....', '.....wkwkw......', '..ssssssssss....', '.rsswssswssss...', 'r.sssswwwsssss..', 'r.ssswssswsssss.', 'r..sssssssssss..', 'r..ss.sss.sss...', '...s..s.s..s....', '................', '................', '................'];   // Koschei: his crowned skull, eyes lit, his ribs under the cloak, his red sword
 ICONS.foe_skull = ['................', '.....wwwwww.....', '...wwwwwwwwww...', '..wwwwwwwswwww..', '..wwswwwwwwwww..', '.wwkkkkwwkkkkww.', '.wkkkkkwwkkkkkw.', '.wkkrkkwwkkrkkw.',
   '.wwkkkwwwwkkkww.', '..wwwwwkkwwwww..', '...wwwwwwwwww...', '...wkwkwkwkwk...', '..ssssssssssss..', '.ssssssssssssss.', '.ss.sss..sss.ss.', '..s..s....s..s..'];   // a skull over its goo (the user's picture)
+ICONS.foe_komori = ['................', '................', '.....s....s.....', '.....ss..ss.....', 's....ssssss....s', 'ss...ssssss...ss', 'sss.sossssos.sss', 'ssssssssssssssss', 'skskssssssssksks', 'skskssssssssksks', 's..s.ssssss.s..s', '.....ssssss.....', '......ssss......', '......k..k......', '................', '................'];   // the Mine's komori face on, its wings spread, its eyes orange (the book's; its sprite: KOMORI_SPR)
 // The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs
 // together (not spent), like Downwell's palettes, and each starting a run with an upgrade (`perk`).
 const UNLOCKS = [
@@ -1529,6 +1872,200 @@ const CHUNKS = {
     '....####....',
     '............',
     '....o..o....',
+    '............'] },
+  // The Village's bonus caves (owner, 2026-10-24: «Бонусные пещеры скучные и скудные…»; З1 «В», two gifts in the world's own way, then a puzzle; З2 «А»,
+  // a puzzle tried again at once, nothing lost): laid whole in its stash room (CAVES, Level.build), never in a shaft (kind 'cave'). 21 rows, the room's
+  // height on a small phone; the bottom 8 clear but for the corner over the way out, as the hero is thrown in from the hole in the left wall to the
+  // right wall about 6 tiles up and slides down it (Game.enterRoom)
+  caveMill: { d: 1, kind: 'cave', rows: [   // a gift: a water wheel to ride (MILL), coins round the way its boards carry you, a big one over its top
+    '............',
+    '............',
+    '.....O......',
+    '...o...o....',
+    '............',
+    '.o.......o..',
+    '............',
+    '.O...Q...O..',
+    '............',
+    '.o.......o..',
+    '............',
+    '...o.O.o....',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveBridges: { d: 1, kind: 'cave', rows: [   // a gift: two footbridges across, a garland of coins over each, two big ones in it
+    '............',
+    '............',
+    '............',
+    'ooOoooOoo...',
+    '==========..',
+    '............',
+    '............',
+    '............',
+    '............',
+    '...ooOoooOoo',
+    '..==========',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  cavePestle: { d: 1, kind: 'cave', rows: [   // a puzzle: the pestle (MOCHI) flattens you, and only flat do you fit under the low beam into the vault of big coins;
+    '............',   // out up through its plank roof (from above it holds). Up through the walkway's plank by the post, into the mortar under the pestle, and wait for it.
+    '............',   // Its coins a row clear of its roof and its floor: none in the magnet's reach (COIN.magnet) from over the roof or under the floor
+    '............',
+    '............',
+    '............',
+    '............',
+    '=====.......',
+    '#...#.......',
+    '#OOO#.......',
+    '#OOO#KKK....',
+    '#OOOL.......',
+    '#........P..',
+    '#####UUU==..',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveIn: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins with no door; its roof gives way under you (a crumbling block takes any touch),
+    '............',   // and from inside a head-butt brings it down again. Up by the planks on the right wall. Against the left wall, its floor two
+    '............',   // thick: nowhere outside it within the magnet's reach of its coins (COIN.magnet). Its roof up to the wall: one a tile short is cut back
+    '............',   // to leave a way past it (Level.place's `pass`), a hole over the vault. Its roof 15 tiles up: a full jump from the plank under the cap
+    '............',   // of a 375×667 (21.8 tiles) and out of the vault
+    '............',
+    '............',
+    'CCCCC#......',
+    '#OOOO#......',
+    '#OOOO#..====',
+    '#OOOO#......',
+    '######......',
+    '######......',
+    '.........===',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  // The Mine's bonus caves (owner З3 «А», 2026-10-24: after the Village's, each world's own, one world at a time): its cages, its moss, its cracked rock
+  // and its rubble, the Mine's own things (its world's id 'cave', CAVES). As the Village's: 21 rows, the bottom 8 clear for the throw in, the way out the
+  // hole in the left wall; nothing to stand on over 15 tiles but a vault, so a full jump keeps under the cap of a 375×667 (21.8 tiles)
+  caveLift: { d: 1, kind: 'cave', rows: [   // a gift: two cages to and fro (W), one over the other, a garland of coins over each one's way and a big seam at the top
+    '............',   // up from the floor onto the low cage, from it onto the high one where their ways cross (x 5-10), and on up through the seam
+    '............',
+    '............',
+    '....OOO.....',
+    '............',
+    '............',
+    'o.O.o.O.o...',
+    '..WWW.......',
+    '............',
+    '............',
+    '............',
+    '...o.o.O.o.o',
+    '......WWW...',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveMoss: { d: 1, kind: 'cave', rows: [   // a gift: a long rock roof with moss under it (~): up to it, the hero hangs on and crawls along it through the coins hanging under it
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '..########..',
+    '..~~~~~~~~..',
+    '..OoOOoOO...',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveSeal: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins high over the open, sealed by cracked rock (X, it gives at a head-butt from below, for good); a
+    '.##########.',   // cage to and fro under it: ride it under the seal and jump. Its floor out of reach from the ground (a double jump's head 15.6 tiles, the seal
+    '.##OOOOOO##.',   // 17), walls three thick: no coin in the magnet's reach from outside; out down through the hole
+    '.##OOOOOO##.',
+    '.##XXXXXX##.',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '.....WWW....',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveRubble: { d: 1, kind: 'cave', rows: [   // a puzzle: a pocket of big coins high on the left wall, the way to it two steps of rubble (C) that give way half a second
+    '............',   // after a touch (CRUMBLE): from the open by the right wall onto the low step, at once up onto the high one, at once up onto the ledge. Fallen,
+    '............',   // nothing lost: back in 3 s, try again. Each step 2 tiles clear of the next and of the wall (the hero 2 wide), the ledge two thick and its coins
+    '............',   // a row clear of it (nothing under it in the magnet's reach), its top 15 tiles (a double jump's feet 13.6)
+    'OOO.........',
+    'OOO.........',
+    'OOO.........',
+    '####........',
+    '####........',
+    '............',
+    '.....CC.....',
+    '............',
+    '........CC..',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
+    '............',   // side the way on, coins under; no enemy in the chunk
+    '............',
+    '.......####.',
+    '............',
+    '............',
+    '..u.........',
+    '######......',
+    '............',
+    '.....o..o...',
     '............'] },
   lift: { d: 2, rows: [
     '............',
@@ -2021,6 +2558,19 @@ const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coin
 // An ambush (owner, round 2: «Начинай все по списку»; my r6: 1-4, «яма с волнами врагов»): a small arena (a), stood on its floor its one wave of `waves`
 // dropping in, shown first as an arena's (ARENA.warn), no mini, `coins` big ones for it; left behind, nothing (1-4's motif)
 const AMBUSH = { waves: [2], coins: 2 };
+// Each world's bonus caves (the stash rooms, kind 'treasure'; owner, З1 «В»): its gift rooms and its puzzle rooms, by its world's id (the Village's
+// world kept the Mine's old id). Two gifts, then a puzzle, never the same room twice running (Game.enterRoom). A world not here keeps the five old
+// heaps of coins (Level.build).
+const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] } };   // (the Village's, 'mine'; the Mine's, 'cave')
+// Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
+// an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
+const WAVES = {
+  village: { arena: [['crawler', 'crawler'], ['crawler', 'shell', 'spitter']], ambush: [['crawler', 'shell']] },
+  fuji: { arena: [['crawler', 'crawler'], ['shell', 'crawler', 'shell']], ambush: [['crawler', 'crawler']] },
+  sea: { arena: [['crawler', 'shell'], ['spitter', 'crawler', 'shell']], ambush: [['crawler', 'shell']] },
+  town: { arena: [['crawler', 'shell'], ['spitter', 'crawler', 'shell']], ambush: [['crawler', 'shell']] },
+};
+const wavesOf = (th, small) => { const k = !th ? null : th.village ? 'village' : th.fuji ? 'fuji' : th.sea ? 'sea' : th.town ? 'town' : null; return k ? WAVES[k][small ? 'ambush' : 'arena'] : null; };
 const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
@@ -2034,13 +2584,18 @@ for (const id in CHUNKS) {
     return k < 6 ? ch + copy : copy + ch;   // the copy on the inner side
   }).join(''));
 }
-const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).filter((id) => !CHUNKS[id].tall).map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk);
+// gate3 with its spikes a tile further from the keystone on each side (owner, Г1 «В»: worlds 1-3 not hard; a straight head-butt off
+// the keystone's middle broke it and cost a heart): 1-8, 2-8 and 3-8's gate. Its spike row set after the widening, as a 12-column one
+// can't say it (the keystone's edge column is a widened one)
+CHUNKS.gate3w = { ...CHUNKS.gate3, rows: CHUNKS.gate3.rows.map((row, r) => (r === 3 ? 'vvvvvv......vvvv' : row)) };
+const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).filter((id) => !CHUNKS[id].tall && CHUNKS[id].kind !== 'cave').map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk);
 // (`tall` ones left out: they are a motif level's, which fills its height by `fits`, and the other levels' rooms stay planned as they were)
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
 const STAND = new Set(['#', 'I', 'C', 'D', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z', 'U', 'L']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
+  if (c.kind === 'cave') continue;   // (a bonus cave's room is laid whole, not joined to a chunk under it: no footholds; the mill's has none)
   const runs = (r) => {   // a tile under spikes is no foothold
     const row = c.rows[H - 1 - r], up = c.rows[H - 2 - r] || '', ok = (k) => STAND.has(row[k]) && up[k] !== '^', out = [];
     for (let k = 0; k < COLS; k++) if (ok(k) && !ok(k - 1)) { let k1 = k; while (k1 < COLS - 1 && ok(k1 + 1)) k1++; out.push([k, k1, row[k]]); }
@@ -2088,7 +2643,6 @@ function shuffled(rnd, list) {
   for (let i = a.length - 1; i > 0; i--) { const j = (rnd() * (i + 1)) | 0; const x = a[i]; a[i] = a[j]; a[j] = x; }
   return a;
 }
-const lerp = (a, b, t) => a + (b - a) * t;
 
 // ── Level ────────────────────────────────────────────────────
 // One scene: a shaft of the well, a room behind a bubble, or the boss arena. World y
@@ -2108,11 +2662,13 @@ class Level {
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
-    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.rc = null;
+    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.komori = false; this.rc = null;
+    this.tasks = this.taken = this.gone = this.sig = undefined;   // (a shaft's, Game.setTasks: given here, see loosen)
+    loosen(this, 'l', 'r', 'floor', 'top', 'R', 'cam', 't');   // (fractions in play: see loosen)
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
-    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.R = o.R; this.t = 0;
+    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.R = o.R; this.t = 0; this.cave = o.cave || null;   // (cave: a bonus cave's room, CAVES)
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
@@ -2134,9 +2690,11 @@ class Level {
     this.rng = mulberry32(o.seed >>> 0); this.foeRng = mulberry32((o.seed ^ 0x85ebca6b) >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
+    this.komori = !!(this.foeTypes ? this.foeTypes.includes('komori') : !rc && o.world.enemies && o.world.enemies.komori);   // its bats dive (KOMORI): no harmless ones beside them
     this.fizz = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
     if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows; a recipe's own)
-      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
+      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.episode ? [rc.episode] : rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);   // (a story's episode the
+      // campaign's only: the daily well's levels have none, dayAt)
       if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
     }
     this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0); this.crowRng = mulberry32((o.seed ^ 0x68e31da4) >>> 0);   // folk (see FOLK), by their own generators
@@ -2166,7 +2724,7 @@ class Level {
       if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       if (rc && rc.trial) this.plan.push({ y: this.floor - H * rc.trial.at, kind: 'trial', goal: rc.trial.goal, done: false });   // a trial room (TRIAL)
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
-      if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
+      if (v > 0) loosen(this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0, rush: 0 }, 'y', 'v', 'spitT', 'calm', 'rush');   // (see loosen)
     } else if (o.kind === 'menu') this.menuAt(o.floorY);   // the menu's (owner, 2026-10-23, the Figma «Main»): nothing in it but the hero
     else this.build(o);
   }
@@ -2176,8 +2734,10 @@ class Level {
     this.rects = [this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true })];
   }
   box(x0, y0, x1, y1, f) {
-    return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false,
-      gone: false, t: 0, dx: 0, hit: false, crumbling: false }, f);
+    return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false, gone: false, t: 0, dx: 0, dy: 0, hit: false, crumbling: false,   // (every field
+      // a rect is given later too, from the start: one shape for all of them, 2-5 before, the physics' loops slower for it: perf)
+      kit: undefined, kitWant: undefined, id: undefined, moss: false, board: false, safe: false, mnRoom: undefined, bouncy: false, ac: false, poke: undefined, batsP: undefined, eyesP: undefined,
+      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, spikes: null }, f);
   }
   coin(x, y, v) { this.coins.push({ x, y, v, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: this.rng() * TAU }); }
   // The scenes made whole: the boss arena and the two kinds of room.
@@ -2191,20 +2751,8 @@ class Level {
     if (o.kind === 'boss') {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
-      if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
-        const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
-        for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));
-        this.rail = { x0: this.l + end, x1: this.r - end, y: top + 3.05 * R + 1.6 * cr };   // a hero hanging under the moss clears it
-        const A = this.floor - this.rail.y;
-        for (const [f0, f1] of [[0.06, 0.36], [0.64, 0.94]]) this.rects.push(this.box(this.l + W * f0, this.floor - 0.5 * A, this.l + W * f1, this.floor - 0.5 * A + p, { plank: true, crumble: true }));
-        this.rects.push(this.box(this.l, this.floor - 0.2 * A, this.l + 0.26 * W, this.floor - 0.2 * A + p, { plank: true, move: { a: this.l, b: this.r - 0.26 * W, v: 1.8 * R } }));
-        this.rects.push(this.box(this.r - 0.26 * W, this.floor - 0.34 * A, this.r, this.floor - 0.34 * A + p, { plank: true, move: { a: this.l, b: this.r - 0.26 * W, v: -2.2 * R } }));
-        return;
-      }
-      if (this.rc && this.rc.ice) {   // the Puck's: the floor all ice, four icicles under the ceiling (it shakes them down)
-        this.rects.push(this.box(this.l, this.floor - 0.3 * R, this.r, this.floor, { slick: true }));
-        for (const f of [0.2, 0.4, 0.6, 0.8]) this.icicles.push({ x: this.l + W * f, y: this.capY, state: 'hang', t: 0 });
-      }
+      if (this.rc && this.rc.street) { this.rects.push(this.box(cx - W * 0.18, at(0.3), cx + W * 0.18, at(0.3) + p, { plank: true })); return; }   // the Tram's: one ledge in the middle, away from its stops at the ends
+      if (!this.rc || this.rc.hang || this.rc.bare) return;   // a hanging boss's (Boss.hang; the random run's Lid too, with no recipe), or a bare arena: the floor and the walls; what does nothing in the fight is not there (the plan)
       this.rects.push(this.box(this.l, at(0.32), this.l + W * 0.3, at(0.32) + p, { plank: true }));
       this.rects.push(this.box(this.r - W * 0.3, at(0.32), this.r, at(0.32) + p, { plank: true }));
       return;
@@ -2227,6 +2775,11 @@ class Level {
       });
       for (const f of [0.34, 0.54]) this.coin(this.r - 1.3 * R, at(f), 1);
       for (const f of [0.34, 0.76]) this.coin(cx, at(f), 1);
+    } else if (this.cave) {   // a world's own bonus cave (CAVES): laid whole, its floor the room's; a gift room may hold a heart, as the old ones (a puzzle's prize is its coins)
+      this.place(CHUNKS[this.cave], this.floor, false);
+      if (CAVES[o.world.id] && CAVES[o.world.id].gift.includes(this.cave) && rnd() < 0.45) this.pickups.push({ x: this.r - 1.5 * this.tile, y: this.floor - 14.5 * this.tile, r: 0.6 * R, item: GIFT, sold: false, near: false });   // (by the
+      // right wall 14.5 tiles up: clear of the bridges, their coins and the wheel, and its words under the HUD on every phone; at(0.8) put it on the high
+      // bridge on a 375×667, and 20 tiles up its words went into the HUD there once they lost their fill, b2f80d8; bonuses never touch a platform)
     } else {   // a stash: one of five, each with its own lot of coins (user: one was dull)
       const ledge = (x0, x1, y, f = {}) => this.rects.push(this.box(x0, y, x1, y + (f.plank ? LEVEL.plank : LEVEL.thick) * R, f));
       const row = (y, n, gap, v = 1) => { for (let k = 0; k < n; k++) this.coin(cx + (k - (n - 1) / 2) * gap * R, y, v); };
@@ -2350,7 +2903,9 @@ class Level {
     if (c.kit) for (const r of this.rects.slice(lens[0])) r.kitWant = c.kit;   // the thing it asks for on its wall's ledge (kitThing)
     if (this.fizzAt.length && this.top - (lift + c.rows.length) * this.tile < this.fizzAt[0] && c !== CHUNKS.pocket) {   // a candy due: over a steady ledge of this chunk
       const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile);
-      if (ok.length) { const r = ok[((this.fizzKind[this.fizz.length] === 'astro' ? this.astroRng : this.rng)() * ok.length) | 0]; this.fizz.push({ x: (r.x0 + r.x1) / 2, y: r.y0 - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
+      if (ok.length) { const r = ok[((this.fizzKind[this.fizz.length] === 'astro' ? this.astroRng : this.rng)() * ok.length) | 0], x = (r.x0 + r.x1) / 2, hw = 0.75 * this.R + BONUS_GAP.gap * PIX.base;
+        let top = r.y0; for (const q of this.rects.slice(lens[0])) if (q !== r && !q.gone && q.x0 < x + hw && q.x1 > x - hw && q.y0 < top && q.y1 >= r.y0 - 0.5 * this.tile) top = q.y0;   // a spring or a block on the ledge under it: over that (BONUS_GAP; QA: 4-2's rainbow sat on a spring)
+        this.fizz.push({ x, y: top - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
     }
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
@@ -2459,11 +3014,11 @@ class Level {
     const due = this.folkAt[0];
     if (due && top < due.y) {
       const ok = rs.filter((r) => steady(r) && r.x1 - r.x0 >= 3 * t && bare(r) && over(r, (due.kind === 'trader' ? 4.6 : 3) * R));
-      if (ok.length) { const r = ok[(fr() * ok.length) | 0]; this.folk.push({ kind: due.kind, x: r.x0 + (r.x1 - r.x0) * (0.3 + 0.4 * fr()), y: r.y0, rect: r }); this.folkAt.shift(); }
+      if (ok.length) { const r = ok[(fr() * ok.length) | 0]; this.folk.push({ kind: due.kind, x: r.x0 + (r.x1 - r.x0) * (0.3 + 0.4 * fr()), y: r.y0, rect: r, body: null, open: false }); this.folkAt.shift(); }
     }
     if (fr() < FOLK.critterP) {
       const bat = fr() < 0.5, under = (r) => !this.rects.some((q) => q !== r && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 2.5 * R);
-      const ok = rs.filter((r) => steady(r) && r.x1 - r.x0 >= 2 * t && (bat ? under(r) : bare(r) && over(r, 1.5 * R)));
+      const ok = bat && this.komori ? [] : rs.filter((r) => steady(r) && r.x1 - r.x0 >= 2 * t && (bat ? under(r) : bare(r) && over(r, 1.5 * R)));   // (no harmless bat where the komori hang: KOMORI)
       if (ok.length) {
         const r = ok[(fr() * ok.length) | 0], x = r.x0 + (r.x1 - r.x0) * (0.2 + 0.6 * fr());
         this.folk.push(bat ? { kind: 'bat', x, y: r.y1, fly: false, t: 0 } : { kind: 'bug', x, y: r.y0, rect: r, dir: fr() < 0.5 ? -1 : 1, run: false, t: 0 });
@@ -2563,12 +3118,16 @@ class Level {
       else if (FOE_LETTER[ch]) {   // an enemy on the ledge under it (FOE_LETTER): a crawler (the tutorial's), a spitter (1-3's), a nurikabe over it (1-5's)
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = FOE_LETTER[ch];
         if (q) this.spawns.push({ type, x, y: q.y0 - 1.2 * R * ENEMY[type].size, ledge: q });
+      } else if (ch === 'u') {   // Ume on the ledge under it (UME), the ledge's kit a vending machine
+        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
+        if (q) { q.kitWant = 'vending'; q.kit = undefined; this.folk.push({ kind: 'ume', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, given: false, t: 0, body: null, open: false }); }
       } else if (ch === 'r') {   // the crow with the red ring on the ledge under it (RIBBON), facing into the shaft
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
       else if (ch >= '1' && ch <= '9') this.signs.push({ id: +ch, x: X(k) + t / 2, y: Y(r) - t / 2 });   // a word of the tutorial's, said there
-      else if (ch === 'A' || ch === 'a') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a' });   // (a: AMBUSH)
+      else if (ch === 'A' || ch === 'a') { const kinds = wavesOf(this.theme, ch === 'a'); this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a', floor: undefined,
+        waves: kinds ? kinds.map((q) => q.length) : (ch === 'a' ? AMBUSH : ARENA).waves, kinds, warnAt: -1, dropAt: -1 }); }   // (a: AMBUSH; kinds: its world's waves, WAVES)
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, goal: this.pocketKind === 'trial' ? this.pocketGoal : undefined, side, cd: 0, room: null });
@@ -2579,8 +3138,9 @@ class Level {
       for (let i = from; i < this.rects.length; i++) { const q = this.rects[i]; if (!q.plank && Math.abs(q.y1 - y) < 1 && x > q.x0 && x < q.x1) q.moss = true; }
     }
     // Some plain one-tile ledges are laid as planks to jump up through (not one with spikes on or
-    // under it, or a spring on it; none in a pocket, by its door; none in a stash in the wall, a set piece, a gate or the last rest).
-    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set' && c.kind !== 'gate' && c.kind !== 'tut'; i++) {
+    // under it, or a spring on it; none in a pocket, by its door; none in a stash in the wall, a set piece, a gate, the last rest or a bonus
+    // cave, laid as drawn: a plank for its vault's floor would let you jump up into it past the puzzle).
+    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set' && c.kind !== 'gate' && c.kind !== 'tut' && c.kind !== 'cave'; i++) {
       const r = this.rects[i], over = (a) => a.x1 > r.x0 && a.x0 < r.x1;
       if (r.plank || r.spring || r.slick || r.crumble || r.crack || r.moss || r.stair || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
       if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;
@@ -2610,6 +3170,8 @@ class Level {
         if (q.x1 - q.x0 < 0.5 * R) this.spikes.splice(j, 1);
       }
     }
+    for (const a of this.arenas) if (a.floor === undefined) a.floor = this.rects.filter((r) => r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0] || null;   // an arena's
+    // floor, the first block under its mark (owner, К8 «А»: a world's prop holds its waiting wave over it; Game.arenaWave drops it there)
     // A vault's cage (H, Z) as thin as it is drawn (the owner's pick, research/variants/tokyo-vault-1-px.png F), so nothing solid is out of sight: its walls a post
     // 0.4 tiles thick on its floor's side, reaching up to its roof, a bar 0.3 thick at the roof's top (where it is stood on), and its cracked floor a plate 0.35
     // thick at its foot (where a head-butt from below breaks it); the vault only opens up inside
@@ -2636,7 +3198,7 @@ class Level {
       const k = 1 + ((this.rng() * (COLS - 2)) | 0);
       if (at(r, k) === '.' && at(r - 1, k) === '.') this.coin(X(k) + t / 2, Y(r) - t / 2, this.rng() < 0.12 ? 5 : 1);
     }
-    if (c !== CHUNKS.pocket && c !== CHUNKS.ribbon) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at, and the crow's (RIBBON)
+    if (c !== CHUNKS.pocket && c !== CHUNKS.ribbon && c !== CHUNKS.umeVend) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at, and the crow's (RIBBON)
   }
   // Enemies for a chunk just laid, on what it is made of: a crawler along a clear ledge, a
   // climber up and down the longest stretch of bare wall, a circler round a free block.
@@ -2648,13 +3210,18 @@ class Level {
     const odds = z ? z.foes : rc ? rc.foes : wd.foes * (1 + 0.15 * this.stage);   // a recipe's own odds of one, and of two
     if (!wd.enemies || (this.foeTypes && !this.foeTypes.length) || bottom > this.floor - 6 * t || !(rnd() < odds * this.k)) return;
     const n = wd.pack || (rnd() < (z ? z.pair : rc ? rc.pair || 0 : 0.25 * this.stage) ? 2 : 1);
-    for (let i = 0; i < n; i++) {
-      const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.filter((k) => wd.enemies[k]).map((k) => [k, wd.enemies[k]])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
+    for (let i = 0; i < n; i++) {   // (a recipe's kinds all of them, its world's odds or 1: Tokyo's tofu, not in its world's, was never laid)
+      const type = pick(rnd, this.foeTypes ? Object.fromEntries(this.foeTypes.map((k) => [k, wd.enemies[k] || 1])) : wd.enemies), eR = this.R * ENEMY[type].size, any = (list) => list[(rnd() * list.length) | 0];
       const taken = (r) => this.spawns.some((q) => q.ledge === r || q.rect === r);   // one enemy to a ledge or block
       if (ENEMY[type].move === 'crawl' || ENEMY[type].move === 'flow' || ENEMY[type].move === 'tumble' || ENEMY[type].move === 'crush') {   // (a worm sits on a ledge too; a tumbler, and a nurikabe over one)
         const ok = rects.filter((r) => !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 3 * t && !taken(r) &&
           !this.spikes.some((q) => q.dir === 0 && Math.abs(q.y1 - r.y0) < 1 && q.x1 > r.x0 && q.x0 < r.x1));
         if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y0 - 1.2 * eR, ledge: r }); }
+      } else if (ENEMY[type].move === 'swoop') {   // a komori under a steady ledge with room under it, three tiles clear (KOMORI)
+        const ok = rects.filter((r) => !r.cap && !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 2 * t && !taken(r) &&
+          !this.rects.some((q) => q !== r && !q.cap && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 3 * t));
+        const hang = FOE_SPRITES['komori-' + KOMORI_V + '-1'];   // (its feet on the ledge's underside: half its hanging drawing under it)
+        if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y1 + (hang ? 0.5 * hang.length * PIX.base : eR), ledge: r }); }
       } else if (ENEMY[type].move === 'round') {
         const ok = rects.filter((r) => !r.plank && !r.crumble && !r.spring && r.x0 > this.l + t && r.x1 < this.r - t && !taken(r) &&
           !rects.some((s) => s.spring && Math.abs(s.y1 - r.y0) < 1 && s.x1 > r.x0 && s.x0 < r.x1));   // not one with a spring on top, in its way round
@@ -2677,10 +3244,15 @@ class Level {
   }
   // The end of a shaft: the portal out, and a ceiling over it the camera stops at.
   finish() {
-    const R = this.R;
+    const R = this.R, cw = CAMPAIGN.findIndex((c) => c.world === this.world);
     this.portal = { x: (this.l + this.r) / 2, y: this.top - PORTAL.rise * R, r: 1.35 * R };
     this.capY = this.portal.y - 3.2 * R;
     this.rects.push(this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true }));
+    if (this.rc && cw >= 0 && cw < 3 && this.kind === 'well') {   // worlds 1-3: a trail of coins up the open air into the way out (owner, К7 «А»: the exit found from a jump
+      // below), their twinkles in turn (not off the level's generator: nothing after it moves)
+      for (let k = 0; k < EXIT_TRAIL.n; k++) this.coins.push({ x: this.portal.x, y: this.portal.y + (EXIT_TRAIL.from + EXIT_TRAIL.step * k) * R, v: 1, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: k * 1.3 });
+      this.coinTotal += EXIT_TRAIL.n;
+    }
     this.top = -Infinity;
   }
   near(y0, y1) {
@@ -2739,11 +3311,28 @@ class Level {
     }
     const f = this.fire;
     if (f && g.state === 'play' && !(f.calm > 0 && (f.calm -= dt) > 0)) {   // faster while the hero gains no height (not in a calm start)
-      const k = f.calm === 0 ? 1 + (FIRE.boost - 1) * clamp((g.idleT - FIRE.idle) / FIRE.ramp, 0, 1) : 1;
+      f.rush = f.calm === 0 ? clamp((g.idleT - FIRE.idle) / FIRE.ramp, 0, 1) : 0; const k = 1 + (FIRE.boost - 1) * f.rush;   // (rush: how far into its speed-up, 0 to 1, for
+      // its sound and each world's look of it: owner, К2 «А»)
       f.y = Math.min(f.y - f.v * k * g.mods.fire * dt, this.cam + view.h * (1 + FIRE.lag));
     }
     for (const b of this.bubbles) if (b.cd > 0) b.cd -= dt;
   }
+}
+// The rects' fields that move or change in play, loosened once on a rect made for it (see loosen): a ledge's first spring, crumble or smash
+// would otherwise remake them all.
+loosen(Level.prototype.box(0, 0, 0, 0), 'x0', 'y0', 'x1', 'y1', 't', 'dx', 'dy', 'flash', 'plank', 'crumble', 'slick', 'spring', 'cap', 'gone', 'hit',
+  'crumbling', 'moss', 'board', 'safe', 'bouncy', 'ac', 'crack', 'key', 'broke', 'paid', 'stair', 'magnet', 'cloud', 'mortar', 'beam', 'cage');
+{ const o = { coins: [], rng: () => 0 }; Level.prototype.coin.call(o, 0, 0, 1); loosen(o.coins[0], 'x', 'y', 'vx', 'vy', 't', 'drop', 'moving'); }   // a coin's too (a dropped one's the same make)
+// The same for the bodies' fields that Gum's Body (gum.js, kept as Gum's) begins at small integers or flags, its face's and its unwedging's (up)
+// too: on the hero, the first body made (Game.makeHero), so no body after it remakes them all in play.
+function loosenBody(b) {
+  loosen(b, 'R', 'growth', 'growthV', 'growthTarget', 'exx', 'eyy', 'exy', 'evxx', 'evyy', 'evxy', 'theta', 'omega', 'rigVx', 'rigVy', 'squeeze', 'squeezeIn',
+    'sqAx', 'sqAy', 'sqTheta', 'ceilT', 'peelT', 'ceilCD', 'wasTouching', 'floorX', 'touching', 'settle', 'offFloorT', 'age', 'impactCD', 'badT', 'foldT',
+    'foldRescue', 'foldCleanT', 'asleep', 'calmT', 'calmV', 'calmW', 'calmRelease', 'slowGrow', 'area', 'targetArea', 'lastGoodX', 'lastGoodY', 'minX', 'maxX',
+    'minY', 'maxY', 'cx', 'cy');
+  loosen(b.up, 'on', 'hold', 't', 'rest', 'crowdT', 'flew');
+  loosen(b.face, 'next', 'bt', 'twice', 'open', 'squint', 'surprise', 'wide', 'lx', 'ly', 'tlx', 'tly', 'wander');
+  return b;
 }
 
 // The hero is gooier than Gum's other bodies: after each substep its wobble (all but the rigid move and spin) dies
@@ -2885,8 +3474,8 @@ function collidePair(A, B) {
 const bits = [];
 function burstFx(x, y, R, c) {
   for (let i = 0; i < 80; i++) {
-    const a = rand(0, TAU), sp = rand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
-    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: rand(1.5, 4.5), c: ink, t: 0, life: rand(0.8, 1.6), g: 0.9, drag: 2.2 });
+    const a = fxRand(0, TAU), sp = fxRand(250, 1100), ink = i % 7 === 0 ? INK.flame : i % 5 === 0 ? INK.white : c;
+    bits.push({ x: x + Math.cos(a) * R * 0.5, y: y + Math.sin(a) * R * 0.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 250, s: fxRand(1.5, 4.5), c: ink, t: 0, life: fxRand(0.8, 1.6), g: 0.9, drag: 2.2 });
   }
   fx.add(x, y, 0, 0, R * 1.3, 0.4, INK.white, 0.9, 2); fx.add(x, y, 0, 0, R * 0.8, 0.35, c, 1, 2, 0.08);
 }
@@ -2896,8 +3485,8 @@ function burstFx(x, y, R, c) {
 function sparkFx(x, y, n, a, spread, sp, size, life, inks, g) {
   if (bits.length > 400) return;   // a phone's budget
   for (let i = 0; i < n; i++) {
-    const t = a + rand(-spread, spread), v = rand(sp[0], sp[1]);
-    bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: rand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: rand(life[0], life[1]), g, drag: 4 });
+    const t = a + fxRand(-spread, spread), v = fxRand(sp[0], sp[1]);
+    bits.push({ x, y, vx: Math.cos(t) * v, vy: Math.sin(t) * v, s: fxRand(size[0], size[1]), c: inks[i % inks.length], t: 0, life: fxRand(life[0], life[1]), g, drag: 4 });
   }
 }
 function updateBits(dt) {
@@ -2914,9 +3503,9 @@ function updateBits(dt) {
 function juiceFx(x, y, R, c) {
   if (bits.length > 380) return;   // a phone's budget
   const flesh = c === PAL.red ? INK.flame : PAL.white;
-  for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + rand(-1.4, 1.4), v = rand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: rand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: rand(0.7, 1.1), g: 1, drag: 1.2 }); }
-  for (let i = 0; i < 5; i++) { const a = rand(0, TAU), v = rand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: rand(0.5, 0.9), g: 1, drag: 1.5 }); }
-  for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + rand(-1.7, 1.7), v = rand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: rand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: rand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
+  for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + fxRand(-1.4, 1.4), v = fxRand(260, 620); bits.push({ x: x + Math.cos(a) * 0.4 * R, y: y + Math.sin(a) * 0.3 * R, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, s: fxRand(3.5, 6), c: i % 3 ? c : flesh, t: 0, life: fxRand(0.7, 1.1), g: 1, drag: 1.2 }); }
+  for (let i = 0; i < 5; i++) { const a = fxRand(0, TAU), v = fxRand(150, 380); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, s: 1.5, c: PAL.black, t: 0, life: fxRand(0.5, 0.9), g: 1, drag: 1.5 }); }
+  for (let i = 0; i < 26; i++) { const a = -Math.PI / 2 + fxRand(-1.7, 1.7), v = fxRand(200, 700); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 150, s: fxRand(1.5, 2.8), c: i % 4 ? c : PAL.white, t: 0, life: fxRand(0.45, 0.9), g: 1.2, drag: 2.2 }); }
 }   // (its white pop and ring popFx's now, crisp)
 // An enemy beaten (owner, 2026-10-23: «добавь больше частиц и эффектов при победе над врагом», with two sheets of a hit's frames): over the fruit's
 // burst, the hit's beats in crisp game pixels: a white flash, a ring thrown out, rays, a streak of drops along the blow, blobs of it flung and
@@ -2948,13 +3537,13 @@ function popFx(x, y, R, c, dx, dy) {   // (dx, dy) the blow's way, a unit
 }
 function splatFx(x, y, R, c, n = 9) {
   const k = lighten(c, 0.1);
-  for (let i = 0; i < n; i++) { const a = rand(0, TAU), sp = rand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, rand(0.18, 0.32) * R, rand(0.35, 0.6), k, 0.95, 0); }
+  for (let i = 0; i < n; i++) { const a = fxRand(0, TAU), sp = fxRand(160, 380); fx.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 60, fxRand(0.18, 0.32) * R, fxRand(0.35, 0.6), k, 0.95, 0); }
   fx.add(x, y, 0, 0, R * 0.9, 0.35, lighten(c, 0.3), 0.7, 2);
 }
 function crumbleFx(r, c, up) {   // a block breaking up: puffs and solid chunks of it in its ink and white, dropping away (flung up when smashed from below)
   const y = (r.y0 + r.y1) / 2;
   for (let x = r.x0 + 6; x < r.x1; x += 12) {
-    fx.add(x, y, rand(-40, 40), rand(30, 120), rand(4, 8), rand(0.4, 0.7), c, 0.9, 0);
+    fx.add(x, y, fxRand(-40, 40), fxRand(30, 120), fxRand(4, 8), fxRand(0.4, 0.7), c, 0.9, 0);
     sparkFx(x, y, up ? 3 : 2, up ? -Math.PI / 2 : Math.PI / 2, up ? 1.3 : 0.8, up ? [150, 560] : [20, 140], [1.5, 4], [0.5, 1], [c, c, INK.white], 1);
   }
 }
@@ -2999,27 +3588,22 @@ void main() {
   vec3 c = uTop;
   float t = (uH - gl_FragCoord.y) / uH;   // 0 at the top of the screen, 1 at its foot
   if (uGrad > 0.5 && t * t > bayer(g)) c = uBot;   // a theme's fall from its top ink to its bottom one, through the 4x4 dither (the Crypt's)
-  int s = uPix < 1.5 ? 2 : 1, py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-CSS-px cells, a dot one game pixel
-  ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / float(s)));
+  int py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-game-px cells, a dot one whole cell (2x2: the guide's clusters, no lone pixel)
+  ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / 2.0));
   if (uWin > 2.5 && uWin < 3.5) {   // banks of cloud far off (the Skyscraper's): a smooth field, its edges dithered
     vec2 wp = vec2(float(g.x), float(py)) * vec2(0.008, 0.03);
     float n = sin(wp.x * 3.1 + sin(wp.y * 1.7) * 2.0) * 0.5 + sin(wp.y * 2.3 + wp.x * 0.7) * 0.5;
     if (n > 0.62 + 0.3 * bayer(g)) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // sparse, so the climb reads over them; faint (DEPTH)
-  } else if (uWin > 1.5 && uWin < 2.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dotted between
+  } else if (uWin > 1.5 && uWin < 2.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dashed between (4-px joints, the guide's clusters)
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(8.0, 10.0)), iw = wp - cw * vec2(8.0, 10.0);
     float h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
     if (iw.x >= 2.0 && iw.x < 6.0 && iw.y >= 3.0 && iw.y < 7.0 && h < 0.16) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
-    else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x, 3.0) < 1.0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
-  } else if (uWin > 0.5) {   // a town far off (the Junkyard's, uWin 4; Tokyo's was uWin 1): windows lit here and there in rows, its buildings in columns with dark gaps between
-    vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(6.0, 8.0)), iw = wp - cw * vec2(6.0, 8.0);
-    float bx = wp.x - 36.0 * floor(wp.x / 36.0), h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
-    if (bx < 30.0 && iw.x >= 2.0 && iw.x < 4.0 && iw.y >= 3.0 && iw.y < 6.0 && h < 0.2) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
-  } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // a dot, faint (BG_DOTS)
+    else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x + 2.0, 8.0) < 4.0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
+  } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // a dot, faint (BG_DOTS)
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
     c = ((g.x + g.y) & 3) == 0 ? uWallD : uWall;
-    if (uWin > 3.5) { float by = mod(float(py), 6.0), bx = mod(float(g.x) + (mod(floor(float(py) / 6.0), 2.0) < 1.0 ? 0.0 : 5.0), 10.0); if (by < 1.0 || bx < 1.0) c = uWallD; }   // brick: mortar courses, joints in bond
-    else if (uWin > 1.5 && mod(float(py), uWin > 2.5 ? 16.0 : 24.0) < 1.0) c = uWallD;   // a panel wall's seams, a glass wall's transoms
+    if (uWin > 1.5 && mod(float(py), uWin > 2.5 ? 16.0 : 24.0) < 1.0) c = uWallD;   // a panel wall's seams, a glass wall's transoms
     if (d > -uPix) c = uLip;
   }
   o = vec4(c, 1.0);
@@ -3057,6 +3641,49 @@ void main() {
   if (lit > bayer(g) || tone(1, g) > 0.5) discard;
   o = vec4(PAL[0], 1.0);
 }`;
+// A dark level's light by steps (owner, 2026-10-24, З4 «В» «Уменьши до 3 цветов»: his pixel-art guide's palette ramps): over the drawn screen (uScene),
+// each pixel's ink and its depth (how far from the black it is: behind a quarter, a light 0.6, the play all), then the light on it as the dark
+// counts it, in three steps through the 4x4 Bayer: a cold shade, a mid one, a warm one of that ink (RAMP, a theme's own over it). What is behind is
+// never lit past its plane's step (DEPTH: behind the first, props the second); unlit, the black, but for the sparse sieve the dark always had.
+const RAMP_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
+uniform sampler2D uScene; uniform vec4 uLights[32]; uniform int uN; uniform vec2 uFire; uniform vec3 uRamp[${Object.keys(PAL).length * 3}];
+void main() {
+  ivec2 g = cell();
+  vec2 p = vec2(g) + 0.5;
+  float lit = clamp((p.y - uFire.x) / uFire.y + 1.0, 0.0, 1.0);
+  for (int i = 0; i < 32; i++) {
+    if (i >= uN) break;
+    vec4 L = uLights[i];
+    lit = max(lit, 1.0 - clamp((length(p - L.xy) - L.z) / max(L.w - L.z, 1.0), 0.0, 1.0));
+  }
+  vec3 c = texelFetch(uScene, ivec2(gl_FragCoord.xy), 0).rgb;
+  int k = 0; float tk = 0.0, best = 1e9;
+  for (int i = 1; i < ${Object.keys(PAL).length}; i++) {
+    vec3 d = PAL[i] - PAL[0]; float t = clamp(dot(c - PAL[0], d) / dot(d, d), 0.0, 1.0); vec3 e = c - (PAL[0] + t * d); float err = dot(e, e);
+    if (err < best) { best = err; k = i; tk = t; }
+  }
+  if (tk < 0.06) { o = vec4(PAL[0], 1.0); return; }
+  int cap = tk > 0.8 ? 3 : tk > 0.4 ? 2 : 1;
+  float z = lit * 3.0; int lvl = int(floor(z));
+  if (lvl < 3 && fract(z) > bayer(g)) lvl++;
+  if (lvl == 0 && tone(1, g) > 0.5) lvl = 1;
+  lvl = min(lvl, cap);
+  o = vec4(lvl == 0 ? PAL[0] : uRamp[k * 3 + lvl - 1], 1.0);
+}`;
+// Each ink's three steps: cold (a third of the way from the black, toward blue), mid (two thirds), warm (the ink toward amber); a theme's `ramp`
+// ({ ink: ['#…', '#…', '#…'] }, Worlds') over them. ?ramp=0: the old dark, lit or black, to compare.
+const RAMP_ON = !/[?&]ramp=0\b/.test(location.search);
+const rampOf = (th) => {
+  const out = new Float32Array(Object.keys(PAL).length * 3 * 3), K = PAL.black, mixK = (c, f) => c.map((v, i) => K[i] + (v - K[i]) * f);
+  Object.keys(PAL).forEach((id, k) => {
+    const c = PAL[id], own = th && th.ramp && th.ramp[id];
+    const keep = id === 'white' || id === 'yellow';   // (Worlds: white is the hero's and an edge's mark, yellow a coin's: at the light's full step they stay
+    // themselves, not tinted cream; cold and mid as every ink's)
+    const steps = own ? own.map(hex) : [((m) => [m[0] * 0.8, m[1] * 0.9, Math.min(1, m[2] * 1.18 + 0.03)])(mixK(c, 0.36)), mixK(c, 0.68), keep ? c.slice() : c.map((v, i) => Math.min(1, v * 0.84 + [1, 0.8, 0.52][i] * 0.2))];
+    steps.forEach((s3, j) => out.set(s3, (k * 3 + j) * 3));
+  });
+  return out;
+};
 const FEAT_FS = GLSL + PIX_GLSL + `in vec2 vL; in vec4 vCol; flat in vec4 vP; out vec4 o;
 uniform float uPix;
 float aa(float d) { float w = fwidth(d); return clamp(0.5 - d / max(w, 1e-4), 0.0, 1.0); }
@@ -3100,6 +3727,11 @@ void main() {
   if (a < 0.5 || k <= bayer(g)) discard;
   o = vec4(k > 1.0 ? mix(PAL[0], col, k - 1.0) : col, 1.0);   // over 1: a tone k - 1 of the way from the black (DEPTH)
 }`;
+// A sprite's colour snapped to the palette once, in its vertex shader (it is the instance's alone: FEAT_FS did it for each of its fragments; perf). Gum's
+// pair stays FEAT_VS + FEAT_FS (Renderer.init), this one in its place below; Gum's kept if this one does not build.
+const FEAT_VS_PAL = FEAT_VS.replace(CLIP, CLIP + PIX_GLSL.slice(PIX_GLSL.indexOf('const vec3 PAL['), PIX_GLSL.indexOf('ivec2 cell()')) + PIX_GLSL.slice(PIX_GLSL.indexOf('vec3 snapPal')))
+  .replace('flat out vec4 vP;', 'flat out vec4 vP; flat out vec3 vPal;').replace('vP = vec4(iC.zw, iD);', 'vP = vec4(iC.zw, iD); vPal = snapPal(vCol.rgb);');
+const FEAT_FS_PAL = FEAT_FS.replace('flat in vec4 vP;', 'flat in vec4 vP; flat in vec3 vPal;').replace('vec3 col = snapPal(vCol.rgb);', 'vec3 col = vPal;');
 // The squishies in the same terms (in place of Gum's glossy cushion): the body's colour
 // flat, shade as black tones stepping in toward the back and the bottom, a hard white
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
@@ -3154,6 +3786,16 @@ const FOE_SPRITES = {
 // The bosses' too (owner, 2026-10-20: «Переделай всех шестерых боссов по рисунку листа»): each pick cut from its cell (clear what lies round it,
 // its holes kept black, a black rim on it), fitted over its body (BOSS_FIT: the ink of it that flashes with the body, and how far down the body
 // sits under it), so the fight stays; the body itself unseen (the renderer draws neither it nor its shadow).
+// The Mine's komori (owner 2026-10-24, У3 «Б»: its own diving bats; Д65 «A», Д66 «А»): the eastern bent-winged bat (yubinaga-komori, which lives in
+// the old tunnels of Iwami Ginzan) cut 1:1 from research/variants/mine-komori-1-px.png (cell A): 1 hanging, 2 wings up, 3 wings down (b.frame), facing
+// right as its cell. Its eyes orange (UPwell's dark pass lights them), its grey red while it warns or dives (b.warn).
+const KOMORI_V = 'A';
+const KOMORI_SPR = {
+  'komori-A-1': ['....s........', '....s...s....', '...s....ss...', '...s......s..', '...ss.s..ss..', '..skss..ssss.', '..ss...skkss.', '....s.ssss...', '..ssks.sssss.', '.sssss..sksss', '.sssss..sssss', 'sssss...sssss', '.ssssss.sssss', '.ssss.s.sssks', '.ssss....ssss', '..ss..ss..ss.', '.sss.ssss.ss.', '.sskokso...s.', '..skooooo....', '...s.........', '...ss........', '....s........', '....s........', '....s........'],
+  'komori-A-2': ['ssss..................................s', '....sss...............................s', '..ssskkss.............................s', '..ssssskkss.......................sss.s', '..ssssssskss.....................sssks.', '...sssssssskss..................ssssks.', '...ssssssssskssss..............sssssks.', '...ssssssssssksss.............sssssks..', '...ssssssssssskss.............sssssss..', '...ssssssssssssks............ssssssss..', '....ssssssssssssss..........ssssssss...', '.....sssssskssssks..........ssssssss...', '......sssssssssskss........ssssssss....', '......sssssksssskks........ssssssss....', '......ssssssssssskss......ssssssss.....', '......sssskssssssskss....ssssssss......', '.......ssssssssssskss.sssssssssss......', '.......ssksssssssssksskskksss..s.......', '.........ssssssssssksskkks.............', '.........ssssssssssskkkkkssss..........', '..........ssssssssssksskssssss.........', '...........sssssssssssksssoksso........', '...........ssssssssssskssskoso.........', '............sssssssssskssssssoo........', '.............ssssssssss.ssss...........', '.............ssssssssss..ss............', '.............sssss.sss.................', '.............s.........................', '...........sss.........................', '............s..........................'],
+  'komori-A-3': ['...............sssssss............', '.............sskkkkssss...........', '...........sskkkkkksskssss........', '.........sskkssskksskssssss.s...s.', '........sskssssksssksssssss..ssss.', '......sskkssskksssskssssssssskksso', '.....skksssssksssskssssssssssokss.', '...sskssssskkssssskssssssssssssss.', '.sskkssssskksssssksssssssskssss...', 'sskssssssskssssssksssksssss.ss....', '..ssssssskssssss.sssss.sss........', '..ssssssksssssss..................', '..ssssskssssssskss..s.............', '..ssssksssssssskss..s.............', '..ssskssssssssksss.s..............', '..ss.sssssssssksssss..............', '..s..ssssssssssssss...............', '....sssssssssksssss...............', '...sssssssks.sssss................', '...ssssssss..ssks.................', '.....ssssss..sss..................', '.....sssss...ss...................', '.....ssss....s....................', '.....ssss.........................', '.....sss..........................', '.....ss...........................', '.....s............................', '....s.............................'],
+};
+Object.assign(FOE_SPRITES, KOMORI_SPR);
 const BOSS_FIT = { 'probka-F': ['b', 0.5, 0], 'cart-C': ['o', 0.44, 0, 2], 'puck-F': ['s', 0.5, 1], 'tram-E': ['g', 0.55, -1], 'crane-F': ['o', 0.57, 0, 2], 'pigeon-A': ['s', 0.55, -1], 'namazu-D': ['o', 0.5, 1, 1], 'koschei-A': ['s', 0.5, 0, 1] };   // [its ink, its body's place down it, the way its cell has it face (0: at you), its pixel in game pixels (none: fitted over its body)]
 const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
   const H = rows.length, W = rows[0].length, m = flip ? -1 : 1, sh = d.b.s;
@@ -3163,11 +3805,113 @@ const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
   const hp = d.b.heap || 0, rt = d.b.rattle ? d.b.heapT || 0 : 0, yb = (H - cy) * k, sq = 1 - 0.4 * hp, wx = 1 + 0.3 * hp;   // a heap of bones (Koschei dazed): his rows sunk (his body squashes too) and strewn sideways, rattling before he rises
   rows.forEach((row, j) => {
     const dy = hp ? yb - (yb - (j + 0.5 - cy) * k) * sq : (j + 0.5 - cy) * k, jx = hp ? (((Math.imul(j + 7, 2654435761) >>> 0) / 4294967296 - 0.5) * 18 * hp + (rt ? Math.sin(rt * 45 + j * 1.7) * 1.2 : 0)) * k : 0;
-    for (let i = 0; i < W;) { const ch = row[i]; let e = i + 1; while (row[e] === ch) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k * wx + jx, dy, ((e - i) / 2) * k * wx + o, 0, 0, 0.5 * k * sq + o, fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : PAL[ICON_INK[ch]]); i = e; }
+    for (let i = 0; i < W;) { const ch = row[i]; let e = i + 1; while (row[e] === ch) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k * wx + jx, dy, ((e - i) / 2) * k * wx + o, 0, 0, 0.5 * k * sq + o, fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : ch === 'd' ? PAL.gray : PAL[ICON_INK[ch]], ch === 'd' ? 4 : 0); i = e; }   // ('d': a sheet's dark grey, grey a tone down)
   });
   return true;
 };
-for (const id in FOE_SPRITES) { const fit = BOSS_FIT[id]; LOOK_FACE[id] = (d) => drawSprite(d, FOE_SPRITES[id], fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0, fit); }   // the forest's face right; a boss as its cell has it
+for (const id in KOMORI_SPR) BOSS_FIT[id] = ['x', 0.5, 1, 1];   // a komori: its body under its middle, its cell facing right, 1:1 (no ink of the body's)
+const K9_V = { tofu: 'C', tumbler: 'A', nurikabe: 'B' };   // К9 «А», the owner's picks: the tofu a pudding with green onion (Д121 «C»), the tumbler a plain yokan (Д122 «A»), the nurikabe a block with icicles under it (Д123 «B»)
+const K9_SPR = {   // cut 1:1 from research/variants/tokyo-tofu, tokyo-tumbler, fuji-nurikabe-1-px.png (path A; scratchpad k9/cutk9.py): -1 calm (it can be stomped), -2 sharp
+  // (it can't: spikes, red, icicles); the tofu whole and a bit of it; drawn fitted over the soft body, so it squashes and stretches with it
+  'nurikabe-B-1': ['......wwwwwwwwwwwwwwwww....', '.wwwwwwwwwwwwwwwwwwwwwwwww.', 'wwwwwwwwwwwwwwwwwwwwwwwwwww', 'wwwwwwwwwwwwwwwwwwwwwwwwwww', 'wwwwwwwwwwbwwwwwwwbwwwwwwww', '.wwsdswwwsdswbdsdsdswkdsds.', 'ddsdsdsbsdsdsdsdsdsdsksdsds', 'dsdsdsdsdsdsdsdsdsdsdsksdsd', 'sssddssdsdsdsdsdsdsdsdsksss', 'dsdkdsdsdsdsdsdsdsdsdsddksd', 'ddsksdsdkkkdsdsdkkkdsdsddds', 'dsdddsdskodddsdskodddsdsdsd', 'sssksdsdkokdsssdkokdsssdsds', 'dsdddsdsdsdsdsdsdsdsdsdsdsd', 'sdsssdsdsdsdsksdsdsdsdsssks', 'dsdsdddsdddddsdkdsdsdsdsdsd', '.ssdsdsdsdsdsdsdsssdsdsdsds', '...........................', '.wwwwc.wwbb.www.wwcc.wwww..', '.dwww..wwwc.www.wwcc.www...', '..wwb..dwbd.wwc.dwc..www...', '..ww....wb..dw...wb..dwb...', '..dd....wb...w...wc...w....', '.............b.............'],
+  'nurikabe-B-2': ['....................d...........', '................................', '................................', '...dddwwwwwwwwwwwwwwwwwwwwd.....', '.dwwwwwwwwwwwwwwwwwwwwwwwwwwww..', 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.', 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww', 'cwwwbdwwwwwdswwwwbwwsbwwwwbwwww.', '.ddsdsdwwwdsddwsdsdsdswwksdsds..', 'sdsdsksdsdsdsdsdsdsdsssdsksdsss.', 'dsdsdsdsdsdkdsdsdsdsdsdsdsdsdsd.', 'sdsdsdsdsdkkkdsdsdkkkdsdsdkdsds.', 'dsdkdddsdkooksdsdddookdsdsdsdsds', 'sssdsdsdskkokssdsdkooksdsssdsss.', 'dsdsdsdsdskddsdsdsdkdsdsdsdsdsds', 'sssdsdsdsdsdskddkdsdsdsdsdsksds.', 'dddsd.dsdddsdsdsdddsdsds.dddddd.'],
+  'tofu-C': ['......................ggggg.....................', '.....................gggggggg...................', '...................dgggggggggg..................', '...................ggggkkkkgggg.................', '..................gggkggggkgggg.................', '...................gggkdgkggggg.................', '...................ggggkkggggg..................', '...................dgggkgggggd..................', '..............ooooooosggggggoooooooo............', '............wwokkkkkkkkkkkkkkkkkkkkkw...........', '..........dwwwkkkkkkkkkkkkkkkkkkkkdwwwd.........', '..........swwwkkkkkkkkkkkkkkdddkkkswwww.........', '........dsswwwwkkokkkkkkdokowwwwsssswwwww.......', '........wswwwwkkdwkkkkkdwwkkwwwsssssswwww.......', '........dwwwwwdwwwkkkkkdwwwwssssssssswwwww......', '.......swswwwwkwwwkkwwkdwwssssssssssswwwww......', '.......wdssswwwwwwkdswkdsssssssssssssswwww......', '.......wwssssswwwwkdwskdssssssssssssssswwwd.....', '.......ssssssswwwokwwwkwsssssssssssssswwwww.....', '.......sssssssswwdkdwwwwssssssssssssssswwww.....', '.....dwwssssssswkkkkswwwsssssssssssssssswww.....', '.....dwwwssssssskkkkswwwsssssssssssssssssww.....', '.....dwwwwsssssskkkkwwwwssssssssssssssssswws....', '......swwwwsssssskkdwwwwssssssssssssssssswww....', '.....dswwwwwsssswddwwwwwsssssssssssssssssssw....', '.....dwdwwwdwssswswwwwwsssssssssssssssssssss....', '.....wwwwwwwwwsssswwwwwsssssswowssssswoosssw....', '....wkwwddwwwwsssswwwwwsssssoowoossssoowosssws..', '....wwwwwwwwwwsssswwwwwssssssooosssssoooowsssw..', '....wwwwwwwwwsssssswwwssssssooooossssoooosssss..', '....wwwwwwdwwkssssswwwssssssooooossssoooosssss..', '....wwwwwwwwwwwwwsssssssssssssssssssssssssssss..', '..ddwwwwwwwwwwwwwwssssswssssssssssdsssssssssss..', '..wwsswdwwkwwdwwwwssssswwssssssssdwdssssssssss..', '..dsskdwdswwwwwwwwssssswwssssssswwwwssssssssss..', '..wsssssswkwwwwdwsssssssssssssssswsssssssssssssd', '.dwwdsssswdwwwsdsssswwssssssssssssssssssssssssss', 'dwwwwdsssdwdwssssdswwdsssssssssssssssssssssssdss', '.sssssssswdwsssssssswwssssssssssssssssssssssssss', '..sssssssdwssssdsssssssssssssssssssssds.sdsssd..', '..ddssdsdswsssssssssssssssssssssssssssd.dsssss..', '....sds....ssdsssssssssdsssssds.sdsds...........', '...............sdsdsdsdssss.....................', '................sdddsdsdsds.....................'],
+  'tofuMini-C': ['.....dddddd...', '.....wwwwww...', '..ddwwwwwwwww.', '..dsswwwwwwwww', '.dwsswwwwwwwww', '.wssswwwwwwwow', '.sssswwwowwoow', 'dsssswwwoowoow', 'dsssswwwodwwow', 'dwssswwwowwwsw', '..sssdsssssss.', '...sssssssss..', '...dssssss.d..'],
+  'tumbler-A-1': ['.ddpppppppppprprrr..', 'dppwppwppppppppppppd', 'ddpppppppppdpppppppd', 'drddd........ddd...d', 'rdd................r', 'drd...d.....dd.....r', 'rrd..doo....oo.....d', 'drd..doo....oo.....r', 'rkd..do.....do.....d', 'dr.................r', 'r..................d', 'd..................r', 'r..................r', 'dr.................r', 'r..................d', 'd..................r', 'r..................r', 'd..................r', 'rr.................d', 'd..................r', 'd.......ddd....dd..r', '..dddrdrdddddrdrddd.'],
+  'tumbler-A-2': ['................r............', '............d...rr...........', '............r.ddkrr..........', '.............dddd............', '.............dddwd.drr.......', '........rr..ddd.dpdkrr.......', '........rkdddd...dwpkr.......', '.........dddd.....dpdkdr.....', '......r.dddd.......dpdkrrr...', '....rrkdddd..oo.....dpdkrr...', '....rkddsd...ooo.....drrkr...', '.....ddp......d........rd....', '.dr.ddwd................rr.rr', 'dr..dpd..................rdkr', '..dddd...or...............dd.', '..dddd...oo...............dd.', '....spd...o...............rkr', '.r.dddsd.................r.dr', '.rr.rddsd...............r..rr', '.....ddpsd.............d.....', '....rkddssd...........rkrr...', '....rrkddddd.........r.rrr...', '.....rr.dkdd........r..rr....', '.........ddd.......dkr.......', '........rkdd......d.rr.......', '.......drr.rd....d...r.......', '............rd..d............', '...........rkd...r...........', '...........rr................'],
+  'tumbler-A-3': ['....dr...rr...rr...rr....', '....drd.drrr.drrd..rd....', '...ddddddddddddddddddd...', '.rrddddddwdpdpdpdddddd.r.', '.rrrdpppsdpppdpdsdskd..rr', '...ddpddkkkkkkkkkkkkkd...', '...dppddkkkkkkkkkkkkkd...', '..ddddddkkkkkkkkkkkkkr...', '.rrddddkkkkkkkkkkkkkkd.rr', '.rrpdddkkkkkkkkkkkkkkr.r.', '..rppddkkkkkkkkkkkkkkr...', '...pdddkkkkkkkkkkkkkkr...', '...pdddkkkkkkkkkkkkkkd...', '.drpdddkkkkkkkkkkkkkkr.r.', 'rrrdpddkoookkkkookkkkr.rr', '...dddkkoookkkkookkkkr.r.', '...pddkkdokkkkkookkkkd...', '...pddkkkkkkkkkkkkkkkr...', '.rrddddkdddddddddddddr.r.', '.rrddddppddddpppdpdddr.rd', '...dddpppdpwpdpppppds....', '.........................', '.....d...dr..............'],
+};
+Object.assign(FOE_SPRITES, K9_SPR); for (const id in K9_SPR) BOSS_FIT[id] = ['x', 0.5, 0, 1];   // (its drawing alone, the body under it unseen, as a komori's)
+// Drawn a sheet pixel a game pixel (pixel-perfect), no bigger than its body (what hurts): a sheet drawn bigger made smaller once, as the nearest sheet pixel both
+// ways (its shape kept), till its long side is its body's width and 5% more; never made bigger (that would make its pixels uneven)
+const K9_FIT = new Map(), k9Rows = (id, b) => {
+  const rows = FOE_SPRITES[id], n = Math.max(rows.length, rows[0].length), want = Math.round((2.1 * b.R) / PIX.base);
+  if (n <= want) return rows;
+  const key = id + ':' + want; let r = K9_FIT.get(key); if (r) return r;
+  const q = want / n, H = Math.max(1, Math.round(rows.length * q)), W = Math.max(1, Math.round(rows[0].length * q));
+  r = Array.from({ length: H }, (_, j) => Array.from({ length: W }, (_, i) => rows[Math.floor((j * rows.length) / H)][Math.floor((i * rows[0].length) / W)]).join(''));
+  if (GUIDE) r = pxClean(r); K9_FIT.set(key, r); return r;   // (made smaller: its new specks cleaned)
+};
+const k9Look = (e) => { const V = K9_V[e.type === 'tofuMini' ? 'tofu' : e.type];
+  if (e.type === 'tofu' || e.type === 'tofuMini') return e.type + '-' + V;
+  if (e.type === 'tumbler') {   // sitting or crouching: calm, stomp it; in its somersault (Foe.flip, from TUMBLE.air + 0.2 down) its key poses, edged in red:
+    // tilted, upside down, tilted the other way (8 a second; a sprite is never rotated, its pixels stay square)
+    if (!(e.flip > 0)) return 'tumbler-' + V + '-1';
+    const p = clamp((TUMBLE.air + 0.2 - e.flip) / TUMBLE.air, 0, 1); return 'tumbler-' + V + '-' + (p < 0.3 || p > 0.8 ? 2 : 3);
+  }
+  return 'nurikabe-' + V + '-' + (e.cs === 'down' ? 2 : 1);   // (landed: calm, stomp it; hanging, shaking, falling, rising: its sharp underside)
+};
+const UME_V = 'A';   // Ume's look (owner: Д124 «A», a smile, his leaf tilted)
+const UME_SPR = {   // Ume off research/variants/tokyo-ume-1-px.png (path A, scratchpad k9/cutume.py): an umeboshi, his white rim, his leaf on a stalk, his face; drawn
+  // over his soft body and squashing and stretching with it, as Mochi does (the object: a soft plum; Disney's squash and stretch)
+  'ume-A': ['....................gggg......', '..................ggggggggg...', '.................ggggg.gggg...', '.................ggggggggg....', '................ggkgggggg.....', '.................ggggggg......', '..............gg..............', '..............gg..............', '.......dwwwwwrgkrrwrwww.......', '.....dwwwwrrrrrkrrrrrwwwd.....', '....dwrrrrrrrrrrrrrrrrrrww....', '....wwrwwrrrrrrrrrrrrrrrrws...', '...wrrwwwwrrrrrrrrrrrrrrrrww..', '..dwrwwwwrrrrrrrrrrrrrrrrrrw..', '.dwrrwwwrrrrrrrrrrrrrrrrrrrww.', '.wwrrrrrrrrrrrrrrrrrrrrrrrrrw.', '.wwrrrrrrrrrrrrrrrrrrrrrrrrrw.', 'dwrrrrrrrrrrrrrrrrrrrrrrrrrrrw', 'wwrrrrrrrrrrrrrrrrrrrrrrrrrrrw', 'wwrrrrrrrrrrrrrrrrrrrrrrrrrrrw', 'wwrrrrrrrkrrrrrrrrrrrkrrrrrrrw', 'wwrrrrrrkwkrrrrrrrrrkwdrrrrrrw', 'wwrrrrrrkkrrrrrrrrrrkkrrrrrrrw', 'wwrrrrrrrrrrrrrrrkrrrrrrrrrrrw', 'wwrrrpprrrrrrkkkkrrrrrrppprrrw', 'wwrrrpprrrrrrrrrrrrrrrrppprrrw', 'dwrrrrrrrrrrrrrrrrrrrrrrrrrrrw', '.wwrrrrrrrrrrrrrrrrrrrrrrrrrw.', '..wrrrrrrrrrrrrrrrrrrrrrrrrrw.', '...wrrrrrrrrrrrrrrrrrrrrrrrw..', '...wwrrrrrrrrrrrrrrrrrrrrrwd..', '....wwrrrrrrrrrrrrrrrrrrrw....', '.....dwwwrrrrrrrrrrrrrrww.....', '.......wwwwwwwwwwwwwwww.......', '..........wwwwwwwwwwd.........'],
+};
+Object.assign(FOE_SPRITES, UME_SPR); for (const id in UME_SPR) BOSS_FIT[id] = ['x', 0.5, 0, 1];   // (a sheet pixel a game pixel, as the cube three: crisp, no warping
+// over his soft body, which squashes under him and bobs him; his foot on its foot)
+// The cluster rule in the midground too (owner, 2026-10-24: «Прогони все миры и все объекты в них по новому руководству», the pixel-art guide: «случайный
+// шум — отдельные точки … выглядит как грязная текстура»; a clean silhouette; protected details: eyes, key symbols): every picture cut from a sheet
+// (path A), once at load, loses its specks (pxClean): one inside a shape takes the shape's ink most round it; one off its edge goes (the silhouette clean). Kept: eyes and marks ('o' an eye's glow, 'k' a line or an eye, 'y' a coin or a light, 'r'
+// danger) and a cluster at a picture's side (a tiled band goes on in the next copy). ?guide=0 leaves them as cut, to compare
+const GUIDE = !/[?&]guide=0\b/.test(location.search);
+const PX_MIN = (() => { const q = new URLSearchParams(location.search).get('pxmin'); return q != null && q !== '' ? +q : 3; })();   // (the guide's spec:
+// minUnprotectedClusterArea 3: a cluster of 1 or 2 pixels is noise; ?pxmin=N another, to compare)
+const pxClean = (rows) => {   // each cluster of one ink (either tone, 8-connected) under PX_MIN pixels takes what is most round it: the shape's ink inside a
+  // shape, the clear off its edge; kept: eyes and marks ('o', 'k', 'y', 'r') and a cluster at a picture's left or right side
+  const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H), fill = [], ink = (c) => (c === 'd' ? 's' : c.toLowerCase());
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ch = g[y][x]; if (ch === '.' || seen[y * W + x]) continue;
+    const cells = [[x, y]], st = [[x, y]]; seen[y * W + x] = 1; let side = false;
+    while (st.length) { const [a, b] = st.pop(); if (a === 0 || a === W - 1) side = true;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[v * W + u] && ink(g[v][u]) === ink(ch)) { seen[v * W + u] = 1; st.push([u, v]); cells.push([u, v]); } } }
+    if (cells.length >= PX_MIN || side || 'okyr'.includes(ink(ch))) continue;
+    const own = new Set(cells.map(([a, b]) => b * W + a)), n = {};
+    for (const [a, b] of cells) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+      if (!(dx || dy) || own.has(v * W + u)) continue; const c = u >= 0 && u < W && v >= 0 && v < H ? rows[v][u] : '.'; n[c] = (n[c] || 0) + 1; }
+    let best = '.', most = -1; for (const k in n) if (n[k] > most || (n[k] === most && k !== '.')) { most = n[k]; best = k; }
+    fill.push(cells, best);
+  }
+  for (let k = 0; k < fill.length; k += 2) for (const [a, b] of fill[k]) g[b][a] = fill[k + 1];
+  return fill.length ? g.map((r) => r.join('')) : rows;
+};
+const pxWalk = (o) => {   // every array of ink rows (strings of one length) in a table, cleaned in place
+  if (!o || typeof o !== 'object') return o;
+  if (Array.isArray(o) && o.length > 1 && o.every((r) => typeof r === 'string') && o.every((r) => r.length === o[0].length) && o[0].length > 1) { const c = pxClean(o); if (c !== o) o.splice(0, o.length, ...c); return o; }
+  for (const k in o) { const v = o[k]; if (typeof v === 'object') o[k] = pxWalk(v); }
+  return o;
+};
+// Big areas as masses, not noise (the guide: «большие массы цвета, затем средние кластеры, затем редкие акценты»): a hazard's body under its front (its
+// sheet's grass, snow, embers dithered pixel by pixel) takes, pixel by pixel, the ink most of its 3 x 3 has; its front, its burst untouched; the tide's
+// curls are shapes already (kept)
+const pxVote = (rows, from) => {
+  const H = rows.length, W = rows[0].length; let g = rows.map((r) => [...r]);
+  for (let pass = 0; pass < 1; pass++) {
+    const o = g.map((r) => r.slice());
+    for (let y = from; y < H; y++) for (let x = 0; x < W; x++) {
+      const n = {}; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const v = y + dy, u = (x + dx + W) % W; if (v < 0 || v >= H) continue; const c = g[v][u] === '.' ? 'k' : g[v][u]; n[c] = (n[c] || 0) + (dx || dy ? 1 : 2); }
+      let best = g[y][x], most = -1; for (const k in n) if (n[k] > most) { most = n[k]; best = k; }
+      o[y][x] = best;
+    }
+    g = o;
+  }
+  return g.map((r) => r.join(''));
+};
+if (GUIDE) {
+  for (const k in HAZ_SPR) if (k !== 'tide') { const S = HAZ_SPR[k]; S.band = pxVote(S.band, Math.min(S.band.length, S.front + 3)); }
+  for (const T of [WALL_SPR, ICE_SPR, HOLD_SPR, VDOOR, VIL2, VDROP_SPR, VSLICK_SPR, HAZ_SPR, FOE_SPRITES]) pxWalk(T);   // (K9_SPR's and UME_SPR's arrays are FOE_SPRITES')
+  for (const id in FUJI_SPR) if (typeof FUJI_SPR[id] === 'string' && FUJI_SPR[id].includes('/')) FUJI_SPR[id] = pxClean(FUJI_SPR[id].split('/')).join('/');   // (its own form: rows by '/')
+}
+for (const id of [...Object.keys(K9_SPR), ...Object.keys(UME_SPR)]) LOOK_FACE[id] = () => true;   // (drawn crisp in the world by crispLook, not warped over the soft body)
+for (const id in FOE_SPRITES) if (!K9_SPR[id] && !UME_SPR[id]) { const fit = BOSS_FIT[id]; LOOK_FACE[id] = (d) => drawSprite(d, FOE_SPRITES[id], fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0, fit); }   // the forest's face right; a boss as its cell has it
+// A boss's drawing's width and height in world px at its full size, as drawSprite lays it (BOSS_FIT's whole scale, or fitted over its
+// body's shape): for the owner's 2:1 against the hero (2026-10-21), which its shrink as it loses hearts never goes under (Game.hitBoss).
+const bossSize = (bs) => {
+  const rows = bs.look && FOE_SPRITES[bs.look], fit = bs.look && BOSS_FIT[bs.look], b = bs.body;
+  if (!rows || !fit) return [2 * b.R, 2 * b.R];
+  const W = rows[0].length, H = rows.length, sh = b.s, ex = sh.ext || [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
+  const k = fit[3] ? (fit[3] * PIX.base) / b.R : 1.08 * Math.max((2 * ex[0]) / W, (2 * ex[1]) / H);   // (drawSprite's k: body units a sheet pixel)
+  return [W * k * b.R, H * k * b.R];
+};
 const gumWriteFace = Renderer.prototype.writeFace;
 // The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units
 // (its radius 1, y down).
@@ -3220,11 +3964,16 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     for (let side = -1; side <= 1; side += 2) dot(ex * side + lx, ey + ly, rx * 0.95, ry * 0.5, PAL.blue);
     dot(-0.52, -0.6, 0.13, 0.07, PAL.white);
   } else if (b.helmet === 'astro') { dot(-0.42, 0.02, 0.05, 0.13, PAL.blue); dot(0, 0.8, 0.56, 0.07, PAL.blue); dot(0, 0.9, 0.44, 0.06, PAL.orange); }   // a glint in its window, its neck ring
+  else if (b.helmet === 'umeLeaf') {   // Ume (UME; owner, 2026-10-24, У6 «Б»): an ume's leaf on a stalk on his crown, tilted
+    const tilt = (ux, uy, a, rx, ry, c) => { const ca = Math.cos(a), sa = Math.sin(a); frame(ux, uy, rx * ca, rx * sa, -ry * sa, ry * ca); put(c[0], c[1], c[2], 0); };
+    tilt(0.06, -1.02, 0.25, 0.06, 0.17, ink); tilt(0.36, -1.05, -0.35, 0.34, 0.14, ink); tilt(0.36, -1.05, -0.35, 0.28, 0.09, PAL.green);
+  }
 };
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {
   if (!gumInit.call(this)) return false;
-  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
+  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pRamp = program(this.gl, BG_VS, RAMP_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
+  try { this.pFeat = program(this.gl, FEAT_VS_PAL, FEAT_FS_PAL); } catch (err) { console.error(err); }   // (the sprites' palette snap a corner, not a fragment: FEAT_VS_PAL)
   this.darkBuf = new Float32Array(128);   // 32 lights (the Dark Forest's eyes and fences as well as the coins)
   this.target = null;
   if (this.low) this.makeTarget();
@@ -3250,6 +3999,11 @@ Renderer.prototype.makeTarget = function () {
   gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, t.color);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, t.stencil);
+  if (!t.scene) { t.scene = gl.createTexture(); t.sceneFb = gl.createFramebuffer(); }   // the drawn screen's copy for the dark's light by steps (RAMP_FS)
+  gl.bindTexture(gl.TEXTURE_2D, t.scene); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, lw, lh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, t.sceneFb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t.scene, 0);
+  gl.bindTexture(gl.TEXTURE_2D, null);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 };
@@ -3257,7 +4011,10 @@ Renderer.prototype.makeTarget = function () {
 // One frame of the scene: behind the bodies (wall coats, doors, portal, floor, ledges,
 // spikes, coins, items, drops), the bodies (shadow, cushion, face), in front (puffs,
 // fire, air-jump orbs). World → screen is a shift by uShake = shake − camera.
-Renderer.prototype.draw = function (g, alpha, dots, nDots) {
+// The helpers in draw are made again for each frame; V8 keeps their optimised code only while one of them lives, so a major GC between two frames
+// dropped it and they were all compiled again (perf, 2026-10-24: 10-20 compiles a GC). The last frame's are held till the next frame's are made.
+let drawKept = null;
+Renderer.prototype.draw = function (g, alpha) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
   this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.nSm = 0; this.route = 0;   // (nFar, nSt, nSm, route: the cinematic fork's 2.5D, see cine.js)
@@ -3266,21 +4023,35 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
   const box = (x0, y0, x1, y1, c, a, rad, type, p3) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, c, a, type || 5, hw, hh, type >= 7 ? p3 : rad); };
+  // A world's far view: its foot low on the screen, sinking a little as the climb goes on; on the main screen (Game.menuBackdrop) its foot on the floor Mochi
+  // stands on, so that it shows over and round him (owner: Д113 «А»; the low band is under the buttons there)
+  const farY = (cam, H) => (g.state === 'menu' ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
+  // Where each world's far view starts and ends among the features (pairs of this.nf): on the main screen, of all that is behind, only that is drawn,
+  // over its world's back with no walls, the menu's ink under the colours' row as before (owner, 2026-10-24: «Слишком шумно. Верни как было, оставь
+  // анимацию, а вместо градиента за моти используй фон локации»)
+  const menu = g.state === 'menu', farR = [];
+  const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
+    // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
+    const n = rows[0].length, R = vspRects(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows);   // (behind: no specks, the cluster rule)
+    for (let k = 0; k < R.length; k += 5) { const i = R[k], e = R[k + 1], j0 = R[k + 2], j1 = R[k + 3], ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = flip ? x + (n - e) * s : x + i * s;
+      box(u, y + j0 * s, u + (e - i) * s, y + j1 * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, 0); }
+  };
   const onGrid = (v) => Math.round(v / PIX.size) * PIX.size;   // (on the drawing grid: a picture's dot of 1.5 or 2.5 of its pixels, PIX.fit, leaves no hole)
   const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
-    const rows = ICONS[id], s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });   // (each edge
+    const rows = iconRows(id), s = PIX.size * k / (rows.x2 || 1), x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } }   // (a loop, not a callback made each call: see drawKept) (each edge
     // on the drawing grid)
   };
   const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
     // cosine (past a quarter turn its back, mirrored); no grey edge beside it (owner: «убери серый псевдообъем у бонусов»), and never thinner than `ICON_SPIN`
     // of its width (with its edge gone it shrank to a sliver of a pixel edge on, and blinked out: the tester's «анимация вращения … поломалась»)
-    const rows = ICONS[id], P = PIX.size, s = P * k, w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
+    const rows = iconRows(id), P = PIX.size, s = P * k / (rows.x2 || 1), w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
-    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } }
     if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
-      const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s) / P) * P;
+      const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s * (rows.x2 || 1)) / P) * P;   // (THICK of the 12×12's pixels, a finer picture's too)
       if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
+        const q = row[sn > 0 ? iL : iR]; if (q === 'w' || q === 's') return;   // (a white or grey end a tone darker is the grey edge the owner took off: QA, astro, grow, swarm)
         const bx = x0 + col(sn > 0 ? iL : iR + 1), dx = (sn > 0 ? -d : d) * (c < 0 ? -1 : 1);
         box(Math.min(bx, bx + dx), onGrid(y0 + j * s), Math.max(bx, bx + dx), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[row[sn > 0 ? iL : iR]]], 1.62, 0, 10, 0); });
     }
@@ -3291,7 +4062,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // on the frame, lights turning in the dark of the opening, sparks rising up past it.
   const door = (d, kind) => {
     if (th.fuji && kind !== 'exit') { hut(d, kind); return; }   // Mount Fuji's (see hut)
-    if (th.village && kind !== 'exit') { farmhouse(d, kind); return; }   // the Village's (see farmhouse)
+    if (th.village && kind !== 'exit') { (kind === 'trial' ? farmhouse : iyaDoor)(d, kind); return; }   // the Village's (see iyaDoor; a trial's, farmhouse)
     if (th.sea && kind !== 'exit') { const rt = this.route; if (CINE) this.route = 5; funaya(d, kind); this.route = rt; return; }   // the Sea's (see funaya; 2.5D: its boat bay
     // behind, the rest flat)
     if (th.skazka && kind !== 'exit') { const rt = this.route; if (CINE) this.route = 5; (kind === 'shop' ? izba : pech)(d); this.route = rt; return; }   // the Dark Forest's (see izba,
@@ -3329,51 +4100,60 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else if (s.kind === 'rubber') box(x0, s.y0, x1, s.y1, th.rubber, 1, 0, 8, 8);
     else {
       box(x0, s.y0, x1, s.y1, th.moss, 1, 0, 10, 0);
-      for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
+      if (th.rime) for (let y = s.y0 + 0.2 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.3 * R, k++) { const e = s.side === 1 ? 1 : -1, l = (k % 3 === 1 ? 0.34 : 0.22) * R, ex = s.side === 1 ? lv.l : lv.r;   // rime (Fuji's, owner d36 «А»: no green in the ice): crystals
+        F(ex + (e * l) / 2, y, 0, 0.1 * R, (-e * l) / 2, 0, th.moss, 1, 6, 0.1 * R, l / 2, 0.2 * R); if (k % 2) box(ex + e * 0.06 * R - PIX.size / 2, y - PIX.size / 2, ex + e * 0.06 * R + PIX.size / 2, y + PIX.size / 2, PAL.white, 1, 0, 10, 0); }   // out of its edge, a glint here and there
+      else for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
     }
-  }
-  if (lv.rail && seen(lv.rail.y - R, lv.rail.y + R)) {   // the Minecart's rail: a white line from wall to wall, ties under it
-    box(lv.l, lv.rail.y, lv.r, lv.rail.y + 2.5, th.lip, 1, 0);
-    for (let x = lv.l + 0.6 * R; x < lv.r; x += 1.3 * R) box(x - 1.5, lv.rail.y + 2.5, x + 1.5, lv.rail.y + 0.35 * R, th.wall, 1, 0);
   }
   for (const u of lv.runes) if (seen(u.y - R, u.y + R)) {   // a world's runes on the back wall (RUNE): a faint cloth, the rune knitted on it in the world's ink
     const h = 8 * PIX.base; box(u.x - h, u.y - h, u.x + h, u.y + h, th.wall, 0.16, 0, 10, 0); icon('rune' + u.ch, u.x, u.y, 1, PIX.keep, th.wall);   // (its size kept on a finer grid: PIX.keep)
   }
   if (lv.exit) door(lv.exit, 'exit');
+  // Fuji's sprites cut off its GPT sheets (FUJI_SPR: its props and doors)
+  const SPR_INK = { k: [PAL.black, 1], w: [PAL.gray, 1], g: [PAL.gray, 1.62], b: [PAL.blue, 1], o: [PAL.orange, 1], p: [PAL.purple, 1], a: [PAL.aqua, 1], G: [PAL.gray, 1], r: [PAL.orange, 1], y: [PAL.orange, 1] };
+  const DOOR_INK = { r: [PAL.red, LIT], y: [PAL.yellow, 1] };   // (a door's: its red the shop's mark, muted as a thing's (К6: bright red is danger's), its yellow a window's light)
+  const postId = (n) => {   // the station post with its numeral: n's rows made once (a level of no station keeps the sheet's 八)
+    const id = 'post' + n; if (FUJI_SPR[id] || !POST_NUM[n]) return FUJI_SPR[id] ? id : 'post';
+    const rows = FUJI_SPR.post.split('/').map((row) => [...row]), gl = POST_NUM[n].split('/');
+    for (let j = 0; j < 7; j++) for (let i = 0; i < 7; i++) rows[30 + j][7 + i] = gl[j][i] === '#' ? 'k' : 'o';
+    FUJI_SPR[id] = rows.map((r) => r.join('')).join('/'); return id;
+  };
+  const sprRows = (id) => FUJI_SPR[id] && (FUJI_SPR[id].rows || (FUJI_SPR[id] = { rows: FUJI_SPR[id].split('/') }).rows), sprW = (id) => (sprRows(id) ? sprRows(id)[0].length * PIX.base / lv.tile : 0);
+  const sprOps = (id) => {   // its boxes, once: a run of one ink a box; a run of two inks by turns (a dither) two boxes, the one ink flat under the other's
+    // checker (tone 4), so a dithered sprite costs a few boxes a row, not one a pixel
+    const S = FUJI_SPR[id]; if (S.ops) return S.ops; const rows = sprRows(id), ops = [];
+    rows.forEach((row, j) => { for (let i = 0; i < row.length;) {
+    const c = row[i]; if (c === '.') { i++; continue; }
+    const d = row[i + 1]; let e = i + 1;
+      if (d && d !== '.' && d !== c) { while (e < row.length && row[e] === (((e - i) & 1) ? d : c)) e++; if (e - i >= 4) { ops.push([i, e, j, d, 0], [i, e, j, c, 4]); i = e; continue; } e = i + 1; }
+      while (row[e] === c) e++; ops.push([i, e, j, c, 0]); i = e; } });
+    return (S.ops = ops);
+  };
+  const fspr = (id, x0, b, flip, sh, inks = SPR_INK) => {   // a cut sprite (FUJI_SPR), its foot on b, its near edge at x0 (flip: from a right wall, mirrored); sh(u): a row u px up shifted so far
+    const rows = sprRows(id); if (!rows) return; const Pk = PIX.base, h = rows.length;
+    for (const [i, e, j, c, tone] of sprOps(id)) {
+    const y = b - (h - j) * Pk, dx = sh ? sh(h - j) : 0, [ink, al] = inks[c] || SPR_INK[c] || SPR_INK.k, xa = flip ? x0 - e * Pk : x0 + i * Pk, xb = flip ? x0 - i * Pk : x0 + e * Pk;
+      box(onGrid(xa + dx), onGrid(y), onGrid(xb + dx), onGrid(y + Pk), ink, al, 0, 10, tone);
+    }
+  };
   // Mount Fuji's door into a shop or a stash (the owner's picks, research/variants/fuji-hut-1-px.png: "E and F, the shop"): a mountain hut built round the
   // doorway, 3.4 tiles out from the wall, its roof deep in snow. The stash's (E): its door framed purple and lit warm inside, a little stone lantern by it; the
   // shop's (F): a red noren hanging in its doorway, a face on it, and a lit window beside it. What is inside bobs in the doorway; sparks rise past it.
-  const hut = (d, kind) => {
+  const hut = (d, kind) => {   // (a real Fuji hut, stones on its roof, cut off its sheet: the shop's open, d58 A; the stash's shut for the winter, d59 D)
     const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple;
-    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), xa = Math.min(X(0), X(3.4)), xb = Math.max(X(0), X(3.4)), wy = sn(d.y0 + 0.3 * t), y1 = d.y1;
-    const dx = X(1.25), dw = 0.7 * t, top = sn(wy + 0.55 * t), x = dx, y = (top + y1) / 2;
-    F(dx, y, 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
-    box(xa, wy, xb, y1, th.block, 1, 0, 10, 2);   // its wooden front
-    for (let v = 0.45; v < (y1 - wy) / t; v += 0.45) box(xa, sn(wy + v * t), xb, sn(wy + v * t) + P, PAL.black, 1, 0, 10, 0);   // its boards
-    if (shop) {   // F: a roof sloping down away from the wall, snow along it
-      for (let i = 0; i <= 20; i++) { const u = i / 20, rx = X(-0.1 + u * 3.9), ry = sn(wy - 1.0 * t + u * 0.75 * t); box(rx - P, ry, rx + 2 * P, wy, th.block, 1, 0, 10, 0); box(rx - P, ry - sn(0.2 * t), rx + 2 * P, ry, PAL.gray, 1, 0, 10, 0); }
-    } else {   // E: a roof curving down both ways from a ridge, a finial, snow heaped on it
-      for (let i = 0; i <= 20; i++) { const u = i / 20, rx = X(-0.3 + u * 4.0), lift = 1 - Math.abs(2 * u - 1) ** 1.6, ry = sn(wy - (0.25 + 0.75 * lift) * t); box(rx - P, ry, rx + 2 * P, wy, th.block, 1, 0, 10, 0); box(rx - P, ry - sn(0.22 * t), rx + 2 * P, ry, PAL.gray, 1, 0, 10, 0); }
-      disc(X(1.7), sn(wy - 1.25 * t), 0.12 * t, PAL.gray, 1);
+    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), id = shop ? 'shop' : 'stash', rows = sprRows(id), [c0, c1, r0, r1] = FUJI_DOOR[id], Pk = PIX.base, hh = rows.length;
+    const W = rows[0].length, dcN = (c0 + c1 + 1) / 2, mir = dcN > W - dcN, dc = mir ? W - dcN : dcN;   // (its door kept near the wall, in the door's place: a hut
+    // whose door is past its middle drawn mirrored; one whose door is far out set into the wall, as Fuji's huts are built into the slope)
+    const dx = X(Math.min(1.6, 0.1 + (dc * Pk) / t)), flip = wl ? mir : !mir, x0 = sn(flip ? dx + dcN * Pk : dx - dcN * Pk), y1 = d.y1, top = y1 - (hh - (shop ? r1 + 1 : r0)) * Pk, wy = y1 - hh * Pk;
+    const dw = shop ? Math.max(0.35 * t, ((c1 - c0 + 1) / 2) * Pk) : 0.3 * t, x = dx, y = (top + y1) / 2;
+    F(dx, (top + y1) / 2, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
+    fspr(id, x0, y1, flip, null, DOOR_INK);
+    if (!shop) {   // the stash's door ajar: a dark gap, purple light down both its edges and over it
+      box(sn(dx - dw), sn(top), sn(dx + dw), y1, INK.dark, 1, 0, 10, 0);
+      for (const e of [-1, 1]) box(Math.min(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), sn(top), Math.max(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), y1, PAL.purple, 1, 0, 10, 0);
+      box(sn(dx - dw) - 2 * P, sn(top) - 2 * P, sn(dx + dw) + 2 * P, sn(top), PAL.purple, 1, 0, 10, 0);
     }
-    box(sn(dx - dw), top, sn(dx + dw), y1, INK.dark, 1, 0, 10, 0);   // the doorway
-    if (shop) {   // the noren: red, in three panels, a face on the middle one
-      box(sn(dx - dw), top, sn(dx + dw), sn(top + 0.75 * t), PAL.red, 1, 0, 10, 0);
-      for (const f of [-0.33, 0.33]) box(sn(dx + f * dw), sn(top + 0.2 * t), sn(dx + f * dw) + P, sn(top + 0.75 * t), PAL.black, 1, 0, 10, 0);
-      for (const e of [-1, 1]) box(sn(dx + e * 0.12 * t), sn(top + 0.25 * t), sn(dx + e * 0.12 * t) + P, sn(top + 0.25 * t) + 2 * P, PAL.black, 1, 0, 10, 0);
-      box(sn(dx - 0.12 * t), sn(top + 0.5 * t), sn(dx + 0.12 * t) + P, sn(top + 0.5 * t) + P, PAL.black, 1, 0, 10, 0);
-      const wx0 = Math.min(X(2.2), X(3.1)), wx1 = Math.max(X(2.2), X(3.1)), wy0 = sn(top + 0.2 * t), wy1 = sn(top + 1.1 * t);   // the lit window, its shoji's grid
-      F((wx0 + wx1) / 2, (wy0 + wy1) / 2, 0.7 * t, 0, 0, 0.6 * t, PAL.orange, 0.45, 1); box(wx0, wy0, wx1, wy1, PAL.orange, 1, 0, 10, 0);
-      for (let gx = wx0 + 0.3 * t; gx < wx1 - P; gx += 0.3 * t) box(sn(gx), wy0, sn(gx) + P, wy1, PAL.black, 1, 0, 10, 0); box(wx0, sn((wy0 + wy1) / 2), wx1, sn((wy0 + wy1) / 2) + P, PAL.black, 1, 0, 10, 0);
-    } else {   // its purple frame, the warm light inside, the little lantern by it
-      for (const [a0, b0, a1, b1] of [[dx - dw - 2 * P, top - 2 * P, dx + dw + 2 * P, top], [dx - dw - 2 * P, top, dx - dw, y1], [dx + dw, top, dx + dw + 2 * P, y1]]) box(sn(a0), sn(b0), sn(a1), sn(b1), PAL.purple, 1, 0, 10, 0);
-      F(dx, sn(y1 - 0.6 * t), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-      const lx = X(2.85), lb = y1;
-      box(sn(lx - 0.18 * t), sn(lb - 0.12 * t), sn(lx + 0.18 * t), lb, PAL.gray, 1, 0, 10, 0); box(sn(lx - 0.06 * t), sn(lb - 0.55 * t), sn(lx + 0.06 * t), sn(lb - 0.12 * t), PAL.gray, 1, 0, 10, 0);
-      box(sn(lx - 0.16 * t), sn(lb - 0.85 * t), sn(lx + 0.16 * t), sn(lb - 0.55 * t), PAL.gray, 1, 0, 10, 0); box(sn(lx - 0.08 * t), sn(lb - 0.78 * t), sn(lx + 0.08 * t), sn(lb - 0.62 * t), PAL.orange, 1, 0, 10, 0);
-      box(sn(lx - 0.28 * t), sn(lb - 0.97 * t), sn(lx + 0.28 * t), sn(lb - 0.85 * t), PAL.gray, 1, 0, 10, 0);
-    }
-    const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, ry = shop ? sn(top + 1.25 * t) : y, rr = dw;
+    const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, ry = shop ? sn((top + y1) / 2) : y, rr = shop ? Math.max(dw, 0.6 * t) : 0.42 * t;
     if (shop) { disc(x, ry + bob, rr * 0.42, INK.coinD, 1); disc(x, ry + bob, rr * 0.32, INK.coin, 1); disc(x - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
     else for (let k = 0; k < 3; k++) disc(x + (k - 1) * rr * 0.5, y + rr * 0.3 - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1);
     for (let k = 0; k < 6; k++) {
@@ -3398,7 +4178,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       bx(u0, v0 - px, u1, v0, th.block, 4);
     };
     const dx = X(1.25), dw = sn(0.7 * t), eave = shop ? 2.6 : 2.2, dh = shop ? 2.1 : 2.0, noren = shop ? 0.75 : 0.85;
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
     if (shop) {
       bx(0, 0, 3.9, eave, PAL.black);   // its front, dark between its posts
       for (const u of [0.3, 2.15, 3.72]) bx(u, 0, u + 0.18, eave, th.block, 4);   // wooden posts (E's, chequered), the beam over them
@@ -3429,7 +4209,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
     F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-    bx(0.55, dh - noren, 1.95, dh, c);   // the noren in three panels, a white crest on its middle one
+    bx(0.55, dh - noren, 1.95, dh, c, 0, shop ? LIT : 1);   // the noren in three panels, a white crest on its middle one (the shop's red muted: К6, bright red is danger's)
     for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.2, PAL.black);
     for (const [u, v] of [[1.25, dh - 0.22], [1.15, dh - 0.38], [1.35, dh - 0.38]]) bx(u - px, v - px, u + px, v + px, INK.white);
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
@@ -3437,6 +4217,26 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     else { const ry = Y(0.55); for (let k = 0; k < 3; k++) disc(dx + (k - 1) * rr * 0.5, ry - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
     for (let k = 0; k < 6; k++) {
       const u = (T * 0.45 + k / 6) % 1, q = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + q * 2 * dw), spy = y1 - u * (eave * t + 2.5 * R);
+      const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;
+      if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
+    }
+  };
+  // The Village's door from the Iya valley (Д91 «А», VDOOR): the shop a soba shop, the stash the cellar under a farmhouse, off their sheets; its doorway's mark
+  // where the old farmhouse had its door (1.25 tiles out from the wall); a glow breathing round it, what is inside bobbing in it, sparks rising past it
+  const iyaDoor = (d, kind) => {
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, c = shop ? PAL.red : PAL.purple, y1 = d.y1, q = PIX.base;
+    const S = VDOOR[shop ? 'shop' : 'stash'], n = S.rows[0].length, [c0, c1, r0, r1] = S.mark || [n >> 2, n >> 2, 0, 0];
+    const dx = sn((wl ? lv.l : lv.r) + (wl ? 1 : -1) * 1.25 * t), cm0 = (c0 + c1 + 1) / 2, mir = cm0 > n / 2, flip = wl ? mir : !mir;   // (a house whose door is past its
+    // middle drawn mirrored, so that its door is the nearer the wall and less of it in the wall, as Fuji's huts)
+    const cm = flip ? n - cm0 : cm0, x0 = sn(dx - cm * q), y0 = y1 - S.base * q;
+    const my = y0 + ((r0 + r1 + 1) / 2) * q, dw = sn(0.7 * t);
+    F(dx, my, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
+    vsp(S.rows, x0, y0, flip);
+    const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
+    if (shop) { const ry = sn(my); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
+    else { const ry = sn(y1 - 0.5 * t); for (let k = 0; k < 3; k++) disc(dx + (k - 1) * rr * 0.5, ry - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
+    for (let k = 0; k < 6; k++) {
+      const u = (T * 0.45 + k / 6) % 1, qq = ((Math.sin(k * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + qq * 2 * dw), spy = y1 - u * (S.base * q + 2.5 * R);
       const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = k & 1 ? INK.white : c;
       if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
     }
@@ -3449,7 +4249,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
     const W = 3.2, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
     for (const u of [0.3, 1.4, 2.5, W - 0.2]) bx(u, -1.7, u + 0.12, 0, th.block, 0, DIM);   // its boat bay under the ledge, behind: piles, the boat, the water
     bx(0.6, -1.25, 2.6, -0.95, PAL.gray, 0, DIM); bx(0.9, -1.45, 2.3, -1.25, PAL.gray, 0, DIM); for (const u of [0.2, 1.3, 2.4]) bx(u, -1.75, u + 0.8, -1.7, th.block, 0, DIM);
     bx(0, 0, W, eave, PAL.black); bx(0, 0, W, eave, th.block, 2); for (const u of [0.45, 2.05, W - 0.15]) bx(u, 0, u + 0.13, eave, th.block);   // its wooden front, dotted, its posts
@@ -3461,7 +4261,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     bx((W - 0.3) / 2, eave + 1.15, (W - 0.3) / 2 + 2 * px, eave + 1.45, PAL.gray);   // its ridge's end
     bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
     F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-    bx(0.55, dh - noren, 1.95, dh, c);   // the noren, its slits, its crest
+    bx(0.55, dh - noren, 1.95, dh, c, 0, shop ? LIT : 1);   // the noren, its slits, its crest (the shop's red muted: К6)
     for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.22, PAL.black);
     for (const [u, v] of [[1.25, dh - 0.24], [1.15, dh - 0.4], [1.35, dh - 0.4]]) bx(u - px, v - px, u + px, v + px, INK.white);
     const lan = (u, v) => { bx(u, v + 0.3, u + px, eave - 0.15, PAL.gray); bx(u - 0.15, v - 0.2, u + 0.17, v + 0.3, PAL.orange); bx(u - 0.15, v + 0.04, u + 0.17, v + 0.04 + px, PAL.black); F(X(u), Y(v + 0.05), 0.45 * t, 0, 0, 0.45 * t, PAL.orange, 0.4, 1); };   // a lantern off the eave, lit
@@ -3538,11 +4338,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // breathes round it.
   const mnShop = (d) => {
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.red, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
     bx(0.25, 0, 2.25, dh + 0.45, G, 1); bx(0.5, 0, 2.0, dh, INK.dark);   // its wooden front, the doorway dim inside
     for (const u of [0.3, 2.0]) bx(u, 0, u + 0.2, dh + 0.4, G, 3); bx(0.25, dh + 0.3, 2.25, dh + 0.45, G); bx(0.25, dh + 0.3, 2.25, dh + 0.3 + px, K);   // its posts, its lintel
     bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 3, 1);   // its flat roof (grey, its grain dotted: it was white, an alpha of 3, and read as a ledge's edge)
-    bx(0.5, dh - 0.6, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.6, u + px, dh, K);   // its noren, in strips,
+    bx(0.5, dh - 0.6, 2.0, dh, c, 0, LIT); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.6, u + px, dh, K);   // its noren, in strips, red muted (К6),
     F(dx, Y(dh - 0.3), 0.17 * t, 0, 0, 0.17 * t, PAL.white, 1, 4); bx(1.25 - px, dh - 0.45, 1.25 + px, dh - 0.15, PAL.white); bx(1.1, dh - 0.31, 1.4, dh - 0.29, PAL.white);   // a mark on it
     bx(2.3, 0.9, 2.75, 1.4, PAL.orange); bx(2.3, 1.15, 2.75, 1.15 + px, K); bx(2.52 - px / 2, 0.9, 2.52 + px / 2, 1.4, K); vlamps.push([X(2.52), Y(1.15), 0.4, 1.2]);   // a window lit (a light)
     mnLamp(X(3.0), Y(2.4), true, 0.85);   // a lamp
@@ -3550,7 +4350,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   const mnStash = (d) => {
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) it
     for (let i = 0; i < 9; i++) { const q = i / 8, u = q < 0.3 ? 0.32 : q > 0.7 ? 2.18 : 0.32 + ((q - 0.3) / 0.4) * 1.86, v = q < 0.3 ? (q / 0.3) * dh : q > 0.7 ? ((1 - q) / 0.3) * dh : dh; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1, 1.5); }   // its frame of stones (half dark)
     bx(0.5, 0, 2.0, dh, G, 3, 1.5); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber (half dark: it was pure white), iron bands
     for (const [u, v] of [[0.62, 0.3], [1.88, 0.3], [0.62, 1.6], [1.88, 1.6]]) bx(u, v, u + px, v + px, PAL.white);   // its studs
@@ -3600,10 +4400,21 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     skInside(d, 'stash', c, dx, dw, ht);
   };
   const pt = lv.portal;
-  if (pt && seen(pt.y - 3 * pt.r, pt.y + 3 * pt.r)) {
+  // The way out the brightest thing on the screen (К7 «А», the Level Design Book: the main exit lit most, side doors dimmer): the world beyond shows
+  // through it and its light falls down the shaft, seen from a jump below. The Village's sky, the Mine's lamp, Fuji's snow glinting, the Sea's sky, Tokyo's neon
+  const xl = th.village ? [PAL.blue, INK.white] : th.mines ? [PAL.orange, INK.white] : th.fuji ? [PAL.blue, INK.white] : th.sea ? [PAL.aqua, INK.white] : th.town ? [PAL.blue, PAL.purple] : null;
+  if (pt && seen(pt.y - 3 * pt.r, pt.y + (xl ? 6 : 3) * pt.r)) {
     const p = 1 + 0.08 * Math.sin(T * 4);
+    if (xl) F(pt.x, pt.y + 2.4 * pt.r, 1.25 * pt.r, 0, 0, 2.8 * pt.r, xl[0], 0.22 + 0.04 * Math.sin(T * 2), 1);   // its light falling down the shaft
     F(pt.x, pt.y, pt.r * 2.2 * p, 0, 0, pt.r * 2.2 * p, INK.white, 0.3, 1);
-    disc(pt.x, pt.y, pt.r, INK.dark, 1);   // a hole: the hero shows going into it
+    disc(pt.x, pt.y, pt.r, xl ? xl[0] : INK.dark, th.mines ? LIT : 1);   // a hole: the hero shows going into it (the world beyond in it; the Mine's a warm dark round its lamp)
+    if (xl) {
+      const r = pt.r, q = (T * 0.15) % 1;
+      if (th.village || th.sea) { const cx = pt.x - 0.45 * r + q * 0.75 * r; F(cx, pt.y + 0.2 * r, 0.42 * r, 0, 0, 0.16 * r, xl[1], 1, 0); F(cx + 0.25 * r, pt.y + 0.08 * r, 0.26 * r, 0, 0, 0.14 * r, xl[1], 1, 0); }   // a cloud drifting across the sky
+      else if (th.mines) { const fl = 0.85 + 0.15 * Math.sin(T * 11) * Math.sin(T * 7); F(pt.x, pt.y + 0.08 * r, 0.3 * r * fl, 0, 0, 0.5 * r * fl, PAL.orange, 1, 0); disc(pt.x, pt.y + 0.15 * r, 0.13 * r, xl[1], 1); }   // a lamp's flame flickering
+      else if (th.fuji) { const tw = Math.sin(T * 3) > 0.2; for (const [u, v] of [[-0.35, -0.2], [0.3, 0.25]]) disc(pt.x + u * r, pt.y + v * r, (tw ? 0.12 : 0.07) * r, xl[1], 1); }   // the snow glinting
+      else { const off = Math.sin(T * 13) * Math.sin(T * 3.1) > 0.9; if (!off) F(pt.x, pt.y, 0.62 * r, 0, 0, 0.62 * r, xl[1], 1, 4); }   // a neon ring, now and then flickering off
+    }
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }
@@ -3675,8 +4486,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const s = neonSign(lv, k);
       if (!s || s.y1 + 0.3 * t < top || s.y0 - 0.4 * t > bot) continue;
       const { word, pic, kk, gw, sw, left, x0, y0, y1 } = s, cx = x0 + sw / 2, on = lv.neonLit && lv.neonLit.get(k), lit = on != null && !((T - on) < 0.4 && Math.floor((T - on) * 20) % 3 === 1);
-      const ink = lit ? s.ink : PAL.gray, ia = lit ? 1 : DIM;
-      if (lit) { F(cx, (y0 + y1) / 2, 2.2 * sw, 0, 0, 0.62 * (y1 - y0) + 1.4 * sw, ink, 1.3, 1); F(cx, (y0 + y1) / 2, sw, 0, 0, 0.55 * (y1 - y0) + 0.5 * sw, ink, 2.4, 1); }   // its glow: a wide halo, and round the box a solid tone fading
+      const ink = lit ? s.ink : PAL.gray, ia = lit ? (ink === PAL.red ? LIT : 1) : DIM;   // (its red muted, К6 «А»: bright red is danger's)
+      if (lit) { F(cx, (y0 + y1) / 2, 2.2 * sw, 0, 0, 0.62 * (y1 - y0) + 1.4 * sw, ink, ia === LIT ? 1.15 : 1.3, 1); F(cx, (y0 + y1) / 2, sw, 0, 0, 0.55 * (y1 - y0) + 0.5 * sw, ink, ia === LIT ? LIT : 2.4, 1); }   // its glow: a wide halo, and round the box a solid tone fading
       for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, DIM, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, DIM, 0, 10, 0); }   // the arms, bolted on
       box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, DIM, 0, 10, 0);
       box(x0, y0, x0 + sw, y1, PAL.black, 1, 0, 10, 0);
@@ -3690,7 +4501,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is
       // for what you take), the slot under the front
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
-      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 3 * t, r.y0) || mod(Math.round(r.y0 / t), 3)) continue;
+      if (!seen(r.y0 - 3 * t, r.y0) || (kitThing(lv, r) || {}).kind !== 'vending') continue;   // (where: kitThing's, never twice in a row, the owner's rule)
       const w = 1.4 * t, h = 2.2 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w, y0 = r.y0 - h;
       if (atDoor(x0 - 0.15 * t, y0 - 0.2 * t, x0 + w + 0.15 * t, r.y0)) continue;
       const g0 = snap(wl ? x0 + 0.1 * w : x0 + 0.36 * w), g1 = snap(g0 + 0.54 * w), c0 = snap(wl ? x0 + 0.72 * w : x0 + 0.12 * w);
@@ -3707,8 +4518,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const r of lv.rects) {   // a bonsai at the wall end of some other steady ledges, as on a balcony (the owner's pick, research/variants/tokyo-bonsai-1.png F):
       // a shallow grey pot, an orange trunk in an S and its branches, pads of green needles shaded down to the right; not under an air conditioner, nor by a cage or Moti
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
-      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
-        || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))) continue;
+      if (!seen(r.y0 - 2 * t, r.y0) || (kitThing(lv, r) || {}).kind !== 'bonsai') continue;   // (where: kitThing's, never twice in a row, the owner's rule)
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
       if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
       const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
@@ -3751,6 +4561,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   const mnBatsAt = (r) => {   // under one ledge in five that has room under it: not a moving or crumbling one, nothing a tile and a half under it
     if (r.cap || r.move || r.crumble || r.spring || r.x1 - r.x0 < 2.4 * kitT) return false;
+    if (lv.komori) return false;   // none where the komori hang (lv.komori, UPwell's: set once a level where they can be laid): a harmless bat beside one that dives is a lie (Вр4)
     const h = (((Math.imul(Math.round(r.y0 / kitT) + 11, 0x9e3779b1) >>> 0) / 4294967296) * 5) | 0;
     return h === 2 && !lv.rects.some((q) => q !== r && !q.cap && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 < r.y1 + 1.5 * kitT && q.y1 > r.y1);
   };
@@ -3800,7 +4611,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   };
   const mnFar = () => {   // the mine far off: a tunnel going off into the dark, its frames smaller and smaller, rails running in, lamps glowing deep in it, a lamp on a post;
     // screen-fixed, low, at a quarter (DIM), the lamps lights (they show the frames round them)
-    const t = kitT, G = PAL.gray, cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+    const t = kitT, G = PAL.gray, cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
     const fb = (u0, v0, u1, v1, c = G, a = DIM) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, 0);
     const fl = (u0, v0, u1, v1, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), G, a, wd);
     const glow = (u, v) => { fb(u - 0.08, v - 0.1, u + 0.08, v + 0.1, PAL.orange, LIT); vlamps.push([U(u), Vv(v), 0.4, 1.4]); };
@@ -3824,15 +4635,16 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (CINE) this.route = 0;
     for (const r of lv.rects) if (!r.gone && seen(r.y1 - kitT, r.y1 + 2 * kitT) && mnBatsAt(r)) mnBats(r);   // bats asleep under some ledges
     if (CINE) this.route = 3;
-    mnFar();
+    farR.push(this.nf); mnFar(); farR.push(this.nf);
     this.route = rt0;
   }
   if (th.fuji && lv.kind === 'well') {   // Mount Fuji's kit (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png): each its size on the sheets (owner:
     // "twice as big: their size from the mockup"), and only where nothing laid stands in front of it. Far off, behind the shaft at a quarter (DIM, the owner's depth
-    // rule): Fuji itself (A), keeping its place on the screen as the climb goes on, and cranes flying across (A). In the midground (solid, no white, no yellow but a
-    // flame's core), on ledges' wall ends by turns of height: a kamakura with a snow rabbit by it (E, B), a snowman (D), a snow monkey in a hot tub (E by a stone
-    // lantern, or D under a little roof), persimmons drying on strings off a beam (E), a pine (C, its ropes off, or D in yukitsuri).
-    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
+    // rule): Fuji itself (A), keeping its place on the screen as the climb goes on, under the stars only (owner d42 «А», d43 «Б»: the cranes off,
+    // Hokkaido's, not Fuji's). In the midground (solid, no white, no yellow but a
+    // light's core), on ledges' wall ends by turns of height, true to the real mountain (owner 2026-10-23/24, his letters; FUJI_SPR): a tent
+    // with a snow rabbit by it, a snowman (D), a serow or a fox, the pilgrims' stone monuments, persimmons drying on strings off a beam (E), a bare larch.
+    const t = kitT, P = kitP;
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
     const clear = (x0, y0, x1, y1) => !atDoor(x0, y0, x1, y1) && !lv.rects.some((q) => !q.gone && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
     const rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork, the rule book: far off behind, the kamakura flat, the props small with
@@ -3840,53 +4652,80 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
-    {   // Fuji far off (A): a cone of blue, its flat top and its snow grey down its ridges, two clouds; low on the screen, sinking a little as the climb goes on
-      const cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
+    farR.push(this.nf);
+    {   // Fuji far off: a cone of blue, its ridges uneven, its snow grey down them in tongues; a long bank of cloud across its waist in a living shape (the owner's
+      // pick, 2026-10-23, d33 C; his rule: «для природных фонов и элементов в игровом мире используй более биологическую форму», his picture's clouds: an outline
+      // of uneven round bumps, no straight runs, no symmetry, holes of the dark in it, ragged strands of checker trailing off). Low on the screen, sinking a little
+      // as the climb goes on
+      // (К12 «А»: the climb's compass, the mountain nearer level by level, its foot and the lake at the bottom, its summit close by the ninth: k 1 to 2.6)
+      const menu = g.state === 'menu', k = menu ? 1.8 : 1 + 1.6 * clamp((lv.stage || 0) / 8, 0, 1), lake = !menu && lv.stage % 2 === 1 && lv.stage < 4;   // (on the main screen
+      // bigger, its foot on Mochi's floor: its summit over his head, Д113 «А»)   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi; low down only)
+      const shore = snap(farY(cam, H)), cx = (lv.l + lv.r) / 2, ht = 5.5 * t * k, hw = 6.6 * t * k, foot = lake || menu ? shore : shore + (k - 1) * 4 * t;   // (nearer: bigger, its foot down past the keys; over the lake it stands on the far shore)   // (over the lake: the mountain on its far
+      // shore, its reflection under it down to the keys)
+      const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return Math.min((lv.r - lv.l) / 2, w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side))); };   // its flanks, uneven (between the walls)
       for (let y = 0; y < ht; y += 2 * P) {
-        const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25), yy = foot - ht + y, sn = 0.3 + 0.07 * Math.sin(y / P * 0.9);
-        box(snap(cx - w), yy, snap(cx + w), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
-        if (u < sn) box(snap(cx - w * Math.min(1, (sn - u) * 9)), yy, snap(cx + w * Math.min(1, (sn - u) * 9)), yy + 2 * P, PAL.gray, DIM, 0, 10, 0);
+        const u = y / ht, yy = foot - ht + y, wl = half(y, -1), wr = half(y, 1), sn = 0.3 + 0.06 * Math.sin(y / P * 0.9) + 0.05 * Math.sin(y / P * 2.3);
+        box(snap(cx - wl), yy, snap(cx + wr), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
+        if (u < sn) { const q = Math.min(1, (sn - u) * 9); box(snap(cx - wl * q * (1 - 0.2 * Math.abs(Math.sin(y / P * 0.61)))), yy, snap(cx + wr * q * (1 - 0.2 * Math.abs(Math.sin(y / P * 0.47 + 1)))), yy + 2 * P, PAL.gray, DIM, 0, 10, 0); }   // its snow in tongues
       }
-      for (const [dx, dy, w] of [[-4.6, -4.4, 2.8], [4.4, -5.0, 2.3]]) box(snap(cx + (dx - w / 2) * t), snap(foot + dy * t), snap(cx + (dx + w / 2) * t), snap(foot + dy * t) + 3 * P, PAL.gray, DIM, 0, 10, 0);
+      const hs = (n) => ((Math.sin(n * 12.9898 + 4.1) * 43758.5453) % 1 + 1) % 1;
+      const inCone = (x, y) => { const yy = y - (foot - ht); return yy >= 0 && yy < ht && x > cx - half(yy, -1) && x < cx + half(yy, 1); };
+      const hole = (x, y, r) => F(snap(x), snap(y), r, 0, 0, 0.8 * r, inCone(x, y) ? PAL.blue : PAL.black, inCone(x, y) ? DIM : 1, 0);   // a hole: the dark behind (or Fuji's blue)
+      const strand = (x, y, dx, dy, n, s) => { for (let j = 0; j < n; j++) { const l = (0.35 + 0.65 * hs(s + j)) * t * (1 - 0.6 * j / n), x0 = x + j * dx * t, y0 = y + j * dy * t, sx = Math.sign(dx || 1), o = (hs(s + j * 2.3) - 0.5) * 0.3 * t;   // ragged checker, a band
+          box(snap(Math.min(x0 + o, x0 + o + sx * l)), snap(y0), snap(Math.max(x0 + o, x0 + o + sx * l)), snap(y0) + 3 * P, PAL.gray, DIM, 0, 10, 4); } };
+      const cloud = (x, y, w, h, s, holes = 2, dome = 0.5) => {   // bumps of uneven size all round it, bigger over, smaller under, notches cut in its edge, holes in it
+        const nt = Math.max(4, Math.round(w / (0.32 * t))), nb = Math.max(3, Math.round(w / (0.42 * t))), bump = (bx, by, r) => F(snap(bx), snap(by), r, 0, 0, r * (0.85 + 0.25 * hs(bx * 0.13 + s)), PAL.gray, DIM, 0);
+        F(snap(x), snap(y - 0.1 * h), w * 0.42, 0, 0, 0.3 * h, PAL.gray, DIM, 0);   // its body
+        for (let i = 0; i < nt; i++) { const q = (i + 0.5) / nt, r = (0.16 + 0.3 * hs(s + i * 3.1)) * h * (0.6 + 0.7 * Math.sin(Math.PI * q)); bump(x - w / 2 + q * w + (hs(s + i) - 0.5) * 0.15 * t, y - 0.12 * h - dome * h * Math.sin(Math.PI * q) * (0.5 + 0.5 * hs(s + i * 7)), r); }   // over
+        for (let i = 0; i < nb; i++) { const q = (i + 0.5) / nb, r = (0.1 + 0.16 * hs(s + i * 4.7 + 1)) * h; bump(x - w * 0.45 + q * w * 0.9 + (hs(s + i * 2) - 0.5) * 0.2 * t, y + 0.12 * h - 0.06 * h * hs(s + i * 9), r); }   // under, smaller
+        for (let i = 0; i < 2; i++) { const e = i ? 1 : -1; F(snap(x + e * w * (0.18 + 0.12 * hs(s + 70 + i))), snap(y + 0.3 * h), (0.12 + 0.08 * hs(s + 80 + i)) * t, 0, 0, 0.1 * t, inCone(x + e * w * 0.2, y + 0.3 * h) ? PAL.blue : PAL.black, inCone(x + e * w * 0.2, y + 0.3 * h) ? DIM : 1, 0); }   // notches under it
+        for (let i = 0; i < holes; i++) hole(x - w / 3 + (i + 0.5) / holes * (w * 0.66) + (hs(s + 40 + i) - 0.5) * 0.3 * t, y - (0.1 + 0.3 * hs(s + 50 + i)) * h, (0.07 + 0.08 * hs(s + 60 + i)) * t);
+      };
+      const U = (u) => cx + u * t, V = (v) => foot - v * t;
+      if (!lake) { cloud(U(0.2), V(2.6 * k), 9.5 * t, 0.75 * t, 5, 5, 0.3); strand(U(-4.6), V(2.4 * k), -0.3, 0.02, 6, 11); strand(U(5.0), V(2.4 * k), 0.3, 0.02, 6, 12); }   // the bank, its strands off both ends
+      const top0 = foot - ht;   // the summit
+      const lens = (x, y, w, h, s, c = PAL.gray, a = DIM) => {   // a kasagumo's lens: a dome over a flat underside, its rim a little uneven (a living shape, d32)
+        for (let yy = 0; yy < h; yy += P) { const q = 1 - yy / h, hw2 = w * Math.sqrt(Math.max(0, 1 - q * q)) * (0.94 + 0.08 * hs(s + yy / P)); box(snap(x - hw2), snap(y - yy), snap(x + hw2), snap(y - yy) + P, c, a, 0, 10, 0); }
+      };
+      lens(cx, top0 - 0.5 * t, 2.1 * t * (1 + 0.3 * (k - 1)), 0.42 * t, 31);   // the kasagumo, a cap of cloud floating over the summit (d40 «Б», d60 A)
+      if (lake) {   // Lake Kawaguchi (d61 B): its far shore with the town's windows lit and a grove of bare trees at the right, the mountain upside down in the
+        // still water under it, broken by ripples, each window's light and each tree down the water
+        const lit = (x, y, w = 2) => { box(snap(x), snap(y), snap(x) + w * P, snap(y) + P, PAL.orange, LIT, 0, 10, 0); box(snap(x), snap(y) + 2 * P, snap(x) + w * P, snap(y) + 3 * P, PAL.orange, 1.35, 0, 10, 0); box(snap(x), snap(y) + 5 * P, snap(x) + P, snap(y) + 6 * P, PAL.orange, 1.2, 0, 10, 0); };   // (and its light down the water)
+        box(lv.l, shore - P, lv.r, shore, PAL.gray, DIM, 0, 10, 0);   // the far shore's line
+        for (let y = 0, j = 0; y < 0.62 * ht; y += P, j++) {   // the mountain in the water, upside down: every row, a ripple a tone fainter every other, rows broken here and there
+          const yy = shore + P + y, src = ht - y / 0.62, wl = half(src, -1) * (1 - 0.05 * hs(70 + j)), wr = half(src, 1) * (1 - 0.05 * hs(90 + j)), cut = j % 3 === 1 && hs(110 + j) < 0.5 ? (hs(120 + j) - 0.5) * 1.6 * wl : null;
+          const ink = src / ht < 0.32 ? PAL.gray : PAL.blue, al = j % 2 ? 1.08 : 1.16;
+          if (cut == null) box(snap(cx - wl), yy, snap(cx + wr), yy + P, ink, al, 0, 10, 0);
+          else { box(snap(cx - wl), yy, snap(cx + cut - 0.25 * t), yy + P, ink, al, 0, 10, 0); box(snap(cx + cut + 0.25 * t), yy, snap(cx + wr), yy + P, ink, al, 0, 10, 0); }
+        }
+        const tree = (x, h, s, refl) => {   // a bare tree on the shore, its twigs, faint; refl: its reflection too
+          box(snap(x), snap(shore - h * t), snap(x) + P, shore, PAL.gray, DIM, 0, 10, 0);
+          for (let i = 0; i < 3; i++) { const v = (0.45 + 0.18 * i) * h, e = i % 2 ? 1 : -1, l = (0.25 + 0.2 * hs(s + i)) * t; line(snap(x), snap(shore - v * t), snap(x + e * l), snap(shore - v * t - 0.5 * l), PAL.gray, DIM, 1); }
+          if (refl) box(snap(x), shore + P, snap(x) + P, snap(shore + 0.7 * h * t), PAL.gray, 1.12, 0, 10, 0);
+        };
+        const town = (u0, u1, y, n, s) => { for (let i = 0; i < n; i++) { const x = cx + (u0 + (u1 - u0) * hs(s + i)) * t; lit(x, y - (hs(s + 50 + i) < 0.3 ? 2 * P : 0)); } };
+        town(-6.4, 4.0, shore - 2 * P, 10, 220); for (const [u, h] of [[4.8, 1.0], [5.5, 1.3], [6.2, 0.9]]) tree(cx + u * t, h, u * 7, true);
+      }
     }
-    const csh = CINE ? 0.55 * cam : 0;   // (2.5D: the cranes on a plane of their own, far: 0.45 of the climb)
-    for (let k = Math.floor((top - csh) / (18 * t)) - 1; k * 18 * t + csh < bot; k++) {   // a pair of cranes (A) crossing the shaft, slowly, by turns of height either way
-      const dir = mod(k, 2) ? 1 : -1, span = lv.r - lv.l + 8 * t, x = lv.l - 4 * t + mod(T * 0.9 * t + k * 7.3 * t, span), y = (k * 18 + 9) * t + csh;
-      if (y < top - 2 * t || y > bot) continue;
-      for (const [ox, oy] of [[0, 0], [-2.6, 1.3]]) { const fx = dir > 0 ? x + ox * t : lv.r + lv.l - x - ox * t, fr = Math.floor(T * 2.4 + ox) % 2 ? 'craneUp' : 'craneDown';
-        const rows = CRITTER[fr + (dir > 0 ? '' : 'L')], Pk = PIX.base, x0 = snap(fx - rows[0].length * Pk / 2), y0 = snap(y + oy * t);
-        rows.forEach((row, j) => { for (let i = 0; i < row.length;) { if (row[i] === '.') { i++; continue; } let e = i + 1; while (row[e] === '#') e++; box(onGrid(x0 + i * Pk), onGrid(y0 + j * Pk), onGrid(x0 + e * Pk), onGrid(y0 + (j + 1) * Pk), PAL.gray, DIM, 0, 10, 0); i = e; } }); }
-    }
-    const steam = (x, y, k, s) => { for (let i = 0; i < 3; i++) { const u = (T * 0.25 + i / 3 + k * 0.37) % 1; F(snap(x + Math.sin(T * 1.3 + i * 2 + k) * 0.2 * s * t), snap(y - u * 1.5 * s * t), (0.2 + 0.16 * u) * s * t, 0, 0, (0.2 + 0.16 * u) * s * t, PAL.gray, 0.35 * (1 - u), 1); } };
-    const lantern = (x, b, s) => {   // a little stone lantern, its window lit (the Cave's toro, smaller)
-      const X = (u) => snap(x + u * s * t), Y = (v) => snap(b - v * s * t);
-      box(X(-0.16), Y(0.1), X(0.16), b, PAL.gray, 1, 0, 10, 0); box(X(-0.05), Y(0.45), X(0.05), Y(0.1), PAL.gray, 1, 0, 10, 0);
-      box(X(-0.14), Y(0.72), X(0.14), Y(0.45), PAL.gray, 1, 0, 10, 0); box(X(-0.07), Y(0.66), X(0.07), Y(0.52), PAL.orange, 1, 0, 10, 0);
-      box(X(-0.24), Y(0.82), X(0.24), Y(0.72), PAL.gray, 1, 0, 10, 0); disc(x, Y(0.86), 0.05 * s * t, PAL.gray, 1);
-    };
+    farR.push(this.nf);
     for (const r of lv.rects) {
       if (!seen(r.y0 - 6 * t, r.y0) || !steady(r, 2.4)) continue;
-      const k = mod(Math.round(r.y0 / t), 6), wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
+      const kk = kitThing(lv, r); if (!kk) continue;   // (which thing: kitThing's, never the one next under it, the owner's rule)
+      const k = kk.kind, wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
       const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);
-      if (k === 0 && w >= 4 * t && room(0, 3.8, 3.4)) {   // a kamakura (E): a dome of snow bricks 3.5 tiles across, its doorway lit by a candle, holly on top
-        L(0); const kx = X(1.9), rx = 1.75 * t, ry = 1.6 * t;   // (flat: a way in, and its glow stays behind its candle)
-        F(kx, b, rx, 0, 0, ry, PAL.gray, 1, 0);
-        for (const v of [0.4, 0.8, 1.2]) { const hw = rx * Math.sqrt(Math.max(0, 1 - (v * t / ry) ** 2)); box(snap(kx - hw), snap(b - v * t), snap(kx + hw), snap(b - v * t) + P, PAL.black, 1, 0, 10, 0);
-          for (let j = -4; j <= 4; j++) { const jx = snap(kx + (j + (Math.round(v / 0.4) % 2 ? 0.5 : 0)) * 0.5 * t); if (Math.abs(jx - kx) < hw - 2 * P) box(jx, snap(b - v * t), jx + P, snap(b - (v - 0.4) * t), PAL.black, 1, 0, 10, 0); } }
-        F(kx, snap(b - 0.5 * t), 0.9 * t, 0, 0, 0.75 * t, PAL.orange, 0.5, 1);
-        box(snap(kx - 0.45 * t), snap(b - 0.85 * t), snap(kx + 0.45 * t), b, PAL.black, 1, 0, 10, 0); disc(kx, snap(b - 0.85 * t), 0.45 * t, PAL.black, 1);
-        F(kx, snap(b - 0.5 * t), 0.5 * t, 0, 0, 0.7 * t, PAL.orange, 0.85, 1);
-        box(snap(kx) - P, snap(b - 0.3 * t), snap(kx) + 2 * P, b, PAL.gray, 1, 0, 10, 0); disc(snap(kx) + P / 2, snap(b - 0.4 * t), 0.09 * t, PAL.orange, 1); box(snap(kx), snap(b - 0.44 * t), snap(kx) + P, snap(b - 0.38 * t), PAL.yellow, 1, 0, 10, 0);
-        for (const e of [-1, 1]) box(Math.min(snap(kx + e * 0.08 * t), snap(kx + e * 0.34 * t)), snap(b - ry - 0.14 * t), Math.max(snap(kx + e * 0.08 * t), snap(kx + e * 0.34 * t)), snap(b - ry + 0.02 * t), PAL.green, 1, 0, 10, 0);
-        for (const e of [-1, 1]) box(snap(kx + e * 0.06 * t) - P, snap(b - ry - 0.1 * t) - P, snap(kx + e * 0.06 * t) + 2 * P, snap(b - ry - 0.1 * t) + 2 * P, PAL.orange, 1, 0, 10, 0);
-        if (w >= 5.6 * t && room(3.8, 5.3, 2.2)) {   // the snow rabbit (B): an egg of snow, leaf ears, berry eyes
+      if (k === 'tent') {   // a mountaineer's tent (d53 B; the owner's d38: the kamakura goes, a tent, lit warm with no flame),
+        // its snow rabbit by it (B, its ears of snow now: d37 «А»)
+        L(0); const id = 'tent', wd = sprW(id); F(X(0.3 + wd / 2), snap(b - 0.7 * t), 1.5 * t, 0, 0, 0.9 * t, PAL.orange, 0.22 + 0.05 * Math.sin(T * 2.2 + b), 1);   // (flat: thin lines
+        // all round it; the warm light breathing behind its door)
+        fspr(id, X(0.3), b, !wl);
+        if (w >= 6.2 * t && room(4.7, 6.2, 2.2)) {
           L(4);
-          const ux = X(4.55), uh = 1.4 * t;
+          const ux = X(5.45), uh = 1.4 * t;
           F(ux, snap(b - 0.45 * uh), 0.62 * t, 0, 0, 0.55 * uh, PAL.gray, 1, 0);
-          for (const e of [-1, 1]) for (let j = 0; j < 5; j++) box(snap(ux + e * (0.12 + 0.05 * j) * t), snap(b - uh - (0.1 + 0.1 * j) * t), snap(ux + e * (0.12 + 0.05 * j) * t) + 3 * P, snap(b - uh - (0.1 + 0.1 * j) * t) + 3 * P, PAL.green, 1, 0, 10, 0);
+          for (const e of [-1, 1]) for (let j = 0; j < 5; j++) box(snap(ux + e * (0.12 + 0.05 * j) * t), snap(b - uh - (0.1 + 0.1 * j) * t), snap(ux + e * (0.12 + 0.05 * j) * t) + 3 * P, snap(b - uh - (0.1 + 0.1 * j) * t) + 3 * P, PAL.gray, 1, 0, 10, 0);
           for (const e of [-1, 1]) box(snap(ux + e * 0.22 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.22 * t) + 2 * P, snap(b - 0.62 * uh) + 3 * P, PAL.orange, 1, 0, 10, 0);
         }
-      } else if (k === 1 && room(0, 2.2, 2.9)) {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
+      } else if (k === 'snowman') {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
         L(4); const sw = CINE ? cinePoke(g, lv, r, 'snowman', Math.min(X(0.3), X(1.9)), b - 2.8 * t, Math.max(X(0.3), X(1.9)), b) : 0, SH = (v) => (sw ? snap(sw * v * t) : 0);   // (poked: he
         // sways, his bucket the most)
         const sx = X(1.1);
@@ -3894,24 +4733,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(snap(sx - 0.42 * t) + SH(2.6), snap(b - 2.2 * t), snap(sx + 0.42 * t) + SH(2.6), snap(b - 2.06 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx - 0.32 * t) + SH(2.9), snap(b - 2.72 * t), snap(sx + 0.32 * t) + SH(2.9), snap(b - 2.2 * t), PAL.purple, 1, 0, 10, 0);
         for (const e of [-1, 1]) box(snap(sx + e * 0.2 * t) - P + SH(1.8), snap(b - 1.86 * t), snap(sx + e * 0.2 * t) + 2 * P + SH(1.8), snap(b - 1.72 * t), PAL.black, 1, 0, 10, 0);
         box(snap(sx - 0.48 * t) + SH(1.24), snap(b - 1.32 * t), snap(sx + 0.48 * t) + SH(1.24), snap(b - 1.16 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx + 0.08 * t) + SH(1.0), snap(b - 1.16 * t), snap(sx + 0.26 * t) + SH(1.0), snap(b - 0.72 * t), PAL.purple, 1, 0, 10, 0);
-      } else if (k === 2 && w >= 3.4 * t && room(0, 3.2, 3.2)) {   // a snow monkey in a hot tub, steam rising
-        const roof = ((Math.round(r.y0 / t) * 7) & 1) === 1, tx = X(roof ? 1.5 : 2.1), hy = snap(b - 1.3 * t);
-        L(4); if (!roof) lantern(X(0.5), b, 2);
-        L(0); steam(tx - 0.6 * t, hy - 0.6 * t, 1, 2); steam(tx + 0.7 * t, hy - 0.4 * t, 2, 2); L(4);
-        disc(tx, hy, 0.62 * t, PAL.gray, 1);
-        for (const [dx, dy] of [[-0.62, -0.2], [0.62, -0.2], [-0.42, -0.5], [0.42, -0.5], [0, -0.62], [-0.2, -0.6], [0.2, -0.6]]) box(snap(tx + dx * t) - P, snap(hy + dy * t) - P, snap(tx + dx * t) + P, snap(hy + dy * t) + P, PAL.gray, 1, 0, 10, 0);   // its fluffy head
-        disc(tx, snap(hy + 0.08 * t), 0.4 * t, PAL.orange, 1);
-        for (const e of [-1, 1]) box(snap(tx + e * 0.18 * t) - P, snap(hy), snap(tx + e * 0.18 * t) + 2 * P, snap(hy) + P, PAL.black, 1, 0, 10, 0);   // eyes closed
-        box(snap(tx) - P, snap(hy + 0.24 * t), snap(tx) + P, snap(hy + 0.24 * t) + P, PAL.black, 1, 0, 10, 0);
-        box(snap(tx - 0.95 * t), snap(b - 0.72 * t), snap(tx + 0.95 * t), snap(b - 0.62 * t), PAL.blue, 1, 0, 10, 0);   // the water
-        if (!roof) box(snap(tx - 0.62 * t), snap(b - 0.86 * t), snap(tx + 0.62 * t), snap(b - 0.68 * t), PAL.purple, 1, 0, 10, 0);   // E's towel round its shoulders
-        box(snap(tx - 0.95 * t), snap(b - 0.62 * t), snap(tx + 0.95 * t), b, PAL.orange, 1, 0, 10, 0); box(snap(tx - 0.95 * t), snap(b - 0.62 * t), snap(tx + 0.95 * t), snap(b - 0.62 * t) + P, PAL.black, 1, 0, 10, 0);
-        for (let x = tx - 0.7 * t; x < tx + 0.8 * t; x += 0.3 * t) box(snap(x), snap(b - 0.55 * t), snap(x) + P, b, PAL.black, 1, 0, 10, 0);   // the tub's staves
-        if (roof) {   // D: a little roof over it, snow on it
-          for (let i = 0; i <= 14; i++) { const u = i / 14; for (const e of [-1, 1]) { const rx = snap(tx + e * u * 1.2 * t), ry = snap(hy - 1.0 * t + u * 0.7 * t); box(rx, ry, rx + 2 * P, ry + 2 * P, PAL.blue, 1, 0, 10, 0); } }
-          box(snap(tx - 0.7 * t), snap(hy - 1.25 * t), snap(tx + 0.7 * t), snap(hy - 0.92 * t), PAL.gray, 1, 0, 10, 0);
-        }
-      } else if (k === 4 && w >= 3.4 * t && room(0.3, 3.5, 4.3)) {   // persimmons drying (E): strings off a beam on a knee brace, purple ties and tassels
+      } else if (k === 'serow' || k === 'fox') {   // a serow or a fox (d54 E; d46 «Г»: Fuji's own beasts, the Nagano monkey gone), never twice in a row (kitThing)
+        L(4); fspr(k, X(0.3), b, !wl);
+      } else if (k === 'stelae') {   // the Fuji-ko pilgrims' stone monuments (d55 F; d48 «Б»), their rope grey
+        L(4); fspr('stelae', X(0.3), b, !wl);
+      } else if (k === 'persimmons') {   // persimmons drying (E): strings off a beam on a knee brace, purple ties and tassels
         const by = snap(b - 4.1 * t);
         L(4); box(Math.min(X(0), X(3.3)), by, Math.max(X(0), X(3.3)), by + snap(0.2 * t), PAL.gray, 1, 0, 10, 0); L(0); brace(wx, d, by + snap(0.2 * t), snap(0.8 * t), 2 * P, PAL.gray);   // (the beam
         // and the fruit small; the brace, the strings, the ties and the tassels flat)
@@ -3920,15 +4746,24 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           for (let j = 0; j < 4; j++) { const fy = snap(by + (0.7 + 0.5 * j) * t); L(4); disc(sx + P / 2, fy, 0.2 * t, PAL.orange, 1); L(0); box(sx - P, fy - snap(0.24 * t), sx + 2 * P, fy - snap(0.16 * t), PAL.green, 1, 0, 10, 0); }
           for (const e of [-1, 0, 1]) rod(sx, snap(b - 1.4 * t), sx + e * 0.14 * t, snap(b - 1.12 * t), PAL.purple);   // its tassel
         }
-      } else if (k === 5 && w >= 3.6 * t && room(0, 4.0, 5.2)) {   // a pine: C (a grey trunk, its ropes off) or D (an orange one in yukitsuri)
-        const ropes = ((Math.round(r.y0 / t) * 7) & 1) === 1, cx = X(1.9), Y = (v) => b - v * t, SW = CINE ? cinePoke(g, lv, r, 'pine', Math.min(X(0.6), X(3.2)), b - 4.4 * t, Math.max(X(0.6), X(3.2)), b) : 0;
-        const PX = (u, v = 0) => cx + d * u * t + (SW ? snap(SW * v * t) : 0);   // (poked, it sways, its top the most, and sheds snow)
-        const trunk = (q) => [PX(0.36 * Math.sin(q * Math.PI * 1.6) - 0.1, 3.8 * q), Y(3.8 * q)];
-        L(4); for (let q = 0; q <= 1; q += P / (3.8 * t)) { const [x, y] = trunk(q); disc(x, y, (0.26 - 0.14 * q) * t, ropes ? PAL.orange : PAL.gray, 1); }
-        const pads = [[0, 4.0, 0.84], [-1.0, 3.1, 0.72], [1.0, 3.2, 0.76], [0.9, 2.0, 0.72], [-0.84, 2.1, 0.6]];
-        for (const [u, v, rx] of pads) { F(PX(u, v), Y(v) - 0.1 * t, rx * t, 0, 0, 0.32 * t, PAL.gray, 1, 0); F(PX(u, v), Y(v) + 0.06 * t, rx * t, 0, 0, 0.26 * t, PAL.green, 1, 9, 0); }
-        if (ropes) { const tx = PX(0, 5.1), ty = Y(5.1); box(snap(tx) - P, snap(ty), snap(tx) + 2 * P, snap(Y(4.0)), PAL.orange, 1, 0, 10, 0);
-          L(0); for (const [u, v, rx] of pads) line(tx, ty, PX(u + Math.sign(u || 1) * rx * 0.9, v), Y(v), PAL.gray, 1, 1); }   // (its ropes flat, a feature each)
+      } else if (k === 'larch') {   // a bare larch of the tree line, bent by the wind, snow on its boughs (d56 E; d49 «Б»: no green)
+        const id = 'larch', SW = CINE ? cinePoke(g, lv, r, 'pine', Math.min(X(0.2), X(4.6)), b - 4.7 * t, Math.max(X(0.2), X(4.6)), b) : 0;   // (poked, it sways, its top the most)
+        L(0); fspr(id, X(0.2), b, !wl, SW ? (u) => snap(SW * u * kitP / t * t) : null);   // (flat: its boughs thin)
+      }
+    }
+    if (lv.rc && lv.portal) {   // the trail's station post on the last ledge under the way out (d57 E; d47 «Б»: level n is station n,
+      // the tenth the summit), at its free end, clear of what stands at its wall end. (A campaign's level only.)
+      if (lv.fujiPost === undefined) lv.fujiPost = lv.rects.filter((q) => !(q.gone || q.cap || q.plank || q.move || q.crumble || q.spring || q.key || q.cage || q.slick) && q.x1 - q.x0 >= 1.8 * t
+        && q.y0 > lv.portal.y && q.y0 < lv.portal.y + 16 * t).sort((p, q) => p.y0 - q.y0)[0] || null;   // (the last ledge, most often the end's own floating in the shaft)
+      const q = lv.fujiPost, id = postId(lv.stage + 1);
+      if (q && seen(q.y0 - 4.6 * t, q.y0)) {   // (at an end away from a wall and clear of its coins; never mirrored: its kanji read)
+        const wd = sprW(id) * t, free = (x) => !lv.coins.some((c) => c.x > x - 0.6 * t && c.x < x + wd + 0.6 * t && c.y < q.y0 && c.y > q.y0 - 4.6 * t), xl = snap(q.x0 + 0.4 * t), xr = snap(q.x1 - 0.4 * t - wd);
+        if (lv.fujiPostU === undefined) {   // its place, once (a Level field, as fujiPost; a share of its ledge, so a rescale keeps it): from an end away from a wall
+        // inward till no coin is by it
+          const xs = []; for (let k = 0; xr - k * 0.5 * t >= xl; k++) { if (q.x1 < lv.r - 1) xs.push(xr - k * 0.5 * t); if (q.x0 > lv.l + 1) xs.push(xl + k * 0.5 * t); }
+          lv.fujiPostU = ((xs.find(free) ?? (q.x1 >= lv.r - 1 ? xl : xr)) - q.x0) / (q.x1 - q.x0);
+        }
+        L(4); fspr(id, snap(q.x0 + lv.fujiPostU * (q.x1 - q.x0)), q.y0, false);
       }
     }
     this.route = rt0;
@@ -3945,11 +4780,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (i % 2) line(wh.cx + c * wh.rad, wh.cy + s2 * wh.rad, wh.cx + c * (wh.rad + 0.55 * t), wh.cy + s2 * (wh.rad + 0.55 * t), th.plank, DIM, 4); }
     disc(wh.cx, wh.cy, 0.45 * t, th.plank, DIM); disc(wh.cx, wh.cy, 0.2 * t, PAL.gray, DIM);
     const fx = wh.cx + dir * 0.6 * wh.rad, wx = dir > 0 ? lv.r : lv.l, fy = wh.cy - wh.rad - 1.3 * t, fall = wh.cy - 0.6 * wh.rad;
-    box(snap(Math.min(wx, fx)), snap(fy), snap(Math.max(wx, fx)), snap(fy) + 3 * kitP, th.plank, DIM, 0, 10, 0);   // the flume
-    for (let y = fy + 3 * kitP + ((T * 90) % (0.6 * t)); y < fall; y += 0.6 * t) box(snap(fx - kitP), snap(y), snap(fx + kitP), snap(Math.min(fall, y + 0.35 * t)), PAL.blue, DIM, 0, 10, 0);
+    box(snap(Math.min(wx, fx)), snap(fy), snap(Math.max(wx, fx)), snap(fy) + 3 * kitP, th.plank, DIM, 0, 10, 0);   // the flume; its water in discrete states (the guide: 4-8 a second), here three steps down a dash's beat, eight a second
+    for (let y = fy + 3 * kitP + ((Math.floor(T * 8) % 3) * 0.2 * t); y < fall; y += 0.6 * t) box(snap(fx - kitP), snap(y), snap(fx + kitP), snap(Math.min(fall, y + 0.35 * t)), PAL.blue, DIM, 0, 10, 0);
   }
-  if (th.sea) for (const r of lv.rects) if (r.plank && r.move && !r.move.wheel && seen(r.y1, r.y1 + kitT)) {   // a Sea raft's stream across the shaft under it, its ripples going by, behind (DEPTH)
-    const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + ((T * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0);
+  if (th.sea) for (const r of lv.rects) if (r.plank && r.move && !r.move.wheel && seen(r.y1, r.y1 + kitT)) {   // a Sea raft's stream across the shaft under it, its ripples going by, behind (DEPTH), in steps six a second (the guide's water)
+    const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + (((Math.floor(T * 6) / 6) * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0);
   }
   if (th.sea && lv.kind === 'well') {   // the Sea's props (the owner's picks, research/variants/sea-*-game.png, 2026-10-20): on ledges, by kitThing, a lighthouse
     // (E), nets drying with glass floats (A), a gull crying out on a mooring post (D), octopus pots wrapped in a net (C), the big-catch flags (E). In the
@@ -3957,9 +4792,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const t = kitT, P = kitP, px = P / t, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'], rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic
     // fork, the rule book: the sea far off behind; the props small, their thin parts flat)
     L(3);
+    farR.push(this.nf);
     {   // the sea far off (the owner's picks, the wave sheet's B and the far sheet's F, a level each in turn): screen-fixed, low on the screen and sinking a
       // little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
-      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+      const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
       const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
       const tri = (u, v0, hw, h, c) => { const hd = (h * t) / 2; F(U(u), Vv(v0) - hd, hw * t, 0, 0, hd, c, DIM, 6, hw * t, hd, 2 * hw * t); };   // a triangle: a pine's tier, a roof
@@ -3976,6 +4812,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (lv.stage % 2 === 0) { stilts(-7.2, 3, 0.6, true); for (const [u, s] of [[-6.3, 1.1], [-3.4, 1.0]]) pine(u, 2.1, s); boat(3.6, 0.7, 1.4, [[0.6, 0.9]]); }   // stilt houses lit, pines behind them, a boat (B)
       else { isle(-7.8, -3.4, 0.7, 0.6, [[-6.8, 1.0], [-5.0, 0.9]]); isle(3.8, 7.8, 0.7, 0.6, [[5.2, 0.9], [6.8, 1.0]]); torii(0.4, 0.7, 1.4); boat(-2.4, 0.4, 0.6, [[0.3, 0.5]]); boat(3.0, 0.35, 0.8, [[0.4, 0.7]]); }   // a torii in the water between two islands, boats (F)
     }
+    farR.push(this.nf);
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
       if (!p || !PROPS.includes(p.kind)) continue;
@@ -4060,9 +4897,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const rt0 = this.route;   // (the cinematic fork, the rule book: the forest far off behind, all of it, the moon, its eyes, Koschei's oak and chest; the fence small, its
     // skulls' eyes flat)
     if (CINE) this.route = 3;
+    farR.push(this.nf);
     {   // the forest far off (F): spruces, a dead tree with eyes in it, the moon, mist; screen-fixed, low on the screen and sinking a little as the climb goes on;
       // at a quarter (DIM), the moon brighter (a light: it shows through the dark, the crooked treetops black against it), the eyes LIT
-      const ar = lv.kind === 'boss', cx = (lv.l + lv.r) / 2, foot = snap(ar ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);   // (Koschei's arena: on its floor)
+      const ar = lv.kind === 'boss', cx = (lv.l + lv.r) / 2, foot = snap(ar ? lv.floor : farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);   // (Koschei's arena: on its floor)
       const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
       const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
       const fl = (u0, v0, u1, v1, c, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), c, a, wd);
@@ -4073,14 +4911,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         let x0 = u, y0 = v; for (let i = 1; i <= 4; i++) { const x1 = u + 0.15 * s * Math.sin(i * 1.7 + n), y1 = v + (h * i) / 4; fl(x0, y0, x1, y1, G, DIM, Math.max(1, 4 - i)); x0 = x1; y0 = y1; }
         for (const [q, du, dv] of [[0.4, -1.1, 0.6], [0.55, 1.0, 0.75], [0.75, -0.7, 0.55], [0.9, 0.6, 0.6]]) { const bu = u + 0.15 * s * Math.sin(q * 4 * 1.7 + n), bv = v + h * q;
           fl(bu, bv, bu + du * s, bv + dv * s, G, DIM, 2); fl(bu + du * s, bv + dv * s, bu + du * s * 1.35, bv + dv * s * 1.1, G, DIM, 1); fl(bu + du * s, bv + dv * s, bu + du * s * 1.1, bv + dv * s * 1.6, G, DIM, 1); } };
-      const mu = ar ? -3.8 : 3.8, mv = ar ? (lv.floor - cam - 0.24 * H) / t : 5.0;   // (in the arena high on the left, over the planks)
+      const mu = ar ? -3.8 : 3.8, mv = ar ? (lv.floor - cam - 0.13 * H) / t : 5.0, mr = ar ? 1.0 : 1.5;   // (in the arena high on the left, small and up under the HUD: off the fight, owner 2026-10-23 «убери лишние визуальные элементы»)
       if (ar) skOak(U, Vv);   // Koschei's oak, under the moon on the left of his arena
-      fe(mu, mv, 1.5, 1.5, G, LIT); vlamps.push([U(mu), Vv(mv), 1.5 * 1.05, 1.5 * 1.6]);   // the moon, a light in the dark
+      fe(mu, mv, mr, mr, G, LIT); vlamps.push([U(mu), Vv(mv), mr * 1.05, mr * 1.6]);   // the moon, a light in the dark
       row(-7.4, -3.0, 1.2, 0.3, [3.0, 3.8, 3.2]); dead(5.8, 0.3, 4.8, 1.0, 6); fe(5.9, 2.8, 0.32, 0.42, K, 1);   // a dead tree, a hollow in it,
       for (const e of [-0.12, 0.12]) fb(5.9 + e, 2.85, 5.9 + e + 2 * px, 2.85 + 2 * px, PAL.orange, LIT); vlamps.push([U(5.9), Vv(2.85), 0.15, 0.45]);   // eyes glowing in it
       row(-1.6, 4.2, 1.15, 0.3, [2.8, 3.6, 3.0, 3.8]);
       for (let i = 0; i < 6; i++) { const v = 0.1 + 0.22 * i, u0 = -7.5 + ((i * 29) % 7) * 0.6; fb(u0, v, u0 + 2.4 + (i % 3) * 0.8, v + px, G); fb(u0 + 4.2, v, u0 + 6.0, v + px, G); }   // mist over the swamp
     }
+    farR.push(this.nf);
     for (const r of lv.kind === 'well' ? lv.rects : []) {   // Baba Yaga's fence on a ledge (E): broken stakes, a fallen one across them, a long pole leaning out over the shaft with a skull on its end whose
       // sockets glow the nearer the hero comes, their cores looking at him
       const p = !r.gone && seen(r.y0 - 4 * t, r.y0) && kitThing(lv, r);
@@ -4115,6 +4954,25 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     this.route = rt0;
   }
+  if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.village) {   // the Village's stash room: the cellar under a farmhouse (Д97 «А», Д110
+    // «C»'s layout), as a few big flat shapes at a quarter on a quiet black (owner: «Фоны в подарочных комнатах выглядят грязно: предметы не читаются, пиксели
+    // лезут в глаза, выглядит как грязь»; its sheet was dark dithered mush): two posts and the beam over them, braces; three shelves on the back wall, jars on the
+    // top one, sacks on the middle, a crate of the stash's purple and a sack on the low one; the ladder up to the hatch, lit warm over it. No white, no dither
+    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32;
+    const bx = (u0, v0, u1, v1, c, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
+    const el = (u, v, ru, rv, c, a = LT) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
+    bx(0.6, 0, 1.3, 20.6, PAL.orange); bx(14.7, 0, 15.4, 20.6, PAL.orange); bx(0, 20.6, 16, 21.2, PAL.orange);   // its posts and the beam
+    line(X(1.3), Y(18.4), X(3.4), Y(20.6), PAL.orange, WD, 3); line(X(14.7), Y(18.4), X(12.6), Y(20.6), PAL.orange, WD, 3);   // braces
+    for (const [v, kind] of [[15, 'jar'], [10.5, 'sack'], [6, 'low']]) {   // the shelves, each on two brackets, what is on it
+      bx(2.4, v - 0.28, 10.4, v, PAL.orange); for (const u of [3, 9.6]) bx(u, v - 1.0, u + 0.3, v - 0.28, PAL.orange);
+      if (kind === 'jar') for (const u of [3.6, 5.4, 7.2, 9.0]) { el(u, v + 0.62, 0.62, 0.62, PAL.orange); bx(u - 0.32, v + 1.22, u + 0.32, v + 1.42, PAL.orange, WD); }   // jars, lids
+      else if (kind === 'sack') for (const u of [4.2, 6.4, 8.6]) { el(u, v + 0.75, 0.82, 0.75, PAL.gray); bx(u - 0.18, v + 1.45, u + 0.18, v + 1.85, PAL.gray); }   // sacks tied at the neck
+      else { bx(3.0, v, 6.4, v + 1.5, PAL.orange); bx(3.1, v + 1.5, 6.3, v + 1.85, PAL.purple, LT); el(8.4, v + 0.8, 1.0, 0.8, PAL.gray); }   // a crate of the stash's, a sack
+    }
+    for (const u of [11.8, 13.2]) bx(u, 0, u + 0.25, 20.6, PAL.orange);   // the ladder up to the hatch
+    for (let v = 1; v < 20.5; v += 1.2) bx(11.8, v, 13.45, v + 0.22, PAL.orange);
+    F(X(12.6), Y(20.9), 1.4 * t, 0, 0, 0.5 * t, PAL.orange, 0.3, 1); bx(11.6, 20.6, 13.6, 21.2, PAL.orange, 1.7);   // the hatch over it, lit warm
+  }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter
     // (DIM): the countryside far off (F), its forest of cedars and bamboo purple, a farmhouse, a torii and terraces orange, keeping its place low on the screen; a
@@ -4123,9 +4981,22 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     // a stone lantern and a branch of sakura out of the wall (D), koinobori flying off a pole (D). Nothing covers a door.
     const t = kitT, P = kitP, px = P / t, mod = (k, n) => ((k % n) + n) % n;
     const sp = lv.rc && lv.rc.sparse, few = (list, keep) => (sp ? list.filter((q, i) => keep.includes(i)) : list);   // a `sparse` level's: less of it (owner: «E»)
+    farR.push(this.nf);
     {   // the countryside far off (F), low on the screen and sinking a little as the climb goes on
-      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
+      const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, tn = 0) => box(U(u0), V(v1), U(u1), V(v0), c, DIM, 0, 10, tn);
+      const FV = window.__far === 99 ? null : VFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 2];   // (Д86 «А», Д111 «А»: by level; a level of no
+      // campaign: the farmhouses; window.__far 99: the old view, to count against)
+      if (FV) { const q = 2 * PIX.base, n = FV[0].length; vsp(FV, snap(cx - (n * q) / 2), snap(foot - FV.length * q), false, DIM, q); }
+      if (FV && lv.rc && (lv.stage || 0) <= 2) {   // the gorge's morning mist over it on 1-1…1-3 (Д112 «А»): its sheet's band laid across the shaft, every other copy
+        // mirrored, drifting slowly downstream, cut at the walls
+        const q = 2 * PIX.base, n = VMIST[0].length, bw = n * q, off = (((T * 0.05 * t) % (2 * bw)) + 2 * bw) % (2 * bw), y = snap(foot - VMIST.length * q);
+        for (let k = 0, x = lv.l - off; x < lv.r; k++, x += bw) {
+          const c0 = Math.max(0, Math.ceil((lv.l - x) / q)), c1 = Math.min(n, Math.floor((lv.r - x) / q));
+          if (c1 > c0) vsp(vspCut(k % 2 ? VMIST_M : VMIST, c0, c1, k % 2 ? 'mistM' : 'mist'), snap(x + c0 * q), y, false, DIM, q);
+        }
+      }
+      else {
       for (const [u0, u1, v] of few([[-2.6, 7.9, 0.3], [-1.8, 7.2, 0.85], [-1.0, 6.4, 1.4], [-0.2, 5.4, 1.95]], [0, 1])) fb(u0, v, u1, v + px, PAL.orange);   // terraces
       for (const [u, h] of few([[-7.55, 6.2], [-7.15, 5.4], [-6.6, 6.6], [-6.2, 4.9]], [])) fb(u, 0, u + px, h, PAL.purple);   // bamboo
       for (const [u, h] of few([[-5.3, 4.6], [-4.3, 3.6], [-3.2, 4.2], [1.4, 3.9], [2.6, 4.8], [5.9, 4.4], [7.0, 3.5]], [1, 4, 6])) {   // cedars: a trunk, three tiers
@@ -4136,7 +5007,9 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       for (const [u0, u1, v0, v1] of [[-2.0, 0.8, 2.8, 3.1], [-1.75, 0.55, 3.1, 3.4], [-1.45, 0.25, 3.4, 3.7]]) fb(u0, v0, u1, v1, PAL.orange);   // its thatch
       for (const u of [3.7, 4.55]) fb(u, 0.9, u + 2 * px, 2.7, PAL.orange);   // a torii: its posts, its beams, their ends turned up
       fb(3.35, 2.7, 4.95, 2.9, PAL.orange); fb(3.55, 2.35, 4.75, 2.45, PAL.orange); fb(3.25, 2.85, 3.4, 3.0, PAL.orange); fb(4.9, 2.85, 5.05, 3.0, PAL.orange);
+      }
     }
+    farR.push(this.nf);
     for (const side of [-1, 1]) {   // a bamboo grove up each wall (E): two stalks in segments, a node between, sprays of three leaves off the inner one
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), seg = 2.2 * t;
       for (const [d, w, ph] of few([[0.3, 3, 0], [1.15, 2, 0.8]], [0])) {
@@ -4158,6 +5031,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its top the most; see cinePoke)
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => { const q = SW((v0 + v1) / 2); box(Math.min(X(u0), X(u1)) + q, Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)) + q, Y(Math.min(v0, v1)), c, a, 0, 10, tn); };   // by tiles out from the wall and up from the ledge
       const el = (u, v, ru, rv, c) => { const xu = X(u) + SW(v); if (CINE && CINE.on('vol')) { F(xu + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(xu - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(xu - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(xu, Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume, swaying)
+      if (p.kind === 'sakura' || p.kind === 'beast' || p.kind === 'kaya' || p.kind === 'statue' || p.kind === 'koinobori') {   // the Iya valley's, off their sheets (VIL2, round 2)
+        const q = PIX.base, at = (S, dx) => { const n = S.rows[0].length, x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q); vsp(S.rows, x, snap(b - S.base * q), !wl); };
+        if (p.kind === 'sakura') { const S = vil2('cherry'); at(S, S.dx); }   // a mountain cherry (Д94 «А»)
+        else if (p.kind === 'beast') at(vil2('beast')[p.a || ['macaque', 'deer', 'boar'][((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) >>> 9) % 3]], Math.round((0.6 * t) / q));   // one of the three (Д90 «В»)
+        else if (p.kind === 'kaya') at(vil2('kaya'), Math.round((0.4 * t) / q));   // kaya stacks (Д87 «В»)
+        else if (p.kind === 'statue') { const S = vil2('statue'), n = S.rows[0].length, ex = wl ? r.x1 : r.x0; vsp(S.rows, wl ? snap(ex - S.end * q) : snap(ex - (n - S.end) * q), snap(b - S.base * q), !wl); }   // at the ledge's end (Д93 «А»)
+        else {   // koinobori on a rope across the shaft over the ledge (Д89 «А»), sagging, faint; its carps along it, swaying
+          const S = vil2('rope'), Wd = lv.r - lv.l, yr = b - 4.8 * t, sag = 0.5 * t, ry = (x) => snap(yr + sag * (1 - Math.pow((2 * (x - lv.l)) / Wd - 1, 2)));
+          for (let x = lv.l; x < lv.r; x += P) box(snap(x), ry(x), snap(x) + P, ry(x) + P, PAL.gray, DIM, 0, 10, 0);
+          S.carps.forEach((c, i) => { const n = c.rows[0].length, cx = lv.l + (0.06 + 0.88 * c.u) * Wd, sw = Math.round(Math.sin(T * 2.2 + i * 1.3)) * q; vsp(c.rows, snap(cx - (n * q) / 2) + sw, ry(cx) + snap(c.hang * q)); });
+        }
+        continue;
+      }
       if (p.kind === 'sakura') {   // a sakura in full bloom (C): its gnarled trunk grey (C's dark grey), its branches, clouds of blossom, petals falling
         const bark = 1.5;   // a grey half the way from the black: C's trunk was dark
         bx(0.95, 0, 1.55, 0.22, PAL.gray, 0, bark); bx(1.05, 0.22, 1.45, 1.1, PAL.gray, 0, bark); bx(1.12, 1.1, 1.5, 1.75, PAL.gray, 0, bark); bx(1.22, 1.75, 1.55, 2.25, PAL.gray, 0, bark); bx(1.2, 0.35, 1.2 + px, 1.5, PAL.black);
@@ -4182,10 +5068,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         // (the task: its lantern dark till the hero comes near, then lit for good, flickering on, a ring of light going out from it, its glow as the neon's;
         // its light red, Inari's vermilion: orange was lost on the Village's orange earth, owner: «зажигай святилище красным светом, иначе плохой контраст»)
         const on = lv.tended.get(r), lit = on != null && !((T - on) < 0.4 && Math.floor((T - on) * 20) % 3 === 1), lx = X(0.63), ly = Y(1.3);
-        if (lit) { F(lx, ly, 1.6 * t, 0, 0, 1.3 * t, PAL.red, 1.3, 1); F(lx, ly, 0.55 * t, 0, 0, 0.5 * t, PAL.red, 2.4, 1); vlamps.push([lx, ly]); }   // its glow under it: a wide halo, a solid tone round it
+        if (lit) { F(lx, ly, 1.6 * t, 0, 0, 1.3 * t, PAL.red, 1.15, 1); F(lx, ly, 0.55 * t, 0, 0, 0.5 * t, PAL.red, LIT, 1); vlamps.push([lx, ly]); }   // its glow under it: a wide halo, a solid tone round it
         bx(0.3, 0, 0.96, 0.12, PAL.gray); bx(0.55, 0.12, 0.72, 1.05, PAL.gray); bx(0.38, 1.05, 0.88, 1.6, PAL.gray);
-        bx(0.5, 1.15, 0.76, 1.45, PAL.red, 0, lit ? 1 : DIM);   // its window
-        if (on != null && T - on < 0.7) { const q = (T - on) / 0.7; F(lx, ly, (0.3 + 1.7 * q) * t, 0, 0, (0.3 + 1.7 * q) * t, PAL.red, 1 - q, 4); }
+        bx(0.5, 1.15, 0.76, 1.45, PAL.red, 0, lit ? LIT : DIM);   // its window (lit red, muted: К6 «А», bright red is danger's)
+        if (on != null && T - on < 0.7) { const q = (T - on) / 0.7; F(lx, ly, (0.3 + 1.7 * q) * t, 0, 0, (0.3 + 1.7 * q) * t, PAL.red, 0.6 * (1 - q), 4); }
         bx(0.25, 1.6, 1.01, 1.74, PAL.gray); bx(0.56, 1.74, 0.71, 1.94, PAL.gray);
         if (CINE) this.route = 0;   // (the cinematic fork: the altar flat, its foxes too)
         for (const [c, f] of [[1.4, 1], [3.45, -1]]) {   // a fox, facing the shrine: grey stone, its tail up behind it, an orange bib (D's collar red)
@@ -4298,26 +5184,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x0, r.y0 - dh, x0 + dw, r.y0, PAL.black, 1, 0, 10, 0); box(x0 + P, r.y0 - dh + P, x0 + dw - P, r.y0, PAL.blue, 1, 0, 10, 0); box(x0 + dw * 0.7, r.y0 - dh * 0.5, x0 + dw * 0.7 + 2 * P, r.y0 - dh * 0.5 + P, PAL.black, 1, 0, 10, 0);   // the door, its handle
       box(x0 - 0.3 * t, r.y0 - dh - 0.25 * t, x0 + dw + 0.3 * t, r.y0 - dh, PAL.gray, 1, 0, 10, 0); disc(x0 + dw / 2, r.y0 - dh - 0.45 * t, 0.12 * t, PAL.white, 1);   // its canopy, its lamp
       box(bx, r.y0 - 0.55 * t, bx + bw, r.y0 - 0.42 * t, PAL.gray, 1, 0, 10, 0); for (const lx of [bx + 0.1 * t, bx + bw - 0.2 * t]) box(lx, r.y0 - 0.42 * t, lx + 0.1 * t, r.y0, PAL.gray, 1, 0, 10, 0);   // the bench
-    }
-  }
-  if (th.junk && lv.kind === 'well') {   // the Junkyard's kit: a fire escape up each wall (a landing every 6 tiles, a ladder slanting up to the next), and
-    // a dumpster at the wall end of some wide steady ledges
-    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
-    for (const side of [-1, 1]) {
-      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), off = side < 0 ? 0 : 3 * t;
-      for (let k = Math.floor((top - off) / (6 * t)) - 1; k * 6 * t + off < bot + 6 * t; k++) {
-        const y = k * 6 * t + off, [x0, x1] = [Math.min(at(0), at(1.6 * t)), Math.max(at(0), at(1.6 * t))];
-        box(x0, y, x1, y + 0.15 * t, PAL.black, 1, 0, 10, 0); box(x0, y - 0.6 * t, x1, y - 0.6 * t + P, PAL.gray, DIM, 0, 10, 0);   // the landing, its rail, behind (DEPTH)
-        box(side < 0 ? x1 - P : x0, y - 0.6 * t, side < 0 ? x1 : x0 + P, y, PAL.gray, DIM, 0, 10, 0);
-        for (let i = 0; i <= 10; i++) { const u = i / 10, x = snap(at((0.2 + 1.2 * u) * t)), yy = snap(y - 6 * t * u); box(x - P / 2, yy - P / 2, x + P / 2, yy + P / 2, PAL.gray, DIM, 0, 10, 0); }   // the ladder to the next
-      }
-    }
-    for (const r of lv.rects) {
-      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
-      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.slick || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 0) continue;
-      const w = 1.8 * t, h = 1.1 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w;
-      box(x0, r.y0 - h, x0 + w, r.y0 - 0.15 * t, th.block, 1, 0, 10, 0); box(x0 - 0.05 * t, r.y0 - h - 0.15 * t, x0 + w + 0.05 * t, r.y0 - h, PAL.black, 1, 0, 10, 0);   // a dumpster, its lid
-      for (const dx of [0.2, 0.8]) disc(x0 + dx * w, r.y0 - 0.12 * t, 0.12 * t, PAL.black, 1);
     }
   }
   // The Junkyard's ledges: a block is green brick (mortar courses, joints in bond), a plank off a wall a fire escape's black grating behind
@@ -4468,12 +5334,30 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const villageRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
     const thin = (f) => { const rt = this.route; if (CINE) this.route = 0; f(); this.route = rt; };   // (2.5D: a rail, a rope, a post or a charm flat, no depth of its own: owner, 2026-10-23: «дублирование перил и мелких деталей ради объема не нужно, сильно утяжеляет»)
-    const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
+    const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;
+    if (r.slick) {   // a slick wall without ice (owner, Д77: no cold in the Village): its sheet's surface (VSLICK_SPR), a sheet pixel a game pixel, tiled down and across
+      // the rect, its white top edge to stand on
+      const S = VSLICK_SPR, q = PIX.base, n = S[0].length, sn = (v) => Math.round(v / P) * P;
+      box(r.x0, r.y0, r.x1, r.y1, PAL.black, 1, 0, 10, 0);
+      for (let y = r.y0, j = 0; y < r.y1; y += q, j++) { const row = S[j % S.length];
+        for (let x = r.x0, i = 0; x < r.x1;) { const ch = row[i % n]; let e = i + 1; while (e % n !== 0 && row[e % n] === ch && x + (e - i) * q < r.x1) e++;
+          const x1 = Math.min(r.x1, x + (e - i) * q); if (ch !== '.' && ch !== 'k') box(sn(x), sn(y), sn(x1), Math.min(r.y1, sn(y + q)), PAL[ICON_INK[ch]], 1, 0, 10, 0); x = x1; i = e; } }
+      if (CINE) this.route = 2; box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+    }   // a charm or a weight off its free end on one ledge in three (owner: «очень много мелких висячих деталей. Они могут быть, но не на каждой платформе»)
+    if (r.crumble && !r.board) {   // the vine bridge of Iya (kazurabashi, Д95 «А»; VIL2.bridge): its sheet's tile along it, its deck on the rect's top (its slats wood), its two
+      // ends; shaking and fading as it goes, as the rope bridge did
+      const S = vil2('bridge'), q = PIX.base, n = S.tile[0].length, u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, y0 = snap(r.y0 - S.deck * q), yb = y0 + S.tile.length * q;
+      thin(() => {
+        for (let x = r.x0, i = 0; x < r.x1 - 0.5 * q; x += n * q, i++) { const m = Math.min(n, Math.round((r.x1 - x) / q)), ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0; vsp(m < n ? vspCut(S.tile, 0, m, 'bridge') : S.tile, snap(x) + ox, y0, false, a); }
+        vsp(S.left, snap(r.x0) - (S.left[0].length - 2) * q, yb - S.left.length * q, false, a); vsp(S.right, snap(r.x1) - 2 * q, yb - S.right.length * q, false, a);
+      });
+      if (CINE) this.route = 2; box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25); return true;
+    }
     if (r.crumble) {   // a rope bridge (the owner's pick C, 2026-10-21, of six in wood: grey looked strange in a village): narrow slats wide apart, each shaking
       // its own way as it gives, two grey ropes through them
       const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, n = r.board ? 1 : Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;   // (a board: one slat, the one that goes; 2.5D: no fading, a dither in depth reads as a sieve: it shakes)
       for (let i = 0; i < n; i++) {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 || r.board ? 2 * P : 0) + ox;   // (a board's last too: the next board's comes on)
+        const ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 || r.board ? 2 * P : 0) + ox;   // (a board's last too: the next board's comes on)
         box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);   // a slat, its underside in shade
         box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
       }
@@ -4584,7 +5468,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.crumble) {   // a raft of driftwood: logs with rounded ends, each shaking its own way as it gives, bands of orange rope between them, lashed to the wall with it
       const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, n = Math.max(1, Math.round(w / (1.3 * t))), pw = w / n;   // (2.5D: it shakes, no fading)
       for (let i = 0; i < n; i++) {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * pw) + ox;
+        const ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * pw) + ox;
         box(x0, r.y0 + 3 * P, x1, r.y1 - 3 * P, th.crumble, a, 0, 10, 2); box(x0 + P, r.y0 + P, x1 - P, r.y1 - P, th.crumble, a, 0, 10, 2); box(x0 + 3 * P, r.y0, x1 - 3 * P, r.y1, th.crumble, a, 0, 10, 2);   // a log, its ends round
         box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y0 + 2.5, th.lip, a, 1.25);
         if (i) box(x0 - P, r.y0 - P, x0 + P, r.y1 + P, PAL.orange, a, 0, 10, 0);   // a band of rope between two logs
@@ -4670,7 +5554,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.crumble) {   // a rotten log broken in two: grey in black rot, its grain split, holes, a spiral knot, grey toadstools, a snail; its pieces shake as it gives
       const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, cut = 0.58;   // (2.5D: no fading, a dither in depth reads as a sieve: it shakes)
       [[0, cut - 0.03], [cut + 0.03, 1]].forEach(([q0, q1], i) => {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(Math.min(W(q0 * wt), W(q1 * wt))) + ox, x1 = snap(Math.max(W(q0 * wt), W(q1 * wt))) + ox;
+        const ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0, x0 = snap(Math.min(W(q0 * wt), W(q1 * wt))) + ox, x1 = snap(Math.max(W(q0 * wt), W(q1 * wt))) + ox;
         box(x0, r.y0 + 2 * P, x1, r.y1 - 2 * P, th.crumble, a, 0, 10, 1); box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y1, th.crumble, a, 0, 10, 1);   // a piece, its ends round, its rot speckled
         box(x0 + 2 * P, Y(ht * 0.6), x1 - 2 * P, r.y1 - P, th.crumble, a, 0, 10, 4);   // its underside darker
         for (let x = x0 + snap(0.2 * t), j = 0; x < x1 - snap(0.3 * t); j++) { const ww = snap((0.3 + 0.5 * hsh(j + i * 50)) * t), yy = Y(ht * (0.25 + 0.4 * hsh(j + 9 + i * 50))); box(x, yy, Math.min(x1 - 2 * P, x + ww), yy + P, K, a, 0, 10, 0); x += ww + snap((0.25 + 0.35 * hsh(j + 21)) * t); }   // its grain split
@@ -4736,7 +5620,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // braced across, a lamp and a basket in it, its two pulleys and their ropes up (F, blue); a crumbling block rubble in two rows of stones, a post at the wall and a
   // short one at its end, grit trickling (A, orange). Timber under a ledge half dark (behind its face, DEPTH). False for what keeps the common look.
   const mineRect = (r) => {
-    const t = kitT, P = kitP, px = P / t, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
@@ -4746,7 +5630,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const room = (u0, u1, v0, v1) => { const x0 = Math.min(W(u0), W(u1)), x1 = Math.max(W(u0), W(u1)), y0 = Y(v0), y1 = Y(v1); return !lv.rects.some((q) => q !== r && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1); };   // nothing laid there
     const R0 = r.mnRoom || (r.mnRoom = { under: room(0, Math.min(wt - 0.2, 3.3), ht, ht + 2.2), end: room(wt - 0.7, wt, ht, ht + 1.1), wall: room(0, 0.4, -1.4, ht + 1.1) });   // (once a ledge: where its timber has room)
     if (r.crumble) {   // loose rubble and broken ore held up by rotten boards: rounded stones with black gaps in two rows, shaking as it gives, grit falling
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0);   // (2.5D: no
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0);   // (2.5D: no
       // fading, a dither in depth reads as a sieve: it shakes)
       box(r.x0, r.y0 + 2 * P, r.x1, r.y1, K, a, 0, 10, 0);   // the dark between its stones
       const n = Math.max(1, Math.round(wt / 0.55));
@@ -4818,12 +5702,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         }
       }
       const bell = kitThing(lv, r);
-      if (bell) {   // its bell off its free end (C's; the task): grey till the hero comes near, then rung for good, orange, swinging, rings of its sound going out from it
-        const bx = snap(bell.x), by = snap(r.y1 + 0.2 * t), on = lv.tended.get(r), u = on != null ? T - on : 1e9, c = on != null ? PAL.orange : PAL.gray;
-        const nud = CINE && on != null && u > 1.6 ? cinePoke(g, lv, r, 'bell', bx - 0.4 * t, r.y1, bx + 0.4 * t, by + 0.5 * t) : 0;   // (2.5D: rung, a nudge swings it again, less)
+      if (bell) {   // a pilgrim's kongo-zue planted at its free end, its bell on it (d52 E; the task): grey till the hero comes near, then rung for good,
+        // orange, swinging, rings of its sound going out from it. An orange staff, a purple tie and ribbon at its top, mountains branded all down it
+        const dir = wl ? 1 : -1, sx = snap(bell.x), top = snap(r.y0 - 2.1 * t), on = lv.tended.get(r), u = on != null ? T - on : 1e9;
+        const c = on != null ? PAL.orange : PAL.gray, wood = PAL.orange, K = PAL.black, Xs = (q) => snap(sx + dir * q * t), Ys = (q) => snap(r.y0 - q * 1.27 * t);   // (its marks laid out on 1.65, the staff 2.1 tiles tall)
+        const bx = Xs(0.18), by = Ys(1.1);
+        const nud = CINE && on != null && u > 1.6 ? cinePoke(g, lv, r, 'bell', bx - 0.4 * t, by - 0.3 * t, bx + 0.4 * t, by + 0.5 * t) : 0;   // (2.5D: rung, a nudge swings it again, less)
         const sw = u < 1.6 ? snap(Math.sin(u * 13) * 0.12 * t * (1 - u / 1.6)) : nud ? snap(nud * 1.2 * t) : 0;
-        box(bx, r.y1, bx + P, by, PAL.gray, 1, 0, 10, 0);   // its cord, the bell (twice C's size: a task's), its lip, its clapper
-        if (CINE) this.route = 4;   // (the bell small, its cord and its rings flat)
+        if (CINE) this.route = 0;   // (its staff, its cord, its cloth flat: thin things)
+        box(sx - P, top, sx + 2 * P, r.y0, wood, 1, 0, 10, 0);   // the staff, three game px thick
+        const mark = (q) => { const y = Ys(q); box(sx - P, y, sx + 2 * P, y + P, K, 1, 0, 10, 0); box(sx, y - P, sx + P, y, K, 1, 0, 10, 0); };   // a brand: a little mountain
+        const cord = (x0, y0, x1, y1) => { box(Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1) + P, Math.max(y0, y1) + P, PAL.gray, 1, 0, 10, 0); };
+        disc(sx + P / 2, top, 2 * P, PAL.orange, 1); box(sx - 2 * P, Ys(1.5), sx + 3 * P, Ys(1.4), PAL.purple, 1, 0, 10, 0); box(Math.min(Xs(0.1), Xs(0.14)), Ys(1.4), Math.max(Xs(0.1), Xs(0.14)) + P, Ys(0.85), PAL.purple, 1, 0, 10, 0); cord(sx + dir * P, Ys(1.4), bx, Ys(1.4)); cord(bx, Ys(1.4), bx, by); for (const q of [1.2, 1.0, 0.8, 0.6, 0.4]) mark(q);
+        if (CINE) this.route = 4;   // (the bell small, its rings flat)
         box(bx + sw - snap(0.13 * t), by, bx + sw + snap(0.13 * t) + P, snap(by + 0.24 * t), c, 1, 0, 10, 0); box(bx + sw - snap(0.22 * t), snap(by + 0.24 * t), bx + sw + snap(0.22 * t) + P, snap(by + 0.36 * t), c, 1, 0, 10, 0);
         box(bx + 2 * sw, snap(by + 0.36 * t), bx + 2 * sw + P, snap(by + 0.36 * t) + 2 * P, PAL.black, 1, 0, 10, 0);
         if (CINE) this.route = 0; for (let i = 0; i < 3; i++) { const q = (u - i * 0.22) / 1.1; if (q > 0 && q < 1) F(bx, by + 0.2 * t, (0.35 + 1.9 * q) * t, 0, 0, (0.35 + 1.9 * q) * t, PAL.orange, 1 - q, 4); }
@@ -4831,14 +5722,56 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (CINE) this.route = 2; box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
-    box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 0);
-    for (let y0 = r.y0 + 0.25 * t, row = 0; y0 < r.y1 - 0.5 * t; y0 += 1.8 * t, row++) for (let x = r.x0 + (0.8 + 0.6 * hsh(1 + row)) * t, i = 0; x < r.x1 - 0.5 * t; x += (1.6 + 0.8 * hsh(2 + i + 9 * row)) * t, i++) {   // cracks a tile long
-      let cx = x, j = 0; for (let y = y0; y < Math.min(r.y1 - P, y0 + 1.1 * t); y += 2 * P) { box(snap(cx), snap(y), snap(cx) + P, snap(y) + 2 * P, PAL.black, 1, 0, 10, 0); cx += hsh(i * 13 + j++ + 31 * row) < 0.5 ? -P : P; }
+    if (r.slick || r.crumble) {   // its ice (white: you slip on it) and what crumbles (grey), in the kit's look (owner 2026-10-24: «Белые бруски полностью
+      // выбиваются», «в ФУДЗИ нет исчезающих платформ»; d63 «E», d64 «E»): the ice a white top over a light body, a fringe of short icicles under it; what
+      // crumbles the trail's sandbags, tied in a row, shaking and fading as it goes. The 2.5D top takes 7 game px under the edge: kept plain
+      const W = PAL.white, G = PAL.gray, K = PAL.black, Bl = PAL.blue, w = r.x1 - r.x0;
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, ox = r.crumbling ? snap(Math.sin(T * 31) * 1.8 * u) : 0, al = 1 - 0.5 * u * u;
+      const bx = (a0, b0, a1, b1, c, a = al, tn = 0) => box(snap(a0) + ox, snap(b0), snap(a1) + ox, snap(b1), c, a, 0, 10, tn);
+      const icicle = (x, len, c = W) => F(snap(x) + ox, snap(r.y1) + snap(len / 2), snap(0.09 * t) + P, 0, 0, -snap(len / 2), c, al, 6, snap(0.09 * t) + P, snap(len / 2), 2 * (snap(0.09 * t) + P));   // (a spike pointing down)
+      if (r.slick) {   // (its top a band of white, the ice's sign, down past the 7 game px the 2.5D top takes; its body light: white chequered on the world's blue)
+        const top = r.y0 + 0.6 * t, light = (a0, b0, a1, b1) => { bx(a0, b0, a1, b1, Bl); bx(a0, b0, a1, b1, W, 1, 4); };
+        light(r.x0, top, r.x1, r.y1); bx(r.x0, r.y0, r.x1, top, W); for (let x = r.x0 + 0.3 * t, i = 0; x < r.x1 - 0.2 * t; x += 0.45 * t, i++) icicle(x, (0.15 + 0.35 * hsh(260 + i)) * t);   // its fringe of icicles
+        if (CINE) this.route = 2; box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+      }
+      const n = Math.max(2, Math.round(w / (0.9 * t))); bx(r.x0, r.y0, r.x1, r.y1, K, al);
+      for (let i = 0; i < n; i++) { const a0 = r.x0 + (i * w) / n + P, a1 = r.x0 + ((i + 1) * w) / n - P; bx(a0, r.y0, a1, r.y1, G, al); bx(a0 + 0.15 * t, r.y0 + 0.55 * t, a1 - 0.15 * t, r.y0 + 0.55 * t + P, K); bx((a0 + a1) / 2 - P, r.y1 - 0.25 * t, (a0 + a1) / 2 + P, r.y1, K); }   // its sandbags
+      if (CINE) this.route = 2; box(r.x0 + ox, r.y0, r.x1 + ox, r.y0 + 2.5, th.lip, al, 1.25); return true;
     }
-    for (let x = r.x0 + 0.4 * t, i = 0; x < r.x1 - 0.3 * t; x += (0.5 + 0.5 * hsh(30 + i)) * t, i++) box(snap(x), snap(r.y1 - (1 + Math.round(2 * hsh(50 + i))) * P), snap(x + (0.15 + 0.2 * hsh(70 + i)) * t), r.y1, PAL.black, 1, 0, 10, 0);   // notches in its underside
-    const sy = snap(r.y0 + 0.16 * t);
+    // its stones (d51 C): the trail's dry-stone walls, boulders big and small fitted without mortar, black gaps, small grey chinking stones in them, a heavier
+    // snow running down between them. (The 2.5D top takes the colour 7 game px under the edge: there only the stones' own blue or a gap a pixel wide, never a
+    // chink.)
+    const K = PAL.black, G = PAL.gray, B = th.block, hb = r.y1 - r.y0;
+    const bands = hb < 1.5 * t ? [[r.y0, r.y1]] : [[r.y0, r.y0 + t]];   // its rows of stone: a tile at the top (the 2.5D top face's), then rows of about 1.4 tiles
+    if (hb >= 1.5 * t) { const m = Math.max(1, Math.round((hb - t) / (1.4 * t))); for (let j = 0; j < m; j++) bands.push([r.y0 + t + ((hb - t) * j) / m, r.y0 + t + ((hb - t) * (j + 1)) / m]); }
+    box(r.x0, r.y0, r.x1, r.y1, K, 1, 0, 10, 0);
+    const chink = (x, y, s) => box(snap(x - s * P), snap(y - s * P), snap(x + s * P), snap(y + s * P), G, 1, 0, 10, 0);
+    const stone = (x, y, rx, ry) => { F(snap(x), snap(y + P), rx, 0, 0, ry, B, 1.55, 0); F(snap(x), snap(y - P / 2), rx - P, 0, 0, ry - P, B, 1, 0); };   // a boulder, a darker rim under it
+    const fit = (x0, x1, ws, seed, jit = 0.12) => {   // widths in a row, jittered, scaled to fill x0..x1 exactly: [centre, width] each (nothing past its ends)
+      const q = []; let sum = 0; for (let i = 0; sum < x1 - x0 || q.length < 1; i++) { const w = ws[i % ws.length] * (1 - jit + 2 * jit * hsh(seed + i)); q.push(w); sum += w; }
+      if (q.length > 1 && sum - q[q.length - 1] / 2 > x1 - x0) { sum -= q.pop(); }
+      const k = (x1 - x0) / sum; let x = x0; return q.map((w) => { const c = x + (w * k) / 2; x += w * k; return [c, w * k]; });
+    };
+    const boulders = (rad, cyq, mix) => {   // a row of boulders a row of the ledge: rad of rh across, their centres cyq of rh down, mix: big ones and stacked small ones by turns
+      bands.forEach(([yA, yB], j) => {
+        const rh = yB - yA, cy = yA + cyq * rh, ws = mix ? [2 * rad * rh, 1.15 * rad * rh] : [2 * rad * rh], row = fit(r.x0, r.x1, j % 2 ? ws.slice().reverse() : ws, 7 + 31 * j, j ? 0.3 : 0.12);
+        row.forEach(([x, w], i) => {
+          const small = mix && w < 1.6 * rad * rh, q = Math.min(w / 2 + 0.4 * P, (small ? 0.62 : 1) * Math.min(cyq, 1.02 - cyq) * rh);
+          if (!small) stone(x, cy, w / 2 + 0.4 * P, q); else { stone(x, cy - 0.24 * rh, w / 2 + 0.4 * P, q * 0.9); stone(x, cy + 0.26 * rh, w / 2 + 0.2 * P, q * 0.85); }
+          if (i < row.length - 1) { const mx = x + w / 2; chink(mx, cy + 0.42 * rh, 1); if (hsh(60 + i + 7 * j) < 0.6) chink(mx, cy - 0.47 * rh, 1); }
+        });
+      });
+    };
+    boulders(0.5, 0.53, true);
+    if (!r.key && !r.crack && !r.cage && !r.mortar && !r.beam && r.x1 - r.x0 >= BIG_BLOCK.w * t && hb >= BIG_BLOCK.h * t) {   // a big block's kanji (KANJI) cut in a flat dressed
+      // stone set into the wall, not over the boulders
+      const hs = snap((BIG_BLOCK.size * Math.min(r.x1 - r.x0, hb)) / 2 + 0.3 * t), cx = snap((r.x0 + r.x1) / 2), cy = snap((r.y0 + r.y1) / 2 + 0.06 * hb);
+      box(cx - hs - P, cy - hs - P, cx + hs + P, cy + hs + P, K, 1, 0, 10, 0); box(cx - hs, cy - hs, cx + hs, cy + hs, B, 1, 0, 10, 0); box(cx - hs, cy + hs - 2 * P, cx + hs, cy + hs, B, 1.55, 0, 10, 0);
+    }
+    const sy = snap(r.y0 + 0.2 * t);
     box(r.x0, r.y0, r.x1, sy, PAL.white, 1, 0, 10, 0);   // the snow
-    for (let x = r.x0, i = 0; x < r.x1; x += 0.35 * t, i++) box(snap(x), sy, snap(Math.min(r.x1, x + 0.35 * t)), sy + (1 + Math.round(2 * hsh(90 + i))) * P, PAL.white, 1, 0, 10, 0);   // its lumpy edge
+    for (let x = r.x0, i = 0; x < r.x1; x += 0.35 * t, i++) box(snap(x), sy, snap(Math.min(r.x1, x + 0.35 * t)), sy + (1 + Math.round(3 * hsh(90 + i))) * P, PAL.white, 1, 0, 10, 0);   // its lumpy edge
+    for (let x = r.x0 + 0.6 * t, i = 0; x < r.x1 - 0.4 * t; x += (1.1 + 0.8 * hsh(100 + i)) * t, i++) box(snap(x), sy, snap(x) + 2 * P, snap(r.y0 + (0.42 + 0.2 * hsh(110 + i)) * t), PAL.white, 1, 0, 10, 0);   // snow running down between its boulders
     if (!wl) box(r.x0, sy, r.x0 + 2 * P, snap(r.y0 + 0.4 * t), PAL.white, 1, 0, 10, 0);   // a drip over a free end
     if (!wr) box(r.x1 - 2 * P, sy, r.x1, snap(r.y0 + 0.35 * t), PAL.white, 1, 0, 10, 0);
     return true;
@@ -4846,7 +5779,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   const townRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
     if (r.ac) {   // an air conditioner (aircon; owner: you may stand on it, for 3 s): its top edge white, and once stood on it rattles, harder as it gives way
-      const u = r.crumbling ? r.t / AC.time : 0, ox = u ? snap(Math.sin(T * 55) * (1 + 2 * u) * P) : 0;
+      const u = r.crumbling ? r.t / AC.time : 0, ox = u ? snap(Math.sin(T * 31) * (1 + 2 * u) * P) : 0;
       aircon(r, ox, 0); box(r.x0 + ox, r.y0, r.x1 + ox, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.plank && r.move) {   // a window cleaner's gondola (the owner's pick, research/variants/tokyo-gondola-1.png C): a purple box of panels hung under its
@@ -4976,8 +5909,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
-    if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = !r.slick && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 31) * 1.8 * u; a = 1 - 0.5 * u * u; }
+    const own = (!r.slick || th.fuji || th.village) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
@@ -4995,6 +5928,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
     if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
+      if (th.rime) for (let x = r.x0 + 0.2 * R, k = 0; x < r.x1 - 0.1 * R; x += 0.36 * R, k++) if (k % 2) box(x + ox, r.y1 - 0.06 * R, x + ox + kitP, r.y1 - 0.06 * R + kitP, PAL.white, a, 0, 10, 0);   // rime: a glint here and there (no strands hanging: owner)
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);
@@ -5047,13 +5981,15 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const q = row[i]; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + (i + 1) * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); } });   // (d, m: the ink's dark and mid tones)
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < row.length;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); i = e; } }   // (d, m: the ink's dark and
+    // mid tones; a box a run of one ink, as cineSpr: a crow with its ring 492 boxes, 255 now: perf)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
-    else if (f.kind === 'crow') spr(CRITTER[(f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y, th.wall, PIX.keep, false);   // a game pixel a dot: about a tile and a half long
+    else if (f.kind === 'crow') spr(CRITTER[(f.dive ? 'crowDive' : f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : f.wait > CROW.wait ? 'crowWarn' : 'crow') + ((f.fly || f.dive ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y,
+      f.dive || (f.wait > CROW.wait && Math.floor((f.wait - CROW.wait) * 5) % 2 === 0) ? PAL.red : th.wall, PIX.keep, false);   // (rearing as it warns, red blinking, and beak first as it dives, red: CROW)   // a game pixel a dot: about a tile and a half long
     else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
       const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'rcrowUp' : 'rcrowDown') : f.t % 1.6 < 0.24 ? 'rcrowUp' : 'rcrow';
       spr(CRITTER[wing + L], f.x, f.y, th.wall, PIX.keep, false);
@@ -5061,21 +5997,60 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (CINE) this.route = bonusEye ? 4 : 0;
   for (const p of lv.pickups) {   // a shop's items: their pictures, bobbing a game pixel at a time, in a glow
-    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face)
-    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5) * PIX.size - (ICONS[p.item.id].length * PIX.base * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 2.4 + p.x) * 1.5 * PIX.keep) * PIX.size, a = p.sold ? 0.25 : 1;   // (the fork: riding its ledge's face; a bob in the levels'
+    // pixels, PIX.keep, as all of these: on a computer's finer grid it was half: review)
+    p.top = y - Math.round(Math.sin(T * 2.4 + p.x) * 1.5 * PIX.keep) * PIX.size - (ICONS[p.item.id].length * PIX.base * 2.4) / 2 - PIX.size;   // its picture's top at the highest of its bob: the label goes over that (owner: «подписи не должны попадать на сердца»)
     if (bonusEye) this.route = 3; F(p.x, y, p.r * 2, 0, 0, p.r * 2, p.item.color, 0.25 * a, 1); if (bonusEye) this.route = 4;   // (B, D: its glow behind it, not dotted over it)
     if (bonusStack && a === 1) for (let q = 3; q >= 1; q--) iconSpin(p.item.id, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // (C: its thickness)
     iconSpin(p.item.id, p.x, y, a, 2.4 * PIX.keep, T * 1.8 + p.x * 0.05);   // a fifth bigger than at first (user), turning
   }
   for (const p of lv.fizz) if (!p.taken && seen(p.y - p.r, p.y + p.r)) {   // candies, bobbing in a glow
-    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5) * PIX.size;   // (the fork: riding its ledge's face)
+    const y = p.y - (CINE ? cineRide(lv, p.x, p.y, p.r, cam, H) : 0) + Math.round(Math.sin(T * 3 + p.x) * 1.5 * PIX.keep) * PIX.size;   // (the fork: riding its ledge's face)
     const k = Math.max(1, Math.round((1.5 * R) / (12 * PIX.size))), gr = 0.65 * 12 * k * PIX.size;   // about 1.5 R across, as on a phone: a fixed size was half that on a desktop (user)
     if (bonusEye) this.route = 3; F(p.x, y, gr, 0, 0, gr, INK.coin, 0.3, 1); if (bonusEye) this.route = 4; if (bonusStack) for (let q = 3; q >= 1; q--) iconSpin(p.kind, p.x + q * 0.7 * PIX.size, y + q * PIX.size, 1.62 - 0.07 * q, k, T * 2.2 + p.x * 0.05); iconSpin(p.kind, p.x, y, 1, k, T * 2.2 + p.x * 0.05);
   }
   if (CINE) this.route = 0;
+  // A sheet's sprite (path A; owner 2026-10-24: natural things from the sheets' own pixels): its rows of ICON_INK letters ('.' clear), a sheet pixel two game
+  // pixels (the sheets drew the hero half size), left to right or mirrored, at alpha a
+  const sprAt = (rows, x, y, flip = false, a = 1, s = 2 * PIX.base) => {   // (s: a sheet pixel's size, 2 game pixels where the sheet drew the hero half size)
+    const n = rows[0].length;
+    rows.forEach((r, j) => { for (let i = 0; i < n;) { const ch = r[i]; let e = i + 1; while (r[e] === ch) e++; if (ch !== '.') { const u = flip ? x + (n - e) * s : x + i * s; box(u, y + j * s, u + (e - i) * s, y + (j + 1) * s, PAL[ICON_INK[ch]], a, 0, 10, 0); } i = e; } });
+  };
+  const HB = HAZ_SPR[th.hazard] && HAZ_SPR[th.hazard].blob, hazBlob = (x, y, flip, a = 1) => {   // what a world's own hazard throws (К13: a piece of its burst), rimmed red (danger)
+    const q = 2 * PIX.base, b = HB, red = HB.red || (HB.red = HB.map((r) => r.replace(/[^.]/g, 'r'))), x0 = sn2(x - (b[0].length * q) / 2), y0 = sn2(y - (b.length * q) / 2);
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) sprAt(red, x0 + dx * q, y0 + dy * q, flip, a);
+    sprAt(b, x0, y0, flip, a);
+  };
+  const IC = icicleSpr(th), sn2 = (v) => Math.round(v / PIX.size) * PIX.size;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
+    : IC ? (x, y, falling, sw = 0) => { const r = falling ? IC.fall : IC.hang, x0 = sn2(x - (r[0].length * PIX.base) / 2), y0 = sn2(y);
+      if (!sw) sprAt(r, x0, y0, false, 1, PIX.base); else r.forEach((row, j) => sprAt([row], x0 + Math.round((sw * (j + 1)) / r.length) * PIX.base, y0 + j * PIX.base, false, 1, PIX.base)); }   // the world's own icicle off its sheet
+    // (ICE_SPR), its root at y; a sheet pixel one game pixel, so it is as wide as what hurts (ICICLE.r; at 2x it was three times as big)
     : (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
-  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5) * PIX.size : 0), c.y);
+  // Where an arena's (or an ambush's) wave waits (К8 «А», the Level Design Book: an ambush is fair when it can be seen first): the world's own thing just over
+  // where its enemies drop from (ARENA.drop R over its middle), there from the start (HOLD_SPR), shaking from when the wave is shown (warnAt), emptied once it
+  // drops (dropAt); its rope or chain (its top rows, as drawn) on up out of sight
+  const HO = HOLD_SPR[th.holder];
+  if (HO) for (const a of lv.arenas || []) if (seen(a.y - (ARENA.drop + 12) * R, a.y)) {
+    const shaking = a.warnAt >= 0 && !(a.dropAt >= a.warnAt) && !a.done, rows = shaking ? HO.shake : a.done || a.dropAt >= 0 ? HO.empty : HO.full, q = 2 * PIX.base;
+    const x = sn2(a.x - (rows[0].length * q) / 2), y = sn2(a.y - (ARENA.drop + 1) * R - rows.length * q);
+    // It swings as a weight on a rope does, about its top (owner: «вся анимация подчиняется объекту… дисней и пиксар»): idly a pixel now and then; harder and
+    // faster as its wave is about to drop (anticipation); after, its swing dying away (follow-through). Each row shifted by its depth: a pendulum, not a shake
+    const gw = shaking ? clamp((lv.t - a.warnAt) / ARENA.warn, 0, 1) : 0, since = a.dropAt >= 0 ? lv.t - a.dropAt : 1e9;
+    const sw = shaking ? (1 + 2 * gw) * Math.sin(T * (6 + 5 * gw)) : since < 3 ? 3 * Math.exp(-1.6 * since) * Math.sin(since * 8) : 0.7 * Math.sin(T * 2.2 + a.x * 0.01);
+    const swing = (rs, j0, yy) => rs.forEach((r, j) => sprAt([r], x + Math.round((sw * (j0 + j + 1)) / rows.length) * q, yy + j * q));
+    let n = 0; while (HOLD_ROPE[th.holder] && n < 8 && n < rows.length && rows[n].replace(/\./g, '').length <= 3) n++;   // (its top a rope: those rows on up, a row at a time,
+    // to the ledge over it, or out of sight)
+    let rope = n; while (n && rope < rows.length && rows[rope].replace(/\./g, '').length <= 3) rope++;   // (all its rope, as drawn)
+    const cx = x + (rows[0].length * q) / 2, body = y + rope * q, over = lv.rects.reduce((m, r) => (!r.gone && r.x0 < cx && r.x1 > cx && r.y1 <= body && r.y1 > m ? r.y1 : m), top);
+    if (n >= 4) for (let yy = y - q, j = n - 1; yy >= over; yy -= q, j = (j + n - 1) % n) sprAt([rows[j]], x, yy);
+    const k0 = n && over > y ? Math.min(rope, Math.ceil((over - y) / q)) : 0;   // (a ledge over it cutting into its rope: the rope from the ledge down)
+    swing(k0 ? rows.slice(k0) : rows, k0, y + k0 * q);
+  }
+  for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) {   // shaking loose: it sways about its root, harder as it goes (a pine cone more, ice a little), then falls
+    const g = c.state === 'shake' ? 1 - clamp((c.t || 0) / ICICLE.shake, 0, 1) : 0, amp = th.ice === 'village' ? 3 : 1.5;
+    icicle(c.x, c.y, false, g ? amp * (0.4 + 0.6 * g) * Math.sin(T * (9 + 6 * g)) : 0);
+  }
   const xg = lv.crossing;
   if (xg && seen(xg.y0 - R, xg.y1 + R)) {   // a level crossing: rails along the band's foot, the lights by the walls, and the train
     box(lv.l, xg.y1 - 0.12 * R, lv.r, xg.y1, th.lip, 1, 0, 10, 0); box(lv.l, xg.y1 - 0.42 * R, lv.r, xg.y1 - 0.3 * R, th.lip, 0.6, 0, 10, 0);
@@ -5084,12 +6059,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       box(x - 0.06 * R, xg.y0 - 0.2 * R, x + 0.06 * R, xg.y1, PAL.gray, 1, 0, 10, 0);   // the post
       for (const k of [0, 1]) disc(x + d * (k ? 0.32 : 0) * R, xg.y0 - 0.2 * R, 0.17 * R, on && blink === k ? INK.spike : INK.dark, 1);   // its two lamps
     }
-    if (xg.state === 'pass' && th.junk) {   // the Junkyard's: a garbage truck, green, its cab white-windowed at the front, wheels
-      const L = 0.9 * W, x1 = xg.x, x0 = x1 - L, y0 = xg.y0 + 0.08 * R, y1 = xg.y1 - 0.45 * R, c0 = x1 - 0.3 * L;
-      box(Math.max(lv.l, x0), y0, Math.min(lv.r, c0), y1, th.block, 1, 0, 10, 0); box(Math.max(lv.l, c0), y0 + 0.3 * (y1 - y0), Math.min(lv.r, x1), y1, th.block, 1, 0, 10, 0);
-      if (x1 - 0.25 * L > lv.l && x1 - 0.1 * L < lv.r) box(Math.max(lv.l, x1 - 0.25 * L), y0 + 0.4 * (y1 - y0), Math.min(lv.r, x1 - 0.08 * L), y0 + 0.65 * (y1 - y0), PAL.white, 1, 0, 10, 0);
-      for (const f of [0.15, 0.45, 0.85]) { const wx = x0 + f * L; if (wx > lv.l && wx < lv.r) disc(wx, y1, 0.35 * R, PAL.black, 1); }
-    } else if (xg.state === 'pass') {   // the train: dark cars with a white roof line and lit windows, a headlight at its front
+    if (xg.state === 'pass') {   // the train: dark cars with a white roof line and lit windows, a headlight at its front
       const L = TRAIN.len * W, x1 = xg.x, x0 = x1 - L, y0 = xg.y0 + 0.08 * R, y1 = xg.y1 - 0.45 * R;
       box(Math.max(lv.l, x0), y0, Math.min(lv.r, x1), y1, INK.dark, 1, 0, 10, 0); box(Math.max(lv.l, x0), y0, Math.min(lv.r, x1), y0 + 0.12 * R, PAL.white, 1, 0, 10, 0);
       for (let x = x1 - 0.9 * R; x > x0 + 0.5 * R; x -= 1.3 * R) if (x > lv.l && x < lv.r) box(x - 0.4 * R, y0 + 0.35 * R, x + 0.4 * R, y0 + 0.35 * R + 0.5 * (y1 - y0), INK.coin, 1, 0, 10, 0);
@@ -5126,13 +6096,40 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const fw of lv.fireWalls) if (seen(fw.y0, fw.y1)) {   // fire on a wall (FIREWALL): a scorched strip on it with embers; they glow brighter before it bursts out in
     // tongues of flame along it, flickering
     const u = (T + fw.ph) % (FIREWALL.on + FIREWALL.off), on = u >= FIREWALL.off, warn = !on && u >= FIREWALL.off - FIREWALL.warn, d = fw.side === 1 ? 1 : -1, wx = fw.side === 1 ? lv.l : lv.r, t = lv.tile, P = PIX.size;
+    const WS = WALL_SPR[th.wallHaz];
+    if (WS) {   // the world's own (path A, WALL_SPR): its stretch asleep down the wall, flickering as it is about to; bursting out of it, jittering a pixel
+      // A sheet pixel one game pixel; its burst made smaller, as the nearest sheet pixel both ways (its shape kept, pixel for pixel), till it reaches out from
+      // the wall as far as it hurts: FIREWALL.reach tiles, its pixel of jitter at most 1.1 times that (the sheets drew it 4-8 times as far; UPwell's hit, Game)
+      // (its stretch asleep too: it flickers as a warning, so no wider than what will hurt)
+      const s2 = PIX.base, n = Math.floor((FIREWALL.reach * t) / s2), at = (rows) => (d > 0 ? snap(wx) : snap(wx) - rows[0].length * s2);
+      const fit = (B) => (B[0].length <= n ? B : ((m) => Array.from({ length: m }, (_, j) => B[Math.floor((j * B.length) / m)]).map((r) => Array.from({ length: n }, (_, i) => r[Math.floor((i * r.length) / n)]).join('')))(Math.max(1, Math.round((B.length * n) / B[0].length))));
+      // (its stretch asleep cut, not made smaller: the sheet's pixels kept one for one, from a pixel off the wall out to the reach, so its boards and embers stay
+      // whole, the guide's clusters; nearest-pixel picking broke them into specks)
+      const cut0 = (B) => { if (B[0].length <= n) return B; let c0 = 0; while (c0 < B[0].length - 1 && B.every((r) => r[c0] === '.')) c0++; c0 = Math.max(0, c0 - 1); return B.map((r) => r.slice(c0, c0 + n).padEnd(n, '.')); };
+      if (!WS.fit || WS.fit.n !== n) WS.fit = { n, A: GUIDE ? pxClean(cut0(WS.asleep)) : fit(WS.asleep), Bu: GUIDE ? pxClean(fit(WS.burst)) : fit(WS.burst) };   // (made smaller: its new specks cleaned, the cluster rule)
+      const A = WS.fit.A, Bu = WS.fit.Bu;
+      const cut = (rows, y, k) => (k % 2 ? rows.slice().reverse() : rows).slice(0, Math.min(rows.length, Math.ceil((fw.y1 - y) / s2)));   // (every other copy upside down: no repeat shows)
+      // Its warning a glow swelling and ebbing twice a second (blinking past 3 a second is the digest's limit); its burst thrust out of the wall in 0.12 s (slow out)
+      // and drawn back into it at the end (slow in), the wall hiding what is in it; out, each stretch licks a pixel further now and then, each at its own beat
+      const wa = warn ? 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(T * 2 * Math.PI * 2 - Math.PI / 2)) : on ? 1 : 0.8;
+      for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(A, y, k), at(A), snap(y), d < 0, wa, s2);
+      if (on) {
+        const tin = u - FIREWALL.off, tout = FIREWALL.on - tin, ein = Math.min(1, tin / 0.12), eout = Math.min(1, tout / 0.12), e = Math.min(1 - (1 - ein) * (1 - ein), eout * eout), W0 = Bu[0].length;
+        for (let y = fw.y0, k = 0; y < fw.y1; y += Bu.length * s2, k++) {
+          const o = Math.max(0, Math.min(W0, Math.round((1 - e) * W0) + (e >= 1 && Math.sin(T * 7 + k * 1.9) > 0.55 ? 1 : 0))), rows = cut(Bu, y, k), cutR = o ? rows.map((r) => r.slice(o)) : rows;
+          if (o < W0) sprAt(cutR, d > 0 ? snap(wx) : snap(wx) - (W0 - o) * s2, snap(y), d < 0, 1, s2);
+        }
+      }
+      continue;
+    }
     box(snap(Math.min(wx, wx + d * 0.18 * t)), snap(fw.y0), snap(Math.max(wx, wx + d * 0.18 * t)), snap(fw.y1), INK.fire, warn || on ? 1 : 0.5, 0, 10, 0);   // its seam, smouldering red (seen
     // before it burns: which stretch of the wall is the fire's), lit up when it is about to
-    for (let y = fw.y0 + 0.5 * t, k = 0; y < fw.y1 - 0.2 * t; y += 1.1 * t, k++) { const ex = snap(wx + d * 0.28 * t) - (d < 0 ? 2 * P : 0); box(ex, snap(y), ex + 2 * P, snap(y) + 2 * P, INK.flame, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.5) : on ? 1 : 0.45, 0, 10, 0); }   // its embers
+    for (let y = fw.y0 + 0.5 * t, k = 0; y < fw.y1 - 0.2 * t; y += 1.1 * t, k++) { const ex = snap(wx + d * 0.28 * t) - (d < 0 ? 2 * P : 0); box(ex, snap(y), ex + 2 * P, snap(y) + 2 * P, th.hazard === 'avalanche' ? PAL.white : INK.flame, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.5) : on ? 1 : 0.45, 0, 10, 0); }   // its embers
     if (on) {
       const n = Math.max(1, Math.round((fw.y1 - fw.y0) / (0.9 * t))), hw = (fw.y1 - fw.y0) / n / 2;
       for (let i = 0; i < n; i++) {
         const y = fw.y0 + (i + 0.5) * 2 * hw, len = (0.55 + 0.45 * Math.abs(Math.sin(T * 13 + i * 1.7))) * FIREWALL.reach * t;
+        if (th.hazard === 'avalanche') { const il = (0.7 + 0.3 * Math.abs(Math.sin(i * 1.7))) * FIREWALL.reach * t; F(wx + (d * il) / 2, y, 0, hw, (-d * il) / 2, 0, PAL.white, 1, 6, hw, il / 2, 2 * hw); F(wx + d * il * 0.3, y, 0, 0.5 * hw, -d * il * 0.3, 0, PAL.gray, 1, 6, 0.5 * hw, il * 0.3, hw); continue; }   // ice spikes (Fuji's, d35 «А»)
         F(wx + (d * len) / 2, y, 0, hw, (-d * len) / 2, 0, INK.fire, 1, 6, hw, len / 2, 2 * hw);
         F(wx + d * len * 0.3, y, 0, 0.6 * hw, -d * len * 0.3, 0, INK.flame, 1, 6, 0.6 * hw, len * 0.3, 1.2 * hw);
       }
@@ -5141,6 +6138,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   for (const w of lv.winds) if (seen(w.y0, w.y1)) {   // a gust's way (WIND): its koinobori; sakura petals drifting its way before it, flying through it, tumbling, white streaks with them
     const u = (T + w.ph) % (WIND.on + WIND.off), s = u - (WIND.off - WIND.warn), d0 = w.dir, sc = lv.tile;   // (the kit's carp's size)
     const k = u < 0.6 ? 1 - u / 0.6 : s < 0 ? 0 : s < WIND.warn ? (0.6 * s) / WIND.warn : 0.6 + 0.4 * Math.min(1, (s - WIND.warn) / 0.25);   // how full: limp, filling, flying, then falling back
+    if (th.village) {   // the Village's (Д89 «А», Д106 «F»: koinobori on a rope across the shaft, off the sheet): the rope at the pole's height, its carps hanging limp,
+      // then leaning down the wind as it fills (each row of a carp shifted the more the lower: a shear, its pixels kept), flying out with the gust
+      const q = PIX.base, Wd = lv.r - lv.l, P = PIX.size, sn = (v) => Math.round(v / P) * P, yr = w.py, ry = (x) => sn(yr + 0.35 * lv.tile * (1 - Math.pow((2 * (x - lv.l)) / Wd - 1, 2)));
+      for (let x = lv.l; x < lv.r; x += P) box(sn(x), ry(x), sn(x) + P, ry(x) + P, PAL.gray, DIM, 0, 10, 0);
+      VIL2.rope.carps.forEach((c, i) => { const n = c.rows[0].length, cx2 = lv.l + (0.06 + 0.88 * c.u) * Wd, x0 = sn(cx2 - (n * q) / 2), y0 = ry(cx2) + sn(c.hang * q), wv = 1 + 0.15 * Math.sin(T * 9 - i * 1.3) * k;
+        c.rows.forEach((r, j) => { const sh = sn(d0 * k * wv * j * 0.85 * q); for (let a = 0; a < n;) { const ch = r[a]; let e = a + 1; while (r[e] === ch) e++;
+          if (ch !== '.') { const lc = ch === 'd' ? 's' : ch.toLowerCase(); box(x0 + sh + a * q, y0 + j * q, x0 + sh + e * q, y0 + (j + 1) * q, PAL[ICON_INK[lc]], lc !== ch ? 1.5 : 1, 0, 10, 0); } a = e; } }); });
+    } else {
     let cx = w.px + d0 * 0.55 * lv.tile, cy = w.py;
     const tilt = (i) => (1 - k) * (Math.PI / 2) * (0.9 + 0.05 * i) + k * (0.08 + Math.sin(T * 9 - i * 1.3) * (0.06 + 0.07 * i));   // a part's slope: down, or along the wind, waving
     line(w.px, cy, cx, cy, PAL.gray, 1, 2);   // the pole, the mouth's hoop; then the kit's blue carp (scales dotted) down its length: hanging, or along the wind
@@ -5151,6 +6156,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       if (i === 0) { const ex = cx + d0 * Math.cos(a) * 0.55 * L * sc + d0 * Math.sin(a) * 0.08 * sc, ey = cy + Math.sin(a) * 0.55 * L * sc - Math.cos(a) * 0.08 * sc; disc(ex, ey, 0.2 * sc, PAL.gray, 1); disc(ex, ey, 0.09 * sc, PAL.black, 1); }   // its eye
       if (i === 2) for (const e of [-0.45, 0.45]) line(nx, ny, nx + d0 * Math.cos(a + e) * 0.5 * sc, ny + Math.sin(a + e) * 0.5 * sc, PAL.blue, 1, (0.2 * sc) / kitP, 1);   // its tail, forked
       cx = nx; cy = ny;
+    }
     }
     if (s < 0) continue;   // the petals, since they set off
     const Wd = lv.r - lv.l, P = PIX.size, sn = (v) => Math.round(v / P) * P, gust = s >= WIND.warn;
@@ -5185,8 +6191,19 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   // round it, behind it, only what its setting hangs it on: the tram's wire, the spider's thread, the crane's cable and hook.
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
-    const d = df.rail || df.slide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
-    if (front) return;
+    const d = df.glide || df.quake || df.street || df.bone ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
+      const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
+      F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);
+    }
+    if (front && df.bone && bs.state === 'sweep') {   // Koschei's sweep (KOSCH): his blade's white arc low along the floor in front of him
+      const [sw] = bossSize(bs), x0 = x + d * 0.3 * sw, x1 = x + d * (0.5 * sw + df.bone.reach * R), y = lv.floor - 0.5 * R, u = Math.min(1, bs.st / df.bone.sweep);
+      line(x0, y - 1.0 * R, x0 + (x1 - x0) * u, y - 0.1 * R, PAL.white, 1, 3); line(x0, y - 0.55 * R, x0 + (x1 - x0) * u, y + 0.25 * R, PAL.white, 0.8, 2); line(x0, y - 0.2 * R, x0 + (x1 - x0) * u * 0.85, y + 0.4 * R, PAL.gray, 1, 1);
+    }
+    if (front) {   // the Tsuchigumo tangled in its own thread (SPIDER): loops of it across its drawing while a stomp hurts it
+      if (k === 'cart' && bs.state === 'dazed') { const [w, h] = bossSize(bs), y = b.maxY - 0.55 * h; for (let i = -1; i <= 1; i++) line(x - 0.42 * w, y + i * 0.16 * h - 0.1 * h, x + 0.42 * w, y + i * 0.16 * h + 0.1 * h, PAL.white, 0.85, 1); }
+      return;
+    }
     b.lookDir = d;   // (its drawing on it turns too: LOOK_FACE)
     if (k === 'tram') { const wy = b.minY - 1.15 * R; box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0); }   // the overhead wire its pantograph (in its drawing) runs on
     else if (k === 'koschei' && bs.hp === 1) { const ny = b.minY - 1.0 * R + Math.sin(T * 3) * 0.08 * R, nx = Math.round(x / P) * P; F(nx + P / 2, ny, 0.55 * R, 0, 0, 0.8 * R, gr, 0.18, 1); box(nx, ny - 0.6 * R, nx + P, ny + 0.45 * R, gr, 1, 0, 10, 0); box(nx - P, ny - 0.76 * R, nx + 2 * P, ny - 0.5 * R, gr, 1, 0, 10, 0); box(nx, ny - 0.7 * R, nx + P, ny - 0.56 * R, INK.dark, 1, 0, 10, 0); if (Math.floor(T * 2) % 2) box(nx, ny + 0.3 * R, nx + P, ny + 0.38 * R, PAL.white, 1, 0, 10, 0); }   // his last heart: the needle his death is in, over his crown
@@ -5198,8 +6215,23 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     const b = e.body, t = e.type, V = FOREST_V[t];
     b.look = t + '-' + V; b.lookDir = t === 'kikimora' ? (b.cx < (lv.l + lv.r) / 2 ? 1 : -1) : Math.sign(g.hero.cx - b.cx) || 1;
   };
+  try { drawKept = [F, disc, box, onGrid, icon, iconSpin, seen, door, hut, farmhouse, funaya, skEyes, skDoorAt, skInside, izba, mnShop, mnStash, pech, brace, aircon, rod, line, mnLamp, mnOre, mnBatsAt, mnBats, mnThing, mnFar, skOak, junkRect, skyRect, panelsRect, villageRect, seaRect, skazkaRect, mineRect, fujiRect, townRect, vaultSpan, spr, look, forestFoe]; } catch (err) { if (drawKept !== false) console.warn('drawKept:', err.message); drawKept = false; }   // (see drawKept; a helper gone
+  // from draw and still named here: warned, not a broken frame)
   if (lv.boss && !lv.boss.dead && lv.boss.look) look(lv.boss, false);   // its look's parts behind it
-  for (const e of lv.enemies) if (FOREST_V[e.type]) forestFoe(e);   // a forest enemy's look, before the bodies are drawn
+  for (const e of lv.enemies) if (FOREST_V[e.type]) forestFoe(e); else if (e.type === 'komori') e.body.look = 'komori-' + KOMORI_V + '-' + (e.body.frame || 1); else if (e.type === 'tofu' || e.type === 'tofuMini' || e.type === 'tumbler' || e.type === 'nurikabe') { e.body.look = k9Look(e); e.body.lookDir = e.dir || 1; }   // (К9)
+  for (const b of [...lv.folk.map((f) => f.kind === 'ume' && f.body), ...(g.followers || []).map((f) => f.kind === 'ume' && f.body)]) if (b) b.look = 'ume-' + UME_V;   // Ume's own
+  // look (his leaf in it), waiting and coming along
+  // The cube three and Ume drawn crisp, a sheet pixel a game pixel on the pixel grid, over their soft bodies (unseen): its foot on the body's foot (hanging: its
+  // middle on the body's middle), it moves, hops and falls as its body does; warped over a body squashing under it, its pixels smeared (the owner's
+  // pixel-perfect rule). The tofu and the tumbler face the way they go
+  const crispLook = (b, flip, al = 1) => { if (!b || !b.look || !(K9_SPR[b.look] || UME_SPR[b.look]) || !seen(b.minY - R, b.maxY + R)) return;
+    const rows = k9Rows(b.look, b), q = PIX.base, W = rows[0].length, H = rows.length, hang = b.look.startsWith('nurikabe') && b.look.endsWith('-1'), Pz = PIX.size, snz = (v) => Math.round(v / Pz) * Pz;
+    vsp(rows, snz(b.cx - (W * q) / 2), snz(hang ? b.cy - (H * q) / 2 : b.maxY - H * q), flip, al, q); };
+  for (const e of lv.enemies) if (K9_SPR[e.body.look]) {   // (a tumbler's last quarter of its turn: its tilted pose mirrored; a tofu bit faint while it is harmless)
+    const tb = e.type === 'tumbler' && e.flip > 0 && (TUMBLE.air + 0.2 - e.flip) / TUMBLE.air > 0.8, safe = e.type === 'tofuMini' && e.t < (e.def.safe || 0);
+    crispLook(e.body, !e.body.look.startsWith('nurikabe') && ((e.body.lookDir || 1) < 0) !== tb, safe ? 0.45 + 0.55 * (e.t / e.def.safe) : 1);
+  }
+  for (const f of [...lv.folk, ...(g.followers || [])]) if (f.kind === 'ume') crispLook(f.body, false);   // (a komori's frame: b.frame)   // a forest enemy's look, before the bodies are drawn
   for (const e of lv.enemies) if (e.type === 'worm' && seen(e.body.minY - 3 * R, e.body.maxY + 3 * R)) {   // a worm's tubes, behind its knot
     e.tubes(R, T).forEach((tube, k) => {
       const n = tube.length;
@@ -5208,11 +6240,14 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     });
   }
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart; a falling stalactite
+    if (s.wave) { const y = lv.floor - 0.3 * R, f = Math.sin(T * 20 + s.x * 0.1) * 0.08 * R; F(s.x, y, 0.95 * R, 0, 0, 0.4 * R + f, INK.spike, 1, 0); F(s.x - 0.25 * Math.sign(s.vx) * R, y - 0.18 * R, 0.5 * R, 0, 0, 0.18 * R, PAL.white, 1, 0); continue; }   // Onamazu's quake: a red crest running along the floor
     if (s.rock) { F(s.x, lv.floor + 1, s.r * 1.3, 0, 0, s.r * 0.35, INK.dark, 1, 0); disc(s.x, s.y, s.r, PAL.gray, 1); disc(s.x - 0.3 * s.r, s.y - 0.3 * s.r, 0.3 * s.r, PAL.white, 1); continue; }   // the Minecart's rocks, a shadow under each on the floor
-    if (s.icicle) { icicle(s.x, s.y - 0.3 * R); continue; }
+    if (s.icicle) { icicle(s.x, IC ? s.y + s.r - IC.fall.length * PIX.base : s.y - 0.3 * R, true); continue; }   // (the sheet's: its tip at the bottom of what hurts, its streaks over it)
     if (s.bone) { const an = T * 7 + s.x * 0.05, ca = Math.cos(an) * s.r, sa = Math.sin(an) * s.r; F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); line(s.x - ca, s.y - sa, s.x + ca, s.y + sa, INK.spike, 1, 2); for (const q of [-1, 1]) for (const p of [-1, 1]) disc(s.x + q * ca + p * 0.35 * sa, s.y + q * sa - p * 0.35 * ca, 0.32 * s.r, INK.spike, 1); continue; }   // Koschei's: a bone, spinning, red
-    F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); disc(s.x, s.y, s.r, INK.spike, 1);
-    if (s.fire) disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1);
+    F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1);
+    if (s.fire && HB) { hazBlob(s.x, s.y, (s.vx || 0) < 0); continue; }   // (facing the way it flies: no flipping to and fro, the owner's «рваная»)
+    disc(s.x, s.y, s.r, INK.spike, 1);
+    if (s.fire) { if (th.hazard === 'avalanche') { disc(s.x, s.y, s.r * 0.8, PAL.white, 1); disc(s.x + s.r * 0.2, s.y + s.r * 0.2, s.r * 0.35, PAL.gray, 1); } else disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1); }   // (an avalanche's: a snowball in its red rim)
   }
   if (g.swarm && g.power('swarm')) for (const b of g.swarm) (b.trail || []).forEach(([x, y], i, tr) => { const f = (i + 1) / tr.length; disc(x, y, b.R * (0.3 + 0.55 * f), b.color.base, 0.3 + 0.55 * f); });   // each clone's trail, in its colour (user)
   const tl = g.tail, hb = g.hero, bw = RAINBOW.band * R;   // a rainbow's tail: six bands along the hero's way, fading to its end
@@ -5261,35 +6296,123 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (lv.fire && lv.fire.y - 2.4 * R < bot) {   // the fire, between the walls: a red body under two layers of tongues, red behind and orange in front
     const fy = lv.fire.y, W = lv.r - lv.l;
-    box(lv.l, fy, lv.r, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
-    box(lv.l, fy + 0.9 * R, lv.r, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
-    box(lv.l, fy + 2.2 * R, lv.r, fy + H + 200, INK.fire, 1, 0, 10, 5);
     const steady = (i, k) => { const q = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return q - Math.floor(q); };   // a tongue's own numbers, the same every frame
-    for (const [c, gap, h0, h1, w0, w1, drift, k, off] of [[INK.fire, 0.7, 1.3, 1.45, 0.5, 0.5, 0.3, 1, 0], [INK.flame, 0.7, 0.8, 0.9, 0.36, 0.36, 0.3, 2, 0.5]]) {   // evener than at first (user)
-      const n = Math.ceil(W / (gap * R));
-      for (let i = 0; i < n; i++) {   // alike and evenly set, the front row between the back one's, a gentle flicker, drifting along and wrapping round,
-        const a = steady(i, k), f = 5 + 2 * steady(i, k + 3), x = lv.l + ((((i + 0.5 + off) / n) * W + T * drift * R) % W + W) % W;
-        const hw = Math.min((w0 + (w1 - w0) * a) * R, x - lv.l, lv.r - x);   // and narrower by a wall
-        if (hw < 0.5) continue;
-        const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3))) / 2;
-        F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
+    // A world's own hazard from below (th.hazard): its look only; the fire's place, speed, damage and warnings are the game's and stay. (Fuji's an avalanche:
+    // owner, d34 «В»: «в ледяном мире горы Фудзи не должно быть зелени или огня».) A world without one keeps the fire with its mouth
+    if (HAZ_SPR[th.hazard]) {
+      // Each world's own (К13 «А»: each world its own reason the floor rises; th.hazard): the Village's spring field burning (noyaki), the Mine's groundwater
+      // flooding up, Fuji's avalanche, the Sea's spring tide, Tokyo's fire in its alleys. Path A
+      // (owner: «внимательно повторить листы жпт»): its sheet's own pixels (HAZ_SPR), a sheet pixel two game pixels (the sheet drew the hero half size), its
+      // band laid wall to wall, every other copy mirrored so no seam shows, drifting with the wind, the flames over its front flickering a pixel; its ground on
+      // down to the keys; its burst rising out of the front and falling back as the fire throws a jet
+      const S = HAZ_SPR[th.hazard], P = PIX.size, s = 2 * PIX.base, sn = (x) => Math.round(x / P) * P;
+      if (!S.body) { const n = {}; for (const r of S.band.slice(-8)) for (const ch of r) if (ch !== '.' && ch !== 'k') n[ch] = (n[ch] || 0) + 1; S.body = Object.keys(n).sort((a, b) => n[b] - n[a])[0] || 'k'; }   // its ground's own ink
+      // How it moves is how its thing moves (owner, 2026-10-24: «вся анимация подчиняется объекту, а базово правилам дисней и пиксар»; «опасность некрасиво сверху
+      // обрезается, анимация рваная»). Its sheet's band is laid along the shaft without mirroring (that made a Rorschach of it), each copy over the next by
+      // D sheet pixels in a checker, so no seam shows; it drifts with the wind. Its front (the rows over S.front) stands up column by column (lift, whole sheet
+      // pixels, its gap filled with its body's ink): fire in tongues that rise and sink each at its own beat, water in waves travelling along, snow billowing
+      // forward; higher as it speeds up (К2: lv.fire.rush). So its top is never a straight line. Its bursts: the front swells where one is coming
+      // (anticipation), it is thrown up out of it in an arc (slow at the top: gravity), falls back in, and the front dips where it lands
+      const band = S.band, n = band[0].length, D = 6, st = n - D, y0 = sn(fy + 0.3 * R - S.front * s), yf = y0 + S.front * s, rush = lv.fire.rush || 0;
+      const mv = HAZ_MOVE[th.hazard] || HAZ_MOVE.noyaki, Amp = mv.amp + mv.rush * rush, TAUv = 2 * Math.PI, T = Math.floor(lv.t * mv.fps) / mv.fps;   // (its front in
+      // discrete states, the guide's time rule: water 6 a second, snow 8, fire 12; its drift and its bursts at the frame's)
+      const drift = lv.t * 0.25 * R, start = sn(lv.l - D * s - (((drift % (st * s)) + st * s) % (st * s))), cols = Math.ceil((lv.r - start) / s) + 1;
+      const jets = [];   // (its bursts now: where, and how far into their throw)
+      for (let k = 0; k < 3; k++) {
+        const cyc = lv.t * 0.45 + k / 3, tt = (cyc % 1) / 0.45;   // (seconds into its turn of 2.2)
+        if (tt > 1.3) continue;
+        const xc = sn(lv.l + (0.2 + 0.6 * steady(Math.floor(cyc), k + 7)) * W);
+        jets.push({ xc, tt });
+      }
+      const L = HAZ_LIFT.length >= cols ? HAZ_LIFT : (HAZ_LIFT.length = cols, HAZ_LIFT);
+      for (let g = 0; g < cols; g++) {
+        const X = start + g * s, u = X / s;
+        let h;
+        if (mv.kind === 'wave') h = 0.5 + 0.5 * (0.65 * Math.sin(TAUv * (u / mv.len - T * mv.speed)) + 0.35 * Math.sin(TAUv * (u / (0.57 * mv.len) + T * 0.6 * mv.speed) + 1.3));
+        else if (mv.kind === 'roll') { const b = 0.5 + 0.5 * Math.sin(TAUv * (u / mv.len - T * mv.speed)); h = b * b * (0.75 + 0.25 * Math.sin(TAUv * (u / (2.1 * mv.len) + T * 0.4 * mv.speed))); }
+        else h = (0.5 + 0.5 * Math.sin(T * mv.speed + u * 0.37 + 2 * Math.sin(u * 0.071))) * (0.55 + 0.45 * Math.sin(u / mv.len + T * 0.8));   // (a tongue's own beat)
+        let lf = Amp * h;
+        for (const j of jets) {   // the swell before a burst, the dip where it lands
+          const dx = (X - j.xc) / (6 * s), gs = Math.exp(-dx * dx);
+          if (j.tt < 0.25) lf += 0.6 * Amp * gs * (j.tt / 0.25) * (2 - j.tt / 0.25);   // (slow out)
+          else if (j.tt > 1.1) lf -= Amp * gs * Math.sin(((j.tt - 1.1) / 0.2) * Math.PI);
+        }
+        L[g] = Math.max(0, Math.round(lf));
+      }
+      const KT = 12;   // (the body's first KT rows lifted less and less under it: no straight line where the front meets the body)
+      const put = (ch, g0, g1, y, lift) => {   // a run of one ink over global sheet columns g0…g1 at row y (lift: 1 its front's, each column lifted its own; less, a share)
+        if (!lift) { const a = Math.max(start + g0 * s, lv.l), b = Math.min(start + g1 * s, lv.r); if (b > a) box(a, y, b, y + s, PAL[ICON_INK[ch]], 1, 0, 10, 0); return; }
+        for (let g = g0; g < g1;) { const l = Math.round(L[g] * lift); let e = g + 1; while (e < g1 && Math.round(L[e] * lift) === l) e++;
+          const a = Math.max(start + g * s, lv.l), b = Math.min(start + e * s, lv.r); if (b > a) box(a, y - l * s, b, y - l * s + s, PAL[ICON_INK[ch]], 1, 0, 10, 0); g = e; }
+      };
+      const row = (r, k, y, j, lift, keepK) => {   // copy k's row j: its runs, its first and last D columns a checker (the cross-fade with its neighbours)
+        const g0 = k * st;
+        for (let i = 0; i < n;) { const ch = r[i]; let e = i + 1; while (e < n && r[e] === ch) e++;
+          if (ch !== '.' && (keepK || ch !== 'k')) {
+            const m0 = Math.max(i, D), m1 = Math.min(e, st);
+            if (m1 > m0) put(ch, g0 + m0, g0 + m1, y, lift);
+            for (let q = i; q < Math.min(e, D); q++) if ((g0 + q + j) % 2 === 1) put(ch, g0 + q, g0 + q + 1, y, lift);
+            for (let q = Math.max(i, st); q < e; q++) if ((g0 + q + j) % 2 === 0) put(ch, g0 + q, g0 + q + 1, y, lift);
+          }
+          i = e; }
+      };
+      for (const j of jets) if (j.tt >= 0.25 && j.tt <= 1.15) {   // a burst thrown up in an arc out of the front (behind it: the front and its black come over it)
+        const b = S.burst, p = (j.tt - 0.25) / 0.9, hgt = (b.length + 6) * s * 4 * p * (1 - p), x = sn(j.xc - (b[0].length * s) / 2), yb = y0 + S.foot * s + b.length * s;
+        sprAt(b, x, sn(yb - hgt) - b.length * s, false, 1, s);
+      }
+      box(lv.l, yf, lv.r, fy + H + 200, PAL.black, 1, 0, 10, 0);   // black under its front
+      for (let g = 0; g < cols;) { const l = L[g]; let e = g + 1; while (e < cols && L[e] === l) e++;   // under a lifted front, its body's ink
+        if (l > 0) { const a = Math.max(start + g * s, lv.l), b = Math.min(start + e * s, lv.r); if (b > a) box(a, yf - l * s, b, yf + KT * s, PAL[ICON_INK[S.body]], 1, 0, 10, 0); }
+        g = e; }
+      for (let k = 0, x = start; x < lv.r; k++, x += st * s) {
+        if (x + n * s <= lv.l) continue;
+        band.forEach((r, j) => { const y = y0 + j * s; if (y - Amp * 2 * s < bot && y + s > top) row(r, k, y, j, j < S.front ? 1 : j < S.front + KT ? 1 - (j - S.front + 1) / (KT + 1) : 0, j < S.front); });
+        for (let y = y0 + band.length * s, j = 0; y < bot && j < 2 * band.length; y += s, j++) {   // its ground on down, its embers thinning out into the black
+          if (y + s <= top) continue;
+          const G = (S.ground || (S.ground = []))[k % 2] || (S.ground[k % 2] = []);   // (its rows the same every frame: made once)
+          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), (k % 2) + 50) * q.length), keep = 1 - j / (2 * band.length);
+            G[j] = [...q.slice(o) + q.slice(0, o)].map((ch, i) => (ch === S.body && steady(Math.floor((i + 3 * (Math.floor(j / 2) % 2)) / 4), Math.floor(j / 2) + 60) < keep ? ch : 'k')).join(''); }   // (its body's
+            // ink only: no crystal or sign repeated; thinned in clusters of 4 by 2, never single pixels: the guide's cluster rule)
+          row(G[j], k, y, band.length + j, false, false);
+        }
+      }
+    } else {
+      box(lv.l, fy, lv.r, fy + 0.9 * R, INK.fire, 1, 0, 10, 0);   // bright only at the top, then dimmer through the dither
+      box(lv.l, fy + 0.9 * R, lv.r, fy + 2.2 * R, INK.fire, 1, 0, 10, 4);
+      box(lv.l, fy + 2.2 * R, lv.r, fy + H + 200, INK.fire, 1, 0, 10, 5);
+      for (const [c, gap, h0, h1, w0, w1, drift, k, off] of [[INK.fire, 0.7, 1.3, 1.45, 0.5, 0.5, 0.3, 1, 0], [INK.flame, 0.7, 0.8, 0.9, 0.36, 0.36, 0.3, 2, 0.5]]) {   // evener than at first (user)
+        const n = Math.ceil(W / (gap * R));
+        for (let i = 0; i < n; i++) {   // alike and evenly set, the front row between the back one's, a gentle flicker, drifting along and wrapping round,
+          const a = steady(i, k), f = 5 + 2 * steady(i, k + 3), x = lv.l + ((((i + 0.5 + off) / n) * W + T * drift * R) % W + W) % W;
+          const hw = Math.min((w0 + (w1 - w0) * a) * R, x - lv.l, lv.r - x);   // and narrower by a wall
+          if (hw < 0.5) continue;
+          const hd = ((h0 + (h1 - h0) * a) * R * (0.92 + 0.08 * Math.sin(T * f + a * 6.3)) * (1 + 0.5 * (lv.fire.rush || 0))) / 2;   // (taller as it speeds up: К2)
+          F(x, fy + 0.35 * R - hd, hw, 0, 0, hd, c, 1, 6, hw, hd, 2 * hw);
+        }
+      }
+      // its mouth (user: a big open mouth wall to wall, fire bursting out of it): a black gum line on its rim, white fangs along it and
+      // big ones at the walls, and now and then a tall jet of flame out between them (to look at: the fire's blobs are what hurt)
+      box(lv.l, fy + 0.3 * R, lv.r, fy + 0.55 * R, INK.dark, 1, 0, 10, 0);
+      for (let n = Math.max(4, Math.round(W / (1.1 * R))), i = 0; i <= n; i++) {
+        const x = lv.l + (i / n) * W, big = i === 0 || i === n, hw = (big ? 0.45 : 0.28) * R, hd = (big ? 0.75 : 0.42) * R * (0.96 + 0.04 * Math.sin(T * 4 + i));
+        F(clamp(x, lv.l + hw, lv.r - hw), fy + 0.32 * R - hd, hw, 0, 0, hd, INK.white, 1, 6, hw, hd, 2 * hw);
+      }
+      for (let k = 0; k < 3; k++) {   // three jets in turn, each a moment every two seconds or so
+        const u = (T * 0.45 + k / 3) % 1;
+        if (u > 0.16) continue;
+        const x = lv.l + (0.2 + 0.6 * steady(Math.floor(T * 0.45 + k / 3), k + 7)) * W, h = Math.sin((u / 0.16) * Math.PI) * 2.2 * R;
+        F(x, fy - h / 2, 0.42 * R, 0, 0, h / 2 + 0.3 * R, INK.fire, 1, 6, 0.42 * R, h / 2 + 0.3 * R, 0.84 * R); F(x, fy - h * 0.35, 0.24 * R, 0, 0, h * 0.35 + 0.2 * R, INK.flame, 1, 6, 0.24 * R, h * 0.35 + 0.2 * R, 0.48 * R);
       }
     }
-    // its mouth (user: a big open mouth wall to wall, fire bursting out of it): a black gum line on its rim, white fangs along it and
-    // big ones at the walls, and now and then a tall jet of flame out between them (to look at: the fire's blobs are what hurt)
-    box(lv.l, fy + 0.3 * R, lv.r, fy + 0.55 * R, INK.dark, 1, 0, 10, 0);
-    for (let n = Math.max(4, Math.round(W / (1.1 * R))), i = 0; i <= n; i++) {
-      const x = lv.l + (i / n) * W, big = i === 0 || i === n, hw = (big ? 0.45 : 0.28) * R, hd = (big ? 0.75 : 0.42) * R * (0.96 + 0.04 * Math.sin(T * 4 + i));
-      F(clamp(x, lv.l + hw, lv.r - hw), fy + 0.32 * R - hd, hw, 0, 0, hd, INK.white, 1, 6, hw, hd, 2 * hw);
-    }
-    for (let k = 0; k < 3; k++) {   // three jets in turn, each a moment every two seconds or so
-      const u = (T * 0.45 + k / 3) % 1;
-      if (u > 0.16) continue;
-      const x = lv.l + (0.2 + 0.6 * steady(Math.floor(T * 0.45 + k / 3), k + 7)) * W, h = Math.sin((u / 0.16) * Math.PI) * 2.2 * R;
-      F(x, fy - h / 2, 0.42 * R, 0, 0, h / 2 + 0.3 * R, INK.fire, 1, 6, 0.42 * R, h / 2 + 0.3 * R, 0.84 * R); F(x, fy - h * 0.35, 0.24 * R, 0, 0, h * 0.35 + 0.2 * R, INK.flame, 1, 6, 0.24 * R, h * 0.35 + 0.2 * R, 0.48 * R);
-    }
     const w = lv.fire.warn;
-    if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
+    if (w && HB) { const u = 1 - w.t / FIRE.warn, e = u * u * (3 - 2 * u); hazBlob(w.x, fy + 0.6 * R - e * 1.2 * R, false); }   // where a blob is coming: it rises out of the front,
+    // slow in and slow out, and is thrown from there (no blinking)
+    else if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, th.hazard === 'avalanche' ? (u > 0.5 ? INK.spike : PAL.white) : u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
+  }
+  if (lv.fire && lv.fire.rush > 0 && lv.fire.y > cam + H) {   // the fire speeding up out of sight (in sight its front stands higher: no red band over it) (К2 «А»: «красноватый край снизу»): the screen's bottom edge red, in four steps fading up
+    // to over the keys, pulsing; not over the fire (in sight, its taller front says it)
+    const P = PIX.size, yb = cam + H, hh = (view.keep || 0) + 1.6 * R, a = lv.fire.rush * (0.8 + 0.2 * Math.sin(T * 7)), y1 = Math.min(yb, lv.fire.y), at = (k) => Math.round((yb - (k / 4) * hh) / P) * P;
+    for (let k = 4; k >= 1; k--) { const y0 = at(k), y2 = Math.min(y1, at(k - 1)); if (y2 > y0) box(lv.l, y0, lv.r, y2, INK.spike, a * (0.75 - 0.15 * k), 0, 10, 0); }   // (each step its own, denser down: the dither's dots don't add up)
   }
   for (const f of lv.folk) if (f.kind === 'cage' && !f.open && f.body && seen(f.body.minY - R, f.body.maxY)) {   // a cage: white bars, a yellow lock (yellow: touch it)
     const b = f.body, P = PIX.size, x0 = b.cx - 0.95 * R, x1 = b.cx + 0.95 * R, y1 = b.maxY + 1, y0 = y1 - 1.9 * R;
@@ -5299,7 +6422,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   for (const e of lv.enemies) if (e.over && seen(e.body.minY - 2 * R, e.body.maxY)) {   // one that can be stomped, the hero over it (STOMP, Game.frame): a white chevron
     // over it, bobbing, «land here» (tester: «вот этой границы хитбокса врагов я до конца понять не смог»)
-    const b = e.body, y = b.minY - 0.6 * R + Math.round(Math.sin(T * 6) * 1.5) * PIX.size, hw = 0.3 * R, hd = 0.2 * R;
+    const b = e.body, y = b.minY - 0.6 * R + Math.round(Math.sin(T * 6) * 1.5 * PIX.keep) * PIX.size, hw = 0.3 * R, hd = 0.2 * R;
     F(b.cx, y, hw, 0, 0, -hd, PAL.white, 1, 6, hw, hd, 2 * hw);
   }
   const bs = lv.boss;
@@ -5311,35 +6434,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
     box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
   }
-  if (bs && !bs.dead && bs.look) look(bs, true);   // its look's parts before it (LOOKS), instead of what is below
-  else if (bs && !bs.dead && bs.def && bs.def.rat) {   // the Rat King's round ears, its tail
-    const b = bs.body, w = 0.45 * (b.maxX - b.minX), up = b.up && b.up.fails ? 1 : -1;
-    for (const d of [-1, 1]) { disc(b.cx + d * w, b.minY + 0.15 * R, 0.4 * R, PAL.gray, 1); disc(b.cx + d * w, b.minY + 0.15 * R, 0.2 * R, PAL.purple, 1); }
-    for (let k = 0; k < 8; k++) disc(b.maxX + k * 0.18 * R, b.maxY - 0.3 * R - Math.sin(T * 6 + k * 0.7) * 0.15 * R * k * 0.3, 0.07 * R, PAL.gray, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.pigeon) {   // the Pigeon's wings, flapping, and its beak
-    const b = bs.body, w = 0.6 * (b.maxX - b.minX), f = Math.sin(T * (bs.state === 'dive' ? 22 : 9));
-    for (const d of [-1, 1]) F(b.cx + d * w, b.cy - 0.1 * R + f * 0.25 * R, 0.55 * R, d * 0.2 * R, 0, (0.3 + 0.12 * f) * R, PAL.gray, 1, 0);
-    disc(b.cx, b.cy + 0.15 * (b.maxY - b.minY), 0.16 * R, INK.flame, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.crane) {   // the Crane's load: a cable up out of sight, its hook block, two slings to the load's shoulders
-    const b = bs.body, P = PIX.size, cx = Math.round(b.cx / P) * P, hy = b.minY - 0.7 * R;
-    box(cx - P, top, cx + P, hy, PAL.gray, 1, 0, 10, 0); box(cx - 0.3 * R, hy, cx + 0.3 * R, hy + 0.25 * R, PAL.gray, 1, 0, 10, 0);
-    for (const d of [-1, 1]) for (let k = 0; k <= 6; k++) { const u = k / 6, x = Math.round((cx + d * 0.55 * (b.maxX - b.cx) * u) / P) * P, y = Math.round((hy + 0.25 * R + (b.minY + 0.15 * (b.maxY - b.minY) - hy - 0.25 * R) * u) / P) * P; box(x - P / 2, y - P / 2, x + P / 2, y + P / 2, PAL.gray, 1, 0, 10, 0); }
-  } else if (bs && !bs.dead && bs.def && bs.def.tram) {   // the Tram's car round it, in the town's blue: dark windows, a white band, its pantograph up to the wire
-    const b = bs.body, hw = 0.62 * (b.maxX - b.minX), y1 = lv.rail.y, y0 = b.cy - 0.05 * (b.maxY - b.minY), hgt = y1 - y0, wy = b.minY - 1.2 * R, P = PIX.size;
-    box(lv.l, wy, lv.r, wy + P, PAL.gray, 1, 0, 10, 0);   // the overhead wire
-    for (let k = 0; k <= 8; k++) { const u = k / 8, x = Math.round((b.cx - 0.5 * R + R * Math.abs(u - 0.5)) / P) * P, y = Math.round((b.minY - (b.minY - wy) * u) / P) * P; box(x - P, y - P, x + P, y, PAL.gray, 1, 0, 10, 0); }
-    box(b.cx - hw - 2.5, y0 - 2.5, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0, b.cx + hw, y1, th.block, 1, 0);
-    for (let k = -1; k <= 1; k++) box(b.cx + k * 0.62 * hw - 0.22 * hw, y0 + 0.18 * hgt, b.cx + k * 0.62 * hw + 0.22 * hw, y0 + 0.55 * hgt, INK.dark, 1, 0, 10, 0);
-    box(b.cx - hw, y0 + 0.68 * hgt, b.cx + hw, y0 + 0.78 * hgt, PAL.white, 1, 0, 10, 0);
-    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.rail) {   // the Minecart's cart, in front of it: dark, a white rim, two wheels on the rail
-    const b = bs.body, hw = 0.55 * (b.maxX - b.minX), y0 = b.cy, y1 = lv.rail.y;
-    box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
-    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
-  }
-  if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
+  if (bs && !bs.dead && bs.look) look(bs, true);   // its look's parts before it (LOOKS)
+  if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
   if (g.warns.length) {   // threats coming down into view (see Game.threats): a red sign under the HUD over where each comes in
-    const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2) * PIX.size;
+    const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size;
     for (const x of g.warns) icon('warn', clamp(x, lv.l + hw, lv.r - hw), wy, 1, wk);
   }
   if (g.power('bubble') && (g.gunT > 1 || Math.floor(T * 5) % 2 === 0)) {   // a bubble round the hero (BUBBLE): thin purple, wobbling, a white shine; blinking its last second
@@ -5348,7 +6446,6 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   }
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
     disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, (g.power('smash') ? 0.22 : 0.15) * R, g.power('smash') ? INK.flame : INK.white, 1);   // orange: the next one rams
-  for (let k = 0; k < nDots; k++) { const u = k / Math.max(1, JUMP.dots - 1); disc(dots[2 * k], dots[2 * k + 1], (2.4 - 1.2 * u) * PIX.base, INK.white, 1); }   // the slingshot's arc: solid dots that shrink (tiny see-through ones would dither to crumbs)
   if (CINE) cineMotes(this, g, lv, cam, H, box, disc, T);
   const nFront = this.nf - front;
   gl.bindVertexArray(null);
@@ -5364,17 +6461,22 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   gl.disable(gl.BLEND);
   const pg = this.pBg;
   gl.useProgram(pg.p);
-  gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, lv.l, lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);
-  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win === 'brick' ? 4 : th.win === 'clouds' ? 3 : th.win === 'grid' ? 2 : th.win ? 1 : 0);
+  gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, menu ? -1e6 : lv.l, menu ? 1e6 : lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);   // (the main screen: no walls)
+  gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win === 'clouds' ? 3 : th.win === 'grid' ? 2 : 0);
   gl.uniform3fv(pg.u.uWall, th.wall); gl.uniform3fv(pg.u.uWallD, th.wallD); gl.uniform3fv(pg.u.uLip, th.lip);
   gl.bindVertexArray(this.emptyVao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
+  if (menu) {   // the main screen: under the colours' row its own ink, as before (MENU_BG's last)
+    const k = MENU_BG.rgb; gl.enable(gl.SCISSOR_TEST); gl.scissor(0, 0, lw, Math.max(0, lh - Math.round((g.menuSplit || 0.5 * H) / P)));
+    gl.clearColor(k[9], k[10], k[11], 1); gl.clear(gl.COLOR_BUFFER_BIT); gl.clearColor(0, 0, 0, 0); gl.disable(gl.SCISSOR_TEST);
+  }
   gl.enable(gl.BLEND);
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
   if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
-  this.drawFeat(0, back);
+  if (menu) for (let i = 0; i + 1 < farR.length; i += 2) this.drawFeat(farR[i], farR[i + 1] - farR[i]);   // (the main screen: its far view only)
+  else this.drawFeat(0, back);
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
   gl.uniform2f(ps.u.uOffset, 0, RENDER.shadowOffset); gl.uniform1f(ps.u.uShadowA, RENDER.shadowA);
@@ -5424,14 +6526,29 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) light((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 1.2, 3.4); }   // Tokyo's lit neon
     for (const sp of lv.spots) if (!sp.used) light(sp.x, sp.y, 1.4, 3.2);   // the flip side's pools glow (its way back out)
     for (const [x, y, r0 = 0.9, r1 = 2.6] of vlamps) light(x, y, r0, r1);   // the Village's stone lanterns, the Dark Forest's fences, candles and moon (see their kits)
+    for (const e of lv.enemies) if (e.type === 'komori' && FOE_SPRITES[e.body.look]) {   // a komori's eyes (its rows' 'o'), a small light; more as it warns and dives (KOMORI)
+      const b = e.body, [u, v] = spriteEyes(b.look), k = e.cs === 'warn' || e.fierce() ? 2.2 : 1;
+      light(b.cx + ((b.lookDir || 1) < 0 ? -u : u) * PIX.base, b.cy + v * PIX.base, 0.14 * k, 0.45 * k);
+    }
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y - (CINE ? cineRide(lv, c.x, c.y, COIN.r * R, cam, H) : 0), 0.5, 1.3);   // (the fork: where it is drawn)
-    const pd = this.pDark;
+    const ramp = RAMP_ON && !CINE && this.pRamp && this.target.scene, pd = ramp ? this.pRamp : this.pDark;   // (the cinematic fork keeps the old dark for now)
+    if (ramp) {   // the drawn screen copied, then laid over again by steps of light (RAMP_FS)
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.target.sceneFb);
+      gl.blitFramebuffer(0, 0, lw, lh, 0, 0, lw, lh, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.disable(gl.BLEND);
+    }
     gl.useProgram(pd.p); grid(pd.u);
     gl.uniform4fv(pd.u['uLights[0]'], L); gl.uniform1i(pd.u.uN, n); gl.uniform2f(pd.u.uFire, lv.fire ? lv.fire.y / P : 1e9, (3 * R) / P);
+    if (ramp) {
+      if (this.rampTh !== th) { this.rampTh = th; this.rampBuf = rampOf(th); }
+      gl.uniform3fv(pd.u['uRamp[0]'], this.rampBuf);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.target.scene); gl.uniform1i(pd.u.uScene, 0);
+    }
     gl.bindVertexArray(this.emptyVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (ramp) { gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND); }
   }
   gl.bindVertexArray(null);
   if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)
@@ -5443,6 +6560,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
 // The menu's frame (owner, 2026-10-23, the Figma «Main»): its backdrop (MENU_FS) and the hero alone over it, big, to drag and press (menuTouch in
 // game.js): its shadow, body, face and the puffs a poke sends off, on the game-pixel grid like the levels; no 2.5D, nothing of a level.
 Renderer.prototype.drawMenu = function (g, alpha) {
+  if (g.menuBack) {   // over its world's own background (owner, 2026-10-24; Game.menuBackdrop): that level's back and far view (draw's `menu`), at the menu's camera and time, the hero on its floor
+    const real = g.lv, bk = g.menuBack; bk.cam = real.cam; bk.t = real.t; g.lv = bk;
+    try { this.draw(g, alpha); } finally { g.lv = real; }
+    return;
+  }
   const gl = this.gl, lv = g.lv, hero = g.hero, W = this.w, H = this.h, sig = hero.id + ',';
   this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.nSm = 0; this.route = 0;
   this.idxDirty = sig !== this.idxSig; this.kolobok = false;

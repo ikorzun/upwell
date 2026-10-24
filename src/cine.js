@@ -13,9 +13,10 @@ const CINE_ON = (() => {
   // bonus (?bonus=A-E), the bonuses' depth to pick from (owner: «У монет и сердец потерялся объем»; no 3D engine: «будем отрисовывать кодом псевдо 3д»): A as at
   // first, flat; B in depth toward the eye (SMALL); C a token's thickness, three copies a tone darker; D as B, deeper; E turning with its thickness (THICK
   // of its pixels) on the side turned to us, in its own inks a tone darker: the owner's pick («Е»), the default
-  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
+  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], fxLv: null, lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
 })();
-// The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
+// The 2.5D now: CINE_ON, or null for 2D. On where the player has set it on (the settings' switch, cineUse; 2D by default, owner 2026-10-24: «По умолчанию
+// игра в 2d»; ?plain or #plain off, ?cine on) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
 let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
 const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || !!th.town || !!th.skazka || /[?&]cine\b/.test(location.search));   // the worlds done: the Village,
@@ -94,10 +95,10 @@ void main() {
   vec3 col = texelFetch(uFar, tc, 0).rgb;
   bool well = uv.x > uWell.x && uv.x < uWell.y;
   if (well) {
-    col = mix(col, texture(uFarB, uv).rgb, uK.x);   // out of focus
-    col *= 1.0 - uK.z * texture(uSoft, uv + uShOff).r;   // the play's soft shadow
-    vec2 eu = uv + uExOff; vec4 ex = texelFetch(uPlay, clamp(ivec2(floor(eu * uLow)), ivec2(0), ivec2(uLow) - 1), 0);
-    if (pl.a < 0.5 && ex.a > 0.5 && texture(uSoft, eu).r > 0.45) col = mix(col, ex.rgb * 0.3, uK.w);   // its thickness (the big shapes only: not the coins')
+    if (uK.x > 0.0) col = mix(col, texture(uFarB, uv).rgb, uK.x);   // out of focus (each part at 0 not sampled at all: perf)
+    if (uK.z > 0.0) col *= 1.0 - uK.z * texture(uSoft, uv + uShOff).r;   // the play's soft shadow
+    if (uK.w > 0.0) { vec2 eu = uv + uExOff; vec4 ex = texelFetch(uPlay, clamp(ivec2(floor(eu * uLow)), ivec2(0), ivec2(uLow) - 1), 0);
+      if (pl.a < 0.5 && ex.a > 0.5 && texture(uSoft, eu).r > 0.45) col = mix(col, ex.rgb * 0.3, uK.w); }   // its thickness (the big shapes only: not the coins')
   }
   bool lit3 = false;   // (a thing's front or depth: lit as the things, a little)
   if (uK3.x > 0.0 && texture(uSoft, uv).r > 0.003) {   // 2.5D (the system above feat): the ledges deep, then the small things over them
@@ -112,7 +113,7 @@ void main() {
     L += uLC[i] * f * f * uL[i].w; G += uLC[i] * exp(-r * r * 36.0) * uL[i].w;
   }
   col *= lit3 ? mix(vec3(1.0), L, 0.45) : L;
-  if (well && !lit3) {   // the haze: faint and dark, drifting, thicker low down; lit where a light reaches it through the gaps (the rays)
+  if (well && !lit3 && (uK.y > 0.0 || uK2.y > 0.0)) {   // the haze: faint and dark, drifting, thicker low down; lit where a light reaches it through the gaps (the rays)
     float fg = noise(vec2(uv.x * 2.4 + uTime * 0.025, uv.y * 3.2 / uAsp - uTime * 0.04)) * 0.65 + noise(vec2(uv.x * 7.0 - uTime * 0.05, uv.y * 10.0)) * 0.35;
     float dn = uK.y * smoothstep(0.25, 0.85, fg) * (0.6 + 0.4 * (1.0 - uv.y));
     col += uFogC * dn + texture(uRays, uv).rgb * uK2.y * (0.25 + dn * 2.2);
@@ -132,6 +133,7 @@ void main() {
 if (CINE_ON) {
   const gumMake = Renderer.prototype.makeTarget, gumFeat = Renderer.prototype.feat, gumInitW = Renderer.prototype.init;
   Renderer.prototype.init = function () {
+    this.cine = null; this.pComp = null;   // (a lost context's: not deleted in the new one; gumInitW's makeTarget the plain one, this one's below lets it go: QA)
     if (!gumInitW.call(this)) return false;
     try {
       const gl = this.gl;
@@ -139,7 +141,8 @@ if (CINE_ON) {
       this.pRays = program(gl, BG_VS, CINE_RAYS_FS); this.pComp = program(gl, BG_VS, CINE_COMP_FS);
     } catch (err) { console.error(err); return false; }
     this.fFar = new Float32Array(14 * 512); this.nFar = 0; this.fSt = new Float32Array(14 * 1024); this.nSt = 0; this.fSm = new Float32Array(14 * 1024); this.nSm = 0; this.route = 0;
-    this.cine = null; if (this.low) this.makeTarget();
+    this.farStart = this.stStart = this.smStart = 0; this.cineL = undefined;   // (set as it draws: given here, the renderer's shape whole from the start: see loosen)
+    if (this.low) this.makeTarget();
     return true;
   };
   // The targets: the play's (a texture now, so it can be read; its stencil as before), what is behind, and the small ones the blurs and the rays use.
@@ -260,7 +263,7 @@ function cineBack(rd, lv, cam, H, box, F, T) {
 // embers elsewhere. Kept in a band round the view; each one that leaves it starts again at its top or anywhere in it.
 function cineMotes(rd, g, lv, cam, H, box, disc, T) {
   { const dt0 = CINE.fxT == null ? 0 : Math.max(0, Math.min(0.05, T - CINE.fxT)); CINE.fxT = T; const h = g.hero; if (CINE.hp && dt0 > 0) CINE.hv = Math.hypot(h.cx - CINE.hp[0], h.cy - CINE.hp[1]) / dt0; CINE.hp = [h.cx, h.cy];
-    if (CINE.fx.length && CINE.fx.lv !== lv) CINE.fx.length = 0; CINE.fx.lv = lv; cineFx(g, lv, cam, H, box, dt0); }   // (what the pokes shed: see cinePoke)
+    if (CINE.fx.length && CINE.fxLv !== lv) CINE.fx.length = 0; CINE.fxLv = lv; cineFx(g, lv, cam, H, box, dt0); }   // (what the pokes shed: see cinePoke)
   if (!CINE.on('motes')) return;
   const look = CINE_LOOK(lv.theme), t = lv.tile, P = PIX.size, snap = (v) => Math.round(v / P) * P, M = CINE.motes;
   const dt = CINE.lastT == null ? 0 : Math.max(0, Math.min(0.05, T - CINE.lastT)); CINE.lastT = T;
@@ -312,7 +315,8 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
   if (on('dof')) { pass(c.h1, this.pCopy, (u) => tex(0, c.far.tex, u.uTex)); blur(c.h2, c.h1, c.h1); }   // what is behind, out of focus: in h1
   pass(c.q1, this.pAlpha, (u) => { tex(0, c.st.tex, u.uTex); tex(1, c.sm.tex, u.uTex2); }); blur(c.q2, c.q3, c.q1);   // the things' coverage in q1, softened in q3 (where to look for depth; the shadow's)
   const toUv = (x, y) => [(x + sx) / W, 1 - (y + sy) / H];
-  const L = cineLights(this, g, lv, vlamps).filter(([x, y, r]) => y + sy > -r && y + sy < H + r).sort((a, b) => b[3] * b[2] - a[3] * a[2]);
+  const L = !on('rays') && !on('light') && !on('glow') ? [] : cineLights(this, g, lv, vlamps).filter(([x, y, r]) => y + sy > -r && y + sy < H + r).sort((a, b) => b[3] * b[2] - a[3] * a[2]);   // (none
+  // wanted, none made: it sorted all the coins a frame for nothing; perf)
   const rays = on('rays') ? L.filter((l) => l[2] > 1.6 * lv.R).slice(0, 4) : [];
   if (rays.length) pass(c.q2, this.pRays, (u) => {
     tex(0, c.q1.tex, u.uOcc); const R4 = new Float32Array(16), C4 = new Float32Array(12);

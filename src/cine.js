@@ -363,17 +363,17 @@ const POKE = { reach: 1.0, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(
     // snowman's bucket wobbles)
 function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
   const k = POKE.kinds[kind];
-  if (!CINE || !CINE.on('poke') || !k) return 0;
+  if (!k || (CINE && !CINE.on('poke'))) return 0;   // (in 2D too since 2026-10-24: the owner's «объекты… как-то просто реагировали на героя»; its flying bits 2.5D's only)
   const H = g.hero, t = lv.tile, T = lv.t, P = r.poke || (r.poke = { t: -9, s: 0, d: 1, was: false, back: 0 });
   const m = POKE.reach * t, inside = g.state === 'play' && H.maxX > x0 - m && H.minX < x1 + m && H.maxY > y0 - m && H.minY < y1 + m;
   if (inside && !P.was && T - P.t > POKE.cool) {
-    P.t = T; P.s = Math.min(1, 0.4 + (CINE.hv || 0) / (10 * lv.R)); P.d = H.cx < (x0 + x1) / 2 ? 1 : -1;
-    if (k.shed) for (let i = 0, n = Math.max(1, Math.round(k.n * P.s * (POKE.still ? 0.4 : 1))); i < n; i++)
+    P.t = T; P.s = Math.min(1, 0.4 + ((CINE && CINE.hv) || 0) / (10 * lv.R)); P.d = H.cx < (x0 + x1) / 2 ? 1 : -1;
+    if (k.shed && CINE) for (let i = 0, n = Math.max(1, Math.round(k.n * P.s * (POKE.still ? 0.4 : 1))); i < n; i++)
       CINE.fx.push({ k: k.shed, x: x0 + Math.random() * (x1 - x0), y: k.under ? y1 : y0 + Math.random() * (y1 - y0) * 0.5, vx: P.d * (15 + Math.random() * 35), vy: 5 + Math.random() * 20, ph: Math.random() * 6.28, on: r, life: 0 });
-    if (k.bird && perch && P.back <= T) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0, ink: k.grey ? PAL.gray : null }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }
+    if (k.bird && perch && P.back <= T && CINE) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0, ink: k.grey ? PAL.gray : null }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }
     if (k.shut && P.back <= T) P.back = T + k.shut;   // (eyes: shut, see cinePerched)
-    if (k.splash) for (let i = 0; i < 6; i++) CINE.fx.push({ k: 'drop', x: i % 2 ? x0 : x1, y: y1, vx: (i % 2 ? -1 : 1) * (25 + Math.random() * 35), vy: -(70 + Math.random() * 60), life: 0 });   // (off its ends)
-    if (k.bats && perch && P.back <= T) { perch.forEach(([x, y], i) => CINE.fx.push({ k: 'bat', x, y, vx: P.d * (50 + Math.random() * 70) * (i % 2 ? 1 : -0.6), vy: -(60 + Math.random() * 90), life: -0.12 * i })); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.2, 2.4); }   // (one after another)
+    if (k.splash && CINE) for (let i = 0; i < 6; i++) CINE.fx.push({ k: 'drop', x: i % 2 ? x0 : x1, y: y1, vx: (i % 2 ? -1 : 1) * (25 + Math.random() * 35), vy: -(70 + Math.random() * 60), life: 0 });   // (off its ends)
+    if (k.bats && perch && P.back <= T && CINE) { perch.forEach(([x, y], i) => CINE.fx.push({ k: 'bat', x, y, vx: P.d * (50 + Math.random() * 70) * (i % 2 ? 1 : -0.6), vy: -(60 + Math.random() * 90), life: -0.12 * i })); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.2, 2.4); }   // (one after another)
     if (typeof sound !== 'undefined') { if (k.clunk) sound.play('land', 0.25, 0.6); else if (k.splash) sound.play('bubble', 0.18, 0.7); else if (k.ding) sound.note(0, 0.12); else if (!k.bats && !k.shut && sound.gust) sound.gust(P.d, 0.3, 0.1 + 0.12 * P.s); }   // (a ding
     // lower and quieter than the task's ring)
   }

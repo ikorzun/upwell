@@ -5720,6 +5720,11 @@ Renderer.prototype.draw = function (g, alpha) {
 // The menu's frame (owner, 2026-10-23, the Figma «Main»): its backdrop (MENU_FS) and the hero alone over it, big, to drag and press (menuTouch in
 // game.js): its shadow, body, face and the puffs a poke sends off, on the game-pixel grid like the levels; no 2.5D, nothing of a level.
 Renderer.prototype.drawMenu = function (g, alpha) {
+  if (g.menuBack) {   // over its world's own backdrop (owner, 2026-10-24; Game.menuBackdrop): that level drawn as any, at the menu's camera and time, the hero on its floor
+    const real = g.lv, bk = g.menuBack; bk.cam = real.cam; bk.t = real.t; g.lv = bk;
+    try { this.draw(g, alpha); } finally { g.lv = real; }
+    return;
+  }
   const gl = this.gl, lv = g.lv, hero = g.hero, W = this.w, H = this.h, sig = hero.id + ',';
   this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.nSm = 0; this.route = 0;
   this.idxDirty = sig !== this.idxSig; this.kolobok = false;

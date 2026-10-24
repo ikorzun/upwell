@@ -799,7 +799,7 @@ class Game {
     this.newRun();
     this.kept = 0; this.first = false; this.seed = 0; this.downWas = false; this.hintAt = 0; this.curAt = 0;   // (set as a level starts or in play, given here: see loosen)
     this.dieT = this.hang = this.dashT = this.dashCD = this.mantleCD = this.noteK = this.noteT = this.rubT = this.rubY = this.oweThen = this.stars = this.medals =
-      this.bonusGot = this.bonusWhy = this.markSay = this.synSay = this.storyOn = this.adBusy = this.menuR = undefined;   // (and those set only on some turns: a death, a dash, a bonus...)
+      this.bonusGot = this.bonusWhy = this.markSay = this.synSay = this.storyOn = this.adBusy = this.menuR = this.menuBack = undefined;   // (and those set only on some turns: a death, a dash, a bonus...)
   }
   newRun() {
     this.world = 0; this.stage = 0; this.mods = MODS(); this.taken = [];
@@ -846,8 +846,20 @@ class Game {
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
     this.builtW = view.w; this.R = this.menuR || MENU_HERO.k * MENU_HERO.w * view.w; this.well = null; this.door = null; this.lv = new Level();
     this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
+    this.menuBack = this.menuBackdrop(); menuTouch.idleAt = performance.now(); menuTouch.hopAt = 0; menuTouch.hops = 0;
     this.makeHero(); this.levelReset();
     ui.hideAll(); ui.menu();
+  }
+  // The menu's backdrop (owner, 2026-10-24: «На главном экране используй фон того мира, в котором сейчас игрок или первого»): the level Continue goes
+  // to (a new player's the first), drawn as any (Renderer.drawMenu), its world's walls, ground and far view, lit, with nothing of play in it; a boss's or
+  // a bonus level's tier shows its world's first. Its floor is the menu's, where the hero stands.
+  menuBackdrop() {
+    const { w, s, rc } = campAt(campNextId()), cw = CAMPAIGN[w], r = rc.boss || rc.bonus != null ? cw.levels[0] : rc, lv = new Level(), R = clamp((view.w - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
+    lv.reset({ kind: 'well', w: view.w, h: view.h, R, seed: r.seed || 1, world: cw.world, stage: r === rc ? s : 0, theme: cw.world.theme, recipe: r, height: (r.len || 30) * R_PER_M * R });
+    lv.ensure(lv.floor - 2 * view.h);
+    for (const k of ['coins', 'spawns', 'enemies', 'bubbles', 'arenas', 'icicles', 'winds', 'kines', 'wheels', 'seesaws', 'fireWalls', 'pickups', 'shots', 'spots', 'rings', 'runes', 'folk', 'signs', 'spikes', 'coats', 'fizz']) if (Array.isArray(lv[k])) lv[k].length = 0;
+    lv.rects = lv.rects.filter((q) => q.cap); lv.fire = null; lv.dark = false; lv.portal = null; lv.crossing = null; lv.tasks = [];
+    return lv;
   }
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
   // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
@@ -3555,12 +3567,18 @@ class MenuPtr {
     return dt < 0.004 ? [0, 0] : [(x1 - x0) / dt, (y1 - y0) / dt];
   }
 }
+// The menu's hero hops a little now and then while nobody touches it (owner, 2026-10-24: «Моти на экране чуть подпрыгивает, чтобы игрок понял, что на
+// него можно нажимать»): `first` s after the menu shows, then every `every` s of quiet; squeezed (`squash`) for `ready` s, then off the ground,
+// stretching, as Gum's own hop off a released squeeze (its landing squash the body's own): thrown as for `up` R, it rises about 0.3 R (the soft body
+// gives the rest to its stretch)
+const MENU_HOP = { first: 1.2, every: 3.6, ready: 0.12, squash: 0.5, stretch: 0.8, up: 0.5 };
 const menuTouch = {
-  ptrs: new Map(), lastT: 0, lastPoke: null,
+  ptrs: new Map(), lastT: 0, lastPoke: null, idleAt: 0, hopAt: 0, hops: 0,
   on() { return game.state === 'menu' && ui.open === 'menu' && game.lv && game.lv.kind === 'menu' && !!game.hero; },
   local(e) { return [e.clientX - view.left, e.clientY + game.lv.cam]; },   // in the world
   look(x, y, now) { const l = game.heroLook; l.x = x; l.y = y; l.t = now; },
   down(e) {
+    this.idleAt = performance.now(); this.hopAt = 0;   // (a touch: no hop on its way, the quiet counted from now)
     if (this.ptrs.has(e.pointerId)) this.up(e, true);
     const now = performance.now(), [x, y] = this.local(e), b = game.hero, touch = e.pointerType !== 'mouse', tol = touch ? GRAB.pickTouch : GRAB.pickMouse, lp = this.lastPoke;
     const hit = (x > b.minX - tol && x < b.maxX + tol && y > b.minY - tol && y < b.maxY + tol && (pointInPoly(b.x, b.y, b.n, x, y) || distToPoly(b.x, b.y, b.n, x, y) < tol))
@@ -3613,6 +3631,7 @@ const menuTouch = {
     if (!p) return;
     this.ptrs.delete(e.pointerId);
     const now = performance.now(), b = p.body;
+    this.idleAt = now;
     if (b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
     if (!this.on()) cancel = true;   // (the menu shut under it, the settings say: let go where it is, not flung)
     if (p.mode === 'press') {
@@ -3637,11 +3656,16 @@ const menuTouch = {
     this.lastPoke = { x: p.x, y: p.y, t: performance.now() };
   },
   cancelAll() { for (const id of [...this.ptrs.keys()]) this.up({ pointerId: id }, true); },
+  hop(now, b) {   // squeezed a moment on the ground, then off it (MENU_HOP)
+    if (this.hopAt) { if (now - this.hopAt >= MENU_HOP.ready * 1000) { this.hopAt = 0; this.idleAt = now; this.hops++; b.wake(); unstick(b, 0.25); b.kickSquash(0, 1, -MENU_HOP.stretch); b.hop(Math.sqrt(2 * WORLD.gravity * MENU_HOP.up * b.R)); } return; }   // (off its stick to the floor first, as a jump is)
+    if ((b.wallMask & 8) && (b.asleep || b.calmT > 0.25) && now - this.idleAt > 1000 * (this.hops ? MENU_HOP.every : MENU_HOP.first)) { this.hopAt = now; b.wake(); b.kickSquash(0, 1, MENU_HOP.squash); }   // (on the ground and come to rest: Gum's calm)
+  },
   update(now) {   // each frame: the squeeze of a press held, a dragging finger's target (inside the walls, under the top, over the floor)
     const dt = Math.min(0.1, Math.max(0, (now - this.lastT) / 1000)), b = game.hero, lv = game.lv, sk = WORLD.skin;
     this.lastT = now;
     if (!this.on()) { if (this.ptrs.size) this.cancelAll(); return; }
     b.squeezeIn = 0;
+    if (!this.ptrs.size) this.hop(now, b);   // nobody touching it: now and then a little hop (MENU_HOP)
     for (const p of this.ptrs.values()) {
       if (p.body !== b) { p.mode = 'done'; continue; }
       if (p.mode === 'press') {
@@ -3764,7 +3788,7 @@ function pixGuard(dt) {
 // One frame: input → fixed-step physics → camera → draw. `fixedDt` is for the debug tick.
 function runFrame(now, fixedDt) {
   if (window.devicePixelRatio !== loop.dpr) { loop.dpr = window.devicePixelRatio; layoutQueued = true; }   // moved to another screen
-  if (CINE_ON) cineSync(game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for)
+  if (CINE_ON) cineSync(game.state === 'menu' ? null : game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for; the menu's backdrop 2D)
   if (layoutQueued) { layoutQueued = false; layout(); }
   menuTouch.update(now);   // (the menu's hero in the hand, before the physics: Gum's order)
   let dt = fixedDt != null ? fixedDt : (now - loop.last) / 1000;

@@ -6231,7 +6231,7 @@ Renderer.prototype.draw = function (g, alpha) {
       // the block, its upper valve lifted over the rect; pressed, shut to the rect's own height, its top the edge you stand on
       const q = PIX.base, S = enoSpr(r.pressed ? 'clamshut' : 'clamopen'), n = S.rows[0].length, rows = r.pressed ? enoFit(S, n, Math.max(2, Math.round((r.y1 - r.y0) / q)), 0, 0, 2, 2) : S.rows;
       vsp(rows, snap((r.x0 + r.x1) / 2) - Math.round(n / 2) * q, snap(r.y1) - rows.length * q, false, 1, q);
-      if (r.pressed) box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
+      if (r.pressed) box(r.x0, r.y0, r.x1, r.y0 + PIX.size, th.lip, 1, 0);   // (its edge one pixel: on a shell this small the usual edge was most of it)
       continue;
     }
     if (r.plate) {   // a Sea cave's clam shell (CLAM): a scallop in three steps, its ribs dark; pressed, it shuts flat and white (Worlds' look to come)

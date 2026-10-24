@@ -3769,7 +3769,8 @@ async function boot() {
   const s = !b ? l : !l ? b : progress(l) !== progress(b) ? (progress(l) > progress(b) ? l : b) : (l.at || 0) > (b.at || 0) ? l : b;   // the one further on (a visit without the Bridge may have begun from nothing), then the newer, then the Bridge's
   cloud = br && got;
   loadSave(s);
-  if (save.flat) cineUse(false);   // (the cinematic fork: 2D, as the player set it)
+  if (!/[?&]cine\b/.test(location.search)) cineUse(cinePref && save.flat === false);   // (the cinematic fork: 2D unless the player set 2.5D in the settings; owner, 2026-10-24:
+  // «По умолчанию игра в 2d». ?cine shows it anyway, ?plain never)
   if (br) bridge.platform.getServerTime().then((ms) => { today = Math.floor(ms / 86400000); }).catch(() => {});
   ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen

@@ -15,7 +15,8 @@ const CINE_ON = (() => {
   // of its pixels) on the side turned to us, in its own inks a tone darker: the owner's pick («Е»), the default
   return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], fxLv: null, lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
 })();
-// The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
+// The 2.5D now: CINE_ON, or null for 2D. On where the player has set it on (the settings' switch, cineUse; 2D by default, owner 2026-10-24: «По умолчанию
+// игра в 2d»; ?plain or #plain off, ?cine on) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
 let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
 const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || !!th.town || !!th.skazka || /[?&]cine\b/.test(location.search));   // the worlds done: the Village,

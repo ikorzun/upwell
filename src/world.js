@@ -3907,10 +3907,11 @@ Renderer.prototype.draw = function (g, alpha) {
       // pick, 2026-10-23, d33 C; his rule: «для природных фонов и элементов в игровом мире используй более биологическую форму», his picture's clouds: an outline
       // of uneven round bumps, no straight runs, no symmetry, holes of the dark in it, ragged strands of checker trailing off). Low on the screen, sinking a little
       // as the climb goes on
-      const lake = lv.stage % 2 === 1;   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi)
-      const shore = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), cx = (lv.l + lv.r) / 2, ht = 5.5 * t, hw = 6.6 * t, foot = shore;   // (over the lake: the mountain on its far
+      // (К12 «А»: the climb's compass, the mountain nearer level by level, its foot and the lake at the bottom, its summit close by the ninth: k 1 to 2.6)
+      const k = 1 + 1.6 * clamp((lv.stage || 0) / 8, 0, 1), lake = lv.stage % 2 === 1 && lv.stage < 4;   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi; low down only)
+      const shore = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), cx = (lv.l + lv.r) / 2, ht = 5.5 * t * k, hw = 6.6 * t * k, foot = lake ? shore : shore + (k - 1) * 4 * t;   // (nearer: bigger, its foot down past the keys; over the lake it stands on the far shore)   // (over the lake: the mountain on its far
       // shore, its reflection under it down to the keys)
-      const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side)); };   // its flanks, uneven
+      const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return Math.min((lv.r - lv.l) / 2, w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side))); };   // its flanks, uneven (between the walls)
       for (let y = 0; y < ht; y += 2 * P) {
         const u = y / ht, yy = foot - ht + y, wl = half(y, -1), wr = half(y, 1), sn = 0.3 + 0.06 * Math.sin(y / P * 0.9) + 0.05 * Math.sin(y / P * 2.3);
         box(snap(cx - wl), yy, snap(cx + wr), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
@@ -3930,12 +3931,12 @@ Renderer.prototype.draw = function (g, alpha) {
         for (let i = 0; i < holes; i++) hole(x - w / 3 + (i + 0.5) / holes * (w * 0.66) + (hs(s + 40 + i) - 0.5) * 0.3 * t, y - (0.1 + 0.3 * hs(s + 50 + i)) * h, (0.07 + 0.08 * hs(s + 60 + i)) * t);
       };
       const U = (u) => cx + u * t, V = (v) => foot - v * t;
-      if (!lake) { cloud(U(0.2), V(2.6), 9.5 * t, 0.75 * t, 5, 5, 0.3); strand(U(-4.6), V(2.4), -0.3, 0.02, 6, 11); strand(U(5.0), V(2.4), 0.3, 0.02, 6, 12); }   // the bank, its strands off both ends
+      if (!lake) { cloud(U(0.2), V(2.6 * k), 9.5 * t, 0.75 * t, 5, 5, 0.3); strand(U(-4.6), V(2.4 * k), -0.3, 0.02, 6, 11); strand(U(5.0), V(2.4 * k), 0.3, 0.02, 6, 12); }   // the bank, its strands off both ends
       const top0 = foot - ht;   // the summit
       const lens = (x, y, w, h, s, c = PAL.gray, a = DIM) => {   // a kasagumo's lens: a dome over a flat underside, its rim a little uneven (a living shape, d32)
         for (let yy = 0; yy < h; yy += P) { const q = 1 - yy / h, hw2 = w * Math.sqrt(Math.max(0, 1 - q * q)) * (0.94 + 0.08 * hs(s + yy / P)); box(snap(x - hw2), snap(y - yy), snap(x + hw2), snap(y - yy) + P, c, a, 0, 10, 0); }
       };
-      lens(cx, top0 - 0.5 * t, 2.1 * t, 0.42 * t, 31);   // the kasagumo, a cap of cloud floating over the summit (d40 «Б», d60 A)
+      lens(cx, top0 - 0.5 * t, 2.1 * t * (1 + 0.3 * (k - 1)), 0.42 * t, 31);   // the kasagumo, a cap of cloud floating over the summit (d40 «Б», d60 A)
       if (lake) {   // Lake Kawaguchi (d61 B): its far shore with the town's windows lit and a grove of bare trees at the right, the mountain upside down in the
         // still water under it, broken by ripples, each window's light and each tree down the water
         const lit = (x, y, w = 2) => { box(snap(x), snap(y), snap(x) + w * P, snap(y) + P, PAL.orange, LIT, 0, 10, 0); box(snap(x), snap(y) + 2 * P, snap(x) + w * P, snap(y) + 3 * P, PAL.orange, 1.35, 0, 10, 0); box(snap(x), snap(y) + 5 * P, snap(x) + P, snap(y) + 6 * P, PAL.orange, 1.2, 0, 10, 0); };   // (and its light down the water)

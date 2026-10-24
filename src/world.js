@@ -5120,6 +5120,9 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   if (th.danchi && lv.kind === 'well') {   // the Danchi's (the owner's picks): what runs up its walls behind the play, its things on the ledges, the estate far off
     const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, MUTE = 1.6;   // (laundry and the like in their colours, but muted: their inks mean things here)
+    const rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork, the rule book: the walls' storeys and the estate far off behind,
+    // whatever their tones (the beams' black ends, the lit windows); its things small, their thin parts flat)
+    L(3);
     for (const side of [-1, 1]) {   // up the walls, behind (DIM), in Isozaki's concrete (the owner's pick, d27 A, iso-wall): a storey every 8 tiles, board-formed, a
       // hollow beam out over it, its end open; a drainpipe down past them. The right wall's storeys half a storey off the left's
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), wb = (d0, y0, d1, y1, c = G, a = DIM, tn = 0) => box(snap(Math.min(at(d0 * t), at(d1 * t))), snap(y0), snap(Math.max(at(d0 * t), at(d1 * t))), snap(y1), c, a, 0, 10, tn);
@@ -5139,28 +5142,34 @@ Renderer.prototype.draw = function (g, alpha) {
       const leaves = (u, v, n, s = 1) => { for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.5; ln(u, v, u + Math.cos(a) * 0.3 * s, v - Math.sin(a) * 0.35 * s, i % 3 === 1 ? PAL.green : G, 2); } };
       if (p.kind === 'bikes') {   // a bicycle under a shelter's flat roof (bikes B, mk-bikes), its basket and a child seat; the roof aqua and the seat purple, muted (the
         // sheet's red seat: red means danger here)
-        for (const u of [0.1, 2.4]) bx(u, 0, u + 0.08, 1.4, G); bx(-0.02, 1.4, 2.6, 1.52, PAL.aqua, MUTE); bx(-0.02, 1.4, 2.6, 1.44, K, 0.6);   // its shelter
-        const u = 0.5; for (const e of [0, 1.15]) { ring(u + e, 0.38, 0.36); disc(X(u + e), Y(0.38), 0.04 * t, G, 1); }   // its wheels
+        L(4); bx(-0.02, 1.4, 2.6, 1.52, PAL.aqua, MUTE); L(0); for (const u of [0.1, 2.4]) bx(u, 0, u + 0.08, 1.4, G); bx(-0.02, 1.4, 2.6, 1.44, K, 0.6);   // its shelter (its
+        // roof small, its posts and the roof's shaded edge flat)
+        const u = 0.5; for (const e of [0, 1.15]) { ring(u + e, 0.38, 0.36); disc(X(u + e), Y(0.38), 0.04 * t, G, 1); }   // its wheels (flat, as all its wire)
         ln(u, 0.38, u + 0.55, 0.38); ln(u + 0.55, 0.38, u + 0.9, 0.8); ln(u + 0.35, 0.82, u + 0.55, 0.38); ln(u + 0.35, 0.82, u + 0.9, 0.8); ln(u + 0.9, 0.8, u + 1.15, 0.38);   // its frame
         ln(u + 0.95, 0.8, u + 1.02, 1.0, G, 2); ln(u + 0.9, 1.0, u + 1.15, 1.02); bx(u + 0.28, 0.85, u + 0.45, 0.9, K);   // its handlebar, its saddle
-        bx(u + 1.1, 0.75, u + 1.45, 1.0, G, 1, 4); bx(u - 0.25, 0.85, u + 0.1, 1.25, PAL.purple, MUTE);   // its basket, the child seat
+        L(4); bx(u + 1.1, 0.75, u + 1.45, 1.0, G, 1, 4); bx(u - 0.25, 0.85, u + 0.1, 1.25, PAL.purple, MUTE);   // its basket, the child seat (small)
       } else if (p.kind === 'plants') {   // a little garden (the owner's pick, d17 E, mk-plants), twice the size (S): a box of vegetables, a tall plant in a pot, a
         // hose on its reel; leaves mostly grey (green is moss you hold here)
-        bx(0.2, 0, 1.0, 0.32, G, 1, 1); for (const u of [0.35, 0.6, 0.85]) bx(u, 0.32, u + 0.06, 0.5, PAL.green); pot(1.35, 0.3, 0.4); leaves(1.35, 0.4, 6, 1.2); ring(2.0, 0.3, 0.26); ring(2.0, 0.3, 0.12, K);
+        L(4); bx(0.2, 0, 1.0, 0.32, G, 1, 1); pot(1.35, 0.3, 0.4);   // its box, its pot (small)
+        L(0); for (const u of [0.35, 0.6, 0.85]) bx(u, 0.32, u + 0.06, 0.5, PAL.green); leaves(1.35, 0.4, 6, 1.2); ring(2.0, 0.3, 0.26); ring(2.0, 0.3, 0.12, K);   // its shoots, its leaves,
+        // its hose (flat: thin)
       } else if (p.kind === 'mail') {   // the block's mailboxes (mail C, mk-mail): three rows of three, a plant in a pot; the block's number painted grey over them
         const nl = Math.min(X(0.25), X(1.0)), nt = Y(2.15), digit = (x, n) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
           [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * P, nt + b0 * P, x + a1 * P, nt + b1 * P, G, 1, 0, 10, 0); }); };   // a digit five by nine
-        digit(nl, 5); digit(nl + 7 * P, 1);   // its number, 51
-        for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const u = 0.15 + i * 0.36, v = 0.25 + j * 0.3; bx(u, v, u + 0.32, v + 0.26, G); bx(u + 0.06, v + 0.16, u + 0.26, v + 0.19, K); }   // its boxes, their slots
-        pot(1.6, 0.3, 0.35); leaves(1.6, 0.35, 4);
+        L(0); digit(nl, 5); digit(nl + 7 * P, 1);   // its number, 51 (flat: painted on the wall)
+        for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const u = 0.15 + i * 0.36, v = 0.25 + j * 0.3; L(4); bx(u, v, u + 0.32, v + 0.26, G); L(0); bx(u + 0.06, v + 0.16, u + 0.26, v + 0.19, K); }   // its boxes
+        // (small), their slots (flat)
+        L(4); pot(1.6, 0.3, 0.35); L(0); leaves(1.6, 0.35, 4);
       } else if (p.kind === 'cat') {   // a stray cat (cat C, mk-cat) sitting by its bowl (blue, muted: the sheet's red bowl; and the sheet's ginger cat grey: orange
         // is crumbling here)
-        const u = 0.7; F(X(u), Y(0.3), 0.22 * t, 0, 0, 0.3 * t, G, 1, 0); F(X(u + 0.05), Y(0.72), 0.16 * t, 0, 0, 0.14 * t, G, 1, 0);   // its body, its head
-        for (const e of [-0.08, 0.12]) bx(u + e, 0.82, u + e + 0.07, 0.95, G); for (const e of [-0.02, 0.1]) bx(u + e, 0.72, u + e + 0.03, 0.75, K); ln(u - 0.2, 0.05, u - 0.45, 0.35, G, 2);   // its ears, its eyes, its tail
-        bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE);   // its bowl
+        const u = 0.7; L(4); F(X(u), Y(0.3), 0.22 * t, 0, 0, 0.3 * t, G, 1, 0); F(X(u + 0.05), Y(0.72), 0.16 * t, 0, 0, 0.14 * t, G, 1, 0);   // its body, its head (small)
+        L(0); for (const e of [-0.08, 0.12]) bx(u + e, 0.82, u + e + 0.07, 0.95, G); for (const e of [-0.02, 0.1]) bx(u + e, 0.72, u + e + 0.03, 0.75, K); ln(u - 0.2, 0.05, u - 0.45, 0.35, G, 2);   // its ears, its eyes,
+        // its tail (flat: too small for depth)
+        bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE);   // its bowl (flat: thin)
       }
     }
-    dcFar();
+    L(3); dcFar();
+    this.route = rt0;
   }
   if (th.panels && lv.kind === 'well') {   // the Tower Blocks' kit (THEMES.blocks; see the parts catalog): a riser pipe up each wall on a bracket every
     // 4 tiles, satellite dishes on the walls, an entrance (a blue door, its canopy and lamp, a bench) at the wall end of some wide ledges.
@@ -5252,7 +5261,8 @@ Renderer.prototype.draw = function (g, alpha) {
     const shirt = (x, y, c) => { box(snap(x - 0.2 * t), snap(y + 0.05 * t), snap(x + 0.2 * t), snap(y + 0.45 * t), c, MUTE, 0, 10, 0); box(snap(x - 0.3 * t), snap(y + 0.05 * t), snap(x + 0.3 * t), snap(y + 0.17 * t), c, MUTE, 0, 10, 0); line(x, y - 0.12 * t, x, y + 0.05 * t, G, 1, 1); };   // a shirt on a hanger
     if (r.stair) {   // a step of a flight of stairs (stairs D, iso-stairs): under a barrel vault (behind, at a quarter), stepping up with the flight
       const c = th.block;
-      box(r.x0, snap(r.y0 - 2.7 * t), r.x1, snap(r.y0 - 2.35 * t), G, DIM, 0, 10, 4);   // the vault over the flight, behind
+      if (CINE) this.route = 3; box(r.x0, snap(r.y0 - 2.7 * t), r.x1, snap(r.y0 - 2.35 * t), G, DIM, 0, 10, 4); if (CINE) this.route = 2;   // the vault over the flight, behind
+      // (2.5D too: behind)
       box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, r.y0 + 2 * P, r.x1, r.y0 + 3 * P, K, 1, 0, 10, 0);   // its tread (and riser), its nosing
       lip(); return true;
     }
@@ -5264,8 +5274,8 @@ Renderer.prototype.draw = function (g, alpha) {
         for (let j = 0; j < 4; j++) for (let x = x0 + (j % 2 ? 0.25 : 0.5) * t; x < x1 - 2; x += 0.5 * t) box(snap(x), hy(j / 4), snap(x) + P, hy((j + 1) / 4), K, a, 0, 10, 0);
         box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
       }
-      if (on) for (let i = 0; i < 2; i++) { const q = (T * 0.5 + i / 2) % 1; box(snap(E(0.3) + i * P * 2), snap(r.y1 + q * 1.2 * t), snap(E(0.3) + i * P * 2) + P, snap(r.y1 + q * 1.2 * t) + P, c, 1 - q, 0, 10, 0); }   // bits falling off it
-      return true;
+      if (CINE) this.route = 0; if (on) for (let i = 0; i < 2; i++) { const q = (T * 0.5 + i / 2) % 1; box(snap(E(0.3) + i * P * 2), snap(r.y1 + q * 1.2 * t), snap(E(0.3) + i * P * 2) + P, snap(r.y1 + q * 1.2 * t) + P, c, 1 - q, 0, 10, 0); }   // bits falling off it
+      if (CINE) this.route = 2; return true;   // (2.5D: the bits flat)
     }
     if (r.plank && r.move) return false;
     if (r.plank && on) {   // a balcony off the wall (balcony B, iso-balcony): a pipe railing; shirts on a pole over it on one balcony in three (the sheet's blue and
@@ -5273,17 +5283,19 @@ Renderer.prototype.draw = function (g, alpha) {
       if (r.bouncy) return false;
       const c = th.plank, rail = 0.8;
       box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, K, 1, 0, 10, 0);   // its slab, its underside
+      if (CINE) this.route = 0;   // (2.5D: its railing and the laundry flat, thin and hung: the rule book)
       for (let u = 0.2; u < wt - 0.05; u += 0.6) bw(u, -rail, u + px, 0, G); for (const v of [-rail, -rail / 2]) bw(0, v, wt, v + px, G);   // its railing
       if (one(51)) { const v = -rail - 1.0; bw(0.15, v, wt - 0.4, v + px, G); shirt(E(1.6), Y(v + 0.02), Wh); shirt(E(1.0), Y(v + 0.02), G); }   // shirts on a pole
-      lip(); return true;
+      if (CINE) this.route = 2; lip(); return true;
     }
     if (r.plank) {   // something long and thin hung across the shaft from above (pole D, iso-pole): a light lattice truss on two hangers
       if (r.bouncy) return false;
       const c = th.plank, l = r.x0, rr = r.x1, up = snap(r.y0 - 3.5 * t), y2 = snap(r.y1 + 0.45 * t);
-      box(l, r.y0, rr, r.y1, c, 1, 0, 10, 0); box(l, r.y1 - P, rr, r.y1, K, 1, 0, 10, 0); box(l, y2 - 2 * P, rr, y2, c, 1, 0, 10, 0);   // its top chord, its bottom one
+      box(l, r.y0, rr, r.y1, c, 1, 0, 10, 0); box(l, r.y1 - P, rr, r.y1, K, 1, 0, 10, 0); if (CINE) this.route = 0; box(l, y2 - 2 * P, rr, y2, c, 1, 0, 10, 0);   // its top chord, its
+      // bottom one (2.5D: the top chord deep, what is under it and its hangers flat, thin)
       for (let x = l, i = 0; x < rr - 0.3 * t; x += 0.4 * t, i++) line(snap(x + (i % 2 ? 0.4 * t : 0)), r.y1, snap(x + (i % 2 ? 0 : 0.4 * t)), y2 - 2 * P, c, 1, 1);   // its zigzag
       for (const x of [snap(l + 0.35 * t), snap(rr - 0.35 * t)]) { box(x - P / 2, up, x + P / 2, r.y0, G, 1, 0, 10, 0); box(x - 2 * P, r.y0 - 2 * P, x + 2 * P, r.y0, G, 1, 0, 10, 0); }   // its hangers
-      lip(); return true;
+      if (CINE) this.route = 2; lip(); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.slick) return false;
     {   // Isozaki's concrete (slab E, iso-slab): a shallow barrel vault under it; a tall block an end wall, little vaults across its face, the block's number
@@ -5294,7 +5306,8 @@ Renderer.prototype.draw = function (g, alpha) {
       const big = tall && wt >= 2.4 && ht >= 2.4 ? (() => { const n = 1 + Math.floor(hsh(26) * 24), sz = Math.max(P, snap(Math.min(wt * 0.8 / (n > 9 ? 14 : 6), ht * 0.45 / 10) * t)), y = Y(Math.max(cl + 0.1, Math.min(0.6, ht * 0.15)));
         return { n, sz, y, v0: (y - r.y0) / t, v1: (y + 10 * sz - r.y0) / t, x: snap((r.x0 + r.x1) / 2 - ((n > 9 ? 14 : 6) * sz) / 2) }; })() : null;   // an end wall's number, painted big: where
       const clear = (v0, v1) => !big || v1 < big.v0 - 0.15 || v0 > big.v1 + 0.15;   // (not over the number)
-      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, Y(lo), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside in shade
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); if (!CINE) box(r.x0, Y(lo), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside in shade (2.5D: not, its
+      // underside face is that: the rule book)
       if (on) bw(0.1, cl, 0.1 + px, lo, K);   // the seam where it goes into the wall (under the plain rows)
       if (!tall) { const n = Math.max(6, Math.round(wt / 0.2)); for (let i = 0; i < n; i++) { const q = (i + 0.5) / n, dv = 0.42 * (1 - Math.sin(Math.PI * q)); if (dv > 0.03) bw((i / n) * wt, ht, ((i + 1) / n) * wt, ht + dv, c, 4); } }   // the vault under it
       else for (let v = 1.2; v < lo - 0.6; v += 1.4) if (clear(v, v + 0.5)) for (let u = 0.3; u < wt - 0.8; u += 1.0) { const n = 5; for (let i = 0; i < n; i++) bw(u + i * 0.15, v + 0.5 - Math.sin(Math.PI * (i + 0.5) / n) * 0.4, u + (i + 1) * 0.15, v + 0.5 - Math.sin(Math.PI * (i + 0.5) / n) * 0.4 + px, G, 0, SH); }   // a tall block: little vaults
@@ -5891,12 +5904,13 @@ Renderer.prototype.draw = function (g, alpha) {
       if (th.danchi) {   // the Danchi's spring (the owner's pick, 2026-10-22, d8 E; research/variants/mk-spring-1-px.png; blue: springs are blue here): a rabbit spring
         // rider on its coil, squashing as it throws
         const c = th.spring, cx = snap((r.x0 + r.x1) / 2), w2 = (r.x1 - r.x0) / 2, s = r.y1 - hh, top = snap(s - 0.3 * R), bt = snap(s + 0.12 * R), Q = 1.35 * R, K = PAL.black, G = PAL.gray, L = 1.6;
+        if (CINE) this.route = 0;   // (2.5D, the rule book: its body and head deep, its coil, base, tail, ears, eye and handles flat: thin)
         for (let i = 0, n = 3; i < n; i++) { const y = snap(bt + (i + 0.5) * (r.y1 - bt) / n); box(snap(cx - 0.32 * w2), y - kitP, snap(cx + 0.32 * w2), y + kitP, c, 1, 0, 10, 0); } box(snap(cx - 0.6 * w2), r.y1 - 2 * kitP, snap(cx + 0.6 * w2), r.y1, c, 1, 0, 10, 0);   // its coil, its base
-        F(snap(cx + 0.1 * w2), snap((top + bt) / 2), 0.9 * w2, 0, 0, (bt - top) / 2 + 0.03 * R, c, 1, 0); box(snap(cx + 0.92 * w2), snap(top + 0.02 * R), snap(cx + 1.05 * w2), snap(top + 0.14 * R), c, 1, 0, 10, 0);   // its body, its tail
+        if (CINE) this.route = 2; F(snap(cx + 0.1 * w2), snap((top + bt) / 2), 0.9 * w2, 0, 0, (bt - top) / 2 + 0.03 * R, c, 1, 0); if (CINE) this.route = 0; box(snap(cx + 0.92 * w2), snap(top + 0.02 * R), snap(cx + 1.05 * w2), snap(top + 0.14 * R), c, 1, 0, 10, 0);   // its body, its tail
         const hx = snap(cx - 0.6 * w2), hy = snap(top - 0.15 * R), e = (u, v, rr, cc = K) => disc(snap(hx + u * Q), snap(hy + v * Q), rr * Q, cc, 1), o = (u, v, ax, ay, cc = c, a = 1) => F(snap(hx + u * Q), snap(hy + v * Q), ax * Q, 0, 0, ay * Q, cc, a, 0);
-        for (const u of [-0.1, 0.08]) { o(u, -0.5, 0.07, 0.24); o(u, -0.48, 0.03, 0.16, c, L); } o(0, 0, 0.28, 0.26); e(-0.12, -0.03, 0.05); e(-0.26, 0.08, 0.03);   // its ears, its head, its eye, its nose
+        for (const u of [-0.1, 0.08]) { o(u, -0.5, 0.07, 0.24); o(u, -0.48, 0.03, 0.16, c, L); } if (CINE) this.route = 2; o(0, 0, 0.28, 0.26); if (CINE) this.route = 0; e(-0.12, -0.03, 0.05); e(-0.26, 0.08, 0.03);   // its ears, its head, its eye, its nose
         const hb = snap(hx + 0.38 * Q); box(hb - kitP, snap(top - 0.25 * R), hb + kitP, top, G, 1, 0, 10, 0); box(snap(hb - 0.12 * R), snap(top - 0.27 * R), snap(hb + 0.12 * R), snap(top - 0.21 * R), G, 1, 0, 10, 0);   // its handles
-        continue;
+        if (CINE) this.route = 2; continue;
       }
       if (th.panels) {   // the Tower Blocks': an old mattress thrown out, blue and white stripes, flattening as it throws
         const y0 = r.y1 - hh - 0.2 * R; box(r.x0, y0, r.x1, r.y1, PAL.white, 1, 0, 10, 0);
@@ -5926,8 +5940,10 @@ Renderer.prototype.draw = function (g, alpha) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka || th.danchi)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+      if (CINE && th.danchi) this.route = 0;   // (the Danchi's flat in 2.5D, the rule book: in depth its green and its slab's vault's dither made lone dots)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
+      if (CINE && th.danchi) this.route = 2;
       if (th.rime) for (let x = r.x0 + 0.2 * R, k = 0; x < r.x1 - 0.1 * R; x += 0.36 * R, k++) if (k % 2) box(x + ox, r.y1 - 0.06 * R, x + ox + kitP, r.y1 - 0.06 * R + kitP, PAL.white, a, 0, 10, 0);   // rime: a glint here and there (no strands hanging: owner)
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);

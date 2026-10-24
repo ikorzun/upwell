@@ -1,5 +1,5 @@
 {
- "commit": "a7055ea+changes",
+ "commit": "fff9549+changes",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -74,7 +74,7 @@
   },
   "c1-10": {
    "result": "won",
-   "time": 24.5,
+   "time": 25,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
@@ -239,10 +239,12 @@
   },
   "c3-10": {
    "result": "won",
-   "time": 37,
-   "heartsLost": 0,
+   "time": 37.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "boss@cast"
+   ],
    "boss": "Tsurara-onna",
    "dealt": "4/4"
   },
@@ -483,7 +485,7 @@
   },
   "c6-10": {
    "result": "won",
-   "time": 55,
+   "time": 57,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
@@ -650,7 +652,7 @@
   },
   "c8-10": {
    "result": "won",
-   "time": 53,
+   "time": 47,
    "heartsLost": 2,
    "stuck": [],
    "hits": [

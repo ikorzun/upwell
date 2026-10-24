@@ -1,5 +1,5 @@
 {
- "commit": "635b168",
+ "commit": "331757a",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -313,15 +313,15 @@
   },
   "c4-10": {
    "result": "won",
-   "time": 69.5,
+   "time": 36,
    "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "shot@warn",
-    "shot@warn"
+    "shot@hover",
+    "shot@hover"
    ],
    "boss": "Onamazu",
-   "dealt": "6/6"
+   "dealt": "5/5"
   },
   "c5-1": {
    "result": "clear",

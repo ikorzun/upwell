@@ -1,5 +1,5 @@
 {
- "commit": "0bc18ac",
+ "commit": "5ba6644",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -91,9 +91,11 @@
   },
   "c2-2": {
    "result": "clear",
-   "time": 14.5,
+   "time": 36.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "overhang@149"
+   ],
    "hits": []
   },
   "c2-3": {
@@ -105,7 +107,7 @@
   },
   "c2-4": {
    "result": "clear",
-   "time": 28,
+   "time": 27.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -138,12 +140,13 @@
   },
   "c2-8": {
    "result": "clear",
-   "time": 27,
-   "heartsLost": 1,
-   "stuck": [],
-   "hits": [
-    "spikes@gate3"
-   ]
+   "time": 49,
+   "heartsLost": 0,
+   "stuck": [
+    "rubberwall@137",
+    "mosswall@163"
+   ],
+   "hits": []
   },
   "c2-9": {
    "result": "clear",

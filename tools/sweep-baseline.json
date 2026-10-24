@@ -1,5 +1,5 @@
 {
- "commit": "8aa5620",
+ "commit": "635b168",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -239,12 +239,12 @@
   },
   "c3-10": {
    "result": "won",
-   "time": 47.5,
+   "time": 42.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
    "boss": "Tsurara-onna",
-   "dealt": "5/5"
+   "dealt": "4/4"
   },
   "c4-1": {
    "result": "clear",

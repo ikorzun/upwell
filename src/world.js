@@ -309,6 +309,32 @@ const VSP_RECTS = new WeakMap(), vspRects = (rows) => {   // a picture's boxes f
     open = cur; });
   VSP_RECTS.set(rows, R); return R;
 };
+// The cluster rule (owner, 2026-10-24, the pixel-art guide he sent, its first rule: «Случайный шум — отдельные точки без общей структуры … почти всегда
+// выглядит как грязная текстура», and «Фоны в подарочных комнатах выглядят грязно»): a sheet drawn behind (DIM) loses its specks. Every cluster of one
+// ink, its pixels touching by sides or corners (so a checker's strands hold together) and either of its tones (a capital is its darker half: a river
+// drawn in both is one shape, its ripples kept), of at most VSP_SPECK pixels takes the ink most of its eight neighbours have: the clear, or the shape
+// round it: a lone pixel, none of its ink round it. Yellow and red keep theirs (a light, a mark; white has no place behind, DEPTH), and so does a
+// cluster at a side of the picture (a vspCut piece's may go on in the next). Once a picture (VSP_CLEAN); ?speck=N another size, 0 none, to compare.
+const VSP_SPECK = (() => { const q = new URLSearchParams(location.search).get('speck'); return q != null && q !== '' && +q >= 0 ? +q : 1; })();   // (1: a lone pixel; at 2 a river's short ripples and the wisteria's sparks went too)
+const VSP_CLEAN = new WeakMap(), vspClean = (rows) => {
+  let out = VSP_CLEAN.get(rows); if (out) return out;
+  const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H), fill = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ch = g[y][x]; if (ch === '.' || seen[y * W + x]) continue;
+    const cells = [[x, y]], st = [[x, y]]; seen[y * W + x] = 1; let side = false;
+    while (st.length) { const [a, b] = st.pop(); if (a === 0 || a === W - 1) side = true;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[v * W + u] && g[v][u].toLowerCase() === ch.toLowerCase()) { seen[v * W + u] = 1; st.push([u, v]); cells.push([u, v]); } } }
+    if (cells.length > VSP_SPECK || side || 'yr'.includes(ch.toLowerCase())) continue;
+    const own = new Set(cells.map(([a, b]) => b * W + a)), n = {};
+    for (const [a, b] of cells) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+      if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !own.has(v * W + u)) n[g[v][u]] = (n[g[v][u]] || 0) + 1; }   // (the exact letter: a shape's own tone)
+    let best = '.', most = -1; for (const k in n) if (n[k] > most) { most = n[k]; best = k; }
+    fill.push(cells, best);
+  }
+  for (let k = 0; k < fill.length; k += 2) for (const [a, b] of fill[k]) g[b][a] = fill[k + 1];
+  out = fill.length ? g.map((r) => r.join('')) : rows; VSP_CLEAN.set(rows, out); return out;
+};
 const VSP_CUT = new Map(), vspCut = (rows, c0, c1, tag) => {   // a picture's columns c0…c1, the same array each time (so its boxes are worked out once)
   const key = tag + ':' + c0 + ':' + c1; let r = VSP_CUT.get(key); if (!r) VSP_CUT.set(key, (r = rows.map((q) => q.slice(c0, c1)))); return r;
 };
@@ -607,6 +633,19 @@ const QUAKE = { keep: 3, creep: 2.2, rest: [2.0, 1.7, 1.5, 1.3], rear: 0.8, wave
 // stomp on its roof hurts it, and its pantograph throws `sparks` at the hero; `close` s to shut. On its last heart (`twice`) it runs
 // back once more after `again` s before it stops. Five hearts. Still its first `calm` s.
 const TRAMRUN = { warn: 0.8, again: 0.45, rush: [16, 18, 20, 22], stop: 1.5, close: 0.3, sparks: [2, 2, 3, 3], twice: 3, calm: 2.5 };
+// The Karasu-tengu (BOSSES.pigeon, the Sky's, world 7; owner 2026-10-24): it flies `high` R up, swaying, its moves taking turns. Its fan:
+// raised, red, a whoosh, `fan` s, then `gust` s of wind blowing the hero toward the far wall (`push`, as WIND's, half on the floor),
+// streaks across the sky. Feathers: a flick `fwarn` s, then `fn` feathers fanned at the hero, fast. Its swoop: a screech, red, `swarn` s
+// (it stops following the hero its last `lock` s), then a dive along a straight line through where the hero was, into the floor, where
+// its beak sticks `stuck` s, the only time a stomp hurts it. Its last heart swoops twice. Six hearts. Still its first `calm` s.
+const TENGU = { high: 12, sway: 0.2, rest: [1.4, 1.3, 1.2, 1.1], fan: 0.7, gust: 2.0, push: 9, fwarn: 0.6, fn: [2, 2, 3, 3], swarn: 0.7, lock: 0.4, speed: 30, stuck: 1.8, reel: 0.7, twice: 3, calm: 2.5 };
+// Koschei (BOSSES.koschei, the Dark Forest's, world 8, the last and the hardest; owner 2026-10-24): he walks his arena's floor in his cloak,
+// keeping `keep` R off the hero, his moves taking turns. Bones: an arm raised, red, `twarn` s, then `bones` thrown in arcs at the hero.
+// His sword: raised, red, a scrape, `swarn` s, then a low sweep along the floor in front of him, `reach` R past his drawing, `sweep` s
+// (jump it); after it he is off balance `stagger` s, the only time a stomp hurts him. A stomp breaks him into a heap of bones that rattles
+// and flies together again `heap` s later. From phase `skulls` he calls the forest's skulls; on his last heart (the needle over his crown)
+// he sweeps twice. Six hearts. Still his first `calm` s.
+const KOSCH = { keep: 3.5, walk: 2.4, rest: [1.4, 1.3, 1.2, 1.1], twarn: 0.6, bones: [2, 2, 3, 3], swarn: 0.6, reach: 3, sweep: 0.3, stagger: 1.4, heap: 1.6, again: 0.4, skulls: 2, twice: 3, calm: 2.5 };
 // The Tsuchigumo (BOSSES.cart, the Cave's; owner 2026-10-23: «Очень легкий босс… Зачем вагонетки внизу не понятно», the fight redone
 // to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
 // the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
@@ -630,6 +669,11 @@ const TANUKI = { high: 13, swing: 0.16, follow: 0.6, spit: 1.2, webs: [0, 1, 1, 
 const NUPPE = { high: 12, swing: 0.18, follow: 0.3, spit: 0.7, webs: [0, 1, 2, 2], warn: 0.75, lock: 0.6, track: 8, again: 0.5, dive: 36, tangle: 1.6, reel: 0.8, rest: [1.5, 1.4, 1.3, 1.2], calm: 2.5,
   lings: [0, 0, 0, 0], ling: 'crawler', splat: [1, 2, 2, 3], twice: 3, shadow: true, sweep: { warn: 0.7, dur: 1.2, low: 7.2 },
   snd: { spit: ['bubble', 0.7, 0.4], warn: ['crumble', 0.6, 1.6], sweep: ['crumble', 0.8, 1.1], phase: ['bubble', 0.9, 0.35] } };
+// The Lid (BOSSES.lid, the random run's summit; owner 2026-10-24: all bosses redone): a hanging boss too (Boss.hang), the last of a run
+// that can be long, so on the later bosses' tells. It lobs its goo, then drops where its shadow grows and lies `tangle` s; its second
+// phase on calls a crawler down each phase; its last heart drops it twice.
+const LIDF = { high: 12, swing: 0.24, follow: 0.4, spit: 0.8, webs: [1, 2, 2, 3], warn: 0.9, lock: 0.7, track: 7, again: 0.6, dive: 34, tangle: 1.8, reel: 0.8, rest: [1.6, 1.5, 1.4, 1.3], calm: 2.5,
+  lings: [0, 1, 1, 1], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['spit', 0.6, 0.7], warn: ['crumble', 0.6, 1.2], phase: ['bosshit', 0.6, 0.6] } };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -978,13 +1022,16 @@ const BOSSES = {
     hint: { en: 'Belly up! Stomp it!', es: '¡Panza arriba! ¡Písalo!', pt: 'De barriga pra cima! Pise nele!', ja: 'おなかが うえ！ ふみつけろ！' },   // the first time it flops
     how: { en: 'Jump the wave, dodge the leap, stomp', es: 'Salta la ola, esquiva el salto, pisa', pt: 'Pule a onda, desvie do salto, pise', ja: 'なみを とんで、ジャンプを よけて、ふめ' } },   // after three losses
   // The Sky's: a Karasu-tengu on the Cork's dive (hover, warn, dive, dazed, rise), flapping its wings.
-  pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', pigeon: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
+  pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', sky: TENGU, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'The sky has a guard. Me.', es: 'El cielo tiene un guardián. Yo.', pt: 'O céu tem um guardião. Eu.', ja: 'そらには ばんにんが いる。わたしだ。' },
       { en: 'Caw! Climbers fall. Crows fly.', es: '¡Cra! Tú caes. Los cuervos vuelan.', pt: 'Cró! Você cai. Corvos voam.', ja: 'カァ！ のぼる ものは おちる。カラスは とぶ。' },
       { en: 'Show me your wings, climber.', es: 'Enséñame tus alas, escalador.', pt: 'Mostre suas asas, escalador.', ja: 'つばさを みせてみな。' }],
     quip: [{ en: 'Caw-caw! Back to earth.', es: '¡Cra-cra! De vuelta a tierra.', pt: 'Cró-cró! De volta ao chão.', ja: 'カァカァ！ じめんに おかえり。' },
       { en: 'No wings, no sky.', es: 'Sin alas, no hay cielo.', pt: 'Sem asas, sem céu.', ja: 'つばさ なしに そら なし。' }],
-    defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' } },
+    defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' },
+    top: { en: 'Not now. Wait till it crashes!', es: '¡Ahora no! Espera a que se estrelle.', pt: 'Agora não! Espere ele se esborrachar.', ja: 'いまは だめ。つっこむまで まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Beak stuck! Stomp it!', es: '¡Pico atascado! ¡Písalo!', pt: 'Bico preso! Pise nele!', ja: 'くちばしが ささった！ ふめ！' },   // the first time its beak sticks
+    how: { en: 'Brace the wind, dodge the swoop, stomp', es: 'Resiste el viento, esquiva y pisa', pt: 'Aguente o vento, desvie e pise', ja: 'かぜに たえ、きゅうこうかを よけて、ふめ' } },   // after three losses
   // The Tower Blocks': a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
   crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', hang: NUPPE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
@@ -1009,7 +1056,8 @@ const BOSSES = {
     hint: { en: 'Doors open! Stomp the roof!', es: '¡Puertas abiertas! ¡Pisa el techo!', pt: 'Portas abertas! Pise no teto!', ja: 'ドアが ひらいた！ やねを ふめ！' },   // the first stop
     how: { en: 'Jump the tram, stomp it at a stop', es: 'Salta el tranvía y písalo en la parada', pt: 'Pule o bonde e pise na parada', ja: 'でんしゃを とんで、ていしゃで ふめ' } },   // after three losses
   // The random run's summit: the Lid (the plan's last boss, its first look): goo from the start, then helpers, then twice the goo.
-  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, ink: 'blue', hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
+  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, ink: 'blue', hang: LIDF, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3),
+    top: { en: 'Not now. Wait till it lands!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
     intro: [{ en: 'Nothing up there. I checked.', es: 'Arriba no hay nada. Lo comprobé.', pt: 'Lá em cima não tem nada. Eu vi.', ja: 'うえには なにも ないよ。' },
       { en: 'The sky? Just a story.', es: '¿El cielo? Solo un cuento.', pt: 'O céu? Só uma história.', ja: 'そら？ ただの おはなし。' },
       { en: 'Climb all you like. I stay shut.', es: 'Trepa cuanto quieras. Sigo cerrada.', pt: 'Suba o quanto quiser. Fico fechada.', ja: 'いくら のぼっても あかないよ。' }],
@@ -1019,13 +1067,16 @@ const BOSSES = {
   // The Dark Forest's (owner, 2026-10-21: boss-koschei A, the bony king with his sword; «Бой b»): Koschei the Deathless on the Lid's dive. Lying
   // dazed he is a heap of bones, and rising his bones fly together again, with a rattle first (bones); he drops bones and calls the forest's
   // skulls (minion); on his last heart the needle his death is in shows over his crown, and the last blow snaps it (needle).
-  koschei: { name: { en: 'Koschei', es: 'Koschéi', pt: 'Koschei', ja: 'コシチェイ' }, ink: 'gray', hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3), bones: true, needle: true, minion: 'skull',
+  koschei: { name: { en: 'Koschei', es: 'Koschéi', pt: 'Koschei', ja: 'コシチェイ' }, ink: 'gray', bone: KOSCH, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3), bones: true, needle: true, minion: 'skull',
     intro: [{ en: 'My death is far from here.', es: 'Mi muerte está lejos de aquí.', pt: 'Minha morte está longe daqui.', ja: 'わしの しは とおくに ある。' },
       { en: 'Kill me? Find my needle first.', es: '¿Matarme? Primero busca mi aguja.', pt: 'Me matar? Ache minha agulha primeiro.', ja: 'わしを たおす？ まず はりを さがせ。' },
       { en: 'Roll away, little bun.', es: 'Rueda lejos, panecillo.', pt: 'Role pra longe, pãozinho.', ja: 'ころがって にげな、パンぼうや。' }],
     quip: [{ en: 'Deathless. And you?', es: 'Inmortal. ¿Y tú?', pt: 'Imortal. E você?', ja: 'わしは しなぬ。おまえは？' },
       { en: 'Bones remember. Bones return.', es: 'Los huesos recuerdan. Y vuelven.', pt: 'Os ossos lembram. E voltam.', ja: 'ほねは おぼえてる。ほねは もどる。' }],
-    defeat: { en: '…The needle… broke.', es: '…La aguja… se rompió.', pt: '…A agulha… quebrou.', ja: '…はりが… おれた。' } },
+    defeat: { en: '…The needle… broke.', es: '…La aguja… se rompió.', pt: '…A agulha… quebrou.', ja: '…はりが… おれた。' },
+    top: { en: 'Not now. Wait till he swings!', es: '¡Ahora no! Espera a que dé el tajo.', pt: 'Agora não! Espere ele golpear.', ja: 'いまは だめ。ふりおろすまで まて！' },   // the first stomp that clangs off him
+    hint: { en: 'Off balance! Stomp him!', es: '¡Desequilibrado! ¡Písalo!', pt: 'Desequilibrado! Pise nele!', ja: 'よろけた！ ふみつけろ！' },   // the first time he staggers
+    how: { en: 'Jump his sword, then stomp him', es: 'Salta su espada y písalo', pt: 'Pule a espada e pise nele', ja: 'けんを とんで、ふみつけろ' } },   // after three losses
 };
 // The bosses' looks (owner, 2026-10-20: each boss a yokai of its world, picked from tools/variants.py's sheets boss-<id>, A to F, as the
 // game's code draws them): its body's design (and size, where its drawing is in whole game pixels on it: BOSS_FIT); the renderer draws the rest round it (look) and on
@@ -1160,7 +1211,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...FOREST, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], dark: true, enemies: ['leshy', 'kikimora', 'skull', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7107 },
   { role: 'rest', len: 22, fire: 0.3, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
-  { role: 'boss', boss: 'koschei', dark: true },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
+  { role: 'boss', boss: 'koschei', dark: true, par: 70 },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
 ] },
 // World 1, the Village (the Mine's world until 4084599; at first world 3): how to climb, crumbling blocks, spitters, the pit's waves and a fat
 // spitter, a peak, the bonus, moving planks, a peak, Moti's shop; the Cork's dive. Its runes the story's first (since 2026-10-21, when the old
@@ -1242,7 +1293,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [0, 113791], seed: 7108 },
   { role: 'rest', len: 32, fire: 0.44, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'pigeon' },
+  { role: 'boss', boss: 'pigeon', bare: true, par: 65 },   // the Karasu-tengu's (owner, 2026-10-24): a bare arena, the floor its swoop ends in (under a ledge was out of its reach); par: its time medal
 ] }];
 
 // Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
@@ -1896,7 +1947,9 @@ const CHUNKS = {
   caveIn: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins with no door; its roof gives way under you (a crumbling block takes any touch),
     '............',   // and from inside a head-butt brings it down again. Up by the planks on the right wall. Against the left wall, its floor two
     '............',   // thick: nowhere outside it within the magnet's reach of its coins (COIN.magnet). Its roof up to the wall: one a tile short is cut back
-    '............',   // to leave a way past it (Level.place's `pass`), a hole over the vault
+    '............',   // to leave a way past it (Level.place's `pass`), a hole over the vault. Its roof 15 tiles up: a full jump from the plank under the cap
+    '............',   // of a 375×667 (21.8 tiles) and out of the vault
+    '............',
     '............',
     'CCCCC#......',
     '#OOOO#......',
@@ -1905,8 +1958,6 @@ const CHUNKS = {
     '######......',
     '######......',
     '.........===',
-    '............',
-    '............',
     '............',
     '............',
     '............',
@@ -2611,7 +2662,7 @@ class Level {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
       if (this.rc && this.rc.street) { this.rects.push(this.box(cx - W * 0.18, at(0.3), cx + W * 0.18, at(0.3) + p, { plank: true })); return; }   // the Tram's: one ledge in the middle, away from its stops at the ends
-      if (this.rc && this.rc.hang) return;   // a hanging boss's (Boss.hang): the floor and the walls; what does nothing in the fight is not there (the plan)
+      if (!this.rc || this.rc.hang || this.rc.bare) return;   // a hanging boss's (Boss.hang; the random run's Lid too, with no recipe), or a bare arena: the floor and the walls; what does nothing in the fight is not there (the plan)
       if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
         const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
         for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));
@@ -2650,7 +2701,9 @@ class Level {
       for (const f of [0.34, 0.76]) this.coin(cx, at(f), 1);
     } else if (this.cave) {   // a world's own bonus cave (CAVES): laid whole, its floor the room's; a gift room may hold a heart, as the old ones (a puzzle's prize is its coins)
       this.place(CHUNKS[this.cave], this.floor, false);
-      if (CAVES[o.world.id] && CAVES[o.world.id].gift.includes(this.cave) && rnd() < 0.45) this.pickups.push({ x: cx, y: at(0.8), r: 0.6 * R, item: GIFT, sold: false, near: false });
+      if (CAVES[o.world.id] && CAVES[o.world.id].gift.includes(this.cave) && rnd() < 0.45) this.pickups.push({ x: this.r - 1.5 * this.tile, y: this.floor - 14.5 * this.tile, r: 0.6 * R, item: GIFT, sold: false, near: false });   // (by the
+      // right wall 14.5 tiles up: clear of the bridges, their coins and the wheel, and its words under the HUD on every phone; at(0.8) put it on the high
+      // bridge on a 375×667, and 20 tiles up its words went into the HUD there once they lost their fill, b2f80d8; bonuses never touch a platform)
     } else {   // a stash: one of five, each with its own lot of coins (user: one was dull)
       const ledge = (x0, x1, y, f = {}) => this.rects.push(this.box(x0, y, x1, y + (f.plank ? LEVEL.plank : LEVEL.thick) * R, f));
       const row = (y, n, gap, v = 1) => { for (let k = 0; k < n; k++) this.coin(cx + (k - (n - 1) / 2) * gap * R, y, v); };
@@ -3842,7 +3895,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const menu = g.state === 'menu', farR = [];
   const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
-    const n = rows[0].length, R = vspRects(rows);
+    const n = rows[0].length, R = vspRects(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows);   // (behind: no specks, the cluster rule)
     for (let k = 0; k < R.length; k += 5) { const i = R[k], e = R[k + 1], j0 = R[k + 2], j1 = R[k + 3], ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = flip ? x + (n - e) * s : x + i * s;
       box(u, y + j0 * s, u + (e - i) * s, y + j1 * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, 0); }
   };
@@ -4701,9 +4754,9 @@ Renderer.prototype.draw = function (g, alpha) {
         let x0 = u, y0 = v; for (let i = 1; i <= 4; i++) { const x1 = u + 0.15 * s * Math.sin(i * 1.7 + n), y1 = v + (h * i) / 4; fl(x0, y0, x1, y1, G, DIM, Math.max(1, 4 - i)); x0 = x1; y0 = y1; }
         for (const [q, du, dv] of [[0.4, -1.1, 0.6], [0.55, 1.0, 0.75], [0.75, -0.7, 0.55], [0.9, 0.6, 0.6]]) { const bu = u + 0.15 * s * Math.sin(q * 4 * 1.7 + n), bv = v + h * q;
           fl(bu, bv, bu + du * s, bv + dv * s, G, DIM, 2); fl(bu + du * s, bv + dv * s, bu + du * s * 1.35, bv + dv * s * 1.1, G, DIM, 1); fl(bu + du * s, bv + dv * s, bu + du * s * 1.1, bv + dv * s * 1.6, G, DIM, 1); } };
-      const mu = ar ? -3.8 : 3.8, mv = ar ? (lv.floor - cam - 0.24 * H) / t : 5.0;   // (in the arena high on the left, over the planks)
+      const mu = ar ? -3.8 : 3.8, mv = ar ? (lv.floor - cam - 0.13 * H) / t : 5.0, mr = ar ? 1.0 : 1.5;   // (in the arena high on the left, small and up under the HUD: off the fight, owner 2026-10-23 «убери лишние визуальные элементы»)
       if (ar) skOak(U, Vv);   // Koschei's oak, under the moon on the left of his arena
-      fe(mu, mv, 1.5, 1.5, G, LIT); vlamps.push([U(mu), Vv(mv), 1.5 * 1.05, 1.5 * 1.6]);   // the moon, a light in the dark
+      fe(mu, mv, mr, mr, G, LIT); vlamps.push([U(mu), Vv(mv), mr * 1.05, mr * 1.6]);   // the moon, a light in the dark
       row(-7.4, -3.0, 1.2, 0.3, [3.0, 3.8, 3.2]); dead(5.8, 0.3, 4.8, 1.0, 6); fe(5.9, 2.8, 0.32, 0.42, K, 1);   // a dead tree, a hollow in it,
       for (const e of [-0.12, 0.12]) fb(5.9 + e, 2.85, 5.9 + e + 2 * px, 2.85 + 2 * px, PAL.orange, LIT); vlamps.push([U(5.9), Vv(2.85), 0.15, 0.45]);   // eyes glowing in it
       row(-1.6, 4.2, 1.15, 0.3, [2.8, 3.6, 3.0, 3.8]);
@@ -5843,10 +5896,14 @@ Renderer.prototype.draw = function (g, alpha) {
   // round it, behind it, only what its setting hangs it on: the tram's wire, the spider's thread, the crane's cable and hook.
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
-    const d = df.rail || df.slide || df.glide || df.quake || df.street ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    const d = df.rail || df.slide || df.glide || df.quake || df.street || df.bone ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
     if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
       const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
       F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);
+    }
+    if (front && df.bone && bs.state === 'sweep') {   // Koschei's sweep (KOSCH): his blade's white arc low along the floor in front of him
+      const [sw] = bossSize(bs), x0 = x + d * 0.3 * sw, x1 = x + d * (0.5 * sw + df.bone.reach * R), y = lv.floor - 0.5 * R, u = Math.min(1, bs.st / df.bone.sweep);
+      line(x0, y - 1.0 * R, x0 + (x1 - x0) * u, y - 0.1 * R, PAL.white, 1, 3); line(x0, y - 0.55 * R, x0 + (x1 - x0) * u, y + 0.25 * R, PAL.white, 0.8, 2); line(x0, y - 0.2 * R, x0 + (x1 - x0) * u * 0.85, y + 0.4 * R, PAL.gray, 1, 1);
     }
     if (front) {   // the Tsuchigumo tangled in its own thread (SPIDER): loops of it across its drawing while a stomp hurts it
       if (k === 'cart' && bs.state === 'dazed') { const [w, h] = bossSize(bs), y = b.maxY - 0.55 * h; for (let i = -1; i <= 1; i++) line(x - 0.42 * w, y + i * 0.16 * h - 0.1 * h, x + 0.42 * w, y + i * 0.16 * h + 0.1 * h, PAL.white, 0.85, 1); }

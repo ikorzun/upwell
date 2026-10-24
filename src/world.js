@@ -631,24 +631,19 @@ const FUJI_DOOR = { shop: [15, 33, 29, 45], stash: [40, 40, 28, 42] };   // [col
 // (the shop's red noren, the stash's purple crack): what is inside bobs in it
 // The station post's numeral (d47 «Б»: level n is station n, the tenth the summit's arena): 一 to 九, 7 x 7 game px, cut over its sheet's 八 (rows 30-36,
 // columns 7-13 of FUJI_SPR.post; its 合目 under it kept)
-const FC_V = (() => {   // Fuji's bonus caves after the real Narusawa Ice Cave (owner Д97 «А»), six takes of each while the owner picks: the room behind, the bells,
-  // the ice gate (?fc=room:C,bell:B,gate:E shows others)
-  const v = { room: 'A', bell: 'A', gate: 'A' }, m = location.search.match(/[?&]fc=([\w:,]+)/);
-  if (m) for (const p of m[1].split(',')) { const [k, l] = p.split(':'); if (k in v && /^[A-F]$/.test(l)) v[k] = l; }
-  return v;
-})();
-// A bell's outline by take (FC_V.bell): its half width at v (0 its crown, 1 its lip) as a part of BELLS.w, so it keeps UPwell's size
-const BELL_HW = {
-  A: (v) => (v < 0.22 ? 0.5 + 0.5 * Math.sqrt(v / 0.22) : v < 0.8 ? 1 : 1 + 0.18 * ((v - 0.8) / 0.2)),   // a temple bell: a round crown, straight, a flared lip
-  B: (v) => 0.35 + 0.83 * Math.pow(v, 1.6),   // flared from a narrow crown
-  C: (v) => (v < 0.15 ? 0.72 + 0.28 * Math.sqrt(v / 0.15) : 1),   // a bonshō: a cylinder, its crown rounded
-  D: (v) => 1.05 * Math.sqrt(Math.max(0, 1 - ((v - 0.5) / 0.5) ** 2)),   // a suzu: round
-  E: (v) => 0.86 * (v < 0.18 ? 0.5 + 0.5 * Math.sqrt(v / 0.18) : v < 0.82 ? 1 : 1 + 0.16 * ((v - 0.82) / 0.18)),   // tall and narrow
-  F: (v) => (v < 0.22 ? 0.5 + 0.5 * Math.sqrt(v / 0.22) : v < 0.8 ? 1 : 1 + 0.18 * ((v - 0.8) / 0.2)),   // as A, a band of waves on it
-};
+// Fuji's bonus caves after the real Narusawa Ice Cave (owner Д97 «А»; his picks Д170 A, Д171 A, Д172 «Перерисуй с листа вариант Е», Д173 «А»): a temple bell's
+// outline, its half width at v (0 its crown, 1 its lip) as a part of BELLS.w (UPwell's size kept): a round crown, straight, a flared lip
+const bellHw = (v) => (v < 0.22 ? 0.5 + 0.5 * Math.sqrt(v / 0.22) : v < 0.8 ? 1 : 1 + 0.18 * ((v - 0.8) / 0.2));
+// The gate of kept ice, off research/variants/fuji-cavegate-1-px.png E (path A, scratchpad fcave/cutgate.py): round lumps of ice stacked, coins in them; shrunk
+// to the gate's height by the nearest sheet pixel where it is lower than the sheet's (fcGate)
+const FC_GATE = { rows: ['.......................wwwwwwwwwww.................', '.....................wwwwwwwwwwwwwwb...............', '...................dswwwwwwwwwwwwwwwd..............', '...................wwwwwwwwwwwwwwwwww..............', '..................wwwwwwwwwwbbwwwwwwww.............', '..................wwwwwwwbbbbbbwwwwwwwdd...........', '..................wwwbbbbbbbbbbbbbbwwwbb...........', '................dbwwbbbwbbbbbbbwbbbbbwbb...........', '................dbwwbbbbbbbbbbbbbbbbbwwd...........', '................dbwbbbbbbbbbbbbbbbsbbwww...........', '................dbbbbbbbbbbbbbbbbbwbbbww...........', '................dbbbbbbbbbbbbbbbbbbbbbww...........', '................dbbbbbbbbbbbbbbbbbbbbbww...........', '................dbbbbbbbbbbbbbdbbbbbbbww...........', '................dbbbbbbbbbbbbbbbbbbbbbbd...........', '................dbbbbbbbbbbbbbbbbbbbbbbb...........', '................dbbbbbbbbbbbbbbbbbbbbbbb...........', '.........sswwwwwwbbbbbbbbbbbbbbbbbdbbbbb...........', '........wwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbb...........', '........wwwwwwwwwwwwbbdbbbbbbbbbbbbbbbd............', '......wwwwwwwwwwwwwwwwwwwbbbbbbbbbbbbb.............', '......wwwwwwwwwwwwwwwwwwwwwwbbdbbbbbbb.............', '......wwwwwwwwwwwwwwwwwwwwwwbbbbbbbbbd.............', '......wwwbbbbbbbbbbbbbbbbbbbwwwwdbdbd..............', '.....bwwbbbbbdbbbbbbbbbbbbbbbbbwwwwwwbbb...........', '.....bbbbbbbbbbbbbbbbbbbbbbbbbbwbwwwwwbbddd........', '.....bbbbbbbbbbbbsssssbbbbbbbbbbbbbbwwwwwwb........', '.....bbbbbbbbbbssbssscsbbbbbbbbbbbbbbbbbwwwb.......', '.....bbbbbbbbbbbssssscssbbbbbbbbbbbbbbbbbbwwbb.....', '.....bbbbbbbbbbsbsbssccssbbbbbbbbbbbbbbbbbwwwb.....', '.....bbbbbbbbbssscbsssscssbbbbbbbbbbbbbbcbbwww.....', '.....bbbbbbbbbsbssbsssscssbbbbbbbbbbbbbbbbwbbw.....', '.....bbbbbbbbbsbssbsscscsybbbbbbbbbbbbbbbbwbww.....', '.....bbbbbbbbbssssbsscccssbbbbbbbbbbbbbbbbwbbw.....', '.....bbbbbbbbbssssbsssscssbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbssssbbsssssybbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbssssbssssssbbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbbssbcccccsbbbbbbbbbbbbbbbbbbbbbw.d...', '.....bbbbbbbbbbbbssssssbbbbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbbw.....', '.....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbw.....', '..wwwwwwwwwwbbbbbbbbbbbbbbdbbbbbbbbbbbbbbbbbbw.....', 'dwwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbbbbbbbbbbw.....', 'wwwwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbbbbbbbbbw.....', 'wwwwwwwwwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbbbbbw.....', 'wwwwwwbbbwsbwwwwwwwwwwwwwwbbbbbbbbbbbbbbbbbbbb.....', 'wwwwwwbbbbbbbwwwwbwwwwwwwwbbbbbbbbbbbbbbbbbbbb.....', 'bbbbbbbbbbbbbbbbbbbbbbwwwwwwwbddbbbbbbbbbbbbbb.....', 'bbbwwbbbbbbbbbbbbbbbbbbwwbbwwwwbbkbbbbbbbbbbb......', 'bbbbwbbbbbbbbbbbbbbbbbbbbbbbwbbbbbdbkbbbbbbb.......', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbkkkbbbbb........', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbkkbbbwwwwwwww......', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdbbwwwwwwbbwwww.....', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbdbdkbbwwwwwwbbwwww.....', 'bbbbbbbbbbbbbbbbbbbbbbbbbdkdbbbwwwbbbbbwbbbwwwww...', 'bbbbbbbbbbbbbbbbbbbbbbkbbbwwwbbbbbbbbbbwbbbbbbww...', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbwwbbbbbbbbbbbbbbbbwwwd..', 'bbbbbbbbbbbbbbbbbbkddbbwwbbbbbbbbbbbbbbbbbbbbbwwb..', 'bbbbbbbbbbbbbbbkbbbbwbbbbbbbbbbbbbbbbbbbbbbwbbwwb..', 'bbbbbbbbbbbbbbbddbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', 'bbbbbbbbbbbkbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', 'bbbbbbdbkbbwsbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', '..bbbbbbwbbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbb..', '..bbdbbbbbbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbb..', '..bwwwbbbbbbbbbbbbbbsbsssbssbbbbbbbbbbbbbbbbbbbbwbb', 'dwbbbbbbbbbbbbbbbbssbsbssssssbbbbbbbbbbbbbbbbbbbwww', 'bwbbbbbbbbbbbbbbbbsscbbsssccbbbbbbbbbbbbbbbbbbbbwww', 'bwbbbbbbbbbbbbbbbbsscbbssccssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsscbbssccssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsssbbssccssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsssssssscssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsscsbssscssbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbbbbbbbbbbbsssbssssccsbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbdbbbbbbbbbbbsssccssssssbbbbbbbbbbbbbbbbbdbbws', 'bbbbbbbdbbbbbbbbbbssbsccccssbbbbbbbbbbbbbbbbbbbbbww', 'bbbbbbbbdbbbbbbbbbbbscsscsbbbbbbbbbbbbbbbbbbbbbbbws', 'bbbbbbbbbbbbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbbbbbw', 'bbbbbbbbbbdbbbbbbbbbbsssssbbbbbbbbbbbbbbbbbbbbdbbbb', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'bbbbbbbbbbbbdbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdbbbbbbbd', 'bbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.b', 'bbbbbbbbbbd...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..', 'bbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdb..'] };
 const POST_NUM = { 1: '......./......./......./#######/......./......./.......', 2: '......./.#####./......./......./......./#######/.......', 3: '#######/......./.#####./......./......./#######/.......', 4: '#######/#..#..#/#..#..#/#.#.#.#/##...##/#.....#/#######', 5: '#######/...#.../...#.../.#####./..#..#./..#..#./#######', 6: '...#.../....#../#######/......./..#.#../.#...#./#.....#', 7: '..#..../..#..../#######/..#..../..#..../..#...#/...####', 9: '..#..../#####../..#.#../..#.#../.#..#../.#..#.#/#...###' };
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
+// The Danchi's kit in Arata Isozaki's concrete, the owner's picks (2026-10-23, the questions page d23–d30): slab E, balcony B, pole D, stairs D, wall A,
+// far F, shop D, stash E; its things his Maekawa picks (d22 «оставить»): spring E, bikes B, mail C, cat C, boxes E; its garden E twice the size (d17, d18; on
+// d10: «too small»): DC_GARDEN
+const DC_GARDEN = 2;
 const kitAvoid = (lv, r, rows = 1) => {   // what r's thing may not be: the kinds in the nearest row of things under it (two rows where a world has four kinds or
   // more), within a screen: what is seen one after another; and those already decided across at its height (the one to its left at its very height first).
   // Decided in that order, bottom up, so the same whatever asks first
@@ -702,6 +697,9 @@ const kitThing = (lv, r) => {
     k = hk(7); opts = [[0, 'lighthouse', () => steady(3.3) && room(0, 3.4, 5.4), () => ({ x: X(2.3), y: b - 3.5 * t })],   // (its lamp's place: the task's, see its drawing)
       [1, 'net', () => steady(4.2) && room(0, 4.3, 2.9)], [2, 'gull', () => steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)],
       [3, 'octopus', () => steady(2.8) && room(0, 2.7, 2.6)], [4, 'flags', () => steady(3) && room(0, 3, 4.9)]];
+  } else if (th.danchi) {   // the Danchi's: bicycles, a balcony garden (drawn bigger, DC_GARDEN), the block's mailboxes on the wall over it, a stray cat on the ledge
+    k = hk(5); opts = [[0, 'bikes', () => steady(3.0) && room(0, 2.8, 1.6)], [2, 'plants', () => steady(2.3 * DC_GARDEN) && room(0, 2.3 * DC_GARDEN, 1.0 * DC_GARDEN)],
+      [3, 'mail', () => steady(2.0) && room(0, 2.1, 2.6)], [5, 'cat', () => steady(1.6) && room(0, 1.4, 1.2)]];
   } else if (th.skazka) {   // the Dark Forest's: Baba Yaga's fence (its skulls' eyes the dark's lights) on two ledges in six with room
     const fence = () => steady(3.2) && room(0, 3.2, 3.5);
     k = hk(13); opts = [[0, 'fence', fence], [3, 'fence', fence]];
@@ -866,7 +864,7 @@ const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2
 // belly drum lobs an acorn first (two on its last heart, when it also drops twice). It floats out of a plain jump's reach, its sway drawn over the hero (`follow`): no corner to sit its drop out in. Three hearts, every warning longer than the later bosses'.
 const TANUKI = { high: 13, swing: 0.16, follow: 0.6, spit: 1.2, webs: [0, 1, 1, 2], warn: 1.4, lock: 0.9, track: 5, again: 1.2, dive: 30, tangle: 2.8, reel: 1.0, rest: [2.2, 2.0, 1.8, 1.8], calm: 2.5,
   lings: [0, 0, 0, 0], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['stomp', 0.6, 1.5], warn: ['bubble', 0.7, 0.6], phase: ['bosshit', 0.6, 0.7] } };
-// Nuppeppo (BOSSES.crane, the Tower Blocks', world 6; owner 2026-10-24): the crane's load, a lump of flesh in its sling, the same hanging
+// Nuppeppo (BOSSES.crane, the Danchi's, world 6; owner 2026-10-24): the crane's load, a lump of flesh in its sling, the same hanging
 // boss (Boss.hang) with two moves of its own. A swing: the crane winds it back away from the hero, red, creaking, `sweep.warn` s, then
 // sweeps it across the arena like a wrecking ball, its middle `sweep.low` R over the floor: a hero on the floor passes under it, one on a
 // ledge or in the air is hit (stay low). Drips: it wobbles `spit` s with a gurgle and lobs `webs` of its goo at the hero. Its drop, where
@@ -952,7 +950,7 @@ const THEMES = {
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
   tokyo: Object.assign(theme(PAL.purple, { ice: PAL.white, crumble: PAL.gray, mover: PAL.blue }), { dots: PAL.black, town: true, hazard: 'cityfire', wallHaz: 'sparkpanel', holder: 'tokyo' }),   // Tokyo's town at night (see TOKYO), purple (owner: blue went with Fuji's;
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
-  blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { win: 'grid', panels: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
+  blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { danchi: true }),   // the Danchi (world 6; was the Tower Blocks): raw concrete (see BLOCKS)
   sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true, hazard: 'tide', wallHaz: 'blowhole', holder: 'sea' }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
   skazka: Object.assign(theme(PAL.gray, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
   // crumbles or flies tells itself by its shape (a rotten log, Baba Yaga's mortar); colour only for the hero, lights, coins, danger and the doors' marks
@@ -1122,7 +1120,7 @@ const SKY = Object.assign({}, WORLDS[2], { id: 'sky', name: { en: 'Skyscraper', 
 // The Tower Blocks (user: Soviet brutalism, stairs and panel blocks; the campaign's world 5): raw concrete, a regular grid of windows
 // far off (BG_FS uWin 2), riser pipes, satellite dishes and entrances with a bench on its walls and ledges, balconies, heating pipes,
 // stairs you walk up (the 'T' step), old mattresses for springs (THEMES.blocks `panels`, drawn by the renderer). ?play=blocks shows it.
-const BLOCKS = Object.assign({}, WORLDS[2], { id: 'blocks', name: { en: 'Tower Blocks', es: 'Bloques', pt: 'Blocos', ja: 'だんち' }, theme: THEMES.blocks, dark: [], maxD: 2, magnet: 0,
+const BLOCKS = Object.assign({}, WORLDS[2], { id: 'blocks', name: { en: 'Danchi', es: 'Danchi', pt: 'Danchi', ja: 'だんち' }, theme: THEMES.blocks, dark: [], maxD: 2, magnet: 0,
   chunks: { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 2, rest: 1, vault: 1 },
   enemies: { crawler: 3, climber: 2, shell: 1, spitter: 2 },
   intro: [{ news: { en: 'stairs: just walk up', es: 'escaleras: sube andando', pt: 'escadas: é só subir andando', ja: 'かいだん: あるいて のぼれる' } }, {}, {}] });
@@ -1238,7 +1236,7 @@ const BOSSES = {
     top: { en: 'Not now. Wait till it crashes!', es: '¡Ahora no! Espera a que se estrelle.', pt: 'Agora não! Espere ele se esborrachar.', ja: 'いまは だめ。つっこむまで まて！' },   // the first stomp that clangs off it
     hint: { en: 'Beak stuck! Stomp it!', es: '¡Pico atascado! ¡Písalo!', pt: 'Bico preso! Pise nele!', ja: 'くちばしが ささった！ ふめ！' },   // the first time its beak sticks
     how: { en: 'Brace the wind, dodge the swoop, stomp', es: 'Resiste el viento, esquiva y pisa', pt: 'Aguente o vento, desvie e pise', ja: 'かぜに たえ、きゅうこうかを よけて、ふめ' } },   // after three losses
-  // The Tower Blocks': a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
+  // The Danchi's: a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
   crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', hang: NUPPE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
       { en: 'Who needs a face anyway?', es: '¿Quién necesita una cara?', pt: 'Quem precisa de rosto?', ja: 'かおなんて いる？' },
@@ -1294,7 +1292,7 @@ const LOOKS = {
   namazu: ['D', 'round', 2.5],   // the Sea's: Onamazu, arched, the stone on its back (its body the round of its drawing at 1:1, its middle, so it flips in place)
   koschei: ['A', 'round', 2.38],   // the Dark Forest's: Koschei the bony king, his sword out (its body the round of its drawing at 1:1, its middle)
   tram: ['E', 'tram'],   // Tokyo's: a tsukumogami tram
-  crane: ['F', 'round', 2.74],   // the Tower Blocks': Nuppeppo in its ropes (its body the round of its drawing at 2x)
+  crane: ['F', 'round', 2.74],   // the Danchi's: Nuppeppo in its ropes (its body the round of its drawing at 2x)
   pigeon: ['A', 'tengu'],   // the Sky's: a Karasu-tengu
 };
 for (const k in LOOKS) BOSSES[k].look = { id: k + '-' + LOOKS[k][0], design: LOOKS[k][1], size: LOOKS[k][2] };
@@ -1331,7 +1329,7 @@ const CAMPAIGN = [
     news: { en: 'level crossings: mind the train', es: 'pasos a nivel: cuidado con el tren', pt: 'passagens de nível: cuidado com o trem', ja: 'ふみきり: でんしゃに ちゅうい' } },
   { role: 'rest', len: 25, fire: 0.37, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 5109,
     },
-  { role: 'boss', boss: 'tram', street: true, par: 55 },   // the Tram's (owner, 2026-10-24): the street's floor, one ledge in the middle, away from its stops; par: its time medal
+  { role: 'boss', boss: 'tram', par: 55 },   // the Tram's (owner, 2026-10-24): the street's floor, bare (2026-10-25: jumped, not waited out on a ledge); par: its time medal
 ] },
 // World 2, the Mine (the Cave until 2026-10-21; at first world 1; owner: «мир темной пещеры, рудников японии», and its dark the real one, «Настоящая тьма»):
 // every level but its bonus and its boss dark, lit by the hero, its lanterns and what glows; its moss, rubber walls; the Minecart. The basics are the
@@ -1351,7 +1349,7 @@ const CAMPAIGN = [
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
   { role: 'peak', len: 28, gate: 'gate3w', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['komori', 'crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
-  { role: 'boss', boss: 'cart', hang: true, par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
+  { role: 'boss', boss: 'cart', par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
@@ -1371,7 +1369,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 32, sides: [0, 110785], gate: 'gate3w', fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, rubberwall: 1, twinshaft: 1 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler', 'nurikabe'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'rest', len: 22, fire: 0.33, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, icewall: 1 }, intro: [], enemies: ['shell'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 4104,
     },
-  { role: 'boss', boss: 'puck', glide: true, par: 45 },   // Tsurara-onna's (owner, 2026-10-24): packed snow (her slide is hers: a floor of ice made every dodge a slither), two ledges, her icicles only when she calls them; par: its time medal
+  { role: 'boss', boss: 'puck', par: 45 },   // Tsurara-onna's (owner, 2026-10-24): packed snow (her slide is hers: a floor of ice made every dodge a slither), bare (2026-10-25: her slide jumped), her icicles only when she calls them; par: its time medal
 ] },
 // World 4, the Sea (owner, 2026-10-20: rivers, the sea and an island between Fuji and Tokyo; its kit in the renderer, see THEMES.sea): where the
 // climb begins to get harder (the owner's 10-15 minute rule keeps worlds 1-3 gentle). One new thing a level: wet rock, rafts riding the streams,
@@ -1394,7 +1392,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], enemies: ['circler', 'spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6107 },
   { role: 'rest', len: 22, fire: 0.35, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, iceblocks: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 6109,
     },
-  { role: 'boss', boss: 'namazu', quake: true, par: 55 },   // Onamazu's (owner, 2026-10-24): rock and two ledges over its waves; par: its time medal
+  { role: 'boss', boss: 'namazu', par: 55 },   // Onamazu's (owner, 2026-10-24): rock, bare (2026-10-25: its waves jumped); par: its time medal
 ] },
 // The Dark Forest (the owner's bonus world, 2026-10-20: scary Russian fairy tales; its kit in the renderer, see THEMES.skazka; last in CAMP_ORDER, it
 // opens at 180 stars, off the line): every level dark, the hero a Kolobok. One new thing a level: the dark itself, skulls that lunge, the Kikimora on the walls, Baba Yaga's mortars, a
@@ -1417,7 +1415,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...FOREST, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], dark: true, enemies: ['leshy', 'kikimora', 'skull', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 7107 },
   { role: 'rest', len: 22, fire: 0.3, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: 'someone is stuck in a cage', es: 'alguien está atrapado', pt: 'alguém está preso', ja: 'だれかが つかまってる' } },
-  { role: 'boss', boss: 'koschei', dark: true, par: 70 },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
+  { role: 'boss', boss: 'koschei', dark: true, ledges: true, par: 70 },   // Koschei (the boss chat, 2026-10-21): the Lid's dive, a heap of bones when dazed, the needle his last heart; his arena dark (owner: «Сделать тёмной»)
 ] },
 // World 1, the Village (the Mine's world until 4084599; at first world 3): how to climb, crumbling blocks, spitters, the pit's waves and a fat
 // spitter, a peak, the bonus, moving planks, a peak, Moti's shop; the Cork's dive. Its runes the story's first (since 2026-10-21, when the old
@@ -1459,7 +1457,7 @@ const CAMPAIGN = [
     enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,   // practice (round 2): the calm before the boss, its one idea the coins: rows along a jump's arc, the
     // moss garden to rest in (the digest §5: a breather after the peak, not an empty one); few enemies
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'probka', hang: true, par: 35 },   // the Bake-danuki's (owner, 2026-10-24: all bosses redone): an empty arena for the first fight; par: its time medal
+  { role: 'boss', boss: 'probka', par: 35 },   // the Bake-danuki's (owner, 2026-10-24: all bosses redone): an empty arena for the first fight; par: its time medal
 ] },
 // World 5, the Tower Blocks (the user's Soviet brutalism; its kit in the renderer, see THEMES.blocks): stairs you walk up, old balconies
 // that give way, old mattresses that bounce, then winter (icicles off the roofs, the twist); the Crane. Its runes: a frame, a tower, two
@@ -1479,7 +1477,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 42, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, spikes: 1, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [17935, 0], seed: 9039 },
   { role: 'rest', len: 30, fire: 0.42, maxD: 2, chunks: { flight: 3, stairs: 2, planks: 3, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, sides: [0, 113769], seed: 6109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'crane', par: 60 },   // Nuppeppo's (owner, 2026-10-24): two ledges, in its swing's way; par: its time medal
+  { role: 'boss', boss: 'crane', ledges: true, par: 60 },   // Nuppeppo's (owner, 2026-10-24): two ledges, in its swing's way (its swing hits what is up on one: the only arena that keeps them); par: its time medal
 ] },
 // World 6, the Skyscraper (the user's skyscraper and clouds; its kit in the renderer, see THEMES.sky): clouds that dissolve under you,
 // window-cleaning gondolas, bolts dropped from above, then night over the clouds (the twist: dark); the Pigeon. Its runes: a cross of
@@ -1499,7 +1497,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SKYP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [0, 113791], seed: 7108 },
   { role: 'rest', len: 32, fire: 0.44, maxD: 2, chunks: { planks: 3, shelves: 3, stairs: 2, pillars: 2 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 7109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'pigeon', bare: true, par: 65 },   // the Karasu-tengu's (owner, 2026-10-24): a bare arena, the floor its swoop ends in (under a ledge was out of its reach); par: its time medal
+  { role: 'boss', boss: 'pigeon', par: 65 },   // the Karasu-tengu's (owner, 2026-10-24): a bare arena, the floor its swoop ends in (under a ledge was out of its reach); par: its time medal
 ] }];
 
 // Pairs of upgrades that together are something new (the plan after the sandbox: synergies): both taken, it comes by itself,
@@ -2313,19 +2311,91 @@ const CHUNKS = {
   caveBells: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins on the left wall shut by a gate of ice (G); three bells (BELLS) to ring in their order,
     '............',   // 一 二 三 (big to small): 一 under the vault (a jump from the floor), 二 under the high ledge (a jump from the low one), 三 at the low ledge's far
     '............',   // end (a jump from the floor); bottom up they come 三 二 一. Rung in order the gate melts; a wrong one and all fall quiet. The way in: a double jump
-    '............',   // from the floor beside it. Its floor two thick and its roof run along it: no coin in the magnet's reach from outside
+    '............',   // from the floor beside it. Its floor two thick and its roof run along it: no coin in the magnet's reach from outside. Its gate three tiles
+    // wide, as Worlds' kept ice is drawn (handover 23: Д172 E)
     '............',
     '............',
     '............',
     '#####...###.',
-    '....G....5..',
-    '....G.......',
-    'OOOOG.......',
-    'OOOOG.......',
+    '...GG....5..',
+    'OOOGG.......',
+    'OOOGG.......',
+    'OOOGG.......',
     '#####.......',
     '#####...####',
     '...4......6.',
     '............', '............', '............', '............', '............', '............', '............'] },
+  // The Sea's bonus caves (owner З3 «А», З9 «А», after Fuji's, one world at a time), a sea grotto's own things (Urashima's, Worlds' look): its blowholes (springs),
+  // its rafts, its driftwood and its clam shells (CLAM, the caves' second new thing). As the others: 21 rows, the bottom 8 clear but for the blowholes, the
+  // way out the hole in the left wall (nothing to fall down within 3 tiles of it)
+  caveSpouts: { d: 1, kind: 'cave', rows: [   // a gift: two blowholes in the floor (S) throwing you up through a column of coins each, onto a ledge with big ones;
+    '............',   // the right one under a driftwood log (C) in a niche: stand on it and it sinks (back in 3 s). A held jump on one throws you higher
+    '............',
+    '............',
+    '............',
+    '............',
+    'OOO.......OO',
+    '###......###',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '............',
+    '............',
+    '............',
+    '............',
+    '......CCCC..',
+    '......#..#..',
+    '....S.#S.#..'] },
+  caveRafts: { d: 1, kind: 'cave', rows: [   // a gift: three rafts (M) drifting wall to wall at 9, 12 and 15 tiles, a garland of coins over each one's way, big ones
+    '............',   // at the top: up from the floor onto the low one, and from raft to raft as they pass. A ledge by the left wall catches a fall off
+    '............',   // one there (the way out is under it)
+    '............',
+    '.o.o.o.o.o..',
+    '..O..O..O...',
+    '............',
+    '......MMM...',
+    '.o.o.o.o.o..',
+    '............',
+    '...MMM......',
+    '..o.o.o.o.o.',
+    '............',
+    '.......MMM..',
+    '###.........',
+    '............', '............', '............', '............', '............', '............', '............'] },
+  caveShell: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins on the left wall behind a gate (G); a clam shell (F, a latch) on the high ledge across
+    '............',   // the room: up three ledges to it, stand on it, and the gate is gone for good; then down onto the ledge by the gate and in. Its floor
+    '............',   // two thick and its roof run along it: no coin in the magnet's reach from outside
+    '............',
+    '............',
+    '............',
+    '..........F.',
+    '#####....###',
+    '....G.......',
+    '....G.......',
+    'OOOOG##.....',
+    'OOOOG.......',
+    '#####.......',
+    '#####...####',
+    '............', '............', '............', '............', '............', '............', '............', '............'] },
+  caveKeel: { d: 1, kind: 'cave', rows: [   // a puzzle: the same vault and gate; its clam shell (J, holds) at the far end of a shelf a raft (W) drifts to and fro
+    '............',   // over: the gate open only while the raft's keel is on the shell (about a sixth of the time), and never shut on the hero. Wait on the
+    '............',   // ledge by the gate and go in when it opens. Stood on the shell yourself, the gate is too far: it shuts before you're there
+    '............',
+    '............',
+    '............',
+    '............',
+    '#####.......',
+    '....G.......',
+    '....G.......',
+    'OOOOG##.....',
+    'OOOOG.......',
+    '#####...WW.J',
+    '#####...####',
+    '............', '............', '............', '............', '............', '............', '............', '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -2832,7 +2902,8 @@ const AMBUSH = { waves: [2], coins: 2 };
 // world kept the Mine's old id). Two gifts, then a puzzle, never the same room twice running (Game.enterRoom). A world not here keeps the five old
 // heaps of coins (Level.build).
 const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] },
-  ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] } };   // (the Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice')
+  ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] }, sea: { gift: ['caveSpouts', 'caveRafts'], puzzle: ['caveShell', 'caveKeel'] } };   // (the Village's, 'mine';
+// the Mine's, 'cave'; Fuji's, 'ice'; the Sea's, 'sea')
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {
@@ -2847,11 +2918,15 @@ const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either sid
 // and `h` tall (tiles) by its number; the hero bumping into one rings it, its pitch `rate` (the chime's). Rung in their order (一 二 三) the room's ice gate ('G')
 // melts; a wrong one and all three fall quiet, to start again (owner З2 «А»: a mistake costs nothing). None rings the room's first `calm` s (the throw in)
 const BELLS = { rope: 0.3, w: [0.8, 0.65, 0.5], h: [1.35, 1.1, 0.85], rate: [0.6, 0.8, 1.05], calm: 1.2 };
+// The Sea's clam shells in a cave (caveShell, caveKeel): a shell `w` half wide and `h` tall (tiles) on the block under it opens the room's gate ('G'). 'F' a latch: stood on
+// once, the gate is gone for good. 'J' holds it: open only while something is on it, the hero or a raft's keel (a mover over it, its underside within `keel` tiles),
+// shut again once nothing is in the gateway (never on the hero)
+const CLAM = { w: 0.45, h: 0.3, keel: 1.2 };
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', '4', '5', '6', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', '4', '5', '6', 'F', 'J', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -2933,7 +3008,7 @@ function shuffled(rnd, list) {
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.plates = null; this.gates = null; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -2948,7 +3023,7 @@ class Level {
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.plates = null; this.gates = null; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
@@ -3012,7 +3087,7 @@ class Level {
     return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false, gone: false, t: 0, dx: 0, dy: 0, hit: false, crumbling: false,   // (every field
       // a rect is given later too, from the start: one shape for all of them, 2-5 before, the physics' loops slower for it: perf)
       kit: undefined, kitWant: undefined, id: undefined, moss: false, board: false, safe: false, mnRoom: undefined, bouncy: false, ac: false, poke: undefined, batsP: undefined, eyesP: undefined,
-      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, gate: false, spikes: null }, f);
+      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, gate: false, latched: false, plate: null, pressed: false, spikes: null }, f);
   }
   coin(x, y, v) { this.coins.push({ x, y, v, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: this.rng() * TAU }); }
   // The scenes made whole: the boss arena and the two kinds of room.
@@ -3024,10 +3099,9 @@ class Level {
     this.rects.push(this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true }));
     const at = (f) => this.floor + (this.capY - this.floor) * f;
     if (o.kind === 'boss') {
-      const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
+      const p = LEVEL.plank * R;   // two ledges a jump up (Nuppeppo's: in its swing's way)
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
-      if (this.rc && this.rc.street) { this.rects.push(this.box(cx - W * 0.18, at(0.3), cx + W * 0.18, at(0.3) + p, { plank: true })); return; }   // the Tram's: one ledge in the middle, away from its stops at the ends
-      if (!this.rc || this.rc.hang || this.rc.bare) return;   // a hanging boss's (Boss.hang; the random run's Lid too, with no recipe), or a bare arena: the floor and the walls; what does nothing in the fight is not there (the plan)
+      if (!(this.rc && this.rc.ledges)) return;   // the floor and the walls (owner, 2026-10-25: «убери платформы со всех уровней там, где можно без них обойтись»): every move has its dodge on the floor
       this.rects.push(this.box(this.l, at(0.32), this.l + W * 0.3, at(0.32) + p, { plank: true }));
       this.rects.push(this.box(this.r - W * 0.3, at(0.32), this.r, at(0.32) + p, { plank: true }));
       return;
@@ -3374,6 +3448,7 @@ class Level {
       } else if (ch === 'S') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - 0.7 * R, Y(r) - 0.36 * R, cx + 0.7 * R, Y(r), { spring: true })); }
       else if (ch === 'o' || ch === 'O') this.coin(X(k) + t / 2, Y(r) - t / 2, ch === 'O' ? 5 : 1);
       else if (ch === 'Y') this.icicles.push({ x: X(k) + t / 2, y: Y(r + 1), state: 'hang', t: 0 });
+      else if (ch === 'F' || ch === 'J') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - CLAM.w * t, Y(r) - CLAM.h * t, cx + CLAM.w * t, Y(r), { plate: ch === 'F' ? 'latch' : 'hold' })); }   // a clam shell (CLAM)
       else if (ch === '4' || ch === '5' || ch === '6') this.bells.push({ x: X(k) + t / 2, y: Y(r + 1), n: +ch - 3, rung: false, in: false, t: -9 });   // a bell off the ledge over it (BELLS)
       else if (ch === 'V') {   // a seesaw's pivot (SEESAW): its post down to the block under it, a seat at each end of its beam
         let rr = r - 1; while (rr >= 0 && !SOLID[at(rr, k)]) rr--;
@@ -4175,7 +4250,7 @@ const pxVote = (rows, from) => {
 };
 if (GUIDE) {
   for (const k in HAZ_SPR) if (k !== 'tide') { const S = HAZ_SPR[k]; S.band = pxVote(S.band, Math.min(S.band.length, S.front + 3)); }
-  for (const T of [WALL_SPR, ICE_SPR, HOLD_SPR, VDOOR, VIL2, VDROP_SPR, VSLICK_SPR, HAZ_SPR, FOE_SPRITES, MFAR.cell, IW, TFAR.cell, GAI]) pxWalk(T);   // (K9_SPR's and UME_SPR's arrays are FOE_SPRITES')
+  for (const T of [WALL_SPR, ICE_SPR, HOLD_SPR, VDOOR, VIL2, VDROP_SPR, VSLICK_SPR, HAZ_SPR, FOE_SPRITES, MFAR.cell, IW, FC_GATE, TFAR.cell, GAI]) pxWalk(T);   // (K9_SPR's and UME_SPR's arrays are FOE_SPRITES')
   for (const id in FUJI_SPR) if (typeof FUJI_SPR[id] === 'string' && FUJI_SPR[id].includes('/')) FUJI_SPR[id] = pxClean(FUJI_SPR[id].split('/')).join('/');   // (its own form: rows by '/')
 }
 for (const id of [...Object.keys(K9_SPR), ...Object.keys(UME_SPR)]) LOOK_FACE[id] = () => true;   // (drawn crisp in the world by crispLook, not warped over the soft body)
@@ -4350,6 +4425,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (th.town && kind !== 'exit' && kind !== 'trial') { iyaDoor(d, kind, gaiSpr(kind === 'shop' ? 'shop' : 'stash')); return; }   // Tokyo's: a tiny izakaya and a stair door
     // of Golden Gai (Д157 «А», GAI, six takes while the owner picks; see iyaDoor); a trial's the old arch
     if (th.mines && kind !== 'exit') { if (kind === 'trial') mnStash(d); else iyaDoor(d, kind, IW[kind === 'shop' ? 'shop' : 'stash']); return; }   // the Mine's: Omori's merchant house and a mabu's mouth (Д120 «А», IW; see iyaDoor), a trial's the old vault (mnStash)
+    if (th.danchi && kind !== 'exit') { (kind === 'shop' ? dcShop : dcStash)(d); return; }   // the Danchi's (see dcShop, dcStash)
     const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
@@ -4577,11 +4653,11 @@ Renderer.prototype.draw = function (g, alpha) {
     const ln = (u0, v0, u1, v1, ink, wp = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), ink, a, wp);
     return { P, t, sn, X, Y, bx, ln, px: P / t, dir, y1 };
   };
-  const skInside = (d, kind, c, dx, dw, top) => {   // what is inside, bobbing in the doorway; sparks rising past it
+  const skInside = (d, kind, c, dx, dw, top, sparks = true) => {   // what is inside, bobbing in the doorway; sparks rising past it (but the Danchi's stash's)
     const { P, sn, Y, y1 } = skDoorAt(d), bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
     if (kind === 'shop') { const ry = Y(0.8); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
     else { const ry = Y(0.55); for (let i = 0; i < 3; i++) disc(dx + (i - 1) * rr * 0.5, ry - (i === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
-    for (let i = 0; i < 6; i++) {
+    if (sparks) for (let i = 0; i < 6; i++) {
       const u = (T * 0.45 + i / 6) % 1, q = ((Math.sin(i * 12.9898 + d.x0) * 43758.5453) % 1 + 1) % 1, spx = sn(dx - dw + q * 2 * dw), spy = y1 - u * (top * lv.tile + 2.5 * R);
       const k2 = Math.sin(u * Math.PI), l = (k2 > 0.7 ? 2 : 1) * P, ink = i & 1 ? INK.white : c;
       if (k2 > 0.25) { box(spx - l, spy - P * 0.5, spx + l, spy + P * 0.5, ink, 1, 0, 10, 0); box(spx - P * 0.5, spy - l, spx + P * 0.5, spy + l, ink, 1, 0, 10, 0); }
@@ -4628,6 +4704,29 @@ Renderer.prototype.draw = function (g, alpha) {
     F(X(1.25), Y(dh + 0.42), 0.26 * t, 0, 0, 0.24 * t, G, 1, 0); F(X(1.25), Y(dh + 0.42), 0.15 * t, 0, 0, 0.13 * t, K, 1, 4);   // a keystone with its mark
     mnDish(X(2.7), Y(2.2), 0.85);   // an oil dish
     skInside(d, 'stash', c, dx, dw, dh);
+  };
+  // The Danchi's doors in Isozaki's concrete (the owner's picks, 2026-10-23, d29 D, d30 E; research/variants/iso-shop-1-px.png, iso-stash-1-px.png): the shop in
+  // a board-formed front under a huge hollow beam out of the wall, its end cut square and open, a red noren (its mark), a window lit, mailboxes by it and a round
+  // lantern lit; the stash a grille deep in the open end of a giant hollow beam, its purple glow (its mark) through it, no sparks rising past it (owner: «delete
+  // arrows»). What is inside bobs in the doorway (skInside), a glow breathes round it. The beams' tops dotted, never a ledge's white edge.
+  const dcShop = (d) => {
+    const { t, sn, X, Y, bx, px } = skDoorAt(d), c = PAL.red, G = PAL.gray, K = PAL.black, O = PAL.orange, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    bx(0.15, 0, 2.75, dh + 0.35, G, 0, 1.5); for (let v = 0.25; v < dh + 0.35; v += 0.25) bx(0.15, v, 2.75, v + px, K, 0, 0.6);   // its board-formed front (half dark)
+    bx(-0.05, dh + 0.45, 3.4, dh + 1.25, G, 2, 1.5); bx(0.1, dh + 0.35, 3.2, dh + 0.45, G, 4, 1.5); bx(2.7, dh + 0.5, 3.4, dh + 1.2, G); bx(2.7 + 2 * px, dh + 0.5 + 2 * px, 3.4 - 2 * px, dh + 1.2 - 2 * px, K);   // the beam, its soffit, its open end
+    bx(0.42, 0, 2.08, dh + 0.08, G); bx(0.5, 0, 2.0, dh, INK.dark);   // its frame, the doorway dim inside
+    bx(0.5, dh - 0.55, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.55, u + px, dh, K);   // its noren, in strips
+    bx(2.2, 0.7, 2.5, 1.6, G); bx(2.25, 0.75, 2.45, 1.55, O); bx(2.25, 1.15, 2.45, 1.15 + px, K); vlamps.push([X(2.35), Y(1.15), 0.4, 1.2]);   // a window lit (a light)
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 3; j++) { const u = 2.6 + i * 0.3, v = 0.3 + j * 0.28; bx(u, v, u + 0.26, v + 0.24, G); bx(u + 0.05, v + 0.14, u + 0.21, v + 0.17, K); }   // mailboxes
+    F(X(2.75), Y(1.75), 0.14 * t, 0, 0, 0.14 * t, O, 1, 0); vlamps.push([X(2.75), Y(1.75), 0.35, 1.1]);   // a round lantern, lit
+    skInside(d, 'shop', c, dx, dw, dh + 1.1);
+  };
+  const dcStash = (d) => {
+    const { t, sn, X, Y, bx, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
+    bx(0.15, 0, 2.75, dh + 0.6, G, 2, 1.5); bx(0.15, dh + 0.6, 2.75, dh + 0.7, G, 2); bx(0.32, 0, 2.58, dh + 0.45, K); bx(0.32, dh + 0.3, 2.58, dh + 0.45, G, 4, 1.5);   // the beam's end: its thick walls, the dark in it, its soffit
+    bx(0.5, 0, 2.0, dh, c, 0, 1.6); for (let u = 0.62; u < 2.0; u += 0.2) bx(u, 0, u + px, dh, K); for (let v = 0.2; v < dh; v += 0.2) bx(0.5, v, 2.0, v + px, K);   // a grille, the glow through
+    skInside(d, 'stash', c, dx, dw, dh, false);
   };
   const pech = (d) => {   // a crooked Russian stove (the stash, E), tall and lumpy and cracked, its mouth the door, its chimney bent, a bench step off it with a shelf over it
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
@@ -4809,20 +4908,11 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   // The Mine's shared pieces: an oil dish lit (Iwami Ginzan's, Д117 «А»; the wall lamps the hero lights are IW's, see iwLamp), its ore glinting in the wall over
   // a ledge (the owner's pick of 2026-10-21, research/variants/mine-*-game.png C), its things on ledges, its bats, the mine far off
-  const fcGate = (r) => {   // Fuji's cave's gate (caveBells 'G'): a wall of the ice the cave kept, by take (FC_V.gate), coins faint behind it; it melts (UPwell's crumbleFx)
-    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, B = PAL.blue, W = PAL.white, L = FC_V.gate, x0 = r.x0, x1 = r.x1, w = x1 - x0, n = Math.max(1, Math.round((r.y1 - r.y0) / t));
-    const coin = (y) => F(sn((x0 + x1) / 2), sn(y), 0.22 * w, 0, 0, 0.28 * w, PAL.yellow, 1.5, 0);   // a coin seen through the ice (its darker half)
-    if (L === 'E') { for (let k = 0; k < n; k++) { const cy = r.y1 - (k + 0.5) * t; F(sn((x0 + x1) / 2), sn(cy), 0.55 * w, 0, 0, 0.5 * t, B, 1, 0); F(sn(x0 + 0.35 * w), sn(cy - 0.2 * t), 0.12 * w, 0, 0, 0.1 * t, W, 1, 0); } coin(r.y1 - 1.5 * t); return; }   // round lumps
-    for (let k = 0; k < n; k++) {   // its blocks, bottom up
-      const y1 = r.y1 - k * t, y0 = y1 - t, o = L === 'D' ? sn((k % 2 ? 0.12 : -0.12) * w) : 0;
-      box(x0 + o, sn(y0), x1 + o, sn(y1), B, 1, 0, 10, 0); box(x0 + o, sn(y0), x1 + o, sn(y0) + P, W, 1, 0, 10, 0);   // a block, its top edge white
-      if (L === 'A' || L === 'D') line(sn(x0 + o + 0.2 * w), sn(y0 + 0.2 * t), sn(x0 + o + 0.7 * w), sn(y0 + 0.7 * t), PAL.black, 1.6, 1);   // a crack
-      if (L === 'C') box(sn(x0 + 0.2 * w), sn(y0 + 0.1 * t), sn(x0 + 0.3 * w), sn(y1 - 0.1 * t), W, 1.3, 0, 10, 0);   // a smooth face's gleam
-    }
-    if (L === 'B') for (let k = 0; k < 3; k++) { const u = x0 + ((k + 0.5) / 3) * w; box(sn(u - 0.12 * w), sn(r.y0 - (0.35 + 0.15 * k) * t), sn(u + 0.12 * w), sn(r.y0), B, 1, 0, 10, 0); }   // shards on top
-    if (L === 'C') box(x0 - P, sn(r.y0 - 0.15 * t), x1 + P, sn(r.y0), W, 1, 0, 10, 0);   // snow on it
-    if (L === 'F') F(sn((x0 + x1) / 2), sn(r.y1 - 2.4 * t), 0.32 * w, 0, 0, 0.4 * t, PAL.black, 1, 0);   // a hole, a coin in it
-    coin(r.y1 - 1.5 * t); if (L === 'F') coin(r.y1 - 2.4 * t);
+  const fcGate = (r) => {   // Fuji's cave's gate (caveBells 'G'): the sheet's lumps of kept ice (FC_GATE), standing on its foot; it melts (UPwell's crumbleFx)
+    const q = PIX.base, S = FC_GATE.rows, n = Math.max(1, Math.min(S.length, Math.floor((r.y1 - r.y0) / q))), key = 'h' + n;
+    if (!FC_GATE[key]) { const m = Math.max(1, Math.round((S[0].length * n) / S.length)); FC_GATE[key] = Array.from({ length: n }, (_, j) => S[Math.floor((j * S.length) / n)]).map((row) => Array.from({ length: m }, (_, i) => row[Math.floor((i * row.length) / m)]).join('')); }
+    const rows = FC_GATE[key], w = rows[0].length * q;
+    vsp(rows, Math.round((r.x1 - w) / PIX.size) * PIX.size, r.y1 - rows.length * q, false, 1, q);   // (its right edge the gate's, the side the hero comes from: he never walks into the ice)
   };
   const mnDish = (x, y, s = 1) => {   // an Edo miner's oil dish lit, on a peg from (x, y) (Д117 «А»: no caged lamp in Iwami's mine), its glow a light of the dark
     const t = kitT, U = (u) => snap(x + u * s * t), V = (v) => snap(y + v * s * t), bx = (u0, v0, u1, v1, c, a = 1) => box(U(u0), V(v0), U(u1), V(v1), c, a, 0, 10, 0);
@@ -5252,6 +5342,11 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     this.route = rt0;
   }
+  // A stash room's way out kept clear (UPwell, handover 23's QA: «keep the way out clear»): its backdrop never over the exit's arch, a margin round it (in tiles,
+  // from the room's left wall and floor): a post starts over the arch, a lump of the lava tube by it is left out
+  const exitT = lv.kind === 'treasure' && lv.exit ? ((t) => [(lv.exit.x0 - lv.l) / t - 0.3, (lv.floor - lv.exit.y1) / t - 0.3, (lv.exit.x1 - lv.l) / t + 0.3, (lv.floor - lv.exit.y0) / t + 0.4])(lv.tile) : null;
+  const overExit = (u0, v0, u1, v1) => !!exitT && u0 < exitT[2] && u1 > exitT[0] && v0 < exitT[3] && v1 > exitT[1];
+  const postFoot = (u0, u1, v1) => (overExit(u0, 0, u1, v1) ? exitT[3] : 0);
   if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.village) {   // the Village's stash room: the cellar under a farmhouse (Д97 «А», Д110
     // «C»'s layout), as a few big flat shapes at a quarter on a quiet black (owner: «Фоны в подарочных комнатах выглядят грязно: предметы не читаются, пиксели
     // лезут в глаза, выглядит как грязь»; its sheet was dark dithered mush): two posts and the beam over them, braces; three shelves on the back wall, jars on the
@@ -5259,7 +5354,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32;
     const bx = (u0, v0, u1, v1, c, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
     const el = (u, v, ru, rv, c, a = LT) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
-    bx(0.6, 0, 1.3, 20.6, PAL.orange); bx(14.7, 0, 15.4, 20.6, PAL.orange); bx(0, 20.6, 16, 21.2, PAL.orange);   // its posts and the beam
+    bx(0.6, postFoot(0.6, 1.3, 20.6), 1.3, 20.6, PAL.orange); bx(14.7, postFoot(14.7, 15.4, 20.6), 15.4, 20.6, PAL.orange); bx(0, 20.6, 16, 21.2, PAL.orange);   // its posts and the beam
     line(X(1.3), Y(18.4), X(3.4), Y(20.6), PAL.orange, WD, 3); line(X(14.7), Y(18.4), X(12.6), Y(20.6), PAL.orange, WD, 3);   // braces
     for (const [v, kind] of [[15, 'jar'], [10.5, 'sack'], [6, 'low']]) {   // the shelves, each on two brackets, what is on it
       bx(2.4, v - 0.28, 10.4, v, PAL.orange); for (const u of [3, 9.6]) bx(u, v - 1.0, u + 0.3, v - 0.28, PAL.orange);
@@ -5277,7 +5372,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32, G = PAL.gray;
     const bx = (u0, v0, u1, v1, c = G, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
     const el = (u, v, ru, rv, c = G, a = WD) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
-    bx(1, 0, 1.6, 19); bx(14.4, 0, 15, 19); bx(0.7, 19, 15.3, 19.6); line(X(1.6), Y(17), X(3.4), Y(19), G, WD, 3); line(X(14.4), Y(17), X(12.6), Y(19), G, WD, 3);   // posts, beam, braces
+    bx(1, postFoot(1, 1.6, 19), 1.6, 19); bx(14.4, postFoot(14.4, 15, 19), 15, 19); bx(0.7, 19, 15.3, 19.6); line(X(1.6), Y(17), X(3.4), Y(19), G, WD, 3); line(X(14.4), Y(17), X(12.6), Y(19), G, WD, 3);   // posts, beam, braces
     for (let i = 0; i <= 7; i++) { const q = i / 7; el(4 + 6 * q, 17 - 13 * q, 1.3 * (0.8 + 0.3 * Math.sin(i * 1.7)), 1.17); }   // the vein: a band of rock lumps
     for (let i = 0; i < 14; i++) { const q = (i + 0.5) / 14, u = 4 + 6 * q + 0.45 * Math.sin(i * 2.3), v = 17 - 13 * q + 0.39 * Math.cos(i * 1.9); bx(u - 0.1, v - 0.1, u + 0.1, v + 0.1, PAL.purple, LT); }   // its glints
     line(X(6), Y(1), X(7), Y(3.2), G, WD, 2); line(X(6.4), Y(3), X(7.6), Y(3.4), G, WD, 3);   // a pickaxe leaning
@@ -5313,25 +5408,20 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.fuji) {   // Fuji's stash room: the Narusawa Ice Cave at the foot of the mountain (Д97 «А»;
     // a lava tube of 864, its ice pillars of February and March, icicles to 90 cm, ice and food kept in it since Edo, wet steps with bamboo rails, entered by a fall of
-    // its roof), as the cellar is drawn: big flat shapes at a quarter on a quiet black, lava grey, ice blue a step lighter, wood orange; by take (FC_V.room)
-    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32, G = PAL.gray, B = PAL.blue, O = PAL.orange, L = FC_V.room;
+    // its roof), as the cellar is drawn: big flat shapes at a quarter on a quiet black, lava grey, ice blue a step lighter, wood orange
+    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32, G = PAL.gray, B = PAL.blue, O = PAL.orange;
     const bx = (u0, v0, u1, v1, c = G, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
     const el = (u, v, ru, rv, c = G, a = WD) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
-    const tube = (gap) => {   // the lava tube's walls and roof, lumps along a U; gap: where its roof fell in (u0, u1), or none
-      for (let v = 0; v <= 20; v += 1.4) { el(0.3, v, 0.9, 0.8); el(15.7, v + 0.7, 0.9, 0.8); }
-      for (let u = 0.5; u <= 15.5; u += 1.3) if (!gap || u < gap[0] || u > gap[1]) el(u, 20.6 - 0.35 * Math.sin(u * 0.9), 1.0, 0.8);
+    const tube = () => {   // the lava tube's walls and roof, lumps along a U
+      for (let v = 0; v <= 20; v += 1.4) { if (!overExit(-0.6, v - 0.8, 1.2, v + 0.8)) el(0.3, v, 0.9, 0.8); if (!overExit(14.8, v - 0.1, 16.6, v + 1.5)) el(15.7, v + 0.7, 0.9, 0.8); }
+      for (let u = 0.5; u <= 15.5; u += 1.3) el(u, 20.6 - 0.35 * Math.sin(u * 0.9), 1.0, 0.8);
     };
     const icicle = (u, v, len) => { for (let k = 0; k < 4; k++) { const f = 1 - k / 4; bx(u - 0.16 * f, v - (k + 1) * len / 4, u + 0.16 * f, v - (k * len) / 4, B, LT); } };   // hanging from v down
     const pillar = (u, hgt, wd = 0.5) => { for (let k = 0; k < 5; k++) { const f = 1 - k / 6; bx(u - wd * f, (k * hgt) / 5, u + wd * f, ((k + 1) * hgt) / 5, B, LT); } el(u, hgt, 0.3 * wd, 0.25, B, LT); };   // up from the floor
     const shelf = (u0, u1, v, n) => { bx(u0, v - 0.2, u1, v, O); for (const u of [u0 + 0.1, u1 - 0.3]) bx(u, 0, u + 0.2, v, O); for (let k = 0; k < n; k++) { const u = u0 + 0.4 + (k * (u1 - u0 - 0.8)) / Math.max(1, n - 1); bx(u - 0.35, v, u + 0.35, v + 0.6, B, LT); } };   // a shelf of kept ice
-    tube(L === 'F' ? [6, 10] : null);
+    tube();
     for (const [u, len] of [[3, 1.4], [5.5, 2.2], [8.3, 1.2], [11, 1.8], [13.2, 1.1]]) icicle(u, 20.2, len);
-    if (L === 'A') { pillar(4, 3.5); pillar(9.5, 2.4, 0.4); pillar(13.5, 4.2); shelf(10.5, 14.5, 9, 3); }
-    else if (L === 'B') { for (const v of [6, 9.5, 13]) shelf(8.5, 14.8, v, 4); pillar(4, 4); }
-    else if (L === 'C') { for (let k = 0; k < 9; k++) bx(2 + k * 0.9, 9 + k * 1.0, 3.2 + k * 0.9, 9.3 + k * 1.0, O); line(X(2), Y(10.4), X(10.1), Y(18.4), O, WD, 2); pillar(12, 3); pillar(14.2, 4.6); }   // wet steps, a bamboo rail
-    else if (L === 'D') { F(X(8), Y(9), 3.2 * t, 0, 0, 2.2 * t, PAL.black, 1, 0); for (const u of [3, 6, 10, 13]) pillar(u, 3 + (u % 3)); }   // a low passage on, pillars in a row
-    else if (L === 'E') { for (let k = 0; k < 8; k++) { const f = 0.9 + 0.25 * Math.sin(k * 1.3); bx(7 - f, k * 2.6, 7 + f, (k + 1) * 2.6, B, LT); } shelf(11, 15, 8, 3); }   // one column of ice, floor to roof
-    else { F(X(8), Y(19), 2.0 * t, 0, 0, 1.5 * t, PAL.white, 0.25, 1); for (let k = 0; k < 6; k++) bx(7.2 + 0.25 * k, 11 + k * 1.5, 7.6 + 0.25 * k, 12 + k * 1.5, PAL.white, 1.15); pillar(4, 3.2); pillar(12.5, 3.8); }   // its roof fallen in, the way in, light from above
+    pillar(4, 3.5); pillar(9.5, 2.4, 0.4); pillar(13.5, 4.2); shelf(10.5, 14.5, 9, 3);   // three pillars of ice, a shelf of kept blocks (Д170 A)
   }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter
@@ -5463,6 +5553,74 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     if (CINE) this.route = 1;
   }
+  const dcFar = () => {   // the estate far off in Isozaki's concrete (the owner's pick, 2026-10-23, d28 F; research/variants/iso-far-1-px.png): blocks of flats over
+    // a covered walk on hollow beams, their ends open, a lantern lit under it; the moon over them. Screen-fixed, low, dimmer than the storeys on the walls (they
+    // pass in front of it), the lit windows lights of a sort (LIT, no light cast)
+    const t = kitT, G = PAL.gray, K = PAL.black, FD = 1.18, cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+    const fb = (u0, v0, u1, v1, c = G, a = FD, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
+    const hs = (a, b) => ((Math.sin(a * 12.9898 + b * 78.233) * 43758.5453) % 1 + 1) % 1, lit = (u, v, w = 0.22, h = 0.18) => fb(u, v, u + w, v + h, PAL.orange, LIT);
+    const blk = (u0, u1, v0, n, s) => {   // a block of flats: its body (checkered), its end wall, a balcony's parapet a floor, windows lit here and there, its roof's edge
+      const top = v0 + n * 0.62 + 0.15; fb(u0 + 0.45, v0, u1, top, G, FD, 4); fb(u0, v0, u0 + 0.45, top);
+      for (let i = 0; i < n; i++) { const v = v0 + i * 0.62; fb(u0 + 0.45, v + 0.36, u1, v + 0.5); for (let u = u0 + 0.8; u < u1 - 0.3; u += 0.7) if (hs(u + s, i) < 0.2) lit(u, v + 0.08); }
+      fb(u0, top, u1 + 0.1, top + 0.15);
+    };
+    F(U(3.6), Vv(6.4), 0.6 * t, 0, 0, 0.6 * t, G, DIM, 0);   // the moon (clear of the drainpipes on the walls; at a quarter)
+    blk(-7.0, -0.5, 1.4, 4, 9); blk(0.5, 6.4, 1.4, 3, 10); fb(-7.0, 1.0, 6.8, 1.4);   // two blocks, the walk's deck under them
+    for (let u = -6.5; u < 6.6; u += 2.6) fb(u, 0, u + 0.3, 1.0); for (let u = -6.0; u < 6.4; u += 2.6) fb(u + 1.9, 1.06, u + 2.24, 1.34, K, 1); lit(1.2, 0.35, 0.18, 0.3);   // its posts, its beams' open ends, a lantern
+  };
+  if (th.danchi && lv.kind === 'well') {   // the Danchi's (the owner's picks): what runs up its walls behind the play, its things on the ledges, the estate far off
+    const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, MUTE = 1.6;   // (laundry and the like in their colours, but muted: their inks mean things here)
+    const rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork, the rule book: the walls' storeys and the estate far off behind,
+    // whatever their tones (the beams' black ends, the lit windows); its things small, their thin parts flat)
+    L(3);
+    for (const side of [-1, 1]) {   // up the walls, behind (DIM), in Isozaki's concrete (the owner's pick, d27 A, iso-wall): a storey every 8 tiles, board-formed, a
+      // hollow beam out over it, its end open; a drainpipe down past them. The right wall's storeys half a storey off the left's
+      const at = (d) => (side < 0 ? lv.l + d : lv.r - d), wb = (d0, y0, d1, y1, c = G, a = DIM, tn = 0) => box(snap(Math.min(at(d0 * t), at(d1 * t))), snap(y0), snap(Math.max(at(d0 * t), at(d1 * t))), snap(y1), c, a, 0, 10, tn);
+      const beat = (n) => { const out = []; for (let j = Math.floor(top / (n * t)) - 1; j * n * t < bot + n * t; j++) out.push(j * n * t + (side < 0 ? 0 : n * 0.5 * t)); return out; };
+      wb(2.4, top, 2.58, bot);   // a drainpipe
+      for (const y of beat(8)) { const Y = (v) => y + v * t; wb(0, Y(0), 2.0, Y(2.4), G, DIM, 3); wb(0, Y(-0.6), 3.0, Y(0)); wb(2.4, Y(-0.5), 2.95, Y(-0.1), K, 1); }   // a storey: board-formed, a beam out over it, its end open
+    }
+    for (const r of lv.rects) {   // its things on some ledges (kitThing)
+      const p = !r.gone && seen(r.y0 - 3 * t, r.y0 + t) && kitThing(lv, r);
+      if (!p) continue;
+      const S = p.kind === 'plants' ? DC_GARDEN : 1;   // (the garden drawn bigger: owner, «too small»)
+      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * S * t), Y = (v) => snap(b - v * S * t);
+      const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+      const ln = (u0, v0, u1, v1, c = G, wd = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), c, a, wd);
+      const ring = (u, v, rr, c = G) => { F(X(u), Y(v), rr * S * t, 0, 0, rr * S * t, c, 1, 4); };
+      const pot = (u, w, h, c = G) => { bx(u - w / 2, 0, u + w / 2, h, c, 1, 4); bx(u - w / 2 - 0.04, h - 0.06, u + w / 2 + 0.04, h, c); };
+      const leaves = (u, v, n, s = 1) => { for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.5; ln(u, v, u + Math.cos(a) * 0.3 * s, v - Math.sin(a) * 0.35 * s, i % 3 === 1 ? PAL.green : G, 2); } };
+      if (p.kind === 'bikes') {   // a bicycle under a shelter's flat roof (bikes B, mk-bikes), its basket and a child seat; the roof aqua and the seat purple, muted (the
+        // sheet's red seat: red means danger here)
+        L(4); bx(-0.02, 1.4, 2.6, 1.52, PAL.aqua, MUTE); L(0); for (const u of [0.1, 2.4]) bx(u, 0, u + 0.08, 1.4, G); bx(-0.02, 1.4, 2.6, 1.44, K, 0.6);   // its shelter (its
+        // roof small, its posts and the roof's shaded edge flat)
+        const u = 0.5; for (const e of [0, 1.15]) { ring(u + e, 0.38, 0.36); disc(X(u + e), Y(0.38), 0.04 * t, G, 1); }   // its wheels (flat, as all its wire)
+        ln(u, 0.38, u + 0.55, 0.38); ln(u + 0.55, 0.38, u + 0.9, 0.8); ln(u + 0.35, 0.82, u + 0.55, 0.38); ln(u + 0.35, 0.82, u + 0.9, 0.8); ln(u + 0.9, 0.8, u + 1.15, 0.38);   // its frame
+        ln(u + 0.95, 0.8, u + 1.02, 1.0, G, 2); ln(u + 0.9, 1.0, u + 1.15, 1.02); bx(u + 0.28, 0.85, u + 0.45, 0.9, K);   // its handlebar, its saddle
+        L(4); bx(u + 1.1, 0.75, u + 1.45, 1.0, G, 1, 4); bx(u - 0.25, 0.85, u + 0.1, 1.25, PAL.purple, MUTE);   // its basket, the child seat (small)
+      } else if (p.kind === 'plants') {   // a little garden (the owner's pick, d17 E, mk-plants), twice the size (S): a box of vegetables, a tall plant in a pot, a
+        // hose on its reel; leaves mostly grey (green is moss you hold here)
+        L(4); bx(0.2, 0, 1.0, 0.32, G, 1, 1); pot(1.35, 0.3, 0.4);   // its box, its pot (small)
+        L(0); for (const u of [0.35, 0.6, 0.85]) bx(u, 0.32, u + 0.06, 0.5, PAL.green); leaves(1.35, 0.4, 6, 1.2); ring(2.0, 0.3, 0.26); ring(2.0, 0.3, 0.12, K);   // its shoots, its leaves,
+        // its hose (flat: thin)
+      } else if (p.kind === 'mail') {   // the block's mailboxes (mail C, mk-mail): three rows of three, a plant in a pot; the block's number painted grey over them
+        const nl = Math.min(X(0.25), X(1.0)), nt = Y(2.15), digit = (x, n) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
+          [[0, 0, 5, 1], [0, 0, 1, 5], [4, 0, 5, 5], [0, 4, 5, 5], [0, 4, 1, 9], [4, 4, 5, 9], [0, 8, 5, 9]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * P, nt + b0 * P, x + a1 * P, nt + b1 * P, G, 1, 0, 10, 0); }); };   // a digit five by nine
+        L(0); digit(nl, 5); digit(nl + 7 * P, 1);   // its number, 51 (flat: painted on the wall)
+        for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const u = 0.15 + i * 0.36, v = 0.25 + j * 0.3; L(4); bx(u, v, u + 0.32, v + 0.26, G); L(0); bx(u + 0.06, v + 0.16, u + 0.26, v + 0.19, K); }   // its boxes
+        // (small), their slots (flat)
+        L(4); pot(1.6, 0.3, 0.35); L(0); leaves(1.6, 0.35, 4);
+      } else if (p.kind === 'cat') {   // a stray cat (cat C, mk-cat) sitting by its bowl (blue, muted: the sheet's red bowl; and the sheet's ginger cat grey: orange
+        // is crumbling here)
+        const u = 0.7; L(4); F(X(u), Y(0.3), 0.22 * t, 0, 0, 0.3 * t, G, 1, 0); F(X(u + 0.05), Y(0.72), 0.16 * t, 0, 0, 0.14 * t, G, 1, 0);   // its body, its head (small)
+        L(0); for (const e of [-0.08, 0.12]) bx(u + e, 0.82, u + e + 0.07, 0.95, G); for (const e of [-0.02, 0.1]) bx(u + e, 0.72, u + e + 0.03, 0.75, K); ln(u - 0.2, 0.05, u - 0.45, 0.35, G, 2);   // its ears, its eyes,
+        // its tail (flat: too small for depth)
+        bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE);   // its bowl (flat: thin)
+      }
+    }
+    L(3); dcFar();
+    this.route = rt0;
+  }
   if (th.panels && lv.kind === 'well') {   // the Tower Blocks' kit (THEMES.blocks; see the parts catalog): a riser pipe up each wall on a bracket every
     // 4 tiles, satellite dishes on the walls, an entrance (a blue door, its canopy and lamp, a bench) at the wall end of some wide ledges.
     const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
@@ -5536,6 +5694,76 @@ Renderer.prototype.draw = function (g, alpha) {
       if (hgt <= t + 1) for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) for (let i = 0; i <= 6; i++) { const u = i / 6, x = snap(wx + d * 1.1 * t * u), y = snap(r.y1 + 1.1 * t * (1 - u)); box(x - P / 2, y - P / 2, x + P / 2, y + P / 2, PAL.gray, 1, 0, 10, 0); }
     }
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
+  };
+  // The Danchi in Arata Isozaki's concrete (the owner's picks, 2026-10-23, the questions page d23–d26, after research/variants/iso-*-1-px.png): a block is
+  // Isozaki's concrete, a shallow barrel vault under it (slab E), a plank off a wall a balcony with a pipe railing (balcony B), a free plank a light lattice truss
+  // (pole D), a step a flight of stairs under a barrel vault (stairs D); a crumbling block a heap of bricks (boxes E, orange: what crumbles is orange here).
+  // Laundry muted (its inks mean things here) and on one balcony in three. The row 7 game pixels under a white edge stays plain (the 2.5D top face takes its
+  // colour from it). False for what keeps the common look.
+  const danchiRect = (r) => {
+    const t = kitT, P = kitP, px = P / t, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);
+    const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
+    const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    const lip = (a = 1) => box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25);
+    const G = PAL.gray, K = PAL.black, Wh = PAL.white, MUTE = 1.6, SH = 1.6, one = (n) => window.__dcAll || hsh(n) < 0.34;   // SH: concrete in shade; one(n): on one ledge in three
+    // (owner: small hanging things not on every ledge; the gallery shows all)
+    const shirt = (x, y, c) => { box(snap(x - 0.2 * t), snap(y + 0.05 * t), snap(x + 0.2 * t), snap(y + 0.45 * t), c, MUTE, 0, 10, 0); box(snap(x - 0.3 * t), snap(y + 0.05 * t), snap(x + 0.3 * t), snap(y + 0.17 * t), c, MUTE, 0, 10, 0); line(x, y - 0.12 * t, x, y + 0.05 * t, G, 1, 1); };   // a shirt on a hanger
+    if (r.stair) {   // a step of a flight of stairs (stairs D, iso-stairs): under a barrel vault (behind, at a quarter), stepping up with the flight
+      const c = th.block;
+      if (CINE) this.route = 3; box(r.x0, snap(r.y0 - 2.7 * t), r.x1, snap(r.y0 - 2.35 * t), G, DIM, 0, 10, 4); if (CINE) this.route = 2;   // the vault over the flight, behind
+      // (2.5D too: behind)
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, r.y0 + 2 * P, r.x1, r.y0 + 3 * P, K, 1, 0, 10, 0);   // its tread (and riser), its nosing
+      lip(); return true;
+    }
+    if (r.crumble) {   // a row that gives way (boxes E, mk-boxes; orange: what crumbles is orange here): a heap of bricks, each piece shaking as it gives
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = (typeof CINE !== 'undefined' && CINE) ? 1 : 1 - 0.5 * u * u, c = th.crumble, n = Math.max(1, Math.round(wt / 1.3)), pw = w / n;
+      for (let i = 0; i < n; i++) {
+        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 ? P : 0) + ox, hy = (f) => snap(r.y0 + f * (r.y1 - r.y0));
+        box(x0, r.y0, x1, r.y1, c, a, 0, 10, 0); for (let j = 1; j < 4; j++) box(x0, hy(j / 4), x1, hy(j / 4) + P, K, a, 0, 10, 0);   // bricks, their mortar
+        for (let j = 0; j < 4; j++) for (let x = x0 + (j % 2 ? 0.25 : 0.5) * t; x < x1 - 2; x += 0.5 * t) box(snap(x), hy(j / 4), snap(x) + P, hy((j + 1) / 4), K, a, 0, 10, 0);
+        box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
+      }
+      if (CINE) this.route = 0; if (on) for (let i = 0; i < 2; i++) { const q = (T * 0.5 + i / 2) % 1; box(snap(E(0.3) + i * P * 2), snap(r.y1 + q * 1.2 * t), snap(E(0.3) + i * P * 2) + P, snap(r.y1 + q * 1.2 * t) + P, c, 1 - q, 0, 10, 0); }   // bits falling off it
+      if (CINE) this.route = 2; return true;   // (2.5D: the bits flat)
+    }
+    if (r.plank && r.move) return false;
+    if (r.plank && on) {   // a balcony off the wall (balcony B, iso-balcony): a pipe railing; shirts on a pole over it on one balcony in three (the sheet's blue and
+      // purple ones white and grey)
+      if (r.bouncy) return false;
+      const c = th.plank, rail = 0.8;
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); box(r.x0, r.y1 - P, r.x1, r.y1, K, 1, 0, 10, 0);   // its slab, its underside
+      if (CINE) this.route = 0;   // (2.5D: its railing and the laundry flat, thin and hung: the rule book)
+      for (let u = 0.2; u < wt - 0.05; u += 0.6) bw(u, -rail, u + px, 0, G); for (const v of [-rail, -rail / 2]) bw(0, v, wt, v + px, G);   // its railing
+      if (one(51)) { const v = -rail - 1.0; bw(0.15, v, wt - 0.4, v + px, G); shirt(E(1.6), Y(v + 0.02), Wh); shirt(E(1.0), Y(v + 0.02), G); }   // shirts on a pole
+      if (CINE) this.route = 2; lip(); return true;
+    }
+    if (r.plank) {   // something long and thin hung across the shaft from above (pole D, iso-pole): a light lattice truss on two hangers
+      if (r.bouncy) return false;
+      const c = th.plank, l = r.x0, rr = r.x1, up = snap(r.y0 - 3.5 * t), y2 = snap(r.y1 + 0.45 * t);
+      box(l, r.y0, rr, r.y1, c, 1, 0, 10, 0); box(l, r.y1 - P, rr, r.y1, K, 1, 0, 10, 0); if (CINE) this.route = 0; box(l, y2 - 2 * P, rr, y2, c, 1, 0, 10, 0);   // its top chord, its
+      // bottom one (2.5D: the top chord deep, what is under it and its hangers flat, thin)
+      for (let x = l, i = 0; x < rr - 0.3 * t; x += 0.4 * t, i++) line(snap(x + (i % 2 ? 0.4 * t : 0)), r.y1, snap(x + (i % 2 ? 0 : 0.4 * t)), y2 - 2 * P, c, 1, 1);   // its zigzag
+      for (const x of [snap(l + 0.35 * t), snap(rr - 0.35 * t)]) { box(x - P / 2, up, x + P / 2, r.y0, G, 1, 0, 10, 0); box(x - 2 * P, r.y0 - 2 * P, x + 2 * P, r.y0, G, 1, 0, 10, 0); }   // its hangers
+      if (CINE) this.route = 2; lip(); return true;
+    }
+    if (r.move || r.spring || r.magnet || r.bouncy || r.slick) return false;
+    {   // Isozaki's concrete (slab E, iso-slab): a shallow barrel vault under it; a tall block an end wall, little vaults across its face, the block's number
+      // painted big on it
+      const c = th.block, tall = ht > 1.4, sh = Math.min(0.18, ht * 0.18), lo = ht - sh, cl = 0.5;   // cl: the plain rows
+      const bold = (x, y, n, sz) => { const seg = [[1, 1, 1, 0, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 0, 1, 1], [0, 1, 1, 1, 0, 1, 0], [1, 1, 0, 1, 0, 1, 1], [1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]][n];
+        [[0, 0, 6, 2], [0, 0, 2, 6], [4, 0, 6, 6], [0, 4, 6, 6], [0, 4, 2, 10], [4, 4, 6, 10], [0, 8, 6, 10]].forEach(([a0, b0, a1, b1], i) => { if (seg[i]) box(x + a0 * sz, y + b0 * sz, x + a1 * sz, y + b1 * sz, K, 1, 0, 10, 0); }); };   // a bold digit 6 by 10 of sz, its strokes 2 thick
+      const big = tall && wt >= 2.4 && ht >= 2.4 ? (() => { const n = 1 + Math.floor(hsh(26) * 24), sz = Math.max(P, snap(Math.min(wt * 0.8 / (n > 9 ? 14 : 6), ht * 0.45 / 10) * t)), y = Y(Math.max(cl + 0.1, Math.min(0.6, ht * 0.15)));
+        return { n, sz, y, v0: (y - r.y0) / t, v1: (y + 10 * sz - r.y0) / t, x: snap((r.x0 + r.x1) / 2 - ((n > 9 ? 14 : 6) * sz) / 2) }; })() : null;   // an end wall's number, painted big: where
+      const clear = (v0, v1) => !big || v1 < big.v0 - 0.15 || v0 > big.v1 + 0.15;   // (not over the number)
+      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 0); if (!CINE) box(r.x0, Y(lo), r.x1, r.y1, c, 1, 0, 10, 4);   // its concrete, its underside in shade (2.5D: not, its
+      // underside face is that: the rule book)
+      if (on) bw(0.1, cl, 0.1 + px, lo, K);   // the seam where it goes into the wall (under the plain rows)
+      if (!tall) { const n = Math.max(6, Math.round(wt / 0.2)); for (let i = 0; i < n; i++) { const q = (i + 0.5) / n, dv = 0.42 * (1 - Math.sin(Math.PI * q)); if (dv > 0.03) bw((i / n) * wt, ht, ((i + 1) / n) * wt, ht + dv, c, 4); } }   // the vault under it
+      else for (let v = 1.2; v < lo - 0.6; v += 1.4) if (clear(v, v + 0.5)) for (let u = 0.3; u < wt - 0.8; u += 1.0) { const n = 5; for (let i = 0; i < n; i++) bw(u + i * 0.15, v + 0.5 - Math.sin(Math.PI * (i + 0.5) / n) * 0.4, u + (i + 1) * 0.15, v + 0.5 - Math.sin(Math.PI * (i + 0.5) / n) * 0.4 + px, G, 0, SH); }   // a tall block: little vaults
+      if (big) { if (big.n > 9) { bold(big.x, big.y, Math.floor(big.n / 10), big.sz); bold(big.x + 8 * big.sz, big.y, big.n % 10, big.sz); } else bold(big.x, big.y, big.n, big.sz); }   // an end wall: its number painted big
+      lip(); return true;
+    }
   };
   // The Tower Blocks' ledges: a step is a concrete step with a handrail post, a plank off a wall a balcony behind its bars, a free plank a
   // heating pipe in white lagging bands, a block a concrete panel cut square with seams every 2 tiles and window slits in a thick one.
@@ -6163,12 +6391,29 @@ Renderer.prototype.draw = function (g, alpha) {
       continue;
     }
     if (r.cap) { box(lv.l - 2, Math.max(r.y0, top), lv.r + 2, r.y1, th.wall, 1, 0); box(lv.l - 2, r.y1 - 2.5, lv.r + 2, r.y1, th.lip, 1, 0); continue; }
+    if (r.plate) {   // a Sea cave's clam shell (CLAM): a scallop in three steps, its ribs dark; pressed, it shuts flat and white (Worlds' look to come)
+      const w = r.x1 - r.x0, hh = (r.y1 - r.y0) * (r.pressed ? 0.55 : 1), c = r.pressed ? PAL.white : PAL.orange, q = kitP, Y = (f) => Math.round((r.y1 - f * hh) / q) * q, Xs = (f) => Math.round((r.x0 + f * w) / q) * q;
+      box(Xs(0), Y(0.4), Xs(1), r.y1, c, 1, 0, 10, 0); box(Xs(0.14), Y(0.75), Xs(0.86), Y(0.4), c, 1, 0, 10, 0); box(Xs(0.3), Y(1), Xs(0.7), Y(0.75), c, 1, 0, 10, 0);
+      for (const f of [0.3, 0.5, 0.7]) box(Xs(f), Y(0.85), Xs(f) + q, r.y1, PAL.black, 0.5, 0, 10, 0);
+      continue;
+    }
     if (r.spring) {
       const k = r.t / SPRING.anim, hh = (r.y1 - r.y0) * (1 - 0.5 * k), w = r.x1 - r.x0;
       if (th.junk) {   // the Junkyard's: a black trash bag, its grey tie, a glint, flattening as it throws
         const y0 = r.y1 - hh - 0.25 * R, cx = (r.x0 + r.x1) / 2; F(cx, (y0 + r.y1) / 2, (r.x1 - r.x0) / 2, 0, 0, (r.y1 - y0) / 2 + 0.05 * R, PAL.black, 1, 0);
         box(cx - 0.08 * R, y0 - 0.15 * R, cx + 0.08 * R, y0, PAL.gray, 1, 0, 10, 0); disc(cx - 0.3 * R, y0 + 0.12 * R, 0.07 * R, PAL.white, 1);
         continue;
+      }
+      if (th.danchi) {   // the Danchi's spring (the owner's pick, 2026-10-22, d8 E; research/variants/mk-spring-1-px.png; blue: springs are blue here): a rabbit spring
+        // rider on its coil, squashing as it throws
+        const c = th.spring, cx = snap((r.x0 + r.x1) / 2), w2 = (r.x1 - r.x0) / 2, s = r.y1 - hh, top = snap(s - 0.3 * R), bt = snap(s + 0.12 * R), Q = 1.35 * R, K = PAL.black, G = PAL.gray, L = 1.6;
+        if (CINE) this.route = 0;   // (2.5D, the rule book: its body and head deep, its coil, base, tail, ears, eye and handles flat: thin)
+        for (let i = 0, n = 3; i < n; i++) { const y = snap(bt + (i + 0.5) * (r.y1 - bt) / n); box(snap(cx - 0.32 * w2), y - kitP, snap(cx + 0.32 * w2), y + kitP, c, 1, 0, 10, 0); } box(snap(cx - 0.6 * w2), r.y1 - 2 * kitP, snap(cx + 0.6 * w2), r.y1, c, 1, 0, 10, 0);   // its coil, its base
+        if (CINE) this.route = 2; F(snap(cx + 0.1 * w2), snap((top + bt) / 2), 0.9 * w2, 0, 0, (bt - top) / 2 + 0.03 * R, c, 1, 0); if (CINE) this.route = 0; box(snap(cx + 0.92 * w2), snap(top + 0.02 * R), snap(cx + 1.05 * w2), snap(top + 0.14 * R), c, 1, 0, 10, 0);   // its body, its tail
+        const hx = snap(cx - 0.6 * w2), hy = snap(top - 0.15 * R), e = (u, v, rr, cc = K) => disc(snap(hx + u * Q), snap(hy + v * Q), rr * Q, cc, 1), o = (u, v, ax, ay, cc = c, a = 1) => F(snap(hx + u * Q), snap(hy + v * Q), ax * Q, 0, 0, ay * Q, cc, a, 0);
+        for (const u of [-0.1, 0.08]) { o(u, -0.5, 0.07, 0.24); o(u, -0.48, 0.03, 0.16, c, L); } if (CINE) this.route = 2; o(0, 0, 0.28, 0.26); if (CINE) this.route = 0; e(-0.12, -0.03, 0.05); e(-0.26, 0.08, 0.03);   // its ears, its head, its eye, its nose
+        const hb = snap(hx + 0.38 * Q); box(hb - kitP, snap(top - 0.25 * R), hb + kitP, top, G, 1, 0, 10, 0); box(snap(hb - 0.12 * R), snap(top - 0.27 * R), snap(hb + 0.12 * R), snap(top - 0.21 * R), G, 1, 0, 10, 0);   // its handles
+        if (CINE) this.route = 2; continue;
       }
       if (th.panels) {   // the Tower Blocks': an old mattress thrown out, blue and white stripes, flattening as it throws
         const y0 = r.y1 - hh - 0.2 * R; box(r.x0, y0, r.x1, r.y1, PAL.white, 1, 0, 10, 0);
@@ -6182,7 +6427,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 31) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = (!r.slick || th.fuji || th.village) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    const own = (!r.slick || th.fuji || th.village) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.gate && lv.world && lv.world.theme && lv.world.theme.fuji) fcGate(r);   // (Fuji's cave's gate of ice, by take)
       else if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
@@ -6199,8 +6444,10 @@ Renderer.prototype.draw = function (g, alpha) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka || th.danchi)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+      if (CINE && th.danchi) this.route = 0;   // (the Danchi's flat in 2.5D, the rule book: in depth its green and its slab's vault's dither made lone dots)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
+      if (CINE && th.danchi) this.route = 2;
       if (th.rime) for (let x = r.x0 + 0.2 * R, k = 0; x < r.x1 - 0.1 * R; x += 0.36 * R, k++) if (k % 2) box(x + ox, r.y1 - 0.06 * R, x + ox + kitP, r.y1 - 0.06 * R + kitP, PAL.white, a, 0, 10, 0);   // rime: a glint here and there (no strands hanging: owner)
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
@@ -6215,7 +6462,7 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   if (th.town) for (const r of lv.rects) if (r.ac && r.gone && r.t < 1.5) { const oy = 20 * kitT * r.t * r.t; if (seen(r.y0 + oy, r.y0 + oy + 3 * kitT)) aircon(r, 0, oy); }   // an air conditioner falling off its wall
   this.route = 0;   // (the cinematic fork: the play again)
-  if (!th.town && !th.panels) for (const r of lv.rects) {   // a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps
+  if (!th.town && !th.panels && !th.danchi) for (const r of lv.rects) {   // (not the Danchi's: its end walls have the block's number, the owner's d31 «А») a big plain block's kanji in its middle, in its own ink a tone darker, as cut into it (KANJI; by its place, so it keeps
     // its word; not Tokyo's nor the Tower Blocks': their blocks are buildings, their windows enough)
     const w = r.x1 - r.x0, hh = r.y1 - r.y0;
     if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.bouncy || r.magnet || r.stair || r.slick || r.key || r.crack || r.cage || r.mortar || r.beam || w < BIG_BLOCK.w * lv.tile || hh < BIG_BLOCK.h * lv.tile || !seen(r.y0, r.y1)) continue;
@@ -6330,20 +6577,10 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = lv.tile, q = PIX.size, i = b.n - 1, w = BELLS.w[i] * t, h = BELLS.h[i] * t, u = T - b.t, top = sn2(b.y + BELLS.rope * t);
     const sw = u < 1.6 ? sn2(Math.sin(u * 11) * 0.14 * t * (1 - u / 1.6)) : 0, x = sn2(b.x) + sw, c = u < 0.12 ? PAL.white : b.rung ? PAL.orange : PAL.gray;
     box(sn2(b.x) - q / 2, sn2(b.y), sn2(b.x) + q / 2, top, PAL.gray, 1, 0, 10, 0);   // the rope (straight: the swing is the bell's)
-    {   // its body by take (BELL_HW, FC_V.bell), row by row, and the take's marks in its darker half or black
-      const hw = BELL_HW[FC_V.bell], rows = Math.max(4, Math.round(h / q));
-      for (let j = 0; j < rows;) { const f = hw((j + 0.5) / rows); let e = j + 1; while (e < rows && Math.abs(hw((e + 0.5) / rows) - f) * w < q / 2) e++; box(sn2(x - f * w), sn2(top + (j * h) / rows), sn2(x + f * w), sn2(top + (e * h) / rows), c, 1, 0, 10, 0); j = e; }
-      const band = (v, k = 1) => { const f = hw(v); box(sn2(x - f * w), sn2(top + v * h), sn2(x + f * w), sn2(top + v * h) + k * q, PAL.black, 1.6, 0, 10, 0); };
-      const stud = (u, v) => box(sn2(x + u * w) - q, sn2(top + v * h), sn2(x + u * w) + q, sn2(top + v * h) + 2 * q, PAL.black, 1.6, 0, 10, 0);
-      const L = FC_V.bell;
-      if (L === 'A') { band(0.3); band(0.62); band(0.92); }
-      else if (L === 'B') { band(0.16); band(0.88); }
-      else if (L === 'C') { band(0.6); band(0.9); for (const u of [-0.5, 0.5]) box(sn2(x + u * w), sn2(top + 0.15 * h), sn2(x + u * w) + q, sn2(top + 0.6 * h), PAL.black, 1.6, 0, 10, 0);   // its kesa bands
-        for (const [u, v] of [[-0.78, 0.2], [-0.78, 0.36], [0.62, 0.2], [0.62, 0.36]]) stud(u, v);   // its nyū studs
-        F(x, sn2(top + 0.75 * h), 0.18 * w, 0, 0, 0.18 * w, PAL.black, 1.6, 0); }   // its striking seat
-      else if (L === 'D') { box(sn2(x - 0.7 * w), sn2(top + 0.72 * h), sn2(x + 0.7 * w), sn2(top + 0.72 * h) + q, PAL.black, 1, 0, 10, 0); band(0.42); }   // its slit, a band
-      else if (L === 'E') { band(0.2); for (const v of [0.3, 0.46, 0.62]) for (const u of [-0.5, 0, 0.5]) stud(u, v); band(0.88); }   // rows of studs
-      else { band(0.3); for (let k = -2; k <= 2; k++) F(sn2(x + k * 0.38 * w), sn2(top + 0.7 * h), 0.18 * w, 0, 0, 0.14 * w, PAL.black, 1.6, 4); band(0.9); }   // a band of waves (seigaiha)
+    {   // its body (bellHw), row by row, three bands across it in its darker half
+      const rows = Math.max(4, Math.round(h / q));
+      for (let j = 0; j < rows;) { const f = bellHw((j + 0.5) / rows); let e = j + 1; while (e < rows && Math.abs(bellHw((e + 0.5) / rows) - f) * w < q / 2) e++; box(sn2(x - f * w), sn2(top + (j * h) / rows), sn2(x + f * w), sn2(top + (e * h) / rows), c, 1, 0, 10, 0); j = e; }
+      for (const v of [0.3, 0.62, 0.92]) { const f = bellHw(v); box(sn2(x - f * w), sn2(top + v * h), sn2(x + f * w), sn2(top + v * h) + q, PAL.black, 1.6, 0, 10, 0); }
     }
     const gl = POST_NUM[b.n].split('/'), p = gl.length * 2 * q < 0.7 * h ? 2 * q : q, gx = x - (gl[0].length * p) / 2, gy = top + sn2(0.55 * h) - (gl.length * p) / 2;   // (its glyph's pixel two game px where it fits)
     gl.forEach((row, j) => { for (let k = 0; k < row.length; k++) if (row[k] === '#') box(gx + k * p, gy + j * p, gx + (k + 1) * p, gy + (j + 1) * p, PAL.black, 1, 0, 10, 0); });

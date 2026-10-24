@@ -19,8 +19,8 @@ const CINE_ON = (() => {
 // игра в 2d»; ?plain or #plain off, ?cine on) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
 let cinePref = !(/[?&]plain\b/.test(location.search) || /plain/.test(location.hash)), CINE = null;
-const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || !!th.town || !!th.skazka || /[?&]cine\b/.test(location.search));   // the worlds done: the Village,
-// the Mine, Fuji, the Sea, Tokyo, the Dark Forest
+const CINE_DONE = (th) => !!th && (!!th.village || !!th.mines || !!th.fuji || !!th.sea || !!th.town || !!th.danchi || !!th.skazka || /[?&]cine\b/.test(location.search));   // the worlds
+// done: the Village, the Mine, Fuji, the Sea, Tokyo, the Danchi, the Dark Forest
 // Each world's air: its haze, the tone its shadows take, how dark it is away from its lights, a moon or none, its motes, its far planes.
 const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012, 0.016, 0.045], amb: 0.5, moon: [0.62, 0.72, 1.0], motes: { dust: 14, fly: 7, petal: 10 }, planes: 'bamboo' }
   : th.town ? { fog: [0.2, 0.08, 0.24], shade: [0.03, 0.01, 0.04], amb: 0.48, moon: null, motes: { dust: 12, rain: 34 }, planes: 'city' }
@@ -30,6 +30,10 @@ const CINE_LOOK = (th) => th.village ? { fog: [0.13, 0.15, 0.27], shade: [0.012,
   // the rafts' and the ropes'; no planes: the sea far off keeps its place on the screen, the owner's pick)
   : th.skazka ? { fog: [0.1, 0.1, 0.12], shade: [0.012, 0.012, 0.02], amb: 0.5, moon: null, motes: { dust: 8 }, planes: null }   // (grey dust, a little; no embers: the Dark
   // Forest's colour is its eyes and flames)
+  : th.danchi ? { fog: [0.12, 0.11, 0.14], shade: [0.014, 0.012, 0.022], amb: 0.52, moon: null, motes: { dust: 12 }, planes: null }   // (the Danchi: concrete at dusk, a
+  // light grey haze a touch violet; dust only, a little: no embers (the rule book; orange is what crumbles here), no leaves (a leaf would be grey or green, and green
+  // is the moss you hold here); no moon of ours: its far view draws its own, low on the right; no planes: the estate far off is a picture fixed on the screen, and
+  // the rule book's Danchi line is the picture or the parallax, never both)
   : { fog: [0.12, 0.12, 0.17], shade: [0.015, 0.015, 0.03], amb: 0.55, moon: null, motes: { dust: 16, ember: 6 }, planes: null };
 
 const CINE_COPY_FS = GLSL + `in vec2 vUv; out vec4 o; uniform sampler2D uTex; void main() { o = texture(uTex, vUv); }`;

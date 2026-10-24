@@ -490,8 +490,45 @@ const IW = {   // the Mine from Iwami Ginzan, six takes of each while the owner 
     F: { cut: true, asleep: ['s.....', 'ss....', 'b.....', '..b...', '.bbb..', '.bbbb.', '.bbbb.', '.bbbb.', '..bbb.', '..bbb.', '..bbb.', '..bbb.', '....b.', '......', '......', '......', '...bb.', '...bb.', '..bbbb', '..bbbb', '..bbbb', '...bb.'], burst: ['...........................b........................', '..........................bb........................', '.........................bbb........................', '..........................b.........................', '....................................................', '....................................................', '.............s......................................', '...........sss...........s..........................', '...........sss..........sss..........b..............', '...........s..s........sbbbs........bbbb............', '.......................bbbbb.........bbb............', '.s......................bbb...........b.............', '.s...............s.......b..........................', '.s........ss...ssss.................................', '..........ss...sbbb.bb....ss........................', '.........ss.....bwbbb...sssss.......................', '........ss....bbbbb....sss..................bb......', '........ssr..bbbbb....sss...b.......s......bbbb.....', '..rr.rr..rrrbbbb.......s...bbb.....sss....bbbwb.....', '.rrrrrrbbbbbbb....bb......bbbbb...sssss..bbbbbb.....', 'rbbbbbbb.bb.....bbbbbbbbbbbbbbbb...........bbb......', '.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............bb......', '.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb....................', 'obbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.....................', '.rrbbrbbbbsb.bbb.bb.bb....bbb.s.....................', '.sr.rrbsrbbbbbbbbbb...........s..sss................', '.....r...rbbbbbbbbbb...sssss.....ssss...............', '......r..rrrrrbbbbbb...sssssss...bbbb...............', '..........rr...bbbbb..sssss........bb...........bb..', '.........sss....bbbbb..ssbbs..................bsbbw.', '..........ss.....bbbb....bbb..................bbbbbb', '..............s...bbbb...bbb..................bbbbbb', '...............s....b.....b.....................bbb.', '..............sss.....s.............................', '................ss.....s............................', '................sss.....b........bbb................', '.................sss...bbs......bbbbb...............', '..................ss....bbb.....bbbbbb..............', '..............s....s.....bs......bbbb...............', '............ssss.........s........bb................', '............ssss....................................', '.............ss.....................................', '....................................................', '....................bb...................b..........', '....................bbb.................bbb.........', '....................bbbb.................b..........', '.....................bb.............................'] },
   },
 };
+// The Mine's rock cut by hand, a stone generator (owner: З6 «Б», a generated material whose noise follows the form; Д116 «А», a shelf of hard rock with the
+// chisel's marks, as in the Ryugenji mabu): a ledge's own picture, ink rows from its wall end (s grey, S its darker half, k black, '.' clear), worked out
+// once a ledge. By the pixel guide: big planes first, then the chisel's marks as clusters of 3 or more, none within 2 pixels of its silhouette (the detail
+// budget), its underside a step darker; every mark anchored to the ledge, never to the screen. Six takes while the owner picks (IW_V.slab):
+// A rows of short upright strokes; B rough, pitted, its underside lumpy; C big planes split by cracks; D its underside in scallops, faint rows over it;
+// E long strokes in rows and an empty niche by its free end; F two planes, a crack between, a few pits (F's sheet had moss: green is the moss you hold here)
+const slabHash = (i, j, k) => ((Math.imul(i + 7919 * k, 73856093) ^ Math.imul(j + 31 * k, 19349663)) >>> 0) / 4294967296;
+const slabRows = (v, nx, ny, seed) => {
+  const g = Array.from({ length: ny }, () => Array(nx).fill('s')), H = (i, j, k = 0) => slabHash(i, j, seed * 13 + k);
+  const smooth = (i, per, k) => { const a = Math.floor(i / per), f = i / per - a, e = f * f * (3 - 2 * f); return H(a, 0, k) * (1 - e) + H(a + 1, 0, k) * e; };
+  const cut = (i) => v === 'B' ? Math.round(1 + 3 * smooth(i, 7, 1)) : v === 'C' ? Math.round((i / nx) * Math.min(5, ny * 0.35)) : v === 'D' ? Math.round(3 - 3 * Math.sqrt(Math.max(0, 1 - (((i % 10) - 4.5) / 5) ** 2))) : 0;
+  const under = Math.max(2, Math.round(ny * 0.3));
+  for (let i = 0; i < nx; i++) { const c = cut(i); for (let j = 0; j < ny; j++) { if (j >= ny - c) g[j][i] = '.'; else if (j >= ny - c - under) g[j][i] = 'S'; } }
+  const inside = (i, j) => i >= 2 && i < nx - 2 && j >= 3 && j < ny - cut(i) - 2 && g[j][i] !== '.';
+  const mark = (i, j, ch = 'k') => { if (inside(i, j)) g[j][i] = ch; };
+  if (v === 'A') for (let j = 4, r = 0; j < ny - 3; j += 4, r++) for (let i = 2 + (r % 2) * 2; i < nx - 2; i += 4) if (H(i, j, 2) < 0.7) { mark(i, j); mark(i, j + 1); mark(i, j + 2); }
+  if (v === 'B') for (let j = 3; j < ny - 3; j++) for (let i = 2; i < nx - 2; i++) if (H(i, j, 3) < 0.035) { mark(i, j); mark(i + 1, j); mark(i, j + 1); }
+  if (v === 'C' || v === 'F') {   // planes: the nearest of seeds a dozen pixels apart, a crack where two meet; each plane lit or shaded (C), or one plane over another (F)
+    const seeds = []; for (let i = 0; i < nx; i += 12) seeds.push([i + 2 + Math.floor(H(i, 0, 4) * 8), Math.floor(H(i, 1, 4) * ny)]);
+    const near = (i, j) => { let b = 0, bd = 1e9; seeds.forEach(([x, y], k) => { const dd = (x - i) ** 2 + 2 * (y - j) ** 2; if (dd < bd) { bd = dd; b = k; } }); return b; };
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      if (g[j][i] === '.') continue;
+      const k = v === 'C' ? near(i, j) : j < ny * 0.5 + 5 * (smooth(i, 9, 6) - 0.5) ? 0 : 1;
+      if (v === 'C' && k % 2 && g[j][i] === 's' && j > 2) g[j][i] = 'S';
+      const kr = v === 'C' ? (i + 1 < nx ? near(i + 1, j) : k) : (j + 1 < ny && (j + 1 < ny * 0.5 + 5 * (smooth(i, 9, 6) - 0.5) ? 0 : 1)) || k;
+      if (kr !== k) mark(i, j);
+    }
+    if (v === 'F') for (let j = 3; j < ny - 3; j++) for (let i = 2; i < nx - 2; i++) if (H(i, j, 5) < 0.02) { mark(i, j); mark(i + 1, j); mark(i + 1, j + 1); }
+  }
+  if (v === 'D') for (let j = 5; j < ny - 4; j += 5) for (let i = 3 + (j % 2); i < nx - 3; i += 6) for (let q = 0; q < 3; q++) if (inside(i + q, j)) g[j][i + q] = 'S';
+  if (v === 'E') {
+    for (let j = 4, r = 0; j < ny - 3; j += 3, r++) for (let i = 2 + (r % 2) * 3; i < nx - 2; i += 6) { mark(i, j); mark(i + 1, j); mark(i + 2, j); }
+    const nw = 6, nh = Math.min(8, ny - 6), n0 = nx - 4 - nw;   // an empty niche cut in its face near its free end
+    if (n0 > 8 && nh >= 5) for (let j = 3; j < 3 + nh; j++) for (let i = n0; i < n0 + nw; i++) { const arch = j - 3 < 2 && (i === n0 || i === n0 + nw - 1); if (!arch) g[j][i] = 'k'; }
+  }
+  return g.map((r) => r.join(''));
+};
 const IW_V = (() => {   // the take of each shown (all «A» till the owner picks; ?iw=baskets:C,lamp:B shows others)
-  const v = { baskets: 'A', windlass: 'A', shrine: 'A', rakan: 'A', silver: 'A', lamp: 'A', shop: 'A', stash: 'A', water: 'A' }, m = location.search.match(/[?&]iw=([\w:,]+)/);
+  const v = { baskets: 'A', windlass: 'A', shrine: 'A', rakan: 'A', silver: 'A', lamp: 'A', shop: 'A', stash: 'A', water: 'A', slab: 'A' }, m = location.search.match(/[?&]iw=([\w:,]+)/);
   if (m) for (const p of m[1].split(',')) { const [k, l] = p.split(':'); if (k in v && /^[A-F]$/.test(l)) v[k] = l; }
   return v;
 })();
@@ -5683,12 +5720,17 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
     {   // rough rock, dotted grey, its underside shaded: a timber beam under it, a post down to its footing, a coil of rope off its end (half dark)
-      const c = th.block;
-      box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 1); box(r.x0, Y(Math.max(0.3, ht - 0.28)), r.x1, r.y1, c, 1, 0, 10, 4);   // its rock, its underside darker
-      if (ht > 1.4) {   // a thick one, a pillar of rock: darker under its top, in strata, cracks down its face, the timber shoring its sides and a cap under its edge
-        box(r.x0, Y(0.3), r.x1, r.y1, c, 1, 0, 10, 4);
-        for (let v = 0.75, i = 0; v < ht - 0.25; v += 0.6, i++) { const y = Y(v); line(r.x0, y, r.x1, snap(y + (hsh(i + 50) - 0.5) * 0.2 * t), K, 1, 1); }   // its strata
-        for (let i = 0, n = Math.max(1, Math.round(wt / 1.8)); i < n; i++) { const x = snap(r.x0 + ((i + 0.5) / n) * w), y0 = Y(0.5 + (ht - 1.5) * hsh(i + 60)); line(x, y0, snap(x + (hsh(i + 70) - 0.5) * 0.5 * t), snap(y0 + (0.6 + 0.5 * hsh(i + 80)) * t), K, 1, 1); }   // cracks
+      const c = th.block, q = PIX.base, nx = Math.max(4, Math.round(w / q)), ny = Math.max(4, Math.round((r.y1 - r.y0) / q)), key = IW_V.slab + nx + 'x' + ny;
+      if (!r.slab || r.slab.key !== key) r.slab = { key, rows: slabRows(IW_V.slab, nx, ny, Math.round(r.y0 / t) & 1023) };   // (once a ledge: its picture, the stone generator)
+      if (c === PAL.gray) vsp(r.slab.rows, r.x0, r.y0, d < 0, 1, q);   // its rock cut by hand (Д116 «А»)
+      else { box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 1); box(r.x0, Y(Math.max(0.3, ht - 0.28)), r.x1, r.y1, c, 1, 0, 10, 4); }   // (another world's block in the Mine's look: dotted)
+      if (ht > 1.4) {   // a thick one, a pillar of rock (its face the stone generator's; another world's block: darker under its top, in strata, cracks down it): the timber
+        // shoring its sides and a cap under its edge
+        if (c !== PAL.gray) {
+          box(r.x0, Y(0.3), r.x1, r.y1, c, 1, 0, 10, 4);
+          for (let v = 0.75, i = 0; v < ht - 0.25; v += 0.6, i++) { const y = Y(v); line(r.x0, y, r.x1, snap(y + (hsh(i + 50) - 0.5) * 0.2 * t), K, 1, 1); }   // its strata
+          for (let i = 0, n = Math.max(1, Math.round(wt / 1.8)); i < n; i++) { const x = snap(r.x0 + ((i + 0.5) / n) * w), y0 = Y(0.5 + (ht - 1.5) * hsh(i + 60)); line(x, y0, snap(x + (hsh(i + 70) - 0.5) * 0.5 * t), snap(y0 + (0.6 + 0.5 * hsh(i + 80)) * t), K, 1, 1); }   // cracks
+        }
         for (const [x0, x1] of [[r.x0, r.x0 + 0.24 * t], [r.x1 - 0.24 * t, r.x1]]) box(snap(x0), Y(0.3), snap(x1), r.y1, G, 1, 0, 10, 3);   // its posts
         box(r.x0, Y(0.3), r.x1, Y(0.48), G, 1, 0, 10, 3);   // its cap
       }

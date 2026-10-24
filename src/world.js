@@ -358,6 +358,10 @@ const HOLD_SPR = {   // cut from research/variants/<world>-holder-1-px.png, path
        empty: ['sssssssssssssssssssssssssss', '.ssssssssssssssssssssssssss', '.........................s.', '..s.s........s.s........ss.', '.............s..sss.....s..', '.ss..........s..s....sss...', '.ss.s........s..s..s....ss.', '.ss..........s..s..s.....s.', '..s.s........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss.s........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '..s.s........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '..s.s........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '..s.s........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '..s.s........s..s.rsr.s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss.s........s..s..s..s..s.', '.ss..........s..s..s..s..s.', '.ss.s........s.....s..s..s.', '.ss............sss....s..s.', '.ss................ss....s.', '.ss..................sss.s.', '..s.....................ss.', '...................s.......', '...................s.......', '...................s.......', '...........................', '...........................', '...........................', '...........................', '..................k..k.....', '...........................', '...........................', '...........................'] },
   },
 };
+// What hangs and falls in a world (ICE_SPR; the Village's own, VDROP_SPR, without cold), its hang drawn from its top row at the hang point down, a sheet pixel
+// one game pixel: icicleTip is how far under the hang point its tip is (game px), for the game to drop what hurts from there (UPwell); 0 where it has none
+const icicleSpr = (th) => (th.ice === 'village' ? VDROP_SPR['ABCDEF'[typeof window !== 'undefined' && window.__vd != null ? window.__vd : VDROP_V]] : ICE_SPR[th.ice]);
+const icicleTip = (th) => { const IC = icicleSpr(th); return IC ? IC.hang.length * PIX.base : 0; };
 const VDROP_V = 0, VSLICK_V = 0;   // the Village's falling things and slick walls without cold (owner, Д77: «В деревне не должно быть элементов холода»),
 // six looks A-F each while the owner picks (window.__vd, window.__vs: the gallery's); cut from research/variants/village-drop and village-slick, path A
 const VDROP_SPR = {
@@ -5319,7 +5323,7 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) sprAt(red, x0 + dx * q, y0 + dy * q, flip, a);
     sprAt(b, x0, y0, flip, a);
   };
-  const IC = th.ice === 'village' ? VDROP_SPR['ABCDEF'[window.__vd != null ? window.__vd : VDROP_V]] : ICE_SPR[th.ice], sn2 = (v) => Math.round(v / PIX.size) * PIX.size;
+  const IC = icicleSpr(th), sn2 = (v) => Math.round(v / PIX.size) * PIX.size;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
     : IC ? (x, y, falling) => { const r = falling ? IC.fall : IC.hang; sprAt(r, sn2(x - (r[0].length * PIX.base) / 2), sn2(y), false, 1, PIX.base); }   // the world's own icicle off its sheet
     // (ICE_SPR), its root at y; a sheet pixel one game pixel, so it is as wide as what hurts (ICICLE.r; at 2x it was three times as big)
@@ -5383,10 +5387,13 @@ Renderer.prototype.draw = function (g, alpha) {
     const u = (T + fw.ph) % (FIREWALL.on + FIREWALL.off), on = u >= FIREWALL.off, warn = !on && u >= FIREWALL.off - FIREWALL.warn, d = fw.side === 1 ? 1 : -1, wx = fw.side === 1 ? lv.l : lv.r, t = lv.tile, P = PIX.size;
     const WS = WALL_SPR[th.wallHaz];
     if (WS) {   // the world's own (path A, WALL_SPR): its stretch asleep down the wall, flickering as it is about to; bursting out of it, jittering a pixel
-      // A sheet pixel one game pixel; its burst narrowed, column by nearest column, to FIREWALL.reach and 0.3 tile more (the sheets drew it 4-8 times as far as it
-      // hurts: a burst a little bigger than its harm, never far bigger)
-      const s2 = PIX.base, A = WS.asleep, n = Math.round(((FIREWALL.reach + 0.3) * t) / s2), at = (rows) => (d > 0 ? snap(wx) : snap(wx) - rows[0].length * s2);
-      const Bu = WS.burst[0].length <= n ? WS.burst : WS.fit && WS.fit[0].length === n ? WS.fit : (WS.fit = WS.burst.map((r) => Array.from({ length: n }, (_, i) => r[Math.floor((i * r.length) / n)]).join('')));
+      // A sheet pixel one game pixel; its burst made smaller, as the nearest sheet pixel both ways (its shape kept, pixel for pixel), till it reaches out from
+      // the wall as far as it hurts: FIREWALL.reach tiles, its pixel of jitter at most 1.1 times that (the sheets drew it 4-8 times as far; UPwell's hit, Game)
+      // (its stretch asleep too: it flickers as a warning, so no wider than what will hurt)
+      const s2 = PIX.base, n = Math.floor((FIREWALL.reach * t) / s2), at = (rows) => (d > 0 ? snap(wx) : snap(wx) - rows[0].length * s2);
+      const fit = (B) => (B[0].length <= n ? B : ((m) => Array.from({ length: m }, (_, j) => B[Math.floor((j * B.length) / m)]).map((r) => Array.from({ length: n }, (_, i) => r[Math.floor((i * r.length) / n)]).join('')))(Math.max(1, Math.round((B.length * n) / B[0].length))));
+      if (!WS.fit || WS.fit.n !== n) WS.fit = { n, A: fit(WS.asleep), Bu: fit(WS.burst) };
+      const A = WS.fit.A, Bu = WS.fit.Bu;
       const cut = (rows, y, k) => (k % 2 ? rows.slice().reverse() : rows).slice(0, Math.min(rows.length, Math.ceil((fw.y1 - y) / s2)));   // (every other copy upside down: no repeat shows)
       for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(A, y, k), at(A), snap(y), d < 0, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.55) : on ? 1 : 0.8, s2);
       if (on) for (let y = fw.y0, k = 0; y < fw.y1; y += Bu.length * s2, k++) sprAt(cut(Bu, y, k), at(Bu) + d * (Math.floor(T * 12 + k) % 2) * s2, snap(y), d < 0, 1, s2);

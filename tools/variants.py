@@ -394,6 +394,78 @@ ELEMENTS = {
     'mine-stash': dict(world='mine', kind='prop', what='the sealed door of a silver vault cut into the rock: the way into a stash', where='standing on a ledge against the shaft wall',
                        material='a heavy timber door with iron bands and studs, a big lock, a frame of stone', size='about 3 tiles wide and 3 tiles tall',
                        inks='grey and black timber and iron, its cracks glowing purple inside (purple is the stash\'s mark)', scene=MINE_AT),
+    # The Mine's real place, Iwami Ginzan (owner 2026-10-24, Д114–Д120 all «А»; research/mine/mine-attributes.md): round 2, six takes on each pick
+    'iwami-far1': dict(world='mine', kind='prop', what="the far view behind the shaft as the climb goes up out of the Iwami Ginzan silver mine, a different scene in each cell, "
+                       "left to right, top to bottom: A the flooded lowest drift, black water standing in a low tunnel cut by hand, B the drainage shaft going up, a wooden ladder "
+                       "and a hand windlass with a rope and a bucket, C the great cavern of Okubo mabu, a huge hollow in the mountain with log scaffolds up its walls, "
+                       "D narrow side drifts chasing a vein of silver, a man's width each, chisel marks on their walls, E the bats' hall, bats hanging in rows from its ceiling, "
+                       "F a later drift shored up with log frames and laid with rails",
+                       plane='back', where='far behind everything, low and faint, so the play reads over it; in the dark levels seen only near the lamps',
+                       material='hand-cut rock, black water, logs, ladders, rails', size='about 14 tiles wide and 6 tiles tall',
+                       inks='a faint grey dither on the black in big flat shapes (no fine speckle), the water a faint blue, a lamp a small orange glow',
+                       scene=MINE_AT + ' in front of it'),
+    'iwami-far2': dict(world='mine', kind='prop', what="the far view behind the shaft near the top of the Iwami Ginzan silver mine, a different scene in each cell, left to right, top "
+                       "to bottom: A a niche with a little shrine of the mountain god, an oil dish burning in front of it, B the arched stone mouth of a mabu opening onto the forest, "
+                       "C the forested mountain Sennoyama under the night sky with the tiled roofs of Omori town at its foot, D the shrine niche again, seen another way, "
+                       "E the mabu mouth again, seen from inside looking out, F the mountain and the town again, from higher up",
+                       plane='back', where='far behind everything, low and faint, so the play reads over it', material='hand-cut rock, a shrine, a stone arch, forest, roofs',
+                       size='about 14 tiles wide and 6 tiles tall',
+                       inks='a faint grey dither on the black in big flat shapes (no fine speckle), the forest a faint green, the roofs a faint orange-brown (never red), the oil flame a small orange glow',
+                       scene=MINE_AT + ' in front of it'),
+    'iwami-slab': dict(world='mine', kind='ledge', what='the basic ledge, a shelf of hard rock cut by hand with chisel and hammer, as in the Ryugenji mabu of Iwami Ginzan',
+                       does='solid on every side: you stand on it, cling to its sides and jump off it',
+                       material='hard grey rock, its faces covered in small chisel marks in rows, here and there an old log prop under it',
+                       size='4 tiles long and 1 tile thick', main='grey (the rock)', rule=MINE_INKS,
+                       vary='its rock silhouette and underside, the pattern of chisel marks (rows of short strokes, cross strokes, little scalloped hollows, a few cracks '
+                       'between big flat planes), whether a log props it (none, a short wedge, a post going down), and one small detail (a miner\'s mark, a tiny niche, a trickle of water)'),
+    'iwami-lamp': dict(world='mine', kind='prop', what='the oil lamp of the Edo-period miners of Iwami Ginzan, drawn twice in each cell: unlit (cold and grey) on the left and '
+                       'lit on the right, as the hero lights it by coming near; one kind in each cell: A a little unglazed clay dish of oil with a wick in a niche cut in the rock, '
+                       'B the same dish on a short iron spike driven into the rock, C a turban shell (sazae) filled with oil, D a clay dish on a small wooden shelf with a soot mark '
+                       'above it, E a dish on a forked iron holder, F a dish in a deep arched niche',
+                       where='set in the shaft wall over a ledge', material='unglazed clay, oil, a wick, rock, iron', size='about 0.7 tiles wide and 0.8 tiles tall',
+                       inks='grey clay and rock; lit, its flame orange with a yellow core and a dither halo of orange round it: a light of the dark; unlit, all grey and black',
+                       scene=MINE_AT + ' below it'),
+    'iwami-water': dict(world='mine', kind='wallhaz', what='groundwater breaking out of a crack in the rock wall of the old silver mine',
+                        why='as the drifts went deeper, water under pressure burst from the rock; it flooded the mine, and drainage tunnels were dug against it',
+                        asleep='a dark crack in the rock wall, wet, a few drops seeping out of it', bursting='a thin jet of water under pressure blasting straight out of the crack, '
+                        'spraying (not a wide spout like a blowhole)',
+                        vary='the crack (a jagged split, a row of holes, a seam along the rock layers), its seeping, the jet\'s shape (a straight needle, a fan of spray, a rope '
+                        'of water that bends down)', inks='the water blue, its spray grey (never white), red along the jet\'s edge where it hurts, the crack black, the rock grey'),
+    'iwami-baskets': dict(world='mine', kind='prop', what='the ore carriers\' baskets of Iwami Ginzan: woven straw or bamboo baskets heaped with broken ore, the kind carried on the back',
+                          where='on the top of a ledge at its wall end', material='woven bamboo and straw, rope straps, broken grey ore',
+                          size='about 1.5 tiles wide and 1 tile tall', inks='grey and dark grey weave, the ore grey with a few white glints (never yellow)', scene=MINE_AT),
+    'iwami-windlass': dict(world='mine', kind='prop', what='a hand windlass over a drainage shaft of Iwami Ginzan: a timber frame, a drum with a crank, a rope down to a wooden bucket',
+                           where='on the top of a ledge at its wall end', material='old timber, rope, a wooden bucket', size='about 2 tiles wide and 2.5 tiles tall',
+                           inks='grey timber and rope, black shadows, a drop of blue water at the bucket', scene=MINE_AT),
+    'iwami-shrine': dict(world='mine', kind='prop', what='a little shrine of the mountain god in the mine: a small wooden hokora with a tiny roof, a shimenawa rope with paper '
+                         'streamers (shide) over it, an oil dish burning in front of it',
+                         where='on the top of a ledge at its wall end', material='old wood, a straw rope, white paper, a clay dish',
+                         size='about 1.5 tiles wide and 1.5 tiles tall', inks='grey and dark grey wood, white paper streamers, a small orange flame with a dither halo (never red)',
+                         scene=MINE_AT),
+    'iwami-rakan': dict(world='mine', kind='prop', what='one of the five hundred stone rakan (arhats) of Rakan-ji at Iwami Ginzan, carved in memory of the miners: a small seated '
+                        'stone figure with a calm face, in a niche cut in the rock',
+                        where='in the shaft wall beside a ledge, or on the top of a ledge at its wall end', material='worn grey stone, a rock niche, a little moss',
+                        size='about 1 tile wide and 1.2 tiles tall', inks='grey stone, a dark niche, a touch of green moss (tiny)', scene=MINE_AT),
+    'iwami-silver': dict(world='mine', kind='prop', what='a wooden box of silver ingots from Iwami Ginzan, bound with rope, its lid ajar, the ingots inside stamped and gleaming',
+                         where='on the top of a ledge at its wall end', material='old wood, rope, silver ingots', size='about 1.5 tiles wide and 1 tile tall',
+                         inks='grey wood and rope, the silver white and pale grey with small glints (never yellow, the coins\' colour)', scene=MINE_AT),
+    'iwami-shop': dict(world='mine', kind='prop', what="a merchant's house of Omori town at the foot of Iwami Ginzan, a way into the game's shop: a two-storey wooden front with "
+                       "lattice windows, roofed with the glazed sekishu roof tiles of the region, a red noren curtain in its open doorway, a white plaster storehouse wall beside it",
+                       where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
+                       material='dark old timber, wooden lattice, glazed roof tiles, white plaster, a noren', size='about 3.5 tiles wide and 3 tiles tall',
+                       inks="the roof tiles orange-brown (never red: red is danger), dark grey timber with grey lattice, a red noren with a simple white coin on it "
+                       "(the shop's mark), white plaster, a warm orange window with a dither halo", scene=MINE_AT),
+    'iwami-stash': dict(world='mine', kind='prop', what="the way into the game's secret stash: the arched stone mouth of an old mabu (mine tunnel) of Iwami Ginzan cut in the rock, "
+                        "a soft purple light glowing deep inside from the rich silver ore (fukuishi)", where='cut into the shaft wall at the wall end of a ledge, standing on the ledge',
+                        material='hand-cut rock, a stone or timber arch, a straw rope across it', size='about 3 tiles wide and 3 tiles tall',
+                        inks='grey rock and timber, a purple glow with a dither halo from inside (purple is the stash\'s mark)', scene=MINE_AT),
+    'iwami-stashroom': dict(world='mine', kind='prop', what="the inside of the secret stash under Iwami Ginzan, seen as one whole game screen: the fukuishi chamber, a hollow cut "
+                            "by hand where the rich silver ore was mined, its walls of chisel-marked rock with veins of ore glowing a soft purple, old log props, a ladder, "
+                            "baskets of ore, coins to collect hanging in the room", plane='back',
+                            where='the whole room behind the play: its back wall and its props; the ledges in it are rock shelves and log beams',
+                            material='hand-cut rock, ore veins, logs, a ladder, baskets', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                            inks='a dark rock back wall in big flat faint grey shapes (no fine speckle), the veins a faint purple glow (the stash), dark grey logs, gold coins',
+                            scene=MINE_AT + ' as a shelf in the room'),
     # The Danchi (owner 2026-10-21: world 6 Japanese, «Данчи»), six takes on each
     'danchi-slab': dict(world='danchi', kind='ledge', what='the basic ledge, a slab of raw danchi concrete sticking out of the shaft wall', does='solid on every side: you '
                         'stand on it, cling to its sides and jump off it', material='poured concrete, the seams of its panels, rust and rain stains running down it, '

@@ -3616,8 +3616,8 @@ Renderer.prototype.draw = function (g, alpha) {
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
   const box = (x0, y0, x1, y1, c, a, rad, type, p3) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, c, a, type || 5, hw, hh, type >= 7 ? p3 : rad); };
   // A world's far view: its foot low on the screen, sinking a little as the climb goes on; on the main screen (Game.menuBackdrop) its foot on the floor Mochi
-  // stands on when window.__menuFar (a look for the owner: there the low band is under the buttons)
-  const farY = (cam, H) => (g.state === 'menu' && window.__menuFar ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
+  // stands on, so that it shows over and round him (owner: Д113 «А»; the low band is under the buttons there)
+  const farY = (cam, H) => (g.state === 'menu' ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
   const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
     const n = rows[0].length, R = vspRects(rows);
@@ -4225,8 +4225,9 @@ Renderer.prototype.draw = function (g, alpha) {
       // of uneven round bumps, no straight runs, no symmetry, holes of the dark in it, ragged strands of checker trailing off). Low on the screen, sinking a little
       // as the climb goes on
       // (К12 «А»: the climb's compass, the mountain nearer level by level, its foot and the lake at the bottom, its summit close by the ninth: k 1 to 2.6)
-      const k = 1 + 1.6 * clamp((lv.stage || 0) / 8, 0, 1), lake = lv.stage % 2 === 1 && lv.stage < 4;   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi; low down only)
-      const shore = snap(farY(cam, H)), cx = (lv.l + lv.r) / 2, ht = 5.5 * t * k, hw = 6.6 * t * k, foot = lake ? shore : shore + (k - 1) * 4 * t;   // (nearer: bigger, its foot down past the keys; over the lake it stands on the far shore)   // (over the lake: the mountain on its far
+      const menu = g.state === 'menu', k = menu ? 1.8 : 1 + 1.6 * clamp((lv.stage || 0) / 8, 0, 1), lake = !menu && lv.stage % 2 === 1 && lv.stage < 4;   // (on the main screen
+      // bigger, its foot on Mochi's floor: its summit over his head, Д113 «А»)   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi; low down only)
+      const shore = snap(farY(cam, H)), cx = (lv.l + lv.r) / 2, ht = 5.5 * t * k, hw = 6.6 * t * k, foot = lake || menu ? shore : shore + (k - 1) * 4 * t;   // (nearer: bigger, its foot down past the keys; over the lake it stands on the far shore)   // (over the lake: the mountain on its far
       // shore, its reflection under it down to the keys)
       const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return Math.min((lv.r - lv.l) / 2, w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side))); };   // its flanks, uneven (between the walls)
       for (let y = 0; y < ht; y += 2 * P) {

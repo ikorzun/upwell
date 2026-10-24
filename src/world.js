@@ -4702,6 +4702,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const ax = (x1 - x0) / 2, ay = (y1 - y0) / 2, l = Math.hypot(ax, ay) || 1, hw = ((w + 0.1) * kitP) / 2;
     F((x0 + x1) / 2, (y0 + y1) / 2, ax, ay, (-ay / l) * hw, (ax / l) * hw, c, a, 10, l, hw, tn);
   };
+  const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon, Golden Gai's far
   const gaiAt = (S, wx, b, d, a = 1) => {   // a Golden Gai thing (GAI) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + S.dx * q : snap(wx) - (S.dx + n) * q;
     vsp(S.rows, x0, snap(b) - S.base * q, d < 0, a, q);
@@ -4710,8 +4711,13 @@ Renderer.prototype.draw = function (g, alpha) {
     // pixel, centred, its foot at farY (as the Mine's MFAR)
     const FV = TFAR.cell[TFAR.pick || TFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5]];   // (no recipe: 5-6's, the bonus level's, the fair)
     if (!FV) return;
-    const q = 2 * PIX.base, n = FV[0].length, foot = snap(farY(cam, H));
-    vsp(FV, snap((lv.l + lv.r) / 2 - (n * q) / 2), snap(foot - FV.length * q), false, DIM, q);
+    const q = 2 * PIX.base, n = FV[0].length, foot = snap(farY(cam, H)), x0 = snap((lv.l + lv.r) / 2 - (n * q) / 2), y0 = snap(foot - FV.length * q);
+    vsp(FV, x0, y0, false, DIM, q);
+    if (!FV.lit) { FV.lit = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (!'oO'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);   // its lights (its
+      // orange clusters, once a cell) light the dark round them, as the Mine's
+      while (st.length) { const [a, b] = st.pop(); cl.push([a, b]); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy; if (v >= 0 && v < FV.length && u >= 0 && u < n && !seen2.has(v * n + u) && 'oO'.includes(FV[v][u])) { seen2.add(v * n + u); st.push([u, v]); } } }
+      if (cl.length >= 4) FV.lit.push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
+    for (const [a, b] of FV.lit) vlamps.push([x0 + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
   };
   if (th.town && lv.kind === 'well') {   // Tokyo's kit (THEMES.tokyo; see the parts catalog): whatever hangs, hangs on something. A utility pole up
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
@@ -4801,7 +4807,6 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     if (CINE) this.route = 1;
   }
-  const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon
   // The Mine's shared pieces: an oil dish lit (Iwami Ginzan's, Д117 «А»; the wall lamps the hero lights are IW's, see iwLamp), its ore glinting in the wall over
   // a ledge (the owner's pick of 2026-10-21, research/variants/mine-*-game.png C), its things on ledges, its bats, the mine far off
   const fcGate = (r) => {   // Fuji's cave's gate (caveBells 'G'): a wall of the ice the cave kept, by take (FC_V.gate), coins faint behind it; it melts (UPwell's crumbleFx)

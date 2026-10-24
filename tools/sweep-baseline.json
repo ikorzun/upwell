@@ -1,5 +1,5 @@
 {
- "commit": "0af97fc",
+ "commit": "8aa5620",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -74,12 +74,14 @@
   },
   "c1-10": {
    "result": "won",
-   "time": 14.5,
-   "heartsLost": 0,
+   "time": 24.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "shot@hover"
+   ],
    "boss": "Bake-danuki",
-   "dealt": "5/5"
+   "dealt": "3/3"
   },
   "c2-1": {
    "result": "clear",
@@ -155,11 +157,11 @@
   },
   "c2-10": {
    "result": "won",
-   "time": 32.5,
+   "time": 33,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "boss@hover"
+    "shot@hover"
    ],
    "boss": "Tsuchigumo",
    "dealt": "4/4"

@@ -167,7 +167,7 @@ function score(base, st) {
 //   slide (the Puck, the Rat King): a rolling shell is a flip to come (it slides into its own shells: Game.rolling); behind a
 //     shell from it, to stomp it its way; at it while it lies belly up.
 //   ride (the Tram, the Minecart): up, as high as over it (open from above only), then over it.
-//   spider (the Tsuchigumo): never under it as it shakes over the hero and drops; near it, to be at it while it lies tangled.
+//   hang (the Tsuchigumo, the Bake-danuki): never under it as it shakes over the hero and drops; near it, to be at it while it lies on the floor.
 function bossScore(base) {
   const lv = g.lv, bs = lv.boss, d = bs.def || {}, H = g.hero, b = bs.body, T = tileOf();
   if (bs.dead) return 1e9;
@@ -181,7 +181,7 @@ function bossScore(base) {
       const sh = lv.enemies.filter((e) => e.type === 'shell' && e.state !== 'shell').sort((p, q) => Math.abs(p.body.cx - H.cx) - Math.abs(q.body.cx - H.cx))[0];
       if (sh) s -= (Math.abs(H.cx - (sh.body.cx - Math.sign(b.cx - sh.body.cx) * (sh.body.R + H.R))) / T) * 150;
     }
-  } else if (d.spider) {
+  } else if (d.hang) {
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while it lies tangled
     else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - b.cx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // never under it as it drops
     else s -= Math.abs(dx - 3) * 60;   // near enough to be at it once it falls

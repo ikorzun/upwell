@@ -587,10 +587,17 @@ const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], win
 // to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
 // the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
 // lobbed at the hero. A drop: over the hero, its eyes red and dust off the ceiling where it will fall, `warn` s with a creak (still
-// its last `lock` s), then down at `dive` R/s to the floor. There, tangled in its own thread, it lies `tangle` s, the only time a
+// its last `lock` s: time to run clear of it; before that it follows the hero no faster than `track` R/s), then down at `dive` R/s to the floor. There, tangled in its own thread, it lies `tangle` s, the only time a
 // stomp hurts it (any other stomp clangs off its back); then it reels back up in `reel` s. `rest` s between moves by phase. Its first
 // hit calls two spiderlings down; on its last heart it drops twice running, the second after `again` s. Still its first `calm` s.
-const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2, lock: 0.4, again: 0.9, dive: 34, tangle: 2.5, reel: 0.9, rest: [2.0, 1.8, 1.6, 1.4], calm: 2.5 };
+const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2, lock: 0.7, track: 7, again: 0.9, dive: 34, tangle: 2.5, reel: 0.9, rest: [2.0, 1.8, 1.6, 1.4], calm: 2.5,
+  lings: [0, 2, 0, 0], ling: 'crawler', twice: 3, dust: true, snd: { spit: ['spit', 0.6, 0.5], warn: ['crumble', 0.6, 1.6], phase: ['spit', 0.9, 0.55] } };
+// The Bake-danuki (BOSSES.probka, the Village's, world 1: the first boss teaches the loop, dodge then hit; owner 2026-10-24 «Помни про кривую
+// сложности»): the same hanging boss as the spider (Boss.hang) without a thread. It floats `high` R up, swaying; a leaf on its head, it
+// drops like a stone where its shadow grows on the floor (`warn` s, a rustle), then sits dizzy `tangle` s. From its second phase its
+// belly drum lobs an acorn first (two on its last heart, when it also drops twice). It floats out of a plain jump's reach, its sway drawn over the hero (`follow`): no corner to sit its drop out in. Three hearts, every warning longer than the later bosses'.
+const TANUKI = { high: 13, swing: 0.16, follow: 0.6, spit: 1.2, webs: [0, 1, 1, 2], warn: 1.4, lock: 0.9, track: 5, again: 1.2, dive: 30, tangle: 2.8, reel: 1.0, rest: [2.2, 2.0, 1.8, 1.8], calm: 2.5,
+  lings: [0, 0, 0, 0], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['stomp', 0.6, 1.5], warn: ['bubble', 0.7, 0.6], phase: ['bosshit', 0.6, 0.7] } };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -891,13 +898,16 @@ const BONUS = [
 // The Cork's dive went to the Village and the Minecart to the Cave (owner, 2026-10-20): the colours stayed with the worlds, the Village's boss blue, the Cave's orange.
 const BOSSES = {
   // The Village's: a Bake-danuki on the Cork's dive, its name and lines its own (owner, 2026-10-20: the yokai of its look).
-  probka: { name: { en: 'Bake-danuki', es: 'Bake-danuki', pt: 'Bake-danuki', ja: 'ばけだぬき' }, ink: 'blue', hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  probka: { name: { en: 'Bake-danuki', es: 'Bake-danuki', pt: 'Bake-danuki', ja: 'ばけだぬき' }, ink: 'blue', hang: TANUKI, hp: 3, phase: (hp) => (hp >= 3 ? 0 : hp >= 2 ? 1 : 3),
     intro: [{ en: "One leaf, and I'm anyone.", es: 'Una hoja, y soy cualquiera.', pt: 'Uma folha, e sou qualquer um.', ja: 'はっぱ いちまいで なんにでも なれる。' },
       { en: 'Pon-poko! Hear my belly drum?', es: '¡Pon-poko! ¿Oyes el tambor de mi panza?', pt: 'Pon-poko! Ouve o tambor da minha barriga?', ja: 'ポンポコ！ おなかの たいこ きこえる？' },
       { en: 'This whole village is my trick.', es: 'Todo este pueblo es mi truco.', pt: 'Esta vila toda é um truque meu.', ja: 'この むら ぜんぶが わたしの いたずら。' }],
     quip: [{ en: 'Fooled you! Pon-poko!', es: '¡Te engañé! ¡Pon-poko!', pt: 'Te enganei! Pon-poko!', ja: 'だまされた！ ポンポコ！' },
       { en: 'A leaf beats a drop.', es: 'Una hoja gana a una gota.', pt: 'Folha vence gota.', ja: 'はっぱは しずくより つよい。' }],
-    defeat: { en: 'Fine… my leaf has wilted.', es: 'Vale… mi hoja se marchitó.', pt: 'Tá bom… minha folha murchou.', ja: 'まいった… はっぱが しおれた。' } },
+    defeat: { en: 'Fine… my leaf has wilted.', es: 'Vale… mi hoja se marchitó.', pt: 'Tá bom… minha folha murchou.', ja: 'まいった… はっぱが しおれた。' },
+    top: { en: 'Not now. Wait till it lands!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Dizzy! Jump on it!', es: '¡Mareado! ¡Salta encima!', pt: 'Tonto! Pule em cima!', ja: 'めが まわってる！ とびのれ！' },   // the first time it sits dizzy
+    how: { en: 'Dodge its drop, then stomp it', es: 'Esquiva su caída y písalo', pt: 'Desvie da queda e pise nele', ja: 'おちてくるのを よけて、ふみつけろ' } },   // after three losses
   // Fuji's: a Tsurara-onna on the Puck's slide (the plan's §5.4): over the ice, beaten by her own shells (PUCK, Boss.slide). The first three bosses'
   // five hearts and the Cork's phases (owner, 2026-10-20: her round body kept, the fight softened, worlds 1-3 not hard).
   puck: { name: { en: 'Tsurara-onna', es: 'Tsurara-onna', pt: 'Tsurara-onna', ja: 'つららおんな' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
@@ -910,9 +920,9 @@ const BOSSES = {
     top: { en: 'Hard on top. Roll a shell at her!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
     hint: { en: 'Flipped! Land on her belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
     how: { en: 'Roll a shell into her, then stomp her', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
-  // The Cave's: a Tsuchigumo hanging by its thread in an empty cave (SPIDER, Boss.spider; owner 2026-10-23: the fight redone, the lifts,
+  // The Cave's: a Tsuchigumo hanging by its thread in an empty cave (SPIDER, Boss.hang; owner 2026-10-23: the fight redone, the lifts,
   // bridges and rail gone): four hearts, each earned while it lies tangled after its drop.
-  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, spider: true, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
+  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, hang: SPIDER, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'The dark down here is my web.', es: 'La oscuridad aquí es mi telaraña.', pt: 'O escuro aqui é minha teia.', ja: 'この くらやみは わたしの くものす。' },
       { en: 'Eight legs, one thread, no way out.', es: 'Ocho patas, un hilo, sin salida.', pt: 'Oito patas, um fio, sem saída.', ja: 'あし はっぽん、いと いっぽん、にげみち なし。' },
       { en: 'Nobody leaves my burrow.', es: 'Nadie sale de mi madriguera.', pt: 'Ninguém sai da minha toca.', ja: 'わたしの あなから だれも でられない。' }],
@@ -1047,7 +1057,7 @@ const CAMPAIGN = [
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
   { role: 'peak', len: 28, gate: 'gate3w', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['komori', 'crawler', 'climber'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
-  { role: 'boss', boss: 'cart', spider: true, par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
+  { role: 'boss', boss: 'cart', hang: true, par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
@@ -1155,7 +1165,7 @@ const CAMPAIGN = [
     enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,   // practice (round 2): the calm before the boss, its one idea the coins: rows along a jump's arc, the
     // moss garden to rest in (the digest §5: a breather after the peak, not an empty one); few enemies
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'probka', moss: true },   // the Cork's dive (owner, 2026-10-20: the first boss's fight); moss on its arena's walls: a place to sit its dive out
+  { role: 'boss', boss: 'probka', hang: true, par: 35 },   // the Bake-danuki's (owner, 2026-10-24: all bosses redone): an empty arena for the first fight; par: its time medal
 ] },
 // World 5, the Tower Blocks (the user's Soviet brutalism; its kit in the renderer, see THEMES.blocks): stairs you walk up, old balconies
 // that give way, old mattresses that bounce, then winter (icicles off the roofs, the twist); the Crane. Its runes: a frame, a tower, two
@@ -2466,7 +2476,7 @@ class Level {
     if (o.kind === 'boss') {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
-      if (this.rc && this.rc.spider) return;   // the Tsuchigumo's: the floor and the walls; what does nothing in the fight is not there (the plan)
+      if (this.rc && this.rc.hang) return;   // a hanging boss's (Boss.hang): the floor and the walls; what does nothing in the fight is not there (the plan)
       if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
         const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
         for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));
@@ -5569,6 +5579,10 @@ Renderer.prototype.draw = function (g, alpha) {
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
     const d = df.rail || df.slide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
+      const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
+      F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);
+    }
     if (front) {   // the Tsuchigumo tangled in its own thread (SPIDER): loops of it across its drawing while a stomp hurts it
       if (k === 'cart' && bs.state === 'dazed') { const [w, h] = bossSize(bs), y = b.maxY - 0.55 * h; for (let i = -1; i <= 1; i++) line(x - 0.42 * w, y + i * 0.16 * h - 0.1 * h, x + 0.42 * w, y + i * 0.16 * h + 0.1 * h, PAL.white, 0.85, 1); }
       return;
@@ -5857,6 +5871,11 @@ Renderer.prototype.draw = function (g, alpha) {
 // The menu's frame (owner, 2026-10-23, the Figma «Main»): its backdrop (MENU_FS) and the hero alone over it, big, to drag and press (menuTouch in
 // game.js): its shadow, body, face and the puffs a poke sends off, on the game-pixel grid like the levels; no 2.5D, nothing of a level.
 Renderer.prototype.drawMenu = function (g, alpha) {
+  if (g.menuBack) {   // over its world's own backdrop (owner, 2026-10-24; Game.menuBackdrop): that level drawn as any, at the menu's camera and time, the hero on its floor
+    const real = g.lv, bk = g.menuBack; bk.cam = real.cam; bk.t = real.t; g.lv = bk;
+    try { this.draw(g, alpha); } finally { g.lv = real; }
+    return;
+  }
   const gl = this.gl, lv = g.lv, hero = g.hero, W = this.w, H = this.h, sig = hero.id + ',';
   this.nv = 0; this.ni = 0; this.nf = 0; this.ranges.length = 0; this.nFar = 0; this.nSt = 0; this.nSm = 0; this.route = 0;
   this.idxDirty = sig !== this.idxSig; this.kolobok = false;

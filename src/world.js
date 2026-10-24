@@ -581,6 +581,7 @@ const GATE = { at: [0.55, 0.65], run: ['gate', 'gate2', 'gate3', 'gate3'] };
 const TRAIN = { p: 0.45, at: [0.3, 0.7], h: 0.11, rest: [4, 7], warn: 1.6, len: 2.5, v: 2.2 };
 const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
 const CRUMBLE = { time: 0.55, back: 3, board: 0.45 };   // gives way `time` s after a touch, is back `back` s later; a rope bridge's board (D) `board` tiles deep
+// (its tremble before it goes, and an air conditioner's, 5 a second, growing: under the 6-12 a second of jitter the owner bans, «вся анимация подчиняется объекту»)
 const SLICK = { fr: 0.03 };
 // Wall coats beside ice: moss takes the hero at a touch and lets it slide at `slide` of the
 // usual speed; rubber takes nothing and throws it back off at `x` R/s and `up` of a jump's
@@ -4777,11 +4778,11 @@ Renderer.prototype.draw = function (g, alpha) {
       if (i % 2) line(wh.cx + c * wh.rad, wh.cy + s2 * wh.rad, wh.cx + c * (wh.rad + 0.55 * t), wh.cy + s2 * (wh.rad + 0.55 * t), th.plank, DIM, 4); }
     disc(wh.cx, wh.cy, 0.45 * t, th.plank, DIM); disc(wh.cx, wh.cy, 0.2 * t, PAL.gray, DIM);
     const fx = wh.cx + dir * 0.6 * wh.rad, wx = dir > 0 ? lv.r : lv.l, fy = wh.cy - wh.rad - 1.3 * t, fall = wh.cy - 0.6 * wh.rad;
-    box(snap(Math.min(wx, fx)), snap(fy), snap(Math.max(wx, fx)), snap(fy) + 3 * kitP, th.plank, DIM, 0, 10, 0);   // the flume
-    for (let y = fy + 3 * kitP + ((T * 90) % (0.6 * t)); y < fall; y += 0.6 * t) box(snap(fx - kitP), snap(y), snap(fx + kitP), snap(Math.min(fall, y + 0.35 * t)), PAL.blue, DIM, 0, 10, 0);
+    box(snap(Math.min(wx, fx)), snap(fy), snap(Math.max(wx, fx)), snap(fy) + 3 * kitP, th.plank, DIM, 0, 10, 0);   // the flume; its water in discrete states (the guide: 4-8 a second), here three steps down a dash's beat, eight a second
+    for (let y = fy + 3 * kitP + ((Math.floor(T * 8) % 3) * 0.2 * t); y < fall; y += 0.6 * t) box(snap(fx - kitP), snap(y), snap(fx + kitP), snap(Math.min(fall, y + 0.35 * t)), PAL.blue, DIM, 0, 10, 0);
   }
-  if (th.sea) for (const r of lv.rects) if (r.plank && r.move && !r.move.wheel && seen(r.y1, r.y1 + kitT)) {   // a Sea raft's stream across the shaft under it, its ripples going by, behind (DEPTH)
-    const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + ((T * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0);
+  if (th.sea) for (const r of lv.rects) if (r.plank && r.move && !r.move.wheel && seen(r.y1, r.y1 + kitT)) {   // a Sea raft's stream across the shaft under it, its ripples going by, behind (DEPTH), in steps six a second (the guide's water)
+    const sy = snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + (((Math.floor(T * 6) / 6) * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0);
   }
   if (th.sea && lv.kind === 'well') {   // the Sea's props (the owner's picks, research/variants/sea-*-game.png, 2026-10-20): on ledges, by kitThing, a lighthouse
     // (E), nets drying with glass floats (A), a gull crying out on a mooring post (D), octopus pots wrapped in a net (C), the big-catch flags (E). In the
@@ -5220,7 +5221,7 @@ Renderer.prototype.draw = function (g, alpha) {
       // ends; shaking and fading as it goes, as the rope bridge did
       const S = vil2('bridge'), q = PIX.base, n = S.tile[0].length, u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, y0 = snap(r.y0 - S.deck * q), yb = y0 + S.tile.length * q;
       thin(() => {
-        for (let x = r.x0, i = 0; x < r.x1 - 0.5 * q; x += n * q, i++) { const m = Math.min(n, Math.round((r.x1 - x) / q)), ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0; vsp(m < n ? vspCut(S.tile, 0, m, 'bridge') : S.tile, snap(x) + ox, y0, false, a); }
+        for (let x = r.x0, i = 0; x < r.x1 - 0.5 * q; x += n * q, i++) { const m = Math.min(n, Math.round((r.x1 - x) / q)), ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0; vsp(m < n ? vspCut(S.tile, 0, m, 'bridge') : S.tile, snap(x) + ox, y0, false, a); }
         vsp(S.left, snap(r.x0) - (S.left[0].length - 2) * q, yb - S.left.length * q, false, a); vsp(S.right, snap(r.x1) - 2 * q, yb - S.right.length * q, false, a);
       });
       if (CINE) this.route = 2; box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, a, 1.25); return true;
@@ -5229,7 +5230,7 @@ Renderer.prototype.draw = function (g, alpha) {
       // its own way as it gives, two grey ropes through them
       const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, n = r.board ? 1 : Math.max(1, Math.round((r.x1 - r.x0) / (0.55 * t))), pw = (r.x1 - r.x0) / n;   // (a board: one slat, the one that goes; 2.5D: no fading, a dither in depth reads as a sieve: it shakes)
       for (let i = 0; i < n; i++) {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 || r.board ? 2 * P : 0) + ox;   // (a board's last too: the next board's comes on)
+        const ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox, x1 = snap(r.x0 + (i + 1) * pw) - (i < n - 1 || r.board ? 2 * P : 0) + ox;   // (a board's last too: the next board's comes on)
         box(x0, r.y0, x1, r.y1, PAL.orange, a, 0, 10, 0); box(x0, r.y1 - P, x1, r.y1, PAL.orange, a, 0, 10, 4);   // a slat, its underside in shade
         box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
       }
@@ -5340,7 +5341,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (r.crumble) {   // a raft of driftwood: logs with rounded ends, each shaking its own way as it gives, bands of orange rope between them, lashed to the wall with it
       const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, n = Math.max(1, Math.round(w / (1.3 * t))), pw = w / n;   // (2.5D: it shakes, no fading)
       for (let i = 0; i < n; i++) {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * pw) + ox;
+        const ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0, x0 = snap(r.x0 + i * pw) + ox + (i ? P : 0), x1 = snap(r.x0 + (i + 1) * pw) + ox;
         box(x0, r.y0 + 3 * P, x1, r.y1 - 3 * P, th.crumble, a, 0, 10, 2); box(x0 + P, r.y0 + P, x1 - P, r.y1 - P, th.crumble, a, 0, 10, 2); box(x0 + 3 * P, r.y0, x1 - 3 * P, r.y1, th.crumble, a, 0, 10, 2);   // a log, its ends round
         box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y0 + 2.5, th.lip, a, 1.25);
         if (i) box(x0 - P, r.y0 - P, x0 + P, r.y1 + P, PAL.orange, a, 0, 10, 0);   // a band of rope between two logs
@@ -5426,7 +5427,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (r.crumble) {   // a rotten log broken in two: grey in black rot, its grain split, holes, a spiral knot, grey toadstools, a snail; its pieces shake as it gives
       const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, cut = 0.58;   // (2.5D: no fading, a dither in depth reads as a sieve: it shakes)
       [[0, cut - 0.03], [cut + 0.03, 1]].forEach(([q0, q1], i) => {
-        const ox = u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0, x0 = snap(Math.min(W(q0 * wt), W(q1 * wt))) + ox, x1 = snap(Math.max(W(q0 * wt), W(q1 * wt))) + ox;
+        const ox = u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0, x0 = snap(Math.min(W(q0 * wt), W(q1 * wt))) + ox, x1 = snap(Math.max(W(q0 * wt), W(q1 * wt))) + ox;
         box(x0, r.y0 + 2 * P, x1, r.y1 - 2 * P, th.crumble, a, 0, 10, 1); box(x0 + 2 * P, r.y0, x1 - 2 * P, r.y1, th.crumble, a, 0, 10, 1);   // a piece, its ends round, its rot speckled
         box(x0 + 2 * P, Y(ht * 0.6), x1 - 2 * P, r.y1 - P, th.crumble, a, 0, 10, 4);   // its underside darker
         for (let x = x0 + snap(0.2 * t), j = 0; x < x1 - snap(0.3 * t); j++) { const ww = snap((0.3 + 0.5 * hsh(j + i * 50)) * t), yy = Y(ht * (0.25 + 0.4 * hsh(j + 9 + i * 50))); box(x, yy, Math.min(x1 - 2 * P, x + ww), yy + P, K, a, 0, 10, 0); x += ww + snap((0.25 + 0.35 * hsh(j + 21)) * t); }   // its grain split
@@ -5502,7 +5503,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const room = (u0, u1, v0, v1) => { const x0 = Math.min(W(u0), W(u1)), x1 = Math.max(W(u0), W(u1)), y0 = Y(v0), y1 = Y(v1); return !lv.rects.some((q) => q !== r && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1); };   // nothing laid there
     const R0 = r.mnRoom || (r.mnRoom = { under: room(0, Math.min(wt - 0.2, 3.3), ht, ht + 2.2), end: room(wt - 0.7, wt, ht, ht + 1.1), wall: room(0, 0.4, -1.4, ht + 1.1) });   // (once a ledge: where its timber has room)
     if (r.crumble) {   // loose rubble and broken ore held up by rotten boards: rounded stones with black gaps in two rows, shaking as it gives, grit falling
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 70 + i * 2.3) * 1.8 * u) : 0);   // (2.5D: no
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, a = CINE ? 1 : 1 - 0.5 * u * u, c = th.crumble, shake = (i) => (u ? snap(Math.sin(T * 31 + i * 2.3) * 1.8 * u) : 0);   // (2.5D: no
       // fading, a dither in depth reads as a sieve: it shakes)
       box(r.x0, r.y0 + 2 * P, r.x1, r.y1, K, a, 0, 10, 0);   // the dark between its stones
       const n = Math.max(1, Math.round(wt / 0.55));
@@ -5598,7 +5599,7 @@ Renderer.prototype.draw = function (g, alpha) {
       // выбиваются», «в ФУДЗИ нет исчезающих платформ»; d63 «E», d64 «E»): the ice a white top over a light body, a fringe of short icicles under it; what
       // crumbles the trail's sandbags, tied in a row, shaking and fading as it goes. The 2.5D top takes 7 game px under the edge: kept plain
       const W = PAL.white, G = PAL.gray, K = PAL.black, Bl = PAL.blue, w = r.x1 - r.x0;
-      const u = r.crumbling ? r.t / CRUMBLE.time : 0, ox = r.crumbling ? snap(Math.sin(T * 70) * 1.8 * u) : 0, al = 1 - 0.5 * u * u;
+      const u = r.crumbling ? r.t / CRUMBLE.time : 0, ox = r.crumbling ? snap(Math.sin(T * 31) * 1.8 * u) : 0, al = 1 - 0.5 * u * u;
       const bx = (a0, b0, a1, b1, c, a = al, tn = 0) => box(snap(a0) + ox, snap(b0), snap(a1) + ox, snap(b1), c, a, 0, 10, tn);
       const icicle = (x, len, c = W) => F(snap(x) + ox, snap(r.y1) + snap(len / 2), snap(0.09 * t) + P, 0, 0, -snap(len / 2), c, al, 6, snap(0.09 * t) + P, snap(len / 2), 2 * (snap(0.09 * t) + P));   // (a spike pointing down)
       if (r.slick) {   // (its top a band of white, the ice's sign, down past the 7 game px the 2.5D top takes; its body light: white chequered on the world's blue)
@@ -5651,7 +5652,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const townRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
     if (r.ac) {   // an air conditioner (aircon; owner: you may stand on it, for 3 s): its top edge white, and once stood on it rattles, harder as it gives way
-      const u = r.crumbling ? r.t / AC.time : 0, ox = u ? snap(Math.sin(T * 55) * (1 + 2 * u) * P) : 0;
+      const u = r.crumbling ? r.t / AC.time : 0, ox = u ? snap(Math.sin(T * 31) * (1 + 2 * u) * P) : 0;
       aircon(r, ox, 0); box(r.x0 + ox, r.y0, r.x1 + ox, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.plank && r.move) {   // a window cleaner's gondola (the owner's pick, research/variants/tokyo-gondola-1.png C): a purple box of panels hung under its
@@ -5771,7 +5772,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
-    if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 70) * 1.8 * u; a = 1 - 0.5 * u * u; }
+    if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 31) * 1.8 * u; a = 1 - 0.5 * u * u; }
     const own = (!r.slick || th.fuji || th.village) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (th.mines && mineRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top

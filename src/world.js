@@ -3405,7 +3405,7 @@ Renderer.prototype.draw = function (g, alpha) {
   if (lv.exit) door(lv.exit, 'exit');
   // Fuji's sprites cut off its GPT sheets (FUJI_SPR: its props and doors)
   const SPR_INK = { k: [PAL.black, 1], w: [PAL.gray, 1], g: [PAL.gray, 1.62], b: [PAL.blue, 1], o: [PAL.orange, 1], p: [PAL.purple, 1], a: [PAL.aqua, 1], G: [PAL.gray, 1], r: [PAL.orange, 1], y: [PAL.orange, 1] };
-  const DOOR_INK = { r: [PAL.red, 1], y: [PAL.yellow, 1] };   // (a door's: its red the shop's mark, its yellow a window's light)
+  const DOOR_INK = { r: [PAL.red, LIT], y: [PAL.yellow, 1] };   // (a door's: its red the shop's mark, muted as a thing's (К6: bright red is danger's), its yellow a window's light)
   const postId = (n) => {   // the station post with its numeral: n's rows made once (a level of no station keeps the sheet's 八)
     const id = 'post' + n; if (FUJI_SPR[id] || !POST_NUM[n]) return FUJI_SPR[id] ? id : 'post';
     const rows = FUJI_SPR.post.split('/').map((row) => [...row]), gl = POST_NUM[n].split('/');
@@ -3503,7 +3503,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
     F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-    bx(0.55, dh - noren, 1.95, dh, c);   // the noren in three panels, a white crest on its middle one
+    bx(0.55, dh - noren, 1.95, dh, c, 0, shop ? LIT : 1);   // the noren in three panels, a white crest on its middle one (the shop's red muted: К6, bright red is danger's)
     for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.2, PAL.black);
     for (const [u, v] of [[1.25, dh - 0.22], [1.15, dh - 0.38], [1.35, dh - 0.38]]) bx(u - px, v - px, u + px, v + px, INK.white);
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
@@ -3535,7 +3535,7 @@ Renderer.prototype.draw = function (g, alpha) {
     bx((W - 0.3) / 2, eave + 1.15, (W - 0.3) / 2 + 2 * px, eave + 1.45, PAL.gray);   // its ridge's end
     bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
     F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-    bx(0.55, dh - noren, 1.95, dh, c);   // the noren, its slits, its crest
+    bx(0.55, dh - noren, 1.95, dh, c, 0, shop ? LIT : 1);   // the noren, its slits, its crest (the shop's red muted: К6)
     for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.22, PAL.black);
     for (const [u, v] of [[1.25, dh - 0.24], [1.15, dh - 0.4], [1.35, dh - 0.4]]) bx(u - px, v - px, u + px, v + px, INK.white);
     const lan = (u, v) => { bx(u, v + 0.3, u + px, eave - 0.15, PAL.gray); bx(u - 0.15, v - 0.2, u + 0.17, v + 0.3, PAL.orange); bx(u - 0.15, v + 0.04, u + 0.17, v + 0.04 + px, PAL.black); F(X(u), Y(v + 0.05), 0.45 * t, 0, 0, 0.45 * t, PAL.orange, 0.4, 1); };   // a lantern off the eave, lit
@@ -3616,7 +3616,7 @@ Renderer.prototype.draw = function (g, alpha) {
     bx(0.25, 0, 2.25, dh + 0.45, G, 1); bx(0.5, 0, 2.0, dh, INK.dark);   // its wooden front, the doorway dim inside
     for (const u of [0.3, 2.0]) bx(u, 0, u + 0.2, dh + 0.4, G, 3); bx(0.25, dh + 0.3, 2.25, dh + 0.45, G); bx(0.25, dh + 0.3, 2.25, dh + 0.3 + px, K);   // its posts, its lintel
     bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 3, 1);   // its flat roof (grey, its grain dotted: it was white, an alpha of 3, and read as a ledge's edge)
-    bx(0.5, dh - 0.6, 2.0, dh, c); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.6, u + px, dh, K);   // its noren, in strips,
+    bx(0.5, dh - 0.6, 2.0, dh, c, 0, LIT); for (let u = 0.5; u < 2.0; u += 0.375) bx(u, dh - 0.6, u + px, dh, K);   // its noren, in strips, red muted (К6),
     F(dx, Y(dh - 0.3), 0.17 * t, 0, 0, 0.17 * t, PAL.white, 1, 4); bx(1.25 - px, dh - 0.45, 1.25 + px, dh - 0.15, PAL.white); bx(1.1, dh - 0.31, 1.4, dh - 0.29, PAL.white);   // a mark on it
     bx(2.3, 0.9, 2.75, 1.4, PAL.orange); bx(2.3, 1.15, 2.75, 1.15 + px, K); bx(2.52 - px / 2, 0.9, 2.52 + px / 2, 1.4, K); vlamps.push([X(2.52), Y(1.15), 0.4, 1.2]);   // a window lit (a light)
     mnLamp(X(3.0), Y(2.4), true, 0.85);   // a lamp
@@ -3726,8 +3726,8 @@ Renderer.prototype.draw = function (g, alpha) {
       const s = neonSign(lv, k);
       if (!s || s.y1 + 0.3 * t < top || s.y0 - 0.4 * t > bot) continue;
       const { word, pic, kk, gw, sw, left, x0, y0, y1 } = s, cx = x0 + sw / 2, on = lv.neonLit && lv.neonLit.get(k), lit = on != null && !((T - on) < 0.4 && Math.floor((T - on) * 20) % 3 === 1);
-      const ink = lit ? s.ink : PAL.gray, ia = lit ? 1 : DIM;
-      if (lit) { F(cx, (y0 + y1) / 2, 2.2 * sw, 0, 0, 0.62 * (y1 - y0) + 1.4 * sw, ink, 1.3, 1); F(cx, (y0 + y1) / 2, sw, 0, 0, 0.55 * (y1 - y0) + 0.5 * sw, ink, 2.4, 1); }   // its glow: a wide halo, and round the box a solid tone fading
+      const ink = lit ? s.ink : PAL.gray, ia = lit ? (ink === PAL.red ? LIT : 1) : DIM;   // (its red muted, К6 «А»: bright red is danger's)
+      if (lit) { F(cx, (y0 + y1) / 2, 2.2 * sw, 0, 0, 0.62 * (y1 - y0) + 1.4 * sw, ink, ia === LIT ? 1.15 : 1.3, 1); F(cx, (y0 + y1) / 2, sw, 0, 0, 0.55 * (y1 - y0) + 0.5 * sw, ink, ia === LIT ? LIT : 2.4, 1); }   // its glow: a wide halo, and round the box a solid tone fading
       for (const y of [y0 + 0.3 * t, y1 - 0.5 * t]) { box(left ? lv.l : x0 + sw, y, left ? x0 : lv.r, y + 0.12 * t, PAL.gray, DIM, 0, 10, 0); box(left ? lv.l : lv.r - 0.2 * t, y - 0.06 * t, left ? lv.l + 0.2 * t : lv.r, y + 0.18 * t, PAL.gray, DIM, 0, 10, 0); }   // the arms, bolted on
       box(x0 - P, y0 - 0.14 * t, x0 + sw + P, y0, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y0 - 0.28 * t, x0 + sw - 2 * P, y0 - 0.14 * t, PAL.gray, DIM, 0, 10, 0); box(x0 + 2 * P, y1, x0 + sw - 2 * P, y1 + 0.12 * t, PAL.gray, DIM, 0, 10, 0);
       box(x0, y0, x0 + sw, y1, PAL.black, 1, 0, 10, 0);
@@ -4253,10 +4253,10 @@ Renderer.prototype.draw = function (g, alpha) {
         // (the task: its lantern dark till the hero comes near, then lit for good, flickering on, a ring of light going out from it, its glow as the neon's;
         // its light red, Inari's vermilion: orange was lost on the Village's orange earth, owner: «зажигай святилище красным светом, иначе плохой контраст»)
         const on = lv.tended.get(r), lit = on != null && !((T - on) < 0.4 && Math.floor((T - on) * 20) % 3 === 1), lx = X(0.63), ly = Y(1.3);
-        if (lit) { F(lx, ly, 1.6 * t, 0, 0, 1.3 * t, PAL.red, 1.3, 1); F(lx, ly, 0.55 * t, 0, 0, 0.5 * t, PAL.red, 2.4, 1); vlamps.push([lx, ly]); }   // its glow under it: a wide halo, a solid tone round it
+        if (lit) { F(lx, ly, 1.6 * t, 0, 0, 1.3 * t, PAL.red, 1.15, 1); F(lx, ly, 0.55 * t, 0, 0, 0.5 * t, PAL.red, LIT, 1); vlamps.push([lx, ly]); }   // its glow under it: a wide halo, a solid tone round it
         bx(0.3, 0, 0.96, 0.12, PAL.gray); bx(0.55, 0.12, 0.72, 1.05, PAL.gray); bx(0.38, 1.05, 0.88, 1.6, PAL.gray);
-        bx(0.5, 1.15, 0.76, 1.45, PAL.red, 0, lit ? 1 : DIM);   // its window
-        if (on != null && T - on < 0.7) { const q = (T - on) / 0.7; F(lx, ly, (0.3 + 1.7 * q) * t, 0, 0, (0.3 + 1.7 * q) * t, PAL.red, 1 - q, 4); }
+        bx(0.5, 1.15, 0.76, 1.45, PAL.red, 0, lit ? LIT : DIM);   // its window (lit red, muted: К6 «А», bright red is danger's)
+        if (on != null && T - on < 0.7) { const q = (T - on) / 0.7; F(lx, ly, (0.3 + 1.7 * q) * t, 0, 0, (0.3 + 1.7 * q) * t, PAL.red, 0.6 * (1 - q), 4); }
         bx(0.25, 1.6, 1.01, 1.74, PAL.gray); bx(0.56, 1.74, 0.71, 1.94, PAL.gray);
         if (CINE) this.route = 0;   // (the cinematic fork: the altar flat, its foxes too)
         for (const [c, f] of [[1.4, 1], [3.45, -1]]) {   // a fox, facing the shrine: grey stone, its tail up behind it, an orange bib (D's collar red)

@@ -623,6 +623,14 @@ const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2
 // belly drum lobs an acorn first (two on its last heart, when it also drops twice). It floats out of a plain jump's reach, its sway drawn over the hero (`follow`): no corner to sit its drop out in. Three hearts, every warning longer than the later bosses'.
 const TANUKI = { high: 13, swing: 0.16, follow: 0.6, spit: 1.2, webs: [0, 1, 1, 2], warn: 1.4, lock: 0.9, track: 5, again: 1.2, dive: 30, tangle: 2.8, reel: 1.0, rest: [2.2, 2.0, 1.8, 1.8], calm: 2.5,
   lings: [0, 0, 0, 0], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['stomp', 0.6, 1.5], warn: ['bubble', 0.7, 0.6], phase: ['bosshit', 0.6, 0.7] } };
+// Nuppeppo (BOSSES.crane, the Tower Blocks', world 6; owner 2026-10-24): the crane's load, a lump of flesh in its sling, the same hanging
+// boss (Boss.hang) with two moves of its own. A swing: the crane winds it back away from the hero, red, creaking, `sweep.warn` s, then
+// sweeps it across the arena like a wrecking ball, its middle `sweep.low` R over the floor: a hero on the floor passes under it, one on a
+// ledge or in the air is hit (stay low). Drips: it wobbles `spit` s with a gurgle and lobs `webs` of its goo at the hero. Its drop, where
+// its shadow grows, bursts `splat` blobs out of it as it lands; it lies wobbling `tangle` s, the only time a stomp hurts it.
+const NUPPE = { high: 12, swing: 0.18, follow: 0.3, spit: 0.7, webs: [0, 1, 2, 2], warn: 0.75, lock: 0.6, track: 8, again: 0.5, dive: 36, tangle: 1.6, reel: 0.8, rest: [1.5, 1.4, 1.3, 1.2], calm: 2.5,
+  lings: [0, 0, 0, 0], ling: 'crawler', splat: [1, 2, 2, 3], twice: 3, shadow: true, sweep: { warn: 0.7, dur: 1.2, low: 7.2 },
+  snd: { spit: ['bubble', 0.7, 0.4], warn: ['crumble', 0.6, 1.6], sweep: ['crumble', 0.8, 1.1], phase: ['bubble', 0.9, 0.35] } };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -979,13 +987,16 @@ const BOSSES = {
       { en: 'No wings, no sky.', es: 'Sin alas, no hay cielo.', pt: 'Sem asas, sem céu.', ja: 'つばさ なしに そら なし。' }],
     defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' } },
   // The Tower Blocks': a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
-  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', crane: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
+  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', hang: NUPPE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
       { en: 'Who needs a face anyway?', es: '¿Quién necesita una cara?', pt: 'Quem precisa de rosto?', ja: 'かおなんて いる？' },
       { en: 'Wobble, wobble… splat!', es: 'Tiembla, tiembla… ¡plaf!', pt: 'Treme, treme… plaft!', ja: 'ぷるぷる… べちゃっ！' }],
     quip: [{ en: 'Splat. Flat as a panel.', es: 'Plaf. Plano como un panel.', pt: 'Plaft. Plano como um painel.', ja: 'べちゃっ。パネルみたいに ぺしゃんこ。' },
       { en: "Sticky down there, isn't it?", es: 'Pegajoso ahí abajo, ¿eh?', pt: 'Grudento aí embaixo, né?', ja: 'したは ベタベタでしょ？' }],
-    defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' } },
+    defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' },
+    top: { en: 'Not now. Wait till it drops!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Splat! Stomp it now!', es: '¡Plaf! ¡Písalo ya!', pt: 'Plaft! Pise agora!', ja: 'べちゃっ！ いま ふめ！' },   // the first time it lies splatted
+    how: { en: 'Stay low in its swing, stomp after its drop', es: 'Agáchate en su vaivén y písalo al caer', pt: 'Fique baixo no balanço, pise após a queda', ja: 'ゆれは したで よけ、おちたら ふめ' } },   // after three losses
   // Tokyo's: the Tram, a tsukumogami now (a streetcar come alive after a hundred years: the owner's look and name, 2026-10-20): the Minecart's ride
   // on a rail (CART, Boss.ride), its pantograph up to an overhead wire; the rail at full strength, as the later of the two (the Minecart has its gentleness).
   tram: { name: { en: 'Tsukumo Tram', es: 'Tranvía Tsukumo', pt: 'Bonde Tsukumo', ja: 'つくもでんしゃ' }, ink: 'green', design: 'loaf', size: CART.size, street: TRAMRUN, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
@@ -1212,7 +1223,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 42, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, spikes: 1, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [17935, 0], seed: 9039 },
   { role: 'rest', len: 30, fire: 0.42, maxD: 2, chunks: { flight: 3, stairs: 2, planks: 3, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, sides: [0, 113769], seed: 6109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'crane' },
+  { role: 'boss', boss: 'crane', par: 60 },   // Nuppeppo's (owner, 2026-10-24): two ledges, in its swing's way; par: its time medal
 ] },
 // World 6, the Skyscraper (the user's skyscraper and clouds; its kit in the renderer, see THEMES.sky): clouds that dissolve under you,
 // window-cleaning gondolas, bolts dropped from above, then night over the clouds (the twist: dark); the Pigeon. Its runes: a cross of
@@ -1813,6 +1824,98 @@ const CHUNKS = {
     '............',
     '....o..o....',
     '............'] },
+  // The Village's bonus caves (owner, 2026-10-24: «Бонусные пещеры скучные и скудные…»; З1 «В», two gifts in the world's own way, then a puzzle; З2 «А»,
+  // a puzzle tried again at once, nothing lost): laid whole in its stash room (CAVES, Level.build), never in a shaft (kind 'cave'). 21 rows, the room's
+  // height on a small phone; the bottom 8 clear but for the corner over the way out, as the hero is thrown in from the hole in the left wall to the
+  // right wall about 6 tiles up and slides down it (Game.enterRoom)
+  caveMill: { d: 1, kind: 'cave', rows: [   // a gift: a water wheel to ride (MILL), coins round the way its boards carry you, a big one over its top
+    '............',
+    '............',
+    '.....O......',
+    '...o...o....',
+    '............',
+    '.o.......o..',
+    '............',
+    '.O...Q...O..',
+    '............',
+    '.o.......o..',
+    '............',
+    '...o.O.o....',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveBridges: { d: 1, kind: 'cave', rows: [   // a gift: two footbridges across, a garland of coins over each, two big ones in it
+    '............',
+    '............',
+    '............',
+    'ooOoooOoo...',
+    '==========..',
+    '............',
+    '............',
+    '............',
+    '............',
+    '...ooOoooOoo',
+    '..==========',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  cavePestle: { d: 1, kind: 'cave', rows: [   // a puzzle: the pestle (MOCHI) flattens you, and only flat do you fit under the low beam into the vault of big coins;
+    '............',   // out up through its plank roof (from above it holds). Up through the walkway's plank by the post, into the mortar under the pestle, and wait for it.
+    '............',   // Its coins a row clear of its roof and its floor: none in the magnet's reach (COIN.magnet) from over the roof or under the floor
+    '............',
+    '............',
+    '............',
+    '............',
+    '=====.......',
+    '#...#.......',
+    '#OOO#.......',
+    '#OOO#KKK....',
+    '#OOOL.......',
+    '#........P..',
+    '#####UUU==..',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveIn: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins with no door; its roof gives way under you (a crumbling block takes any touch),
+    '............',   // and from inside a head-butt brings it down again. Up by the planks on the right wall. Against the left wall, its floor two
+    '............',   // thick: nowhere outside it within the magnet's reach of its coins (COIN.magnet). Its roof up to the wall: one a tile short is cut back
+    '............',   // to leave a way past it (Level.place's `pass`), a hole over the vault
+    '............',
+    'CCCCC#......',
+    '#OOOO#......',
+    '#OOOO#..====',
+    '#OOOO#......',
+    '######......',
+    '######......',
+    '.........===',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -2315,6 +2418,10 @@ const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coin
 // An ambush (owner, round 2: «Начинай все по списку»; my r6: 1-4, «яма с волнами врагов»): a small arena (a), stood on its floor its one wave of `waves`
 // dropping in, shown first as an arena's (ARENA.warn), no mini, `coins` big ones for it; left behind, nothing (1-4's motif)
 const AMBUSH = { waves: [2], coins: 2 };
+// Each world's bonus caves (the stash rooms, kind 'treasure'; owner, З1 «В»): its gift rooms and its puzzle rooms, by its world's id (the Village's
+// world kept the Mine's old id). Two gifts, then a puzzle, never the same room twice running (Game.enterRoom). A world not here keeps the five old
+// heaps of coins (Level.build).
+const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] } };
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {
@@ -2341,13 +2448,14 @@ for (const id in CHUNKS) {
 // the keystone's middle broke it and cost a heart): 1-8, 2-8 and 3-8's gate. Its spike row set after the widening, as a 12-column one
 // can't say it (the keystone's edge column is a widened one)
 CHUNKS.gate3w = { ...CHUNKS.gate3, rows: CHUNKS.gate3.rows.map((row, r) => (r === 3 ? 'vvvvvv......vvvv' : row)) };
-const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).filter((id) => !CHUNKS[id].tall).map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk);
+const CHUNK_TALL = Math.max(...Object.keys(CHUNKS).filter((id) => !CHUNKS[id].tall && CHUNKS[id].kind !== 'cave').map((id) => CHUNKS[id].rows.length));   // the tallest chunk, in tiles: how far one carries the shaft past a planned room (addChunk);
 // (`tall` ones left out: they are a motif level's, which fills its height by `fits`, and the other levels' rooms stay planned as they were)
 // Each chunk's first and last footholds, worked out from its rows once: runs of columns
 // [from, to, tile] in the lowest and the highest row anything can be stood on.
 const STAND = new Set(['#', 'I', 'C', 'D', '=', 'M', 'W', 'S', 'X', 'T', 'H', 'Z', 'U', 'L']);
 for (const id in CHUNKS) {
   const c = CHUNKS[id], H = c.rows.length;
+  if (c.kind === 'cave') continue;   // (a bonus cave's room is laid whole, not joined to a chunk under it: no footholds; the mill's has none)
   const runs = (r) => {   // a tile under spikes is no foothold
     const row = c.rows[H - 1 - r], up = c.rows[H - 2 - r] || '', ok = (k) => STAND.has(row[k]) && up[k] !== '^', out = [];
     for (let k = 0; k < COLS; k++) if (ok(k) && !ok(k - 1)) { let k1 = k; while (k1 < COLS - 1 && ok(k1 + 1)) k1++; out.push([k, k1, row[k]]); }
@@ -2420,7 +2528,7 @@ class Level {
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
-    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.R = o.R; this.t = 0;
+    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.R = o.R; this.t = 0; this.cave = o.cave || null;   // (cave: a bonus cave's room, CAVES)
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
@@ -2541,6 +2649,9 @@ class Level {
       });
       for (const f of [0.34, 0.54]) this.coin(this.r - 1.3 * R, at(f), 1);
       for (const f of [0.34, 0.76]) this.coin(cx, at(f), 1);
+    } else if (this.cave) {   // a world's own bonus cave (CAVES): laid whole, its floor the room's; a gift room may hold a heart, as the old ones (a puzzle's prize is its coins)
+      this.place(CHUNKS[this.cave], this.floor, false);
+      if (CAVES[o.world.id] && CAVES[o.world.id].gift.includes(this.cave) && rnd() < 0.45) this.pickups.push({ x: cx, y: at(0.8), r: 0.6 * R, item: GIFT, sold: false, near: false });
     } else {   // a stash: one of five, each with its own lot of coins (user: one was dull)
       const ledge = (x0, x1, y, f = {}) => this.rects.push(this.box(x0, y, x1, y + (f.plank ? LEVEL.plank : LEVEL.thick) * R, f));
       const row = (y, n, gap, v = 1) => { for (let k = 0; k < n; k++) this.coin(cx + (k - (n - 1) / 2) * gap * R, y, v); };
@@ -2899,8 +3010,9 @@ class Level {
       for (let i = from; i < this.rects.length; i++) { const q = this.rects[i]; if (!q.plank && Math.abs(q.y1 - y) < 1 && x > q.x0 && x < q.x1) q.moss = true; }
     }
     // Some plain one-tile ledges are laid as planks to jump up through (not one with spikes on or
-    // under it, or a spring on it; none in a pocket, by its door; none in a stash in the wall, a set piece, a gate or the last rest).
-    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set' && c.kind !== 'gate' && c.kind !== 'tut'; i++) {
+    // under it, or a spring on it; none in a pocket, by its door; none in a stash in the wall, a set piece, a gate, the last rest or a bonus
+    // cave, laid as drawn: a plank for its vault's floor would let you jump up into it past the puzzle).
+    for (let i = from; i < this.rects.length && c !== CHUNKS.pocket && c !== CHUNKS.vault && c !== CHUNKS.rest && c.kind !== 'set' && c.kind !== 'gate' && c.kind !== 'tut' && c.kind !== 'cave'; i++) {
       const r = this.rects[i], over = (a) => a.x1 > r.x0 && a.x0 < r.x1;
       if (r.plank || r.spring || r.slick || r.crumble || r.crack || r.moss || r.stair || r.y1 - r.y0 > t + 1 || r.x1 - r.x0 < 2 * t - 1) continue;
       if (this.spikes.slice(spikesFrom).some((q) => over(q) && (Math.abs(q.y1 - r.y0) < 1 || Math.abs(q.y0 - r.y1) < 1))) continue;

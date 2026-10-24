@@ -1,10 +1,10 @@
-// Fuji's ice blocks and crumbling ledges, six looks each (FUJI_V2, window.__fujiV2), drawn by the game, a step each; compose.py lays them out A-F.
+// Fuji's ice blocks and crumbling ledges, drawn by the game. (The owner picked E and E on 2026-10-24 and the other looks went, so this shows the picks
+// only: a template.)
 // A free ice block and a crumbling ledge off the wall, a plain stone ledge beside for the kit, the hero by them for size.
 (() => {
   if (typeof STORY === 'object') for (const k in STORY) save.seen['card_' + k] = 1;
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), els = window.__galEls || ['ice', 'crumble'];
   const scene = async (el, k) => {
-    window.__fujiV2 = Object.assign({}, FUJI_V2, { [el]: k });
     const tst = document.getElementById('toast'); if (tst) tst.style.display = 'none';
     __up.go(1, 0, 3); g.state = 'play';
     const lv = g.lv, t = lv.tile, R = g.R, P = PIX.size, sn = (v) => Math.round(v / P) * P;
@@ -18,5 +18,5 @@
     const cam = y0 - 0.5 * view.h; lv.cam = cam; __up.tick(2); lv.cam = cam; __up.tick(1, 0); await wait(250);
     return { el, k, sy: Math.round(y0 - cam), w: 11, at: 0.65, nf: renderer.nf };
   };
-  window.__steps = els.flatMap((el) => [0, 1, 2, 3, 4, 5].map((k) => async () => { input.clear(); return scene(el, k); }));
+  window.__steps = els.flatMap((el) => [0].map((k) => async () => { input.clear(); return scene(el, k); }));
 })();

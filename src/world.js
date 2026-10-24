@@ -2941,7 +2941,7 @@ class Level {
       if (rc ? rc.trader : fr() < FOLK.traderP) this.folkAt.push({ kind: 'trader', y: at(FOLK.trader) });
       this.folkAt.sort((p, q) => q.y - p.y);   // the lower first
     }
-    const nC = rc ? rc.candy.length : CANDIES.at.length, slots = nC <= CANDIES.at.length ? CANDIES.at.slice(0, nC) : Array.from({ length: nC }, (_, k) => [0.12 + (0.8 * k) / nC, 0.12 + (0.8 * (k + 0.6)) / nC]);   // (more than two: evenly up it)
+    const nC = rc ? (rc.candy || []).length : CANDIES.at.length, slots = nC <= CANDIES.at.length ? CANDIES.at.slice(0, nC) : Array.from({ length: nC }, (_, k) => [0.12 + (0.8 * k) / nC, 0.12 + (0.8 * (k + 0.6)) / nC]);   // (more than two: evenly up it)
     this.fizzAt = o.kind === 'well' && o.height ? slots.map(([a, b]) => this.floor - o.height * (a + this.rng() * (b - a))) : [];   // heights for the candies (a recipe's, as many)
     this.fizzKind = intro.candy || shuffled(mulberry32((o.seed ^ 0x9e3779b9) >>> 0), Object.keys(CANDY).filter((k) => k !== 'astro'));   // and which kinds, by a generator of their own: the shaft is laid as before
     this.windRng = mulberry32((o.seed ^ 0x51ed2700) >>> 0);   // a level's wind, by a generator of its own (the shaft laid as without it)

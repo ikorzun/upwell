@@ -528,7 +528,7 @@ const slabRows = (v, nx, ny, seed) => {
   return g.map((r) => r.join(''));
 };
 const IW_V = (() => {   // the take of each shown (all «A» till the owner picks; ?iw=baskets:C,lamp:B shows others)
-  const v = { baskets: 'A', windlass: 'A', shrine: 'A', rakan: 'A', silver: 'A', lamp: 'A', shop: 'A', stash: 'A', water: 'A', slab: 'A' }, m = location.search.match(/[?&]iw=([\w:,]+)/);
+  const v = { baskets: 'A', windlass: 'A', shrine: 'A', rakan: 'A', silver: 'A', lamp: 'A', shop: 'A', stash: 'A', water: 'A', slab: 'A', stashroom: 'A' }, m = location.search.match(/[?&]iw=([\w:,]+)/);
   if (m) for (const p of m[1].split(',')) { const [k, l] = p.split(':'); if (k in v && /^[A-F]$/.test(l)) v[k] = l; }
   return v;
 })();
@@ -5152,6 +5152,29 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const u of [11.8, 13.2]) bx(u, 0, u + 0.25, 20.6, PAL.orange);   // the ladder up to the hatch
     for (let v = 1; v < 20.5; v += 1.2) bx(11.8, v, 13.45, v + 0.22, PAL.orange);
     F(X(12.6), Y(20.9), 1.4 * t, 0, 0, 0.5 * t, PAL.orange, 0.3, 1); bx(11.6, 20.6, 13.6, 21.2, PAL.orange, 1.7);   // the hatch over it, lit warm
+  }
+  if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.mines) {   // the Mine's stash room: the fukuishi chamber of Iwami Ginzan (Д120 «А»), where the
+    // rich silver ore was cut, as the cellar is drawn (big flat shapes at a quarter on a quiet black; research/variants/iwami-stashroom-1.png for the six takes,
+    // IW_V.stashroom): log posts and a beam, braces; the vein of ore down the rock, its glints the stash's purple; baskets of ore, a lamp, a ladder, by take
+    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32, G = PAL.gray, v6 = IW_V.stashroom;
+    const bx = (u0, v0, u1, v1, c = G, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
+    const el = (u, v, ru, rv, c = G, a = WD) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
+    const frame = (u0, u1, top) => { bx(u0, 0, u0 + 0.6, top); bx(u1 - 0.6, 0, u1, top); bx(u0 - 0.3, top, u1 + 0.3, top + 0.6); line(X(u0 + 0.6), Y(top - 2), X(u0 + 2.4), Y(top), G, WD, 3); line(X(u1 - 0.6), Y(top - 2), X(u1 - 2.4), Y(top), G, WD, 3); };
+    const vein = (u0, v0, u1, v1, w, n) => {   // a band of rock lumps, a few glints of ore in it
+      for (let i = 0; i <= n; i++) { const q = i / n, u = u0 + (u1 - u0) * q, v = v0 + (v1 - v0) * q; el(u, v, w * (0.8 + 0.3 * Math.sin(i * 1.7)), w * 0.9); }
+      for (let i = 0; i < 2 * n; i++) { const q = (i + 0.5) / (2 * n), u = u0 + (u1 - u0) * q + 0.35 * w * Math.sin(i * 2.3), v = v0 + (v1 - v0) * q + 0.3 * w * Math.cos(i * 1.9); bx(u - 0.1, v - 0.1, u + 0.1, v + 0.1, PAL.purple, LT); }
+    };
+    const basket = (u, v) => { bx(u - 0.8, v, u + 0.8, v + 1.0); for (const du of [-0.45, 0.05, 0.5]) el(u + du, v + 1.15, 0.38, 0.3); bx(u - 0.9, v + 0.9, u + 0.9, v + 1.0, PAL.black, WD); };
+    const lamp = (u, v) => { bx(u - 0.25, v, u + 0.25, v + 0.5); F(X(u), Y(v + 0.25), 1.2 * t, 0, 0, 1.2 * t, PAL.orange, 0.3, 1); bx(u - 0.1, v + 0.1, u + 0.1, v + 0.35, PAL.orange, LT); };
+    const ladder = (u, v0, v1) => { bx(u, v0, u + 0.2, v1); bx(u + 1.3, v0, u + 1.5, v1); for (let v = v0 + 0.8; v < v1; v += 1.1) bx(u, v, u + 1.5, v + 0.18); };
+    const pick = (u, v) => { line(X(u), Y(v), X(u + 1.0), Y(v + 2.2), G, WD, 2); line(X(u + 0.4), Y(v + 2.0), X(u + 1.6), Y(v + 2.4), G, WD, 3); };
+    if (v6 === 'A') { frame(1, 15, 19); vein(4, 17, 10, 4, 1.3, 7); pick(6, 1); basket(10.5, 0); basket(12.6, 0); lamp(2.2, 13); }
+    else if (v6 === 'B') { frame(1, 15, 19); vein(3.5, 16, 6, 3, 1.2, 6); ladder(11.5, 0, 19); bx(7, 15, 10.5, 15.8); el(8.7, 16.4, 0.7, 0.7); basket(8.5, 0); lamp(2.2, 13); }
+    else if (v6 === 'C') { frame(1, 15, 19); vein(4, 15, 9, 3, 1.3, 6); line(X(10.5), Y(19), X(10.5), Y(14.2), G, WD, 1); basket(10.5, 13); basket(12.5, 0); lamp(2.2, 13); }
+    else if (v6 === 'D') { frame(1, 15, 19); vein(4, 15, 8, 4, 1.2, 6); for (const u of [5, 9, 12]) { line(X(u - 0.4), Y(19), X(u), Y(17.6), G, WD, 3); line(X(u + 0.4), Y(19), X(u), Y(17.6), G, WD, 3); }
+      el(10.5, 17.6, 0.45, 0.6); pick(2.6, 1); pick(12.2, 1); basket(8.8, 0); basket(11, 0); }
+    else if (v6 === 'E') { frame(1, 15, 19); vein(5, 17, 11, 2.5, 1.7, 8); lamp(2.2, 13); basket(12.5, 0); }
+    else { frame(1, 15, 19); vein(2.4, 16, 3.2, 3, 1.0, 6); vein(13.6, 15, 12.8, 3, 1.0, 6); line(X(8), Y(19), X(8), Y(16.6), G, WD, 1); lamp(8, 16); bx(6, 0, 10, 1.5); bx(6, 1.5, 10, 1.85, PAL.purple, LT); }
   }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter

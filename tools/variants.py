@@ -1383,6 +1383,130 @@ ELEMENTS.update({
 })
 
 
+
+# The Sea from Enoshima, round 2 (owner 2026-10-24: Д140 «А» the place, Д141–Д148 what to take; research/sea/sea-attributes.md): six takes of each picked
+# thing, for the game's code to cut or draw (Worlds, branch sea-real). Run with --ref research/variants/ref-sea.png: its world is the Sea's
+WORLDS['enoshima'] = ('the Sea', 'the island of Enoshima in Sagami Bay, Japan, on a summer night, cosy and cute, kawaii, true to the real island as it is today '
+                      'but without concrete: its sea-worn rock terrace of Chigogafuchi with tide pools, the Iwaya sea caves with candles and stone statues, '
+                      'wooden walkways along the cliff, shrines among pines (their vermilion drawn orange), black kites in the sky, stray cats, the lighthouse on '
+                      'its summit; no cars, no escalators, the harbour only far off', 'aqua #6fe0ee',
+                      'white is wet rock you slip on (a whole block of it), green is seaweed you can hold on to, purple marks springs, rubber walls and the '
+                      'stash, orange marks boats and planks that move, grey blocks crumble', 'the black summer night by the sea, nothing far off')
+ENO_AT = 'an aqua rock ledge with a white top edge sticking out of the wall'
+ENO_RULE = ('In this world white is wet rock you slip on, green is seaweed you can hold on to, purple marks springs and rubber walls, orange marks boats and planks '
+            'that move and grey blocks crumble, so use those only for tiny details; never yellow (the coins\' colour) and never red (danger).')
+ENO_FAR = ('each thing in one or two faint dim tones on the black in big flat shapes (no dither noise, no fine speckle): the sea a dim blue, rock a dim grey, '
+           'pines and seaweed a dim green, foam a dim grey (never white), shrines and torii a dim orange (never red), the dragon a dim purple, candles, '
+           'lamps and lit windows small orange glows; no white anywhere but the hero')
+ELEMENTS.update({
+    'eno-far1': dict(world='enoshima', kind='prop', plane='back', what="the far view behind the shaft as the climb goes up the island of Enoshima from the bottom of "
+                     "Sagami Bay, a different scene in each cell, left to right, top to bottom: A the bottom of the bay under water: rocks, swaying kelp, spiky turban "
+                     "shells (sazae), a moray eel looking out of a crack, a shoal of tiny whitebait; B the surf at the foot of the island's cliff, waves breaking on "
+                     "black rocks, the little sightseeing boat Benten-maru going by with its lights; C the Chigogafuchi rock terrace, flat layered rock with tide "
+                     "pools, two fishermen with long rods at its edge; D the mouth of the Iwaya sea cave in the cliff, deep inside it a dragon statue lit purple, "
+                     "candles by it; E the passage of the first Iwaya cave, stone statues in niches along its wall, small candles at their feet; F wooden walkways "
+                     "and stairs going up the cliff face, stone lanterns along them, black kites wheeling over the pines",
+                     where='far behind everything, low and faint, so the play reads over it', material='rock, sea water, kelp, a boat, a cave, statues, candles, pines',
+                     size='about 14 tiles wide and 6 tiles tall', inks=ENO_FAR, scene=ENO_AT + ' in front of it'),
+    'eno-far2': dict(world='enoshima', kind='prop', plane='back', what="the far view behind the shaft near the top of the island of Enoshima, a different scene in each "
+                     "cell, left to right, top to bottom: A over the cliff, the Ryuren bell (a bronze bell hung under a little roof) on a rock above the sea and the "
+                     "Okutsumiya shrine among pines; B the summit: the brick ruins of the old Cocking greenhouse, arches and walls, palms and flowers round them, the "
+                     "roofs of the shrines; C the summit at night: the Sea Candle lighthouse, a slim tower widening up to its lit lamp, over the pines, Mount Fuji "
+                     "across the bay, the lights of the far shore; D the bell and the shrine again, seen from below the cliff; E the greenhouse ruins and palms "
+                     "again, from closer, an arch in front; F the lighthouse and Fuji again, from further off: the island's dark green hump in the sea with the "
+                     "lighthouse on it, Fuji behind",
+                     where='far behind everything, low and faint, so the play reads over it', material='rock, pines, a bell, shrines, brick ruins, palms, a lighthouse, a mountain',
+                     size='about 14 tiles wide and 6 tiles tall', inks=ENO_FAR + '; Fuji a dim blue, the bricks a dim orange, the lighthouse a dim aqua and grey with its lamp an orange glow',
+                     scene=ENO_AT + ' in front of it'),
+    'eno-slab': dict(world='enoshima', kind='ledge', what='the basic ledge, a shelf of the Chigogafuchi rock terrace at the foot of the Enoshima cliff: flat rock worn '
+                     'by the sea and lifted out of it, in thin layers (strata), small tide pools of sea water in it',
+                     does='solid on every side: you stand on it, cling to its sides and jump off it',
+                     material='flat layered sandstone and tuff worn smooth by the sea, tide pools, barnacles, a limpet or a tiny turban shell',
+                     size='4 tiles long and 1 tile thick', main='aqua (the rock)',
+                     rule=ENO_RULE + ' The tide pools are a deep blue; the white top edge runs flat along its whole length (it is where you stand), so a pool sits in its face or just under that edge, never breaking it.',
+                     vary='its layers (thin even strata, thick and thin bands, tilted strata, layers stepped back at its free end), how its tide pools sit (one long pool '
+                     'just under the top edge, small round pools cut away in its face, water dripping off its end), its underside (flat, worn into scallops, notched, '
+                     'eaten into holes by the waves) and one small detail (barnacles, a limpet, a turban shell, a tiny crab)'),
+    'eno-plank': dict(world='enoshima', kind='ledge', what='a walkway to the Iwaya caves of Enoshima: a narrow deck of planks on brackets along the foot of the cliff, '
+                      'a low railing of posts and rope beside it', does='a thin platform: you jump up through it from below and stand on it',
+                      material='weathered wooden planks, timber posts, iron brackets, a rope railing', size='4 tiles long and a third of a tile thick, its railing at most half a tile high',
+                      place='the walkway sticking out of that wall', main='aqua (painted wood)', rule=ENO_RULE,
+                      vary='the planks and the gaps between them, the brackets or posts under it, how it is fixed to the wall, its railing (rope between short posts, a '
+                      'single low rail, only a post at its free end, none) and the small details on it (a coil of rope, a small lantern hung under it, a float)'),
+    'eno-boat': dict(world='enoshima', kind='ledge', what='the Benten-maru, the little sightseeing boat of Enoshima that carries people from the Benten bridge to the '
+                     'Chigogafuchi rock terrace, as a moving platform', does='a thin platform that rides sideways along its row, from wall to wall and back, carrying '
+                     'you; you jump up through it from below and stand on its top', material='a small boat: a flat canopy roof on posts over its open deck, benches, a '
+                     'low hull with a rail, a life ring', size='6 tiles long; its flat roof is the top you stand on (a third of a tile thick, a white top edge), the deck '
+                     'and the hull hang about 1.2 tiles under it', place='the boat in the middle of the shaft riding on a thin band of sea water that runs across the shaft',
+                     main='orange (what moves is orange in this world)', rule="Orange is this world's mark for what moves, so it is its main colour; the hull and roof "
+                     "orange with grey and black details, the windows or the open deck black, never red, no white but the roof's top edge.",
+                     vary='the hull (a round bow, a sharp raised bow, a flat barge), the roof (a flat canopy on posts, a rounded canopy, a cabin with windows), the rail, '
+                     'and the small details (a life ring, a small flag, a lantern, a name board, a wake at its stern)'),
+    'eno-lighthouse': dict(world='enoshima', kind='prop', what="a small harbour lighthouse of the kind on the breakwaters round Enoshima, drawn twice in each cell: "
+                           "unlit (dark) on the left and lit on the right, as the hero lights it by coming near; one kind in each cell: A a round tower narrowing up, "
+                           "a gallery and a lamp room with a domed roof; B a square tower with a door and a small window; C a slender column on a round stone base; "
+                           "D a tower shaped like a sail, as the light of Shonan harbour; E a short squat tower on a heap of breakwater blocks; F an open steel "
+                           "lattice tower with the lamp on top", where='on the top of a ledge at its wall end', material='a painted tower, a glass lamp room, a small iron gallery',
+                           size='about 1.2 tiles wide and 3.5 tiles tall', inks='the tower aqua with grey bands or grey parts (never red, never white for its body), its '
+                           'door black; lit, its lamp orange with a yellow core and a dither halo of orange round it: a light of the dark; unlit, its lamp grey and black',
+                           scene=ENO_AT + ' below them'),
+    'eno-candle': dict(world='enoshima', kind='prop', what="the Enoshima Sea Candle, the lighthouse and lookout tower on the summit of Enoshima, lit: a slim tower that "
+                       "widens upward like a candle's flame or a basket of ribs, a round lookout deck near its top, the lamp on its top", where='on the top of a ledge at its '
+                       'wall end, at the top of the level', material='a steel and glass tower, a lookout deck, a lamp', size='about 3 tiles wide and 7 tiles tall',
+                       inks='aqua and grey (never white, never red), the lamp and the deck\'s windows orange with a yellow core and a dither halo (a light)', scene=ENO_AT),
+    'eno-kite': dict(world='enoshima', kind='prop', what='a black kite (tobi), the big bird of prey of Enoshima that snatches food out of people\'s hands, perched on a '
+                     'wooden post, cute, looking out to sea', where="on a short post standing at a ledge's free end", material='feathers, a wooden mooring post',
+                     size='the kite about 1.2 tiles tall, the post 1 tile tall', inks='a grey and black kite (its brown drawn grey, never red), its hooked beak and its '
+                     'feet orange, a black eye; an orange post (no white)', scene=ENO_AT),
+    'eno-sazae': dict(world='enoshima', kind='prop', what="a grill of sazae, spiky turban shells roasting in their own shells on glowing charcoal, as at the stalls at "
+                      "the entrance to Enoshima (tsuboyaki): a small charcoal brazier or a low grill, three or four shells on its grate, steam rising from them",
+                      where='on the top of a ledge at its wall end', material='an iron grate, a clay or iron brazier, charcoal, spiky shells',
+                      size='about 1.8 tiles wide and 1.3 tiles tall with its steam', inks='grey shells with black spikes, the coals orange with a yellow core and a dither '
+                      'halo (a light; never red), a grey or orange brazier, grey steam (no white)', scene=ENO_AT),
+    'eno-cats': dict(world='enoshima', kind='prop', what="the stray cats of Enoshima asleep: two or three cats curled up together on an old stone step, a folded "
+                     "cushion or a little wooden bench, cute", where='on the top of a ledge at its wall end', material='fur, an old stone step or a bench',
+                     size='about 2.2 tiles wide and 1 tile tall', inks='cats in grey, orange and black (calico and tabby without white: white is the hero\'s), their '
+                     'eyes shut; a grey step or an orange bench', scene=ENO_AT),
+    'eno-rods': dict(world='enoshima', kind='prop', what="the fishermen's gear left on the Chigogafuchi rock terrace: two or three long fishing rods leaning on the wall "
+                     "or standing in a holder, a bucket for the catch, a cooler box or a folding stool", where='on the top of a ledge at its wall end',
+                     material='long thin rods and their lines, a bucket, a cooler box', size='about 2 tiles wide and 3 tiles tall with the rods',
+                     inks='grey and black rods with orange tips, an aqua or blue bucket, a grey cooler with an orange lid (no white, no red)', scene=ENO_AT),
+    'eno-shop': dict(world='enoshima', kind='prop', what="a shop on Nakamise street of Enoshima, the steep lane of old wooden shops up from the bronze torii, a way into "
+                     "the game's shop: a two-storey wooden front, a deep tiled eave, a red noren curtain in its open doorway, a paper lantern hung by it, a lattice "
+                     "window upstairs", where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
+                     material='dark old timber, wooden lattice, roof tiles, a noren, a paper lantern', size='about 3.5 tiles wide and 3.5 tiles tall',
+                     inks="dark grey timber, grey lattice and roof tiles, a red noren with a simple white coin on it (the shop's mark), the lantern lit orange with a "
+                     "yellow core and a dither halo, a warm orange window", scene=ENO_AT),
+    'eno-stash': dict(world='enoshima', kind='prop', what="the way into the game's secret stash: the dark arched mouth of the Iwaya sea cave in the Enoshima cliff, a "
+                      "short wooden walkway leading into it, a soft purple light glowing deep inside from the dragon", where='cut into the shaft wall at the wall end of a '
+                      'ledge, standing on the ledge', material='sea-worn rock, a wooden walkway, a rope railing', size='about 3 tiles wide and 3 tiles tall',
+                      inks='grey rock with aqua details, the walkway grey and orange, a purple glow with a dither halo from inside (purple is the stash\'s mark)',
+                      scene=ENO_AT),
+    'eno-stashroom': dict(world='enoshima', kind='prop', plane='back', what="the inside of the secret stash under Enoshima, seen as one whole game screen: the Iwaya "
+                          "sea cave, a low passage washed out by the waves, stone statues (seated Buddhas, small jizo) in niches along its walls, small candles burning "
+                          "at their feet, and at the passage's far end the statue of the dragon lit purple; coins to collect hanging in the room",
+                          where='the whole room behind the play: its back wall and its props; the ledges in it are rock shelves',
+                          material='sea-worn rock, stone statues, candles, a dragon statue', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                          inks='a dark rock back wall in big flat faint grey shapes (no fine speckle), faint grey statues, the candles small orange glows, the dragon a '
+                          'faint purple glow (the stash), gold coins', scene=ENO_AT + ' as a shelf in the room'),
+
+    # The Sea's bonus caves' own things (UPwell's CAVES.sea, main a7055ea; their look is Worlds'): the clam shells that open a vault's gate, and the gate
+    'eno-clam': dict(world='enoshima', kind='prop', what="a clam shell lying on a rock ledge in a sea cave, a switch: drawn twice in each cell, open on the left (its "
+                     "upper valve lifted, the dark inside showing) and shut flat on the right (pressed down by the hero standing on it); one kind in each cell: A a "
+                     "scallop (hotate) with fan ribs, B a hard clam (hamaguri), smooth with bands, C a giant clam with a wavy lip, D a rough oyster, E a long dark "
+                     "mussel, F an ark shell with ribs", where='lying on the top of a ledge', material='shell', size='about 1 tile wide; open, about 0.8 tiles tall; '
+                     'shut, a third of a tile tall', inks='a real shell\'s colours in our inks: orange, grey, blue or aqua with black ribs and lines; never red, never '
+                     'yellow; white only along its top edge when it is shut (that is where you stand)', scene=ENO_AT + ' under them'),
+    'eno-gate': dict(world='enoshima', kind='ledge', what="a gate shutting the way into a little vault of coins in the Iwaya sea cave of Enoshima; when a clam shell "
+                     "somewhere in the cave is pressed it opens and is gone", does='a solid block standing in the vault\'s doorway: you can stand on its top, it blocks '
+                     'the way in till it opens', material='sea rock, wood, rope, glass floats, coral', size='2 tiles wide and 4 tiles tall',
+                     place='the gate standing on the rock floor in the doorway of a little vault in the cave wall, a few gold coins faint behind it',
+                     main='aqua or grey', rule=ENO_RULE + ' Its top edge white (you stand on it), no other white.',
+                     vary='what it is: A a wall of stacked sea-worn rock blocks, B the wooden door of a sunken shrine with a shimenawa rope across it, C a fishing '
+                     'net of rope stretched over the doorway, glass floats caught in it, D a wall of barnacled stones and coral, E a gate of driftwood logs lashed '
+                     'with rope, F a big stone slab carved with waves; and how it shows it will open (a crack, a knot, a seam of light)'),
+})
+
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.
 In play: {does}. Material: {material}. Size: {size}; {grid}

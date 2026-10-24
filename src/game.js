@@ -146,7 +146,7 @@ const campAt = (i) => {
 // numbers when the Village became the first world: Tokyo's own of before, for the tiers it plays (DAY_TIERS)
 const DAY_NUMS = { 1: { len: 31, fire: 0.35, foes: 0.5, pair: 0, safe: true }, 2: { len: 28, fire: 0.35, foes: 0.45, pair: 0, safe: true }, 3: { len: 34, fire: 0.38, foes: 0.55, pair: 0.1, safe: false },
   4: { len: 25, fire: 0.42, maxD: 2, foes: 0.75, pair: 0.3, safe: false }, 6: { len: 30, fire: 0.38, foes: 0.55, pair: 0.1, safe: false }, 7: { len: 30, fire: 0.42, maxD: 2, foes: 0.7, pair: 0.25, safe: false } };
-const dayAt = (i) => { const s = Math.floor((i % 30) / 3); return sideOf(i % 3, Object.assign({}, CAMPAIGN[DAY_W].levels[s], DAY_NUMS[s])); };
+const dayAt = (i) => { const s = Math.floor((i % 30) / 3); return sideOf(i % 3, Object.assign({}, CAMPAIGN[DAY_W].levels[s], DAY_NUMS[s], { episode: null })); };   // (no story episode: UME)
 // One level a tier (owner, 2026-10-20: no map between levels, the sides in the middle one, three times as long): its middle id; the way up
 // is a line. The calm and fierce sides (SIDE) are parts of it now, in a new order each time (campMerge); the daily well still plays them alone.
 const campOpen = (i) => {
@@ -1297,10 +1297,14 @@ class Game {
       if (s.y < lv.cam + view.h || lv.under) lv.enemies.push(new Foe(s, lv));
     }
     if (!lv.under) for (let i = lv.enemies.length - 1; i >= 0; i--) if (lv.enemies[i].body.cy > far) lv.enemies.splice(i, 1);
-    for (const f of lv.folk) if (!f.body && (f.kind === 'cage' || f.kind === 'trader') && f.y > lim && f.y < lv.cam + view.h + this.R) this.folkUp(f);
+    for (const f of lv.folk) if (!f.body && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ume') && f.y > lim && f.y < lv.cam + view.h + this.R) this.folkUp(f);
   }
   folkUp(f) {   // a cage's blob (a hero's colour, not this one's) or the trader (purple), standing on its ledge; the hero passes through them
     const lv = this.lv, R = this.R, cage = f.kind === 'cage', cols = PALETTE.filter((c) => c.id !== save.color), r = (cage ? 0.7 : 0.95) * R;
+    if (f.kind === 'ume') {   // Ume (UME): red, an ume's leaf on him, a kind face
+      const b = (f.body = new Body(designById('round'), { id: 'ume', base: PAL.red, deep: PAL.black }, f.x, f.y - 1.05 * UME.r * R, UME.r * R, 0.9));
+      b.gScale = 1; b.sticky = false; b.ghost = true; b.helmet = 'umeLeaf'; b.face.frown = false; return;
+    }
     const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(fxRand(0, 1) * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
     b.gScale = 1; b.sticky = false; b.ghost = true; b.face.frown = cage;   // locked in: glum
     if (!cage) { f.p = { x: f.x, y: f.y - 3 * R, r: 0.6 * R, item: SHOP_ITEMS[(Math.random() * SHOP_ITEMS.length) | 0], sold: false, near: false, trader: f }; lv.pickups.push(f.p); }
@@ -1315,6 +1319,7 @@ class Game {
       if (f.kind === 'cage' && b) {
         if (!f.open && H.maxX > b.cx - 0.95 * R && H.minX < b.cx + 0.95 * R && H.maxY > b.maxY - 1.9 * R && H.minY < b.maxY) this.free(f);
       } else if (f.kind === 'trader' && b && f.p) { f.p.x = b.cx; f.p.y = b.minY - 1.6 * R; }
+      else if (f.kind === 'ume' && b) { if (!f.given && Math.abs(H.cx - f.x) < UME.reach * R && H.maxY > f.y - 2.5 * R && H.minY < f.y) this.treat(f); }   // Ume (UME): the hero by him
       else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a touch frees it; then off it flies
         f.t += dt;
         if (!f.fly && Math.abs(H.cx - f.x) < RIBBON.reach * R && H.maxY > f.y - 2 * R && H.minY < f.y) this.untangle(f);
@@ -1344,6 +1349,18 @@ class Game {
       }
     }
     this.tend(H.cy - 12 * lv.tile, H.cy + 12 * lv.tile, (x0, y0, x1, y1, reach) => Math.hypot(Math.max(x0 - H.cx, 0, H.cx - x1), Math.max(y0 - H.cy, 0, H.cy - y1)) < reach * R);   // what the hero comes near
+  }
+  treat(f) {   // Ume treated (UME): a can out of the machine for him, half for Mochi (a heart back, else coins), he hops for joy and comes along; card VI a moment after
+    const R = this.R, lv = this.lv, b = f.body, i = lv.folk.indexOf(f);
+    f.given = true; b.face.surprise = 1; b.kickSquash(0, 1, 1.4); setVel(b, 0, -0.55 * this.vjump);
+    sparkFx(f.x, b.minY - 0.5 * R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red, INK.coin], 0.6); fx.ring(b.cx, b.cy, 1.6 * R, INK.white);
+    sound.play('click', 0.8, 0.7); sound.play('bubble', 0.9, 1.3); haptics.buzz(16);
+    if (this.hp < this.maxHp) { this.heal(1); ui.hurt(); ui.toast(L2(UME.thanks) + '\n' + t('freedHeart'), 2400); sound.play('buy'); }
+    else { this.drop(f.x, f.y - 2 * R, FOLK.coins); ui.toast(L2(UME.thanks) + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400); }
+    if (i >= 0) lv.folk.splice(i, 1);
+    if (lv.gone && !this.well) lv.gone.push(f.id);
+    b.thread = true; b.gScale = 0; this.followers.push(f);   // and along he comes after the hero (followStep)
+    this.cardDue = { id: 'city_friendship', t: UME.card };
   }
   untangle(f) {   // the crow with the red ring set free (RIBBON): sparks, its thanks and coins, off up it flies with the ring on it, and the story's card II
     const R = this.R, lv = this.lv;   // a moment after

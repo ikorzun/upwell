@@ -212,6 +212,10 @@ for (const id of ['crow', 'crowUp', 'crowDown', 'crowWarn', 'crowDive', 'rcrow',
 // (the chunk 'ribbon', 1-3's set piece), flapping there now and then; a touch frees it, coins and its thanks, off it flies with the ring on it,
 // and `card` s later the card (STORY village_crow; owner, 2026-10-23: «Как только его коснулся, карточка появляется сразу за секунду»), its thanks read first
 const RIBBON = { card: 1, reach: 1.8, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
+// Ume, Mochi's friend in Tokyo (owner, 2026-10-24: У1 «Б», the treat now; У6 «Б», red with an ume leaf, a kind face): by a vending machine on 5-3's ledge
+// at a wall (the chunk 'umeVend', u). The hero comes to him: a can for him, half for Mochi (a heart back if one is missing, else coins), he hops for joy
+// and comes along after the hero; `card` s later the story's card VI. [R his size, R of reach]
+const UME = { card: 1, r: 0.92, reach: 1.8, thanks: { en: 'Thanks, Mochi! Half for you', es: '¡Gracias, Mochi! La mitad para ti', pt: 'Valeu, Mochi! Metade pra você', ja: 'ありがとう、モチ！ はんぶんこ' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the shaft (DEPTH), the beams' and gondolas' cables too
@@ -858,7 +862,7 @@ const CAMPAIGN = [
     news: { en: 'neon signs light up as you pass', es: 'los neones se encienden al pasar', pt: 'os neons acendem quando você passa', ja: 'ネオンは ちかよると つく' } },
   { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler', 'shell'], foes: 0.6, candy: [], aircons: false, seed: 2101,
     news: { en: 'crows: scare them, never wait under them', es: 'cuervos: espántalos, no esperes debajo', pt: 'corvos: espante, não espere embaixo', ja: 'カラス: おどかそう。したで またないで' } },
-  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,
+  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], episode: 'umeVend', enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,   // (Ume's treat: UME)
     news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, crumble: 2 }, intro: ['crumble'], enemies: ['crawler', 'tofu', 'spitter', 'shell'], foes: 0.6, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
     },
@@ -1618,6 +1622,17 @@ const CHUNKS = {
     '............',
     '....o..o....',
     '............'] },
+  umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
+    '............',   // side the way on, coins under; no enemy in the chunk
+    '............',
+    '.......####.',
+    '............',
+    '............',
+    '..u.........',
+    '######......',
+    '............',
+    '.....o..o...',
+    '............'] },
   lift: { d: 2, rows: [
     '............',
     '............',
@@ -2235,7 +2250,8 @@ class Level {
     this.komori = !!(this.foeTypes ? this.foeTypes.includes('komori') : !rc && o.world.enemies && o.world.enemies.komori);   // its bats dive (KOMORI): no harmless ones beside them
     this.fizz = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
     if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows; a recipe's own)
-      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
+      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.episode ? [rc.episode] : rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);   // (a story's episode the
+      // campaign's only: the daily well's levels have none, dayAt)
       if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
     }
     this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0); this.crowRng = mulberry32((o.seed ^ 0x68e31da4) >>> 0);   // folk (see FOLK), by their own generators
@@ -2667,6 +2683,9 @@ class Level {
       else if (FOE_LETTER[ch]) {   // an enemy on the ledge under it (FOE_LETTER): a crawler (the tutorial's), a spitter (1-3's), a nurikabe over it (1-5's)
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = FOE_LETTER[ch];
         if (q) this.spawns.push({ type, x, y: q.y0 - 1.2 * R * ENEMY[type].size, ledge: q });
+      } else if (ch === 'u') {   // Ume on the ledge under it (UME), the ledge's kit a vending machine
+        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
+        if (q) { q.kitWant = 'vending'; q.kit = undefined; this.folk.push({ kind: 'ume', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, given: false, t: 0, body: null, open: false }); }
       } else if (ch === 'r') {   // the crow with the red ring on the ledge under it (RIBBON), facing into the shaft
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
@@ -2743,7 +2762,7 @@ class Level {
       const k = 1 + ((this.rng() * (COLS - 2)) | 0);
       if (at(r, k) === '.' && at(r - 1, k) === '.') this.coin(X(k) + t / 2, Y(r) - t / 2, this.rng() < 0.12 ? 5 : 1);
     }
-    if (c !== CHUNKS.pocket && c !== CHUNKS.ribbon) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at, and the crow's (RIBBON)
+    if (c !== CHUNKS.pocket && c !== CHUNKS.ribbon && c !== CHUNKS.umeVend) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at, and the crow's (RIBBON)
   }
   // Enemies for a chunk just laid, on what it is made of: a crawler along a clear ledge, a
   // climber up and down the longest stretch of bare wall, a circler round a free block.
@@ -3374,6 +3393,10 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     for (let side = -1; side <= 1; side += 2) dot(ex * side + lx, ey + ly, rx * 0.95, ry * 0.5, PAL.blue);
     dot(-0.52, -0.6, 0.13, 0.07, PAL.white);
   } else if (b.helmet === 'astro') { dot(-0.42, 0.02, 0.05, 0.13, PAL.blue); dot(0, 0.8, 0.56, 0.07, PAL.blue); dot(0, 0.9, 0.44, 0.06, PAL.orange); }   // a glint in its window, its neck ring
+  else if (b.helmet === 'umeLeaf') {   // Ume (UME; owner, 2026-10-24, У6 «Б»): an ume's leaf on a stalk on his crown, tilted
+    const tilt = (ux, uy, a, rx, ry, c) => { const ca = Math.cos(a), sa = Math.sin(a); frame(ux, uy, rx * ca, rx * sa, -ry * sa, ry * ca); put(c[0], c[1], c[2], 0); };
+    tilt(0.06, -1.02, 0.25, 0.06, 0.17, ink); tilt(0.36, -1.05, -0.35, 0.34, 0.14, ink); tilt(0.36, -1.05, -0.35, 0.28, 0.09, PAL.green);
+  }
 };
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {

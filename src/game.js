@@ -915,7 +915,8 @@ const RISE_HINT = { flood: 'riseWater', tide: 'riseWater', avalanche: 'riseSnow'
 const WALL_HINT = { crackwater: 'waterWall', blowhole: 'waterWall', wallice: 'iceWall', sparkpanel: 'sparkWall', lightning: 'boltWall' };   // (sparkpanel: Golden Gai's, Д154 «Б», gai-real; lightning: the TV Tower's rod, Д164, tower-real)   // a wall hazard's hint by what bursts out (the Mine's groundwater, Д118: no gas; the Sea's blowholes; Fuji's ice)
 const WET = { flood: { why: 'water', ink: PAL.blue, body: { id: 'die', base: PAL.blue, deep: PAL.black } }, tide: { why: 'water', ink: PAL.white, body: { id: 'die', base: PAL.aqua, deep: PAL.black } },
   avalanche: { why: 'snow', ink: PAL.white, body: { id: 'die', base: PAL.white, deep: PAL.blue } },
-  storm: { why: 'storm', ink: PAL.white, body: { id: 'die', base: PAL.gray, deep: PAL.black } } };   // (the TV Tower's storm cloud, Д165: «Thunderstruck!»; its look Worlds')
+  storm: { why: 'storm', ink: PAL.red, body: { id: 'die', base: PAL.gray, deep: PAL.red } } };   // (the TV Tower's storm cloud, Д165: «Thunderstruck!»; Д239 E: the kill the red bolt,
+  // the hero the cloud's grey struck red, its sparks and splats the bolt's red: red is danger)
 const hazInk = (th) => (WET[th.hazard] ? WET[th.hazard].ink : INK.flame);
 const dieBody = (why, th) => (why === 'fire' && WET[th.hazard] ? WET[th.hazard].body : DIE.body[why]);
 const deadKey = (why, th) => 'dead_' + (why === 'fire' && WET[th.hazard] ? WET[th.hazard].why : why);

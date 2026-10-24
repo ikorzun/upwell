@@ -3622,6 +3622,9 @@ Renderer.prototype.draw = function (g, alpha) {
   const F = (cx, cy, ax, ay, bx, by, c, a, type, p1, p2, p3) => this.feat(cx, cy, ax, ay, bx, by, c[0], c[1], c[2], a, type, p1 || 0, p2 || 0, p3 || 0);
   const disc = (x, y, r, c, a) => F(x, y, r, 0, 0, r, c, a, 0);
   const box = (x0, y0, x1, y1, c, a, rad, type, p3) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, c, a, type || 5, hw, hh, type >= 7 ? p3 : rad); };
+  // A world's far view: its foot low on the screen, sinking a little as the climb goes on; on the main screen (Game.menuBackdrop) its foot on the floor Mochi
+  // stands on, so that it shows over and round him (owner: Д113 «А»; the low band is under the buttons there)
+  const farY = (cam, H) => (g.state === 'menu' ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
   const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
     const n = rows[0].length, R = vspRects(rows);
@@ -4183,7 +4186,7 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const mnFar = () => {   // the mine far off: a tunnel going off into the dark, its frames smaller and smaller, rails running in, lamps glowing deep in it, a lamp on a post;
     // screen-fixed, low, at a quarter (DIM), the lamps lights (they show the frames round them)
-    const t = kitT, G = PAL.gray, cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+    const t = kitT, G = PAL.gray, cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
     const fb = (u0, v0, u1, v1, c = G, a = DIM) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, 0);
     const fl = (u0, v0, u1, v1, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), G, a, wd);
     const glow = (u, v) => { fb(u - 0.08, v - 0.1, u + 0.08, v + 0.1, PAL.orange, LIT); vlamps.push([U(u), Vv(v), 0.4, 1.4]); };
@@ -4229,8 +4232,9 @@ Renderer.prototype.draw = function (g, alpha) {
       // of uneven round bumps, no straight runs, no symmetry, holes of the dark in it, ragged strands of checker trailing off). Low on the screen, sinking a little
       // as the climb goes on
       // (К12 «А»: the climb's compass, the mountain nearer level by level, its foot and the lake at the bottom, its summit close by the ninth: k 1 to 2.6)
-      const k = 1 + 1.6 * clamp((lv.stage || 0) / 8, 0, 1), lake = lv.stage % 2 === 1 && lv.stage < 4;   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi; low down only)
-      const shore = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), cx = (lv.l + lv.r) / 2, ht = 5.5 * t * k, hw = 6.6 * t * k, foot = lake ? shore : shore + (k - 1) * 4 * t;   // (nearer: bigger, its foot down past the keys; over the lake it stands on the far shore)   // (over the lake: the mountain on its far
+      const menu = g.state === 'menu', k = menu ? 1.8 : 1 + 1.6 * clamp((lv.stage || 0) / 8, 0, 1), lake = !menu && lv.stage % 2 === 1 && lv.stage < 4;   // (on the main screen
+      // bigger, its foot on Mochi's floor: its summit over his head, Д113 «А»)   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi; low down only)
+      const shore = snap(farY(cam, H)), cx = (lv.l + lv.r) / 2, ht = 5.5 * t * k, hw = 6.6 * t * k, foot = lake || menu ? shore : shore + (k - 1) * 4 * t;   // (nearer: bigger, its foot down past the keys; over the lake it stands on the far shore)   // (over the lake: the mountain on its far
       // shore, its reflection under it down to the keys)
       const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return Math.min((lv.r - lv.l) / 2, w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side))); };   // its flanks, uneven (between the walls)
       for (let y = 0; y < ht; y += 2 * P) {
@@ -4363,7 +4367,7 @@ Renderer.prototype.draw = function (g, alpha) {
     L(3);
     {   // the sea far off (the owner's picks, the wave sheet's B and the far sheet's F, a level each in turn): screen-fixed, low on the screen and sinking a
       // little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
-      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
+      const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
       const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
       const tri = (u, v0, hw, h, c) => { const hd = (h * t) / 2; F(U(u), Vv(v0) - hd, hw * t, 0, 0, hd, c, DIM, 6, hw * t, hd, 2 * hw * t); };   // a triangle: a pine's tier, a roof
@@ -4466,7 +4470,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (CINE) this.route = 3;
     {   // the forest far off (F): spruces, a dead tree with eyes in it, the moon, mist; screen-fixed, low on the screen and sinking a little as the climb goes on;
       // at a quarter (DIM), the moon brighter (a light: it shows through the dark, the crooked treetops black against it), the eyes LIT
-      const ar = lv.kind === 'boss', cx = (lv.l + lv.r) / 2, foot = snap(ar ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);   // (Koschei's arena: on its floor)
+      const ar = lv.kind === 'boss', cx = (lv.l + lv.r) / 2, foot = snap(ar ? lv.floor : farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);   // (Koschei's arena: on its floor)
       const fb = (u0, v0, u1, v1, c, a = DIM, tn = 0) => box(Math.min(U(u0), U(u1)), Math.min(Vv(v0), Vv(v1)), Math.max(U(u0), U(u1)), Math.max(Vv(v0), Vv(v1)), c, a, 0, 10, tn);
       const fe = (u, v, ru, rv, c, a = DIM) => F(U(u), Vv(v), ru * t, 0, 0, rv * t, c, a, 0);
       const fl = (u0, v0, u1, v1, c, a = DIM, wd = 1) => line(U(u0), Vv(v0), U(u1), Vv(v1), c, a, wd);
@@ -4534,7 +4538,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = kitT, P = kitP, px = P / t, mod = (k, n) => ((k % n) + n) % n;
     const sp = lv.rc && lv.rc.sparse, few = (list, keep) => (sp ? list.filter((q, i) => keep.includes(i)) : list);   // a `sparse` level's: less of it (owner: «E»)
     {   // the countryside far off (F), low on the screen and sinking a little as the climb goes on
-      const cx = (lv.l + lv.r) / 2, foot = snap(cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
+      const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, tn = 0) => box(U(u0), V(v1), U(u1), V(v0), c, DIM, 0, 10, tn);
       const FV = window.__far === 99 ? null : VFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 2];   // (Д86 «А», Д111 «А»: by level; a level of no
       // campaign: the farmhouses; window.__far 99: the old view, to count against)

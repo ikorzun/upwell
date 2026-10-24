@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0e0d13">
 <title>Upwell</title>
 <link rel="preload" href="assets/fonts/vt323.woff2" as="font" type="font/woff2" crossorigin>   <!-- the type, before the first screen (see .tx) -->
-<script async src="https://bridge.playgama.com/v2/stable/playgama-bridge.js"></script>   <!-- Playgama Bridge: ads (see `ads` in game.js); the game runs without it -->
+<script async src="https://bridge.playgama.com/v2/stable/playgama-bridge.js" onerror="window.bridgeFailed = true"></script>   <!-- Playgama Bridge: ads (see `ads` in game.js); the game runs without it -->
 <!--
   Upwell — a squishy climbs a well (Downwell, upside down). Portrait first.
   src/gum.js   the soft body and the renderer, copied from Gum (see its header)

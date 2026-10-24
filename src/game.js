@@ -90,7 +90,7 @@ const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || na
 const SAVE_KEY = 'upwell.save', LOCAL_KEY = 'upwell.local';   // (LOCAL_KEY: the browser's copy of a visit without the Bridge, a key no Bridge storage takes over)
 // Kept through the Playgama Bridge's storage (its checklist: never localStorage itself), the whole of it under one key in
 // one call; without the Bridge (it did not load) in localStorage. Laid over these defaults at boot (see loadSave).
-const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: true, camp: null };   // seen: hints shown once; stick: touch by a stick, not the keys
+const save = { v: 2, best: 0, bank: 0, wins: 0, runs: 0, color: PALETTE[0].id, hard: false, seen: {}, stick: true, camp: null, caves: {} };   // seen: hints shown once; stick: touch by a stick, not the keys
 // The campaign's progress (save v2): the first level not cleared yet (open), each level's best stars, the coins carried (one
 // purse for all of it) and each world's upgrades (its build: kept for its levels played again). A v1 save had none: a
 // run's progress stays in save.run, for the random run.
@@ -184,7 +184,7 @@ shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   const obj = (o) => o && typeof o === 'object' && !Array.isArray(o), num = (v) => typeof v === 'number' && Number.isFinite(v);
-  for (const k of ['book', 'seen']) if (!obj(save[k])) save[k] = {};   // (a hand-edited or broken store: «book: 3» stopped the boot, «seen: null» every step; QA)
+  for (const k of ['book', 'seen', 'caves']) if (!obj(save[k])) save[k] = {};   // (a hand-edited or broken store: «book: 3» stopped the boot, «seen: null» every step; QA)
   if (save.cur != null && !(obj(save.cur) && num(save.cur.ci) && num(save.cur.m) && num(save.cur.seed))) delete save.cur;   // (a level under way that cannot go on: «Continue · NaN m»)
   const c = save.camp = Object.assign(campFresh(), save.camp && typeof save.camp === 'object' ? save.camp : {});   // v1 to v2
   if (!Array.isArray(c.stars)) c.stars = []; if (!Array.isArray(c.builds)) c.builds = []; if (!c.fails || typeof c.fails !== 'object') c.fails = {}; if (!Array.isArray(c.runes)) c.runes = []; if (!c.medals || typeof c.medals !== 'object') c.medals = {};   // (v6 to v7: the medals, MEDAL)
@@ -2117,7 +2117,7 @@ class Game {
   enterRoom(bub) {
     if (!bub.room) {
       const room = new Level();
-      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor() });
+      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor(), cave: bub.kind === 'treasure' ? this.caveNext(this.lv.world) : undefined });
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
@@ -2126,6 +2126,15 @@ class Game {
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
     this.hero.squeezeIn = 0; ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
+  }
+  // A world's next bonus cave (CAVES; owner, З1 «В»): two gift rooms, then a puzzle, counted per world from play to play (save.caves); of each kind not the
+  // one it had last
+  caveNext(wd) {
+    const c = CAVES[wd.id]; if (!c) return undefined;
+    const s = save.caves[wd.id] || (save.caves[wd.id] = { n: 0, gift: '', puzzle: '' }), kind = s.n % 3 === 2 ? 'puzzle' : 'gift', opts = c[kind].filter((id) => id !== s[kind]);
+    const id = opts.length ? opts[(Math.random() * opts.length) | 0] : c[kind][0];
+    s.n++; s[kind] = id; persist();
+    return id;
   }
   // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in the dark, with coins as rain and no
   // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).

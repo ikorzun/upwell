@@ -1160,7 +1160,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 30, gate: 'gate3w', fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1 }, intro: [], motif: ['iceride', 'icewall'], steps: true,
     sparse: true, set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4102,   // by the practice (round 2): its one idea the walls of
     // ice, 1-7's walls that held turned slick: a yaen across between them, then the zigzag up between them; the arena midway; moss in the pool, the walls that hold
-    news: { en: 'icy walls', es: 'paredes de hielo', pt: 'paredes de gelo', ja: 'こおりの かべ' } },   // (short: one line at 320 px)
+    news: { en: 'slippery walls', es: 'paredes resbaladizas', pt: 'paredes escorregadias', ja: 'すべる かべ' } },   // (short: one line at 320 px)
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 2, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], motif: ['coinarc', 'garden'], steps: true, sparse: true,   // by the
     enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,   // practice (round 2): the calm before the boss, its one idea the coins: rows along a jump's arc, the
     // moss garden to rest in (the digest §5: a breather after the peak, not an empty one); few enemies

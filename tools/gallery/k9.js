@@ -12,7 +12,7 @@
   };
   const put = (lv, type, x, y, ledge, set) => { const f = new Foe({ type, x, y, ledge }, lv); lv.enemies.push(f); if (set) set(f); return f; };
   const scene = async (k) => {
-    window.__k9 = { tofu: k, tumbler: k, nurikabe: k };
+
     const P = PIX.size, sn = (v) => Math.round(v / P) * P;
     let lv = base(4), t = lv.tile, R = g.R; const y0 = sn(lv.floor - 30 * t), shots = [];
     const a = lv.box(lv.l, y0, lv.r, y0 + t, {}); a.kit = null; lv.rects.push(a);
@@ -24,7 +24,7 @@
     return { el: 'k9', k, nf: renderer.nf };
   };
   const fuji = async (k) => {
-    window.__k9 = { tofu: k, tumbler: k, nurikabe: k };
+
     const P = PIX.size, sn = (v) => Math.round(v / P) * P;
     const lv = base(2), t = lv.tile, R = g.R, y0 = sn(lv.floor - 30 * t);
     const a = lv.box(lv.l, y0, lv.r, y0 + t, {}); a.kit = null; lv.rects.push(a);
@@ -37,5 +37,5 @@
     lv.cam = cam; __up.tick(1, 0); await wait(150);
     return { el: 'k9f', k, nf: renderer.nf };
   };
-  window.__steps = [0, 1, 2, 3, 4, 5].map((k) => async () => { input.clear(); return scene(k); }).concat([0, 1, 2, 3, 4, 5].map((k) => async () => { input.clear(); return fuji(k); }));
+  window.__steps = [0].map((k) => async () => { input.clear(); return scene(k); }).concat([0].map((k) => async () => { input.clear(); return fuji(k); }));
 })();

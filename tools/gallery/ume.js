@@ -2,8 +2,8 @@
 (() => {
   if (typeof STORY === 'object') for (const k in STORY) save.seen['card_' + k] = 1;
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
-  window.__steps = [0, 1, 2, 3, 4, 5].map((k) => async () => {
-    window.__ume = k;
+  window.__steps = [0].map((k) => async () => {
+
     const tst = document.getElementById('toast'); if (tst) tst.style.display = 'none';
     __up.camp(4 * 30 + 2 * 3, 0); g.state = 'play'; const lv = g.lv, t = lv.tile; g.invuln = 1e9; lv.fire && (lv.fire.y = lv.floor + 1e5); lv.ensure(lv.endY - 10 * t);
     const f = lv.folk.find((q) => q.kind === 'ume'); if (!f) return { k, ume: false };

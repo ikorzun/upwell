@@ -1,10 +1,8 @@
-// Fuji's bonus caves after the Narusawa Ice Cave (FC_V: the room behind, the bells, the ice gate), six takes: each take in the bells' room as a player enters
-// it, then the bells rung (the gate gone) in the same room. Q is none.
+// Fuji's bonus caves after the Narusawa Ice Cave (the owner's picks): the bells' room as a player enters it, its middle bell rung. Q is none.
 (() => {
   if (typeof STORY === 'object') for (const k in STORY) save.seen['card_' + k] = 1;
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
-  window.__steps = [0, 1, 2, 3, 4, 5].map((k) => async () => {
-    FC_V.room = FC_V.bell = FC_V.gate = 'ABCDEF'[k];
+  window.__steps = [0].map((k) => async () => {
     const tst = document.getElementById('toast'); if (tst) tst.style.display = 'none';
     __up.camp(69, 0); g.state = 'play'; g.invuln = 1e9;
     const room = new Level(); room.reset({ kind: 'treasure', w: view.w, h: view.h, R: g.R, seed: 7, world: g.lv.world, theme: THEMES.stash, hard: false, keep: g.roomFloor(), cave: 'caveBells' });

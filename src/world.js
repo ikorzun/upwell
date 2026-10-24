@@ -695,7 +695,7 @@ const ENEMY = {
   mini: { design: 'mochi', color: 'red', size: 0.5, grav: 1, stomp: true, coins: 2, speed: 80, step: 0.4, move: 'crawl' },
   chaser: { design: 'slug', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 5, speed: 70, step: 0.5, move: 'wall', chase: true },
   worm: { design: 'round', color: 'red', size: 0.85, grav: 1, stomp: true, coins: 6, speed: 0, step: 0.9, move: 'flow' },   // a knot of tubes, flowing ledge to ledge (WORM)
-  komori: { design: 'round', color: 'goo', size: 0.72, grav: 0, stomp: true, coins: 4, speed: 0, step: 0.8, move: 'none' },   // the Mine's diving bat (KOMORI_V): a stub to draw it by; UPwell's behaviour replaces it
+  komori: { design: 'round', color: 'goo', size: 0.72, grav: 0, stomp: true, coins: 4, speed: 0, step: 0.8, move: 'swoop' },   // the Mine's diving bat, its look KOMORI_V (KOMORI)
   skull: { design: 'dome', color: 'goo', size: 1.1, grav: 1, stomp: true, coins: 5, speed: 40, step: 0.8, move: 'crawl' },   // a skull in black goo, dripping (SKULL; the Crypt's)
   // the square ones (owner, 2026-10-22: «еще нужны квадратные враги», all three he picked): jelly cubes ('cube')
   tumbler: { design: 'cube', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 4, speed: 0, step: 1, move: 'tumble' },   // a yokan somersaulting along its ledge (TUMBLE)
@@ -710,6 +710,20 @@ const ENEMY = {
 const TUMBLE = { rest: 1.8, crouch: 0.45, air: 0.45, hop: 2.0 };   // (owner, 2026-10-23: «квадратных врагов тяжело одолеть, точно нужно проще»: it sits longer, crouches clearer, hops shorter; was 1.1, 0.3, 2.4)
 const CRUSH = { up: 3.6, reach: 1.2, warn: 0.85, fall: 2.2, down: 2.4, rise: 2.2 };   // (the same: it shakes longer, falls slower, lies longer; was 0.55, 3, 1.4)
 const TOFU = { n: 4 };
+const SPRITE_EYES = {}, spriteEyes = (id) => SPRITE_EYES[id] || (SPRITE_EYES[id] = (() => {   // where a sprite's eyes are (its 'o' cells), in game pixels from its middle
+  const rows = FOE_SPRITES[id]; let n = 0, x = 0, y = 0;
+  rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] === 'o') { n++; x += i + 0.5; y += j + 0.5; } });
+  return n ? [x / n - rows[0].length / 2, y / n - rows.length / 2] : [0, 0];
+})());
+// The Mine's komori (owner, 2026-10-24, У3 «Б»: its own diving bats): it hangs asleep under its ledge; the hero within `see` R, `low` R under it or more
+// and in its sight (in the hero's light: the Mine is dark), it flashes red `warn` s (b.warn), letting go `drop` R, then dives `dive` s in a U through where
+// he was as it woke (move away, and it misses) and up the far side, flies back to its perch in `back` s and hangs `rest` s before it can wake again. Red,
+// on its way down to that spot, it hurts and is not stomped; grey (asleep, rising, flying back) it never hurts and is stomped from over it (Вр4: one look,
+// one meaning). It flies through nothing: its dive the first way `pad` clear of blocks (a U, half of one, straight down at him and slowly back), else
+// none. A lamp lit within `lamp` R of its perch keeps it asleep; a bump from under it wakes it. It touches nothing but the hero, by its own circle `hit`
+// (Game.komoriTouch); `hit` and `pad` in its drawing's pixels (1:1, the owner's Д66 «А»: the circle holds about 70% of a flying frame's ink, its thin
+// wingtips out); `flap` its frames a second, diving and flying back.
+const KOMORI = { see: 5.5, low: 1.5, warn: 0.8, drop: 0.3, dive: 0.9, back: 1.2, rest: 2, lamp: 4, hit: 12, pad: 12, flap: [8, 5] };
 // The worm (user's video: dithered tubes flowing over each other, ball tips): its knot is stomped, its tubes hurt. Four tubes,
 // two to a side, waving up and out (the knot's top is clear: the way to stomp it); `len` theirs, R, in discs `seg` apart, `w`
 // half-wide, `tip` the balls at their ends. On a ledge it `wait`s, then, on screen, reaches a tube out (`reach` s, the warning)
@@ -744,6 +758,7 @@ const FOE_DESC = {
   tofuMini: { en: "A quarter of a tofu: small and quick.", es: 'Un cuarto de tofu: pequeño y rápido.', pt: 'Um quarto de tofu: pequeno e rápido.', ja: 'とうふの かけら。はやい。' },
   nurikabe: { en: 'Drops on you from above. Stomp it once it lands.', es: 'Cae sobre ti. Písalo cuando aterriza.', pt: 'Cai em você. Pise quando ele pousa.', ja: 'うえから おちてくる。おちたら ふもう。' },
   skull: { en: 'Creeps in its goo, lunges up close.', es: 'Se arrastra en su baba; se lanza de cerca.', pt: 'Rasteja na gosma; ataca de perto.', ja: 'どろどろ はう。ちかいと とびかかる。' },
+  komori: { en: 'Dives when red. Lamps keep it asleep.', es: 'Rojo, se lanza en picado. Las lámparas lo duermen.', pt: 'Vermelho, ele mergulha. Lâmpadas o fazem dormir.', ja: 'あかく なると とっしん。ランプで ねむる。' },
 };
 const FOE_NAMES = {
   crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
@@ -755,6 +770,7 @@ const FOE_NAMES = {
   skull: { en: 'Skull', es: 'Calavera', pt: 'Caveira', ja: 'ドクロ' },
   tumbler: { en: 'Tumbler', es: 'Volteretas', pt: 'Cambalhota', ja: 'ゴロゴロようかん' }, tofu: { en: 'Tofu', es: 'Tofu', pt: 'Tofu', ja: 'とうふ' },
   tofuMini: { en: 'Tofu bit', es: 'Trocito', pt: 'Pedacinho', ja: 'とうふの かけら' }, nurikabe: { en: 'Nurikabe', es: 'Nurikabe', pt: 'Nurikabe', ja: 'ぬりかべ' },
+  komori: { en: 'Bat', es: 'Murciélago', pt: 'Morcego', ja: 'コウモリ' },
 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
@@ -770,7 +786,7 @@ const MINI = { size: 1.6, hp: 3 };
 const WORLDS = [
   { id: 'cave', name: { en: 'Mine', es: 'Mina', pt: 'Mina', ja: 'こうざん' }, theme: THEMES.cave, heights: [30, 38, 46], fire: 0.4, bouncy: 0.2,   // the Mine since 2026-10-21 (owner: «мир темной пещеры, рудников японии»; the Cave before)
     chunks: { stairs: 4, planks: 3, shelves: 2, pillars: 3, rest: 1, comb: 2, overhang: 1, chimney: 1, spring: 1, crumble: 1, mosswall: 2, fork: 1, vault: 2 },
-    foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1 },
+    foes: 0.55, enemies: { crawler: 3, climber: 1, hedgehog: 1, komori: 2 },
     intro: [{ chunks: ['mosswall', 'spring'], enemies: ['crawler'], candy: ['smash', 'rainbow'], news: { en: 'moss and springs', es: 'musgo y resortes', pt: 'musgo e molas', ja: 'コケと バネ' } },
       { chunks: ['crumble', 'rubberwall'], enemies: ['crawler', 'climber'], candy: ['smash', 'bubble'], news: { en: 'crumbling blocks, rubber and climbers', es: 'bloques que se caen, goma y trepadores', pt: 'blocos que desmoronam, borracha e escaladores', ja: 'くずれる ブロック、ゴム、カベノボリ' } },
       { chunks: ['icewall', 'lift'], news: { en: 'ice, moving planks and hedgehogs', es: 'hielo, tablas móviles y erizos', pt: 'gelo, tábuas móveis e ouriços', ja: 'こおり、うごく いた、ハリネズミ' } }] },
@@ -1018,15 +1034,16 @@ const CAMPAIGN = [
 { world: WORLDS[0], runes: 'LnY', lore: { en: 'In the dark, Mochi lit the lamps.\nEvery one of them looked up.', es: 'En la oscuridad, Mochi encendió las lámparas.\nTodas miraban hacia arriba.', pt: 'No escuro, Mochi acendeu as lâmpadas.\nTodas olhavam para cima.', ja: 'くらやみで モチは あかりを ともした。\nどれも うえを むいていた。' }, levels: [
   { role: 'teach', len: 25, fire: 0.3, calm: 15, maxD: 1, chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2 }, intro: [], dark: true, enemies: [], foes: 0, candy: [], safe: true, seed: 3111,
     news: { en: 'the dark: light the lamps', es: 'la oscuridad: enciende las lámparas', pt: 'o escuro: acenda as lâmpadas', ja: 'くらやみ: ランプを ともそう' } },
-  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], dark: true, enemies: ['crawler'], foes: 0.5, candy: [], safe: true, seed: 2101 },
+  { role: 'teach', len: 31, gate: 'gate', fire: 0.35, maxD: 2, chunks: CAVE, intro: [], dark: true, enemies: ['komori', 'crawler'], foes: 0.5, candy: [], safe: true, seed: 2101,
+    news: { en: 'bats: light a lamp and they sleep', es: 'murciélagos: enciende una lámpara y duermen', pt: 'morcegos: acenda uma lâmpada e eles dormem', ja: 'コウモリ: ランプを ともすと ねむる' } },
   { role: 'teach', len: 28, fire: 0.35, maxD: 2, chunks: { ...CAVE, mosswall: 2 }, intro: ['mosswall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.45, candy: [], safe: true, seed: 2909,
     news: { en: 'moss holds you', es: 'el musgo te sujeta', pt: 'o musgo segura você', ja: 'コケに くっつける' }, tip: true },
-  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2, crumble: 2 }, intro: ['crumble'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
-  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 2, crumble: 2 }, intro: ['crumble'], dark: true, enemies: ['komori', 'crawler'], foes: 0.55, pair: 0.1, candy: ['smash', 'smash'], stash: 0.35, seed: 2303 },
+  { role: 'peak', len: 25, fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, chimney: 2, overhang: 2, mosswall: 2 }, intro: [], dark: true, enemies: ['komori', 'crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 2606 },
   { role: 'twist', len: 28, sides: [0, 109693], fire: 0.38, maxD: 2, chunks: { ...CAVE, mosswall: 1, rubberwall: 2 }, intro: ['rubberwall'], dark: true, enemies: ['crawler'], foes: 0.55, pair: 0.1, candy: ['smash'], stash: 0.3, seed: 3010,
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
-  { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
+  { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['komori', 'crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
   { role: 'boss', boss: 'cart', spider: true, par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
 ] },
@@ -2334,7 +2351,7 @@ class Level {
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
-    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.rc = null;
+    this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.komori = false; this.rc = null;
     this.tasks = this.taken = this.gone = this.sig = undefined;   // (a shaft's, Game.setTasks: given here, see loosen)
     loosen(this, 'l', 'r', 'floor', 'top', 'R', 'cam', 't');   // (fractions in play: see loosen)
   }
@@ -2362,6 +2379,7 @@ class Level {
     this.rng = mulberry32(o.seed >>> 0); this.foeRng = mulberry32((o.seed ^ 0x85ebca6b) >>> 0); this.tile = (this.r - this.l) / COLS; this.last = null; this.rested = false; this.setAt = null; this.pocketKind = 'shop'; this.placed = []; this.lastFeet = null;
     const intro = rc ? { chunks: rc.intro, enemies: rc.enemies, candy: rc.candy } : (o.world.intro && o.world.intro[this.stage]) || {};
     this.intro = o.kind === 'well' ? shuffled(this.rng, intro.chunks || []) : []; this.foeTypes = intro.enemies || null;
+    this.komori = !!(this.foeTypes ? this.foeTypes.includes('komori') : !rc && o.world.enemies && o.world.enemies.komori);   // its bats dive (KOMORI): no harmless ones beside them
     this.fizz = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
     if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows; a recipe's own)
       const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
@@ -2696,7 +2714,7 @@ class Level {
     }
     if (fr() < FOLK.critterP) {
       const bat = fr() < 0.5, under = (r) => !this.rects.some((q) => q !== r && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 2.5 * R);
-      const ok = rs.filter((r) => steady(r) && r.x1 - r.x0 >= 2 * t && (bat ? under(r) : bare(r) && over(r, 1.5 * R)));
+      const ok = bat && this.komori ? [] : rs.filter((r) => steady(r) && r.x1 - r.x0 >= 2 * t && (bat ? under(r) : bare(r) && over(r, 1.5 * R)));   // (no harmless bat where the komori hang: KOMORI)
       if (ok.length) {
         const r = ok[(fr() * ok.length) | 0], x = r.x0 + (r.x1 - r.x0) * (0.2 + 0.6 * fr());
         this.folk.push(bat ? { kind: 'bat', x, y: r.y1, fly: false, t: 0 } : { kind: 'bug', x, y: r.y0, rect: r, dir: fr() < 0.5 ? -1 : 1, run: false, t: 0 });
@@ -2888,6 +2906,11 @@ class Level {
         const ok = rects.filter((r) => !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 3 * t && !taken(r) &&
           !this.spikes.some((q) => q.dir === 0 && Math.abs(q.y1 - r.y0) < 1 && q.x1 > r.x0 && q.x0 < r.x1));
         if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y0 - 1.2 * eR, ledge: r }); }
+      } else if (ENEMY[type].move === 'swoop') {   // a komori under a steady ledge with room under it, three tiles clear (KOMORI)
+        const ok = rects.filter((r) => !r.cap && !r.crumble && !r.spring && !r.move && r.x1 - r.x0 >= 2 * t && !taken(r) &&
+          !this.rects.some((q) => q !== r && !q.cap && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 3 * t));
+        const hang = FOE_SPRITES['komori-' + KOMORI_V + '-1'];   // (its feet on the ledge's underside: half its hanging drawing under it)
+        if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y1 + (hang ? 0.5 * hang.length * PIX.base : eR), ledge: r }); }
       } else if (ENEMY[type].move === 'round') {
         const ok = rects.filter((r) => !r.plank && !r.crumble && !r.spring && r.x0 > this.l + t && r.x1 < this.r - t && !taken(r) &&
           !rects.some((s) => s.spring && Math.abs(s.y1 - r.y0) < 1 && s.x1 > r.x0 && s.x0 < r.x1));   // not one with a spring on top, in its way round
@@ -5244,8 +5267,8 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
-    else if (f.kind === 'crow') spr(CRITTER[(f.dive ? 'crowDown' : f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly || f.dive ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y,
-      f.dive || (f.wait > CROW.wait && Math.floor((f.wait - CROW.wait) * 5) % 2 === 0) ? PAL.red : th.wall, PIX.keep, false);   // (red as it warns, blinking, and as it dives: CROW)   // a game pixel a dot: about a tile and a half long
+    else if (f.kind === 'crow') spr(CRITTER[(f.dive ? 'crowDive' : f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : f.wait > CROW.wait ? 'crowWarn' : 'crow') + ((f.fly || f.dive ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y,
+      f.dive || (f.wait > CROW.wait && Math.floor((f.wait - CROW.wait) * 5) % 2 === 0) ? PAL.red : th.wall, PIX.keep, false);   // (rearing as it warns, red blinking, and beak first as it dives, red: CROW)   // a game pixel a dot: about a tile and a half long
     else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
       const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'rcrowUp' : 'rcrowDown') : f.t % 1.6 < 0.24 ? 'rcrowUp' : 'rcrow';
       spr(CRITTER[wing + L], f.x, f.y, th.wall, PIX.keep, false);
@@ -5643,6 +5666,10 @@ Renderer.prototype.draw = function (g, alpha) {
     if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) light((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 1.2, 3.4); }   // Tokyo's lit neon
     for (const sp of lv.spots) if (!sp.used) light(sp.x, sp.y, 1.4, 3.2);   // the flip side's pools glow (its way back out)
     for (const [x, y, r0 = 0.9, r1 = 2.6] of vlamps) light(x, y, r0, r1);   // the Village's stone lanterns, the Dark Forest's fences, candles and moon (see their kits)
+    for (const e of lv.enemies) if (e.type === 'komori' && FOE_SPRITES[e.body.look]) {   // a komori's eyes (its rows' 'o'), a small light; more as it warns and dives (KOMORI)
+      const b = e.body, [u, v] = spriteEyes(b.look), k = e.cs === 'warn' || e.fierce() ? 2.2 : 1;
+      light(b.cx + ((b.lookDir || 1) < 0 ? -u : u) * PIX.base, b.cy + v * PIX.base, 0.14 * k, 0.45 * k);
+    }
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y - (CINE ? cineRide(lv, c.x, c.y, COIN.r * R, cam, H) : 0), 0.5, 1.3);   // (the fork: where it is drawn)

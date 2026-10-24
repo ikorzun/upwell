@@ -2685,8 +2685,9 @@ class Level {
       for (const f of [0.34, 0.76]) this.coin(cx, at(f), 1);
     } else if (this.cave) {   // a world's own bonus cave (CAVES): laid whole, its floor the room's; a gift room may hold a heart, as the old ones (a puzzle's prize is its coins)
       this.place(CHUNKS[this.cave], this.floor, false);
-      if (CAVES[o.world.id] && CAVES[o.world.id].gift.includes(this.cave) && rnd() < 0.45) this.pickups.push({ x: cx, y: this.floor - 20 * this.tile, r: 0.6 * R, item: GIFT, sold: false, near: false });   // (20 tiles up, over the
-      // high bridge and the wheel's top board on every phone: the old rooms' at(0.8) is 17.5 tiles on a 375×667, on them; bonuses never touch a platform)
+      if (CAVES[o.world.id] && CAVES[o.world.id].gift.includes(this.cave) && rnd() < 0.45) this.pickups.push({ x: this.r - 1.5 * this.tile, y: this.floor - 14.5 * this.tile, r: 0.6 * R, item: GIFT, sold: false, near: false });   // (by the
+      // right wall 14.5 tiles up: clear of the bridges, their coins and the wheel, and its words under the HUD on every phone; at(0.8) put it on the high
+      // bridge on a 375×667, and 20 tiles up its words went into the HUD there once they lost their fill, b2f80d8; bonuses never touch a platform)
     } else {   // a stash: one of five, each with its own lot of coins (user: one was dull)
       const ledge = (x0, x1, y, f = {}) => this.rects.push(this.box(x0, y, x1, y + (f.plank ? LEVEL.plank : LEVEL.thick) * R, f));
       const row = (y, n, gap, v = 1) => { for (let k = 0; k < n; k++) this.coin(cx + (k - (n - 1) / 2) * gap * R, y, v); };

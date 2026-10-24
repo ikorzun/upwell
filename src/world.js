@@ -745,7 +745,7 @@ const THEMES = {
   stash: theme(PAL.purple, { rubber: PAL.blue, spring: PAL.blue, crumble: PAL.gray }),   // in the purple of its door (user)
   tokyo: Object.assign(theme(PAL.purple, { ice: PAL.white, crumble: PAL.gray, mover: PAL.blue }), { dots: PAL.black, town: true, hazard: 'cityfire', wallHaz: 'boardfire', holder: 'tokyo' }),   // Tokyo's town at night (see TOKYO), purple (owner: blue went with Fuji's;
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
-  blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { danchi: true }),   // the Tower Blocks: raw concrete (see BLOCKS)
+  blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { danchi: true }),   // the Danchi (world 6; was the Tower Blocks): raw concrete (see BLOCKS)
   sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true, hazard: 'tide', wallHaz: 'blowhole', holder: 'sea' }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
   skazka: Object.assign(theme(PAL.gray, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
   // crumbles or flies tells itself by its shape (a rotten log, Baba Yaga's mortar); colour only for the hero, lights, coins, danger and the doors' marks
@@ -915,7 +915,7 @@ const SKY = Object.assign({}, WORLDS[2], { id: 'sky', name: { en: 'Skyscraper', 
 // The Tower Blocks (user: Soviet brutalism, stairs and panel blocks; the campaign's world 5): raw concrete, a regular grid of windows
 // far off (BG_FS uWin 2), riser pipes, satellite dishes and entrances with a bench on its walls and ledges, balconies, heating pipes,
 // stairs you walk up (the 'T' step), old mattresses for springs (THEMES.blocks `panels`, drawn by the renderer). ?play=blocks shows it.
-const BLOCKS = Object.assign({}, WORLDS[2], { id: 'blocks', name: { en: 'Tower Blocks', es: 'Bloques', pt: 'Blocos', ja: 'だんち' }, theme: THEMES.blocks, dark: [], maxD: 2, magnet: 0,
+const BLOCKS = Object.assign({}, WORLDS[2], { id: 'blocks', name: { en: 'Danchi', es: 'Danchi', pt: 'Danchi', ja: 'だんち' }, theme: THEMES.blocks, dark: [], maxD: 2, magnet: 0,
   chunks: { flight: 4, stairs: 2, shelves: 3, planks: 2, pillars: 2, comb: 1, chimney: 1, crumble: 2, spring: 2, rest: 1, vault: 1 },
   enemies: { crawler: 3, climber: 2, shell: 1, spitter: 2 },
   intro: [{ news: { en: 'stairs: just walk up', es: 'escaleras: sube andando', pt: 'escadas: é só subir andando', ja: 'かいだん: あるいて のぼれる' } }, {}, {}] });

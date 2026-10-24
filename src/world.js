@@ -5185,7 +5185,8 @@ Renderer.prototype.draw = function (g, alpha) {
     const b = e.body, t = e.type, V = FOREST_V[t];
     b.look = t + '-' + V; b.lookDir = t === 'kikimora' ? (b.cx < (lv.l + lv.r) / 2 ? 1 : -1) : Math.sign(g.hero.cx - b.cx) || 1;
   };
-  drawKept = [F, disc, box, onGrid, icon, iconSpin, seen, door, hut, farmhouse, funaya, skEyes, skDoorAt, skInside, izba, mnShop, mnStash, pech, brace, aircon, rod, line, mnLamp, mnOre, mnBatsAt, mnBats, mnThing, mnFar, skOak, junkRect, skyRect, panelsRect, villageRect, seaRect, skazkaRect, mineRect, fujiRect, townRect, vaultSpan, spr, look, forestFoe];   // (see drawKept)
+  try { drawKept = [F, disc, box, onGrid, icon, iconSpin, seen, door, hut, farmhouse, funaya, skEyes, skDoorAt, skInside, izba, mnShop, mnStash, pech, brace, aircon, rod, line, mnLamp, mnOre, mnBatsAt, mnBats, mnThing, mnFar, skOak, junkRect, skyRect, panelsRect, villageRect, seaRect, skazkaRect, mineRect, fujiRect, townRect, vaultSpan, spr, look, forestFoe]; } catch (err) { if (drawKept !== false) console.warn('drawKept:', err.message); drawKept = false; }   // (see drawKept; a helper gone
+  // from draw and still named here: warned, not a broken frame)
   if (lv.boss && !lv.boss.dead && lv.boss.look) look(lv.boss, false);   // its look's parts behind it
   for (const e of lv.enemies) if (FOREST_V[e.type]) forestFoe(e);   // a forest enemy's look, before the bodies are drawn
   for (const e of lv.enemies) if (e.type === 'worm' && seen(e.body.minY - 3 * R, e.body.maxY + 3 * R)) {   // a worm's tubes, behind its knot

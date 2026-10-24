@@ -466,6 +466,28 @@ ELEMENTS = {
                             material='hand-cut rock, ore veins, logs, a ladder, baskets', size='the whole room, about 16 tiles wide and 26 tiles tall',
                             inks='a dark rock back wall in big flat faint grey shapes (no fine speckle), the veins a faint purple glow (the stash), dark grey logs, gold coins',
                             scene=MINE_AT + ' as a shelf in the room'),
+    # Fuji's bonus caves from the real Narusawa Ice Cave (owner Д97 «А»: the lava tube with its ice pillars at the foot of the mountain; UPwell's rooms main 4cd9efa)
+    'fuji-caveroom': dict(world='fuji', kind='prop', what="the inside of a secret bonus cave at the foot of Mount Fuji, the real Narusawa Ice Cave, seen as one whole game screen: "
+                          "a lava tube with ropy black lava walls and ceiling, pillars of ice rising from the floor and icicles hanging from the ceiling, old wooden walkways and "
+                          "steps, wooden shelves stacked with blocks of ice stored there since the Edo era, a faint blue cold light, coins to collect hanging in the room",
+                          plane='back', where='the whole room behind the play: its back wall and its props; the ledges in it are lava rock shelves and ice',
+                          material='black lava rock, ice, old wood', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                          inks='a dark lava back wall in big flat faint grey and blue shapes (no fine speckle), the ice white and faint blue, the wood faint orange, gold coins',
+                          scene=FUJI_AT + ' as a shelf in the room'),
+    'fuji-cavebells': dict(world='fuji', kind='prop', what='three temple bells of bronze hung in a row in an ice cave, big, middle and small, each on a short rope from a ledge above, '
+                           'drawn twice in each cell: quiet (grey, still) on the left and just rung (glowing warm orange, swinging, rings of sound round it) on the right; a '
+                           'bell is rung by the hero bumping it in the right order',
+                           where='hanging under ledges in the cave', material='bronze, a straw rope', size='the big one about 1.6 tiles wide and 1.4 tall, the middle 1.3 by 1.1, '
+                           'the small 1 by 0.85', inks='grey bronze, darker grey bands; rung, orange with a dither glow (never yellow, the coins\' colour); the rope grey',
+                           scene=FUJI_AT + ' above them'),
+    'fuji-caveledge': dict(world='fuji', kind='ledge', what='a ledge in the ice cave: a shelf of black ropy lava rock with a crust of ice and frost on it, small icicles under it',
+                           does='solid on every side: you stand on it, cling to its sides and jump off it', material='black lava rock (pahoehoe ropes), ice',
+                           size='4 tiles long and 1 tile thick', main='blue (the rock)', rule=FUJI_RULE,
+                           vary='the lava\'s ropy texture and silhouette, the ice crust, the icicles under it (none, a few, a fringe), a wooden plank laid on it, frost'),
+    'fuji-cavegate': dict(world='fuji', kind='prop', what='a wall of ice blocking a niche in the cave, stacked ice blocks like the ice the cave stored, cracked, with coins seen through it; '
+                          'it melts away when the puzzle is solved', where='standing on a ledge against the cave wall, from the ledge up to the ledge over it',
+                          material='clear blue ice blocks, frost, cracks', size='about 2 tiles wide and 3 tiles tall', inks='white and blue ice in big flat shapes, faint blue dither, '
+                          'gold coins faint behind it', scene=FUJI_AT),
     # The Danchi (owner 2026-10-21: world 6 Japanese, «Данчи»), six takes on each
     'danchi-slab': dict(world='danchi', kind='ledge', what='the basic ledge, a slab of raw danchi concrete sticking out of the shaft wall', does='solid on every side: you '
                         'stand on it, cling to its sides and jump off it', material='poured concrete, the seams of its panels, rust and rain stains running down it, '

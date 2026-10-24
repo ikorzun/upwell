@@ -570,7 +570,7 @@ class Foe {
 // for a moment: then it hurts to touch.
 class Boss {
   constructor(lv, def) {   // def: a campaign boss's (BOSSES); the random run's summit boss has none
-    const lk = def && def.look, R = lv.R * ((lk && lk.size) || (def && def.size) || BOSS.size), slide = !!(def && (def.slide || def.glide || def.quake || def.street)), rail = def && def.rail && lv.rail;   // lk: its look (LOOKS)   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
+    const lk = def && def.look, R = lv.R * ((lk && lk.size) || (def && def.size) || BOSS.size), slide = !!(def && (def.slide || def.glide || def.quake || def.street || def.bone)), rail = def && def.rail && lv.rail;   // lk: its look (LOOKS)   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
     this.ink = def && def.ink ? { id: 'boss', base: PAL[def.ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink)
     this.body = new Body(designById((lk && lk.design) || (def && def.design) || 'cat'), this.ink, rail ? rail.x1 : slide ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, rail ? rail.y - 0.75 * R : slide ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = slide ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
@@ -582,7 +582,7 @@ class Boss {
     const [sw, sh] = bossSize(this); this.halfW = sw / 2; this.minGrowth = Math.min(1, (4 * lv.R) / Math.max(sw, sh));   // its drawing's half width; its shrink stops at 2:1 against the hero's 2R
     loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
-  open() { const d = this.def; return d && (d.hang || d.glide || d.quake || d.street || d.sky) ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
+  open() { const d = this.def; return d && (d.hang || d.glide || d.quake || d.street || d.sky || d.bone) ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
   to(s) { this.state = s; this.st = 0; }
   think(dt, g) {
     if (this.def && this.def.hang) { this.hang(dt, g); return; }
@@ -590,6 +590,7 @@ class Boss {
     if (this.def && this.def.quake) { this.quake(dt, g); return; }
     if (this.def && this.def.street) { this.street(dt, g); return; }
     if (this.def && this.def.sky) { this.sky(dt, g); return; }
+    if (this.def && this.def.bone) { this.bone(dt, g); return; }
     if (this.def && this.def.slide) { this.slide(dt, g); return; }
     if (this.def && this.def.rail) { this.ride(dt, g); return; }
     const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
@@ -640,7 +641,7 @@ class Boss {
     }
   }
   rise() {
-    const b = this.body, slide = this.def && (this.def.slide || this.def.quake); this.to('rise'); b.gScale = slide || (this.def && (this.def.glide || this.def.street)) ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); this.rattled = false;
+    const b = this.body, slide = this.def && (this.def.slide || this.def.quake); this.to('rise'); b.gScale = slide || (this.def && (this.def.glide || this.def.street || this.def.bone)) ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); this.rattled = false;
     if (slide) { turnOver(b); b.up.fails = 0; setVel(b, 0, -3 * b.R); }   // the Puck: back on its feet with a hop
   }
   // Tsurara-onna (BOSSES.puck, ICE): she creeps over the ice at the hero, her moves taking turns: icicles called down over the hero after
@@ -823,6 +824,55 @@ class Boss {
     } else if (this.state === 'rise') {   // pulled free, back up
       seat(b.cx, high, 3);
       if (this.st > F.reel) this.to('hover');
+    }
+  }
+  // Koschei (BOSSES.koschei, KOSCH): he walks his floor keeping off the hero, his moves taking turns: bones thrown in arcs at the hero; his
+  // sword's low sweep along the floor in front of him (jump it), after which he is off balance, the only time a stomp hurts him. A stomp
+  // breaks him into a heap of bones that rattles and flies together again. He calls skulls later; his last heart (the needle) sweeps twice.
+  bone(dt, g) {
+    const F = this.def.bone, b = this.body, lv = g.lv, R = lv.R, H = g.hero, ph = this.def.phase(this.hp);
+    const flash = () => { b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink; };   // 2.5 flashes a second: under WCAG's 3
+    b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
+    b.heap = this.state === 'rise' ? (this.st < F.heap - 0.4 ? Math.min(1, this.st / 0.12) : Math.max(0, (F.heap - this.st) / 0.4)) : 0;   // broken by a stomp: a heap, then together again
+    b.rattle = this.state === 'rise' && this.st > F.heap - 0.9 && this.st < F.heap - 0.4; b.heapT = this.t;
+    if (b.rattle && !this.rattled) { this.rattled = true; sound.play('crumble', 0.6, 1.5); }   // the warning: his bones rattle, then fly together
+    if (this.t < F.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first, while his name is up
+    if (ph > this.phSeen) { this.phSeen = ph; shake.add(6); sound.play('crumble', 0.9, 0.5); }   // a new phase: a rattle and a shake
+    if (ph >= F.skulls && (this.call -= dt) <= 0) { this.call = BOSS.spawnEvery; if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: this.def.minion, x: (lv.l + lv.r) / 2, y: lv.capY + 2 * R }, lv)); }
+    if (this.state === 'hover') {   // walking to `keep` R off the hero, his next move after his rest
+      this.dir = Math.sign(H.cx - b.cx) || 1;
+      const off = H.cx - this.dir * (this.halfW + F.keep * R) - b.cx;
+      addVel(b, (clamp(off * 2, -F.walk * R, F.walk * R) - b.rigVx) * Math.min(1, 3 * dt), 0);
+      if (this.st > F.rest[ph]) { const sw = this.next === 'sweep'; this.to(sw ? 'warn' : 'throw'); sound.play(...(sw ? ['deny', 0.6, 0.6] : ['crumble', 0.5, 1.8])); }   // a scrape, or a rattle of bones
+    } else if (this.state === 'throw') {   // an arm raised, red: bones to come
+      addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0); flash();
+      if (this.st > F.twarn) {
+        const x = b.cx, y = b.minY + 0.3 * (b.maxY - b.minY), n = F.bones[ph];
+        for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.2 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 450, 0.55, 1.0); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: 0.32 * R, bone: true }); }
+        b.color = this.ink; sound.play('spit', 0.6, 0.7); this.next = 'sweep'; this.to('hover');
+      }
+    } else if (this.state === 'warn') {   // his sword raised, red, a scrape: its sweep to come
+      this.dir = Math.sign(H.cx - b.cx) || this.dir;
+      addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0); flash();
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, -0.1);
+      if (this.st > (this.drops ? F.again : F.swarn)) { this.to('sweep'); b.color = this.ink; sound.play('airjump', 0.9, 0.7); }
+    } else if (this.state === 'sweep') {   // the blade low along the floor in front of him: a hero on the floor there is cut
+      const x0 = b.cx, x1 = b.cx + this.dir * (this.halfW + F.reach * R);
+      if (H.maxY > lv.floor - 1.1 * R && (H.cx - Math.min(x0, x1)) * (H.cx - Math.max(x0, x1)) < 0) g.hurt(this.dir, -0.5, 'boss');
+      if (this.st > F.sweep) {
+        if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // his last heart: a second sweep, the other way
+        this.drops = 0; this.next = 'throw'; this.to('dazed'); b.kickSquash(1, 0, 1.2);
+        if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+      }
+    } else if (this.state === 'dazed') {   // off balance after his sweep: open to a stomp
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (Math.floor(this.st * 6) % 2) b.kickSquash(1, 0, 0.05);
+      if (this.st > F.stagger * this.help) this.to('hover');
+    } else if (this.state === 'rise') {   // a heap of bones after a stomp, then together again (and a moment after: he only pushes, angry)
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      this.angry = Math.max(this.angry, F.heap + 0.8 - this.st);
+      if (this.st > F.heap) { this.to('hover'); this.rattled = false; }
     }
   }
   // The Puck (BOSSES.puck, PUCK): slides the ice to and fro flicking out shells, winds up (backing off, flat, flashing)
@@ -1030,7 +1080,7 @@ class Game {
     return a;
   }
   makeHero() {
-    const bs = this.lv.boss, x = bs && bs.def && (bs.def.slide || bs.def.glide || bs.def.quake || bs.def.street) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
+    const bs = this.lv.boss, x = bs && bs.def && (bs.def.slide || bs.def.glide || bs.def.quake || bs.def.street || bs.def.bone) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
     this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
     this.hero.isHero = true;
     this.startY = this.hero.cy;
@@ -1483,7 +1533,7 @@ class Game {
         if (puck && (A === puck || B === puck) && A !== hero && B !== hero) continue;   // the Puck slides through its own shells (a rolling one turns it over: rolling)
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
-        const solid = lv.boss && !(lv.boss.def && (lv.boss.def.slide || lv.boss.def.glide || lv.boss.def.quake || lv.boss.def.street || lv.boss.def.rail)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
+        const solid = lv.boss && !(lv.boss.def && (lv.boss.def.slide || lv.boss.def.glide || lv.boss.def.quake || lv.boss.def.street || lv.boss.def.bone || lv.boss.def.rail)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
         if (withHero && this.invuln > 0 && !solid && playing && !A.ghost && !B.ghost) {   // a hit hero passes through for a moment, but a stomp from over one still counts (Game.blinkMeet)
           const o = A === hero ? B : A; if (o.maxX > hero.minX && o.minX < hero.maxX && o.maxY > hero.minY && o.minY < hero.maxY) o.blinkHero = true; continue;
         }
@@ -1749,7 +1799,7 @@ class Game {
     const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
     if (e.type === 'nurikabe' && !can && above) { this.bounceOff(e); return; }   // its hard top, hanging or going: a bounce, nothing more (CRUSH)
     if (boss && e.def && e.def.top && !can && H.cy < b.cy - 0.2 * b.R && dx < b.R) { this.bounceOff(e); return; }   // the Puck's hard dome: a bounce, nothing more
-    if (boss && e.def && (e.def.rail || e.def.hang || e.def.glide || e.def.quake || e.def.street || e.def.sky) && e.angry > 0) return;   // just hit, red: it only pushes (the stomp's high bounce passes it going back up)   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
+    if (boss && e.def && (e.def.rail || e.def.hang || e.def.glide || e.def.quake || e.def.street || e.def.sky || e.def.bone) && e.angry > 0) return;   // just hit, red: it only pushes (the stomp's high bounce passes it going back up)   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
     if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow') || this.power('swarm')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it

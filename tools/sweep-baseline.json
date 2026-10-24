@@ -1,5 +1,5 @@
 {
- "commit": "92dc22a",
+ "commit": "7274751",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -653,10 +653,13 @@
   },
   "c8-10": {
    "result": "won",
-   "time": 23.5,
-   "heartsLost": 0,
+   "time": 53,
+   "heartsLost": 2,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "boss@hover",
+    "boss@hover"
+   ],
    "boss": "Koschei",
    "dealt": "6/6"
   }

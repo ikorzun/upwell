@@ -1,5 +1,5 @@
 {
- "commit": "331757a",
+ "commit": "e54ebb9",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -396,12 +396,15 @@
   },
   "c5-10": {
    "result": "won",
-   "time": 29,
-   "heartsLost": 0,
+   "time": 49.5,
+   "heartsLost": 2,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "shot@dazed",
+    "shot@dazed"
+   ],
    "boss": "Tsukumo Tram",
-   "dealt": "8/8"
+   "dealt": "5/5"
   },
   "c6-1": {
    "result": "clear",

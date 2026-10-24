@@ -1,5 +1,5 @@
 {
- "commit": "febc164",
+ "commit": "9317a38",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -154,12 +154,14 @@
   },
   "c2-10": {
    "result": "won",
-   "time": 26,
-   "heartsLost": 0,
+   "time": 32.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "boss@hover"
+   ],
    "boss": "Tsuchigumo",
-   "dealt": "5/5"
+   "dealt": "4/4"
   },
   "c3-1": {
    "result": "clear",
@@ -392,7 +394,7 @@
   },
   "c5-10": {
    "result": "won",
-   "time": 26.5,
+   "time": 29,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],

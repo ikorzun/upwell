@@ -1966,6 +1966,97 @@ const CHUNKS = {
     '............',
     '............',
     '............'] },
+  // The Mine's bonus caves (owner З3 «А», 2026-10-24: after the Village's, each world's own, one world at a time): its cages, its moss, its cracked rock
+  // and its rubble, the Mine's own things (its world's id 'cave', CAVES). As the Village's: 21 rows, the bottom 8 clear for the throw in, the way out the
+  // hole in the left wall; nothing to stand on over 15 tiles but a vault, so a full jump keeps under the cap of a 375×667 (21.8 tiles)
+  caveLift: { d: 1, kind: 'cave', rows: [   // a gift: two cages to and fro (W), one over the other, a garland of coins over each one's way and a big seam at the top
+    '............',   // up from the floor onto the low cage, from it onto the high one where their ways cross (x 5-10), and on up through the seam
+    '............',
+    '............',
+    '....OOO.....',
+    '............',
+    '............',
+    'o.O.o.O.o...',
+    '..WWW.......',
+    '............',
+    '............',
+    '............',
+    '...o.o.O.o.o',
+    '......WWW...',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveMoss: { d: 1, kind: 'cave', rows: [   // a gift: a long rock roof with moss under it (~): up to it, the hero hangs on and crawls along it through the coins hanging under it
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '..########..',
+    '..~~~~~~~~..',
+    '..OoOOoOO...',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveSeal: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins high over the open, sealed by cracked rock (X, it gives at a head-butt from below, for good); a
+    '.##########.',   // cage to and fro under it: ride it under the seal and jump. Its floor out of reach from the ground (a double jump's head 15.6 tiles, the seal
+    '.##OOOOOO##.',   // 17), walls three thick: no coin in the magnet's reach from outside; out down through the hole
+    '.##OOOOOO##.',
+    '.##XXXXXX##.',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '.....WWW....',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveRubble: { d: 1, kind: 'cave', rows: [   // a puzzle: a pocket of big coins high on the left wall, the way to it two steps of rubble (C) that give way half a second
+    '............',   // after a touch (CRUMBLE): from the open by the right wall onto the low step, at once up onto the high one, at once up onto the ledge. Fallen,
+    '............',   // nothing lost: back in 3 s, try again. Each step 2 tiles clear of the next and of the wall (the hero 2 wide), the ledge two thick and its coins
+    '............',   // a row clear of it (nothing under it in the magnet's reach), its top 15 tiles (a double jump's feet 13.6)
+    'OOO.........',
+    'OOO.........',
+    'OOO.........',
+    '####........',
+    '####........',
+    '............',
+    '.....CC.....',
+    '............',
+    '........CC..',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -2471,7 +2562,7 @@ const AMBUSH = { waves: [2], coins: 2 };
 // Each world's bonus caves (the stash rooms, kind 'treasure'; owner, З1 «В»): its gift rooms and its puzzle rooms, by its world's id (the Village's
 // world kept the Mine's old id). Two gifts, then a puzzle, never the same room twice running (Game.enterRoom). A world not here keeps the five old
 // heaps of coins (Level.build).
-const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] } };
+const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] } };   // (the Village's, 'mine'; the Mine's, 'cave')
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {

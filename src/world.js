@@ -3625,6 +3625,10 @@ Renderer.prototype.draw = function (g, alpha) {
   // A world's far view: its foot low on the screen, sinking a little as the climb goes on; on the main screen (Game.menuBackdrop) its foot on the floor Mochi
   // stands on, so that it shows over and round him (owner: Д113 «А»; the low band is under the buttons there)
   const farY = (cam, H) => (g.state === 'menu' ? lv.floor : cam + 0.8 * H + Math.max(0, lv.floor - cam - H) * 0.03);
+  // Where each world's far view starts and ends among the features (pairs of this.nf): on the main screen, of all that is behind, only that is drawn,
+  // over its world's back with no walls, the menu's ink under the colours' row as before (owner, 2026-10-24: «Слишком шумно. Верни как было, оставь
+  // анимацию, а вместо градиента за моти используй фон локации»)
+  const menu = g.state === 'menu', farR = [];
   const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
     const n = rows[0].length, R = vspRects(rows);
@@ -4210,7 +4214,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (CINE) this.route = 0;
     for (const r of lv.rects) if (!r.gone && seen(r.y1 - kitT, r.y1 + 2 * kitT) && mnBatsAt(r)) mnBats(r);   // bats asleep under some ledges
     if (CINE) this.route = 3;
-    mnFar();
+    farR.push(this.nf); mnFar(); farR.push(this.nf);
     this.route = rt0;
   }
   if (th.fuji && lv.kind === 'well') {   // Mount Fuji's kit (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png): each its size on the sheets (owner:
@@ -4227,6 +4231,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
+    farR.push(this.nf);
     {   // Fuji far off: a cone of blue, its ridges uneven, its snow grey down them in tongues; a long bank of cloud across its waist in a living shape (the owner's
       // pick, 2026-10-23, d33 C; his rule: «для природных фонов и элементов в игровом мире используй более биологическую форму», his picture's clouds: an outline
       // of uneven round bumps, no straight runs, no symmetry, holes of the dark in it, ragged strands of checker trailing off). Low on the screen, sinking a little
@@ -4281,6 +4286,7 @@ Renderer.prototype.draw = function (g, alpha) {
         town(-6.4, 4.0, shore - 2 * P, 10, 220); for (const [u, h] of [[4.8, 1.0], [5.5, 1.3], [6.2, 0.9]]) tree(cx + u * t, h, u * 7, true);
       }
     }
+    farR.push(this.nf);
     for (const r of lv.rects) {
       if (!seen(r.y0 - 6 * t, r.y0) || !steady(r, 2.4)) continue;
       const kk = kitThing(lv, r); if (!kk) continue;   // (which thing: kitThing's, never the one next under it, the owner's rule)
@@ -4365,6 +4371,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = kitT, P = kitP, px = P / t, PROPS = ['lighthouse', 'net', 'gull', 'octopus', 'flags'], rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic
     // fork, the rule book: the sea far off behind; the props small, their thin parts flat)
     L(3);
+    farR.push(this.nf);
     {   // the sea far off (the owner's picks, the wave sheet's B and the far sheet's F, a level each in turn): screen-fixed, low on the screen and sinking a
       // little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
       const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
@@ -4384,6 +4391,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (lv.stage % 2 === 0) { stilts(-7.2, 3, 0.6, true); for (const [u, s] of [[-6.3, 1.1], [-3.4, 1.0]]) pine(u, 2.1, s); boat(3.6, 0.7, 1.4, [[0.6, 0.9]]); }   // stilt houses lit, pines behind them, a boat (B)
       else { isle(-7.8, -3.4, 0.7, 0.6, [[-6.8, 1.0], [-5.0, 0.9]]); isle(3.8, 7.8, 0.7, 0.6, [[5.2, 0.9], [6.8, 1.0]]); torii(0.4, 0.7, 1.4); boat(-2.4, 0.4, 0.6, [[0.3, 0.5]]); boat(3.0, 0.35, 0.8, [[0.4, 0.7]]); }   // a torii in the water between two islands, boats (F)
     }
+    farR.push(this.nf);
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
       if (!p || !PROPS.includes(p.kind)) continue;
@@ -4468,6 +4476,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const rt0 = this.route;   // (the cinematic fork, the rule book: the forest far off behind, all of it, the moon, its eyes, Koschei's oak and chest; the fence small, its
     // skulls' eyes flat)
     if (CINE) this.route = 3;
+    farR.push(this.nf);
     {   // the forest far off (F): spruces, a dead tree with eyes in it, the moon, mist; screen-fixed, low on the screen and sinking a little as the climb goes on;
       // at a quarter (DIM), the moon brighter (a light: it shows through the dark, the crooked treetops black against it), the eyes LIT
       const ar = lv.kind === 'boss', cx = (lv.l + lv.r) / 2, foot = snap(ar ? lv.floor : farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);   // (Koschei's arena: on its floor)
@@ -4489,6 +4498,7 @@ Renderer.prototype.draw = function (g, alpha) {
       row(-1.6, 4.2, 1.15, 0.3, [2.8, 3.6, 3.0, 3.8]);
       for (let i = 0; i < 6; i++) { const v = 0.1 + 0.22 * i, u0 = -7.5 + ((i * 29) % 7) * 0.6; fb(u0, v, u0 + 2.4 + (i % 3) * 0.8, v + px, G); fb(u0 + 4.2, v, u0 + 6.0, v + px, G); }   // mist over the swamp
     }
+    farR.push(this.nf);
     for (const r of lv.kind === 'well' ? lv.rects : []) {   // Baba Yaga's fence on a ledge (E): broken stakes, a fallen one across them, a long pole leaning out over the shaft with a skull on its end whose
       // sockets glow the nearer the hero comes, their cores looking at him
       const p = !r.gone && seen(r.y0 - 4 * t, r.y0) && kitThing(lv, r);
@@ -4537,6 +4547,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // a stone lantern and a branch of sakura out of the wall (D), koinobori flying off a pole (D). Nothing covers a door.
     const t = kitT, P = kitP, px = P / t, mod = (k, n) => ((k % n) + n) % n;
     const sp = lv.rc && lv.rc.sparse, few = (list, keep) => (sp ? list.filter((q, i) => keep.includes(i)) : list);   // a `sparse` level's: less of it (owner: «E»)
+    farR.push(this.nf);
     {   // the countryside far off (F), low on the screen and sinking a little as the climb goes on
       const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, tn = 0) => box(U(u0), V(v1), U(u1), V(v0), c, DIM, 0, 10, tn);
@@ -4564,6 +4575,7 @@ Renderer.prototype.draw = function (g, alpha) {
       fb(3.35, 2.7, 4.95, 2.9, PAL.orange); fb(3.55, 2.35, 4.75, 2.45, PAL.orange); fb(3.25, 2.85, 3.4, 3.0, PAL.orange); fb(4.9, 2.85, 5.05, 3.0, PAL.orange);
       }
     }
+    farR.push(this.nf);
     for (const side of [-1, 1]) {   // a bamboo grove up each wall (E): two stalks in segments, a node between, sprays of three leaves off the inner one
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), seg = 2.2 * t;
       for (const [d, w, ph] of few([[0.3, 3, 0], [1.15, 2, 0.8]], [0])) {
@@ -5799,17 +5811,22 @@ Renderer.prototype.draw = function (g, alpha) {
   gl.disable(gl.BLEND);
   const pg = this.pBg;
   gl.useProgram(pg.p);
-  gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, lv.l, lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);
+  gl.uniform2f(pg.u.uShake, sx, sy); gl.uniform2f(pg.u.uWalls, menu ? -1e6 : lv.l, menu ? 1e6 : lv.r); gl.uniform1f(pg.u.uPix, P); grid(pg.u);   // (the main screen: no walls)
   gl.uniform3fv(pg.u.uTop, th.top); gl.uniform3fv(pg.u.uDots, th.dots); gl.uniform3fv(pg.u.uBot, th.bot); gl.uniform1f(pg.u.uGrad, th.grad ? 1 : 0); gl.uniform1f(pg.u.uH, lh); gl.uniform1f(pg.u.uWin, th.win === 'clouds' ? 3 : th.win === 'grid' ? 2 : 0);
   gl.uniform3fv(pg.u.uWall, th.wall); gl.uniform3fv(pg.u.uWallD, th.wallD); gl.uniform3fv(pg.u.uLip, th.lip);
   gl.bindVertexArray(this.emptyVao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
+  if (menu) {   // the main screen: under the colours' row its own ink, as before (MENU_BG's last)
+    const k = MENU_BG.rgb; gl.enable(gl.SCISSOR_TEST); gl.scissor(0, 0, lw, Math.max(0, lh - Math.round((g.menuSplit || 0.5 * H) / P)));
+    gl.clearColor(k[9], k[10], k[11], 1); gl.clear(gl.COLOR_BUFFER_BIT); gl.clearColor(0, 0, 0, 0); gl.disable(gl.SCISSOR_TEST);
+  }
   gl.enable(gl.BLEND);
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u);
   if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
-  this.drawFeat(0, back);
+  if (menu) for (let i = 0; i + 1 < farR.length; i += 2) this.drawFeat(farR[i], farR[i + 1] - farR[i]);   // (the main screen: its far view only)
+  else this.drawFeat(0, back);
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
   gl.uniform2f(ps.u.uOffset, 0, RENDER.shadowOffset); gl.uniform1f(ps.u.uShadowA, RENDER.shadowA);
@@ -5882,7 +5899,7 @@ Renderer.prototype.draw = function (g, alpha) {
 // The menu's frame (owner, 2026-10-23, the Figma «Main»): its backdrop (MENU_FS) and the hero alone over it, big, to drag and press (menuTouch in
 // game.js): its shadow, body, face and the puffs a poke sends off, on the game-pixel grid like the levels; no 2.5D, nothing of a level.
 Renderer.prototype.drawMenu = function (g, alpha) {
-  if (g.menuBack) {   // over its world's own backdrop (owner, 2026-10-24; Game.menuBackdrop): that level drawn as any, at the menu's camera and time, the hero on its floor
+  if (g.menuBack) {   // over its world's own background (owner, 2026-10-24; Game.menuBackdrop): that level's back and far view (draw's `menu`), at the menu's camera and time, the hero on its floor
     const real = g.lv, bk = g.menuBack; bk.cam = real.cam; bk.t = real.t; g.lv = bk;
     try { this.draw(g, alpha); } finally { g.lv = real; }
     return;

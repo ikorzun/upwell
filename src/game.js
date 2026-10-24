@@ -894,12 +894,14 @@ class Game {
     this.builtW = view.w; this.R = this.menuR || MENU_HERO.k * MENU_HERO.w * view.w; this.well = null; this.door = null; this.lv = new Level();
     this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: this.menuWd, theme: this.menuWd.theme, floorY: this.menuFloor || 0.5 * view.h });
     this.menuBack = this.menuBackdrop(); menuTouch.idleAt = performance.now(); menuTouch.hopAt = 0; menuTouch.hops = 0;
+    menuInk = '#' + this.menuBack.theme.top.map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');   // (the bar over the page: its back's top, menuTop)
     this.makeHero(); this.levelReset();
     ui.hideAll(); ui.menu();
   }
   // The menu's backdrop (owner, 2026-10-24: «На главном экране используй фон того мира, в котором сейчас игрок или первого»): the level Continue goes
-  // to (a new player's the first), drawn as any (Renderer.drawMenu), its world's walls, ground and far view, lit, with nothing of play in it; a boss's or
-  // a bonus level's tier shows its world's first. Its floor is the menu's, where the hero stands.
+  // to (a new player's the first), with nothing of play in it; a boss's or a bonus level's tier shows its world's first. Of it the main screen draws its
+  // back and its far view only, over and round the hero, not its walls and ground (owner: «Слишком шумно. Верни как было, оставь анимацию, а вместо
+  // градиента за моти используй фон локации»; Renderer.draw's `menu`). Its floor is the menu's, where the hero stands, the far view's foot on it.
   menuBackdrop() {
     const { w, s, rc } = campAt(campNextId()), cw = CAMPAIGN[w], r = rc.boss || rc.bonus != null ? cw.levels[0] : rc, lv = new Level(), R = clamp((view.w - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
     lv.reset({ kind: 'well', w: view.w, h: view.h, R, seed: r.seed || 1, world: cw.world, stage: r === rc ? s : 0, theme: cw.world.theme, recipe: r, height: (r.len || 30) * R_PER_M * R });
@@ -2861,9 +2863,14 @@ function button(text, cls, fn) {
   if (/\bbig\b/.test(cls)) queueMicrotask(() => fitBig(b));   // once it is in its panel
   return b;
 }
-// The bar over the page the menu's backdrop's top ink (owner, 2026-10-23: «градиент должен уходить под остров»): #topTint for iOS 26 Safari, theme-color for the browsers that read it.
+// The bar over the page the menu's backdrop's top ink (owner, 2026-10-23: «градиент должен уходить под остров»): #topTint for iOS 26 Safari, theme-color for the browsers that read it;
+// over a world's background (Game.menuBackdrop) its back's top ink, not the old gradient's grey-blue (a grey line over the screen's dark top otherwise)
 const themeMeta = document.querySelector('meta[name="theme-color"]'), themeInk = themeMeta ? themeMeta.content : '';
-function menuTop(on) { document.documentElement.classList.toggle('menuTop', on); if (themeMeta && coarse) themeMeta.content = on ? MENU_BG.inks[0] : themeInk; }   // (a phone's: a desktop's tab bar left as it is)
+let menuInk = '';   // (Game.toMenu)
+function menuTop(on) {
+  const ink = menuInk || MENU_BG.inks[0];
+  document.documentElement.classList.toggle('menuTop', on); $('topTint').style.background = ink; if (themeMeta && coarse) themeMeta.content = on ? ink : themeInk;   // (a phone's: a desktop's tab bar left as it is)
+}
 function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
   for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
 }

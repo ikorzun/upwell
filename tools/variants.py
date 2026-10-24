@@ -1151,6 +1151,128 @@ ELEMENTS.update({
                          'for tiny glints; his eyes orange, as small lights; red only on what hurts, his blade and the spikes of his crown.'),
 })
 
+# The TV Tower from Tokyo Tower, round 2 (owner 2026-10-24: Д160 «А» the place, Д161–Д168 what to take, Д168 «Б»: the world stays purple, only the far tower and
+# the floodlights orange; research/tower/tower-attributes.md): six takes of each picked thing, for the game's code to cut or draw (Worlds, branch tower-real).
+# Run with --ref research/variants/ref-tokyotower.png (the Skyscraper's purple in the game)
+WORLDS['tokyotower'] = ('the TV Tower', 'Tokyo Tower in Shiba, Tokyo, at night, cosy and cute, kawaii, true to the real tower of 1958: a steel lattice on four arched legs, '
+                        'angles and X bracing, gusset plates with rivets, its outside stair of some 600 steps in flights with landings, the Main Deck at 150 m, the Top '
+                        'Deck at 250 m, the antenna on top; the night painters with their brushes, the floodlights of its Landmark Light, Zojo-ji temple at its foot. In '
+                        'this game its steel is the world\'s purple, never orange', 'purple #c996ff',
+                        'blue marks moving platforms, springs and rubber walls, white clouds dissolve under you, green is moss you can hold on to, orange is only the '
+                        'warm light of the floodlights', 'the black night high over Tokyo, nothing far off')
+TT_AT = 'a purple steel truss ledge with a white top edge sticking out of the wall'
+TT_RULE = ('In this world blue marks moving platforms, springs and rubber walls, white clouds dissolve under you and green is moss you can hold on to, so use those only '
+           'for tiny details; the tower\'s steel is the world\'s purple, never orange (orange is only the floodlights\' light) and never red (danger); never yellow (the coins\' colour).')
+TT_FAR = ('each thing in one or two faint dim tones on the black in big flat shapes (no dither noise, no fine speckle): the tower itself a dim orange (the only orange), '
+          'other steel and buildings a dim purple and grey, trees a dim green, the city\'s lit windows small dim blue and purple dots, white lights a dim grey (never white), '
+          'no red, no yellow')
+TT_PROPS = ('two things side by side on the same ledge, a tile of air between them: {a} on the left, at the ledge\'s wall end, and {b} on the right, with the hero '
+            'for scale standing at the ledge\'s free end to the right of both (each cell a different take on both things)')
+ELEMENTS.update({
+    'tt-far1': dict(world='tokyotower', kind='prop', plane='back', what="the far view behind the shaft as the climb goes up Tokyo Tower from its foot, a different scene "
+                    "in each cell, left to right, top to bottom: A the great wooden main gate of Zojo-ji temple (Sangedatsumon, two storeys under big tiled roofs), rows "
+                    "of small stone jizo statues in knitted caps with pinwheels in front of them, the tower rising far behind the gate; B Shiba Park: round trees and "
+                    "lawns, carp streamers (koinobori) on ropes, the low box of the Foot Town building between the tower's legs behind the trees; C the tower's four "
+                    "arched legs spreading from the ground, the outside stair starting on Foot Town's roof and going up into the lattice; D flights of the outside stair "
+                    "zigzagging up inside the lattice, landings with rails, small lamps; E the Main Deck, a wide two-storey box with bands of windows round the tower, the "
+                    "city's lights far below it; F the lattice narrowing over the Main Deck, two night painters on safety ropes painting the steel with brushes, their "
+                    "buckets hanging", where='far behind everything, low and faint, so the play reads over it',
+                    material='a temple gate, stone statues, trees, steel lattice, stairs, a deck, the city', size='about 14 tiles wide and 7 tiles tall', inks=TT_FAR,
+                    scene=TT_AT + ' in front of it'),
+    'tt-far2': dict(world='tokyotower', kind='prop', plane='back', what="the far view behind the shaft near the top of Tokyo Tower, a different scene in each cell, left "
+                    "to right, top to bottom: A the night: low clouds drifting through the narrowing tower, its steel half hidden in them, a few floodlights glowing "
+                    "through; B the Top Deck, a small box with a ring of windows high on the tower, its crown of small lights on its roof (the Diamond Tiara); C the "
+                    "antenna mast on the very top, its broadcast panels, the lightning rod at its tip, stars and a big round moon; D the clouds again, seen from further "
+                    "off: the upper tower standing out of a sea of clouds, the Main Deck's ring of windows glowing under them; E the Top Deck again, closer, its crown "
+                    "of lights and its windows; F the antenna again, looking up its mast from below at the stars, the moon beside it",
+                    where='far behind everything, low and faint, so the play reads over it', material='steel lattice, clouds, a deck, an antenna, the night sky',
+                    size='about 14 tiles wide and 7 tiles tall', inks=TT_FAR + '; clouds a dim grey, stars small dim grey dots, the moon a dim grey disc', scene=TT_AT + ' in front of it'),
+    'tt-truss': dict(world='tokyotower', kind='ledge', what='the basic ledge, a truss of the steel lattice of Tokyo Tower sticking out of the shaft wall: two chords of '
+                     'steel angle, bracing between them, gusset plates with rivets at the joints, a big gusset plate where it meets the wall',
+                     does='solid on every side: you stand on it, cling to its sides and jump off it', material='steel angles and plates, rivets, painted purple',
+                     size='4 tiles long and 1 tile thick', main='purple (the steel)', rule=TT_RULE,
+                     vary='the bracing between the chords (X crosses, a zigzag Warren truss, K bracing, a double lattice of small diamonds, verticals and diagonals, a plate '
+                     'girder with round lightening holes), the gusset plates and their rivets, how it meets the wall (a big gusset, a knee brace under it, a bolted '
+                     'flange) and how its free end is finished'),
+    'tt-landing': dict(world='tokyotower', kind='ledge', what='a landing of the outside stair of Tokyo Tower sticking out of the wall: a steel grating floor on brackets, '
+                       'a handrail on posts along its free side, a toe board', does='a thin platform: you jump up through it from below and stand on it',
+                       material='a steel grating, a handrail, posts, brackets', size='4 tiles long and a third of a tile thick, its rail about 0.8 tiles over it',
+                       place='the landing sticking out of that wall', main='purple (the steel)',
+                       rule=TT_RULE + ' Its rail is thin and grey or purple, never white: only the floor\'s top edge is white.',
+                       vary='its floor (bars, a mesh, checker plate), its rail and posts (one rail, two rails, a mesh panel, a rail with a small sign plate), its brackets '
+                       'under it (a knee brace, a hanger rod up the wall, a deep cantilever) and one small detail (a lamp, a fire bucket, a coiled hose)'),
+    'tt-stair': dict(world='tokyotower', kind='ledge', what='a flight of the outside stair of Tokyo Tower, its square steel steps rising one tile at a time from the left '
+                     'to the right, each step one tile wide and one tile tall, five of them, the first at the wall, a handrail along them',
+                     does='solid steps: you walk up them; the top of each step is where you stand', material='steel treads (grating or checker plate), stringers, a handrail on posts',
+                     size='each step 1 tile wide and 1 tile tall, five steps, so the flight is 5 tiles wide and 5 tiles tall', place='the flight rising to the right from the wall',
+                     main='purple (the steel)', rule=TT_RULE + ' The top edge of every step is white (you stand on it); the handrail is thin and grey, never white.',
+                     vary='each step\'s face (an open grating box, a checker plate tread over a dark riser, a frame with a cross, a solid plate with rivets), the stringer '
+                     '(a solid zigzag, a diagonal beam under the steps, none), the handrail and its posts, and one small detail (a step number plate with plain glyph '
+                     'blocks, a small lamp, a chain)'),
+    'tt-flood': dict(world='tokyotower', kind='prop', what='a floodlight of Tokyo Tower\'s Landmark Light, fixed to the steel lattice, drawn twice in each cell: unlit (cold, '
+                     'dark) on the left and lit on the right, as the hero lights it by coming near; one kind in each cell: A a round sodium floodlight on a U bracket, '
+                     'B a square box floodlight with a visor over it, C two small round lamps on a short bar, D a floodlight on a short arm with its cable looping down, '
+                     'E a lamp inside a wire cage guard, F a long narrow floodlight bar',
+                     where='fixed to the shaft wall (the steel lattice) over a ledge', material='a steel housing, a glass front, a bracket, a cable',
+                     size='about 1 tile wide and 1 tile tall', inks='unlit: grey and black, its glass dark grey; lit: its glass orange with a yellow core and a dither halo of '
+                     'orange round it, a warm sodium light: a light of the dark; its bracket grey or purple', scene=TT_AT + ' below it'),
+    'tt-lightning': dict(world='tokyotower', kind='wallhaz', what='lightning running down the lightning rod\'s cable on the steel of the tower',
+                         why='summer storms over Tokyo are fierce; the tower carries a lightning rod on its tip, and its cable runs down the steel to the earth',
+                         asleep='a dim grey cable clamped along the wall, a few clamps on it, quiet', bursting='a white jagged zigzag of lightning leaping out of the cable '
+                         'into the shaft, red along its edges where it hurts, a few sparks',
+                         vary='the cable and its clamps (one cable, a cable in a conduit, a flat strap on insulators), the bolt\'s shape (one zigzag, a forked bolt, a '
+                         'crackling arc, a cluster of short jags)', inks='the cable grey, the bolt white with red along its edges (the danger edge), sparks grey, the wall\'s steel purple'),
+    'tt-storm': dict(world='tokyotower', kind='hazard', what='a storm cloud rising up the shaft from below: a dark grey churning mass of cloud from wall to wall, red '
+                     'lightning crackling along its top', why='a summer thunderstorm climbs the tower after you (in August 2018 there were 1246 lightning strikes in ten '
+                     'minutes round Tokyo)', vary='its billows (round heaps, flat layers, curls), how the red lightning runs along its top (a zigzag line, forks, '
+                     'sparks), what it throws up (a forked bolt, a small dark cloud with a spark in it, a ball of lightning)',
+                     inks='the cloud dark grey and grey dithered with black (never white: white clouds are what you stand on here), the lightning along its top red '
+                     '(danger), a few grey sparks'),
+    'tt-binosign': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='a coin-operated binocular of the Main Deck on its post (a viewer with two eyepieces, '
+                        'a coin slot, a step to stand on)', b='a small step-number sign of the outside stair on a short post, its number shown only as two or three plain '
+                        'glyph blocks (squares, bars), no digits, no letters'),
+                        where='on the top of a ledge', material='painted steel, glass, a coin box; a small sign plate on a post',
+                        size='the binocular about 1 tile wide and 1.6 tiles tall, the sign about 1 tile wide and 1 tile tall',
+                        inks='the binocular grey and purple (never blue: blue moves here), its lenses black with a grey glint; the sign grey with purple glyph blocks; no orange', scene=TT_AT),
+    'tt-paintbox': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='the night painters\' things: two or three paint cans with the tower\'s paint dripping '
+                        'down their sides, a wide brush laid across one, a rag', b='the electrician\'s carry box of spare floodlight lamps, its lid open, round glass lamps '
+                        'in it, a coil of cable on it'),
+                        where='on the top of a ledge', material='tin cans, paint, a brush; a steel box, glass lamps, a cable',
+                        size='the cans about 1.2 tiles wide and 0.8 tiles tall, the box about 1.2 tiles wide and 0.9 tiles tall',
+                        inks='the cans grey with purple paint (the tower\'s), the brush grey and black; the box grey and purple, its lamps unlit pale grey glass with black (never '
+                        'orange: they are unlit), the cable black', scene=TT_AT),
+    'tt-antcrow': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='digital broadcast antenna panels on a short mast (tall flat panels in a row, cables '
+                       'down from them, a small dish)', b='a crow perched on the ledge, cute, its feathers ruffled by the wind'),
+                       where='on the top of a ledge', material='steel panels, a mast, cables; black feathers',
+                       size='the antenna about 1.5 tiles wide and 2 tiles tall, the crow about 0.8 tiles wide and 0.8 tiles tall',
+                       inks='the panels grey with black seams, the mast purple, the cables black; the crow black with a grey edge and a grey beak, its eye a grey dot', scene=TT_AT),
+    'tt-shrine': dict(world='tokyotower', kind='prop', what="Tower Daijingu, the tower's own little Shinto shrine on its Main Deck: a small wooden hokora with a tiny "
+                      "roof, a small torii in front of it, a rack of ema votive plaques, a shimenawa rope with paper streamers",
+                      where='on the top of a ledge at its wall end', material='wood, a little roof, a torii, ema plaques, a straw rope, paper',
+                      size='about 2 tiles wide and 2 tiles tall',
+                      inks='the hokora grey and purple, the torii purple or grey stone (never orange: in this world orange is only the floodlights\' light; never red), '
+                      'the ema plaques grey with purple marks, the paper streamers grey', scene=TT_AT),
+    'tt-shop': dict(world='tokyotower', kind='prop', what="the Main Deck's souvenir counter of Tokyo Tower, a way into the game's shop: a counter with shelves behind it "
+                    "of little tower models and keychains on hooks, a red noren curtain hung over its open doorway, a sign board over it with plain glyph blocks",
+                    where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
+                    material='a counter, shelves, little tower models, keychains, a noren, a sign board', size='about 3.5 tiles wide and 3 tiles tall',
+                    inks="the counter and shelves grey and purple, the little tower models grey and purple (never orange: only the far tower is), a red noren with a "
+                    "simple white coin on it (the shop's mark), the sign's glyph blocks purple", scene=TT_AT),
+    'tt-stash': dict(world='tokyotower', kind='prop', what="a steel service hatch in the shaft of Tokyo Tower, the way into the game's secret stash: a riveted square or "
+                     "round hatch with a hand wheel or a lever, bolted to the steel, its slits and gaps glowing a soft purple from inside",
+                     where='set in the shaft wall at the wall end of a ledge, standing on the ledge', material='riveted steel plate, a hand wheel, hinges, bolts',
+                     size='about 2.5 tiles wide and 3 tiles tall', inks='grey steel, black rivets and slits, a purple glow with a dither halo from its gaps (purple is the '
+                     'stash\'s mark)', scene=TT_AT),
+    'tt-topdeck': dict(world='tokyotower', kind='prop', plane='back', what="the inside of the secret stash at the top of Tokyo Tower, seen as one whole game screen: the "
+                       "Top Deck's room of 2018, its walls and ceiling covered in faceted mirrors (triangles and diamonds), lines of LED lights running across them, the "
+                       "city's lights through its windows, coins to collect hanging in the room",
+                       where='the whole room behind the play: its walls and ceiling; the ledges in it are steel shelves',
+                       material='faceted mirror panels, LED strips, window frames', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                       inks='big flat shapes of one dim tone each on the black (no dither, no fine speckle): dim purple and dim grey mirror facets, the LED lines a dim purple, '
+                       'the windows small dim blue dots, gold coins', scene=TT_AT + ' as a shelf in the room'),
+})
+
+
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.
 In play: {does}. Material: {material}. Size: {size}; {grid}

@@ -1,5 +1,5 @@
 {
- "commit": "9317a38",
+ "commit": "0bc18ac",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -105,11 +105,9 @@
   },
   "c2-4": {
    "result": "clear",
-   "time": 42,
+   "time": 28,
    "heartsLost": 0,
-   "stuck": [
-    "gate2@154"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c2-5": {
@@ -140,10 +138,12 @@
   },
   "c2-8": {
    "result": "clear",
-   "time": 17.5,
-   "heartsLost": 0,
+   "time": 27,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": []
+   "hits": [
+    "spikes@gate3"
+   ]
   },
   "c2-9": {
    "result": "clear",
@@ -172,10 +172,12 @@
   },
   "c3-2": {
    "result": "clear",
-   "time": 34,
-   "heartsLost": 0,
+   "time": 43,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": []
+   "hits": [
+    "crawler@iceblocks"
+   ]
   },
   "c3-3": {
    "result": "clear",
@@ -186,7 +188,7 @@
   },
   "c3-4": {
    "result": "clear",
-   "time": 34.5,
+   "time": 35,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -320,40 +322,39 @@
   },
   "c5-1": {
    "result": "clear",
-   "time": 8.5,
+   "time": 8,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c5-2": {
    "result": "clear",
-   "time": 33,
+   "time": 21,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c5-3": {
    "result": "clear",
-   "time": 31.5,
+   "time": 42.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "shelves@70"
+   ],
    "hits": []
   },
   "c5-4": {
    "result": "clear",
-   "time": 47.5,
-   "heartsLost": 2,
+   "time": 41.5,
+   "heartsLost": 0,
    "stuck": [
-    "spring@163"
+    "spring@114"
    ],
-   "hits": [
-    "crawler@shelves",
-    "crawler@gate2"
-   ]
+   "hits": []
   },
   "c5-5": {
    "result": "clear",
-   "time": 28,
+   "time": 19.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -376,14 +377,12 @@
   },
   "c5-8": {
    "result": "clear",
-   "time": 41,
-   "heartsLost": 1,
+   "time": 40,
+   "heartsLost": 0,
    "stuck": [
     "planks@67"
    ],
-   "hits": [
-    "crawler@gate3"
-   ]
+   "hits": []
   },
   "c5-9": {
    "result": "clear",

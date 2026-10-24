@@ -88,6 +88,8 @@ const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350
 const overFoe = (H, b) => H.maxY < b.cy;
 const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
+const CLOUD_FROM = 5;   // the TV Tower's clouds (free planks that give way) only from its sixth level up: no cloud round its foot (Worlds, handover 27)
+const DOOR_GAP = 30;   // tiles between a level's shop door and its stash door at least: a tall phone's screen (28.7 tiles) and the draw margin
 const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]], n: 3 };   // plus: s a candy lasts longer with 'long'; at: the parts of a level's height its candies are laid in (the fizz gun gone, owner 2026-10-22: «удалим пистолет, он лишний как смысл»)
 // A campaign level's candies (owner, 2026-10-24: «Мало бонусов: за весь мир фудзи я не встретил ни друзей в клетках, ни разноцветного множителя, ни большого
 // моти… играть стало скучно»): a tier's three parts each bring theirs (campMerge), filled to `n` from its world's own lot, so each level has a rainbow or a
@@ -417,7 +419,7 @@ const VOL_ON = !/[?&]novol\b/.test(location.search);   // volume on every sheet 
 const shadeTint = (th) => (th && th.shade) || (!th || [PAL.gray, PAL.white, PAL.black].includes(th.wall) ? PAL.blue : th.wall);   // the ink a white's or a grey's shadow
 // takes (SHADE_GLSL): the world's own (its walls'), a cool blue where its walls are grey; a theme's `shade` over it (the Dark Forest's grey: black and white there)
 const VOL_LUM = { k: 0, w: 1, s: 0.75, g: 0.6, d: 0.45, b: 0.55, c: 0.8, o: 0.7, y: 0.9, r: 0.45, p: 0.55, a: 0.8, G: 0.4 };
-const VOL_BANDS = new WeakMap(), VOL_RECTS = new WeakMap();
+const VOL_BANDS = new WeakMap(), VOL_RECTS = new WeakMap(), VOL_KEEP = 'krRyY';
 const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 shadow, 0 its own ink, and black's always), once a sprite and a side
   let C = VOL_BANDS.get(rows); if (!C) VOL_BANDS.set(rows, (C = {})); const key = flip ? 'l' : 'r'; if (C[key]) return C[key];
   const H = rows.length, W = rows[0].length, at = (i, j) => (flip ? rows[j][W - 1 - i] : rows[j][i]), inside = new Uint8Array(W * H), d = new Float32Array(W * H);
@@ -432,7 +434,7 @@ const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 sh
   for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { let t = 0, n = 0; for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { t += get(h, i + x, j + y) * (x || y ? 1 : 2); n += x || y ? 1 : 2; } hs[j * W + i] = t / n; }
   const out = new Int8Array(W * H), [lx, ly, lz] = VOL.L;
   for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
-    const q = j * W + i; if (!inside[q] || at(i, j) === 'k') continue;
+    const q = j * W + i; if (!inside[q] || VOL_KEEP.includes(at(i, j))) continue;   // (black stays black; red and yellow, danger's and what is taken, keep their ink: Worlds)
     const gx = (get(hs, i + 1, j - 1) + 2 * get(hs, i + 1, j) + get(hs, i + 1, j + 1) - get(hs, i - 1, j - 1) - 2 * get(hs, i - 1, j) - get(hs, i - 1, j + 1)) / 8;
     const gy = (get(hs, i - 1, j + 1) + 2 * get(hs, i, j + 1) + get(hs, i + 1, j + 1) - get(hs, i - 1, j - 1) - 2 * get(hs, i, j - 1) - get(hs, i + 1, j - 1)) / 8;
     let nx = -gx * 1.5, ny = -gy * 1.5, nz = 1; const m = Math.hypot(nx, ny, nz); nx /= m; ny /= m; nz /= m;
@@ -440,8 +442,8 @@ const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 sh
     out[q] = L < VOL.deep ? -2 : L < VOL.lo ? -1 : 0;
   }
   for (let pass = 0; pass < 2; pass++) for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {   // no lone step (the guide's clusters): a pixel like none of its eight takes theirs
-    const q = j * W + i; if (!inside[q] || at(i, j) === 'k') continue; const cnt = { '-2': 0, '-1': 0, 0: 0 }; let same = 0;
-    for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { if (!x && !y) continue; const X = i + x, Y = j + y; if (X < 0 || Y < 0 || X >= W || Y >= H || !inside[Y * W + X] || at(X, Y) === 'k') continue; const v = out[Y * W + X]; cnt[v]++; if (v === out[q]) same++; }
+    const q = j * W + i; if (!inside[q] || VOL_KEEP.includes(at(i, j))) continue; const cnt = { '-2': 0, '-1': 0, 0: 0 }; let same = 0;
+    for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { if (!x && !y) continue; const X = i + x, Y = j + y; if (X < 0 || Y < 0 || X >= W || Y >= H || !inside[Y * W + X] || VOL_KEEP.includes(at(X, Y))) continue; const v = out[Y * W + X]; cnt[v]++; if (v === out[q]) same++; }
     if (!same) out[q] = +Object.keys(cnt).reduce((a, b) => (cnt[b] > cnt[a] ? b : a));
   }
   C[key] = out; return out;
@@ -1154,7 +1156,7 @@ const CRYPT = Object.assign({}, WORLDS[2], { id: 'crypt', name: { en: 'Crypt', e
 // The Skyscraper (user: a skyscraper and clouds; the campaign's world 6): dusk in purple, banks of cloud far off (BG_FS uWin 3), glass
 // facades up the walls, steel girders for blocks, clouds for the free planks (they dissolve under the hero and gather again; a catwalk
 // off a wall holds), bolts dropped from above for icicles (THEMES.sky `glass`). ?play=sky shows it.
-const SKY = Object.assign({}, WORLDS[2], { id: 'sky', name: { en: 'Skyscraper', es: 'Rascacielos', pt: 'Arranha-céu', ja: 'まてんろう' }, theme: THEMES.sky, dark: [], maxD: 2, magnet: 0, clouds: true,
+const SKY = Object.assign({}, WORLDS[2], { id: 'sky', name: { en: 'TV Tower', es: 'Torre de TV', pt: 'Torre de TV', ja: 'でんぱとう' }, theme: THEMES.sky, dark: [], maxD: 2, magnet: 0, clouds: true,
   chunks: { planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, movers: 1, rest: 1, vault: 1 },
   enemies: { crawler: 3, climber: 2, shell: 1, spitter: 2 },
   intro: [{ news: { en: 'clouds dissolve under you', es: 'las nubes se deshacen bajo tus pies', pt: 'as nuvens se desfazem sob você', ja: 'くもは あしもとで きえる' } }, {}, {}] });
@@ -1622,7 +1624,7 @@ ICONS.long = '.wwwwwwwwww./..w......w../..wyyyyyyw../...wyyyyw.../....wyyw..../.
 ICONS.bubble = '............/....pppp..../..pppppppp../.ppwwpppppp./.pwwppppppp./pppppppppppp/pppppppppppp/.ppppppppppp/.pppppppppp./..pppppppp../....pppp..../............';   // a bubble of gum, its shine
 ICONS.maxhp = ICONS.heart;
 ICONS.taskCrow = '............/............/.......sss../......sswsss/.....ssssss./..ssssssss../.ssssssssss./sssssssss.../..ssssss..../....s.s...../....s.s...../...ss.ss....';   // a level's tasks (Game.task): the crows,
-ICONS.taskNeon = '............/...rrrrrrrr./sssr......r./...r.rrrr.r./...r......r./...r.rrrr.r./...r....r.r./...r...r..r./sssr..r...r./...rrrrrrrr./............/............';   // the neon (ラ),
+ICONS.taskNeon = '............/.ss........./..s.pppppp../..sspwwwwp../..s.pwkkwp../..s.pwwwwp../..s.pwkkwp../..s.pwwwwp../..s.pppppp../..s........./.ss........./............';   // Tokyo's task: a bar's lightbox lit on its iron arm (Golden Gai, Д207 A; it was the neon)
 ICONS.taskCage = '............/.....ss...../.ssssssssss./.s..s..s..s./.s..s..s..s./.s.gsggsg.s./.sgksggskgs./.sggsggsggs./.sggsggsggs./.ssssssssss./............/............';   // a friend in a cage,
 ICONS.taskLantern = '............/.....ss...../...ssssss.../..ssssssss../....soos..../....soos..../....ssss..../.....ss...../.....ss...../....ssss..../...ssssss.../............';   // a Village shrine's lantern lit,
 ICONS.taskLamp = '............/.....ss...../....s..s..../...ssssss.../...soooos.../...soyyos.../...soyyos.../...soooos.../...ssssss.../....ssss..../............/............';   // the Mine's lamps (its task)
@@ -3116,6 +3118,9 @@ class Level {
       if (rc ? rc.shop : !o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (rc ? rc.shop : 0.3 + rnd() * 0.4), kind: 'shop', done: false });
       if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       if (rc && rc.trial) this.plan.push({ y: this.floor - H * rc.trial.at, kind: 'trial', goal: rc.trial.goal, done: false });   // a trial room (TRIAL)
+      { const sp = this.plan.find((p) => p.kind === 'shop'), st = this.plan.find((p) => p.kind === 'treasure'), gap = DOOR_GAP * this.tile;   // the shop's door and the stash's a screen
+        // apart at least (Worlds, 2026-10-24: the two on one screen were ~1600 boxes, over the density rule, since every level has its shop; and never two rooms offered at once)
+        if (sp && st && H && Math.abs(sp.y - st.y) < gap) { const up = st.y - gap, dn = st.y + gap; if (up >= this.floor - 0.88 * H) sp.y = up; else if (dn <= this.floor - 0.12 * H) sp.y = dn; } }
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
       if (v > 0) loosen(this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0, rush: 0 }, 'y', 'v', 'spitT', 'calm', 'rush');   // (see loosen)
     } else if (o.kind === 'menu') this.menuAt(o.floorY);   // the menu's (owner, 2026-10-23, the Figma «Main»): nothing in it but the hero
@@ -3365,7 +3370,7 @@ class Level {
   // Some of a run's ledges as their world has them (user): the Cave's planks bounce, the Mine's blocks pull (BOUNCY, MAGNET).
   flavour(from) {
     const w = this.world;
-    if (w.clouds) { for (const r of this.rects.slice(from)) if (r.plank && !r.move && !(r.x0 <= this.l + 1 || r.x1 >= this.r - 1)) { r.crumble = true; r.cloud = true; } return; }   // the Skyscraper: a free plank is a cloud and gives way (its kit: a cloud always dissolves, a catwalk off a wall holds)
+    if (w.clouds) { if (this.rc && this.stage < CLOUD_FROM) return; for (const r of this.rects.slice(from)) if (r.plank && !r.move && !(r.x0 <= this.l + 1 || r.x1 >= this.r - 1)) { r.crumble = true; r.cloud = true; } return; }   // the Skyscraper: a free plank is a cloud and gives way (its kit: a cloud always dissolves, a catwalk off a wall holds)
     if (w.awnings) {   // Tokyo: a plank off a wall is a shop's awning, and an awning bounces (its kit); but of two awnings a jump apart, one over the other, only
       // the upper (owner: «эти платформы не должны быть расположены так близко, иначе сильно колбасит героя между ними»): the lower is a steel beam, a jump
       // under it, and the upper keeps its throw where the level wants it (c796bcc kept the lower, and 5-7's way up at 145 m was lost: its throw went past a
@@ -4307,6 +4312,7 @@ const pxVote = (rows, from) => {
 };
 if (GUIDE) {
   for (const k in HAZ_SPR) if (k !== 'tide') { const S = HAZ_SPR[k]; S.band = pxVote(S.band, Math.min(S.band.length, S.front + 3)); }
+  for (const S of [IW.lampoff, IW.lampon, GAI.neko, TW.sign, TW.floodoff, TW.floodon, TW.stash]) if (S) S.flat = true;   // (no volume, VOL: lights, a sign, a window in the wall, a flat hatch; Worlds')
   for (const T of [WALL_SPR, ICE_SPR, HOLD_SPR, VDOOR, VIL2, VDROP_SPR, VSLICK_SPR, HAZ_SPR, FOE_SPRITES, MFAR.cell, IW, FC_GATE, TFAR.cell, GAI, TW, TWFAR.cell]) pxWalk(T);   // (K9_SPR's and UME_SPR's arrays are FOE_SPRITES')
   for (const id in FUJI_SPR) if (typeof FUJI_SPR[id] === 'string' && FUJI_SPR[id].includes('/')) FUJI_SPR[id] = pxClean(FUJI_SPR[id].split('/')).join('/');   // (its own form: rows by '/')
 }
@@ -4684,7 +4690,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const cm = flip ? n - cm0 : cm0, x0 = sn(dx - cm * q), y0 = y1 - S.base * q;
     const my = y0 + ((r0 + r1 + 1) / 2) * q, dw = sn(0.7 * t);
     F(dx, my, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
-    vsp(S.rows, x0, y0, flip, 1, q, true);
+    vsp(S.rows, x0, y0, flip, 1, q, !S.flat);
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
     if (shop) { const ry = sn(my); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
     else { const ry = sn(y1 - 0.5 * t); for (let k = 0; k < 3; k++) disc(dx + (k - 1) * rr * 0.5, ry - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
@@ -4900,7 +4906,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon, Golden Gai's far
   const gaiAt = (S, wx, b, d, a = 1) => {   // a Golden Gai thing (GAI) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + S.dx * q : snap(wx) - (S.dx + n) * q;
-    vsp(S.rows, x0, snap(b) - S.base * q, d < 0, a, q);
+    vsp(S.rows, x0, snap(b) - S.base * q, d < 0, a, q, a === 1 && !S.flat);
   };
   const gaiFar = () => {   // Golden Gai far off, by level (TFAR): screen-fixed, low, at a quarter (DIM), two game pixels a sheet pixel, centred, its foot at farY (as the
     // Mine's MFAR)
@@ -5051,7 +5057,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const iwAt = (S, wx, b, d, a = 1, ox = S.dx, base = S.base) => {   // an Iwami thing (IW) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall; its orange and yellow (a
     // flame, a lit window) lights of the dark
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + ox * q : snap(wx) - (ox + n) * q, y0 = snap(b) - base * q;
-    vsp(S.rows, x0, y0, d < 0, a, q, a === 1);
+    vsp(S.rows, x0, y0, d < 0, a, q, a === 1 && !S.flat);
     if (!S.lit) { S.lit = []; const seen2 = new Set(); S.rows.forEach((row, y) => [...row].forEach((ch, x) => { if (!'oy'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
       while (st.length) { const [a2, b2] = st.pop(); cl.push([a2, b2]); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a2 + dx, v = b2 + dy; if (v >= 0 && v < S.rows.length && u >= 0 && u < n && !seen2.has(v * n + u) && 'oy'.includes(S.rows[v][u])) { seen2.add(v * n + u); st.push([u, v]); } } }
       if (cl.length >= 4) S.lit.push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
@@ -5811,7 +5817,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (p.kind === 'flood') twFlood(wl ? lv.l : lv.r, p.y, d, lv.tended.has(r));
       else if (p.kind === 'crow') {   // the crow on the beam (Д245 A) notices the hero (NOTICE): a hop, it turns to him
         const S = TW.crow, q = PIX.base, n = S.rows[0].length, ox = twDx(S), wx = snap(wl ? lv.l : lv.r), x0 = d > 0 ? wx + ox * q : wx - (ox + n) * q;
-        const nb = notice(g, lv, r, x0, snap(r.y0) - S.base * q, x0 + n * q, r.y0); vsp(S.rows, x0, snap(r.y0 - S.base * q - nb.dy), nb.face === null ? d < 0 : nb.face);
+        const nb = notice(g, lv, r, x0, snap(r.y0) - S.base * q, x0 + n * q, r.y0); vsp(S.rows, x0, snap(r.y0 - S.base * q - nb.dy), nb.face === null ? d < 0 : nb.face, 1, q, true);
       }
       else if (TW[p.kind]) { const S = TW[p.kind]; iwAt(S, wl ? lv.l : lv.r, r.y0, d, 1, twDx(S)); }
     }

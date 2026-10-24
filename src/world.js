@@ -3440,7 +3440,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // whose door is past its middle drawn mirrored; one whose door is far out set into the wall, as Fuji's huts are built into the slope)
     const dx = X(Math.min(1.6, 0.1 + (dc * Pk) / t)), flip = wl ? mir : !mir, x0 = sn(flip ? dx + dcN * Pk : dx - dcN * Pk), y1 = d.y1, top = y1 - (hh - (shop ? r1 + 1 : r0)) * Pk, wy = y1 - hh * Pk;
     const dw = shop ? Math.max(0.35 * t, ((c1 - c0 + 1) / 2) * Pk) : 0.3 * t, x = dx, y = (top + y1) / 2;
-    F(dx, (top + y1) / 2, 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    F(dx, (top + y1) / 2, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
     fspr(id, x0, y1, flip, null, DOOR_INK);
     if (!shop) {   // the stash's door ajar: a dark gap, purple light down both its edges and over it
       box(sn(dx - dw), sn(top), sn(dx + dw), y1, INK.dark, 1, 0, 10, 0);
@@ -3472,7 +3472,7 @@ Renderer.prototype.draw = function (g, alpha) {
       bx(u0, v0 - px, u1, v0, th.block, 4);
     };
     const dx = X(1.25), dw = sn(0.7 * t), eave = shop ? 2.6 : 2.2, dh = shop ? 2.1 : 2.0, noren = shop ? 0.75 : 0.85;
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
     if (shop) {
       bx(0, 0, 3.9, eave, PAL.black);   // its front, dark between its posts
       for (const u of [0.3, 2.15, 3.72]) bx(u, 0, u + 0.18, eave, th.block, 4);   // wooden posts (E's, chequered), the beam over them
@@ -3523,7 +3523,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
     const W = 3.2, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
     for (const u of [0.3, 1.4, 2.5, W - 0.2]) bx(u, -1.7, u + 0.12, 0, th.block, 0, DIM);   // its boat bay under the ledge, behind: piles, the boat, the water
     bx(0.6, -1.25, 2.6, -0.95, PAL.gray, 0, DIM); bx(0.9, -1.45, 2.3, -1.25, PAL.gray, 0, DIM); for (const u of [0.2, 1.3, 2.4]) bx(u, -1.75, u + 0.8, -1.7, th.block, 0, DIM);
     bx(0, 0, W, eave, PAL.black); bx(0, 0, W, eave, th.block, 2); for (const u of [0.45, 2.05, W - 0.15]) bx(u, 0, u + 0.13, eave, th.block);   // its wooden front, dotted, its posts
@@ -3612,7 +3612,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // breathes round it.
   const mnShop = (d) => {
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.red, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
     bx(0.25, 0, 2.25, dh + 0.45, G, 1); bx(0.5, 0, 2.0, dh, INK.dark);   // its wooden front, the doorway dim inside
     for (const u of [0.3, 2.0]) bx(u, 0, u + 0.2, dh + 0.4, G, 3); bx(0.25, dh + 0.3, 2.25, dh + 0.45, G); bx(0.25, dh + 0.3, 2.25, dh + 0.3 + px, K);   // its posts, its lintel
     bx(0.15, dh + 0.45, 2.45, dh + 0.65, G, 3, 1);   // its flat roof (grey, its grain dotted: it was white, an alpha of 3, and read as a ledge's edge)
@@ -3624,7 +3624,7 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const mnStash = (d) => {
     const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
-    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
+    F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) it
     for (let i = 0; i < 9; i++) { const q = i / 8, u = q < 0.3 ? 0.32 : q > 0.7 ? 2.18 : 0.32 + ((q - 0.3) / 0.4) * 1.86, v = q < 0.3 ? (q / 0.3) * dh : q > 0.7 ? ((1 - q) / 0.3) * dh : dh; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1, 1.5); }   // its frame of stones (half dark)
     bx(0.5, 0, 2.0, dh, G, 3, 1.5); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber (half dark: it was pure white), iron bands
     for (const [u, v] of [[0.62, 0.3], [1.88, 0.3], [0.62, 1.6], [1.88, 1.6]]) bx(u, v, u + px, v + px, PAL.white);   // its studs
@@ -3651,10 +3651,21 @@ Renderer.prototype.draw = function (g, alpha) {
     skInside(d, 'stash', c, dx, dw, ht);
   };
   const pt = lv.portal;
-  if (pt && seen(pt.y - 3 * pt.r, pt.y + 3 * pt.r)) {
+  // The way out the brightest thing on the screen (К7 «А», the Level Design Book: the main exit lit most, side doors dimmer): the world beyond shows
+  // through it and its light falls down the shaft, seen from a jump below. The Village's sky, the Mine's lamp, Fuji's snow glinting, the Sea's sky, Tokyo's neon
+  const xl = th.village ? [PAL.blue, INK.white] : th.mines ? [PAL.orange, INK.white] : th.fuji ? [PAL.blue, INK.white] : th.sea ? [PAL.aqua, INK.white] : th.town ? [PAL.blue, PAL.purple] : null;
+  if (pt && seen(pt.y - 3 * pt.r, pt.y + (xl ? 6 : 3) * pt.r)) {
     const p = 1 + 0.08 * Math.sin(T * 4);
+    if (xl) F(pt.x, pt.y + 2.4 * pt.r, 1.25 * pt.r, 0, 0, 2.8 * pt.r, xl[0], 0.22 + 0.04 * Math.sin(T * 2), 1);   // its light falling down the shaft
     F(pt.x, pt.y, pt.r * 2.2 * p, 0, 0, pt.r * 2.2 * p, INK.white, 0.3, 1);
-    disc(pt.x, pt.y, pt.r, INK.dark, 1);   // a hole: the hero shows going into it
+    disc(pt.x, pt.y, pt.r, xl ? xl[0] : INK.dark, th.mines ? LIT : 1);   // a hole: the hero shows going into it (the world beyond in it; the Mine's a warm dark round its lamp)
+    if (xl) {
+      const r = pt.r, q = (T * 0.15) % 1;
+      if (th.village || th.sea) { const cx = pt.x - 0.45 * r + q * 0.75 * r; F(cx, pt.y + 0.2 * r, 0.42 * r, 0, 0, 0.16 * r, xl[1], 1, 0); F(cx + 0.25 * r, pt.y + 0.08 * r, 0.26 * r, 0, 0, 0.14 * r, xl[1], 1, 0); }   // a cloud drifting across the sky
+      else if (th.mines) { const fl = 0.85 + 0.15 * Math.sin(T * 11) * Math.sin(T * 7); F(pt.x, pt.y + 0.08 * r, 0.3 * r * fl, 0, 0, 0.5 * r * fl, PAL.orange, 1, 0); disc(pt.x, pt.y + 0.15 * r, 0.13 * r, xl[1], 1); }   // a lamp's flame flickering
+      else if (th.fuji) { const tw = Math.sin(T * 3) > 0.2; for (const [u, v] of [[-0.35, -0.2], [0.3, 0.25]]) disc(pt.x + u * r, pt.y + v * r, (tw ? 0.12 : 0.07) * r, xl[1], 1); }   // the snow glinting
+      else { const off = Math.sin(T * 13) * Math.sin(T * 3.1) > 0.9; if (!off) F(pt.x, pt.y, 0.62 * r, 0, 0, 0.62 * r, xl[1], 1, 4); }   // a neon ring, now and then flickering off
+    }
     F(pt.x, pt.y, pt.r * 1.12, 0, 0, pt.r * 1.12, th.lip, 1, 4);
     for (let k = 0; k < 3; k++) { const a = T * 2.2 + (k * TAU) / 3; disc(pt.x + Math.cos(a) * pt.r * 1.5, pt.y + Math.sin(a) * pt.r * 1.5, pt.r * 0.13, th.lip, 0.9); }
   }

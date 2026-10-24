@@ -311,10 +311,11 @@ const VSP_RECTS = new WeakMap(), vspRects = (rows) => {   // a picture's boxes f
 };
 // The cluster rule (owner, 2026-10-24, the pixel-art guide he sent, its first rule: «Случайный шум — отдельные точки без общей структуры … почти всегда
 // выглядит как грязная текстура», and «Фоны в подарочных комнатах выглядят грязно»): a sheet drawn behind (DIM) loses its specks. Every cluster of one
-// ink, its pixels touching by sides or corners (so a checker's strands hold together), of at most VSP_SPECK pixels takes the ink most of its eight
-// neighbours have: the clear, or the shape round it. Yellow, white and red keep theirs (a light, an edge, a mark), and so does a cluster at a side of
-// the picture (a vspCut piece's may go on in the next). Once a picture (VSP_CLEAN); ?speck=N another size, 0 none, to compare.
-const VSP_SPECK = (() => { const q = new URLSearchParams(location.search).get('speck'); return q != null && q !== '' && +q >= 0 ? +q : 2; })();
+// ink, its pixels touching by sides or corners (so a checker's strands hold together) and either of its tones (a capital is its darker half: a river
+// drawn in both is one shape, its ripples kept), of at most VSP_SPECK pixels takes the ink most of its eight neighbours have: the clear, or the shape
+// round it: a lone pixel, none of its ink round it. Yellow and red keep theirs (a light, a mark; white has no place behind, DEPTH), and so does a
+// cluster at a side of the picture (a vspCut piece's may go on in the next). Once a picture (VSP_CLEAN); ?speck=N another size, 0 none, to compare.
+const VSP_SPECK = (() => { const q = new URLSearchParams(location.search).get('speck'); return q != null && q !== '' && +q >= 0 ? +q : 1; })();   // (1: a lone pixel; at 2 a river's short ripples and the wisteria's sparks went too)
 const VSP_CLEAN = new WeakMap(), vspClean = (rows) => {
   let out = VSP_CLEAN.get(rows); if (out) return out;
   const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H), fill = [];
@@ -323,11 +324,11 @@ const VSP_CLEAN = new WeakMap(), vspClean = (rows) => {
     const cells = [[x, y]], st = [[x, y]]; seen[y * W + x] = 1; let side = false;
     while (st.length) { const [a, b] = st.pop(); if (a === 0 || a === W - 1) side = true;
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
-        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[v * W + u] && g[v][u] === ch) { seen[v * W + u] = 1; st.push([u, v]); cells.push([u, v]); } } }
-    if (cells.length > VSP_SPECK || side || 'ywr'.includes(ch.toLowerCase())) continue;
+        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[v * W + u] && g[v][u].toLowerCase() === ch.toLowerCase()) { seen[v * W + u] = 1; st.push([u, v]); cells.push([u, v]); } } }
+    if (cells.length > VSP_SPECK || side || 'yr'.includes(ch.toLowerCase())) continue;
     const own = new Set(cells.map(([a, b]) => b * W + a)), n = {};
     for (const [a, b] of cells) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
-      if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !own.has(v * W + u)) n[g[v][u]] = (n[g[v][u]] || 0) + 1; }
+      if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !own.has(v * W + u)) n[g[v][u]] = (n[g[v][u]] || 0) + 1; }   // (the exact letter: a shape's own tone)
     let best = '.', most = -1; for (const k in n) if (n[k] > most) { most = n[k]; best = k; }
     fill.push(cells, best);
   }

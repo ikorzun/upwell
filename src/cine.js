@@ -295,7 +295,7 @@ function cineLights(rd, g, lv, vlamps) {
   const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
   for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b)).slice(0, 6)) add(c.x, c.y, 1.4 * R, 0.4, [1.0, 0.82, 0.3]);
   for (const b of lv.bubbles) add(b.x, b.y, 2.8 * R, 0.6, b.kind === 'shop' ? [1.0, 0.3, 0.25] : [0.75, 0.45, 1.0]);
-  if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) add((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 3.2 * R, 0.75, s.ink === PAL.blue ? [0.35, 0.65, 1.0] : [1.0, 0.25, 0.22]); }
+  if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) add((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 3.2 * R, 0.75, s.ink === PAL.blue ? [0.35, 0.65, 1.0] : s.ink === PAL.aqua ? [0.45, 0.9, 0.95] : s.ink === PAL.purple ? [0.8, 0.6, 1.0] : s.ink === PAL.white ? [0.95, 0.95, 0.95] : [1.0, 0.25, 0.22]); }   // (a lightbox's ink, Д153 «А»)
   if (lv.exit) add((lv.exit.x0 + lv.exit.x1) / 2, (lv.exit.y0 + lv.exit.y1) / 2, 2.6 * R, 0.5, [0.85, 0.92, 1.0]);
   if (lv.fire) add((lv.l + lv.r) / 2, lv.fire.y, 7 * R, 0.9, [1.0, 0.42, 0.15]);
   add(hero.cx, hero.cy, 3.4 * R, 0.22, [0.85, 0.9, 1.0]);

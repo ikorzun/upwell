@@ -162,11 +162,6 @@ function score(base, st) {
 }
 // A boss fight: a heart lost costs what it costs on a climb, a heart dealt pays a little less (no trading one for one), the boss
 // beaten is the level cleared. Between hits the hero is drawn to where the boss's way of being beaten wants it (BOSSES; Boss):
-//   dive (the Cork, the Crane, the Pigeon): up on a plank, never under it as it shakes over the hero and drops (the shaking and
-//     the drop outlast a try's second); at it while it lies dazed. Hovering, it can be stomped too: the tries find that.
-//   slide (the Puck, the Rat King): a rolling shell is a flip to come (it slides into its own shells: Game.rolling); behind a
-//     shell from it, to stomp it its way; at it while it lies belly up.
-//   ride (the Tram, the Minecart): up, as high as over it (open from above only), then over it.
 //   bone (Koschei): off the floor in front of him as he sweeps; at him while he is off balance.
 //   sky (the Karasu-tengu): off the line of its swoop; at it while its beak is stuck in the floor.
 //   street (the Tram): up off the floor while it rings and runs; at its roof while it stands at a stop.
@@ -178,15 +173,7 @@ function bossScore(base) {
   if (bs.dead) return 1e9;
   let s = -(base.hp - g.hp) * 5000 + (base.bossHp - bs.hp) * 4000 + (g.coins - base.coins) * 3 + (g.kills - base.kills) * 40;
   const dx = Math.abs(H.cx - b.cx) / T, h = heightOf(H.cy);
-  if (d.rail) s += h * 80 + (H.maxY < b.minY ? 800 - Math.min(dx, 6) * 120 : 0);
-  else if (d.slide) {
-    s += lv.enemies.filter((e) => e.state === 'shell').length * 2500;
-    if (bs.state === 'dazed') s += 3000 - dx * 400;
-    else {   // the nearest shell still walking: from its far side, a stomp rolls it at the boss (shellUp: away from the hero)
-      const sh = lv.enemies.filter((e) => e.type === 'shell' && e.state !== 'shell').sort((p, q) => Math.abs(p.body.cx - H.cx) - Math.abs(q.body.cx - H.cx))[0];
-      if (sh) s -= (Math.abs(H.cx - (sh.body.cx - Math.sign(b.cx - sh.body.cx) * (sh.body.R + H.R))) / T) * 150;
-    }
-  } else if (d.bone) {
+  if (d.bone) {
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at him, best over him, while he is off balance
     else if (bs.state === 'warn' || bs.state === 'sweep') s += Math.min(h, 4) * 300 - (Math.sign(H.cx - b.cx) === bs.dir && dx < 5 && h < 1.5 ? 3000 : 0);   // up off the floor in front of him
     else s -= Math.abs(dx - 3) * 60;
@@ -211,10 +198,6 @@ function bossScore(base) {
     else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - b.cx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // never under it as it drops
     else if (bs.state === 'windup' || bs.state === 'sweep') s -= Math.max(0, h - 0.5) * 600;   // low on the floor under its swing
     else s -= Math.abs(dx - 3) * 60;   // near enough to be at it once it falls
-  } else if (bs.state === 'dazed') s -= dx * 400;
-  else {
-    s += Math.min(h, 8) * 100;
-    if ((bs.state === 'warn' || bs.state === 'dive') && H.cy > b.cy && Math.abs(H.cx - b.cx) < b.R + H.R + 0.5 * T) s -= 4000;
   }
   return s;
 }

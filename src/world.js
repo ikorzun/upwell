@@ -296,15 +296,32 @@ const HOLD_SPR = {   // cut from research/variants/<world>-holder-1-px.png, path
     shake: ['sssssssssssssssssssssssss.', '...ssssssssssssssssssss..s', '.ssssssssssssssssssssss.s.', '...ssssssssssssssssssss...', '.ssssssssssssssssssssss.s.', '.skskskskskskskskskskss.s.', '.ssssssssssssssssssssss.s.', '.ssssssssssssssssssssss.s.', '.s......................s.', '.ssssssssssssssssssssss.s.', 'sskssssssssssssssssssss.s.', '.sksssssssssssssssssss..s.', '.ssssssssssssssssssssss.s.', '.skssssssssssssssssssss.s.', '.skssssssssssssssssssss.s.', '.ssssssssssssssssssssss.s.', '.ssssssssssssssssssssss.s.', '.s......................s.', '.ssssssssssssssssssssss.s.', '.skssssssssssssssssssss.s.', '.sksssssssssssssssssss..s.', '.ssssssssssssssssssssss.s.', 'sskksksksksksksksks.....s.', '.ssssssssssssssssssssss.s.', '.s.ssssssssssssssssssss.s.', '.s......................s.', 'sss......rrrrr.rr.....s.s.', '.ss......rrrrr.rr.....s.s.', '.ss......rrrrrrrr.....s.s.', '.s........rrrrr.........s.', '.s.sssssssssssssssssss..s.', '........................s.'],
     empty: ['ssssssssssssssssssssss.s', 's.sssssssssssssssssssss.', 's.ssssssssssssssssssss.s', '........................', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s', '.s.....................s'] },
 };
-const VSP_RECTS = new WeakMap(), vspRects = (rows) => {   // a picture's boxes for vsp, once: [i0, i1, j0, j1, ink] by fives, each row's runs merged down
-  let R = VSP_RECTS.get(rows); if (R) return R;
+const VSP_RECTS = new WeakMap(), VSP_TONED = new WeakMap(), vspRects = (rows, toned = false) => {   // a picture's boxes for vsp, once: [i0, i1, j0, j1, ink, tone]
+  // by sixes, each row's runs merged down. Toned (one sheet pixel one game pixel): a checker of one ink with clear or black (30 + its phase), or with its own
+  // darker half (20 + its phase), 3 of its pixels or more, one box, merged down only where the next row keeps the checker (its phase: the parity of i + j of its
+  // dark pixels); vsp draws it in the engine's checker tone of that phase where it lands, so a dithered sheet is fewer boxes, pixel for pixel the same
+  const C = toned ? VSP_TONED : VSP_RECTS; let R = C.get(rows); if (R) return R;
   R = []; let open = new Map();
+  const off = (c) => c === '.' || c === 'k', put = (i, e, j, ch, tn, cur) => { const key = i + ',' + e + ch + tn, o = open.get(key); if (o != null) { R[o + 3] = j + 1; cur.set(key, o); } else { cur.set(key, R.length); R.push(i, e, j, j + 1, ch, tn); } };
   rows.forEach((r, j) => { const cur = new Map();
-    for (let i = 0; i < r.length;) { const ch = r[i]; let e = i + 1; while (r[e] === ch) e++;
-      if (ch !== '.') { const key = i + ',' + e + ch, o = open.get(key); if (o != null) { R[o + 3] = j + 1; cur.set(key, o); } else { cur.set(key, R.length); R.push(i, e, j, j + 1, ch); } }
+    for (let i = 0; i < r.length;) {
+      const ch = r[i];
+      if (toned && ch !== '.' && ch !== 'k') {
+        const lt = ch === 'd' ? 's' : ch.toLowerCase(), dk = (c) => c !== lt, same = (c) => c && c !== '.' && c !== 'k' && (c === 'd' ? 's' : c.toLowerCase()) === lt;
+        if (same(r[i + 1]) && dk(r[i + 1]) !== dk(ch) && r[i + 2] === ch) {   // its ink and its darker half in turn
+          let e = i + 1; while (same(r[e]) && dk(r[e]) === ((e - i) % 2 ? !dk(ch) : dk(ch))) e++;
+          if (e - i >= 4) { const d0 = dk(ch) ? i : i + 1; put(i, e, j, lt, 20 + ((d0 + j) & 1), cur); i = e; continue; }
+        }
+        if (off(r[i + 1] || '.') && r[i + 2] === ch) {   // its ink and clear (or black) in turn
+          let e = i + 1, n = 1; while (off(r[e] || '.') && r[e + 1] === ch) { e += 2; n++; }
+          if (n >= 3) { put(i, e, j, ch, 30 + ((i + 1 + j) & 1), cur); i = e; continue; }
+        }
+      }
+      let e = i + 1; while (r[e] === ch) e++;
+      if (ch !== '.') put(i, e, j, ch, 0, cur);
       i = e; }
     open = cur; });
-  VSP_RECTS.set(rows, R); return R;
+  C.set(rows, R); return R;
 };
 // The cluster rule (owner, 2026-10-24, the pixel-art guide he sent, its first rule: «Случайный шум — отдельные точки без общей структуры … почти всегда
 // выглядит как грязная текстура», and «Фоны в подарочных комнатах выглядят грязно»): a sheet drawn behind (DIM) loses its specks. Every cluster of one
@@ -3606,6 +3623,7 @@ float tone(int k, ivec2 g) {
   if (k == 3) return float((y & 1) == 0);
   if (k == 4) return float(((x + y) & 1) == 0);
   if (k == 5) return float(!((x & 1) == 1 && (y & 1) == 1));
+  if (k == 7) return float(((x + y) & 1) == 1);   // (the checker's other phase: a sheet's dither drawn as one box, vsp)
   return 1.0;
 }
 const float B4[16] = float[16](0., 8., 2., 10., 12., 4., 14., 6., 3., 11., 1., 9., 15., 7., 13., 5.);
@@ -3758,7 +3776,7 @@ void main() {
   }
   else if (t == 7) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 2.0)); if (fract((p.x + p.y) / vP.w) < 0.35) col = PAL[8]; }   // striped box
   else if (t == 8) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 2.0)); if (fract(p.y / vP.w) < 0.5) col = PAL[0]; }   // box ribbed across in black
-  else if (t == 10) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 0.0)); if (tone(int(vP.w + 0.5), g) > 0.5) col = PAL[0]; }   // square box in a tone of black (0: flat)
+  else if (t == 10) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 0.0)); int tn = int(vP.w + 0.5); if (tn >= 10) { if (tone(tn - 10, g) > 0.5) col = mix(PAL[0], col, 0.5); } else if (tone(tn, g) > 0.5) col = PAL[0]; }   // square box in a tone of black (0: flat; 10 + k: tone k its darker half, a sheet's two-tone dither)
   else if (t == 9) {                                                          // ellipse lit from the top left: ink p1 in tones down to the right
     a = aa(length(vL) - 1.0);
     float v = dot(vL, vec2(0.6, 0.8));
@@ -4073,9 +4091,12 @@ Renderer.prototype.draw = function (g, alpha) {
   const menu = g.state === 'menu', farR = [];
   const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
-    const n = rows[0].length, R = vspRects(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows);   // (behind: no specks, the cluster rule)
-    for (let k = 0; k < R.length; k += 5) { const i = R[k], e = R[k + 1], j0 = R[k + 2], j1 = R[k + 3], ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = flip ? x + (n - e) * s : x + i * s;
-      box(u, y + j0 * s, u + (e - i) * s, y + j1 * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, 0); }
+    const P = PIX.size, toned = Math.abs(s - P) < 1e-6 && !window.__vspPlain, n = rows[0].length, R = vspRects(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows, toned);   // (window.__vspPlain: plain boxes, to compare; behind: no specks,
+    // the cluster rule; toned: a sheet pixel one game pixel, so a checker can be the engine's tone)
+    const par = (Math.round(x / P) + Math.round(y / P) + (flip ? n - 1 : 0)) & 1;   // (the world's checker parity at its corner: tone 4 is (x + y) even, 7 odd)
+    for (let k = 0; k < R.length; k += 6) { const i = R[k], e = R[k + 1], j0 = R[k + 2], j1 = R[k + 3], ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = flip ? x + (n - e) * s : x + i * s, t0 = R[k + 5];
+      const tn = t0 >= 20 ? (t0 >= 30 ? 0 : 10) + (((t0 & 1) + par) & 1 ? 7 : 4) : 0;
+      box(u, y + j0 * s, u + (e - i) * s, y + j1 * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, tn); }
   };
   const onGrid = (v) => Math.round(v / PIX.size) * PIX.size;   // (on the drawing grid: a picture's dot of 1.5 or 2.5 of its pixels, PIX.fit, leaves no hole)
   const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
@@ -5570,7 +5591,12 @@ Renderer.prototype.draw = function (g, alpha) {
     {   // rough rock, dotted grey, its underside shaded: a timber beam under it, a post down to its footing, a coil of rope off its end (half dark)
       const c = th.block, q = PIX.base, nx = Math.max(4, Math.round(w / q)), ny = Math.max(4, Math.round((r.y1 - r.y0) / q)), key = nx + 'x' + ny;
       if (!r.slab || r.slab.key !== key) r.slab = { key, rows: slabRows(nx, ny, Math.round(r.y0 / t) & 1023) };   // (once a ledge: its picture, the stone generator)
-      if (c === PAL.gray) vsp(r.slab.rows, r.x0, r.y0, d < 0, 1, q);   // its rock cut by hand (Д116 «А», Д129 «A»)
+      if (c === PAL.gray) {   // its rock cut by hand (Д116 «А», Д129 «A»): its face and its darker underside two boxes, the chisel's marks over them (a few dozen boxes)
+        const nu = r.slab.rows.reduce((m, row) => m + (row[0] === 'S' ? 1 : 0), 0);
+        if (!r.slab.marks) r.slab.marks = r.slab.rows.map((row) => row.replace(/[sS]/g, '.'));
+        box(r.x0, r.y0, r.x1, snap(r.y0 + (ny - nu) * q), PAL.gray, 1, 0, 10, 0); box(r.x0, snap(r.y0 + (ny - nu) * q), r.x1, r.y1, PAL.gray, 1.5, 0, 10, 0);
+        vsp(r.slab.marks, r.x0, r.y0, d < 0, 1, q);
+      }
       else { box(r.x0, r.y0, r.x1, r.y1, c, 1, 0, 10, 1); box(r.x0, Y(Math.max(0.3, ht - 0.28)), r.x1, r.y1, c, 1, 0, 10, 4); }   // (another world's block in the Mine's look: dotted)
       if (ht > 1.4) {   // a thick one, a pillar of rock (its face the stone generator's; another world's block: darker under its top, in strata, cracks down it): the timber
         // shoring its sides and a cap under its edge

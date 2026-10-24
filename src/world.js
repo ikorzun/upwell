@@ -5285,32 +5285,7 @@ Renderer.prototype.draw = function (g, alpha) {
     for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
     box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
   }
-  if (bs && !bs.dead && bs.look) look(bs, true);   // its look's parts before it (LOOKS), instead of what is below
-  else if (bs && !bs.dead && bs.def && bs.def.rat) {   // the Rat King's round ears, its tail
-    const b = bs.body, w = 0.45 * (b.maxX - b.minX), up = b.up && b.up.fails ? 1 : -1;
-    for (const d of [-1, 1]) { disc(b.cx + d * w, b.minY + 0.15 * R, 0.4 * R, PAL.gray, 1); disc(b.cx + d * w, b.minY + 0.15 * R, 0.2 * R, PAL.purple, 1); }
-    for (let k = 0; k < 8; k++) disc(b.maxX + k * 0.18 * R, b.maxY - 0.3 * R - Math.sin(T * 6 + k * 0.7) * 0.15 * R * k * 0.3, 0.07 * R, PAL.gray, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.pigeon) {   // the Pigeon's wings, flapping, and its beak
-    const b = bs.body, w = 0.6 * (b.maxX - b.minX), f = Math.sin(T * (bs.state === 'dive' ? 22 : 9));
-    for (const d of [-1, 1]) F(b.cx + d * w, b.cy - 0.1 * R + f * 0.25 * R, 0.55 * R, d * 0.2 * R, 0, (0.3 + 0.12 * f) * R, PAL.gray, 1, 0);
-    disc(b.cx, b.cy + 0.15 * (b.maxY - b.minY), 0.16 * R, INK.flame, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.crane) {   // the Crane's load: a cable up out of sight, its hook block, two slings to the load's shoulders
-    const b = bs.body, P = PIX.size, cx = Math.round(b.cx / P) * P, hy = b.minY - 0.7 * R;
-    box(cx - P, top, cx + P, hy, PAL.gray, 1, 0, 10, 0); box(cx - 0.3 * R, hy, cx + 0.3 * R, hy + 0.25 * R, PAL.gray, 1, 0, 10, 0);
-    for (const d of [-1, 1]) for (let k = 0; k <= 6; k++) { const u = k / 6, x = Math.round((cx + d * 0.55 * (b.maxX - b.cx) * u) / P) * P, y = Math.round((hy + 0.25 * R + (b.minY + 0.15 * (b.maxY - b.minY) - hy - 0.25 * R) * u) / P) * P; box(x - P / 2, y - P / 2, x + P / 2, y + P / 2, PAL.gray, 1, 0, 10, 0); }
-  } else if (bs && !bs.dead && bs.def && bs.def.tram) {   // the Tram's car round it, in the town's blue: dark windows, a white band, its pantograph up to the wire
-    const b = bs.body, hw = 0.62 * (b.maxX - b.minX), y1 = lv.rail.y, y0 = b.cy - 0.05 * (b.maxY - b.minY), hgt = y1 - y0, wy = b.minY - 1.2 * R, P = PIX.size;
-    box(lv.l, wy, lv.r, wy + P, PAL.gray, 1, 0, 10, 0);   // the overhead wire
-    for (let k = 0; k <= 8; k++) { const u = k / 8, x = Math.round((b.cx - 0.5 * R + R * Math.abs(u - 0.5)) / P) * P, y = Math.round((b.minY - (b.minY - wy) * u) / P) * P; box(x - P, y - P, x + P, y, PAL.gray, 1, 0, 10, 0); }
-    box(b.cx - hw - 2.5, y0 - 2.5, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0, b.cx + hw, y1, th.block, 1, 0);
-    for (let k = -1; k <= 1; k++) box(b.cx + k * 0.62 * hw - 0.22 * hw, y0 + 0.18 * hgt, b.cx + k * 0.62 * hw + 0.22 * hw, y0 + 0.55 * hgt, INK.dark, 1, 0, 10, 0);
-    box(b.cx - hw, y0 + 0.68 * hgt, b.cx + hw, y0 + 0.78 * hgt, PAL.white, 1, 0, 10, 0);
-    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.rail) {   // the Minecart's cart, in front of it: dark, a white rim, two wheels on the rail
-    const b = bs.body, hw = 0.55 * (b.maxX - b.minX), y0 = b.cy, y1 = lv.rail.y;
-    box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
-    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
-  }
+  if (bs && !bs.dead && bs.look) look(bs, true);   // its look's parts before it (LOOKS)
   if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
   if (g.warns.length) {   // threats coming down into view (see Game.threats): a red sign under the HUD over where each comes in
     const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size;

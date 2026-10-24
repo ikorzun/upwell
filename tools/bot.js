@@ -215,7 +215,7 @@ function decide(best) {
 }
 // What cost a heart and what got stomped, counted on the moves really played (not the tries).
 let live = false, cause = '', causeAt = '', killed = {};
-for (const [k, what] of [['meet', (e) => (e === g.lv.boss ? 'boss' : e.type)], ['spikes', () => 'spikes'], ['fireTouch', () => 'fire'], ['shots', () => 'shot'], ['fall', () => 'fall'], ['crossStep', () => 'train']]) {
+for (const [k, what] of [['meet', (e) => (e === g.lv.boss ? 'boss' : e.type)], ['spikes', () => 'spikes'], ['fireTouch', () => 'fire'], ['shots', () => 'shot'], ['fall', () => 'fall'], ['crossStep', () => 'train'], ['komoriTouch', () => 'komori'], ['wormTouch', () => 'worm'], ['folkStep', () => 'crow']]) {   // (a komori's, a worm's tubes', a Tokyo crow's dive: their own touches)
   const f = g[k];
   g[k] = function (...a) { const hp = this.hp, r = f.apply(this, a); if (live && this.hp < hp) { cause = what(...a); causeAt = this.lv.boss ? this.lv.boss.state : ''; } return r; };   // (at a boss: what it was doing)
 }

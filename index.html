@@ -11,6 +11,7 @@
   Upwell — a squishy climbs a well (Downwell, upside down). Portrait first.
   src/gum.js   the soft body and the renderer, copied from Gum (see its header)
   src/world.js tuning, content tables, the level and how it is drawn
+  src/cine.js  the 2.5D look over the drawing: light, depth, haze, motes (see its header)
   src/game.js  the run, the rules, the UI, input and the loop
 -->
 <style>
@@ -95,19 +96,18 @@
   .rune { font-family: 'Yarndings 12'; font-size: 72px; line-height: 1; }   /* knitted on a 12-px grid: crisp at 6 px a stitch */
   .rune.r0 { color: var(--orange); } .rune.r1 { color: var(--white); } .rune.r2 { color: var(--yellow); }   /* the Heat, a drop, the Light */
   .lore { margin-bottom: auto; }
-  .feed { align-self: stretch; flex: 1; min-height: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }   /* the book: one feed down, scrolled by touch here only */
+  .feed { align-self: stretch; flex: 1; min-height: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 6px; margin: 10px 0; scrollbar-width: thin; scrollbar-color: var(--gray) transparent; }   /* the book: one feed down, scrolled by touch here only; a thin bar in the game's grey */
+  .feed::-webkit-scrollbar { width: 4px; } .feed::-webkit-scrollbar-thumb { background: var(--gray); }
   .feed .sect { position: sticky; top: 0; z-index: 1; background: var(--ink); color: var(--yellow); padding: 10px 2px 6px; text-align: left; }   /* a block's header, kept in sight over its cards */
   .card2 { flex: none; display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch); text-align: left; }
   .card2.locked { background: var(--dim); box-shadow: none; color: var(--gray); }
   .card2 .pic { flex: none; width: 56px; height: 56px; display: grid; place-items: center; }
-  .card2 .pic .ico { --p: 4; }
-  .card2 .pic .ico.wide { --p: 3; }   /* an enemy's or a boss's 16 across: 48 px as the rest (QA: 64 in a 56-px frame) */   /* the picture big: 48-56 px */
+  .card2 .pic .ico { --p: 4; }   /* the picture big: 48-56 px */
+  .card2 .pic .ico.wide { --p: 3; }   /* an enemy's or a boss's 16 across: 48 px as the rest (QA: 64 in a 56-px frame) */
   .card2 .pic .tx { --p: 4; }
   .card2 .txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; text-align: left; }
   .card2 .txt span { color: var(--gray); }
   .card2 .txt .tx { text-align: left; }   /* its lines from the left, as a page reads */
-  .feed { scrollbar-width: thin; scrollbar-color: var(--gray) transparent; }   /* a thin bar in the game's grey */
-  .feed::-webkit-scrollbar { width: 4px; } .feed::-webkit-scrollbar-thumb { background: var(--gray); }
   .medals { display: flex; gap: 14px; justify-content: center; }   /* the daily well's three, each over its height */
   .medal { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--gray); --p: 2; }
   .medal .ico { --p: 3; }
@@ -125,7 +125,6 @@
   .grid2 > :last-child:nth-child(odd) { grid-column: span 2; }   /* an odd one out: the whole row */
   .chip .inl { display: inline-flex; align-items: center; gap: 6px; --p: 2; }   /* a picture and its words on one line, caption-sized (the bonus world's stars) */
   * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }   /* Safari: a held finger selects nothing */
-  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
   #hud {
     position: absolute; left: 0; right: 0; top: 0;
@@ -280,7 +279,6 @@
   .swatch.on::before { box-shadow: 0 0 0 2px var(--amber); }
   .swatch.locked::before { opacity: 0.35; }
   .swatch small { grid-area: 1 / 1; color: var(--white); }
-  .chip.wide { min-width: 160px; }
   .perk { display: flex; align-items: center; gap: 8px; text-align: left; }
   .perk .ico { --p: 2; }
   .perk .tx { white-space: nowrap; }   /* on one line (owner, 2026-10-23); fitLine makes a long one smaller */
@@ -289,15 +287,15 @@
     background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
     display: grid; grid-template-columns: auto 1fr; align-items: center; justify-items: start; gap: 8px 12px; text-align: left;
   }
-  .card .ico { grid-row: span 2; --p: 3; }
-  .stars { display: flex; align-items: center; gap: 6px; --p: 3; color: var(--yellow); }
+  .card .ico { grid-row: span 2; --p: 3; }   /* its picture on the left, name over description */
+  .stars { display: flex; align-items: center; gap: 6px; --p: 3; color: var(--yellow); }   /* a level's stars and their coins */
   .stars .ico { animation: starIn 0.4s steps(5) both; }   /* in one after another (delays set in game.js) */
   .stars .ico.won { animation: starIn 0.4s steps(5) both, starTwinkle 1.4s steps(2) infinite; }
   .mastery { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 14px; --p: 2; color: var(--gray); }   /* a level's mastery medals (MEDAL): grey till won (.medal is the daily's) */
   .mast { display: flex; align-items: center; gap: 6px; }
   .mast.won, .mast.new { color: var(--yellow); }
   .mast.new .ico { animation: starIn 0.4s steps(5) 1.5s both, starTwinkle 1.4s steps(2) 2s infinite; }   /* one won now: in after the stars */
-  .stars .pay { animation: payIn 0.3s steps(3) 1.1s both; }   /* what they paid, once they are all in */   /* a level's stars and their coins */   /* its picture on the left, name over description */
+  .stars .pay { animation: payIn 0.3s steps(3) 1.1s both; }   /* what they paid, once they are all in */
   .card b { color: var(--yellow); }
   .card:active { box-shadow: inset 0 0 0 2px var(--yellow); }
   .rows { width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }

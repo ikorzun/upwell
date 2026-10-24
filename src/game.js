@@ -9,9 +9,9 @@
 // ── Words ────────────────────────────────────────────────────
 const STR = {
   en: {
-    hintKeys: '← → run · Space jump', hintMouse: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
+    hintKeys: '← → run · Space jump', hintTouch: 'Drag to run · tap to jump', play: 'Play',
     hard: 'Hard mode', world: 'World {n}', pick: 'Pick an upgrade', dead: 'Run over', won: 'You made it out!',
-    tapJump: 'Tap to jump', continue: 'Continue', newRun: 'New run', keyJump: 'Space to jump', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', tip: 'Tip: {n}', dark: 'darkness',
+    continue: 'Continue', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} coins', bonusDone: 'Bonus done!', double: '×2 for an ad', next: 'Next', timeUp: 'Time!', caught: 'Caught!', starLine: 'Coins {c}', task_crow: 'All the crows scared off!', got_astro: 'Astro! You fly up and take all on the way', seen_tut1K: 'Space again in the air: a double jump', seen_tut1T: 'Tap again in the air: a double jump', seen_tut1S: 'Tap again in the air: a double jump', seen_tut2: 'A shop: go in through the door', seen_tut3: 'Take the helmet: it breaks blocks', resumed: 'On from where you were', starsFor: '{w}: {n} more stars', restarted: 'This level starts over', task_neon: 'All the neon is lit!', task_lantern: 'All the lanterns are lit!', task_lamp: 'Every lamp in the mine is lit!', task_lighthouse: 'All the lighthouses are lit!', task_bell: 'All the bells are rung!', seen_tasks: 'Third star: every coin and the tasks above', news: 'New: {n}', tip: 'Tip: {n}', dark: 'darkness',
     seen_moss: 'Moss holds you: a place to rest', seen_rubber: 'Rubber throws you off', seen_ice: 'Ice is slippery: nothing sticks',
     seen_crumble: 'It crumbles: keep moving', seen_spring: 'Springs throw you high', seen_fire: 'The fire grows while you stand still!',
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_rebound: 'Jump as you land: bounce higher!', rebound_ok: 'Boing! Right on the beat', seen_wallK: '↓ lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge', seen_wind: 'When the carp flag fills, a gust blows you aside', seen_mochi: 'The pestle flattens you: then you fit under low beams', seen_fork: 'Two ways up: the risky one pays more', seen_fireWall: 'Fire bursts out of some walls: wait for it to die down',
@@ -21,14 +21,14 @@ const STR = {
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', depth: '2.5D', on: 'on', off: 'off', ctrl: 'Controls', ctrlKeys: 'buttons', ctrlStick: 'stick',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', depth: '2.5D', on: 'on', off: 'off',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', bookTap: 'Tap one to read it', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily well', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
   },
   es: {
-    hintKeys: '← → correr · Espacio saltar', hintMouse: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
+    hintKeys: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Elige una mejora', dead: 'Fin de la partida', won: '¡Lograste salir!',
-    tapJump: 'Toca para saltar', continue: 'Continuar', newRun: 'Nueva partida', keyJump: 'Espacio para saltar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', tip: 'Consejo: {n}', dark: 'oscuridad',
+    continue: 'Continuar', bonus: 'Bonus', sec: 's', bonusGot: 'Bonus: +{n} monedas', bonusDone: '¡Bonus superado!', double: '×2 con un anuncio', next: 'Siguiente', timeUp: '¡Tiempo!', caught: '¡Te alcanzó!', starLine: 'Monedas {c}', task_crow: '¡Espantaste a todos los cuervos!', got_astro: '¡Astro! Vuelas y te llevas todo a tu paso', seen_tut1K: 'Espacio otra vez en el aire: doble salto', seen_tut1T: 'Toca otra vez en el aire: doble salto', seen_tut1S: 'Toca otra vez en el aire: doble salto', seen_tut2: 'Una tienda: entra por la puerta', seen_tut3: 'Coge el casco: rompe bloques', resumed: 'Sigues donde lo dejaste', starsFor: '{w}: faltan {n} estrellas', restarted: 'Este nivel empieza de nuevo', task_neon: '¡Todo el neón encendido!', task_lantern: '¡Todos los faroles encendidos!', task_lamp: '¡Todas las lámparas de la mina encendidas!', task_lighthouse: '¡Todos los faros encendidos!', task_bell: '¡Sonaron todas las campanas!', seen_tasks: 'Tercera estrella: todas las monedas y las tareas de arriba', news: 'Nuevo: {n}', tip: 'Consejo: {n}', dark: 'oscuridad',
     seen_moss: 'El musgo te sujeta: descansa', seen_rubber: 'La goma te lanza lejos', seen_ice: 'El hielo resbala: nada se pega',
     seen_crumble: 'Se desmorona: no te pares', seen_spring: 'Los resortes te lanzan alto', seen_fire: '¡El fuego crece si te quedas quieto!',
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_rebound: '¡Salta al aterrizar: rebotas más alto!', rebound_ok: '¡Boing! Justo a tiempo', seen_wallK: '↓ te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva', seen_wind: 'Cuando se infla la carpa, una ráfaga te empuja de lado', seen_mochi: 'El mazo te aplasta: así cabes bajo las vigas bajas', seen_fork: 'Dos caminos: el arriesgado paga más', seen_fireWall: 'De algunas paredes sale fuego: espera a que se apague',
@@ -38,14 +38,14 @@ const STR = {
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
-    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', depth: '2.5D', on: 'sí', off: 'no', ctrl: 'Control', ctrlKeys: 'botones', ctrlStick: 'joystick',
+    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', depth: '2.5D', on: 'sí', off: 'no',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', bookTap: 'Toca uno para leerlo', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Pozo del día', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
   },
   pt: {
-    hintKeys: '← → correr · Espaço pular', hintMouse: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
+    hintKeys: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
     hard: 'Modo difícil', world: 'Mundo {n}', pick: 'Escolha uma melhoria', dead: 'Fim da partida', won: 'Você conseguiu sair!',
-    tapJump: 'Toque para pular', continue: 'Continuar', newRun: 'Nova partida', keyJump: 'Espaço para pular', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', tip: 'Dica: {n}', dark: 'escuridão',
+    continue: 'Continuar', bonus: 'Bônus', sec: 's', bonusGot: 'Bônus: +{n} moedas', bonusDone: 'Bônus concluído!', double: '×2 com um anúncio', next: 'Próximo', timeUp: 'Tempo!', caught: 'Pegou você!', starLine: 'Moedas {c}', task_crow: 'Todos os corvos espantados!', got_astro: 'Astro! Você voa e leva tudo pelo caminho', seen_tut1K: 'Espaço de novo no ar: pulo duplo', seen_tut1T: 'Toque de novo no ar: pulo duplo', seen_tut1S: 'Toque de novo no ar: pulo duplo', seen_tut2: 'Uma loja: entre pela porta', seen_tut3: 'Pegue o capacete: ele quebra blocos', resumed: 'Continuando de onde parou', starsFor: '{w}: faltam {n} estrelas', restarted: 'Esta fase começa de novo', task_neon: 'Todo o neon aceso!', task_lantern: 'Todas as lanternas acesas!', task_lamp: 'Todas as lamparinas da mina acesas!', task_lighthouse: 'Todos os faróis acesos!', task_bell: 'Todos os sinos tocaram!', seen_tasks: 'Terceira estrela: todas as moedas e as tarefas acima', news: 'Novo: {n}', tip: 'Dica: {n}', dark: 'escuridão',
     seen_moss: 'O musgo segura você: descanse', seen_rubber: 'A borracha arremessa você', seen_ice: 'O gelo escorrega: nada gruda',
     seen_crumble: 'Ele desmorona: não pare', seen_spring: 'As molas jogam você alto', seen_fire: 'O fogo cresce se você ficar parado!',
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_rebound: 'Pule ao pousar: quica mais alto!', rebound_ok: 'Boing! Bem na hora', seen_wallK: '↓ solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie', seen_wind: 'Quando a carpa enche, uma rajada te empurra de lado', seen_mochi: 'O pilão te achata: aí você passa sob as vigas baixas', seen_fork: 'Dois caminhos: o arriscado paga mais', seen_fireWall: 'Algumas paredes soltam fogo: espere ele baixar',
@@ -55,14 +55,14 @@ const STR = {
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
-    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', depth: '2.5D', on: 'sim', off: 'não', ctrl: 'Controle', ctrlKeys: 'botões', ctrlStick: 'joystick',
+    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', depth: '2.5D', on: 'sim', off: 'não',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', bookTap: 'Toque em um para ler', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Poço do dia', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
   },
   ja: {
-    hintKeys: '← → はしる · スペース ジャンプ', hintMouse: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
+    hintKeys: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
     hard: 'むずかしい モード', world: 'ワールド {n}', pick: 'パワーアップを えらぼう', dead: 'ゲームオーバー', won: 'ぬけだした！',
-    tapJump: 'タップで ジャンプ', continue: 'つづきから', newRun: 'はじめから', keyJump: 'スペースで ジャンプ', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', tip: 'ヒント: {n}', dark: 'くらやみ',
+    continue: 'つづきから', bonus: 'ボーナス', sec: 'びょう', bonusGot: 'ボーナス: +{n} コイン', bonusDone: 'ボーナス クリア！', double: 'こうこくで ×2', next: 'つぎへ', timeUp: 'タイムアップ！', caught: 'つかまった！', starLine: 'コイン {c}', task_crow: 'カラスを ぜんぶ おいはらった！', got_astro: 'アストロ！ とんで みちの ものを ぜんぶ ゲット', seen_tut1K: 'くうちゅうで もう いちど スペース: 2だんジャンプ', seen_tut1T: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut1S: 'くうちゅうで もう いちど タップ: 2だんジャンプ', seen_tut2: 'おみせ: ドアから はいろう', seen_tut3: 'ヘルメットを とろう: ブロックを こわせる', resumed: 'さっきの つづきから', starsFor: '{w}: あと {n} こ の ほし', restarted: 'この ステージは さいしょから', task_neon: 'ネオンが ぜんぶ ついた！', task_lantern: 'とうろうが ぜんぶ ついた！', task_lamp: 'こうざんの カンテラが ぜんぶ ついた！', task_lighthouse: 'とうだいが ぜんぶ ついた！', task_bell: 'かねを ぜんぶ ならした！', seen_tasks: '3つめの ほし: コイン ぜんぶと うえの ミッション', news: 'NEW: {n}', tip: 'ヒント: {n}', dark: 'くらやみ',
     seen_moss: 'コケに くっつける: ひとやすみ', seen_rubber: 'ゴムは はねかえす', seen_ice: 'こおりは すべる: くっつけない',
     seen_crumble: 'くずれる: とまるな', seen_spring: 'バネで たかく とべる', seen_fire: 'とまると ほのおが せまる！',
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_rebound: 'ちゃくちの しゅんかんに ジャンプ: たかく はねる！', rebound_ok: 'ボヨン！ ぴったり', seen_wallK: '↓で かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ', seen_wind: 'こいのぼりが ふくらむと とっぷう: よこへ ながされる', seen_mochi: 'きねに つぶされると ひくい はりの したを とおれる', seen_fork: 'みちは ふたつ: あぶない ほうが たくさん もらえる', seen_fireWall: 'かべから ひが ふきだす: おさまるまで まとう',
@@ -72,9 +72,9 @@ const STR = {
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
-    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', depth: 'りったい', on: 'オン', off: 'オフ', ctrl: 'そうさ', ctrlKeys: 'ボタン', ctrlStick: 'スティック',
+    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', depth: 'りったい', on: 'オン', off: 'オフ',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', bookTap: 'さわって よもう', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'きょうの いど', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
   },
 };
 let lang = 'en';
@@ -114,11 +114,10 @@ const daySeed = (day, w, s, b) => (Math.imul((day ^ 0x9e3779b9) >>> 0, 265443576
 const DAY_W = CAMPAIGN.findIndex((c) => c.world === TOKYO);   // the daily well's world: Tokyo (owner), wherever it stands in the order
 const dayPlan = (day) => { const r = mulberry32(daySeed(day, 9, 9, true)); return DAY_TIERS.map(([a, b]) => DAY_W * 30 + (r() < 0.5 ? a : b) * 3 + ((r() * 3) | 0)); };   // the daily well's three levels of the map (see campAt)
 const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += dayAt(i).len)); };   // its medals: where each of them ends
-// The campaign's map (the user: each world a grid of 3 × 10, a route up it to choose, as in Slay the Spire): a world's first level
-// alone at its foot, eight tiers of three over it, then its boss. Level i is world w, tier s, column c (i = w·30 + s·3 + c; the first
-// and the boss in the middle). The middle one is the tier's recipe; the left the same calmer, the right richer and fiercer (SIDE:
-// its enemies and fire by so much, a stash, a bonus race's time), each on a seed of its own. A level leads up to the one over it;
-// tier by tier in turn, the middle one out to both sides or the sides in to the middle (ups). A world opens with the last one's boss.
+// The campaign's levels by id: level i is world w, tier s, column c (i = w·30 + s·3 + c; a save keeps its stars, losses, medals and
+// last level by it). Ten tiers a world: its first level at the foot, its boss on top. The middle column is the tier's recipe; the left
+// the same calmer, the right richer and fiercer (SIDE: its enemies and fire by so much, a stash, a bonus race's time), each on a seed
+// of its own. A world opens with the last one's boss.
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
@@ -150,23 +149,21 @@ const DAY_NUMS = { 1: { len: 31, fire: 0.35, foes: 0.5, pair: 0, safe: true }, 2
 const dayAt = (i) => { const s = Math.floor((i % 30) / 3); return sideOf(i % 3, Object.assign({}, CAMPAIGN[DAY_W].levels[s], DAY_NUMS[s])); };
 // One level a tier (owner, 2026-10-20: no map between levels, the sides in the middle one, three times as long): its middle id; the way up
 // is a line. The calm and fierce sides (SIDE) are parts of it now, in a new order each time (campMerge); the daily well still plays them alone.
-const campHas = (i) => i % 3 === 1;
-const ups = () => [1];   // the columns a level leads up to
 const campOpen = (i) => {
-  const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3, below = (d) => w * 30 + (s - 1) * 3 + d;
-  if (i >= CAMP_LEN || !campHas(i)) return false;   // (a world past the open ones: shut, whatever a save says)
+  const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3;
+  if (i >= CAMP_LEN || c !== 1) return false;   // (a side's id, or a world past the open ones: shut, whatever a save says)
   if (gated(w) ? lineStars() < CAMP_STARS[CAMPAIGN[w].world.id] : lineBefore(w) >= 0 && !(st[lineBefore(w) * 30 + 28] > 0)) return false;   // its stars, or the boss before it on the line
-  return s === 0 || [0, 1, 2].some((d) => campHas(below(d)) && st[below(d)] > 0 && ups(s - 1, d).includes(c));
+  return s === 0 || st[i - 3] > 0;   // the first, or the one under it cleared
 };
-const campNextId = () => {   // where Continue goes: the last one played again if lost, else on up from it (its column, else the middle),
-  // else the highest open one not cleared in the last world open (on that column, else the middle): always on, never back down
-  const st = save.camp.stars, L = save.camp.last | 0, a = campAt(L), pref = (x) => (x.c === a.c ? 0 : x.c === 1 ? 1 : 2);
-  if (campHas(L) && campOpen(L) && !(st[L] > 0)) return L;
-  if (a.s < 9) { const up = ups(a.s, a.c).map((c) => a.w * 30 + (a.s + 1) * 3 + c).filter((i) => campOpen(i) && !(st[i] > 0)).sort((i, j) => pref(campAt(i)) - pref(campAt(j))); if (up.length) return up[0]; }
+const campNextId = () => {   // where Continue goes: the last one played again if lost, else the one over it, else the highest open one not
+  // cleared in the last world open: always on, never back down
+  const st = save.camp.stars, L = save.camp.last | 0, a = campAt(L);
+  if (campOpen(L) && !(st[L] > 0)) return L;
+  if (a.s < 9) { const i = a.w * 30 + (a.s + 1) * 3 + 1; if (campOpen(i) && !(st[i] > 0)) return i; }
   let best = null, id = CAMP_END;
   for (let i = 0; i < CAMP_LEN; i++) if (campOpen(i) && !(st[i] > 0) && !gated(Math.floor(i / 30))) {   // (on the line: a bonus world is gone into from its map)
     const x = campAt(i);
-    if (!best || x.w > best.w || (x.w === best.w && (x.s > best.s || (x.s === best.s && pref(x) < pref(best))))) { best = x; id = i; }
+    if (!best || x.w > best.w || (x.w === best.w && x.s > best.s)) { best = x; id = i; }
   }
   return id;
 };
@@ -468,8 +465,6 @@ class Foe {
     });
     return out;
   }
-  // A spitter, now and then while the hero is near and on screen, swells up for SPIT.wind s and
-  // lobs a blob that comes down where the hero was. True while it stands to do it.
   lunge(dt, g) {   // a skull (SKULL): the hero close on its level, it rushes at it a moment, rattling; its goo drips all along
     const b = this.body, H = g.hero, R = g.R;
     if (fxRand(0, 1) < 3 * dt) bits.push({ x: b.cx + fxRand(-0.5, 0.5) * b.R, y: b.maxY - 2, vx: 0, vy: 40, s: fxRand(1.5, 2.5), c: INK.dark, t: 0, life: fxRand(0.6, 1.2), g: 0.5, drag: 1 });
@@ -479,6 +474,8 @@ class Foe {
     this.dir = Math.sign(H.cx - b.cx) || this.dir; this.rush = SKULL.rush; this.cool = SKULL.every;
     sound.play('crumble', 0.6, 1.9); b.kickSquash(this.dir, 0, -1.2); return true;
   }
+  // A spitter, now and then while the hero is near and on screen, swells up for SPIT.wind s and
+  // lobs a blob that comes down where the hero was. True while it stands to do it.
   spit(dt, g) {
     const b = this.body, H = g.hero, lv = g.lv;
     if (this.wind > 0) {
@@ -662,7 +659,7 @@ class Game {
   constructor() {
     this.lv = new Level(); this.well = null; this.door = null; this.hero = null; this.state = 'boot'; this.paused = 'play';
     this.R = 30; this.vjump = 1; this.builtW = 0; this.list = []; this.look = { x: 0, y: 0, t: 0 }; this.heroLook = { x: 0, y: 0, t: -1e9 };
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.queued = null; this.rising = false;
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.rising = false;
     this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = [];
     this.pow = null; this.ram = false; this.tail = []; this.rocket = null;   // the candy at work, a ram on its way up, a rainbow's tail, a boost ring's flight
     this.warns = [];   // where threats come down into view (see threats)
@@ -760,12 +757,12 @@ class Game {
   // followers): the timers, the powers, the landing count, the effects
   levelReset() {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
-    this.touch = 0; this.queued = null; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
+    this.touch = 0; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0;   // a beaten boss's win still to come is the old level's
     this.thrown = 0; this.wallHold = 0;   // (a throw out of a room, or its hold on the wall, the old level's: the next hero stuck to a wall; review)
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
-    fx.n = 0; aimCancel(); ui.comboEnd();
+    fx.n = 0; ui.comboEnd();
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
@@ -864,42 +861,34 @@ class Game {
   // ── Jumping ──
   contact() { const b = this.hero; return (b.wallMask & 15) !== 0 || b.stuck > 0; }
   onFloor() { const b = this.hero; return (b.wallMask & 8) !== 0 && b.stuck === 0; }
-  // The way out of what the hero is on, for a slingshot aimed off it; null in the air.
-  surfaceNormal() {
-    if (this.sinceContact > JUMP.coyote) return null;
-    const t = this.touch;
-    return t === 1 ? [1, 0] : t === 2 ? [-1, 0] : t === 4 ? [0, 1] : [0, -1];
-  }
   // From a surface (or just off one) a jump goes at once; in the air it spends an air jump
   // if there is one (every landing gives one back, so does a stomp), or waits a moment for
-  // a surface. `aimed` is a slingshot launch { vx, vy } from the mouse, null for the button.
-  requestJump(aimed = null) {
+  // a surface.
+  requestJump() {
     if (this.state !== 'play') return;
-    if (this.sinceContact <= JUMP.coyote) this.jump(false, aimed);
-    else if (this.power('bubble')) this.jump(true, aimed);   // in a bubble: popped by a jump, a hop out of it (no air jump spent)
-    else if (this.air > 0) { this.air--; this.jump(true, aimed); }
-    else { this.queueT = JUMP.buffer; this.queued = aimed; }
+    if (this.sinceContact <= JUMP.coyote) this.jump(false);
+    else if (this.power('bubble')) this.jump(true);   // in a bubble: popped by a jump, a hop out of it (no air jump spent)
+    else if (this.air > 0) { this.air--; this.jump(true); }
+    else this.queueT = JUMP.buffer;
   }
   // Off a floor: up, keeping the run. Off a wall: up and away. Off a ceiling: pushed down,
-  // or with a side pressed a dash that way. In the air: up again, with a puff under it. A slingshot
-  // launch goes where it was aimed, and letting go of a button cannot cut it.
-  jump(inAir, aimed) {
+  // or with a side pressed a dash that way. In the air: up again, with a puff under it.
+  jump(inAir) {
     if (this.power('bubble')) { this.gunT = 0; this.powerEnd(); }   // a jump pops the bubble, and is a jump
-    const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || (!aimed && this.over(SMASH.look * this.R).some((r) => this.smashable(r)))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
-    const flat = this.flatT > 0, sup = !flat && !inAir && !aimed && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it (flat: not, MOCHI)
-    const reb = !flat && !inAir && !aimed && !sup && side === 0 && !ram && this.landT <= REBOUND.after && this.landV >= REBOUND.min * v, q = reb ? clamp(this.landV / v, 0, 1) : 0;   // in the beat of a hard landing
-    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : reb ? Math.sqrt(1 + REBOUND.k * q) : 1), rise = !aimed && !sup;
+    const H = this.hero, v = this.vjump, ram = this.power('smash') && (inAir || this.touch !== 4 || this.over(SMASH.look * this.R).some((r) => this.smashable(r))), side = inAir || (ram && this.touch === 4) ? 0 : this.touch;   // any jump rams; off a ceiling only with something to break over it (and then up through it)
+    const flat = this.flatT > 0, sup = !flat && !inAir && this.crouch && this.touch === 0;   // from a crouch on a floor: CROUCH.height times as high, no tap cuts it (flat: not, MOCHI)
+    const reb = !flat && !inAir && !sup && side === 0 && !ram && this.landT <= REBOUND.after && this.landV >= REBOUND.min * v, q = reb ? clamp(this.landV / v, 0, 1) : 0;   // in the beat of a hard landing
+    let vx = H.rigVx, vy = -v * (sup ? Math.sqrt(CROUCH.height) : reb ? Math.sqrt(1 + REBOUND.k * q) : 1), rise = !sup;
     this.rebounded = reb;
     if (reb) { this.landUsed = true; this.missed = 0; H.face.surprise = Math.max(H.face.surprise, 0.7); if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
-    if (aimed) { vx = aimed.vx; vy = aimed.vy; }
-    else if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
+    if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
       if (input.dir) { vx = input.dir * JUMP.dash * this.R; vy = JUMP.dashDown * v; this.dashT = 0.15; fx.dust(H.cx - input.dir * H.R, H.minY, IMPACT.puffSpeed + 600); }   // the ceiling's friction off for a moment, or it drags the dash
       else { vx = 0; vy = JUMP.ceil * v; }
       rise = false;
     }
-    if (flat && !aimed && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
-    { const fr = H.floorRect; if (!inAir && !aimed && side === 0 && fr && fr.move && (fr.move.wheel || fr.move.seesaw) && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board or a seat: its way along with it (it carried the hero, with no pace of its own)
+    if (flat && side !== 4) vy *= Math.sqrt(MOCHI.jump);   // a flat hero hops low
+    { const fr = H.floorRect; if (!inAir && side === 0 && fr && fr.move && (fr.move.wheel || fr.move.seesaw) && (H.wallMask & 8)) vx += fr.dx * PHYS.hz; }   // off a mill's board or a seat: its way along with it (it carried the hero, with no pace of its own)
     const R = this.R, foot = H.maxY, hc = H.color.base;   // the juice: a double jump bursts out under the hero, a wall jump off the wall, a jump off its feet
     if (reb) {   // a rebound: the squash let go, a white ring as big as the leap, sparks up
       fx.dust(H.cx, foot, IMPACT.puffSpeed + 700); fx.ring(H.cx, foot, (1 + 0.8 * q) * R, INK.white); fx.ring(H.cx, foot, 0.7 * R, hc);
@@ -916,7 +905,7 @@ class Game {
     H.kickSquash(vx / sp, vy / sp, -JUMP.stretch * Math.min(1, sp / v));   // stretch along the leap
     haptics.buzz(8);
     const thru = ram && this.over(JUMP.height * this.R).some((r) => this.smashable(r));   // a block to break within a jump: no tap may cut it short of it
-    this.rising = rise && !thru; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.queued = null; this.ram = ram;
+    this.rising = rise && !thru; this.sinceContact = JUMP.coyote + 1; this.queueT = 0; this.ram = ram;
   }
   // The solid ledges just over the hero (planks are jumped through anyway), and which of them a ram breaks: a shaft ledge one tile
   // thick, not the exit's ceiling or a spring, with nothing on it or under it that would be left hanging in the air.
@@ -1122,9 +1111,6 @@ class Game {
       this.invuln -= dt;
       if (this.invuln <= 0 && playing && (this.blinkHold || 0) < HEALTH.hold && this.insideFoe()) { this.blinkHold = (this.blinkHold || 0) + dt; this.invuln = 0.5 * dt; }
     } else this.blinkHold = 0;
-    const hang = playing && aim.on && aim.hyb && aim.p > 0;   // the hybrid's aim shown: the hero hangs where it is, in the air or on a wall, till let go
-    if (hang !== !!this.hang) { this.hang = hang; if (this.state !== 'clear') hero.gScale = hang ? 0 : 1; }   // (a hole's pull keeps its own)
-    if (hang) setVel(hero, 0, 0);
     if (this.thrown && (hero.wallMask & (this.thrown > 0 ? 2 : 1))) { this.thrown = 0; this.wallHold = ROOM_THROW.hold; hero.kickSquash(1, 0, 1.6); shake.add(5); haptics.buzz(20); sound.play('land', 0.9, 0.7); }   // splat on the far wall,
     if (this.wallHold > 0) { this.wallHold -= dt; setVel(hero, 0, 0); }   // and held there a moment, no bounce back (then the wall as ever)
     if (playing) for (const r of lv.near(hero.cy - MAGNET.range * this.R, hero.cy + MAGNET.range * this.R)) if (r.magnet && hero.cx > r.x0 - this.R && hero.cx < r.x1 + this.R) {   // a magnet ledge pulls the hero in, more the nearer
@@ -1166,7 +1152,7 @@ class Game {
       this.fallV = 0;
       this.sinceContact = 0; this.air = this.mods.airJumps; this.airDash = 0; this.diving = false;
     } else { this.sinceContact += dt; this.fallV = Math.max(this.fallV, hero.rigVy); }
-    if (this.queueT > 0) { this.queueT -= dt; if (this.sinceContact === 0) this.jump(false, this.queued); }
+    if (this.queueT > 0) { this.queueT -= dt; if (this.sinceContact === 0) this.jump(false); }
     if (hero.springHit && hero.rigVy > -0.5 * SPRING.v * this.vjump) this.spring(hero.springHit);
     if (playing && hero.rubber && !(hero.wallMask & 8)) this.rubberHit(hero.rubber);   // standing, rubber is just a wall
     if (playing && lv.kind === 'well' && this.onFloor() && !hero.springHit) this.markSafe(hero.floorRect);
@@ -1388,7 +1374,7 @@ class Game {
   // From above it is a stomp; anything else is a hit.
   meet(e) {   // (the rule of a stomp, a hurt, and how the enemy's face shows which: see stompable)
     if (e.state === 'shell' || ((e.type === 'mini' || e.type === 'tofuMini') && e.t < (e.def.safe || 0.35))) return;   // a rolling shell, a mini just out of a splitter (or a tofu): harmless
-    const H = this.hero, b = e.body, dy = b.cy - H.cy, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
+    const H = this.hero, b = e.body, dx = Math.abs(b.cx - H.cx), rel = Math.max(H.rigVy, this.heroVy0 || 0) - b.rigVy;   // coming down onto it as the step began counts: by its end the bodies' contact may have thrown the hero back up
     const above = stompable(H, b, rel);   // from over it (its whole top half), or falling onto it
     const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
     if (e.type === 'nurikabe' && !can && above) { this.bounceOff(e); return; }   // its hard top, hanging or going: a bounce, nothing more (CRUSH)
@@ -1444,7 +1430,7 @@ class Game {
     this.diving = false;
     unstick(H, 0.08); H.kickSquash(0, 1, 1.4);
     this.air = Math.max(this.air, 1); this.sinceContact = JUMP.coyote + 1; this.rising = false;
-    if (this.queueT > 0) { this.queueT = 0; this.air--; this.jump(true, this.queued); }   // pressed just before landing on it
+    if (this.queueT > 0) { this.queueT = 0; this.air--; this.jump(true); }   // pressed just before landing on it
     this.hitstop = STOMP.hitstop; shake.add(3.5); haptics.buzz(14);
     const bx = e.body.cx, by = e.body.minY;   // squashed flat: a spray of its colour and white, and a ring
     sparkFx(bx, by, 18, -Math.PI / 2, 1.4, [200, 650], [1.6, 3.6], [0.35, 0.75], [e.body.color.base, INK.white, e.body.color.base], 0.85);
@@ -1554,12 +1540,12 @@ class Game {
     if (this.hp <= 0) this.die();
     return true;
   }
-  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; the last one too, in every level (owner,
-  // 2026-10-23: «почему герой не умирает? Осталось 1 сердце, я падаю в огонь и ничего. Нужно это поменять»: a teaching level kept the last). False: none was lost.
   parOf() {   // a campaign level's par for its time medal (MEDAL)
     const lv = this.lv, m = lv.portal ? (lv.floor - lv.portal.y) / (R_PER_M * this.R) : 0;
     return (this.rc && this.rc.par) || Math.max(MEDAL.min, MEDAL.step * Math.ceil((m * MEDAL.perM) / MEDAL.step));
   }
+  // A heart lost to a hit or a fall: none in a bonus level; a plaster (an upgrade) takes a level's first; the last one too, in every level (owner,
+  // 2026-10-23: «почему герой не умирает? Осталось 1 сердце, я падаю в огонь и ничего. Нужно это поменять»: a teaching level kept the last). False: none was lost.
   loseHeart() {
     if (this.bonus) return false;
     if (this.plasters > 0) { this.plasters--; fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.8, 1.3); return false; }
@@ -1626,13 +1612,13 @@ class Game {
     }
     return { x: (lv.l + lv.r) / 2, y: lv.floor - 1.1 * R };
   }
-  // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
-  // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
   failKey() { return this.mode === 'camp' ? this.ci : 'lid'; }   // whose losses running (save.camp.fails): a campaign boss's by its level, the summit's as one
-  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) + ['L', '', 'R'][this.ci % 3] : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
+  levelId() { return this.mode === 'camp' ? (this.world + 1) + '-' + (this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'B' + (this.world + 1) : this.world >= WORLDS.length ? 'boss' : (this.world + 1) + '-' + (this.stage + 1); }
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.id, level: this.mode === 'camp' ? String(this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall costs no heart (the digest §6; the fire does, owner)
+  // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
+  // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
   fall() {
     if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
@@ -1825,7 +1811,7 @@ class Game {
     this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false; this.lv.cam = this.lv.floor + this.roomFloor() - view.h;   // (as it was built, the view as it is now)
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
     this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
-    aimCancel(); ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
+    this.hero.squeezeIn = 0; ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
   }
   // Into the flip side (UNDER): a short shaft made whole at once, of this world's chunks, in the dark, with coins as rain and no
   // fire; the hero at its top. Its floor, a spot's pool, brings it back up (leaveUnder).
@@ -1843,7 +1829,7 @@ class Game {
     this.well = this.lv; this.door = sp; this.lv = lv;
     this.placeHero((lv.l + lv.r) / 2, lv.capY + 1.6 * R); this.regroup(); this.safes = [];
     lv.cam = this.hero.cy - 0.35 * view.h;
-    aimCancel(); ui.flash(); ui.toast(t('under'), 1600); sound.play('bubble', 1, 0.6); haptics.buzz(20);
+    this.hero.squeezeIn = 0; ui.flash(); ui.toast(t('under'), 1600); sound.play('bubble', 1, 0.6); haptics.buzz(20);
   }
   leaveUnder() {   // back up the level, UNDER.lift m over where it went in, on the highest steady ledge there
     const sp = this.door, well = this.well, R = this.R, ys = Math.max(sp.y - UNDER.lift * R_PER_M * R, well.endY + 6 * R);
@@ -1853,7 +1839,7 @@ class Game {
     const r = well.rects.filter((q) => !q.cap && !q.plank && !q.crumble && !q.move && !q.spring && !q.crack && !q.gone && q.x1 - q.x0 > 2 * R && q.y0 >= ys && q.y0 < sp.y).sort((a, b) => a.y0 - b.y0)[0];
     if (r) { this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }]; } else this.placeHero(sp.x, sp.y);
     well.cam = Math.max(this.hero.cy - CAM.anchor * view.h, well.capY - CAM.top); well.ensure(well.cam - view.h * LEVEL.ahead);
-    this.regroup(); aimCancel(); ui.flash(); ui.toast(t('back'), 1400); sound.play('portal', 0.8, 1.2); haptics.buzz(20);
+    this.regroup(); this.hero.squeezeIn = 0; ui.flash(); ui.toast(t('back'), 1400); sound.play('portal', 0.8, 1.2); haptics.buzz(20);
   }
   trialStep(dt) {   // a trial room's clock and goal (TRIAL): on a moment after coming in; done in time, its pay dropped in; out of time, its coins go
     const lv = this.lv, tr = lv.trial, R = this.R;
@@ -1873,7 +1859,7 @@ class Game {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
     this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R); this.regroup();   // beside the door, on its ledge
-    bub.cd = 1.2; aimCancel(); ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
+    bub.cd = 1.2; this.hero.squeezeIn = 0; ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
     if ((bub.kind === 'treasure' && !room.coins.length) || bub.kind === 'trial') {   // a stash with all its coins taken, or a trial (TRIAL: one try, left halfway or not): its way in closes behind the hero
       this.lv.bubbles.splice(this.lv.bubbles.indexOf(bub), 1);
       sparkFx(bub.x, bub.y, 14, -Math.PI / 2, Math.PI, [80, 240], [1.5, 3], [0.3, 0.6], [this.lv.theme.wall, INK.white], 0.6); fx.dust(bub.x, bub.y1, IMPACT.puffSpeed + 500);
@@ -2028,7 +2014,7 @@ class Game {
     delete save.cur;   // a level begun (Game.resume puts back the one it goes on with)
     this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
     for (const id of save.camp.builds[w] || []) { if (id === 'maxhp') { this.maxHp++; continue; } const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }   // (maxhp: a heart bought in its shops)
-    this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = ![0, 1, 2].some((d) => save.camp.stars[w * 30 + s * 3 + d] > 0);   // its tier's first clear (an upgrade then: one a tier, whichever way up)
+    this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = !(save.camp.stars[w * 30 + s * 3 + 1] > 0);   // its tier's first clear (an upgrade then: one a tier)
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
     this.buildLevel(true); this.saveRun();
@@ -2116,7 +2102,7 @@ class Game {
   // A story card (STORY) once a play-through, the game held under it till Next; `then` after it, or at once when none is due (`again`: shown seen or not)
   story(id, then, again) {
     const c = id && STORY[id];
-    if (!c || (c.draft && !STORY_LIVE) || (save.seen['card_' + id] && !again)) { if (then) then(); return; }   // (a draft, till the owner's «да» to its art: ?story only)
+    if (!c || (save.seen['card_' + id] && !again)) { if (then) then(); return; }
     this.storyOn = true; this.paused = this.state; this.state = 'pause'; input.clear();
     ui.story(c, () => { save.seen['card_' + id] = 1; persist(); this.storyOn = false; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); if (then) then(); });
   }
@@ -2194,8 +2180,8 @@ class Game {
 }
 
 // ── UI ───────────────────────────────────────────────────────
-// The HUD, toasts and the four panels (menu, upgrade cards, pause, result) are DOM over
-// the canvas column, and so is the touch pad.
+// The HUD, toasts and the seven panels (menu, settings, upgrade cards, pause, result, the map with the book, a story card) are
+// DOM over the canvas column, and so is the touch pad.
 const $ = (id) => document.getElementById(id);
 const rgb = (c) => 'rgb(' + c.map((v) => Math.round(v * 255)).join(',') + ')';
 // ── Type ──
@@ -2278,7 +2264,7 @@ const STORY = {
   boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', title: BOSSES.koschei.name },
 };
 for (const k in STORY) STORY[k].id = k;
-const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows the drafts too, and card I before
+const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows card I before
 let storyLook = STORY_LIVE;   // the first level of the load, seen or not)
 // A card's colours (К6): its world's ink over black as the game draws the world (DEPTH: the frame's band a quarter of the way from black to
 // the ink, the corners the ink), white, red and yellow as everywhere; the Moon's cards in the pack's own lavender; the Dark Forest grey.
@@ -2307,7 +2293,7 @@ function storyFrame(f, w, h) {   // the card's medallion (owner, К16 «Б»: «
 // and settle, secondary action out of phase); the card tilts (±8°) toward the finger, else in a slow sweep, its planes parting by depth, a dithered
 // band of the six inks across it as far as it is tipped. The eyes blink, specks twinkle, lights flicker (assets/cards/live.json, scratchpad
 // cards8/live8.py over the art), each on the plane under it. Under «reduce motion» only those.
-const LIVE = { step: 125, blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
+const LIVE = { blink: [20, 21], every: 28, flick: [1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1] };
 const CARD = { tilt: 8, par: 8, step: 0.09, each: 0.32, rise: 24, riseT: 0.56, title: 0.32, next: 0.44, fade: 0.25, w0: 9, z: 0.62, idle: 2500 };   // degrees; the
 // nearest plane's parallax at the most (device px); the coming-in (s: each plane's start after the last's, its dither's length, the rise (CSS px) and
 // its length, the title's and Next's starts and fades); the tilt's spring (rad/s, damping: one small overshoot); the sweep after so long untouched
@@ -2641,21 +2627,21 @@ const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 const goOwed = (f) => { if (!game.owed(f)) f(); };   // into a campaign level: a card owed first (Game.owed)
-const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : JUMP.mouse ? 'hintMouse' : 'hintKeys');   // the first floor's words: how to run and jump
+const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : 'hintKeys');   // the first floor's words: how to run and jump
 function button(text, cls, fn) {
   const b = el('button', cls, text);
   b.addEventListener('click', (e) => { e.stopPropagation(); if (performance.now() - ui.openT < 300) return; sound.unlock(); sound.play('click', 0.6); fn(); });   // (a double tap's second: not into the next screen)
   if (/\bbig\b/.test(cls)) queueMicrotask(() => fitBig(b));   // once it is in its panel
   return b;
 }
-// A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
-// ("×2 con un anuncio", a world's name after Continue on a small phone).
 // The bar over the page the menu's backdrop's top ink (owner, 2026-10-23: «градиент должен уходить под остров»): #topTint for iOS 26 Safari, theme-color for the browsers that read it.
 const themeMeta = document.querySelector('meta[name="theme-color"]'), themeInk = themeMeta ? themeMeta.content : '';
 function menuTop(on) { document.documentElement.classList.toggle('menuTop', on); if (themeMeta && coarse) themeMeta.content = on ? MENU_BG.inks[0] : themeInk; }   // (a phone's: a desktop's tab bar left as it is)
 function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
   for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
 }
+// A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
+// ("×2 con un anuncio", a world's name after Continue on a small phone).
 function fitBig(b, min = 2) {   // (min: the smallest --p it may go to)
   const tx = b.querySelector('.tx');
   for (let p = parseFloat(getComputedStyle(b).getPropertyValue('--p')) || 4; tx && tx.offsetWidth > b.clientWidth - 24 && p > min;) { p -= 0.5; b.style.setProperty('--p', p); }
@@ -2755,7 +2741,7 @@ const ui = {
       const row = el('div', 'stars');
       for (let k = 0; k < 3; k++) {   // one after another, popping in; each earned one rings higher, then twinkles
         const s = iconEl(k < st.n ? 'star' : 'starOff');
-        s.classList.add(k < st.n ? 'won' : 'lost'); s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : '');
+        if (k < st.n) s.classList.add('won'); s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : '');
         row.append(s);
         if (k < st.n) setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k);
       }
@@ -2822,10 +2808,8 @@ const ui = {
     }
     p.append(cap(el('div', 'head', t('book')), 'book'), feed, cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
   },
-  // The campaign's map (see campAt): a world's levels up its tiers, the first at the foot and the boss on top, the paths between
-  // them (lit where a cleared one leads); each its tier's number, a side's its mark instead (a heart on the calm left, an enemy on
-  // the fierce right; a bonus race a coin, the boss its face), over its stars; the open ones to tap, the next one yellow; it scrolls
-  // by touch to the next one, and on to that one under the thumb.
+  // The campaign's map (see campAt): a world's ten levels, the first at the foot and the boss on top, the path between them lit where
+  // a cleared one leads; each its tier's number (a bonus race a coin, the boss its figure) over its stars, the open ones to tap.
   map(w = campAt(campNextId()).w) {   // a world's ten levels at one look (owner, 2026-10-23: no scroll, the screen filled to the buttons' edges, its world's
     // backdrop and no see-through, Menu alone, where the player stopped lit, each world's boss): a path up the screen, three a row and back, the boss on top
     const p = this.panel('map'), c = save.camp, ni = campNextId(), worlds = campWorlds(), wid = CAMPAIGN[w].world.id;
@@ -2844,7 +2828,7 @@ const ui = {
     const at = (s) => (s === 9 ? [1, 0] : [Math.floor(s / 3) % 2 ? 2 - (s % 3) : s % 3, 3 - Math.floor(s / 3)]);   // [column, row from the top]: 1 2 3 along the bottom, 4 5 6 back, 7 8 9, the boss over the middle
     for (let s = 0; s < 10; s++) {
       const i = w * 30 + s * 3 + 1, { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0, [col, row] = at(s);
-      const b = button(rc.boss || rc.bonus != null ? '' : String(s + 1), 'chip lvl' + (i === ni ? ' on' : '') + (open ? '' : ' locked') + (rc.boss ? ' boss' : ''), () => { if (open) goOwed(() => (save.cur && save.cur.ci === i ? game.resume() : game.playLevel(i))); });   // (a level under way goes on where it was)
+      const b = button(rc.boss || rc.bonus != null ? '' : String(s + 1), 'chip lvl' + (i === ni ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) goOwed(() => (save.cur && save.cur.ci === i ? game.resume() : game.playLevel(i))); });   // (a level under way goes on where it was)
       if (rc.boss) { const cv = document.createElement('canvas'); cv.className = 'fig'; b.append(cv); bossFig(rc.boss, cv, b); }   // its world's boss off its card
       else if (rc.bonus != null) b.append(iconEl('coin'));
       if (open) { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(k < n ? 'star' : 'starOff')); b.append(st); }
@@ -3021,7 +3005,7 @@ const input = {
     else if (what === 'down' && on) game.pressDown();
   },
   clear() {
-    aimCancel();
+    if (game.hero) game.hero.squeezeIn = 0;   // (a crouch held into a pause or a card: not left squeezed)
     for (const k of ['left', 'right', 'down', 'jump']) this.set(k, false);
     this.swipe = false; joyEnd();
     for (const e of document.querySelectorAll('#pad .on')) e.classList.remove('on');
@@ -3063,11 +3047,6 @@ const dpad = $('dpad');
 dpad.children[0].append(px('◀')); dpad.children[1].append(px('▶')); $('jumpBtn').append(px('▲'));
 let lastTap = { d: 0, t: -1e9 }, padDir = 0;   // the last press of a side, for a double tap (keys and pad alike)
 padPart(dpad, (e) => {
-  if (aim.on && aim.hyb) {   // ▲ aiming: the finger on ◀ ▶ is the aim's stick, from where it is now
-    if (e) aimStick('pad', e.clientX, e.clientY); else if (aim.stk && aim.stk.id === 'pad') aim.stk.id = -1;
-    padDir = 0; input.set('left', false); input.set('right', false); dpad.children[0].classList.remove('on'); dpad.children[1].classList.remove('on');
-    return;
-  }
   const r = dpad.getBoundingClientRect(), right = !!e && e.clientX > r.left + r.width / 2, d = e ? (right ? 1 : -1) : 0;
   if (d && !padDir) { if (lastTap.d === d && e.timeStamp - lastTap.t < 280) game.dash(d); lastTap = { d, t: e.timeStamp }; }   // a fresh press: a second one quick is a dash
   padDir = d;
@@ -3075,35 +3054,11 @@ padPart(dpad, (e) => {
   dpad.children[0].classList.toggle('on', input.left); dpad.children[1].classList.toggle('on', input.right);
 });
 const act = $('act'), jumpBtn = $('jumpBtn');
-// ▲ (either scheme) tells a tap from a long press on the first press, as UIKit does (a tap counts as the finger
-// lifts, a long press once held `hold` s): let go before that, the plain jump, a quick second tap another; held on
-// (or moved past `slop` px: a pull), that very jump is aimed: the hero hangs where it is (or stands) and the dots show
-// the arc, the plain jump's to begin with; a second finger anywhere leans it like a stick (see aimStick), or ▲ pulled
-// back like a slingshot (the further, the stronger: `min` of a jump to all of it at `full` of the width); let go of ▲
-// and it goes. `hold` is half UIKit's 0.5 s: a jump must not wait long to be told apart. `on`: the aim is put away
-// for now (user); off, ▲ is the plain key: a jump as it goes down, higher the longer it is held.
-const HYB = { on: false, hold: 0.25, slop: 10, full: 0.18, min: 0.6 };
-let hyb = null;   // ▲ down, not yet told apart: since when, where
+// ▲ (either scheme) is the plain key: a jump as it goes down, higher the longer it is held.
 padPart(act, (e) => {
   jumpBtn.classList.toggle('on', !!e);
-  if (!HYB.on) { input.set('jump', !!e); return; }
-  const g = game, x = e ? e.clientX - view.left : 0;
-  if (e && aim.on && aim.hyb) { aim.x = x; aim.y = e.clientY; return; }   // pulling
-  if (!e) {   // let go: an aimed jump goes where aimed; a tap is the plain jump
-    if (aim.on && aim.hyb) { const p = aim.p, vx = aim.vx, vy = aim.vy; aimCancel(); g.requestJump(p > 0 ? { vx, vy } : null); }
-    else if (hyb) { hyb = null; g.requestJump(); }
-    return;
-  }
-  if (!hyb) hyb = { t0: performance.now(), x0: x, y0: e.clientY, x, y: e.clientY };
-  hyb.x = x; hyb.y = e.clientY;
-  if (Math.hypot(x - hyb.x0, e.clientY - hyb.y0) > HYB.slop) hybAim(performance.now());   // pulled at once: a slingshot
+  input.set('jump', !!e);
 });
-function hybCheck(now) { if (HYB.on && hyb && !aim.on && now - hyb.t0 >= HYB.hold * 1000) hybAim(now); }   // held: a long press
-function hybAim(now) {   // ▲ held or pulled: aim the jump it is (off what the hero touches, or one left in the air)
-  const g = game;
-  if (aim.on || g.state !== 'play' || (g.sinceContact > JUMP.coyote && g.air <= 0)) return;
-  Object.assign(aim, { on: true, hyb: true, sx: hyb.x0, x: hyb.x, sy: hyb.y0, y: hyb.y, p: 0, t0: now - HYB.hold * 1000 });   // the plain arc shows at once
-}
 // Gestures over the game (not on the keys), beside them: a finger held off to the left or the right of
 // where it came down runs that way (the centre follows a long drag, so turning back is quick), a quick
 // swipe to a side dashes (as soon as it is fast enough, or on letting go of a quick one); a quick flick up jumps (held, it goes higher), a quick flick down lets go; a
@@ -3112,16 +3067,11 @@ const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, 
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel') || game.state === 'menu') return;
-  if (aim.on && aim.hyb) { aimStick(e.pointerId, e.clientX, e.clientY, true); return; }   // ▲ aiming: a finger anywhere is the aim's stick
   if (gest || joy) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
   if (save.stick) { joyStart(e); return; }
   gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false, dashed: false };
 });
 document.addEventListener('pointermove', (e) => {
-  if (aim.on && aim.hyb && ((aim.stk && aim.stk.id === e.pointerId) || (gest && gest.id === e.pointerId))) {   // the aim's stick (the running finger turns into it)
-    if (gest && gest.id === e.pointerId) { gest = null; input.swipe = false; input.set('left', false); input.set('right', false); }
-    aimStick(e.pointerId, e.clientX, e.clientY); return;
-  }
   if (joy && e.pointerId === joy.id) { joyMove(e); return; }
   const g = gest;
   if (!g || e.pointerId !== g.id) return;
@@ -3137,7 +3087,6 @@ document.addEventListener('pointermove', (e) => {
   if (!g.dashed && t < GEST.quick && Math.abs(ox) > GEST.swipe && Math.abs(ox) > Math.abs(dy) && Math.abs(ox) > (GEST.fast * t) / 1000) { g.dashed = true; game.dash(Math.sign(ox)); }   // a fast swipe: a dash now, not on letting go
 });
 const gestEnd = (e) => {
-  if (aim.stk && aim.stk.id === e.pointerId) { aim.stk.id = -1; if (joy && joy.id === e.pointerId) joyEnd(); return; }   // the aim's stick let go: it keeps its aim
   if (tap2 && e.pointerId === tap2.id) {   // a second finger's tap
     if (e.type === 'pointerup' && e.timeStamp - tap2.t < GEST.tap && Math.hypot(e.clientX - tap2.x, e.clientY - tap2.y) < GEST.still) game.requestJump();
     tap2 = null; return;
@@ -3180,11 +3129,6 @@ function joyStart(e) {
 function joyMove(e) {
   const j = joy, R = JOY.reach, x = e.clientX, y = e.clientY;
   padUsed = performance.now();   // the ▲ key stays bright while the stick is in use
-  if (aim.on && aim.hyb) {   // ▲ aiming: the stick leans the arc, from its base
-    if (!aim.stk || aim.stk.id !== j.id) aim.stk = { id: j.id, sx: j.bx, sy: j.by, x, y }; else { aim.stk.x = x; aim.stk.y = y; }
-    if (j.dir) { j.dir = 0; input.set('left', false); input.set('right', false); }
-    j.x = x; j.y = y; stkShow(); return;
-  }
   let dx = x - j.bx, dy = y - j.by;
   const d = Math.hypot(dx, dy);
   if (d > GEST.still) j.moved = true;
@@ -3218,8 +3162,8 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
-const MUSIC_VOL = 0.4, MUSIC_RATE = 32000, MUSIC_PAD = 0.1, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
-const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', junk: 'junk', skazka: 'skazka', sea: 'sea' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
+const MUSIC_VOL = 0.4, MUSIC_RATE = 32000, MUSIC_PAD = 0.1, FX_VOL = 0.7, PENTA = [0, 2, 4, 7, 9];
+const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', skazka: 'skazka', sea: 'sea', void: 'void' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {
@@ -3303,7 +3247,7 @@ const sound = {
   frame(g) {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const kind = g.lv.kind;
-    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' || kind === 'trial' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || CLIMBS[g.world] || 'climb');   // the Crypt to the Void's drone
+    this.music(g.state === 'menu' || g.state === 'boot' || kind === 'shop' ? 'calm' : kind === 'treasure' || kind === 'trial' ? 'stash' : kind === 'boss' ? 'boss' : g.bonus ? 'bonus' : g.wd === CRYPT ? 'void' : WORLD_MUSIC[g.wd.id] || 'climb');   // the Crypt to the Void's drone
     const duck = g.state === 'play' || g.state === 'menu' ? 1 : 0.35;
     if (duck !== this.duck) { this.duck = duck; this.mus.gain.setTargetAtTime(MUSIC_VOL * duck, this.ctx.currentTime, 0.2); }
   },
@@ -3376,76 +3320,6 @@ const ads = {
   },
 };
 
-// ── Slingshot ────────────────────────────────────────────────
-// With a mouse, as well as the keys: press anywhere, pull back, let go, and the squishy
-// leaps the other way, off whatever it is on (a floor, a wall, a ceiling — never into it)
-// or with its jump in the air. The pull sets the power, up to a full jump; one inside the
-// dead zone is a cancel. While aiming, the body is squeezed along the launch line, it
-// looks where it is going and dots show the arc. Touch keeps the pad.
-const aim = { on: false, id: -1, sx: 0, sy: 0, x: 0, y: 0, p: 0, ux: 0, uy: -1, vx: 0, vy: 0 };
-const dots = new Float32Array(JUMP.dots * 2);
-let nDots = 0;
-function aimUpdate() {
-  const k = aim.stk, byStk = !!k && Math.hypot(k.x - k.sx, k.y - k.sy) >= JUMP.deadZone;   // a stick points where to go; ▲ pulled back points the other way
-  const dx = byStk ? k.x - k.sx : aim.sx - aim.x, dy = byStk ? k.y - k.sy : aim.sy - aim.y, len = Math.hypot(dx, dy);
-  if (len < JUMP.deadZone) {   // not pulled: no dots, but in the hybrid after a moment the plain jump's
-    aim.p = 0;
-    if (aim.hyb && performance.now() - aim.t0 > HYB.hold * 1000) {   // off a wall up and away from it, in the air straight up
-      const t = game.touch, wall = game.sinceContact <= JUMP.coyote && (t === 1 || t === 2);
-      aim.p = 1; aim.ux = 0; aim.uy = -1; aim.vx = wall ? (t === 1 ? 1 : -1) * JUMP.wallX * game.R : game.hero.rigVx; aim.vy = -game.vjump * (wall ? JUMP.wallUp : 1);
-    }
-    return;
-  }
-  let ux = dx / len, uy = dy / len;
-  const n = game.surfaceNormal();
-  if (n) {   // at least `minUp` out of the surface, still to the side it was aimed
-    const tx = -n[1], ty = n[0], out = ux * n[0] + uy * n[1], along = ux * tx + uy * ty;
-    if (out < JUMP.minUp) { const s = (along < 0 ? -1 : 1) * Math.sqrt(1 - JUMP.minUp * JUMP.minUp); ux = JUMP.minUp * n[0] + s * tx; uy = JUMP.minUp * n[1] + s * ty; }
-  }
-  aim.ux = ux; aim.uy = uy;
-  aim.p = Math.min(1, (len - JUMP.deadZone) / (byStk ? JOY.reach - JUMP.deadZone : (aim.hyb ? HYB.full : JUMP.dragFrac) * view.w));
-  const lo = aim.hyb ? HYB.min : JUMP.minPower, v = game.vjump * (lo + (1 - lo) * aim.p);
-  aim.vx = ux * v; aim.vy = uy * v;
-}
-function aimCancel() { aim.on = false; aim.hyb = false; hyb = null; aim.p = 0; nDots = 0; if (game.hero) game.hero.squeezeIn = 0; if (aim.stk) { aim.stk = null; stkShow(); } }
-// The hybrid's other finger while ▲ aims: a stick from where it came down (or where it was), drawn as the stick
-// is, all of the jump at its reach; let go, it keeps its aim till ▲ is let go.
-function aimStick(id, x, y, fresh) {
-  if (fresh || !aim.stk || aim.stk.id !== id) aim.stk = { id, sx: x, sy: y, x, y }; else { aim.stk.x = x; aim.stk.y = y; }
-  stkShow();
-}
-function stkShow() {
-  const k = aim.stk;
-  if (!k) { if (!joy) joyEl.classList.remove('on'); return; }
-  const dx = k.x - k.sx, dy = k.y - k.sy, d = Math.hypot(dx, dy), s = d > JOY.reach ? JOY.reach / d : 1;
-  joyEl.style.transform = 'translate(' + k.sx + 'px,' + k.sy + 'px)'; joyKnob.style.transform = 'translate(' + dx * s + 'px,' + dy * s + 'px)';
-  joyKnob.classList.toggle('on', d >= JUMP.deadZone); joyEl.classList.add('on');
-}
-function aimFrame(now) {
-  hybCheck(now);
-  if (!aim.on) return;
-  if (game.state !== 'play') { aimCancel(); return; }
-  aimUpdate();
-  const b = game.hero, look = game.heroLook;
-  b.squeezeIn = JUMP.squeeze * aim.p;
-  if (aim.p > 0) { b.sqAx = aim.ux; b.sqAy = aim.uy; look.x = b.cx + aim.ux * 240; look.y = b.cy + aim.uy * 240; look.t = now; }
-}
-// The arc as dots, from just outside the body until it meets a wall, a block or the floor.
-function aimPreview() {
-  nDots = 0;
-  if (!aim.on || aim.p <= 0 || game.state !== 'play') return;
-  const b = game.hero, lv = game.lv, g = WORLD.gravity, T = JUMP.preview / JUMP.dots, r2 = (1.2 * b.R) ** 2;
-  for (let k = 1; k <= JUMP.dots; k++) {
-    const s = k * T, x = b.cx + aim.vx * s, y = b.cy + aim.vy * s + 0.5 * g * s * s;
-    if (x < lv.l || x > lv.r || y > lv.floor) break;
-    let hit = false;
-    for (const r of lv.near(y, y)) if (!r.plank && x > r.x0 && x < r.x1) { hit = true; break; }
-    if (hit) break;
-    if ((x - b.cx) ** 2 + (y - b.cy) ** 2 < r2) continue;
-    dots[2 * nDots] = x; dots[2 * nDots + 1] = y; nDots++;
-  }
-}
-
 // ── Setup ────────────────────────────────────────────────────
 const canvas = $('gl');
 const uiEl = $('ui');
@@ -3481,23 +3355,6 @@ function layout() {
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
 // start of the next frame, right before drawing.
 function queueLayout() { layoutQueued = true; }
-
-canvas.addEventListener('pointerdown', (e) => {
-  if (!JUMP.mouse || e.pointerType === 'touch' || !started || paused || e.button > 0 || game.state !== 'play' || aim.on) return;
-  try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
-  aim.on = true; aim.id = e.pointerId; aim.sx = aim.x = e.clientX - view.left; aim.sy = aim.y = e.clientY; aim.p = 0;
-});
-canvas.addEventListener('pointermove', (e) => { if (aim.on && e.pointerId === aim.id) { aim.x = e.clientX - view.left; aim.y = e.clientY; } });
-function aimRelease(e, cancel) {
-  if (!aim.on || e.pointerId !== aim.id) return;
-  aim.x = e.clientX - view.left; aim.y = e.clientY;
-  aimUpdate();
-  const p = aim.p, vx = aim.vx, vy = aim.vy;
-  aimCancel();
-  if (!cancel && p > 0) game.requestJump({ vx, vy });
-}
-canvas.addEventListener('pointerup', (e) => aimRelease(e, false));
-canvas.addEventListener('pointercancel', (e) => aimRelease(e, true));
 
 // The menu's hero in the hand (owner, 2026-10-23: «главного героя можно таскать и жать на него, он такой же сквиш»): Gum's own touch (its Input,
 // for the one body). A quick tap pokes it (a dent, a puff, a startled face); a press held squeezes it flatter till let go, and it hops; a drag
@@ -3659,13 +3516,12 @@ canvas.addEventListener('pointerdown', (e) => { if (menuTouch.on() && e.button <
 canvas.addEventListener('pointermove', (e) => menuTouch.move(e));
 canvas.addEventListener('pointerup', (e) => menuTouch.up(e, false));
 canvas.addEventListener('pointercancel', (e) => menuTouch.up(e, true));
-canvas.addEventListener('lostpointercapture', (e) => aimRelease(e, false));
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.togglePause(true); });
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 // Safari (user: it got in the way): a finger anywhere over the game, the stick and swipes included, must never start a
 // selection, the loupe or a callout. Only buttons keep their default: their click needs it. Pointer events still come.
-for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed, .tree'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
+for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
 for (const type of ['selectstart', 'contextmenu']) document.addEventListener(type, (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
@@ -3750,13 +3606,11 @@ function runFrame(now, fixedDt) {
   const alpha = loop.acc / STEP;
   game.frame(dt, alpha, now);
   sound.frame(game);
-  aimFrame(now);
-  aimPreview();
   fx.update(dt); updateBits(dt);
   shake.update(dt);
   const still = game.state === 'pause' ? [game.lv.cam, canvas.width, canvas.height, CINE ? 1 : 0, perf.ctxLoss].join() : null;   // paused (the pause menu, a story card over
   // the game): nothing in the shaft moves, so its frame stands as drawn till the level, the view, the look or the context changes (perf: 1.5 ms a frame on a phone, and the GPU's)
-  if (!still || still !== renderer.still || game.lv !== renderer.stillLv) renderer.draw(game, alpha, dots, nDots);
+  if (!still || still !== renderer.still || game.lv !== renderer.stillLv) renderer.draw(game, alpha);
   renderer.still = still; renderer.stillLv = game.lv;
   if (!firstFrame) { firstFrame = true; canvas.classList.remove('wait'); }
 }
@@ -3798,7 +3652,6 @@ function start() {
   if (/[?&]play=tokyo\b/.test(location.search)) { game.preview = TOKYO; window.__up.go(1, 0); }   // Tokyo by itself, to look at (a run in it)
   if (/[?&]play=blocks\b/.test(location.search)) { game.preview = BLOCKS; window.__up.go(2, 0); }   // the Tower Blocks by themselves
   if (/[?&]play=sky\b/.test(location.search)) { game.preview = SKY; window.__up.go(2, 0); }   // the Skyscraper by itself
-  if (/[?&]play=junk\b/.test(location.search)) { game.preview = JUNK; window.__up.go(2, 0); }   // the Junkyard by itself
   if (/[?&]play=sea\b/.test(location.search)) { game.preview = SEA; window.__up.go(1, 0); }   // the Sea by itself (not in the campaign yet)
   if (/[?&]play=skazka\b/.test(location.search)) { game.preview = SKAZKA; window.__up.go(1, 0); }   // the Dark Forest by itself (not in the game yet)
   loop.last = performance.now();
@@ -3835,15 +3688,6 @@ window.__up = {
   story(id) { game.story(id, null, true); return !!STORY[id]; },   // a story card shown, seen or not (for a look)
   // Press or let go of a control as a player would: 'left', 'right', 'down' or 'jump'.
   key(what, on = true) { input.set(what, !!on); return { dir: input.dir, down: input.down, jump: input.jump }; },
-  // A slingshot pull (dx, dy) in CSS px from where the mouse went down, let go at once.
-  pull(dx, dy) {
-    aim.on = true; aim.sx = 0; aim.sy = 0; aim.x = dx; aim.y = dy;
-    aimUpdate();
-    const p = aim.p, vx = aim.vx, vy = aim.vy;
-    aimCancel();
-    if (p > 0) game.requestJump({ vx, vy });
-    return { p: +p.toFixed(2), vx: Math.round(vx), vy: Math.round(vy) };
-  },
   // Headless checks: freeze the real-time loop, advance by fixed frames even when the
   // page is hidden or paused, and grab the canvas as a JPEG.
   freeze(on = true) { loop.frozen = !!on; return loop.frozen; },

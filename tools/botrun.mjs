@@ -53,14 +53,25 @@ for (let i = 0; !(await run(`document.readyState === 'complete' && typeof __up =
 }
 await run(`new Promise((ok) => { const s = document.createElement('script'); s.src = 'tools/bot.js?' + Date.now(); s.onload = ok; document.body.append(s); })`);
 await run('__up.freeze(true)');
+// PARTS=all plays each campaign tier in every order of its three parts (worlds 1-3: the calm part first, К1; from world 4 all six), PARTS=021 one order
+// (owner, К10 «А»: the bot over every order); LANDINGS=1 adds where the hero landed (botreport.py makes the landing map and the stalls and hits by chunk).
+const PERMS = ['012', '021', '102', '120', '201', '210'];
+const ordersOf = async (name) => {
+  const P = process.env.PARTS;
+  if (!P || name[0] !== 'c') return [null];
+  if (P !== 'all') return [P];
+  const [w, s] = name.replace(/^c/, '').replace(/[LR]$/, '').split('-').map(Number), alone = await run(`(() => { const r = CAMPAIGN[${w - 1}].levels[${s - 1}]; return ${s} === 1 || !!r.boss || r.bonus != null; })()`);
+  return alone ? [null] : w <= 3 ? ['012', '021'] : PERMS;
+};
 try {
-  for (const name of levels) {
+  for (const name of levels) for (const parts of await ordersOf(name)) {
     const camp = name[0] === 'c', col = /L$/.test(name) ? 0 : /R$/.test(name) ? 2 : 1, [w, s] = name.replace(/^c/, '').replace(/[LR]$/, '').split('-').map(Number);
     const daily = /^d\d$/.test(name), a = await run(daily ? `__bot.level(0, ${name[1] - 1}, ${+seed}, { noFoes: ${process.env.NOFOES === '1'}, daily: true })`
-      : `__bot.level(${w - 1}, ${s - 1}, ${seed === 'r' ? 'null' : +seed}, { noFoes: ${process.env.NOFOES === '1'}, camp: ${camp}, col: ${col}, order: ${process.env.ORDER ? +process.env.ORDER : null} })`);
+      : `__bot.level(${w - 1}, ${s - 1}, ${seed === 'r' ? 'null' : +seed}, { noFoes: ${process.env.NOFOES === '1'}, camp: ${camp}, col: ${col}, order: ${process.env.ORDER ? +process.env.ORDER : null}${parts ? `, parts: [${[...parts].join(',')}]` : ''} })`);
     const boss = a.boss && { boss: a.boss.name, dealt: `${a.boss.max - a.boss.hp}/${a.boss.max}`, blows: a.boss.dealt.map(([t, at]) => `${at}@${t}`) };
     console.log(JSON.stringify({ level: name, result: a.result === 'play' ? 'time' : a.result, time: a.time, heartsLost: a.heartsLost, hits: a.hits.map((h) => `${h.by}@${h.chunk}`), ...boss,
-      foes: a.spawned, stomped: a.killed, coins: `${a.coins}/${a.coinsPlaced}`, combo: a.combo, stuck: a.stuck.map((q) => `${q.chunk}@${q.at}`), tight: a.tightness, wall: a.wall, wallJumps: a.wallJumps, rebounds: a.rebounds, flats: a.flats, tasks: a.tasks, chunks: a.chunks }));
+      foes: a.spawned, stomped: a.killed, coins: `${a.coins}/${a.coinsPlaced}`, combo: a.combo, stuck: a.stuck.map((q) => `${q.chunk}@${q.at}`), tight: a.tightness, wall: a.wall, wallJumps: a.wallJumps, rebounds: a.rebounds, flats: a.flats, tasks: a.tasks, chunks: a.chunks,
+      ...(parts ? { order: parts } : {}), ...(process.env.LANDINGS === '1' ? { landings: a.landings } : {}) }));
   }
 } catch (e) {
   console.error(e);

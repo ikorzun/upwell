@@ -66,6 +66,7 @@ const DOOR = { w: 2.4, h: 2.8 };   // in R: a way into a shop or a stash, and th
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
 // ledges (at a crawler on them, say) passes under it, a full one up from the top ledge gets in.
 const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
+const EXIT_TRAIL = { n: 4, from: 1.7, step: 1.25 };   // worlds 1-3's coins up into the way out (Level.finish): how many, R under its middle the first, R between them
 // The hero is kept at `anchor` of the view height going up, and going down at least `keep`
 // hero heights over the touch keys (or the screen's bottom): a fall is followed, down to the
 // floor, and caught by a ledge or the fire. The ceiling over an exit stops the camera `top` px
@@ -211,6 +212,10 @@ for (const id of ['crow', 'crowUp', 'crowDown', 'crowWarn', 'crowDive', 'rcrow',
 // (the chunk 'ribbon', 1-3's set piece), flapping there now and then; a touch frees it, coins and its thanks, off it flies with the ring on it,
 // and `card` s later the card (STORY village_crow; owner, 2026-10-23: «Как только его коснулся, карточка появляется сразу за секунду»), its thanks read first
 const RIBBON = { card: 1, reach: 1.8, thanks: { en: 'Caw! Free again', es: '¡Cra! Libre otra vez', pt: 'Cra! Livre de novo', ja: 'カァ！ じゆうに なった' } };
+// Ume, Mochi's friend in Tokyo (owner, 2026-10-24: У1 «Б», the treat now; У6 «Б», red with an ume leaf, a kind face): by a vending machine on 5-3's ledge
+// at a wall (the chunk 'umeVend', u). The hero comes to him: a can for him, half for Mochi (a heart back if one is missing, else coins), he hops for joy
+// and comes along after the hero; `card` s later the story's card VI. [R his size, R of reach]
+const UME = { card: 1, r: 0.92, reach: 1.8, thanks: { en: 'Thanks, Mochi! Half for you', es: '¡Gracias, Mochi! La mitad para ti', pt: 'Valeu, Mochi! Metade pra você', ja: 'ありがとう、モチ！ はんぶんこ' } };
 // Tokyo's power lines (THEMES.tokyo), in tiles: from crossarm to crossarm every `arm`, `drop` under it, one `inset` from the walls (owner: half as many
 // as the two there were), sagging `sag`; wireY is its height at x, where a crow perches (FOLK.crowP of the beats).
 const WIRE = { arm: 9, drop: 0.08, inset: 0.5, sag: 0.8 };   // drawn behind the shaft (DEPTH), the beams' and gondolas' cables too
@@ -1024,11 +1029,11 @@ const CAMPAIGN = [
     news: { en: 'neon signs light up as you pass', es: 'los neones se encienden al pasar', pt: 'os neons acendem quando você passa', ja: 'ネオンは ちかよると つく' } },
   { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler', 'shell'], foes: 0.6, candy: [], aircons: false, seed: 2101,
     news: { en: 'crows: scare them, never wait under them', es: 'cuervos: espántalos, no esperes debajo', pt: 'corvos: espante, não espere embaixo', ja: 'カラス: おどかそう。したで またないで' } },
-  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,
+  { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], episode: 'umeVend', enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,   // (Ume's treat: UME)
     news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, crumble: 2 }, intro: ['crumble'], enemies: ['crawler', 'tofu', 'spitter', 'shell'], foes: 0.6, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
     },
-  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2, crumble: 1 }, intro: [], enemies: ['crawler', 'shell', 'spitter', 'tofu'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2, crumble: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'shell', 'spitter', 'tofu'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 5106 },
   { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler', 'tofu'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
     news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' }, tip: true },
@@ -1069,7 +1074,7 @@ const CAMPAIGN = [
     news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' }, tip: true },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.41, maxD: 2, chunks: { ...GLACIER, crumble: 2 }, intro: [], enemies: ['climber', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 4103,
     news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' }, tip: true },
-  { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
+  { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], set: 'arena', enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },   // (an arena: К4 «А»)
   { role: 'bonus', len: 36, bonus: 1, time: 40, seed: 4104 },
   { role: 'twist', len: 32, sides: [13975, 0], fire: 0.4, maxD: 2, chunks: { ...GLACIER, mosswall: 2 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 4102,
     news: { en: 'icicles fall', es: 'los carámbanos caen', pt: 'os pingentes caem', ja: 'つららが おちる' }, tip: true },
@@ -1092,7 +1097,7 @@ const CAMPAIGN = [
     news: { en: 'circlers go round the rocks', es: 'los rondadores rodean las rocas', pt: 'os rondadores rodeiam as pedras', ja: 'グルグルが いわを まわる' } },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.44, maxD: 2, chunks: { ...SEAP, crumble: 3 }, intro: ['crumble'], enemies: ['circler', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 6103,
     news: { en: 'driftwood gives way', es: 'la madera a la deriva cede', pt: 'a madeira à deriva cede', ja: 'ながれぎは くずれる' }, tip: true },
-  { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], enemies: ['circler', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6102 },
+  { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], set: 'arena', enemies: ['circler', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6102 },
   { role: 'bonus', len: 36, bonus: 2, time: 40, seed: 6104 },   // the combo ladder (was the coin rain, the Mine's and Tokyo's too: the five open worlds' bonuses now combo, rain, rubber, combo, rain)
   { role: 'twist', len: 34, fire: 0.44, maxD: 2, chunks: { ...SEAP, lift: 4, crumble: 3, bridge: 1 }, intro: ['lift'], enemies: ['climber', 'crawler'], foes: 0.5, candy: ['smash'], stash: 0.3, seed: 6106,
     news: { en: 'a river of rafts', es: 'un río de balsas', pt: 'um rio de jangadas', ja: 'いかだの かわ' }, tip: true },
@@ -1785,6 +1790,17 @@ const CHUNKS = {
     '............',
     '....o..o....',
     '............'] },
+  umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
+    '............',   // side the way on, coins under; no enemy in the chunk
+    '............',
+    '.......####.',
+    '............',
+    '............',
+    '..u.........',
+    '######......',
+    '............',
+    '.....o..o...',
+    '............'] },
   lift: { d: 2, rows: [
     '............',
     '............',
@@ -2276,6 +2292,15 @@ const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coin
 // An ambush (owner, round 2: «Начинай все по списку»; my r6: 1-4, «яма с волнами врагов»): a small arena (a), stood on its floor its one wave of `waves`
 // dropping in, shown first as an arena's (ARENA.warn), no mini, `coins` big ones for it; left behind, nothing (1-4's motif)
 const AMBUSH = { waves: [2], coins: 2 };
+// Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
+// an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
+const WAVES = {
+  village: { arena: [['crawler', 'crawler'], ['crawler', 'shell', 'spitter']], ambush: [['crawler', 'shell']] },
+  fuji: { arena: [['crawler', 'crawler'], ['shell', 'crawler', 'shell']], ambush: [['crawler', 'crawler']] },
+  sea: { arena: [['crawler', 'shell'], ['spitter', 'crawler', 'shell']], ambush: [['crawler', 'shell']] },
+  town: { arena: [['crawler', 'shell'], ['spitter', 'crawler', 'shell']], ambush: [['crawler', 'shell']] },
+};
+const wavesOf = (th, small) => { const k = !th ? null : th.village ? 'village' : th.fuji ? 'fuji' : th.sea ? 'sea' : th.town ? 'town' : null; return k ? WAVES[k][small ? 'ambush' : 'arena'] : null; };
 const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
@@ -2393,7 +2418,8 @@ class Level {
     this.komori = !!(this.foeTypes ? this.foeTypes.includes('komori') : !rc && o.world.enemies && o.world.enemies.komori);   // its bats dive (KOMORI): no harmless ones beside them
     this.fizz = []; this.signs = []; this.script = rc && rc.script ? rc.script.slice() : null;   // script: a level laid as written (the tutorial)
     if (o.kind === 'well' && o.height && !o.world.bonus) {   // the level's set piece: where, and which (as hard as the level allows; a recipe's own)
-      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);
+      const w = WORLDS.indexOf(o.world), maxD = this.hard ? 3 : MAX_D[Math.max(0, Math.min(w, 3))][Math.min(this.stage, 2)], ok = rc ? (rc.episode ? [rc.episode] : rc.set ? [rc.set] : []) : (SETS[Math.max(0, w)] || SETS[0]).filter((id) => CHUNKS[id].d <= maxD);   // (a story's episode the
+      // campaign's only: the daily well's levels have none, dayAt)
       if (ok.length) { this.setAt = this.floor - o.height * (0.4 + 0.2 * this.rng()); this.setId = ok[(this.rng() * ok.length) | 0]; }
     }
     this.folk = []; this.folkAt = []; this.folkRng = mulberry32((o.seed ^ 0x2545f491) >>> 0); this.crowRng = mulberry32((o.seed ^ 0x68e31da4) >>> 0);   // folk (see FOLK), by their own generators
@@ -2825,12 +2851,16 @@ class Level {
       else if (FOE_LETTER[ch]) {   // an enemy on the ledge under it (FOE_LETTER): a crawler (the tutorial's), a spitter (1-3's), a nurikabe over it (1-5's)
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1), type = FOE_LETTER[ch];
         if (q) this.spawns.push({ type, x, y: q.y0 - 1.2 * R * ENEMY[type].size, ledge: q });
+      } else if (ch === 'u') {   // Ume on the ledge under it (UME), the ledge's kit a vending machine
+        const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
+        if (q) { q.kitWant = 'vending'; q.kit = undefined; this.folk.push({ kind: 'ume', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, given: false, t: 0, body: null, open: false }); }
       } else if (ch === 'r') {   // the crow with the red ring on the ledge under it (RIBBON), facing into the shaft
         const x = X(k) + t / 2, q = this.rects.slice(from).find((b) => Math.abs(b.y0 - Y(r)) < 1 && x > b.x0 && x < b.x1);
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
       else if (ch >= '1' && ch <= '9') this.signs.push({ id: +ch, x: X(k) + t / 2, y: Y(r) - t / 2 });   // a word of the tutorial's, said there
-      else if (ch === 'A' || ch === 'a') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a', floor: undefined, waves: (ch === 'a' ? AMBUSH : ARENA).waves, warnAt: -1, dropAt: -1 });   // (a: AMBUSH)
+      else if (ch === 'A' || ch === 'a') { const kinds = wavesOf(this.theme, ch === 'a'); this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a', floor: undefined,
+        waves: kinds ? kinds.map((q) => q.length) : (ch === 'a' ? AMBUSH : ARENA).waves, kinds, warnAt: -1, dropAt: -1 }); }   // (a: AMBUSH; kinds: its world's waves, WAVES)
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, goal: this.pocketKind === 'trial' ? this.pocketGoal : undefined, side, cd: 0, room: null });
@@ -2900,7 +2930,7 @@ class Level {
       const k = 1 + ((this.rng() * (COLS - 2)) | 0);
       if (at(r, k) === '.' && at(r - 1, k) === '.') this.coin(X(k) + t / 2, Y(r) - t / 2, this.rng() < 0.12 ? 5 : 1);
     }
-    if (c !== CHUNKS.pocket && c !== CHUNKS.ribbon) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at, and the crow's (RIBBON)
+    if (c !== CHUNKS.pocket && c !== CHUNKS.ribbon && c !== CHUNKS.umeVend) this.populate(this.rects.slice(from), base - H * t, base);   // a bubble's ledge is safe to stop at, and the crow's (RIBBON)
   }
   // Enemies for a chunk just laid, on what it is made of: a crawler along a clear ledge, a
   // climber up and down the longest stretch of bare wall, a circler round a free block.
@@ -2946,10 +2976,15 @@ class Level {
   }
   // The end of a shaft: the portal out, and a ceiling over it the camera stops at.
   finish() {
-    const R = this.R;
+    const R = this.R, cw = CAMPAIGN.findIndex((c) => c.world === this.world);
     this.portal = { x: (this.l + this.r) / 2, y: this.top - PORTAL.rise * R, r: 1.35 * R };
     this.capY = this.portal.y - 3.2 * R;
     this.rects.push(this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true }));
+    if (this.rc && cw >= 0 && cw < 3 && this.kind === 'well') {   // worlds 1-3: a trail of coins up the open air into the way out (owner, К7 «А»: the exit found from a jump
+      // below), their twinkles in turn (not off the level's generator: nothing after it moves)
+      for (let k = 0; k < EXIT_TRAIL.n; k++) this.coins.push({ x: this.portal.x, y: this.portal.y + (EXIT_TRAIL.from + EXIT_TRAIL.step * k) * R, v: 1, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: k * 1.3 });
+      this.coinTotal += EXIT_TRAIL.n;
+    }
     this.top = -Infinity;
   }
   near(y0, y1) {
@@ -3526,6 +3561,10 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
     for (let side = -1; side <= 1; side += 2) dot(ex * side + lx, ey + ly, rx * 0.95, ry * 0.5, PAL.blue);
     dot(-0.52, -0.6, 0.13, 0.07, PAL.white);
   } else if (b.helmet === 'astro') { dot(-0.42, 0.02, 0.05, 0.13, PAL.blue); dot(0, 0.8, 0.56, 0.07, PAL.blue); dot(0, 0.9, 0.44, 0.06, PAL.orange); }   // a glint in its window, its neck ring
+  else if (b.helmet === 'umeLeaf') {   // Ume (UME; owner, 2026-10-24, У6 «Б»): an ume's leaf on a stalk on his crown, tilted
+    const tilt = (ux, uy, a, rx, ry, c) => { const ca = Math.cos(a), sa = Math.sin(a); frame(ux, uy, rx * ca, rx * sa, -ry * sa, ry * ca); put(c[0], c[1], c[2], 0); };
+    tilt(0.06, -1.02, 0.25, 0.06, 0.17, ink); tilt(0.36, -1.05, -0.35, 0.34, 0.14, ink); tilt(0.36, -1.05, -0.35, 0.28, 0.09, PAL.green);
+  }
 };
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {

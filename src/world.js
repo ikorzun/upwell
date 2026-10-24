@@ -409,6 +409,14 @@ const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it. It keeps still its first `calm` s.
 const CART = { size: 2.2, pass: [4, 3.4, 2.6], spit: 2.5, wind: 0.6, creak: 0.8, rock: 0.35, crumble: [0.35, 4.5], lifts: 1.5, hold: 2, calm: 2.5 };
 const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 0, 1], flip: 2.5, calm: 2.5 };
+// The Tsuchigumo (BOSSES.cart, the Cave's; owner 2026-10-23: «Очень легкий босс… Зачем вагонетки внизу не понятно», the fight redone
+// to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
+// the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
+// lobbed at the hero. A drop: over the hero, its eyes red and dust off the ceiling where it will fall, `warn` s with a creak (still
+// its last `lock` s), then down at `dive` R/s to the floor. There, tangled in its own thread, it lies `tangle` s, the only time a
+// stomp hurts it (any other stomp clangs off its back); then it reels back up in `reel` s. `rest` s between moves by phase. Its first
+// hit calls two spiderlings down; on its last heart it drops twice running, the second after `again` s. Still its first `calm` s.
+const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2, lock: 0.4, again: 0.9, dive: 34, tangle: 2.5, reel: 0.9, rest: [2.0, 1.8, 1.6, 1.4], calm: 2.5 };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -708,17 +716,18 @@ const BOSSES = {
     top: { en: 'Hard on top. Roll a shell at her!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
     hint: { en: 'Flipped! Land on her belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
     how: { en: 'Roll a shell into her, then stomp her', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
-  // The Cave's: a Tsuchigumo on the Minecart's rail (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
-  // The gentler of the two on a rail, as the earlier (owner, 2026-10-20: it and the Tram traded): the Cork's hits and phases, its passes and spits a quarter slower (slow).
-  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  // The Cave's: a Tsuchigumo hanging by its thread in an empty cave (SPIDER, Boss.spider; owner 2026-10-23: the fight redone, the lifts,
+  // bridges and rail gone): four hearts, each earned while it lies tangled after its drop.
+  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, spider: true, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'The dark down here is my web.', es: 'La oscuridad aquí es mi telaraña.', pt: 'O escuro aqui é minha teia.', ja: 'この くらやみは わたしの くものす。' },
-      { en: 'Eight legs, one rail, no way out.', es: 'Ocho patas, un riel, sin salida.', pt: 'Oito patas, um trilho, sem saída.', ja: 'あし はっぽん、レール いっぽん、にげみち なし。' },
+      { en: 'Eight legs, one thread, no way out.', es: 'Ocho patas, un hilo, sin salida.', pt: 'Oito patas, um fio, sem saída.', ja: 'あし はっぽん、いと いっぽん、にげみち なし。' },
       { en: 'Nobody leaves my burrow.', es: 'Nadie sale de mi madriguera.', pt: 'Ninguém sai da minha toca.', ja: 'わたしの あなから だれも でられない。' }],
     quip: [{ en: 'Stuck in my web!', es: '¡Atrapado en mi telaraña!', pt: 'Preso na minha teia!', ja: 'くものすに ひっかかった！' },
       { en: 'Too slow for eight legs.', es: 'Muy lento para ocho patas.', pt: 'Lento demais para oito patas.', ja: 'はっぽんあしには おそすぎ。' }],
     defeat: { en: 'Ugh… back into my hole.', es: 'Uf… de vuelta a mi agujero.', pt: 'Ai… de volta pro meu buraco.', ja: 'うう… あなに もどる。' },
-    hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
-    how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
+    top: { en: 'Not now. Wait for its drop!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちてくるのを まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Tangled! Jump on it!', es: '¡Enredada! ¡Salta encima!', pt: 'Enrolada! Pule em cima!', ja: 'からまった！ とびのれ！' },   // the first time it lies tangled
+    how: { en: 'Dodge its drop, then stomp it', es: 'Esquiva su caída y písala', pt: 'Desvie da queda e pise nela', ja: 'おちてくるのを よけて、ふみつけろ' } },   // after three losses
   // The Sea's (world 4): Onamazu, the earthquake catfish under the islands, the gods' stone (kaname-ishi) on its back (owner, 2026-10-21:
   // «сом изогнутый», boss-sea D): the Puck's slide over wet rock (rc.ice), its stone the hard top.
   namazu: { name: { en: 'Onamazu', es: 'Onamazu', pt: 'Onamazu', ja: 'おおなまず' }, ink: 'orange', design: 'dome', size: 2.4, slide: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
@@ -843,7 +852,7 @@ const CAMPAIGN = [
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
-  { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends
+  { role: 'boss', boss: 'cart', spider: true, par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
@@ -2233,6 +2242,7 @@ class Level {
     if (o.kind === 'boss') {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
+      if (this.rc && this.rc.spider) return;   // the Tsuchigumo's: the floor and the walls; what does nothing in the fight is not there (the plan)
       if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
         const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
         for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));
@@ -3212,6 +3222,15 @@ const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
   return true;
 };
 for (const id in FOE_SPRITES) { const fit = BOSS_FIT[id]; LOOK_FACE[id] = (d) => drawSprite(d, FOE_SPRITES[id], fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0, fit); }   // the forest's face right; a boss as its cell has it
+// A boss's drawing's width and height in world px at its full size, as drawSprite lays it (BOSS_FIT's whole scale, or fitted over its
+// body's shape): for the owner's 2:1 against the hero (2026-10-21), which its shrink as it loses hearts never goes under (Game.hitBoss).
+const bossSize = (bs) => {
+  const rows = bs.look && FOE_SPRITES[bs.look], fit = bs.look && BOSS_FIT[bs.look], b = bs.body;
+  if (!rows || !fit) return [2 * b.R, 2 * b.R];
+  const W = rows[0].length, H = rows.length, sh = b.s, ex = sh.ext || [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
+  const k = fit[3] ? (fit[3] * PIX.base) / b.R : 1.08 * Math.max((2 * ex[0]) / W, (2 * ex[1]) / H);   // (drawSprite's k: body units a sheet pixel)
+  return [W * k * b.R, H * k * b.R];
+};
 const gumWriteFace = Renderer.prototype.writeFace;
 // The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units
 // (its radius 1, y down).
@@ -5118,7 +5137,10 @@ Renderer.prototype.draw = function (g, alpha) {
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
     const d = df.rail || df.slide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
-    if (front) return;
+    if (front) {   // the Tsuchigumo tangled in its own thread (SPIDER): loops of it across its drawing while a stomp hurts it
+      if (k === 'cart' && bs.state === 'dazed') { const [w, h] = bossSize(bs), y = b.maxY - 0.55 * h; for (let i = -1; i <= 1; i++) line(x - 0.42 * w, y + i * 0.16 * h - 0.1 * h, x + 0.42 * w, y + i * 0.16 * h + 0.1 * h, PAL.white, 0.85, 1); }
+      return;
+    }
     b.lookDir = d;   // (its drawing on it turns too: LOOK_FACE)
     if (k === 'tram') { const wy = b.minY - 1.15 * R; box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0); }   // the overhead wire its pantograph (in its drawing) runs on
     else if (k === 'koschei' && bs.hp === 1) { const ny = b.minY - 1.0 * R + Math.sin(T * 3) * 0.08 * R, nx = Math.round(x / P) * P; F(nx + P / 2, ny, 0.55 * R, 0, 0, 0.8 * R, gr, 0.18, 1); box(nx, ny - 0.6 * R, nx + P, ny + 0.45 * R, gr, 1, 0, 10, 0); box(nx - P, ny - 0.76 * R, nx + 2 * P, ny - 0.5 * R, gr, 1, 0, 10, 0); box(nx, ny - 0.7 * R, nx + P, ny - 0.56 * R, INK.dark, 1, 0, 10, 0); if (Math.floor(T * 2) % 2) box(nx, ny + 0.3 * R, nx + P, ny + 0.38 * R, PAL.white, 1, 0, 10, 0); }   // his last heart: the needle his death is in, over his crown

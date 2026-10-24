@@ -39,10 +39,37 @@ WORLDS = {
              'the steam of a hot spring; cute and warm, kawaii', 'grey #c8c8c8',
              'green is moss you can hold on to, purple marks springs and rubber walls, blue is ice and moving planks, orange blocks crumble',
              'the black dark of the cave, nothing far off'),
-    'fuji': ('Mount Fuji', 'the slopes of Mount Fuji in winter, cosy and cute, kawaii: snow on pine trees tied up with yukitsuri ropes, stone lanterns capped '
-             'with snow, kamakura snow huts lit from inside, snow monkeys in a hot spring', 'blue #5bb8ff',
-             'white is ice you slip on (a whole block or wall of it), grey blocks crumble, purple marks moving planks and springs, green is moss you can hold on to',
-             'the black winter night, nothing far off'),
+    # (owner 2026-10-21: the Cave becomes the dark Mine, «мир темной пещеры, рудников японии», really dark; the shrine's things all replaced)
+    'mine': ('the Mine', 'an old Japanese mine deep inside a mountain, in the dark of its tunnels, cosy and a little eerie, kawaii: tunnels shored up with '
+             'timber frames, rails for little mine carts, the miners\' oil lamps (kantera) hung on hooks, veins of silver ore glinting in the rock, wooden ladders '
+             'and hand winches, straw baskets and pickaxes, bats asleep; as the old silver mine of Iwami Ginzan', 'grey #c8c8c8',
+             'green is moss you can hold on to, purple marks springs and rubber walls, blue is ice and moving planks, orange blocks crumble',
+             'the black dark of the mine, nothing far off'),
+    # (owner 2026-10-21: worlds 6 and 7 Japanese: «Данчи», «Телебашня»)
+    'danchi': ('the Danchi', 'a Japanese danchi at night, a big public housing estate of 1960s concrete blocks, cosy and a little lonely, kawaii: rows of '
+               'identical balconies with futons and laundry hung over their rails, air conditioner units, outdoor stairwells, mamachari bicycles, potted plants '
+               'and styrofoam-box vegetable gardens, banks of mailboxes, the building numbers painted big on the end walls, a playground with a panda spring rider, '
+               'stray cats', 'grey #c8c8c8', 'blue marks springs and moving platforms, orange blocks crumble, green is moss you can hold on to',
+               'the black night, rows of lit windows far off'),
+    'maekawa': ('the Danchi in Maekawa\'s concrete', 'a Japanese housing estate at night built the way the architect Kunio Maekawa built (Tokyo Bunka Kaikan, 1961; '
+                'Fukuoka Art Museum, 1979): massive concrete roofs with deep overhangs, heavy sculptural eaves, walls faced with ceramic tiles cast into the concrete; '
+                'cosy and a little lonely, kawaii life on it: laundry and futons over balconies, mamachari bicycles, potted plants, mailboxes, stray cats',
+                'grey #c8c8c8', 'blue marks springs and moving platforms, orange blocks crumble, green is moss you can hold on to', 'the black night, a few lit windows far off'),
+    'isozaki': ('the Danchi in Isozaki\'s concrete', 'a Japanese housing estate at night built the way the architect Arata Isozaki built (Oita Prefectural '
+                'Library, 1966: a frame of huge hollow concrete beams whose cut square ends stick out open; Gunma Museum of Modern Art, 1974: open cubic frames; '
+                'Kitakyushu Central Library, 1974: long barrel vaults): raw board-formed concrete, box beams cut off square and left open, ducts and pipes; cosy '
+                'and a little lonely, kawaii life on it: laundry and futons over balconies, mamachari bicycles, potted plants, mailboxes, stray cats',
+                'grey #c8c8c8', 'blue marks springs and moving platforms, orange blocks crumble, green is moss you can hold on to', 'the black night, a few lit windows far off'),
+    'tower': ('the Tower', 'a Japanese TV tower at dusk like Tokyo Tower: a steel lattice of trusses and girders painted international orange and grey, maintenance '
+              'catwalks, antennas and broadcast dishes, an observation deck with coin binoculars and a souvenir shop, the tower\'s own little shrine, crows '
+              'resting on the girders, Japanese clouds in the style of old prints drifting through it', 'purple #c996ff',
+              'blue marks moving platforms, springs and rubber walls, white clouds dissolve under you, green is moss you can hold on to',
+              'the purple dusk, the city far below'),
+    'fuji': ('Mount Fuji', 'the slopes of Mount Fuji in winter, cosy and cute, kawaii, and true to the real mountain: dark volcanic rock and '
+             'scoria under snow, dry-stone walls along the trail, mountain huts with stones on their roofs and corrugated iron walls, shut for the winter, wooden '
+             'station posts, the stone monuments of the Fuji-ko pilgrims, bare larches bent by the wind at the tree line; no green leaves and no fire anywhere', 'blue #5bb8ff',
+             'white is ice you slip on (a whole block or wall of it), grey blocks crumble, a grey fringe of rime under a ledge is what you hold on to, purple marks '
+             'moving planks and springs', 'the black winter night, nothing far off'),
     # (owner 2026-10-20: the Mine becomes the Japanese countryside in spring: forest, gardens, village, sakura)
     'village': ('the Village', 'the Japanese countryside in spring, cosy and cute, kawaii: a village of thatched farmhouses among rice terraces, a forest of '
                 'bamboo and cedar, gardens with koi ponds and stone lanterns, sakura in full bloom', 'orange #faa23e',
@@ -73,6 +100,14 @@ WORLDS = {
 }
 LEDGE_AT = 'a purple concrete ledge with a white top edge sticking out of the wall'
 CAVE_AT = 'a grey stone ledge with a white top edge sticking out of the wall'
+MINE_AT = 'a grey rock ledge shored up with old timber, with a white top edge, sticking out of the wall'
+DANCHI_AT = 'a grey concrete ledge with a white top edge sticking out of the wall'
+MK_AT = 'a grey concrete ledge with a white top edge under a deep concrete eave, sticking out of a tile-faced wall'
+ISO_AT = 'a grey concrete ledge with a white top edge, a hollow concrete box beam whose square cut end is open, sticking out of a board-formed concrete wall'
+TOWER_AT = 'a steel girder ledge, orange and grey, with a white top edge, sticking out of the wall'
+DANCHI_INKS = 'In this world blue marks springs and moving platforms, orange blocks crumble and green is moss you can hold on to, so those only for tiny details; never yellow (the coins\' colour) and never red (danger).'
+TOWER_INKS = 'In this world blue marks moving platforms, springs and rubber walls, white clouds dissolve under you and green is moss you can hold on to, so those only for tiny details; the tower\'s steel is international orange and grey (never red: red is danger), and never yellow (the coins\' colour).'
+MINE_INKS = 'In this world green is moss you can hold on to, purple marks springs and rubber walls, blue is ice and moving planks and orange blocks crumble, so those only for tiny details; never yellow (the coins\' colour) and never red (danger).'
 FUJI_AT = 'a blue rock ledge with a soft cap of snow and a white top edge sticking out of the wall'
 VILLAGE_AT = 'an orange earthen terrace ledge with a white top edge sticking out of the wall'
 SEA_AT = 'an aqua rock ledge with a white top edge sticking out of the wall'
@@ -144,6 +179,402 @@ ELEMENTS = {
                           where='on a rope sagging across the shaft from wall to wall', material='paper lanterns ribbed with black, grey caps top and bottom, a rope',
                           size='each lantern about 0.6 tiles wide and 0.8 tiles tall, four to six on the rope',
                           inks='orange lanterns glowing with a dither halo of orange, black ribs, grey caps and rope', scene=CAVE_AT + ' below them'),
+    # The Mine (owner 2026-10-21: «Заменить всё»; ledges, lights, things, the far layer and doors), six takes on each
+    'mine-slab': dict(world='mine', kind='ledge', what='the basic ledge, a ledge of rough rock shored up with old timber, sticking out of the shaft wall',
+                      does='solid on every side: you stand on it, cling to its sides and jump off it', material='rough rock, an old timber beam or brace holding it, '
+                      'iron cramps and nails', size='4 tiles long and 1 tile thick', main='grey (the rock)', rule=MINE_INKS,
+                      vary='its rock silhouette and underside, how the timber holds it (a beam under it, a knee brace to the wall, a post going down), and the small '
+                      'details on it (a rope, an empty lamp hook, a chalk mark, a pickaxe stuck in it, a trickle of dust)'),
+    'mine-plank': dict(world='mine', kind='ledge', what="a scaffold board of the mine: a few weathered planks on two short beams, a walkway sticking out of the wall",
+                       does='a thin platform: you jump up through it from below and stand on it', material='old wooden boards, nails, rope or chain',
+                       size='4 tiles long and a third of a tile thick', place='the board sticking out of that wall', main='grey (weathered wood)', rule=MINE_INKS,
+                       vary='the boards (two or three, gaps between them), the beams under them, how it is fixed to the wall (brackets, ropes or chains up to the wall) '
+                       'and the small details on it (a hanging bucket, an empty lamp hook, a coil of rope)'),
+    'mine-mover': dict(world='mine', kind='ledge', what='a moving platform of the mine', does='a thin platform that rides sideways along its row, from wall to wall '
+                       'and back, carrying you; you jump up through it from below and stand on its top', material='wood and iron, a cable with a pulley or a rail',
+                       size='3 tiles long, its top a third of a tile thick', place='the moving platform in the middle of the shaft', main='blue (moving planks are blue '
+                       'in this world)', rule=MINE_INKS.replace('blue is ice and moving planks and ', ''),
+                       vary='how it moves: A and B an ore bucket hanging from a cable on a pulley, its rim the top, C and D a little mine cart riding a thin rail across '
+                       'the shaft, E and F a wooden cage lift hanging from a rope; its frame, wheels or pulley, and small details (a lump of ore, a lamp, a rope)'),
+    'mine-crumble': dict(world='mine', kind='ledge', what='a ledge of loose rubble and broken ore held up by rotten boards, whose stones give way under you',
+                         does='a row you stand on that falls apart a moment after you touch it and comes back a while later', material='loose rocks, cracked rotten boards, dust',
+                         size='4 tiles long and 1 tile thick', place='the rubble sticking out of that wall', main='orange (crumbling blocks are orange in this world)',
+                         rule=MINE_INKS.replace(' and orange blocks crumble', ''),
+                         vary='the cracks and gaps that show where it will break, the rubble\'s shapes, the rotten boards, dust trickling from it, how it hangs off the wall'),
+    'mine-lamp': dict(world='mine', kind='prop', what='a kantera, a miner\'s oil lamp of old Japan, drawn twice in each cell: unlit (cold and grey) on the left and lit on the '
+                      'right, as the hero lights it by coming near', where='hung on a hook or a peg in the shaft wall over a ledge', material='an iron or tin lamp, a wick',
+                      size='about 0.6 tiles wide and 1 tile tall', inks='grey metal; lit, its flame orange with a yellow core and a dither halo of orange round it: a light of '
+                      'the dark; unlit, all grey and black', scene=MINE_AT + ' below it'),
+    'mine-ore': dict(world='mine', kind='prop', what='a vein of silver ore in the rock, glinting', where='in the shaft wall beside a ledge, behind the play (dithered with black, '
+                     'so it reads as behind)', material='dark rock, crystals and nuggets of ore', size='about 2 tiles wide and 1.5 tiles tall',
+                     inks='grey rock, the ore glinting in small white or pale grey sparkles with a faint dither glow (a small light in the dark); never yellow, the coins\' colour',
+                     scene=MINE_AT + ' beside it'),
+    'mine-cart': dict(world='mine', kind='prop', what='a little mine cart (torokko) parked on a short stretch of rail, heaped with ore', where='on the top of a ledge at its wall end',
+                      material='wood and iron, iron wheels, two rails on sleepers, a stop block', size='about 2 tiles wide and 1.5 tiles tall',
+                      inks='grey wood and iron, black wheels, the ore grey with a few white glints (never yellow)', scene=MINE_AT),
+    'mine-tools': dict(world='mine', kind='prop', what="the miners' tools leaning by the wall: pickaxes, a sledgehammer, straw baskets (zaru), a straw raincoat on a peg",
+                       where='on the top of a ledge at its wall end', material='wooden handles, iron heads, woven straw', size='about 2 tiles wide and 1.5 tiles tall',
+                       inks='grey wood, straw and iron, black shadows', scene=MINE_AT),
+    'mine-winch': dict(world='mine', kind='prop', what='a hand winch over a pit with a rope and a bucket, a wooden ladder leaning beside it', where='on the top of a ledge at its wall end',
+                       material='a timber frame, a drum with a crank, a rope, a bucket, a ladder', size='about 2.5 tiles wide and 3 tiles tall',
+                       inks='grey timber and rope, black shadows', scene=MINE_AT),
+    'mine-bats': dict(world='mine', kind='prop', what='bats hanging asleep upside down, cute, one of them opening an eye', where='hanging under a ledge',
+                      material='furry bodies, folded wings', size='each about 0.5 tiles wide and 0.7 tiles tall, two to four of them',
+                      inks='black bats with a grey outline, the open eye glowing a small orange (a tiny light)', scene=MINE_AT + ' above them'),
+    # The Mine's own enemy (owner 2026-10-24, У3 «Б»: its own diving bats, variants first; Вр3 «А»: from yokai and the place's real animals): a komori,
+    # the three frames UPwell's behaviour asks for in every cell (hanging, wings up, wings down); the eyes orange, never yellow (yellow is a coin)
+    'mine-komori': dict(world='mine', kind='foe', what='a komori, a bat of the old Japanese mine that hangs asleep under a ledge, wakes when the hero comes level with it, '
+                        'and swoops at him. Draw it as one of six bats: A an eastern bent-winged bat (yubinaga-komori, which really lives in the old tunnels of the Iwami '
+                        'Ginzan silver mine): a domed round head, a short muzzle, very long wings folded back at the wrist; B a greater horseshoe bat (kikugashira-komori): '
+                        'a horseshoe-shaped nose leaf, broad round wings it wraps itself in when it hangs; C a Japanese long-eared bat (usagi-komori): ears almost as long as '
+                        'its body; D a tube-nosed bat (tengu-komori): two little tube nostrils sticking out like a tengu\'s nose, a spotted coat; E a nobusuma, the yokai an '
+                        'old bat becomes: shaggy fur, a cape of skin from its arms to its legs like a flying squirrel\'s, big round staring eyes; F a mochi bat: a fat, '
+                        'round, soft little body like a rice cake with small wings, the kawaii one',
+                        does='a diver: it hangs asleep upside down under a ledge; when the hero is level with it, it opens its wings and swoops down at him in a U and back '
+                        'up to its perch; the hero stomps it from above while it hangs or flies back, never while it dives.',
+                        size='flying, about 1.4 tiles across with its wings open (about 22 art pixels) and 0.8 tiles tall (about 12 art pixels); hanging folded, about 0.75 '
+                        'tiles wide (12 art pixels) and 1 tile tall (15 art pixels): much bigger than a coin, half the hero',
+                        place='the same bat three times in the cell, one above the other: at the top hanging asleep upside down from the underside of a thin ledge of rock '
+                        '(a white top edge), wings folded, facing you, its two eyes lit; in the middle flying with its wings raised high, in side view facing right; at the '
+                        'bottom flying with its wings swept down, in side view facing right',
+                        main='grey #c8c8c8', parts='its two wings (grey skin between black finger bones), its ears, its nose, two eyes that glow orange #faa23e (never yellow: '
+                        'yellow is a coin), and its little feet',
+                        vary='the kind of bat, as the six letters above say: its ears, its nose, its wings and how it folds them, its fur',
+                        foe_tone='Cute and a little eerie, as the Mine is, never gory: the game is for everyone, and the Mine is a gentle early world.'),
+    # The Village's rising hazard (К13 «А»): a spring field burning got away up the shaft
+    'village-noyaki': dict(world='village', kind='hazard', what='a spring field burning (noyaki, the old Japanese custom of burning the dry grass of the fields and '
+                           'highlands each early spring): a front of flames running through dry pampas grass (susuki), the grass black and smouldering behind it, '
+                           'smoke rising off it', why='the villagers burn last year\'s grass every spring, and this fire got away from them and climbs the shaft',
+                           vary='how the flames sit on the grass (a ragged front, tall tongues, a low creeping line), the grass (tall plumed susuki, short tussocks, '
+                           'rice straw), the burnt ground under the front (black with glowing embers, grey ash), the smoke (puffs, a curtain, wisps), and what it '
+                           'throws up the shaft (burning tufts of grass, a shower of sparks, smoking stalks)',
+                           inks='the flames red and orange, the grass orange and grey, the burnt ground black with orange and red embers, the smoke grey dither (never '
+                           'white: white is an edge to stand on)'),
+    # The other worlds' rising hazards (К13 «А»; owner 2026-10-24: «Обнови все природные опасности исходя из нового принципа построения»: drawn from these sheets'
+    # own pixels, path A)
+    'mine-flood': dict(world='mine', kind='hazard', what='the old mine flooding: dark groundwater welling up the shaft, churning and foaming at its top, broken '
+                       'timber, a bucket and a straw basket swept along in it, bubbles rising through it', why='the mine\'s old pumps have stopped and the '
+                       'groundwater floods up through the tunnels, as it did in the old silver mines',
+                       vary='its surface (a choppy line, rolling waves, a churning boil), its foam and spray, what floats in it (timber, a bucket, baskets, '
+                       'a lamp still lit), the dark water under it (bands of blue, dithered deeper down), and what it throws up the shaft (a spout of water, '
+                       'a burst of spray and pebbles, a rising bubble)',
+                       inks='the water blue darker downwards through dither, its foam and spray grey (never white: white is an edge to stand on), the '
+                       'floating timber orange and grey, a lamp\'s glow orange'),
+    'fuji-avalanche': dict(world='fuji', kind='hazard', what='an avalanche of snow churning up the shaft from below: a tumbling front of snow clods and '
+                           'powder, rocks and lumps of ice caught in it, a cloud of fine snow blowing off its top', why='a slab of snow broke loose high '
+                           'on the mountain, and the slide pours up the shaft after the climber',
+                           vary='its front (big round clods, a smooth curling wave, a jagged slab breaking up), its powder cloud (puffs, a long plume, '
+                           'streaks), the rocks and ice in it, its body (grey snow banded and dithered darker downwards), and what it throws up the shaft '
+                           '(a snowball, a chunk of ice, a spray of powder)',
+                           inks='the snow grey with white only on the clods\' tops and glints, the rocks black and grey, the ice blue, a red rim along '
+                           'its top (red: the danger edge)'),
+    'sea-tide': dict(world='sea', kind='hazard', what='the sea coming in with a spring tide up the sea cave\'s shaft: waves with curling crests, foam and '
+                     'spray, seaweed and a broken net and driftwood tossing in it', why='at the great spring tide (oshio) the sea pours into the cave '
+                     'under the islands and rises up the shaft',
+                     vary='its crests (curling breakers, choppy wavelets, a rolling swell), its foam (lace, clumps, a long line), what tosses in it '
+                     '(seaweed, a float of glass, driftwood, a broken net), its water (aqua darker downwards through dither), and what it throws up '
+                     'the shaft (a column of spray, a leaping wave, a fish)',
+                     inks='the water aqua and blue darker downwards through dither, its foam grey (never white: white is an edge to stand on), seaweed '
+                     'green, driftwood orange'),
+    'tokyo-fire': dict(world='tokyo', kind='hazard', what='a fire in the back alleys of the town climbing the shaft: flames on burning wooden shop '
+                       'fronts and fallen signs, sparks and cinders whirling, thick smoke lit from below', why='a fire broke out in the old wooden houses '
+                       'of the alleys, as fires did so often in old Tokyo, and it climbs the shaft',
+                       vary='its flames (a wall of tall tongues, curling licks, a low hungry line), what burns in it (wooden beams, a shop\'s fallen '
+                       'sign, paper lanterns, a bicycle), its smoke (a dark curtain, billows, wisps), the glowing debris under it, and what it '
+                       'throws up the shaft (a flaming beam, a whirl of cinders, a burning lantern)',
+                       inks='the flames red and orange, the smoke grey dither (never white), the burnt debris black with red and orange embers, a '
+                       'sign\'s neon purple or blue'),
+    # Each world's hazard on its walls (FIREWALL) and its icicles, drawn from these sheets' pixels (owner 2026-10-24: «Обнови все природные опасности…»)
+    'village-wallfire': dict(world='village', kind='wallhaz', what='the dry grass and bamboo on the shaft\'s earthen wall catching fire',
+                             why='sparks from the spring field burning below blow up the shaft and catch the dry tufts on its walls',
+                             asleep='a seam of scorched grass on the wall, black with a few glowing embers', bursting='a sheet of flame roaring out of the burning tufts',
+                             vary='the scorched seam (tufts, stalks, a charred bamboo), its embers, the shape of the flames bursting out (a flat sheet, licking tongues, a curl)',
+                             inks='the flames red and orange, the scorched seam black and grey, the embers red and orange, smoke grey dither (never white)'),
+    'mine-firedamp': dict(world='mine', kind='wallhaz', what='firedamp, the mine gas, seeping from a crack in the rock wall and flaring',
+                          why='old coal and ore seams give off firedamp, and the miners\' lamps set it alight: the dread of every old mine',
+                          asleep='a crack in the rock wall with a faint shimmer of gas over it and a few sparks', bursting='a jet of blue and red gas flame blasting out of the crack',
+                          vary='the crack (a jagged split, a row of holes, a seam of ore), the gas over it (a shimmer, small sparks), the jet\'s shape (a straight blast, a fan, rolling balls of flame)',
+                          inks='the jet red and orange with a blue heart, the crack black, the rock grey, the shimmer blue dither'),
+    'fuji-wallice': dict(world='fuji', kind='wallhaz', what='frost on the rock wall bursting into spikes of ice',
+                         why='meltwater seeping from the rock freezes in an instant in the summit\'s wind and shoots out of the wall as ice',
+                         asleep='a seam of rime and frost crystals on the wall, glinting', bursting='a burst of sharp ice spikes jutting out from the wall',
+                         vary='the frost seam (rime, a vein of blue ice, a crack frosted over), the spikes\' shapes (long needles, a fan of shards, a cluster of crystals)',
+                         inks='the ice blue and grey with white only on tips and glints, the rock blue, red along the spikes\' tips (the danger edge)'),
+    'sea-blowhole': dict(world='sea', kind='wallhaz', what='a blowhole: sea water forced up through a crack in the cave wall and blasting out in a jet of spray',
+                         why='each wave below drives the sea up through the rock, and it bursts out of the wall',
+                         asleep='a wet crack in the rock with barnacles and a little foam dripping from it', bursting='a jet of sea water and spray blasting out of the crack',
+                         vary='the crack (barnacled, a round hole, a split with seaweed), the jet\'s shape (a straight blast, a fan of spray, a curling burst), its foam',
+                         inks='the water aqua and blue, its foam grey (never white), red along the jet\'s edge (the danger edge), barnacles grey, seaweed green'),
+    'tokyo-wallfire': dict(world='tokyo', kind='wallhaz', what='the wooden boards of the alley wall catching fire from the fire below',
+                           why='the fire in the back alleys climbs the shaft, and its heat sets the old boards alight',
+                           asleep='a strip of charred boards with glowing cracks between them', bursting='flames roaring out between the boards',
+                           vary='the charred boards (planks, a shutter, a sign\'s frame), the glow in their cracks, the flames\' shape (a sheet, tongues, a curl)',
+                           inks='the flames red and orange, the boards black and grey, the glow red and orange, smoke grey dither (never white)'),
+    'village-icicles': dict(world='village', kind='drop', what='icicles left from a cold spring night, hanging under the eaves of a terrace ledge',
+                            size='each about a third of a tile wide and one tile long', scene='an orange earthen terrace ledge',
+                            vary='their shape (one long spike, a cluster, a drop of ice with a point), the meltwater on them, a bit of straw or a leaf frozen in',
+                            inks='the ice grey and blue with white only on glints, red at its point (the danger edge)'),
+    'fuji-icicles': dict(world='fuji', kind='drop', what='icicles hanging under a snowy rock ledge on Mount Fuji',
+                         size='each about a third of a tile wide and one tile long', scene='a blue rock ledge with a cap of snow',
+                         vary='their shape (one long spike, a cluster, a ridged spike), their tips, snow on their roots',
+                         inks='the ice blue and grey with white only on glints, red at its point (the danger edge)'),
+    # The Village's falling hazard and its slick walls without cold (owner, Д77: «В деревне не должно быть элементов холода»): six different things each
+    'village-drop': dict(world='village', kind='drop', what='something of a spring village that hangs under a terrace ledge and drops, one kind in each cell: '
+                         'A a loose stone from the dry-stone terrace wall, B a clay roof tile (kawara) slipping off, C a sharpened bamboo stake, D a hornets\' nest '
+                         '(suzumebachi) with a few hornets round it, E a heavy pine cone, F a clay pot hanging on a straw rope',
+                         size='each about half a tile wide and up to one tile long', scene='an orange earthen terrace ledge',
+                         vary='the thing itself, as the six letters say; how it hangs (on a root, a rope, a crack) and how it shows it is about to fall',
+                         inks='stone grey, tile blue and grey, bamboo orange, the nest grey and orange with black hornets, the pot orange, the rope orange; red where it '
+                         'hurts (its point or its edge); never white or blue ice'),
+    'village-slick': dict(world='village', kind='ledge', what='a slippery wall standing up the shaft, too smooth or wet to cling to, one kind in each cell: '
+                          'A a pillar of polished bamboo trunks lashed together, B wet clay daubed over a terrace wall, glistening, C a stone wall with water '
+                          'running down it, D a lacquered wooden post like a shrine\'s, E oiled paper stretched over a wooden frame, F river stones worn smooth '
+                          'and stacked', does='it stands up the shaft like a wall; you slide down it and cannot cling to it or jump off it as you can off other walls',
+                          material='as the six letters say, each with a sheen, drips or glints that say it is slippery', size='1 tile wide and 4 tiles tall',
+                          place='the wall standing up the middle of the cell from a short ledge', main='orange or grey',
+                          vary='the six kinds above: its surface and how it shows it is slippery (a sheen, drips, glints), never ice, frost or snow'),
+    # Where an arena's wave waits (К8 «А»), the worlds with arenas (the Village; Fuji, the Sea and Tokyo by К4)
+    'village-holder': dict(world='village', kind='holder', what='big woven bamboo baskets hanging on straw ropes from somewhere above, the kind farmers haul rice and greens in',
+                           size='about 2 tiles wide and 2 tiles tall, its rope running up out of the cell', scene='an orange earthen terrace ledge',
+                           vary='the basket (a round one, a tall carrying basket, a flat winnowing tray tied as a sling, a straw sack), how it hangs (one rope, two, a pole) and how it lets the wave go (tips, its bottom drops, it tears)',
+                           inks='the basket orange with black weave, the rope orange, red eyes or a red glow in its gaps'),
+    'fuji-holder': dict(world='fuji', kind='holder', what='a heavy snow cornice overhanging from a rock outcrop above, snow heaped over the waiting wave',
+                        size='about 2.5 tiles wide and 1.5 tiles tall, its rock running up out of the cell', scene='a blue rock ledge with a cap of snow',
+                        vary='the cornice (a curling lip, a slab, a mound with icicles), its rock, how it lets the wave go (it cracks off, it slumps, it bursts)',
+                        inks='the snow grey with white glints only, the rock blue and black, red eyes or a red glow in its cracks'),
+    'sea-holder': dict(world='sea', kind='holder', what='a fishing net full of something, hung from a pole or a rope above, bulging, weighted with floats',
+                       size='about 2 tiles wide and 2 tiles tall, its rope running up out of the cell', scene='an aqua rock ledge',
+                       vary='the net (a round bag net, a long drift net, a lobster pot, a basket trap), its floats and weights, how it lets the wave go (it opens, it tears, it tips)',
+                       inks='the net grey, its floats orange, its rope orange, seaweed green, red eyes in its mesh'),
+    'tokyo-holder': dict(world='tokyo', kind='holder', what='old wooden storm shutters (amado) on a frame hung across the shaft, shut over a dark space',
+                         size='about 2.5 tiles wide and 1.5 tiles tall, its frame running to the walls or up out of the cell', scene='a purple concrete ledge',
+                         vary='the shutters (two swinging leaves, a sliding panel, a roll-up metal shutter, a hanging crate), their frame, how they let the wave go (swing open, slide, roll up, the crate tips)',
+                         inks='the wood grey and black, the metal grey, red eyes or a red glow through the slats'),
+    'mine-far': dict(world='mine', kind='prop', what='the mine far away: tunnels going off into the dark, their timber frames smaller and smaller, rails running in, a few lamps '
+                     'glowing deep inside', plane='back', where='far behind everything, low and faint, so the play reads over it', material='timber frames, rails, rock, lamps',
+                     size='about 14 tiles wide and 6 tiles tall', inks='a faint grey dither on the black, the far lamps small orange glows', scene=MINE_AT + ' in front of it'),
+    'mine-shop': dict(world='mine', kind='prop', what="a miners' tool shed built into the tunnel wall, whose door is a way into a shop", where='standing on a ledge against the '
+                      'shaft wall, its door open', material='a wooden front with a little roof, a noren curtain over the door, a sign, a lamp',
+                      size='about 3.5 tiles wide and 3.5 tiles tall', inks='grey wood, the noren red (red is the shop\'s mark), a lit window orange (a light)', scene=MINE_AT),
+    'mine-stash': dict(world='mine', kind='prop', what='the sealed door of a silver vault cut into the rock: the way into a stash', where='standing on a ledge against the shaft wall',
+                       material='a heavy timber door with iron bands and studs, a big lock, a frame of stone', size='about 3 tiles wide and 3 tiles tall',
+                       inks='grey and black timber and iron, its cracks glowing purple inside (purple is the stash\'s mark)', scene=MINE_AT),
+    # The Danchi (owner 2026-10-21: world 6 Japanese, «Данчи»), six takes on each
+    'danchi-slab': dict(world='danchi', kind='ledge', what='the basic ledge, a slab of raw danchi concrete sticking out of the shaft wall', does='solid on every side: you '
+                        'stand on it, cling to its sides and jump off it', material='poured concrete, the seams of its panels, rust and rain stains running down it, '
+                        'tie holes', size='4 tiles long and 1 tile thick', main='grey (concrete)', rule=DANCHI_INKS,
+                        vary='six different kinds of danchi concrete, one in each cell: A exposed concrete, smooth, its formwork joints as thin dark lines '
+                        'and rows of small round tie holes, a crisp square free end, a thin recessed seam where it meets the wall; B the front of an old balcony, '
+                        'a cap band under its white edge, dark rain streaks running down from the cap, uneven, a drip groove along its underside, a short drain spout '
+                        'under its free end with a grey drop falling; C painted in two tones, pale grey above and a darker grey band below with a thin black line '
+                        'between, paint flaking off in small patches at its ends, a short rust streak under an anchor bolt; D precast panels, their joints sealed '
+                        '(a dark line with a lighter one beside it), one panel with a big black painted block number of two digits, a small grey meter box with a '
+                        'dark window at its wall end; E old and repaired, a black crack zigzagging across, an older crack filled with grey sealant, a patch of '
+                        'newer concrete in a slightly different tone, a spalled corner showing a little rusty rebar, a tiny weed at its free end; F service concrete, '
+                        'a grey pipe along its face on brackets, a small vent grille of black slats, black and grey hazard stripes on its free end, a little bulkhead '
+                        'lamp under its free end glowing orange'),
+    # The Danchi's concrete after Japanese modernism (owner 2026-10-22: «К бетону нужен подход через модернизм и знаковые бетонные здания и музеи Японии»)
+    'danchi-slab-modern': dict(world='danchi', kind='ledge', what='the basic ledge, a slab of concrete sticking out of the shaft wall, built the way a famous Japanese '
+                        'modernist building is', does='solid on every side: you stand on it, cling to its sides and jump off it', material='concrete, as Japan\'s '
+                        'modernist architects built it', size='4 tiles long and 1 tile thick', main='grey (concrete)', rule=DANCHI_INKS + ' Keep the band just under '
+                        'the white top edge plain grey on every variant: patterns, holes and joints only on the lower half of the slab.',
+                        vary='six kinds of Japanese modernist concrete, one in each cell, each after one famous building: A after Tadao Ando\'s Church of the Light, '
+                        'smooth fair-faced concrete in panels of tatami proportion (1 by 2) with thin joints, each panel with six small round tie holes in two rows of '
+                        'three, crisp square ends; B after Kenzo Tange\'s Kagawa Prefectural Office, concrete built like a wooden temple, a row of square beam ends '
+                        'sticking out under the slab like the brackets of temple eaves, its face marked by the boards of its formwork (thin horizontal lines); C after '
+                        'Le Corbusier\'s National Museum of Western Art in Tokyo, precast panels of exposed-aggregate concrete speckled with small pebbles, a round '
+                        'column (a piloti) under the slab near the wall; D after Kisho Kurokawa\'s Nakagin Capsule Tower, the slab\'s free end a pale grey capsule '
+                        'with rounded corners and one round porthole window (dark glass in a grey ring), held to the concrete by four bolts; E after Arata Isozaki\'s '
+                        'Oita Prefectural Library, the slab a hollow box beam whose cut free end shows a square dark hollow inside a thick grey frame; F after Kunio '
+                        'Maekawa\'s Fukuoka Art Museum, ceramic tiles cast into the concrete, a grid of small grey tiles with dark joints on its lower face, a plain '
+                        'deep band like an eave above them'),
+    'danchi-balcony': dict(world='danchi', kind='ledge', what='a danchi balcony sticking out of the wall: its thin slab and its railing, a futon or laundry hung over the rail',
+                           does='a thin platform: you jump up through it from below and stand on it', material='a concrete balcony slab, a steel railing, a futon, towels, '
+                           'clothes pegs', size='4 tiles long, its slab a third of a tile thick, its rail half a tile over it', place='the balcony sticking out of that wall',
+                           main='grey (concrete and steel)', rule=DANCHI_INKS, vary='its railing (bars, a solid parapet, a mesh), what hangs over it (a futon beaten flat, a row '
+                           'of shirts, socks on a hanger, a towel), and the small details (a potted plant, a sandal, an air conditioner pipe)'),
+    'danchi-pole': dict(world='danchi', kind='ledge', what='a long laundry pole (monohoshi-zao) hung across the shaft on two hooks, clothes pegs and hangers on it',
+                        does='a thin platform: you jump up through it from below and stand on it', material='an aluminium pole, hanger hooks, wire, clothes',
+                        size='4 tiles long and a third of a tile thick', place='the pole in the middle of the shaft, hung from above', main='grey (aluminium)',
+                        rule=DANCHI_INKS, vary='how it hangs (two hooks, a wire to each end, a bracket), what is on it (a peg hanger with socks, a shirt on a hanger, a '
+                        'towel, nothing but pegs) and its ends (caps, a bend)'),
+    'danchi-stairs': dict(world='danchi', kind='ledge', what="a flight of the danchi's outdoor stairwell: concrete steps, a handrail on its posts",
+                          does='steps you walk up: each step a little higher than the last', material='concrete steps, a steel handrail, its posts', size='each step '
+                          'half a tile high and a tile deep, four steps', place='the steps going up from that wall', main='grey (concrete)', rule=DANCHI_INKS,
+                          vary='the steps (their nosing, a non-slip strip, worn edges), the handrail (round, square, painted), its posts and the small details '
+                          '(a floor number painted on the wall, a light, a bicycle ramp)'),
+    'danchi-boxes': dict(world='danchi', kind='ledge', what="a stack of cardboard moving boxes (danboru) left out on the ledge, which gives way under you",
+                         does='a row you stand on that falls apart a moment after you touch it and comes back a while later', material='cardboard boxes, packing tape, '
+                         'string', size='4 tiles long and 1 tile thick', place='the boxes stacked out from that wall', main='orange (crumbling blocks are orange here)',
+                         rule=DANCHI_INKS.replace(', orange blocks crumble', ''), vary='how the boxes are stacked, their tape and flaps, the marks on them (an arrow, '
+                         'a fragile cup, a cat face), dents and tears that show where it will give'),
+    'danchi-spring': dict(world='danchi', kind='ledge', what="a playground spring rider: a cute animal on a big coil spring", does='a spring: you land on it and it throws you high',
+                          material='a moulded plastic animal, a steel coil spring, a base', size='about 1.5 tiles wide and 1.5 tiles tall', place='on a ledge',
+                          main='blue (springs are blue in this world)', rule=DANCHI_INKS.replace('blue marks springs and moving platforms, ', ''),
+                          vary='the animal (a panda, a rabbit, a frog, an elephant, a horse, a dog), its handles and its spring'),
+    'danchi-bikes': dict(world='danchi', kind='prop', what='mamachari bicycles parked by the wall, a child seat on one, a basket on the front', where='on the top of a ledge at its wall end',
+                         material='steel frames, wheels, baskets, a child seat', size='about 2.5 tiles wide and 1.2 tiles tall', inks='grey frames, black wheels, small accents', scene=DANCHI_AT),
+    'danchi-plants': dict(world='danchi', kind='prop', what='a little balcony garden: potted plants, a styrofoam box of vegetables, a watering can, a morning glory up a string',
+                          where='on the top of a ledge at its wall end', material='clay and plastic pots, styrofoam boxes, leaves', size='about 2 tiles wide and 1.5 tiles tall',
+                          inks='grey pots and boxes, the leaves green only a little (green is moss you can hold here: so mostly grey leaves with a few green ones)', scene=DANCHI_AT),
+    'danchi-mail': dict(world='danchi', kind='prop', what="a bank of the block's mailboxes with name slots, its number painted big on the wall over them, a notice board",
+                        where='against the wall over a ledge', material='steel mailboxes, paint, paper notices', size='about 2 tiles wide and 2 tiles tall',
+                        inks='grey mailboxes, black slots, the painted number grey, the notices grey', scene=DANCHI_AT + ' below it'),
+    'danchi-cat': dict(world='danchi', kind='prop', what='a stray cat asleep curled on an old cushion, or sitting by a food bowl, cute', where='on the top of a ledge at its wall end',
+                       material='fur, a cushion, a bowl', size='about 1 tile wide and 0.8 tiles tall', inks='a grey or black cat, a grey cushion and bowl', scene=DANCHI_AT),
+    'danchi-wall': dict(world='danchi', kind='prop', what="what runs up the shaft's walls behind the play: drainpipes on their brackets, air conditioner units on stands, a gas meter",
+                        plane='back', where='up the shaft walls, behind everything (dithered with black)', material='pipes, brackets, AC units', size='about 1.5 tiles wide and 6 tiles tall',
+                        inks='a faint grey dither on the black', scene=DANCHI_AT + ' in front of it'),
+    'danchi-far': dict(world='danchi', kind='prop', what='the danchi far away: rows of identical concrete blocks, their windows lit here and there, big numbers on their end walls, '
+                       'water tanks on their roofs, a power pylon, the moon', plane='back', where='far behind everything, low and faint, so the play reads over it',
+                       material='blocks, windows, tanks, a pylon', size='about 14 tiles wide and 6 tiles tall', inks='a faint grey dither on the black, the lit windows orange (lights)',
+                       scene=DANCHI_AT + ' in front of it'),
+    'danchi-shop': dict(world='danchi', kind='prop', what="a tiny dagashiya, a sweet shop on the block's ground floor, its shutter half up, whose door is a way into a shop",
+                        where='standing on a ledge against the shaft wall, its door open', material='a shutter, a glass sliding door, a noren, a sign, a gacha machine',
+                        size='about 3.5 tiles wide and 3 tiles tall', inks='grey shop front, a red noren (red is the shop\'s mark), a lit window orange (a light)', scene=DANCHI_AT),
+    'danchi-stash': dict(world='danchi', kind='prop', what="an apartment's steel front door, a nameplate, a peephole, a milk box, its gap glowing: the way into a stash",
+                         where='standing on a ledge against the shaft wall', material='a painted steel door, a frame, a nameplate, a milk box', size='about 2.5 tiles wide and 3 tiles tall',
+                         inks='a grey door, black details, its gaps glowing purple inside (purple is the stash\'s mark)', scene=DANCHI_AT),
+    # The Danchi in Kunio Maekawa's concrete (owner 2026-10-22, on the questions page: d2 «F»; then «Детали тоже прогони через чат»), six takes on each
+    'mk-slab': dict(world='maekawa', kind='ledge', what="the basic ledge, a slab of Kunio Maekawa's concrete sticking out of the shaft wall", does='solid on every side: you '
+                    'stand on it, cling to its sides and jump off it', material='poured concrete, ceramic tiles cast into it, deep eaves', size='4 tiles long and 1 tile thick',
+                    main='grey (concrete)', rule=DANCHI_INKS, vary='six ways to build this ledge, each a clearly different shape, one in each cell: A a thick slab whose '
+                    'front is a deep eave, its free end turned up in a heavy lip; B a slab faced on its front with small tiles cast into the concrete under a plain concrete '
+                    'band; C a slab with a row of square beam ends sticking out under it like the rafters under a deep roof; D a heavy coping on top of a narrower slab, '
+                    'a deep shadow line between them; E a slab whose underside steps back in two tiers like the soffit of a big roof; F a slab carried on a short thick '
+                    'square column under its middle, the column faced in tiles'),
+    'mk-balcony': dict(world='maekawa', kind='ledge', what="a balcony of Maekawa's concrete sticking out of the wall, laundry or a futon over its parapet",
+                       does='a thin platform: you jump up through it from below and stand on it', material='a concrete balcony slab, its parapet, a futon, towels, clothes pegs',
+                       size='4 tiles long, its slab a third of a tile thick, its parapet half a tile over it', place='the balcony sticking out of that wall',
+                       main='grey (concrete)', rule=DANCHI_INKS, vary='its parapet and what is on it, very different in each: A a solid tiled parapet under a deep concrete '
+                       'eave, a futon beaten flat over it; B a thin slab with a round pipe railing, shirts on hangers; C a parapet pierced by a row of square holes, a towel; '
+                       'D a parapet of thick vertical concrete fins, socks on a peg hanger; E a deep slab with an upturned edge, potted plants on it; F a planter box '
+                       'along its front, its leaves mostly grey with a few green ones, an air conditioner beside it'),
+    'mk-pole': dict(world='maekawa', kind='ledge', what='something long and thin hung across the middle of the shaft', does='a thin platform: you jump up through it from '
+                    'below and stand on it', material='aluminium, concrete, steel, timber', size='4 tiles long and a third of a tile thick', place='it in the middle of '
+                    'the shaft, hung from above at its ends', main='grey', rule=DANCHI_INKS, vary='six different things, each hung from above at its two ends: A a '
+                    'laundry pole on two hooks with socks and a shirt on it; B a slim concrete beam with tiles on its side, on two rods; C a steel pipe handrail on '
+                    'two brackets; D a timber plank from the formwork on two ropes; E a broken-off piece of a thin concrete eave on two cables; F a cable tray with '
+                    'cables in it on two hangers'),
+    'mk-stairs': dict(world='maekawa', kind='ledge', what="a flight of stairs in Maekawa's concrete", does='steps you walk up: each step a little higher than the last',
+                      material='concrete steps, tiles, a balustrade or a handrail', size='each step half a tile high and a tile deep, four steps',
+                      place='the steps going up from that wall', main='grey (concrete)', rule=DANCHI_INKS, vary='six flights, each clearly different: A grand steps with '
+                      'a solid tiled balustrade; B open concrete steps on one beam with a pipe handrail; C steps under a deep concrete eave, a lamp under it glowing '
+                      'orange; D steps with a curved concrete balustrade; E steps beside a side wall pierced by square holes; F steps with tiles on their risers and a '
+                      'square grey handrail'),
+    'mk-boxes': dict(world='maekawa', kind='ledge', what='a row on the ledge that gives way under you', does='a row you stand on that falls apart a moment after you touch it '
+                     'and comes back a while later', material='loose tiles, broken concrete, cardboard, planks, bricks', size='4 tiles long and 1 tile thick',
+                     place='it stacked out from that wall', main='orange (crumbling blocks are orange here)', rule=DANCHI_INKS.replace(', orange blocks crumble', ''),
+                     vary='six different things that give way, all orange, each showing where it will break: A a stack of loose tiles fallen off the wall; B a broken '
+                     'concrete block with rebar at the break; C cardboard moving boxes with tape across; D a scaffold of planks lashed together; E a heap of bricks '
+                     'and broken tiles; F a cracked tiled bench'),
+    'mk-spring': dict(world='maekawa', kind='ledge', what='a spring', does='a spring: you land on it and it throws you high', material='steel coil springs, moulded plastic, '
+                      'concrete', size='about 1.5 tiles wide and 1.5 tiles tall', place='on a ledge', main='blue (springs are blue in this world)',
+                      rule=DANCHI_INKS.replace('blue marks springs and moving platforms, ', ''), vary='six different springs, all blue: A a playground spring rider, '
+                      'a panda; B a coil spring under a concrete bench seat; C a small round trampoline; D a springboard on a coil; E a spring rider, a rabbit; F a coil '
+                      'under a round lid'),
+    'mk-bikes': dict(world='maekawa', kind='prop', what="mamachari bicycles parked under a deep concrete eave, a child seat on one, a basket on the front", where='on the top of a ledge at its wall end',
+                     material='steel frames, wheels, baskets, a child seat, a tiled shelter', size='about 2.5 tiles wide and 1.2 tiles tall', inks='grey frames, black wheels, small accents', scene=MK_AT),
+    'mk-plants': dict(world='maekawa', kind='prop', what='a little garden: potted plants in tiled planters, a styrofoam box of vegetables, a watering can',
+                      where='on the top of a ledge at its wall end', material='tiled planters, pots, styrofoam boxes, leaves', size='about 2 tiles wide and 1.5 tiles tall',
+                      inks='grey pots and planters, the leaves green only a little (green is moss you can hold here: so mostly grey leaves with a few green ones)', scene=MK_AT),
+    'mk-mail': dict(world='maekawa', kind='prop', what="a bank of mailboxes set in a tiled wall under a deep eave, the block's number over them, a notice board",
+                    where='against the wall over a ledge', material='steel mailboxes, tiles, paint, paper notices', size='about 2 tiles wide and 2 tiles tall',
+                    inks='grey mailboxes, black slots, the number grey, the notices grey', scene=MK_AT + ' below it'),
+    'mk-cat': dict(world='maekawa', kind='prop', what='a stray cat asleep on a concrete bench or a tiled step, or sitting by a food bowl, cute', where='on the top of a ledge at its wall end',
+                   material='fur, a bench, a bowl', size='about 1 tile wide and 0.8 tiles tall', inks='a grey or black cat, a grey bench and bowl', scene=MK_AT),
+    'mk-wall': dict(world='maekawa', kind='prop', what="the shaft's walls behind the play in Maekawa's concrete: tile-faced concrete, deep horizontal shadow lines of eaves, "
+                    "drainpipes, a few small windows", plane='back', where='up the shaft walls, behind everything (dithered with black)',
+                    material='tiles cast into concrete, eaves, pipes', size='about 1.5 tiles wide and 6 tiles tall', inks='a faint grey dither on the black', scene=MK_AT + ' in front of it'),
+    'mk-far': dict(world='maekawa', kind='prop', what="Maekawa's buildings far away: a concert hall with a massive sculptural roof and deep eaves, a museum with tiled walls, "
+                   "housing blocks, a few windows lit, the moon", plane='back', where='far behind everything, low and faint, so the play reads over it',
+                   material='concrete roofs, tiled walls, windows', size='about 14 tiles wide and 6 tiles tall', inks='a faint grey dither on the black, a few lit windows orange (lights)',
+                   scene=MK_AT + ' in front of it'),
+    'mk-shop': dict(world='maekawa', kind='prop', what="a tiny shop under a deep concrete eave in a tiled wall, its door open: the way into a shop",
+                    where='standing on a ledge against the shaft wall, its door open', material='a tiled front, a glass door, a noren, a sign, a deep eave',
+                    size='about 3.5 tiles wide and 3 tiles tall', inks='a grey front, a red noren (red is the shop\'s mark), a lit window orange (a light)', scene=MK_AT),
+    'mk-stash': dict(world='maekawa', kind='prop', what="a heavy concrete door in a tile-faced wall under a deep eave, its gaps glowing: the way into a stash",
+                     where='standing on a ledge against the shaft wall', material='a concrete or steel door, a tiled frame, a deep eave', size='about 2.5 tiles wide and 3 tiles tall',
+                     inks='a grey door, black details, its gaps glowing purple inside (purple is the stash\'s mark)', scene=MK_AT),
+    # The Danchi in Arata Isozaki's concrete (owner 2026-10-23, on the questions page: d19 «Переходим на Исодзаки», d2 E), six takes on each of its architecture
+    'iso-slab': dict(world='isozaki', kind='ledge', what="the basic ledge, a slab of Arata Isozaki's concrete sticking out of the shaft wall", does='solid on every side: '
+                     'you stand on it, cling to its sides and jump off it', material='raw board-formed concrete, hollow box beams cut off square', size='4 tiles long and 1 tile '
+                     'thick', main='grey (concrete)', rule=DANCHI_INKS, vary='six ways to build this ledge, each a clearly different shape, one in each cell: A a hollow '
+                     'box beam, its free end cut off square and open, a dark square hole in its end; B two slim beams side by side with a dark gap between them, their ends '
+                     'open; C a slab with a box beam under it whose open end sticks out past the slab; D the bottom bar of an open cubic frame, its corner posts going up '
+                     'a little; E a slab whose underside is a shallow barrel vault, curved; F a slab of board-formed concrete, the timber board marks showing, a round pipe '
+                     'running along its front'),
+    'iso-balcony': dict(world='isozaki', kind='ledge', what="a balcony of Isozaki's concrete sticking out of the wall, laundry or a futon over its parapet",
+                        does='a thin platform: you jump up through it from below and stand on it', material='a concrete slab, hollow beam ends, pipe rails, a futon, towels',
+                        size='4 tiles long, its slab a third of a tile thick, its parapet half a tile over it', place='the balcony sticking out of that wall',
+                        main='grey (concrete)', rule=DANCHI_INKS, vary='its parapet and what is on it, very different in each: A a parapet that is a hollow box beam, its '
+                        'open end at the corner, a futon over it; B a thin slab with a pipe railing, shirts on hangers; C a parapet of short square tubes stacked side by side, '
+                        'their open ends facing out, a towel; D a balcony inside an open cubic frame, a towel on the frame; E a parapet curved like a half barrel vault; '
+                        'F a slab with ducts and pipes running under it, an air conditioner'),
+    'iso-pole': dict(world='isozaki', kind='ledge', what='something long and thin hung across the middle of the shaft', does='a thin platform: you jump up through it '
+                     'from below and stand on it', material='steel tubes, ducts, concrete', size='4 tiles long and a third of a tile thick', place='it in the middle of the '
+                     'shaft, hung from above at its ends', main='grey', rule=DANCHI_INKS, vary='six different things, each hung from above at its two ends: A a square steel '
+                     'tube, its ends open, on two rods; B two parallel pipes on brackets; C a slim concrete box beam, its cut ends open, on two cables; D a light lattice truss '
+                     'on two hangers; E a short piece of a hollow concrete beam on chains; F a big round duct on two straps'),
+    'iso-stairs': dict(world='isozaki', kind='ledge', what="a flight of stairs in Isozaki's concrete", does='steps you walk up: each step a little higher than the last',
+                       material='concrete steps, box beams, pipe rails', size='each step half a tile high and a tile deep, four steps', place='the steps going up from that '
+                       'wall', main='grey (concrete)', rule=DANCHI_INKS, vary='six flights, each clearly different: A steps inside an open grid of cubic frames; B open steps '
+                       'hung on steel rods from a hollow beam over them; C steps with a balustrade of round pipes; D steps under a barrel vault; E steps each made of a '
+                       'short hollow box beam, their open square ends seen from the side; F board-formed steps with a square handrail'),
+    'iso-wall': dict(world='isozaki', kind='prop', what="the shaft's walls behind the play in Isozaki's concrete: board-formed concrete, the open square ends of hollow "
+                     "beams in a grid, ducts and pipes, a few small square windows", plane='back', where='up the shaft walls, behind everything (dithered with black)',
+                     material='board-formed concrete, beam ends, ducts', size='about 1.5 tiles wide and 6 tiles tall', inks='a faint grey dither on the black', scene=ISO_AT + ' in front of it'),
+    'iso-far': dict(world='isozaki', kind='prop', what="Isozaki's buildings far away: the Oita library with its huge hollow beams sticking out, the Gunma museum's cubic "
+                    "frames, the Kitakyushu library's long barrel vaults, housing blocks, a few windows lit, the moon", plane='back', where='far behind everything, low and '
+                    'faint, so the play reads over it', material='concrete beams, cubes, vaults, windows', size='about 14 tiles wide and 6 tiles tall',
+                    inks='a faint grey dither on the black, a few lit windows orange (lights)', scene=ISO_AT + ' in front of it'),
+    'iso-shop': dict(world='isozaki', kind='prop', what="a tiny shop set under a huge hollow concrete beam whose open end hangs over its door, its door open: the way into a shop",
+                     where='standing on a ledge against the shaft wall, its door open', material='board-formed concrete, a glass door, a noren, a lit window',
+                     size='about 3.5 tiles wide and 3 tiles tall', inks='a grey front, a red noren (red is the shop\'s mark), a lit window orange (a light)', scene=ISO_AT),
+    'iso-stash': dict(world='isozaki', kind='prop', what="a heavy door set deep in the open square end of a giant hollow concrete beam, its gaps glowing: the way into a stash",
+                      where='standing on a ledge against the shaft wall', material='a concrete or steel door, the beam\'s thick walls round it', size='about 2.5 tiles wide and 3 tiles tall',
+                      inks='a grey door, black details, its gaps glowing purple inside (purple is the stash\'s mark)', scene=ISO_AT),
+    # The Tower (owner 2026-10-21: world 7 Japanese, «Телебашня»), six takes on each
+    'tower-truss': dict(world='tower', kind='ledge', what="the basic ledge, a steel truss of the tower's lattice sticking out of the shaft wall", does='solid on every side: you '
+                        'stand on it, cling to its sides and jump off it', material='steel angles in a lattice, rivets, gusset plates', size='4 tiles long and 1 tile thick',
+                        main='orange and grey (painted steel)', rule=TOWER_INKS, vary='its lattice (X bracing, K bracing, a Warren truss), its rivets and plates, how it meets the wall'),
+    'tower-catwalk': dict(world='tower', kind='ledge', what='a maintenance catwalk of the tower sticking out of the wall: a steel grating, its handrail',
+                          does='a thin platform: you jump up through it from below and stand on it', material='a steel grating, a handrail, its posts, a toe board',
+                          size='4 tiles long and a third of a tile thick, its rail half a tile over it', place='the catwalk sticking out of that wall', main='grey and orange (steel)',
+                          rule=TOWER_INKS, vary='its grating, its rail and posts, its brackets under it, and the small details (a cable tray, a sign, a safety chain)'),
+    'tower-cloud': dict(world='tower', kind='ledge', what='a Japanese cloud in the style of old prints, a band of cloud with curls at its ends, drifting free in the shaft',
+                        does='a thin platform you stand on that dissolves a moment after you touch it and gathers again a while later', material='cloud', size='4 tiles long and '
+                        'half a tile thick', place='the cloud in the middle of the shaft', main='white (clouds that dissolve are white in this world)',
+                        rule=TOWER_INKS.replace(', white clouds dissolve under you', ''), vary='its curls (spirals, scrolls, waves), its bands and its edge, as on old prints and screens'),
+    'tower-lift': dict(world='tower', kind='ledge', what="a maintenance gondola of the tower hanging from a trolley that runs on a rail across the shaft",
+                       does='a thin platform that rides sideways along its row, from wall to wall and back, carrying you; you jump up through it from below and stand on its top',
+                       material='a steel cage or basket, a trolley, a rail', size='3 tiles long, its top a third of a tile thick', place='the moving platform in the middle of the shaft',
+                       main='blue (moving platforms are blue in this world)', rule=TOWER_INKS.replace('blue marks moving platforms, springs and rubber walls, ', ''),
+                       vary='its basket or cage, its trolley and rail, and small details (a toolbox, a lamp, a coil of cable)'),
+    'tower-spring': dict(world='tower', kind='ledge', what="a big buffer spring like those at the foot of a lift shaft, on a steel base", does='a spring: you land on it and it throws you high',
+                         material='a steel coil, a base plate, a cap', size='about 1.5 tiles wide and 1 tile tall', place='on a ledge', main='blue (springs are blue in this world)',
+                         rule=TOWER_INKS.replace('blue marks moving platforms, springs and rubber walls, ', ''), vary='its coil (one, two side by side, a cone), its cap and base, a warning stripe'),
+    'tower-antenna': dict(world='tower', kind='prop', what='antennas and broadcast dishes on the tower, a panel array, a small warning light', where='on the top of a ledge at its wall end',
+                          material='steel masts, dishes, panels, cables', size='about 2 tiles wide and 2.5 tiles tall', inks='grey and orange steel, black cables, a small orange light', scene=TOWER_AT),
+    'tower-shrine': dict(world='tower', kind='prop', what="the tower's own little shrine on its deck (as Tokyo Tower has): a small hokora, an orange torii, paper lanterns, a rope",
+                         where='on the top of a ledge at its wall end', material='wood, a little roof, a torii, lanterns', size='about 2.5 tiles wide and 2.5 tiles tall',
+                         inks='a grey hokora, an orange torii (never red), the lanterns orange glowing a little', scene=TOWER_AT),
+    'tower-binoculars': dict(world='tower', kind='prop', what='coin-operated binoculars on a post on the observation deck, a bench by them', where='on the top of a ledge at its wall end',
+                             material='steel binoculars on a post, a bench', size='about 2 tiles wide and 1.5 tiles tall', inks='grey and orange steel, a black coin slot', scene=TOWER_AT),
+    'tower-crows': dict(world='tower', kind='prop', what='crows resting on a girder of the tower, cute, one cawing', where='on the top of a ledge at its wall end',
+                        material='black feathers', size='each about 0.6 tiles, two or three of them', inks='black crows with a grey edge and a grey beak', scene=TOWER_AT),
+    'tower-wall': dict(world='tower', kind='prop', what="the tower's steel lattice up the shaft's walls behind the play: diagonal braces, verticals, gusset plates, a cable run",
+                       plane='back', where='up the shaft walls, behind everything (dithered with black)', material='steel angles, plates, cables', size='about 1.5 tiles wide and 6 tiles tall',
+                       inks='a faint orange and grey dither on the black', scene=TOWER_AT + ' in front of it'),
+    'tower-far': dict(world='tower', kind='prop', what='the city far below at dusk seen from the tower: the skyline with its lights, a river, Mount Fuji far off, Japanese clouds drifting',
+                      plane='back', where='far behind everything, low and faint, so the play reads over it', material='buildings, lights, a mountain, clouds',
+                      size='about 14 tiles wide and 6 tiles tall', inks='a faint purple and grey dither on the black, the city lights orange (lights)', scene=TOWER_AT + ' in front of it'),
+    'tower-shop': dict(world='tower', kind='prop', what="the observation deck's little souvenir shop, whose door is a way into a shop", where='standing on a ledge against the shaft wall, its door open',
+                       material='a counter, a sign, shelves of souvenirs, a lantern', size='about 3.5 tiles wide and 3 tiles tall', inks='grey and orange front, a red curtain or awning '
+                       '(red is the shop\'s mark), a lit window orange (a light)', scene=TOWER_AT),
+    'tower-stash': dict(world='tower', kind='prop', what="a riveted steel maintenance hatch in the tower's core, a wheel to open it, its gaps glowing: the way into a stash",
+                        where='standing on a ledge against the shaft wall', material='riveted steel, a hand wheel, a warning sign', size='about 2.5 tiles wide and 3 tiles tall',
+                        inks='grey and orange steel, black rivets, its gaps glowing purple inside (purple is the stash\'s mark)', scene=TOWER_AT),
     'fuji-slab': dict(world='fuji', kind='ledge', what='the basic ledge, a solid ledge of dark volcanic rock with a soft cap of snow, sticking out of the shaft wall',
                       does='solid on every side: you stand on it, cling to its sides and jump off it', material='rough volcanic rock of Mount Fuji, snow on top',
                       size='4 tiles long and 1 tile thick', main='blue (the rock)',
@@ -188,6 +619,61 @@ ELEMENTS = {
                      where='far behind everything, filling the width of the shaft, low and faint, so the play reads over it', material='the mountain, snow, clouds', plane='back',
                      size='about 14 tiles wide and 6 tiles tall', inks='the mountain in a faint blue dither on the black, its snowy top grey with a few white glints, '
                      'the clouds a faint grey dither', scene=FUJI_AT + ' in front of it'),
+    # Fuji from the real mountain, round 2 (owner 2026-10-23, his round-1 letters d44-d50, d40-d41; research/fuji/fuji-attributes.md): each pick as six looks
+    'fuji-stone': dict(world='fuji', kind='ledge', what='the basic ledge, a dry-stone wall of fitted volcanic boulders like the retaining walls along the Mount Fuji trail, with a cap of snow, sticking out of the shaft wall',
+                       does='solid on every side: you stand on it, cling to its sides and jump off it', material='rounded and angular boulders of dark volcanic rock fitted without mortar, small chinking stones in the gaps, snow on top',
+                       size='4 tiles long and 1 tile thick', main='blue (the rock)',
+                       vary='how the boulders are fitted (big round ones, flat courses, a mix with small chinking stones), the black gaps between them, the snow cap (thick, thin, lumps), '
+                       'its free end (a big corner stone, a stepped end, a rounded end), how it meets the wall',
+                       rule=FUJI_RULE + ' The first few art pixels under the white top edge stay one plain colour: the joints begin below them.'),
+    'fuji-stick': dict(world='fuji', kind='prop', what="a pilgrim's kongo-zue, the tall wooden walking staff of Mount Fuji climbers, planted upright at the free end of a wooden boardwalk, "
+                       "a little bell hanging from it on a cord, the brands of the trail's stations burned down its length",
+                       where='planted upright at the free end of a thin wooden boardwalk sticking out of the wall, the bell hanging off it', material='a squared wooden staff, burned brand marks, a small bronze bell, a cord, maybe a strip of cloth',
+                       size='the staff about 1.6 tiles tall and a tenth of a tile thick, the bell about a third of a tile', inks='the staff orange or grey wood with black brand marks, the bell grey '
+                       '(it turns orange when it rings: the level\'s task), a grey cloth (never white: white is an edge to stand on), no yellow, no red',
+                       scene='a thin blue wooden boardwalk with a white top edge sticking out of the wall'),
+    'fuji-beasts': dict(world='fuji', kind='prop', what='a Japanese serow (kamoshika, a stocky goat-antelope with short black horns and a shaggy coat) and a red fox, the wild animals of Mount Fuji, '
+                        'cute, standing on snowy rocks: in every cell the serow on the left and the fox on the right, the same style for both',
+                        where='standing on the top of a ledge at its wall end', material='shaggy fur, short horns, a bushy tail, a little snow on their backs',
+                        size='the serow about 1.6 tiles long and 1.3 tiles tall, the fox about 1.2 tiles long and 0.8 tiles tall',
+                        inks='the serow grey with black horns and dark face marks, the fox orange with a grey tip to its tail (never white: white is an edge to stand on; never red: red is danger), black eyes',
+                        scene=FUJI_AT),
+    'fuji-post': dict(world='fuji', kind='prop', what='a wooden station post of the Mount Fuji trail (a gome post): a tall square timber post with a pointed or capped top marking the station',
+                      where='standing on the top of a ledge, by the way out of a level', material='a square timber post, painted kanji down its face, a little roof cap or a pointed top, snow on top',
+                      size='about 0.45 tiles wide and 2.2 tiles tall', inks='the post orange or grey wood, the kanji black, the snow on its top grey with white glints',
+                      text='the kanji 八合目 (the eighth station), written top to bottom', scene=FUJI_AT),
+    'fuji-stelae': dict(world='fuji', kind='prop', what="the stone monuments of the Fuji-ko pilgrims' confraternities: a cluster of upright carved stelae of different heights with a thick "
+                        'shimenawa rope and zigzag paper streamers (shide) tied across them', where='standing on the top of a ledge at its wall end',
+                        material='carved stone, a twisted rope, zigzag paper strips, snow on their tops', size='about 2 tiles wide and 1.8 tiles tall',
+                        inks='grey stone with black carved lines, the rope grey (never yellow: yellow is what you take), the paper strips grey (never white: white is an edge to stand on), snow grey with white glints',
+                        scene=FUJI_AT),
+    'fuji-larch': dict(world='fuji', kind='prop', what='a bare Japanese larch (karamatsu) at the tree line of Mount Fuji in winter: no needles at all, its crooked trunk and branches bent by the wind '
+                       'all to one side, snow and rime on its branches', where='growing out of the top of a ledge at its wall end', material='bare twisted wood, snow, rime',
+                       size='about 2.5 tiles wide and 3 tiles tall', inks='the trunk and branches orange or grey wood, the snow and rime on them grey with white glints, no green at all', scene=FUJI_AT),
+    'fuji-tent': dict(world='fuji', kind='prop', what="a small mountaineer's tent pitched in the snow, cosy and cute: a dome or a ridge tent with guy lines to stakes, lit warm from inside "
+                      'by a lantern (no flame showing), boots or an ice axe by its door', where='pitched on the top of a ledge at its wall end',
+                      material='tent fabric, poles, guy lines, snow banked round its foot', size='about 2.5 tiles wide and 1.5 tiles tall',
+                      inks='the tent orange or purple (never red: red is danger; never yellow: yellow is what you take), its doorway glowing warm orange, the guy lines grey, snow grey with white glints',
+                      scene=FUJI_AT + ' and a little snow rabbit (a mound of snow with ears of snow, orange berry eyes) beside the tent'),
+    'fuji-shop2': dict(world='fuji', kind='prop', what="a Mount Fuji mountain hut (yama-goya) open as a shop: low and sturdy, its walls of corrugated iron and old timber, big stones weighing "
+                       "down its roof against the wind, a dry-stone wall round its foot, a red noren curtain in its doorway (red is the shop's mark), a warm lit window",
+                       where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play', material='corrugated iron, timber, stones on the roof, a dry-stone foot, snow on the roof',
+                       size='about 3.4 tiles wide and 2.5 tiles tall', inks="blue or grey corrugated walls, grey stones, a red noren with a simple face on it (the shop's mark), a warm orange window with a dither halo, snow grey with white glints",
+                       scene=FUJI_AT),
+    'fuji-stash2': dict(world='fuji', kind='prop', what="a Mount Fuji mountain hut shut for the winter: its windows boarded up with wooden shutters, stones on its roof, snow drifted against "
+                        "it, its door ajar a crack in the middle, a purple glow leaking through the gaps of the boards and the crack (purple is the stash's mark)",
+                        where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its door facing the play', material='corrugated iron, boards nailed across, stones on the roof, snow drifts',
+                        size='about 3.4 tiles wide and 2.5 tiles tall', inks='blue or grey corrugated walls, grey boards, grey stones, purple light through the gaps and the crack of the door, snow grey with white glints',
+                        scene=FUJI_AT),
+    'fuji-kasa': dict(world='fuji', kind='prop', what='Mount Fuji far away wearing a kasagumo, a lens-shaped cap cloud sitting on its summit like a hat, the long bank of cloud across its waist below; '
+                      'the clouds in living shapes: uneven round bumps, holes of the dark in them, ragged strands trailing off, never neat ellipses',
+                      where='far behind everything, filling the width of the shaft, low and faint, so the play reads over it', material='the mountain, snow, clouds', plane='back',
+                      size='about 14 tiles wide and 7 tiles tall', inks='the mountain in a faint blue dither on the black, its snowy top grey, the clouds a faint grey dither', scene=FUJI_AT + ' in front of it'),
+    'fuji-lake': dict(world='fuji', kind='prop', what="Mount Fuji far away seen across Lake Kawaguchi at night: the mountain's cone, its upside-down reflection in the still lake below it, "
+                      "the far shore with a small town's lit windows and their reflections in the water, a few bare trees on the shore",
+                      where='far behind everything, filling the width of the shaft, low and faint, so the play reads over it', material='the mountain, snow, the lake, the shore, little lit windows', plane='back',
+                      size='about 14 tiles wide and 8 tiles tall', inks="everything a faint dim tone: the mountain a blue dither, its snow grey, the lake black with the reflection a fainter blue dither "
+                      "broken by ripples, the town's windows small orange lights (a light may be lit), the shore grey", scene=FUJI_AT + ' in front of it'),
     'village-slab': dict(world='village', kind='ledge', what='the basic ledge, a terrace of earth held up by a dry-stone wall, like a rice terrace, sticking out of the shaft wall',
                          does='solid on every side: you stand on it, cling to its sides and jump off it', material='earth with a thin fringe of grass and little flowers on top, '
                          'its face of fitted stones', size='4 tiles long and 1 tile thick', main='orange (the earth)',
@@ -323,6 +809,13 @@ ELEMENTS = {
                        'huge moon, an owl, Baba Yaga flying across the moon in her mortar, mist over a swamp', plane='back', where='far behind everything, low and faint, so '
                        'the play reads over it', material='spruces, dead trees, the moon, mist', size='about 14 tiles wide and 6 tiles tall', inks='a faint grey dither on '
                        'the black, the moon a soft grey (no white)', scene=SKAZKA_AT + ' in front of it'),
+    # Koschei's arena (owner 2026-10-21: his arena dark, «Сделать тёмной»; its dressing Worlds'): the oak of the tale with his death in it
+    'skazka-oak': dict(world='skazka', kind='prop', what="the old oak of the tale on which Koschei's death is kept: a huge gnarled dead oak, an iron-bound chest hanging on "
+                       'chains from its big branch (in the chest a hare, in the hare a duck, in the duck an egg, in the egg the needle)', plane='back',
+                       where="far behind Koschei's arena, standing on its floor at one side, as part of the back, so the play reads over it",
+                       material='an old oak with clawing branches and roots, an iron-bound wooden chest, chains', size='about 6 tiles wide and 8 tiles tall',
+                       inks='a faint grey dither on the black for the oak, the chest grey with black iron bands, grey chains; at most a pair of eyes glowing orange in a hollow',
+                       scene=SKAZKA_AT + ' in front of it'),
     # The Dark Forest's enemies (owner, 2026-10-20, through Worlds: «делай врагов кикимору и лешего в чате боссов»), six takes on each
     'skazka-kikimora': dict(world='skazka', kind='foe', what='Kikimora, the swamp and house spirit of Russian tales: a small crooked hunched creature, '
                             'a hag of the marsh with wild tangled hair like swamp weed, a long beak of a nose, long thin arms with long bony fingers',
@@ -476,6 +969,47 @@ Keep in every variant: the same size and place, a silhouette that reads at a gla
 Vary between the variants: the silhouette and proportions, the details that make it belong to {world}, how it is fixed to its place, and its colour accents. Make the six clearly different from each other.
 Build every variant from flat rectangles and a few circles: big simple shapes, no fine noise.
 {style} Any glow is a dither too. Use only these colours: {inks9}. The world's own colour is {ink}. The prop's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters{text}."""
+# A world's own hazard from below (owner 2026-10-24, К13 «А»: each world's own reason why the floor rises; the look is Worlds', the fire's mechanics stay)
+HAZARD = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night, and from below the shaft fills with what chases it.
+{refnote}The rising hazard of the world "{world}" ({mood}): {what}. Why it rises here: {why}. It fills the shaft from wall to wall and rises from below; touching it hurts; now and then it throws a burst of itself up the shaft.
+Its size: wall to wall across the shaft; its top edge is what the hero must keep above, and below that edge it fills down past the bottom of the cell; {grid}
+Draw six different design variants of this same hazard in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
+Each cell is a scene from the game: {night}, the shaft's two walls as thin vertical strips at the left and right edges of the cell ({ink_name} dithered with black, a white inner edge), the hazard filling the lower third of the cell from wall to wall, a ledge with a white top edge above it with the hero standing on it for scale ({hero_scale}), and one burst of the hazard thrown up the shaft beside the ledge.
+Keep in every variant: a top edge that reads at a glance as danger, a line of red along it (red means danger); the hazard brightest at its top and darker downwards through dither; alive, drawn as one frame of its movement.
+Vary between the variants: {vary}. Make the six clearly different from each other.
+Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
+{style} Any glow is a dither too. Use only these colours: {inks9}. The world's own colour is {ink}. The hazard's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+# A world's hazard on its walls (FIREWALL in the game: a stretch of wall that sleeps, glows, then bursts out a tile into the shaft and hurts) and what falls
+# from under its ledges (icicles); both drawn from these sheets' own pixels (owner 2026-10-24: «Обнови все природные опасности…»)
+WALLHAZ = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
+{refnote}A hazard on the shaft's walls in the world "{world}" ({mood}): {what}. Why it is there: {why}. A stretch of the wall about 3 tiles tall sleeps, then bursts out about one and a half tiles into the shaft for a moment and hurts whoever is in it, then sleeps again.
+{grid}
+Draw six different design variants of this same hazard in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
+Each cell is a scene from the game: {night}, the shaft's left wall as a strip about 1 tile wide down the left edge of the cell ({ink_name} dithered with black, a white inner edge), and on that wall the same hazard twice, one above the other: in the upper half of the cell the stretch asleep ({asleep}), in the lower half the same stretch bursting ({bursting}), reaching about one and a half tiles out into the shaft. At the right of the cell the hero for scale on a small ledge with a white top edge: {hero_scale}. Nothing else in the cell.
+Keep in every variant: the sleeping stretch quiet but plainly marked, so a player sees which part of the wall it is; the bursting stretch reading at a glance as danger, with red in it (red means danger).
+Vary between the variants: {vary}. Make the six clearly different from each other.
+Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
+{style} Any glow is a dither too. Use only these colours: {inks9}. The world's own colour is {ink}. The hazard's colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+DROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
+{refnote}A falling hazard of the world "{world}" ({mood}): {what}. It hangs under a ledge; when the hero passes under it, it shakes for a moment, then falls straight down and hurts whoever it hits, and breaks on what it lands on.
+Its size: {size}; {grid}
+Draw six different design variants of this same hazard in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
+Each cell is a scene from the game: {night}, a ledge with a white top edge across the upper part of the cell ({scene}), three of them hanging under it side by side, a fourth one falling in the middle of the cell, and the hero for scale standing on a ledge at the bottom: {hero_scale}.
+Keep in every variant: the same size, a point or a weight at its bottom that reads as "this falls and hurts", red in it (red means danger).
+Vary between the variants: {vary}. Make the six clearly different from each other.
+Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
+{style} Use only these colours: {inks9}. The world's own colour is {ink}. Its colours: {inks}. White only for the hero, the ledges' top edges and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
+# The thing an arena's waiting wave hides in (К8 «А», the Level Design Book: an ambush is fair when it can be seen first): over the arena's floor from the
+# start, it shakes as the wave is shown and empties as it drops (lv.arenas floor, warnAt, dropAt)
+HOLDER = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
+{refnote}A thing of the world "{world}" ({mood}) in which a wave of enemies waits over an arena: {what}. It hangs over the middle of a wide floating ledge from the start of the level, so a player sees there is something in it; when the hero lands on the ledge it shakes, then it opens or tips and the enemies drop out onto the ledge. The enemies are small round red blobs.
+Its size: {size}; {grid}
+Draw six different design variants of this same thing in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
+Each cell is a scene from the game: {night}, the shaft's walls as thin strips at the cell's left and right edges ({ink_name} dithered with black, a white inner edge), a wide floating ledge with a white top edge across the lower third of the cell ({scene}), the hero standing on it for scale ({hero_scale}), and above the ledge the same thing three times side by side: on the left full and still, in the middle shaking with a red blob peeking out, on the right opened or tipped and empty with two red blobs falling from it.
+Keep in every variant: the same size, a plain sign that something waits in it (eyes or a red glow in a gap), and nothing on it to stand on (no white top edge).
+Vary between the variants: {vary}. Make the six clearly different from each other.
+Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
+{style} Use only these colours: {inks9}. The world's own colour is {ink}. Its colours: {inks}. White only for the hero, the ledge's top edge and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 BOSS = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}The boss of the world "{world}" ({mood}), drawn as {as_what}. It is in the foreground, the play itself: full colour.
 Its fight: {does} Its size: {size}; {grid}
@@ -498,7 +1032,7 @@ FOE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: a sm
 What it does in play: {does} Its size: {size}; {grid}
 Draw six different design variants of this same creature in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner. Vary between the variants: {vary}. Make the six clearly different from each other.
 Each cell is a scene from the game: {night}, the shaft wall as a thin vertical strip on the left ({ink_name} dithered with black, a white inner edge), {place}, the enemy in flat side view at game scale, and the hero for scale: {hero_scale}.
-Keep in every variant: the same size and the same way of moving, {main} as its main colour, eyes that glow as two small lights in the dark (in this dark world they are what the eye finds first), and a body that is one soft shape (in the game it squashes and wobbles) with a few rigid parts round it: {parts}. Creepy and crooked, never gory: the game is for everyone.
+Keep in every variant: the same size and the same way of moving, {main} as its main colour, eyes that glow as two small lights in the dark (in this dark world they are what the eye finds first), and a body that is one soft shape (in the game it squashes and wobbles) with a few rigid parts round it: {parts}. {foe_tone}
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
 {style} Use only these colours: {inks9}. The world's own colour is {ink}. {rule} White only for the hero, the edges you stand on and tiny glints; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 # The hero as the sheets draw it, by world (the Dark Forest's a Kolobok, owner 2026-10-20): the opening line's, the scale figure's.
@@ -539,7 +1073,7 @@ def prompt(el: str, ref: bool = False) -> str:
             'face': 'a face that reads at a glance on a phone (big eyes, an angry brow, a mouth)',
             'body': f"a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {e.get('parts', '')}",
             'tone': 'Cute and a little spooky, never gory: the game is for everyone.'}   # a boss's defaults (Koschei has his own: not a yokai, the Kolobok)
-    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE}[e['kind']].format(**{**slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
+    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE, 'hazard': HAZARD, 'wallhaz': WALLHAZ, 'drop': DROP, 'holder': HOLDER}[e['kind']].format(**{'foe_tone': 'Creepy and crooked, never gory: the game is for everyone.', **slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
     if e['world'] in SHAPES:   # a world drawn crooked (the Dark Forest): its shapes slanted and jagged, not built of tidy rectangles
         out = re.sub(r'Build every variant from flat rectangles and a few circles: big simple shapes[^.]*\.', SHAPES[e['world']], out)

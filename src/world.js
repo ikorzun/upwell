@@ -1285,6 +1285,7 @@ ICONS.boss_namazu = ['................', '.oo.............', '.ooo............',
 ICONS.boss_koschei = ['.....r.r.r......', '.....sssss......', '....swwwwws.....', '....wowwwow.....', '....wwwkwww.....', '.....wkwkw......', '..ssssssssss....', '.rsswssswssss...', 'r.sssswwwsssss..', 'r.ssswssswsssss.', 'r..sssssssssss..', 'r..ss.sss.sss...', '...s..s.s..s....', '................', '................', '................'];   // Koschei: his crowned skull, eyes lit, his ribs under the cloak, his red sword
 ICONS.foe_skull = ['................', '.....wwwwww.....', '...wwwwwwwwww...', '..wwwwwwwswwww..', '..wwswwwwwwwww..', '.wwkkkkwwkkkkww.', '.wkkkkkwwkkkkkw.', '.wkkrkkwwkkrkkw.',
   '.wwkkkwwwwkkkww.', '..wwwwwkkwwwww..', '...wwwwwwwwww...', '...wkwkwkwkwk...', '..ssssssssssss..', '.ssssssssssssss.', '.ss.sss..sss.ss.', '..s..s....s..s..'];   // a skull over its goo (the user's picture)
+ICONS.foe_komori = ['................', '................', '.....s....s.....', '.....ss..ss.....', 's....ssssss....s', 'ss...ssssss...ss', 'sss.sossssos.sss', 'ssssssssssssssss', 'skskssssssssksks', 'skskssssssssksks', 's..s.ssssss.s..s', '.....ssssss.....', '......ssss......', '......k..k......', '................', '................'];   // the Mine's komori face on, its wings spread, its eyes orange (the book's; its sprite: KOMORI_SPR)
 // The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs
 // together (not spent), like Downwell's palettes, and each starting a run with an upgrade (`perk`).
 const UNLOCKS = [
@@ -3932,7 +3933,7 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const mnBatsAt = (r) => {   // under one ledge in five that has room under it: not a moving or crumbling one, nothing a tile and a half under it
     if (r.cap || r.move || r.crumble || r.spring || r.x1 - r.x0 < 2.4 * kitT) return false;
-    if ((lv.rc && (lv.rc.enemies || []).includes('komori')) || lv.enemies.some((e) => e.type === 'komori')) return false;   // none where the komori hang: a harmless bat beside one that dives is a lie (Вр4)
+    if (lv.komori) return false;   // none where the komori hang (lv.komori, UPwell's: set once a level where they can be laid): a harmless bat beside one that dives is a lie (Вр4)
     const h = (((Math.imul(Math.round(r.y0 / kitT) + 11, 0x9e3779b1) >>> 0) / 4294967296) * 5) | 0;
     return h === 2 && !lv.rects.some((q) => q !== r && !q.cap && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 < r.y1 + 1.5 * kitT && q.y1 > r.y1);
   };

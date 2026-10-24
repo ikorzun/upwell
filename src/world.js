@@ -3656,6 +3656,47 @@ void main() {
   if (lit > bayer(g) || tone(1, g) > 0.5) discard;
   o = vec4(PAL[0], 1.0);
 }`;
+// A dark level's light by steps (owner, 2026-10-24, З4 «В» «Уменьши до 3 цветов»: his pixel-art guide's palette ramps): over the drawn screen (uScene),
+// each pixel's ink and its depth (how far from the black it is: behind a quarter, a light 0.6, the play all), then the light on it as the dark
+// counts it, in three steps through the 4x4 Bayer: a cold shade, a mid one, a warm one of that ink (RAMP, a theme's own over it). What is behind is
+// never lit past its plane's step (DEPTH: behind the first, props the second); unlit, the black, but for the sparse sieve the dark always had.
+const RAMP_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
+uniform sampler2D uScene; uniform vec4 uLights[32]; uniform int uN; uniform vec2 uFire; uniform vec3 uRamp[${Object.keys(PAL).length * 3}];
+void main() {
+  ivec2 g = cell();
+  vec2 p = vec2(g) + 0.5;
+  float lit = clamp((p.y - uFire.x) / uFire.y + 1.0, 0.0, 1.0);
+  for (int i = 0; i < 32; i++) {
+    if (i >= uN) break;
+    vec4 L = uLights[i];
+    lit = max(lit, 1.0 - clamp((length(p - L.xy) - L.z) / max(L.w - L.z, 1.0), 0.0, 1.0));
+  }
+  vec3 c = texelFetch(uScene, ivec2(gl_FragCoord.xy), 0).rgb;
+  int k = 0; float tk = 0.0, best = 1e9;
+  for (int i = 1; i < ${Object.keys(PAL).length}; i++) {
+    vec3 d = PAL[i] - PAL[0]; float t = clamp(dot(c - PAL[0], d) / dot(d, d), 0.0, 1.0); vec3 e = c - (PAL[0] + t * d); float err = dot(e, e);
+    if (err < best) { best = err; k = i; tk = t; }
+  }
+  if (tk < 0.06) { o = vec4(PAL[0], 1.0); return; }
+  int cap = tk > 0.8 ? 3 : tk > 0.4 ? 2 : 1;
+  float z = lit * 3.0; int lvl = int(floor(z));
+  if (lvl < 3 && fract(z) > bayer(g)) lvl++;
+  if (lvl == 0 && tone(1, g) > 0.5) lvl = 1;
+  lvl = min(lvl, cap);
+  o = vec4(lvl == 0 ? PAL[0] : uRamp[k * 3 + lvl - 1], 1.0);
+}`;
+// Each ink's three steps: cold (a third of the way from the black, toward blue), mid (two thirds), warm (the ink toward amber); a theme's `ramp`
+// ({ ink: ['#…', '#…', '#…'] }, Worlds') over them. ?ramp=0: the old dark, lit or black, to compare.
+const RAMP_ON = !/[?&]ramp=0\b/.test(location.search);
+const rampOf = (th) => {
+  const out = new Float32Array(Object.keys(PAL).length * 3 * 3), K = PAL.black, mixK = (c, f) => c.map((v, i) => K[i] + (v - K[i]) * f);
+  Object.keys(PAL).forEach((id, k) => {
+    const c = PAL[id], own = th && th.ramp && th.ramp[id];
+    const steps = own ? own.map(hex) : [((m) => [m[0] * 0.8, m[1] * 0.9, Math.min(1, m[2] * 1.18 + 0.03)])(mixK(c, 0.36)), mixK(c, 0.68), c.map((v, i) => Math.min(1, v * 0.84 + [1, 0.8, 0.52][i] * 0.2))];
+    steps.forEach((s3, j) => out.set(s3, (k * 3 + j) * 3));
+  });
+  return out;
+};
 const FEAT_FS = GLSL + PIX_GLSL + `in vec2 vL; in vec4 vCol; flat in vec4 vP; out vec4 o;
 uniform float uPix;
 float aa(float d) { float w = fwidth(d); return clamp(0.5 - d / max(w, 1e-4), 0.0, 1.0); }
@@ -3852,7 +3893,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {
   if (!gumInit.call(this)) return false;
-  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
+  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pRamp = program(this.gl, BG_VS, RAMP_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
   try { this.pFeat = program(this.gl, FEAT_VS_PAL, FEAT_FS_PAL); } catch (err) { console.error(err); }   // (the sprites' palette snap a corner, not a fragment: FEAT_VS_PAL)
   this.darkBuf = new Float32Array(128);   // 32 lights (the Dark Forest's eyes and fences as well as the coins)
   this.target = null;
@@ -3879,6 +3920,11 @@ Renderer.prototype.makeTarget = function () {
   gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, t.color);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, t.stencil);
+  if (!t.scene) { t.scene = gl.createTexture(); t.sceneFb = gl.createFramebuffer(); }   // the drawn screen's copy for the dark's light by steps (RAMP_FS)
+  gl.bindTexture(gl.TEXTURE_2D, t.scene); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, lw, lh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, t.sceneFb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t.scene, 0);
+  gl.bindTexture(gl.TEXTURE_2D, null);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 };
@@ -6235,11 +6281,22 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const r of lv.near(top, bot)) if (r.key) light((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1, 2.6);   // a gate's keystone glows
     const near = (o) => (o.x - hero.cx) ** 2 + (o.y - hero.cy) ** 2;
     for (const c of lv.coins.slice().sort((a, b) => near(a) - near(b))) light(c.x, c.y - (CINE ? cineRide(lv, c.x, c.y, COIN.r * R, cam, H) : 0), 0.5, 1.3);   // (the fork: where it is drawn)
-    const pd = this.pDark;
+    const ramp = RAMP_ON && !CINE && this.pRamp && this.target.scene, pd = ramp ? this.pRamp : this.pDark;   // (the cinematic fork keeps the old dark for now)
+    if (ramp) {   // the drawn screen copied, then laid over again by steps of light (RAMP_FS)
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.target.sceneFb);
+      gl.blitFramebuffer(0, 0, lw, lh, 0, 0, lw, lh, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.disable(gl.BLEND);
+    }
     gl.useProgram(pd.p); grid(pd.u);
     gl.uniform4fv(pd.u['uLights[0]'], L); gl.uniform1i(pd.u.uN, n); gl.uniform2f(pd.u.uFire, lv.fire ? lv.fire.y / P : 1e9, (3 * R) / P);
+    if (ramp) {
+      if (this.rampTh !== th) { this.rampTh = th; this.rampBuf = rampOf(th); }
+      gl.uniform3fv(pd.u['uRamp[0]'], this.rampBuf);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.target.scene); gl.uniform1i(pd.u.uScene, 0);
+    }
     gl.bindVertexArray(this.emptyVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (ramp) { gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND); }
   }
   gl.bindVertexArray(null);
   if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)

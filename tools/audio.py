@@ -6,7 +6,7 @@ The key comes from ELEVENLABS_API_KEY or the macOS keychain (service "elevenlabs
 anywhere. Credits are shared with CriminalRussia, which keeps RESERVE of them for its voice-over: nothing here runs
 if it would dip below that.
 
-Effects land in assets/sfx/<name>.mp3 (mono), music loops in assets/music/<name>.mp3 (stereo). Raw takes stay in
+Effects land in assets/sfx/<name>.mp3 (mono), music loops in assets/music/<name>.mp3 (mono, 32 kHz, 64 kbps: the game decodes them at that rate, MUSIC_RATE). Raw takes stay in
 assets/_raw (out of git). Each effect is made in TAKES takes; the one that starts at once and fills its length wins,
 then silence is cut off its ends, it is levelled to −16 LUFS and given a 30 ms fade so it cannot click.
 
@@ -315,10 +315,12 @@ def music(names: list[str]) -> None:
         peak = np.abs(y).max() + 1e-9
         rms = np.sqrt(np.mean(y ** 2)) + 1e-9
         y *= min(10 ** (-16 / 20) / rms, 10 ** (-1.5 / 20) / peak)   # about −16 dBFS RMS, peak under −1.5 dBFS, no limiter
+        pad = int(0.1 * SR)   # the loop's last 0.1 s before it and its first 0.1 s after it: the codec's edges outside the loop (game.js MUSIC_PAD)
+        y = np.concatenate([y[-pad:], y, y[:pad]])
         out = os.path.join(ROOT, 'assets/music', f'{name}.mp3')
         os.makedirs(os.path.dirname(out), exist_ok=True)
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', '-c:a', 'libmp3lame',
-                        '-b:a', '128k', out], input=y.astype(np.float32).tobytes(), check=True)
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', '-ac', '1', '-ar', '32000', '-c:a', 'libmp3lame',
+                        '-b:a', '64k', out], input=y.astype(np.float32).tobytes(), check=True)   # (mono at 32 kHz: owner 2026-10-24, «100 мб это очень много»)
         print(f'{name}: {out}', flush=True)
 
 

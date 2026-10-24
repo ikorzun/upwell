@@ -309,6 +309,31 @@ const VSP_RECTS = new WeakMap(), vspRects = (rows) => {   // a picture's boxes f
     open = cur; });
   VSP_RECTS.set(rows, R); return R;
 };
+// The cluster rule (owner, 2026-10-24, the pixel-art guide he sent, its first rule: «Случайный шум — отдельные точки без общей структуры … почти всегда
+// выглядит как грязная текстура», and «Фоны в подарочных комнатах выглядят грязно»): a sheet drawn behind (DIM) loses its specks. Every cluster of one
+// ink, its pixels touching by sides or corners (so a checker's strands hold together), of at most VSP_SPECK pixels takes the ink most of its eight
+// neighbours have: the clear, or the shape round it. Yellow, white and red keep theirs (a light, an edge, a mark), and so does a cluster at a side of
+// the picture (a vspCut piece's may go on in the next). Once a picture (VSP_CLEAN); ?speck=N another size, 0 none, to compare.
+const VSP_SPECK = (() => { const q = new URLSearchParams(location.search).get('speck'); return q != null && q !== '' && +q >= 0 ? +q : 2; })();
+const VSP_CLEAN = new WeakMap(), vspClean = (rows) => {
+  let out = VSP_CLEAN.get(rows); if (out) return out;
+  const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H), fill = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ch = g[y][x]; if (ch === '.' || seen[y * W + x]) continue;
+    const cells = [[x, y]], st = [[x, y]]; seen[y * W + x] = 1; let side = false;
+    while (st.length) { const [a, b] = st.pop(); if (a === 0 || a === W - 1) side = true;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[v * W + u] && g[v][u] === ch) { seen[v * W + u] = 1; st.push([u, v]); cells.push([u, v]); } } }
+    if (cells.length > VSP_SPECK || side || 'ywr'.includes(ch.toLowerCase())) continue;
+    const own = new Set(cells.map(([a, b]) => b * W + a)), n = {};
+    for (const [a, b] of cells) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
+      if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !own.has(v * W + u)) n[g[v][u]] = (n[g[v][u]] || 0) + 1; }
+    let best = '.', most = -1; for (const k in n) if (n[k] > most) { most = n[k]; best = k; }
+    fill.push(cells, best);
+  }
+  for (let k = 0; k < fill.length; k += 2) for (const [a, b] of fill[k]) g[b][a] = fill[k + 1];
+  out = fill.length ? g.map((r) => r.join('')) : rows; VSP_CLEAN.set(rows, out); return out;
+};
 const VSP_CUT = new Map(), vspCut = (rows, c0, c1, tag) => {   // a picture's columns c0…c1, the same array each time (so its boxes are worked out once)
   const key = tag + ':' + c0 + ':' + c1; let r = VSP_CUT.get(key); if (!r) VSP_CUT.set(key, (r = rows.map((q) => q.slice(c0, c1)))); return r;
 };
@@ -3759,7 +3784,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const menu = g.state === 'menu', farR = [];
   const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
-    const n = rows[0].length, R = vspRects(rows);
+    const n = rows[0].length, R = vspRects(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows);   // (behind: no specks, the cluster rule)
     for (let k = 0; k < R.length; k += 5) { const i = R[k], e = R[k + 1], j0 = R[k + 2], j1 = R[k + 3], ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = flip ? x + (n - e) * s : x + i * s;
       box(u, y + j0 * s, u + (e - i) * s, y + j1 * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, 0); }
   };

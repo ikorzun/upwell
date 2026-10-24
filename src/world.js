@@ -2177,15 +2177,16 @@ const CHUNKS = {
   caveBells: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins on the left wall shut by a gate of ice (G); three bells (BELLS) to ring in their order,
     '............',   // 一 二 三 (big to small): 一 under the vault (a jump from the floor), 二 under the high ledge (a jump from the low one), 三 at the low ledge's far
     '............',   // end (a jump from the floor); bottom up they come 三 二 一. Rung in order the gate melts; a wrong one and all fall quiet. The way in: a double jump
-    '............',   // from the floor beside it. Its floor two thick and its roof run along it: no coin in the magnet's reach from outside
+    '............',   // from the floor beside it. Its floor two thick and its roof run along it: no coin in the magnet's reach from outside. Its gate three tiles
+    // wide, as Worlds' kept ice is drawn (handover 23: Д172 E)
     '............',
     '............',
     '............',
     '#####...###.',
-    '....G....5..',
-    '....G.......',
-    'OOOOG.......',
-    'OOOOG.......',
+    '...GG....5..',
+    'OOOGG.......',
+    'OOOGG.......',
+    'OOOGG.......',
     '#####.......',
     '#####...####',
     '...4......6.',

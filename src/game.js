@@ -823,7 +823,10 @@ class Boss {
     }
     if (this.state === 'hover') {   // swinging, its next move after its rest
       swing();
-      if (this.st > F.rest[ph]) { const drop = this.next === 'drop' || !F.webs[ph]; this.to(drop ? 'warn' : 'spit'); this.tx = b.cx; sound.play(...(drop ? F.snd.warn : F.snd.spit)); }   // its drop's sound, or its spit's
+      if (this.st > F.rest[ph]) {   // its next move: a swing (if it has one), a spit (if this phase has any), a drop
+        if (F.sweep && (this.next === 'sweep' || (this.next === 'spit' && !F.webs[ph]))) { this.to('windup'); this.tx = H.cx < cx ? x1 : x0; sound.play(...F.snd.sweep); }
+        else { const drop = this.next === 'drop' || !F.webs[ph]; this.to(drop ? 'warn' : 'spit'); this.tx = b.cx; sound.play(...(drop ? F.snd.warn : F.snd.spit)); }   // its drop's sound, or its spit's
+      }
     } else if (this.state === 'spit') {   // its belly pulses, then the web(s) at the hero, lobbed as a spitter's
       swing();
       if (Math.floor(this.st * 10) % 2) b.kickSquash(0, 1, 0.08);
@@ -832,6 +835,14 @@ class Boss {
         for (let i = 0; i < n; i++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (i ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R });
         b.kickSquash(0, 1, -1.6); sound.play('spit', 0.7, 1); this.next = 'drop'; this.to('hover');
       }
+    } else if (this.state === 'windup') {   // wound back away from the hero, red, creaking: its swing to come
+      seat(this.tx, hang, 5);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (this.st > F.sweep.warn) { this.to('sweep'); b.color = this.ink; sound.play('airjump', 0.8, 0.4); }   // (tx: where its swing sets off)
+    } else if (this.state === 'sweep') {   // across like a wrecking ball, its middle low: under it on the floor is the way through
+      const u = Math.min(1, this.st / F.sweep.dur), xe = this.tx < cx ? x1 : x0;
+      seat(this.tx + (xe - this.tx) * u, hang + (lv.floor - F.sweep.low * R - hang) * Math.sin(Math.PI * u), 12);
+      if (u >= 1) { this.next = F.webs[ph] ? 'spit' : 'drop'; this.to('hover'); }
     } else if (this.state === 'warn') {   // over the hero, its eyes red, dust off the ceiling where it will fall; held still its last `lock` s
       const end = this.drops ? F.again : F.warn;
       if (this.st < end - F.lock) this.tx += clamp(clamp(H.cx, x0, x1) - this.tx, -F.track * R * dt, F.track * R * dt);   // after the hero no faster than `track` R/s: a hero who runs gets clear
@@ -845,7 +856,8 @@ class Boss {
       if ((b.wallMask & 8) || b.maxY >= lv.floor - 1 || this.st > 1.5) {
         shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx - this.halfW, lv.floor, IMPACT.puffSpeed + 700); fx.dust(b.cx + this.halfW, lv.floor, IMPACT.puffSpeed + 700);
         if (ph >= F.twice && !this.drops) { this.drops = 1; this.to('warn'); this.tx = b.cx; setVel(b, 0, -6 * R); return; }   // its last heart: straight back up a way, and a second drop
-        this.drops = 0; this.next = 'spit'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2);
+        this.drops = 0; this.next = F.sweep ? 'sweep' : 'spit'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2);
+        for (let k = 0; k < ((F.splat && F.splat[ph]) || 0) && lv.enemies.length < 4; k++) lv.enemies.push(new Foe({ type: F.ling, x: b.cx + (k % 2 ? 1 : -1) * (this.halfW + 0.6 * R), y: lv.floor - 1.2 * R }, lv));   // blobs out of its splat
         if (!this.dazes++) ui.toast(this.def.hint ? L2(this.def.hint) : t('bossHint'), 2400);   // the first time: what to do now
       }
     } else if (this.state === 'dazed') {   // tangled in its own thread on the floor, struggling: open to a stomp

@@ -617,6 +617,14 @@ const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2
 // belly drum lobs an acorn first (two on its last heart, when it also drops twice). It floats out of a plain jump's reach, its sway drawn over the hero (`follow`): no corner to sit its drop out in. Three hearts, every warning longer than the later bosses'.
 const TANUKI = { high: 13, swing: 0.16, follow: 0.6, spit: 1.2, webs: [0, 1, 1, 2], warn: 1.4, lock: 0.9, track: 5, again: 1.2, dive: 30, tangle: 2.8, reel: 1.0, rest: [2.2, 2.0, 1.8, 1.8], calm: 2.5,
   lings: [0, 0, 0, 0], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['stomp', 0.6, 1.5], warn: ['bubble', 0.7, 0.6], phase: ['bosshit', 0.6, 0.7] } };
+// Nuppeppo (BOSSES.crane, the Tower Blocks', world 6; owner 2026-10-24): the crane's load, a lump of flesh in its sling, the same hanging
+// boss (Boss.hang) with two moves of its own. A swing: the crane winds it back away from the hero, red, creaking, `sweep.warn` s, then
+// sweeps it across the arena like a wrecking ball, its middle `sweep.low` R over the floor: a hero on the floor passes under it, one on a
+// ledge or in the air is hit (stay low). Drips: it wobbles `spit` s with a gurgle and lobs `webs` of its goo at the hero. Its drop, where
+// its shadow grows, bursts `splat` blobs out of it as it lands; it lies wobbling `tangle` s, the only time a stomp hurts it.
+const NUPPE = { high: 12, swing: 0.18, follow: 0.3, spit: 0.7, webs: [0, 1, 2, 2], warn: 0.75, lock: 0.6, track: 8, again: 0.5, dive: 36, tangle: 1.6, reel: 0.8, rest: [1.5, 1.4, 1.3, 1.2], calm: 2.5,
+  lings: [0, 0, 0, 0], ling: 'crawler', splat: [1, 2, 2, 3], twice: 3, shadow: true, sweep: { warn: 0.7, dur: 1.2, low: 7.2 },
+  snd: { spit: ['bubble', 0.7, 0.4], warn: ['crumble', 0.6, 1.6], sweep: ['crumble', 0.8, 1.1], phase: ['bubble', 0.9, 0.35] } };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -973,13 +981,16 @@ const BOSSES = {
       { en: 'No wings, no sky.', es: 'Sin alas, no hay cielo.', pt: 'Sem asas, sem céu.', ja: 'つばさ なしに そら なし。' }],
     defeat: { en: 'Well climbed… the sky is yours.', es: 'Bien trepado… el cielo es tuyo.', pt: 'Bela escalada… o céu é seu.', ja: 'みごとだ… そらは きみの もの。' } },
   // The Tower Blocks': a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
-  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', crane: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
+  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', hang: NUPPE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
       { en: 'Who needs a face anyway?', es: '¿Quién necesita una cara?', pt: 'Quem precisa de rosto?', ja: 'かおなんて いる？' },
       { en: 'Wobble, wobble… splat!', es: 'Tiembla, tiembla… ¡plaf!', pt: 'Treme, treme… plaft!', ja: 'ぷるぷる… べちゃっ！' }],
     quip: [{ en: 'Splat. Flat as a panel.', es: 'Plaf. Plano como un panel.', pt: 'Plaft. Plano como um painel.', ja: 'べちゃっ。パネルみたいに ぺしゃんこ。' },
       { en: "Sticky down there, isn't it?", es: 'Pegajoso ahí abajo, ¿eh?', pt: 'Grudento aí embaixo, né?', ja: 'したは ベタベタでしょ？' }],
-    defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' } },
+    defeat: { en: "Ugh… I'll just ooze away.", es: 'Uf… me escurro y me voy.', pt: 'Ai… vou escorrer embora.', ja: 'うう… とろとろ にげよう。' },
+    top: { en: 'Not now. Wait till it drops!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Splat! Stomp it now!', es: '¡Plaf! ¡Písalo ya!', pt: 'Plaft! Pise agora!', ja: 'べちゃっ！ いま ふめ！' },   // the first time it lies splatted
+    how: { en: 'Stay low in its swing, stomp after its drop', es: 'Agáchate en su vaivén y písalo al caer', pt: 'Fique baixo no balanço, pise após a queda', ja: 'ゆれは したで よけ、おちたら ふめ' } },   // after three losses
   // Tokyo's: the Tram, a tsukumogami now (a streetcar come alive after a hundred years: the owner's look and name, 2026-10-20): the Minecart's ride
   // on a rail (CART, Boss.ride), its pantograph up to an overhead wire; the rail at full strength, as the later of the two (the Minecart has its gentleness).
   tram: { name: { en: 'Tsukumo Tram', es: 'Tranvía Tsukumo', pt: 'Bonde Tsukumo', ja: 'つくもでんしゃ' }, ink: 'green', design: 'loaf', size: CART.size, street: TRAMRUN, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
@@ -1206,7 +1217,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 42, fire: 0.55, maxD: 3, chunks: { ...PANEL, comb: 3, spikes: 1, rubberwall: 2 }, intro: [], set: 'icicles', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', sides: [17935, 0], seed: 9039 },
   { role: 'rest', len: 30, fire: 0.42, maxD: 2, chunks: { flight: 3, stairs: 2, planks: 3, shelves: 3 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, sides: [0, 113769], seed: 6109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
-  { role: 'boss', boss: 'crane' },
+  { role: 'boss', boss: 'crane', par: 60 },   // Nuppeppo's (owner, 2026-10-24): two ledges, in its swing's way; par: its time medal
 ] },
 // World 6, the Skyscraper (the user's skyscraper and clouds; its kit in the renderer, see THEMES.sky): clouds that dissolve under you,
 // window-cleaning gondolas, bolts dropped from above, then night over the clouds (the twist: dark); the Pigeon. Its runes: a cross of

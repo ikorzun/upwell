@@ -199,6 +199,7 @@ function bossScore(base) {
   } else if (d.hang) {
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while it lies tangled
     else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - b.cx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // never under it as it drops
+    else if (bs.state === 'windup' || bs.state === 'sweep') s -= Math.max(0, h - 0.5) * 600;   // low on the floor under its swing
     else s -= Math.abs(dx - 3) * 60;   // near enough to be at it once it falls
   } else if (bs.state === 'dazed') s -= dx * 400;
   else {

@@ -749,6 +749,39 @@ ELEMENTS = {
                                place='the bridge strung between the two walls of the shaft', main='grey',
                                vary='the vine ropes and how they twist, the slats and gaps, the side nets, its sag, how it is tied to the walls',
                                rule="Grey is this world's mark for what crumbles, so it is its main colour."),
+    # round 2, batch 2 (owner 2026-10-24: Д91 «А», Д86 «А», Д94 «А»; the bonus caves Д97 «А», Д101 «А»)
+    'village-soba': dict(world='village', kind='prop', what="an Iya soba shop, a way into the game's shop: a small old farmhouse of the Iya valley with a very thick, steep thatched "
+                         "roof of silver grass on a stone base, a red noren curtain in its open doorway (red is the shop's mark), a round stone hand mill for buckwheat by the door, "
+                         "a warm lit paper window", where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
+                         material='thick thatch, dark old timber, a stone base, a stone mill, a noren', size='about 3.5 tiles wide and 3 tiles tall',
+                         inks="an orange and grey thatch, dark grey or black timber with grey lines, a red noren with a simple white soba bowl on it (the shop's mark), a grey stone mill, "
+                         "a warm orange window with a dither halo", scene=VILLAGE_AT),
+    'village-cellar': dict(world='village', kind='prop', what="the way into the game's secret stash: the open floor of an old Iya farmhouse, its floorboards lifted to show a hatch down "
+                           "into the cellar under the house, a ladder going down, a soft purple light glowing up out of it (purple is the stash's mark), sacks and jars at its rim",
+                           where='built against the shaft wall at the wall end of a ledge: a low cut-away corner of a thatched house standing on the ledge, the hatch in its floor facing the play',
+                           material='thick thatch, dark timber, lifted boards, a wooden ladder, sacks, a pickling jar', size='about 3.5 tiles wide and 2.5 tiles tall',
+                           inks='an orange and grey thatch, dark grey timber, a purple glow with a dither halo coming up from the hatch, grey sacks, an orange jar', scene=VILLAGE_AT),
+    'village-cellarroom': dict(world='village', kind='prop', what="the inside of the secret cellar under an Iya farmhouse, seen as one whole game screen: a room of packed earth, its back "
+                               "wall lined with wooden shelves of pickling jars, sacks of buckwheat and potatoes, a ladder going up to the open hatch in the ceiling with a little light "
+                               "falling through, thick timber posts and beams, roots in the earth walls, coins to collect hanging in the room",
+                               plane='back', where='the whole room behind the play: its back wall and its posts; the ledges in it are wooden shelves and beams',
+                               material='packed earth, timber, shelves, jars, sacks, roots, a ladder', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                               inks='a dark earth back wall in a faint orange and grey dither, dark grey timber, orange jars, grey sacks, a faint purple glow (the stash), gold coins',
+                               scene=VILLAGE_AT + ' as a shelf in the room'),
+    'village-far2': dict(world='village', kind='prop', what="the far view behind the shaft as the climb goes up the Iya valley, a different scene in each cell, left to right, top to bottom: "
+                         "A the emerald river at the bottom of the gorge with a vine bridge across it, B the one-lane cliff road with a white guardrail along the gorge wall, "
+                         "C old thatched farmhouses on stone bases clinging to the slope across the valley, D dry-stone terraces and steep little fields with cone stacks of cut grass, "
+                         "E more farmhouses with a little shrine and wild cherry in bloom, wild wisteria hanging from the trees, F a dark forest of cedars in straight rows",
+                         plane='back', where='far behind everything, low and faint, so the play reads over it', material='slopes, houses, terraces, trees, water',
+                         size='about 14 tiles wide and 6 tiles tall', inks='a faint orange, a faint purple and a faint grey dither on the black, the river a faint aqua',
+                         scene=VILLAGE_AT + ' in front of it'),
+    'village-far3': dict(world='village', kind='prop', what="the far view behind the shaft high up the Iya valley, a different scene in each cell, left to right, top to bottom: "
+                         "A a steep slope of tall silver grass in the wind, B a high ridge of low bamboo grass with a few wind-bent trees, C the rounded summit of Mount Tsurugi "
+                         "with a tiny shrine and a stone marker, a sea of clouds below, D the gorge in morning mist, only ridges showing above it, E the far ridges of Shikoku "
+                         "under the moon, F the valley seen from the summit at dawn",
+                         plane='back', where='far behind everything, low and faint, so the play reads over it', material='slopes, grass, ridges, clouds, mist',
+                         size='about 14 tiles wide and 6 tiles tall', inks='a faint orange, a faint purple and a faint grey dither on the black, mist in a faint grey dither',
+                         scene=VILLAGE_AT + ' in front of it'),
     'village-far': dict(world='village', kind='prop', what='the countryside far away: terraced hills, a village of thatched roofs and sakura, seen far behind the shaft',
                         plane='back', where='far behind everything, low and faint, so the play reads over it', material='hills, terraces, roofs, trees',
                         size='about 14 tiles wide and 6 tiles tall', inks='a faint orange and a faint purple dither on the black', scene=VILLAGE_AT + ' in front of it'),

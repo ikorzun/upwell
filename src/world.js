@@ -5374,9 +5374,13 @@ Renderer.prototype.draw = function (g, alpha) {
   if (HO) for (const a of lv.arenas || []) if (seen(a.y - (ARENA.drop + 12) * R, a.y)) {
     const shaking = a.warnAt >= 0 && !(a.dropAt >= a.warnAt) && !a.done, rows = shaking ? HO.shake : a.done || a.dropAt >= 0 ? HO.empty : HO.full, q = 2 * PIX.base;
     const x = sn2(a.x - (rows[0].length * q) / 2 + (shaking ? Math.round(Math.sin(T * 40)) * q : 0)), y = sn2(a.y - (ARENA.drop + 1) * R - rows.length * q);
-    let n = 0; while (HOLD_ROPE[th.holder] && n < 8 && n < rows.length && rows[n].replace(/\./g, '').length <= 3) n++;   // (its top a rope: those rows on up out of sight)
-    if (n >= 4) for (let yy = y - n * q; yy + n * q > top; yy -= n * q) sprAt(rows.slice(0, n), x, yy);
-    sprAt(rows, x, y);
+    let n = 0; while (HOLD_ROPE[th.holder] && n < 8 && n < rows.length && rows[n].replace(/\./g, '').length <= 3) n++;   // (its top a rope: those rows on up, a row at a time,
+    // to the ledge over it, or out of sight)
+    let rope = n; while (n && rope < rows.length && rows[rope].replace(/\./g, '').length <= 3) rope++;   // (all its rope, as drawn)
+    const cx = x + (rows[0].length * q) / 2, body = y + rope * q, over = lv.rects.reduce((m, r) => (!r.gone && r.x0 < cx && r.x1 > cx && r.y1 <= body && r.y1 > m ? r.y1 : m), top);
+    if (n >= 4) for (let yy = y - q, j = n - 1; yy >= over; yy -= q, j = (j + n - 1) % n) sprAt([rows[j]], x, yy);
+    const k0 = n && over > y ? Math.min(rope, Math.ceil((over - y) / q)) : 0;   // (a ledge over it cutting into its rope: the rope from the ledge down)
+    sprAt(k0 ? rows.slice(k0) : rows, x, y + k0 * q);
   }
   for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) icicle(c.x + (c.state === 'shake' ? Math.round(Math.sin(T * 60) * 1.5 * PIX.keep) * PIX.size : 0), c.y);
   const xg = lv.crossing;

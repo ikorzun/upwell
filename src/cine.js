@@ -352,7 +352,7 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
 // sheds what it sheds (a sakura its petals, a bonsai needles), which fall and lie on its ledge a while; a scarecrow's crow flies off and is back only later.
 // The digest's §8: the juice medium, a peak only for a hard poke; it starts at once and is over in about a second; the world remembers (petals lying, the
 // crow gone); with the system asking for less motion nothing sways and less is shed. A rustle with each (a short soft gust), wings with the crow.
-const POKE = { reach: 0.5, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
+const POKE = { reach: 1.0, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
   kinds: { sakura: { sway: 0.06, shed: 'petal', n: 8 }, scarecrow: { sway: 0.09, bird: true }, koinobori: { sway: 0.05 }, bonsai: { sway: 0.08, shed: 'needle', n: 5 },
     bats: { sway: 0, bats: true }, cart: { sway: 0.06, clunk: true },   // (the Mine's: sleeping bats wake and fly off, a cart rocks on its rails)
     bell: { sway: 0.05, ding: true }, pine: { sway: 0.06, shed: 'snow', n: 6 }, snowman: { sway: 0.07 },   // (Fuji's: a rung bell nudged dings low, a pine sheds snow, a

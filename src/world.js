@@ -2177,6 +2177,77 @@ const CHUNKS = {
     '#####...####',
     '...4......6.',
     '............', '............', '............', '............', '............', '............', '............'] },
+  // The Sea's bonus caves (owner З3 «А», З9 «А», after Fuji's, one world at a time), a sea grotto's own things (Urashima's, Worlds' look): its blowholes (springs),
+  // its rafts, its driftwood and its clam shells (CLAM, the caves' second new thing). As the others: 21 rows, the bottom 8 clear but for the blowholes, the
+  // way out the hole in the left wall (nothing to fall down within 3 tiles of it)
+  caveSpouts: { d: 1, kind: 'cave', rows: [   // a gift: two blowholes in the floor (S) throwing you up through a column of coins each, onto a ledge with big ones;
+    '............',   // the right one under a driftwood log (C) in a niche: stand on it and it sinks (back in 3 s). A held jump on one throws you higher
+    '............',
+    '............',
+    '............',
+    '............',
+    'OOO.......OO',
+    '###......###',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '....o..o....',
+    '............',
+    '............',
+    '............',
+    '............',
+    '......CCCC..',
+    '......#..#..',
+    '....S.#S.#..'] },
+  caveRafts: { d: 1, kind: 'cave', rows: [   // a gift: three rafts (M) drifting wall to wall at 9, 12 and 15 tiles, a garland of coins over each one's way, big ones
+    '............',   // at the top: up from the floor onto the low one, and from raft to raft as they pass. A ledge by the left wall catches a fall off
+    '............',   // one there (the way out is under it)
+    '............',
+    '.o.o.o.o.o..',
+    '..O..O..O...',
+    '............',
+    '......MMM...',
+    '.o.o.o.o.o..',
+    '............',
+    '...MMM......',
+    '..o.o.o.o.o.',
+    '............',
+    '.......MMM..',
+    '###.........',
+    '............', '............', '............', '............', '............', '............', '............'] },
+  caveShell: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins on the left wall behind a gate (G); a clam shell (F, a latch) on the high ledge across
+    '............',   // the room: up three ledges to it, stand on it, and the gate is gone for good; then down onto the ledge by the gate and in. Its floor
+    '............',   // two thick and its roof run along it: no coin in the magnet's reach from outside
+    '............',
+    '............',
+    '............',
+    '..........F.',
+    '#####....###',
+    '....G.......',
+    '....G.......',
+    'OOOOG##.....',
+    'OOOOG.......',
+    '#####.......',
+    '#####...####',
+    '............', '............', '............', '............', '............', '............', '............', '............'] },
+  caveKeel: { d: 1, kind: 'cave', rows: [   // a puzzle: the same vault and gate; its clam shell (J, holds) at the far end of a shelf a raft (W) drifts to and fro
+    '............',   // over: the gate open only while the raft's keel is on the shell (about a sixth of the time), and never shut on the hero. Wait on the
+    '............',   // ledge by the gate and go in when it opens. Stood on the shell yourself, the gate is too far: it shuts before you're there
+    '............',
+    '............',
+    '............',
+    '............',
+    '#####.......',
+    '....G.......',
+    '....G.......',
+    'OOOOG##.....',
+    'OOOOG.......',
+    '#####...WW.J',
+    '#####...####',
+    '............', '............', '............', '............', '............', '............', '............', '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -2683,7 +2754,8 @@ const AMBUSH = { waves: [2], coins: 2 };
 // world kept the Mine's old id). Two gifts, then a puzzle, never the same room twice running (Game.enterRoom). A world not here keeps the five old
 // heaps of coins (Level.build).
 const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] },
-  ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] } };   // (the Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice')
+  ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] }, sea: { gift: ['caveSpouts', 'caveRafts'], puzzle: ['caveShell', 'caveKeel'] } };   // (the Village's, 'mine';
+// the Mine's, 'cave'; Fuji's, 'ice'; the Sea's, 'sea')
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {
@@ -2698,11 +2770,15 @@ const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either sid
 // and `h` tall (tiles) by its number; the hero bumping into one rings it, its pitch `rate` (the chime's). Rung in their order (一 二 三) the room's ice gate ('G')
 // melts; a wrong one and all three fall quiet, to start again (owner З2 «А»: a mistake costs nothing). None rings the room's first `calm` s (the throw in)
 const BELLS = { rope: 0.3, w: [0.8, 0.65, 0.5], h: [1.35, 1.1, 0.85], rate: [0.6, 0.8, 1.05], calm: 1.2 };
+// The Sea's clam shells in a cave (caveShell, caveKeel): a shell `w` half wide and `h` tall (tiles) on the block under it opens the room's gate ('G'). 'F' a latch: stood on
+// once, the gate is gone for good. 'J' holds it: open only while something is on it, the hero or a raft's keel (a mover over it, its underside within `keel` tiles),
+// shut again once nothing is in the gateway (never on the hero)
+const CLAM = { w: 0.45, h: 0.3, keel: 1.2 };
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', '4', '5', '6', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', '4', '5', '6', 'F', 'J', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -2784,7 +2860,7 @@ function shuffled(rnd, list) {
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.plates = null; this.gates = null; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -2799,7 +2875,7 @@ class Level {
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.plates = null; this.gates = null; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
@@ -2863,7 +2939,7 @@ class Level {
     return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false, gone: false, t: 0, dx: 0, dy: 0, hit: false, crumbling: false,   // (every field
       // a rect is given later too, from the start: one shape for all of them, 2-5 before, the physics' loops slower for it: perf)
       kit: undefined, kitWant: undefined, id: undefined, moss: false, board: false, safe: false, mnRoom: undefined, bouncy: false, ac: false, poke: undefined, batsP: undefined, eyesP: undefined,
-      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, gate: false, spikes: null }, f);
+      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, gate: false, latched: false, plate: null, pressed: false, spikes: null }, f);
   }
   coin(x, y, v) { this.coins.push({ x, y, v, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: this.rng() * TAU }); }
   // The scenes made whole: the boss arena and the two kinds of room.
@@ -3225,6 +3301,7 @@ class Level {
       } else if (ch === 'S') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - 0.7 * R, Y(r) - 0.36 * R, cx + 0.7 * R, Y(r), { spring: true })); }
       else if (ch === 'o' || ch === 'O') this.coin(X(k) + t / 2, Y(r) - t / 2, ch === 'O' ? 5 : 1);
       else if (ch === 'Y') this.icicles.push({ x: X(k) + t / 2, y: Y(r + 1), state: 'hang', t: 0 });
+      else if (ch === 'F' || ch === 'J') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - CLAM.w * t, Y(r) - CLAM.h * t, cx + CLAM.w * t, Y(r), { plate: ch === 'F' ? 'latch' : 'hold' })); }   // a clam shell (CLAM)
       else if (ch === '4' || ch === '5' || ch === '6') this.bells.push({ x: X(k) + t / 2, y: Y(r + 1), n: +ch - 3, rung: false, in: false, t: -9 });   // a bell off the ledge over it (BELLS)
       else if (ch === 'V') {   // a seesaw's pivot (SEESAW): its post down to the block under it, a seat at each end of its beam
         let rr = r - 1; while (rr >= 0 && !SOLID[at(rr, k)]) rr--;
@@ -5884,6 +5961,12 @@ Renderer.prototype.draw = function (g, alpha) {
       continue;
     }
     if (r.cap) { box(lv.l - 2, Math.max(r.y0, top), lv.r + 2, r.y1, th.wall, 1, 0); box(lv.l - 2, r.y1 - 2.5, lv.r + 2, r.y1, th.lip, 1, 0); continue; }
+    if (r.plate) {   // a Sea cave's clam shell (CLAM): a scallop in three steps, its ribs dark; pressed, it shuts flat and white (Worlds' look to come)
+      const w = r.x1 - r.x0, hh = (r.y1 - r.y0) * (r.pressed ? 0.55 : 1), c = r.pressed ? PAL.white : PAL.orange, q = kitP, Y = (f) => Math.round((r.y1 - f * hh) / q) * q, Xs = (f) => Math.round((r.x0 + f * w) / q) * q;
+      box(Xs(0), Y(0.4), Xs(1), r.y1, c, 1, 0, 10, 0); box(Xs(0.14), Y(0.75), Xs(0.86), Y(0.4), c, 1, 0, 10, 0); box(Xs(0.3), Y(1), Xs(0.7), Y(0.75), c, 1, 0, 10, 0);
+      for (const f of [0.3, 0.5, 0.7]) box(Xs(f), Y(0.85), Xs(f) + q, r.y1, PAL.black, 0.5, 0, 10, 0);
+      continue;
+    }
     if (r.spring) {
       const k = r.t / SPRING.anim, hh = (r.y1 - r.y0) * (1 - 0.5 * k), w = r.x1 - r.x0;
       if (th.junk) {   // the Junkyard's: a black trash bag, its grey tie, a glint, flattening as it throws

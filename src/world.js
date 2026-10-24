@@ -3694,7 +3694,9 @@ const rampOf = (th) => {
   const out = new Float32Array(Object.keys(PAL).length * 3 * 3), K = PAL.black, mixK = (c, f) => c.map((v, i) => K[i] + (v - K[i]) * f);
   Object.keys(PAL).forEach((id, k) => {
     const c = PAL[id], own = th && th.ramp && th.ramp[id];
-    const steps = own ? own.map(hex) : [((m) => [m[0] * 0.8, m[1] * 0.9, Math.min(1, m[2] * 1.18 + 0.03)])(mixK(c, 0.36)), mixK(c, 0.68), c.map((v, i) => Math.min(1, v * 0.84 + [1, 0.8, 0.52][i] * 0.2))];
+    const keep = id === 'white' || id === 'yellow';   // (Worlds: white is the hero's and an edge's mark, yellow a coin's: at the light's full step they stay
+    // themselves, not tinted cream; cold and mid as every ink's)
+    const steps = own ? own.map(hex) : [((m) => [m[0] * 0.8, m[1] * 0.9, Math.min(1, m[2] * 1.18 + 0.03)])(mixK(c, 0.36)), mixK(c, 0.68), keep ? c.slice() : c.map((v, i) => Math.min(1, v * 0.84 + [1, 0.8, 0.52][i] * 0.2))];
     steps.forEach((s3, j) => out.set(s3, (k * 3 + j) * 3));
   });
   return out;

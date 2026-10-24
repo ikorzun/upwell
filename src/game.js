@@ -883,13 +883,13 @@ class Game {
   levelReset() {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
-    this.winT = 0;   // a beaten boss's win still to come is the old level's
+    this.winT = 0; this.rushed = false;   // a beaten boss's win still to come is the old level's (rushed: the fire's speed-up heard, К2)
     this.thrown = 0; this.wallHold = 0;   // (a throw out of a room, or its hold on the wall, the old level's: the next hero stuck to a wall; review)
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; ui.comboEnd();
     loosen(this, 'R', 'vjump', 'builtW', 'sinceContact', 'queueT', 'hitstop', 'invuln', 'stateT', 'pruneT', 'winT', 'startY', 'world', 'climbed', 'levelM', 'bonusT',
-      'idleT', 'gunT', 'fallV', 'landV', 'dizzyT', 'joyT', 'flatT', 'wallHold', 'seed', 'hintAt', 'curAt');   // (fractions in play: see loosen)
+      'idleT', 'gunT', 'fallV', 'landV', 'dizzyT', 'joyT', 'flatT', 'wallHold', 'seed', 'hintAt', 'curAt', 'rushed');   // (fractions in play: see loosen)
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
@@ -1493,7 +1493,9 @@ class Game {
       if (lv.exit.armed && inDoor(lv.exit, -0.3 * H.R)) { this.leaveRoom(); return; }
     }
     for (const p of lv.pickups) { const at = !p.sold && near(p, p.r + 0.8 * H.R * H.growth); if (at && !p.near) this.buy(p); p.near = at; }   // once per approach
-    if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (!this.gated()) this.idleT += dt; }   // no new height: the fire speeds up
+    if (lv.kind === 'well' && !lv.under) { const m = (this.startY - H.cy) / (R_PER_M * this.R); if (m > this.levelM) { this.levelM = m; this.idleT = 0; } else if (this.world < 3 && lv.arenas.some((a) => a.on && !a.done)) this.idleT = 0; else if (!this.gated()) this.idleT += dt; }   // no new height:
+    // the fire speeds up (not under a gate, nor in worlds 1-3 while an arena or an ambush is fought: owner, К2 «А»)
+    const rush = lv.fire && lv.fire.rush > 0; if (rush && !this.rushed) sound.play('burn', 0.45, 0.6); this.rushed = rush;   // its speed-up heard as it starts (К2: a roar; its look each world's)
     const cam = !lv.exit && (lv.under || lv.kind === 'well') ? Math.max(lv.cam, Math.min(H.maxY + view.keep + this.R - view.h, lv.floor + this.room() - view.h)) : lv.cam;   // where the frame's
     // clamp will hold the camera (Game.frame; the camera itself left to it): at a low frame rate a long fall passed the screen's bottom between two frames and counted as off it, a heart gone (review: 30 fps, 1250 px)
     if (!lv.exit && H.minY > cam + view.h - view.keep + (view.keep ? 0 : CAM.deathPad)) this.fall();   // off the bottom, or behind the touch keys (not in a room: its floor holds, and a fall there came back to the shaft's ledges, out of the room and out of sight; owner: «герой может исчезнуть»)

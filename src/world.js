@@ -2255,7 +2255,7 @@ class Level {
       if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       if (rc && rc.trial) this.plan.push({ y: this.floor - H * rc.trial.at, kind: 'trial', goal: rc.trial.goal, done: false });   // a trial room (TRIAL)
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
-      if (v > 0) loosen(this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 }, 'y', 'v', 'spitT', 'calm');   // (see loosen)
+      if (v > 0) loosen(this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0, rush: 0 }, 'y', 'v', 'spitT', 'calm', 'rush');   // (see loosen)
     } else if (o.kind === 'menu') this.menuAt(o.floorY);   // the menu's (owner, 2026-10-23, the Figma «Main»): nothing in it but the hero
     else this.build(o);
   }
@@ -2840,7 +2840,8 @@ class Level {
     }
     const f = this.fire;
     if (f && g.state === 'play' && !(f.calm > 0 && (f.calm -= dt) > 0)) {   // faster while the hero gains no height (not in a calm start)
-      const k = f.calm === 0 ? 1 + (FIRE.boost - 1) * clamp((g.idleT - FIRE.idle) / FIRE.ramp, 0, 1) : 1;
+      f.rush = f.calm === 0 ? clamp((g.idleT - FIRE.idle) / FIRE.ramp, 0, 1) : 0; const k = 1 + (FIRE.boost - 1) * f.rush;   // (rush: how far into its speed-up, 0 to 1, for
+      // its sound and each world's look of it: owner, К2 «А»)
       f.y = Math.min(f.y - f.v * k * g.mods.fire * dt, this.cam + view.h * (1 + FIRE.lag));
     }
     for (const b of this.bubbles) if (b.cd > 0) b.cd -= dt;

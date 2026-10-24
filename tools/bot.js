@@ -167,6 +167,7 @@ function score(base, st) {
 //   slide (the Puck, the Rat King): a rolling shell is a flip to come (it slides into its own shells: Game.rolling); behind a
 //     shell from it, to stomp it its way; at it while it lies belly up.
 //   ride (the Tram, the Minecart): up, as high as over it (open from above only), then over it.
+//   quake (Onamazu): up off the floor when it rears (its waves), off its leap's way; at it while it lies flopped.
 //   glide (Tsurara-onna): off the floor in her slide's way (a ledge, or over her); at her while she sticks to the wall.
 //   hang (the Tsuchigumo, the Bake-danuki): never under it as it shakes over the hero and drops; near it, to be at it while it lies on the floor.
 function bossScore(base) {
@@ -182,6 +183,10 @@ function bossScore(base) {
       const sh = lv.enemies.filter((e) => e.type === 'shell' && e.state !== 'shell').sort((p, q) => Math.abs(p.body.cx - H.cx) - Math.abs(q.body.cx - H.cx))[0];
       if (sh) s -= (Math.abs(H.cx - (sh.body.cx - Math.sign(b.cx - sh.body.cx) * (sh.body.R + H.R))) / T) * 150;
     }
+  } else if (d.quake) {
+    if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while it lies flopped
+    else if (bs.state === 'crouch' || bs.state === 'dive') s -= Math.max(0, 4 - dx) * 500;   // off its leap's way
+    else s -= Math.abs(dx - 4) * 60;   // near enough to be at it once it flops
   } else if (d.glide) {
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at her, best over her, while she sticks
     else if (bs.state === 'warn' || bs.state === 'dive') s += Math.min(h, 6) * 150;   // up, out of her slide's way

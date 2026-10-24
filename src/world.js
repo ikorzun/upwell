@@ -589,6 +589,13 @@ const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], win
 // there frozen `stun` s, the only time a stomp hurts her (else her top is hard ice). From her second phase the wall shakes `wallIce`
 // icicles down; on her last heart (`twice`) she dashes back the other way after `again` s before she sticks. Still her first `calm` s.
 const ICE = { creep: 2.4, keep: 2.5, rest: [2.0, 1.8, 1.6, 1.5], cast: 1.0, n: [3, 3, 4, 5], gap: 3, shake: 1.0, wind: 1.0, again: 0.6, dash: [13, 15, 17, 19], stun: 2.0, wallIce: [0, 2, 2, 2], twice: 3, calm: 2.5 };
+// Onamazu (BOSSES.namazu, the Sea's, world 4: the curve climbs from here; owner 2026-10-24): the earthquake catfish keeps `keep` R off the
+// hero, creeping `creep` R/s, its moves taking turns. A quake: it rears up on its tail, red, rumbling, `rear` s, and slams: `waves` waves
+// run along the floor both ways at `wave` R/s (jump them, or be up on a ledge) and `rocks` fall from the ceiling over the hero, their
+// shadows on the floor. A leap: it crouches in a splash `crouch` s, then leaps `leap` R high to where the hero was, and lands flopped on
+// its back `flop` s, the only time a stomp hurts it (the gods' stone on its back is hard). From phase `combo` the leap comes straight
+// after the quake. Five hearts. Still its first `calm` s.
+const QUAKE = { keep: 3, creep: 2.2, rest: [2.0, 1.7, 1.5, 1.3], rear: 0.8, waves: [1, 1, 1, 2], wave: 11, rocks: [1, 1, 2, 2], crouch: 0.8, leap: 7, flop: 1.7, combo: 9, again: 0.5, calm: 2.5 };
 // The Tsuchigumo (BOSSES.cart, the Cave's; owner 2026-10-23: «Очень легкий босс… Зачем вагонетки внизу не понятно», the fight redone
 // to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
 // the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
@@ -940,17 +947,17 @@ const BOSSES = {
     hint: { en: 'Tangled! Jump on it!', es: '¡Enredada! ¡Salta encima!', pt: 'Enrolada! Pule em cima!', ja: 'からまった！ とびのれ！' },   // the first time it lies tangled
     how: { en: 'Dodge its drop, then stomp it', es: 'Esquiva su caída y písala', pt: 'Desvie da queda e pise nela', ja: 'おちてくるのを よけて、ふみつけろ' } },   // after three losses
   // The Sea's (world 4): Onamazu, the earthquake catfish under the islands, the gods' stone (kaname-ishi) on its back (owner, 2026-10-21:
-  // «сом изогнутый», boss-sea D): the Puck's slide over wet rock (rc.ice), its stone the hard top.
-  namazu: { name: { en: 'Onamazu', es: 'Onamazu', pt: 'Onamazu', ja: 'おおなまず' }, ink: 'orange', design: 'dome', size: 2.4, slide: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
+  // «сом изогнутый», boss-sea D): its quake and its leap (QUAKE, Boss.quake; owner 2026-10-24: all bosses redone), its stone the hard top.
+  namazu: { name: { en: 'Onamazu', es: 'Onamazu', pt: 'Onamazu', ja: 'おおなまず' }, ink: 'orange', design: 'dome', size: 2.4, quake: QUAKE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'Who wakes me under the islands?', es: '¿Quién me despierta bajo las islas?', pt: 'Quem me acorda sob as ilhas?', ja: 'しまの したで ねてたのに。だれだ？' },
       { en: "The gods' stone holds me. Barely.", es: 'La piedra de los dioses me sujeta. Apenas.', pt: 'A pedra dos deuses me prende. Mal.', ja: 'かみの いしが おさえてる。ぎりぎりね。' },
       { en: 'Feel the ground shake!', es: '¡Siente temblar la tierra!', pt: 'Sinta o chão tremer!', ja: 'じめんが ゆれるぞ！' }],
     quip: [{ en: 'Shaken? That was a small one.', es: '¿Temblando? Ese fue pequeño.', pt: 'Tremendo? Esse foi pequeno.', ja: 'ゆれた？ いまのは ちいさいほう。' },
       { en: 'Splash. Back to the shallows.', es: 'Chof. De vuelta a la orilla.', pt: 'Tchibum. De volta pro raso.', ja: 'ザブン。あさせへ おかえり。' }],
     defeat: { en: '…The stone holds. I sleep again.', es: '…La piedra aguanta. Vuelvo a dormir.', pt: '…A pedra aguenta. Volto a dormir.', ja: '…いしが おもい。また ねむろう。' },
-    top: { en: 'Hard stone. Roll a shell at it!', es: 'Piedra dura. ¡Lánzale un caparazón!', pt: 'Pedra dura. Role um casco nele!', ja: 'いしは かたい。こうらを ころがせ！' },
-    hint: { en: 'Flipped! Land on its belly!', es: '¡Volteado! ¡Salta en su panza!', pt: 'Virado! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },
-    how: { en: 'Roll a shell into it, then stomp it', es: 'Lánzale un caparazón y luego písalo', pt: 'Role um casco nele e depois pise', ja: 'こうらを ぶつけて、ふみつけろ' } },
+    top: { en: 'Hard stone! Wait till it flops!', es: '¡Piedra dura! Espera a que caiga de espaldas.', pt: 'Pedra dura! Espere ele virar de costas.', ja: 'いしは かたい。ひっくりかえるまで まて！' },   // the first bounce off its stone
+    hint: { en: 'Belly up! Stomp it!', es: '¡Panza arriba! ¡Písalo!', pt: 'De barriga pra cima! Pise nele!', ja: 'おなかが うえ！ ふみつけろ！' },   // the first time it flops
+    how: { en: 'Jump the wave, dodge the leap, stomp', es: 'Salta la ola, esquiva el salto, pisa', pt: 'Pule a onda, desvie do salto, pise', ja: 'なみを とんで、ジャンプを よけて、ふめ' } },   // after three losses
   // The Sky's: a Karasu-tengu on the Cork's dive (hover, warn, dive, dazed, rise), flapping its wings.
   pigeon: { name: { en: 'Karasu-tengu', es: 'Karasu-tengu', pt: 'Karasu-tengu', ja: 'からすてんぐ' }, ink: 'gray', design: 'drop', pigeon: true, hp: 8, phase: (hp) => (hp >= 7 ? 2 : 3),
     intro: [{ en: 'The sky has a guard. Me.', es: 'El cielo tiene un guardián. Yo.', pt: 'O céu tem um guardião. Eu.', ja: 'そらには ばんにんが いる。わたしだ。' },
@@ -1107,7 +1114,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 36, gate: 'gate3', fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, movers: 1, crumble: 2, twinshaft: 1 }, intro: [], enemies: ['circler', 'spitter', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6107 },
   { role: 'rest', len: 22, fire: 0.35, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, iceblocks: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 6109,
     },
-  { role: 'boss', boss: 'namazu', ice: true },   // Onamazu (the boss chat, 2026-10-21): the Puck's slide, its floor wet rock
+  { role: 'boss', boss: 'namazu', quake: true, par: 55 },   // Onamazu's (owner, 2026-10-24): rock and two ledges over its waves; par: its time medal
 ] },
 // The Dark Forest (the owner's bonus world, 2026-10-20: scary Russian fairy tales; its kit in the renderer, see THEMES.skazka; last in CAMP_ORDER, it
 // opens at 180 stars, off the line): every level dark, the hero a Kolobok. One new thing a level: the dark itself, skulls that lunge, the Kikimora on the walls, Baba Yaga's mortars, a
@@ -5585,7 +5592,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // round it, behind it, only what its setting hangs it on: the tram's wire, the spider's thread, the crane's cable and hook.
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
-    const d = df.rail || df.slide || df.glide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    const d = df.rail || df.slide || df.glide || df.quake ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
     if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
       const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
       F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);
@@ -5617,6 +5624,7 @@ Renderer.prototype.draw = function (g, alpha) {
     });
   }
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart; a falling stalactite
+    if (s.wave) { const y = lv.floor - 0.3 * R, f = Math.sin(T * 20 + s.x * 0.1) * 0.08 * R; F(s.x, y, 0.95 * R, 0, 0, 0.4 * R + f, INK.spike, 1, 0); F(s.x - 0.25 * Math.sign(s.vx) * R, y - 0.18 * R, 0.5 * R, 0, 0, 0.18 * R, PAL.white, 1, 0); continue; }   // Onamazu's quake: a red crest running along the floor
     if (s.rock) { F(s.x, lv.floor + 1, s.r * 1.3, 0, 0, s.r * 0.35, INK.dark, 1, 0); disc(s.x, s.y, s.r, PAL.gray, 1); disc(s.x - 0.3 * s.r, s.y - 0.3 * s.r, 0.3 * s.r, PAL.white, 1); continue; }   // the Minecart's rocks, a shadow under each on the floor
     if (s.icicle) { icicle(s.x, IC ? s.y + s.r - IC.fall.length * PIX.base : s.y - 0.3 * R, true); continue; }   // (the sheet's: its tip at the bottom of what hurts, its streaks over it)
     if (s.bone) { const an = T * 7 + s.x * 0.05, ca = Math.cos(an) * s.r, sa = Math.sin(an) * s.r; F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); line(s.x - ca, s.y - sa, s.x + ca, s.y + sa, INK.spike, 1, 2); for (const q of [-1, 1]) for (const p of [-1, 1]) disc(s.x + q * ca + p * 0.35 * sa, s.y + q * sa - p * 0.35 * ca, 0.32 * s.r, INK.spike, 1); continue; }   // Koschei's: a bone, spinning, red

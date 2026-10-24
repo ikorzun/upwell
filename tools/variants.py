@@ -241,6 +241,41 @@ ELEMENTS = {
                         'yellow is a coin), and its little feet',
                         vary='the kind of bat, as the six letters above say: its ears, its nose, its wings and how it folds them, its fur',
                         foe_tone='Cute and a little eerie, as the Mine is, never gory: the game is for everyone, and the Mine is a gentle early world.'),
+    # К9 «А» (the Level Design Book: a distinct silhouette per behaviour, and when it can be stomped shown on it; Вр4: no-stomp by spikes or red on top), the
+    # cube three where the К3 roster put them: the tofu and the tumbler in Tokyo, the nurikabe on Fuji
+    'tokyo-tofu': dict(world='tokyo', kind='foe', what='a tofu yokai of the Tokyo backstreets: a soft wobbly block of silken tofu come alive, with a little face, that crawls '
+                       'along its ledge and, stomped, falls apart into four small cubes that scurry off',
+                       does='a crawler: it creeps to and fro along its ledge; the hero stomps it from above any time, and it splits into four small tofu bits that run away '
+                       'fast (they can be stomped too).',
+                       size='about 1.9 tiles wide and 1.6 tiles tall (about 30 by 25 art pixels), nearly the hero\'s size; each bit about 0.9 tiles across',
+                       place='the tofu twice in the cell: on the left whole, crawling along a thin ledge in side view facing right; on the right the same tofu just stomped, '
+                       'split into its four small cubes jumping apart',
+                       main='white-grey #c8c8c8 with grey shading (soft, a little wobbly, cut lines showing where it will split into four)', parts='its face (two eyes that '
+                       'glow orange #faa23e, never yellow: yellow is a coin), the four cut lines across it, a few drops of soy sauce or a leaf of green onion on top',
+                       vary='its shape (a tall block, a flat slab, a wobbly pudding), its face, how its four parts show, what is on top of it',
+                       foe_tone='Cute, a little silly, never gory: the game is for everyone.'),
+    'tokyo-tumbler': dict(world='tokyo', kind='foe', what='a yokan, a block of red bean jelly come alive, that somersaults along its ledge, rolling over and over, then sits still '
+                          'for a moment between tumbles',
+                          does='a tumbler: it somersaults along its ledge, then sits; while it tumbles it hurts the hero (its edges are sharp: show spikes or red edges on '
+                          'the tumbling pose), while it sits it can be stomped from above (its top flat and calm).',
+                          size='about 1.6 tiles across (about 26 art pixels), a cube',
+                          place='the yokan three times in the cell along a thin ledge: on the left sitting still (flat top, calm face, safe to stomp), in the middle mid-'
+                          'somersault tilted 45 degrees with its sharp edges showing, on the right upside down mid-roll',
+                          main='dark purple-black #201010 with a purple sheen (yokan is dark bean jelly), its edges lighter', parts='its face (two eyes that glow orange '
+                          '#faa23e), spikes or red edges only on its tumbling poses, a paper wrapper or a chestnut inside as a detail',
+                          vary='its sheen and inside (plain, with chestnuts, layered, wrapped in paper), its face, how its sharp tumbling edges show',
+                          foe_tone='Cute, a little silly, never gory: the game is for everyone.'),
+    'fuji-nurikabe': dict(world='fuji', kind='foe', what='a nurikabe, the wall yokai, as a slab of snowy volcanic rock with a face, hanging over its ledge that drops on whoever passes '
+                          'under it, then sits flat where it landed',
+                          does='a crusher: it hangs over its ledge, shakes for a moment, drops straight down onto the hero below; while it hangs and falls it hurts (show '
+                          'spikes or red on its underside and top), once it has landed it can be stomped from above (its top flat and calm).',
+                          size='about 2.2 tiles wide and 2 tiles tall (about 35 by 32 art pixels), bigger than the hero',
+                          place='the nurikabe three times in the cell: at the top hanging from the underside of a thin rock ledge, eyes open, spikes or red on its underside; '
+                          'in the middle falling straight down with motion lines; at the bottom landed flat on a thin ledge, calm, its top flat, safe to stomp',
+                          main='dark grey rock with a cap of snow #f3f3f3 on top (white means a top you can stand on, which is right once it has landed)',
+                          parts='its face (two eyes that glow orange #faa23e), cracks, icicles on its underside while it hangs',
+                          vary='its rock and snow, its face, how its dangerous underside shows (icicles, spikes, red), its shape (a slab, a block, a round wall)',
+                          foe_tone='A little eerie, never gory: the game is for everyone, and Fuji is a gentle early world.'),
     # The Village's rising hazard (К13 «А»): a spring field burning got away up the shaft
     'village-noyaki': dict(world='village', kind='hazard', what='a spring field burning (noyaki, the old Japanese custom of burning the dry grass of the fields and '
                            'highlands each early spring): a front of flames running through dry pampas grass (susuki), the grass black and smouldering behind it, '
@@ -897,6 +932,14 @@ ELEMENTS = {
                            size='2 tiles across', main='orange (a baked crust)', scene=SKAZKA_AT,
                            vary='the crust (its shading, a shine of glaze, cracks, a dusting of flour, a darker baked bottom) and the face (the eyes, the brows, a '
                            'cheeky grin, a sly smile, a scared look, rosy cheeks in orange); nothing on it but the bun itself: no hat, no arms, no legs'),
+    # Ume, Mochi's friend of story card VI (the rainy Tokyo street by a vending machine): an umeboshi, a red pickled plum, round and soft like Mochi; he waits on
+    # 5-3 by the vending machine, and comes along after the can (UPwell's bf03669); his look path A (UPwell's leaf a placeholder)
+    'tokyo-ume': dict(world='tokyo', kind='hero', what="Ume, Mochi's friend: an umeboshi, a little red pickled plum come alive, round and soft like Mochi, a stalk with one "
+                      "small green ume leaf on his crown, a kind gentle face; in story card VI he sits in the rain by a vending machine in a Tokyo backstreet",
+                      size='1.8 tiles across, a little smaller than the hero', main='red #f43e34 (his own colour; in this game he is the one friendly red thing)',
+                      scene='a Tokyo backstreet ledge in the rain at night, a glowing vending machine at the wall, Mochi (a white round blob) beside him for scale',
+                      vary='his wrinkles (an umeboshi is wrinkled: soft dents in his skin), his leaf and stalk, his face (the eyes, a little smile, rosy cheeks), '
+                      'a shine on him; nothing on him but himself: no hat, no arms, no legs'),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',

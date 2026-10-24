@@ -3605,18 +3605,18 @@ void main() {
   vec3 c = uTop;
   float t = (uH - gl_FragCoord.y) / uH;   // 0 at the top of the screen, 1 at its foot
   if (uGrad > 0.5 && t * t > bayer(g)) c = uBot;   // a theme's fall from its top ink to its bottom one, through the 4x4 dither (the Crypt's)
-  int s = uPix < 1.5 ? 2 : 1, py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-CSS-px cells, a dot one game pixel
-  ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / float(s)));
+  int py = g.y + int(floor(uShake.y / uPix * 0.5));   // half the climb; the grid is laid in 2-game-px cells, a dot one whole cell (2x2: the guide's clusters, no lone pixel)
+  ivec2 q = ivec2(floor(vec2(float(g.x), float(py)) / 2.0));
   if (uWin > 2.5 && uWin < 3.5) {   // banks of cloud far off (the Skyscraper's): a smooth field, its edges dithered
     vec2 wp = vec2(float(g.x), float(py)) * vec2(0.008, 0.03);
     float n = sin(wp.x * 3.1 + sin(wp.y * 1.7) * 2.0) * 0.5 + sin(wp.y * 2.3 + wp.x * 0.7) * 0.5;
     if (n > 0.62 + 0.3 * bayer(g)) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // sparse, so the climb reads over them; faint (DEPTH)
-  } else if (uWin > 1.5 && uWin < 2.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dotted between
+  } else if (uWin > 1.5 && uWin < 2.5) {   // panel blocks far off (the Tower Blocks'): a regular grid of windows, a few lit, the floors' seams dashed between (4-px joints, the guide's clusters)
     vec2 wp = vec2(float(g.x), float(py)), cw = floor(wp / vec2(8.0, 10.0)), iw = wp - cw * vec2(8.0, 10.0);
     float h = fract(sin(dot(cw, vec2(12.9898, 78.233))) * 43758.5453);
     if (iw.x >= 2.0 && iw.x < 6.0 && iw.y >= 3.0 && iw.y < 7.0 && h < 0.16) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
-    else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x, 3.0) < 1.0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
-  } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3 && (g.x & (s - 1)) == 0 && (py & (s - 1)) == 0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // a dot, faint (BG_DOTS)
+    else if (iw.y < 1.0 && mod(cw.y, 2.0) < 1.0 && mod(wp.x + 2.0, 8.0) < 4.0) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});
+  } else if ((q.y & 7) == 3 && ((q.x + ((q.y >> 3) & 1) * 8) & 15) == 3) c = mix(c, uDots, ${BG_DOTS.toFixed(2)});   // a dot, faint (BG_DOTS)
   float d = min(wx - uWalls.x, uWalls.y - wx);   // > 0 inside the well
   if (d < 0.0) {
     c = ((g.x + g.y) & 3) == 0 ? uWallD : uWall;

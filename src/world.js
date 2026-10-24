@@ -2258,8 +2258,10 @@ class Level {
     this.rects = [this.box(this.l, this.capY - 4000, this.r, this.capY, { cap: true })];
   }
   box(x0, y0, x1, y1, f) {
-    return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false,
-      gone: false, t: 0, dx: 0, hit: false, crumbling: false }, f);
+    return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false, gone: false, t: 0, dx: 0, dy: 0, hit: false, crumbling: false,   // (every field
+      // a rect is given later too, from the start: one shape for all of them, 2-5 before, the physics' loops slower for it: perf)
+      kit: undefined, kitWant: undefined, id: undefined, moss: false, board: false, safe: false, mnRoom: undefined, bouncy: false, ac: false, poke: undefined, batsP: undefined, eyesP: undefined,
+      crack: false, key: false, broke: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, spikes: null }, f);
   }
   coin(x, y, v) { this.coins.push({ x, y, v, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: this.rng() * TAU }); }
   // The scenes made whole: the boss arena and the two kinds of room.
@@ -3184,6 +3186,11 @@ void main() {
   if (a < 0.5 || k <= bayer(g)) discard;
   o = vec4(k > 1.0 ? mix(PAL[0], col, k - 1.0) : col, 1.0);   // over 1: a tone k - 1 of the way from the black (DEPTH)
 }`;
+// A sprite's colour snapped to the palette once, in its vertex shader (it is the instance's alone: FEAT_FS did it for each of its fragments; perf). Gum's
+// pair stays FEAT_VS + FEAT_FS (Renderer.init), this one in its place below; Gum's kept if this one does not build.
+const FEAT_VS_PAL = FEAT_VS.replace(CLIP, CLIP + PIX_GLSL.slice(PIX_GLSL.indexOf('const vec3 PAL['), PIX_GLSL.indexOf('ivec2 cell()')) + PIX_GLSL.slice(PIX_GLSL.indexOf('vec3 snapPal')))
+  .replace('flat out vec4 vP;', 'flat out vec4 vP; flat out vec3 vPal;').replace('vP = vec4(iC.zw, iD);', 'vP = vec4(iC.zw, iD); vPal = snapPal(vCol.rgb);');
+const FEAT_FS_PAL = FEAT_FS.replace('flat in vec4 vP;', 'flat in vec4 vP; flat in vec3 vPal;').replace('vec3 col = snapPal(vCol.rgb);', 'vec3 col = vPal;');
 // The squishies in the same terms (in place of Gum's glossy cushion): the body's colour
 // flat, shade as black tones stepping in toward the back and the bottom, a hard white
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
@@ -3309,6 +3316,7 @@ const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {
   if (!gumInit.call(this)) return false;
   try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
+  try { this.pFeat = program(this.gl, FEAT_VS_PAL, FEAT_FS_PAL); } catch (err) { console.error(err); }   // (the sprites' palette snap a corner, not a fragment: FEAT_VS_PAL)
   this.darkBuf = new Float32Array(128);   // 32 lights (the Dark Forest's eyes and fences as well as the coins)
   this.target = null;
   if (this.low) this.makeTarget();
@@ -5079,7 +5087,8 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const q = row[i]; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + (i + 1) * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); } });   // (d, m: the ink's dark and mid tones)
+    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); i = e; } });   // (d, m: the ink's dark and
+    // mid tones; a box a run of one ink, as cineSpr: a crow with its ring 492 boxes, 255 now: perf)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {

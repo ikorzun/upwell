@@ -94,10 +94,10 @@ void main() {
   vec3 col = texelFetch(uFar, tc, 0).rgb;
   bool well = uv.x > uWell.x && uv.x < uWell.y;
   if (well) {
-    col = mix(col, texture(uFarB, uv).rgb, uK.x);   // out of focus
-    col *= 1.0 - uK.z * texture(uSoft, uv + uShOff).r;   // the play's soft shadow
-    vec2 eu = uv + uExOff; vec4 ex = texelFetch(uPlay, clamp(ivec2(floor(eu * uLow)), ivec2(0), ivec2(uLow) - 1), 0);
-    if (pl.a < 0.5 && ex.a > 0.5 && texture(uSoft, eu).r > 0.45) col = mix(col, ex.rgb * 0.3, uK.w);   // its thickness (the big shapes only: not the coins')
+    if (uK.x > 0.0) col = mix(col, texture(uFarB, uv).rgb, uK.x);   // out of focus (each part at 0 not sampled at all: perf)
+    if (uK.z > 0.0) col *= 1.0 - uK.z * texture(uSoft, uv + uShOff).r;   // the play's soft shadow
+    if (uK.w > 0.0) { vec2 eu = uv + uExOff; vec4 ex = texelFetch(uPlay, clamp(ivec2(floor(eu * uLow)), ivec2(0), ivec2(uLow) - 1), 0);
+      if (pl.a < 0.5 && ex.a > 0.5 && texture(uSoft, eu).r > 0.45) col = mix(col, ex.rgb * 0.3, uK.w); }   // its thickness (the big shapes only: not the coins')
   }
   bool lit3 = false;   // (a thing's front or depth: lit as the things, a little)
   if (uK3.x > 0.0 && texture(uSoft, uv).r > 0.003) {   // 2.5D (the system above feat): the ledges deep, then the small things over them
@@ -112,7 +112,7 @@ void main() {
     L += uLC[i] * f * f * uL[i].w; G += uLC[i] * exp(-r * r * 36.0) * uL[i].w;
   }
   col *= lit3 ? mix(vec3(1.0), L, 0.45) : L;
-  if (well && !lit3) {   // the haze: faint and dark, drifting, thicker low down; lit where a light reaches it through the gaps (the rays)
+  if (well && !lit3 && (uK.y > 0.0 || uK2.y > 0.0)) {   // the haze: faint and dark, drifting, thicker low down; lit where a light reaches it through the gaps (the rays)
     float fg = noise(vec2(uv.x * 2.4 + uTime * 0.025, uv.y * 3.2 / uAsp - uTime * 0.04)) * 0.65 + noise(vec2(uv.x * 7.0 - uTime * 0.05, uv.y * 10.0)) * 0.35;
     float dn = uK.y * smoothstep(0.25, 0.85, fg) * (0.6 + 0.4 * (1.0 - uv.y));
     col += uFogC * dn + texture(uRays, uv).rgb * uK2.y * (0.25 + dn * 2.2);
@@ -313,7 +313,8 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
   if (on('dof')) { pass(c.h1, this.pCopy, (u) => tex(0, c.far.tex, u.uTex)); blur(c.h2, c.h1, c.h1); }   // what is behind, out of focus: in h1
   pass(c.q1, this.pAlpha, (u) => { tex(0, c.st.tex, u.uTex); tex(1, c.sm.tex, u.uTex2); }); blur(c.q2, c.q3, c.q1);   // the things' coverage in q1, softened in q3 (where to look for depth; the shadow's)
   const toUv = (x, y) => [(x + sx) / W, 1 - (y + sy) / H];
-  const L = cineLights(this, g, lv, vlamps).filter(([x, y, r]) => y + sy > -r && y + sy < H + r).sort((a, b) => b[3] * b[2] - a[3] * a[2]);
+  const L = !on('rays') && !on('light') && !on('glow') ? [] : cineLights(this, g, lv, vlamps).filter(([x, y, r]) => y + sy > -r && y + sy < H + r).sort((a, b) => b[3] * b[2] - a[3] * a[2]);   // (none
+  // wanted, none made: it sorted all the coins a frame for nothing; perf)
   const rays = on('rays') ? L.filter((l) => l[2] > 1.6 * lv.R).slice(0, 4) : [];
   if (rays.length) pass(c.q2, this.pRays, (u) => {
     tex(0, c.q1.tex, u.uOcc); const R4 = new Float32Array(16), C4 = new Float32Array(12);

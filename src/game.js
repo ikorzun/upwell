@@ -2466,7 +2466,8 @@ function cardLive(c, card, tilt, clip, title, next) {
   const leave = () => { st.gx = 0; st.gy = 0; };
   card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
   Promise.all([cardImg(def ? `assets/cards/planes/${c.id}-plate.png` : c.still), ...(def ? def.planes.map(([id]) => cardImg(`assets/cards/planes/${c.id}-${id}.png`)) : []),
-    liveData || (liveData = Promise.race([fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({})), new Promise((ok) => setTimeout(() => ok({}), 6000))]))]).then((got) => {
+    Promise.race([liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({}))), new Promise((ok) => setTimeout(() => ok({}), 6000))])]).then((got) => {   // (the wait
+    // a card's: a slow first answer kept as none left every later card without its motion)
     if (!st.alive) return;
     const ims = got.slice(0, -1), j = got[got.length - 1];
     if (!ims[0]) { show(1, 1); return; }   // (no art: the card's ground only, and its Next: a card that did not load held the game for good; review)
@@ -3311,7 +3312,8 @@ const ads = {
     return new Promise((done) => {
       const t0 = performance.now();
       const go = () => {
-        if (!window.bridge) { if (performance.now() - t0 < BRIDGE_WAIT) setTimeout(go, 50); else done(false); return; }
+        if (!window.bridge) { if (performance.now() - t0 < BRIDGE_WAIT && !window.bridgeFailed) setTimeout(go, 50); else done(false); return; }   // (its script failed: at once, not
+        // after 4 s of a blank screen: perf)
         const late = setTimeout(() => { this.late = true; done(false); }, BRIDGE_WAIT);
         bridge.initialize().then(() => {
           clearTimeout(late); this.ok = true;
@@ -3730,7 +3732,10 @@ function runFrame(now, fixedDt) {
   aimPreview();
   fx.update(dt); updateBits(dt);
   shake.update(dt);
-  renderer.draw(game, alpha, dots, nDots);
+  const still = game.state === 'pause' ? [game.lv.cam, canvas.width, canvas.height, CINE ? 1 : 0, perf.ctxLoss].join() : null;   // paused (the pause menu, a story card over
+  // the game): nothing in the shaft moves, so its frame stands as drawn till the level, the view, the look or the context changes (perf: 1.5 ms a frame on a phone, and the GPU's)
+  if (!still || still !== renderer.still || game.lv !== renderer.stillLv) renderer.draw(game, alpha, dots, nDots);
+  renderer.still = still; renderer.stillLv = game.lv;
   if (!firstFrame) { firstFrame = true; canvas.classList.remove('wait'); }
 }
 
@@ -3775,6 +3780,8 @@ function start() {
   if (/[?&]play=sea\b/.test(location.search)) { game.preview = SEA; window.__up.go(1, 0); }   // the Sea by itself (not in the campaign yet)
   if (/[?&]play=skazka\b/.test(location.search)) { game.preview = SKAZKA; window.__up.go(1, 0); }   // the Dark Forest by itself (not in the game yet)
   loop.last = performance.now();
+  const ds = DESIGNS.filter((d) => !SHAPES.has(d.id)), warm = () => { const d = ds.shift(); if (d) { shapeOf(d); setTimeout(warm, 30); } };   // the bodies' shapes worked out in the
+  setTimeout(warm, 300);   // menu, one at a time (shapeOf: up to 16 ms the first time a kind came on in a climb, its worst frames; perf)
 }
 
 // Debug handle for automated checks (read-only state and a few helpers).

@@ -5562,8 +5562,10 @@ Renderer.prototype.draw = function (g, alpha) {
         band.forEach((r, j) => { const y = y0 + j * s; if (j >= S.front && y < bot && y + s > top) row(r, x, y, k % 2 === 1, false); });
         for (let y = y0 + band.length * s, j = 0; y < bot && j < 2 * band.length; y += s, j++) {   // its ground on down, its embers thinning out into the black
           if (y + s <= top) continue;
-          const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), k + 50) * q.length), keep = 1 - j / (2 * band.length);
-          row([...q.slice(o) + q.slice(0, o)].map((ch, i) => (ch === S.body && steady(i, j + 60) < keep ? ch : 'k')).join(''), x, y, k % 2 === 1, false);   // (its body's ink only: no crystal or sign repeated)
+          const G = (S.ground || (S.ground = []))[k] || (S.ground[k] = []);   // (its rows the same every frame: made once, not a string a row a frame)
+          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), k + 50) * q.length), keep = 1 - j / (2 * band.length);
+            G[j] = [...q.slice(o) + q.slice(0, o)].map((ch, i) => (ch === S.body && steady(i, j + 60) < keep ? ch : 'k')).join(''); }   // (its body's ink only: no crystal or sign repeated)
+          row(G[j], x, y, k % 2 === 1, false);
         }
       }
       for (let k = 0; k < 3; k++) {   // its bursts up the shaft now and then (where the fire threw its jets), out of its front and back

@@ -7,6 +7,18 @@
 
 const VERSION = '0.3.0';
 const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; this is where it starts
+// V8 (the browser's engine) gives a field the kind of the first value put in it, for all the objects made the same way: a timer begun at 0 (a small
+// integer) that later holds a fraction, or a flag first set and later changed, has it remake that family of objects and throw away the optimised
+// code built on them, to compile it again; in play, the first time each such field changes (perf, 2026-10-24: most of the recompilations, ~80-120 a
+// climb). loosen gives the named fields that wider kind at once, their values kept (another value put in, then theirs back): on the first object of a
+// make it is enough, the later ones are made the wider way (doing it again costs nothing).
+function loosen(o, ...keys) {
+  for (const k of keys) {
+    const v = o[k], t = typeof v;
+    if (t === 'number' || t === 'boolean' || t === 'string') { o[k] = t === 'number' ? 0.5 : t === 'boolean' ? !v : v + '.'; o[k] = v; }
+  }
+  return o;
+}
 
 // ── Tuning ───────────────────────────────────────────────────
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
@@ -414,6 +426,14 @@ const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it. It keeps still its first `calm` s.
 const CART = { size: 2.2, pass: [4, 3.4, 2.6], spit: 2.5, wind: 0.6, creak: 0.8, rock: 0.35, crumble: [0.35, 4.5], lifts: 1.5, hold: 2, calm: 2.5 };
 const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 0, 1], flip: 2.5, calm: 2.5 };
+// The Tsuchigumo (BOSSES.cart, the Cave's; owner 2026-10-23: «Очень легкий босс… Зачем вагонетки внизу не понятно», the fight redone
+// to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
+// the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
+// lobbed at the hero. A drop: over the hero, its eyes red and dust off the ceiling where it will fall, `warn` s with a creak (still
+// its last `lock` s), then down at `dive` R/s to the floor. There, tangled in its own thread, it lies `tangle` s, the only time a
+// stomp hurts it (any other stomp clangs off its back); then it reels back up in `reel` s. `rest` s between moves by phase. Its first
+// hit calls two spiderlings down; on its last heart it drops twice running, the second after `again` s. Still its first `calm` s.
+const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2, lock: 0.4, again: 0.9, dive: 34, tangle: 2.5, reel: 0.9, rest: [2.0, 1.8, 1.6, 1.4], calm: 2.5 };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -714,17 +734,18 @@ const BOSSES = {
     top: { en: 'Hard on top. Roll a shell at her!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
     hint: { en: 'Flipped! Land on her belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
     how: { en: 'Roll a shell into her, then stomp her', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
-  // The Cave's: a Tsuchigumo on the Minecart's rail (the plan's §5.5): open from above only; the way there is up the walls to the moss over its rail's ends.
-  // The gentler of the two on a rail, as the earlier (owner, 2026-10-20: it and the Tram traded): the Cork's hits and phases, its passes and spits a quarter slower (slow).
-  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, rail: true, slow: 1.25, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  // The Cave's: a Tsuchigumo hanging by its thread in an empty cave (SPIDER, Boss.spider; owner 2026-10-23: the fight redone, the lifts,
+  // bridges and rail gone): four hearts, each earned while it lies tangled after its drop.
+  cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, spider: true, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'The dark down here is my web.', es: 'La oscuridad aquí es mi telaraña.', pt: 'O escuro aqui é minha teia.', ja: 'この くらやみは わたしの くものす。' },
-      { en: 'Eight legs, one rail, no way out.', es: 'Ocho patas, un riel, sin salida.', pt: 'Oito patas, um trilho, sem saída.', ja: 'あし はっぽん、レール いっぽん、にげみち なし。' },
+      { en: 'Eight legs, one thread, no way out.', es: 'Ocho patas, un hilo, sin salida.', pt: 'Oito patas, um fio, sem saída.', ja: 'あし はっぽん、いと いっぽん、にげみち なし。' },
       { en: 'Nobody leaves my burrow.', es: 'Nadie sale de mi madriguera.', pt: 'Ninguém sai da minha toca.', ja: 'わたしの あなから だれも でられない。' }],
     quip: [{ en: 'Stuck in my web!', es: '¡Atrapado en mi telaraña!', pt: 'Preso na minha teia!', ja: 'くものすに ひっかかった！' },
       { en: 'Too slow for eight legs.', es: 'Muy lento para ocho patas.', pt: 'Lento demais para oito patas.', ja: 'はっぽんあしには おそすぎ。' }],
     defeat: { en: 'Ugh… back into my hole.', es: 'Uf… de vuelta a mi agujero.', pt: 'Ai… de volta pro meu buraco.', ja: 'うう… あなに もどる。' },
-    hint: { en: 'Right under you: let go!', es: '¡Justo debajo: suéltate!', pt: 'Bem embaixo: solte!', ja: 'まっした！ はなせ！' },   // the first ▼ over it
-    how: { en: 'Climb over it, then drop onto it', es: 'Sube por encima y déjate caer', pt: 'Suba acima dela e caia em cima', ja: 'うえへ のぼって、とびおりろ' } },   // after three losses
+    top: { en: 'Not now. Wait for its drop!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちてくるのを まて！' },   // the first stomp that clangs off it
+    hint: { en: 'Tangled! Jump on it!', es: '¡Enredada! ¡Salta encima!', pt: 'Enrolada! Pule em cima!', ja: 'からまった！ とびのれ！' },   // the first time it lies tangled
+    how: { en: 'Dodge its drop, then stomp it', es: 'Esquiva su caída y písala', pt: 'Desvie da queda e pise nela', ja: 'おちてくるのを よけて、ふみつけろ' } },   // after three losses
   // The Sea's (world 4): Onamazu, the earthquake catfish under the islands, the gods' stone (kaname-ishi) on its back (owner, 2026-10-21:
   // «сом изогнутый», boss-sea D): the Puck's slide over wet rock (rc.ice), its stone the hard top.
   namazu: { name: { en: 'Onamazu', es: 'Onamazu', pt: 'Onamazu', ja: 'おおなまず' }, ink: 'orange', design: 'dome', size: 2.4, slide: true, hp: 6, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : 2),
@@ -849,7 +870,7 @@ const CAMPAIGN = [
     news: { en: 'rubber walls', es: 'paredes de goma', pt: 'paredes de borracha', ja: 'ゴムの かべ' } },   // (new: the Village's 1-3 lays one only by chance)
   { role: 'peak', len: 28, gate: 'gate3', fire: 0.42, maxD: 2, chunks: { ...CAVE, comb: 3, mosswall: 2, rubberwall: 2, crumble: 1 }, intro: ['rubberwall'], dark: true, set: 'garden', enemies: ['crawler'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2303 },
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], dark: true, enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 3616 },
-  { role: 'boss', boss: 'cart', rail: true },   // the Minecart's (owner, 2026-10-20: the Cave becomes the mines): its rail under the ceiling, moss over its ends
+  { role: 'boss', boss: 'cart', spider: true, par: 45 },   // the Tsuchigumo's (owner, 2026-10-23): an empty cave, its thread from the dark ceiling; par: its time medal (the bot ~32 s)
 ] },
 // World 3, the Glacier (at first world 2): ice, then the Rainbow, shells, climbers, icicles, a cage; the Puck. Its
 // runes: one who climbs, a heart, a lattice (the first climbed without fear; many got stuck).
@@ -2155,6 +2176,8 @@ class Level {
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
     this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.rc = null;
+    this.tasks = this.taken = this.gone = this.sig = undefined;   // (a shaft's, Game.setTasks: given here, see loosen)
+    loosen(this, 'l', 'r', 'floor', 'top', 'R', 'cam', 't');   // (fractions in play: see loosen)
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
@@ -2212,7 +2235,7 @@ class Level {
       if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       if (rc && rc.trial) this.plan.push({ y: this.floor - H * rc.trial.at, kind: 'trial', goal: rc.trial.goal, done: false });   // a trial room (TRIAL)
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
-      if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
+      if (v > 0) loosen(this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 }, 'y', 'v', 'spitT', 'calm');   // (see loosen)
     } else if (o.kind === 'menu') this.menuAt(o.floorY);   // the menu's (owner, 2026-10-23, the Figma «Main»): nothing in it but the hero
     else this.build(o);
   }
@@ -2225,7 +2248,7 @@ class Level {
     return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false, gone: false, t: 0, dx: 0, dy: 0, hit: false, crumbling: false,   // (every field
       // a rect is given later too, from the start: one shape for all of them, 2-5 before, the physics' loops slower for it: perf)
       kit: undefined, kitWant: undefined, id: undefined, moss: false, board: false, safe: false, mnRoom: undefined, bouncy: false, ac: false, poke: undefined, batsP: undefined, eyesP: undefined,
-      crack: false, key: false, broke: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, spikes: null }, f);
+      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, spikes: null }, f);
   }
   coin(x, y, v) { this.coins.push({ x, y, v, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: this.rng() * TAU }); }
   // The scenes made whole: the boss arena and the two kinds of room.
@@ -2239,6 +2262,7 @@ class Level {
     if (o.kind === 'boss') {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
+      if (this.rc && this.rc.spider) return;   // the Tsuchigumo's: the floor and the walls; what does nothing in the fight is not there (the plan)
       if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
         const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
         for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));
@@ -2509,7 +2533,7 @@ class Level {
     const due = this.folkAt[0];
     if (due && top < due.y) {
       const ok = rs.filter((r) => steady(r) && r.x1 - r.x0 >= 3 * t && bare(r) && over(r, (due.kind === 'trader' ? 4.6 : 3) * R));
-      if (ok.length) { const r = ok[(fr() * ok.length) | 0]; this.folk.push({ kind: due.kind, x: r.x0 + (r.x1 - r.x0) * (0.3 + 0.4 * fr()), y: r.y0, rect: r }); this.folkAt.shift(); }
+      if (ok.length) { const r = ok[(fr() * ok.length) | 0]; this.folk.push({ kind: due.kind, x: r.x0 + (r.x1 - r.x0) * (0.3 + 0.4 * fr()), y: r.y0, rect: r, body: null, open: false }); this.folkAt.shift(); }
     }
     if (fr() < FOLK.critterP) {
       const bat = fr() < 0.5, under = (r) => !this.rects.some((q) => q !== r && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 2.5 * R);
@@ -2794,6 +2818,22 @@ class Level {
     }
     for (const b of this.bubbles) if (b.cd > 0) b.cd -= dt;
   }
+}
+// The rects' fields that move or change in play, loosened once on a rect made for it (see loosen): a ledge's first spring, crumble or smash
+// would otherwise remake them all.
+loosen(Level.prototype.box(0, 0, 0, 0), 'x0', 'y0', 'x1', 'y1', 't', 'dx', 'dy', 'flash', 'plank', 'crumble', 'slick', 'spring', 'cap', 'gone', 'hit',
+  'crumbling', 'moss', 'board', 'safe', 'bouncy', 'ac', 'crack', 'key', 'broke', 'paid', 'stair', 'magnet', 'cloud', 'mortar', 'beam', 'cage');
+{ const o = { coins: [], rng: () => 0 }; Level.prototype.coin.call(o, 0, 0, 1); loosen(o.coins[0], 'x', 'y', 'vx', 'vy', 't', 'drop', 'moving'); }   // a coin's too (a dropped one's the same make)
+// The same for the bodies' fields that Gum's Body (gum.js, kept as Gum's) begins at small integers or flags, its face's and its unwedging's (up)
+// too: on the hero, the first body made (Game.makeHero), so no body after it remakes them all in play.
+function loosenBody(b) {
+  loosen(b, 'R', 'growth', 'growthV', 'growthTarget', 'exx', 'eyy', 'exy', 'evxx', 'evyy', 'evxy', 'theta', 'omega', 'rigVx', 'rigVy', 'squeeze', 'squeezeIn',
+    'sqAx', 'sqAy', 'sqTheta', 'ceilT', 'peelT', 'ceilCD', 'wasTouching', 'floorX', 'touching', 'settle', 'offFloorT', 'age', 'impactCD', 'badT', 'foldT',
+    'foldRescue', 'foldCleanT', 'asleep', 'calmT', 'calmV', 'calmW', 'calmRelease', 'slowGrow', 'area', 'targetArea', 'lastGoodX', 'lastGoodY', 'minX', 'maxX',
+    'minY', 'maxY', 'cx', 'cy');
+  loosen(b.up, 'on', 'hold', 't', 'rest', 'crowdT', 'flew');
+  loosen(b.face, 'next', 'bt', 'twice', 'open', 'squint', 'surprise', 'wide', 'lx', 'ly', 'tlx', 'tly', 'wander');
+  return b;
 }
 
 // The hero is gooier than Gum's other bodies: after each substep its wobble (all but the rigid move and spin) dies
@@ -3229,6 +3269,15 @@ const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
 };
 for (const id in KOMORI_SPR) BOSS_FIT[id] = ['x', 0.5, 1, 1];   // a komori: its body under its middle, its cell facing right, 1:1 (no ink of the body's)
 for (const id in FOE_SPRITES) { const fit = BOSS_FIT[id]; LOOK_FACE[id] = (d) => drawSprite(d, FOE_SPRITES[id], fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0, fit); }   // the forest's face right; a boss as its cell has it
+// A boss's drawing's width and height in world px at its full size, as drawSprite lays it (BOSS_FIT's whole scale, or fitted over its
+// body's shape): for the owner's 2:1 against the hero (2026-10-21), which its shrink as it loses hearts never goes under (Game.hitBoss).
+const bossSize = (bs) => {
+  const rows = bs.look && FOE_SPRITES[bs.look], fit = bs.look && BOSS_FIT[bs.look], b = bs.body;
+  if (!rows || !fit) return [2 * b.R, 2 * b.R];
+  const W = rows[0].length, H = rows.length, sh = b.s, ex = sh.ext || [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
+  const k = fit[3] ? (fit[3] * PIX.base) / b.R : 1.08 * Math.max((2 * ex[0]) / W, (2 * ex[1]) / H);   // (drawSprite's k: body units a sheet pixel)
+  return [W * k * b.R, H * k * b.R];
+};
 const gumWriteFace = Renderer.prototype.writeFace;
 // The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units
 // (its radius 1, y down).
@@ -3319,6 +3368,9 @@ Renderer.prototype.makeTarget = function () {
 // One frame of the scene: behind the bodies (wall coats, doors, portal, floor, ledges,
 // spikes, coins, items, drops), the bodies (shadow, cushion, face), in front (puffs,
 // fire, air-jump orbs). World → screen is a shift by uShake = shake − camera.
+// The helpers in draw are made again for each frame; V8 keeps their optimised code only while one of them lives, so a major GC between two frames
+// dropped it and they were all compiled again (perf, 2026-10-24: 10-20 compiles a GC). The last frame's are held till the next frame's are made.
+let drawKept = null;
 Renderer.prototype.draw = function (g, alpha) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
@@ -3331,7 +3383,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const onGrid = (v) => Math.round(v / PIX.size) * PIX.size;   // (on the drawing grid: a picture's dot of 1.5 or 2.5 of its pixels, PIX.fit, leaves no hole)
   const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
     const rows = iconRows(id), s = PIX.size * k / (rows.x2 || 1), x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });   // (each edge
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } }   // (a loop, not a callback made each call: see drawKept) (each edge
     // on the drawing grid)
   };
   const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
@@ -3339,7 +3391,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // of its width (with its edge gone it shrank to a sliver of a pixel edge on, and blinked out: the tester's «анимация вращения … поломалась»)
     const rows = iconRows(id), P = PIX.size, s = P * k / (rows.x2 || 1), w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
-    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } }
     if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
       const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s * (rows.x2 || 1)) / P) * P;   // (THICK of the 12×12's pixels, a finer picture's too)
       if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
@@ -5026,7 +5078,7 @@ Renderer.prototype.draw = function (g, alpha) {
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); i = e; } });   // (d, m: the ink's dark and
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < row.length;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); i = e; } }   // (d, m: the ink's dark and
     // mid tones; a box a run of one ink, as cineSpr: a crow with its ring 492 boxes, 255 now: perf)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
@@ -5164,7 +5216,10 @@ Renderer.prototype.draw = function (g, alpha) {
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
     const d = df.rail || df.slide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
-    if (front) return;
+    if (front) {   // the Tsuchigumo tangled in its own thread (SPIDER): loops of it across its drawing while a stomp hurts it
+      if (k === 'cart' && bs.state === 'dazed') { const [w, h] = bossSize(bs), y = b.maxY - 0.55 * h; for (let i = -1; i <= 1; i++) line(x - 0.42 * w, y + i * 0.16 * h - 0.1 * h, x + 0.42 * w, y + i * 0.16 * h + 0.1 * h, PAL.white, 0.85, 1); }
+      return;
+    }
     b.lookDir = d;   // (its drawing on it turns too: LOOK_FACE)
     if (k === 'tram') { const wy = b.minY - 1.15 * R; box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0); }   // the overhead wire its pantograph (in its drawing) runs on
     else if (k === 'koschei' && bs.hp === 1) { const ny = b.minY - 1.0 * R + Math.sin(T * 3) * 0.08 * R, nx = Math.round(x / P) * P; F(nx + P / 2, ny, 0.55 * R, 0, 0, 0.8 * R, gr, 0.18, 1); box(nx, ny - 0.6 * R, nx + P, ny + 0.45 * R, gr, 1, 0, 10, 0); box(nx - P, ny - 0.76 * R, nx + 2 * P, ny - 0.5 * R, gr, 1, 0, 10, 0); box(nx, ny - 0.7 * R, nx + P, ny - 0.56 * R, INK.dark, 1, 0, 10, 0); if (Math.floor(T * 2) % 2) box(nx, ny + 0.3 * R, nx + P, ny + 0.38 * R, PAL.white, 1, 0, 10, 0); }   // his last heart: the needle his death is in, over his crown
@@ -5176,6 +5231,8 @@ Renderer.prototype.draw = function (g, alpha) {
     const b = e.body, t = e.type, V = FOREST_V[t];
     b.look = t + '-' + V; b.lookDir = t === 'kikimora' ? (b.cx < (lv.l + lv.r) / 2 ? 1 : -1) : Math.sign(g.hero.cx - b.cx) || 1;
   };
+  try { drawKept = [F, disc, box, onGrid, icon, iconSpin, seen, door, hut, farmhouse, funaya, skEyes, skDoorAt, skInside, izba, mnShop, mnStash, pech, brace, aircon, rod, line, mnLamp, mnOre, mnBatsAt, mnBats, mnThing, mnFar, skOak, junkRect, skyRect, panelsRect, villageRect, seaRect, skazkaRect, mineRect, fujiRect, townRect, vaultSpan, spr, look, forestFoe]; } catch (err) { if (drawKept !== false) console.warn('drawKept:', err.message); drawKept = false; }   // (see drawKept; a helper gone
+  // from draw and still named here: warned, not a broken frame)
   if (lv.boss && !lv.boss.dead && lv.boss.look) look(lv.boss, false);   // its look's parts behind it
   for (const e of lv.enemies) if (FOREST_V[e.type]) forestFoe(e); else if (e.type === 'komori') e.body.look = 'komori-' + KOMORI_V + '-' + (e.body.frame || 1);   // (a komori's frame: b.frame)   // a forest enemy's look, before the bodies are drawn
   for (const e of lv.enemies) if (e.type === 'worm' && seen(e.body.minY - 3 * R, e.body.maxY + 3 * R)) {   // a worm's tubes, behind its knot
@@ -5346,32 +5403,7 @@ Renderer.prototype.draw = function (g, alpha) {
     for (let k = -2; k <= 2; k++) box(x + k * 0.22 * r - 0.04 * r, y + 0.7 * r, x + k * 0.22 * r + 0.04 * r, y + 0.95 * r, INK.dark, 1, 0, 10, 0);   // teeth
     box(x + 0.12 * r, y - 0.95 * r, x + 0.2 * r, y - 0.45 * r, INK.dark, 1, 0, 10, 0); box(x + 0.2 * r, y - 0.5 * r, x + 0.42 * r, y - 0.42 * r, INK.dark, 1, 0, 10, 0);   // a crack
   }
-  if (bs && !bs.dead && bs.look) look(bs, true);   // its look's parts before it (LOOKS), instead of what is below
-  else if (bs && !bs.dead && bs.def && bs.def.rat) {   // the Rat King's round ears, its tail
-    const b = bs.body, w = 0.45 * (b.maxX - b.minX), up = b.up && b.up.fails ? 1 : -1;
-    for (const d of [-1, 1]) { disc(b.cx + d * w, b.minY + 0.15 * R, 0.4 * R, PAL.gray, 1); disc(b.cx + d * w, b.minY + 0.15 * R, 0.2 * R, PAL.purple, 1); }
-    for (let k = 0; k < 8; k++) disc(b.maxX + k * 0.18 * R, b.maxY - 0.3 * R - Math.sin(T * 6 + k * 0.7) * 0.15 * R * k * 0.3, 0.07 * R, PAL.gray, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.pigeon) {   // the Pigeon's wings, flapping, and its beak
-    const b = bs.body, w = 0.6 * (b.maxX - b.minX), f = Math.sin(T * (bs.state === 'dive' ? 22 : 9));
-    for (const d of [-1, 1]) F(b.cx + d * w, b.cy - 0.1 * R + f * 0.25 * R, 0.55 * R, d * 0.2 * R, 0, (0.3 + 0.12 * f) * R, PAL.gray, 1, 0);
-    disc(b.cx, b.cy + 0.15 * (b.maxY - b.minY), 0.16 * R, INK.flame, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.crane) {   // the Crane's load: a cable up out of sight, its hook block, two slings to the load's shoulders
-    const b = bs.body, P = PIX.size, cx = Math.round(b.cx / P) * P, hy = b.minY - 0.7 * R;
-    box(cx - P, top, cx + P, hy, PAL.gray, 1, 0, 10, 0); box(cx - 0.3 * R, hy, cx + 0.3 * R, hy + 0.25 * R, PAL.gray, 1, 0, 10, 0);
-    for (const d of [-1, 1]) for (let k = 0; k <= 6; k++) { const u = k / 6, x = Math.round((cx + d * 0.55 * (b.maxX - b.cx) * u) / P) * P, y = Math.round((hy + 0.25 * R + (b.minY + 0.15 * (b.maxY - b.minY) - hy - 0.25 * R) * u) / P) * P; box(x - P / 2, y - P / 2, x + P / 2, y + P / 2, PAL.gray, 1, 0, 10, 0); }
-  } else if (bs && !bs.dead && bs.def && bs.def.tram) {   // the Tram's car round it, in the town's blue: dark windows, a white band, its pantograph up to the wire
-    const b = bs.body, hw = 0.62 * (b.maxX - b.minX), y1 = lv.rail.y, y0 = b.cy - 0.05 * (b.maxY - b.minY), hgt = y1 - y0, wy = b.minY - 1.2 * R, P = PIX.size;
-    box(lv.l, wy, lv.r, wy + P, PAL.gray, 1, 0, 10, 0);   // the overhead wire
-    for (let k = 0; k <= 8; k++) { const u = k / 8, x = Math.round((b.cx - 0.5 * R + R * Math.abs(u - 0.5)) / P) * P, y = Math.round((b.minY - (b.minY - wy) * u) / P) * P; box(x - P, y - P, x + P, y, PAL.gray, 1, 0, 10, 0); }
-    box(b.cx - hw - 2.5, y0 - 2.5, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0, b.cx + hw, y1, th.block, 1, 0);
-    for (let k = -1; k <= 1; k++) box(b.cx + k * 0.62 * hw - 0.22 * hw, y0 + 0.18 * hgt, b.cx + k * 0.62 * hw + 0.22 * hw, y0 + 0.55 * hgt, INK.dark, 1, 0, 10, 0);
-    box(b.cx - hw, y0 + 0.68 * hgt, b.cx + hw, y0 + 0.78 * hgt, PAL.white, 1, 0, 10, 0);
-    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
-  } else if (bs && !bs.dead && bs.def && bs.def.rail) {   // the Minecart's cart, in front of it: dark, a white rim, two wheels on the rail
-    const b = bs.body, hw = 0.55 * (b.maxX - b.minX), y0 = b.cy, y1 = lv.rail.y;
-    box(b.cx - hw - 2.5, y0, b.cx + hw + 2.5, y1 + 2.5, th.lip, 1, 0); box(b.cx - hw, y0 + 2.5, b.cx + hw, y1, INK.dark, 1, 0);   // white round the dark, on the dark
-    for (const d of [-0.6, 0.6]) disc(b.cx + d * hw, y1, 0.24 * R, th.lip, 1);
-  }
+  if (bs && !bs.dead && bs.look) look(bs, true);   // its look's parts before it (LOOKS)
   if (bs && !bs.dead && (bs.state === 'dazed' || bs.mark) && Math.floor(bs.st * 5) % 3 !== 2) icon('mark', bs.body.cx, bs.body.minY - 1.3 * R + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size, 1, Math.max(1, Math.round((1.4 * R) / (12 * PIX.size))));   // a dazed boss: an arrow down at its top
   if (g.warns.length) {   // threats coming down into view (see Game.threats): a red sign under the HUD over where each comes in
     const wk = Math.max(1, Math.round((1.1 * R) / (12 * PIX.size))), hw = 6 * wk * PIX.size, wy = cam + (view.hudB || 0) + hw + 2 * PIX.size + Math.round(Math.sin(T * 8) * 2 * PIX.keep) * PIX.size;

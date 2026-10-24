@@ -13,7 +13,7 @@ const CINE_ON = (() => {
   // bonus (?bonus=A-E), the bonuses' depth to pick from (owner: «У монет и сердец потерялся объем»; no 3D engine: «будем отрисовывать кодом псевдо 3д»): A as at
   // first, flat; B in depth toward the eye (SMALL); C a token's thickness, three copies a tone darker; D as B, deeper; E turning with its thickness (THICK
   // of its pixels) on the side turned to us, in its own inks a tone darker: the owner's pick («Е»), the default
-  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
+  return { on: (k) => set.has(k), k: r ? Math.max(1, Math.min(4, +r[1])) : set.has('light') || set.has('glow') ? 2 : 1, motes: [], fx: [], fxLv: null, lastT: null, light: [], K: 0.06, bonus: (/[?&]bonus=([A-E])/.exec(location.search) || [])[1] || 'E', DEEP: 0.7, SMALL: 0.3, THICK: 2 };
 })();
 // The 2.5D now: CINE_ON, or null for 2D. On where the player has it on (the settings' switch, cineUse; ?plain or #plain off) and the world's 2.5D is done
 // (owner: «Делай миры в 2.5»: world by world, the rest in 2D till theirs is; ?cine shows it in any world): cineSync, at each frame's start
@@ -140,6 +140,7 @@ if (CINE_ON) {
       this.pRays = program(gl, BG_VS, CINE_RAYS_FS); this.pComp = program(gl, BG_VS, CINE_COMP_FS);
     } catch (err) { console.error(err); return false; }
     this.fFar = new Float32Array(14 * 512); this.nFar = 0; this.fSt = new Float32Array(14 * 1024); this.nSt = 0; this.fSm = new Float32Array(14 * 1024); this.nSm = 0; this.route = 0;
+    this.farStart = this.stStart = this.smStart = 0; this.cineL = undefined;   // (set as it draws: given here, the renderer's shape whole from the start: see loosen)
     if (this.low) this.makeTarget();
     return true;
   };
@@ -261,7 +262,7 @@ function cineBack(rd, lv, cam, H, box, F, T) {
 // embers elsewhere. Kept in a band round the view; each one that leaves it starts again at its top or anywhere in it.
 function cineMotes(rd, g, lv, cam, H, box, disc, T) {
   { const dt0 = CINE.fxT == null ? 0 : Math.max(0, Math.min(0.05, T - CINE.fxT)); CINE.fxT = T; const h = g.hero; if (CINE.hp && dt0 > 0) CINE.hv = Math.hypot(h.cx - CINE.hp[0], h.cy - CINE.hp[1]) / dt0; CINE.hp = [h.cx, h.cy];
-    if (CINE.fx.length && CINE.fx.lv !== lv) CINE.fx.length = 0; CINE.fx.lv = lv; cineFx(g, lv, cam, H, box, dt0); }   // (what the pokes shed: see cinePoke)
+    if (CINE.fx.length && CINE.fxLv !== lv) CINE.fx.length = 0; CINE.fxLv = lv; cineFx(g, lv, cam, H, box, dt0); }   // (what the pokes shed: see cinePoke)
   if (!CINE.on('motes')) return;
   const look = CINE_LOOK(lv.theme), t = lv.tile, P = PIX.size, snap = (v) => Math.round(v / P) * P, M = CINE.motes;
   const dt = CINE.lastT == null ? 0 : Math.max(0, Math.min(0.05, T - CINE.lastT)); CINE.lastT = T;

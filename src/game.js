@@ -276,6 +276,7 @@ class Foe {
     this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
     this.s = this.rect ? (this.rect.x1 - this.rect.x0) / 2 + 1.05 * this.body.R : 0;   // a circler starts on top, in the middle
     this.atk = ''; this.atkT = 0; this.atkCool = 0; this.lap = 0; this.ax = 0; this.ay = 0;   // a Kikimora's leap, a Leshy's whirl (leap, whirl): its stage, time in it, rest after
+    loosen(this, 't', 'stall', 'state', 'shellT', 'wind', 's', 'atk', 'atkT', 'atkCool', 'lap', 'ax', 'ay'); loosen(this.body, 'gScale');   // (see loosen)
   }
   // Soft bodies moving as the hero does, by pushes and their own give rather than gliding on rails: each one inches
   // along in pulses (every `step` s), stretching along its way at each push and settling in between, and keeps upright.
@@ -510,10 +511,14 @@ class Boss {
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
     this.state = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // rattled: Koschei's bones have shaken to say he rises
+    this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
+    const [sw, sh] = bossSize(this); this.halfW = sw / 2; this.minGrowth = Math.min(1, (4 * lv.R) / Math.max(sw, sh));   // its drawing's half width; its shrink stops at 2:1 against the hero's 2R
+    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
-  open() { return (this.def && this.def.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(this.def && this.def.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
+  open() { const d = this.def; return d && d.spider ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
   to(s) { this.state = s; this.st = 0; }
   think(dt, g) {
+    if (this.def && this.def.spider) { this.spider(dt, g); return; }
     if (this.def && this.def.slide) { this.slide(dt, g); return; }
     if (this.def && this.def.rail) { this.ride(dt, g); return; }
     const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
@@ -603,6 +608,57 @@ class Boss {
     }
     if (this.st > PUCK.rest[ph] * (this.angry > 0 ? 0.6 : 1)) { this.dir = Math.sign(H.cx - b.cx) || 1; this.to('warn'); sound.play('crumble', 0.6, 0.5); }   // at the hero, after a scrape
   }
+  // The Tsuchigumo (BOSSES.cart, SPIDER): it swings by its thread under the ceiling, lobs a web at the hero, then drops onto it and
+  // lies tangled on the floor, the only time a stomp hurts it; it reels back up. A move's warning is a pose and a sound together. Its
+  // first hit calls two spiderlings down; its last heart drops it twice running. (Its dust is a look only: fxRand, not the game's chances.)
+  spider(dt, g) {
+    const b = this.body, lv = g.lv, R = lv.R, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, H = g.hero, ph = this.def.phase(this.hp);
+    const hang = lv.floor - R * SPIDER.high, x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;
+    const seat = (tx, ty, k) => { const q = Math.min(1, k * dt); addVel(b, ((tx - b.cx) * 3 - b.rigVx) * q, ((ty - b.cy) * 3 - b.rigVy) * q); };   // pulled to (tx, ty) on its thread
+    const swing = () => seat(cx + Math.sin(this.t * 0.55) * W * SPIDER.swing, hang + Math.sin(this.t * 1.1) * 0.3 * R, 2.4);
+    b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);   // upright always: lying tangled too, its eyes up at the hero
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
+    if (this.t < SPIDER.calm) { seat(cx, hang, 4); return; }   // still at first, while its name is up
+    if (ph > this.phSeen) {   // a heart lost into a new phase: a hiss and a shake, so the fight is seen to change; the first calls the spiderlings
+      this.phSeen = ph; shake.add(5); sound.play('spit', 0.9, 0.55);
+      if (ph === 1) for (const f of [0.22, 0.78]) lv.enemies.push(new Foe({ type: 'crawler', x: lv.l + f * W, y: lv.capY + 2 * R }, lv));
+    }
+    if (this.state === 'hover') {   // swinging, its next move after its rest
+      swing();
+      if (this.st > SPIDER.rest[ph]) { const drop = this.next === 'drop'; this.to(drop ? 'warn' : 'spit'); sound.play(drop ? 'crumble' : 'spit', 0.6, drop ? 1.6 : 0.5); }   // a creak, or a hiss
+    } else if (this.state === 'spit') {   // its belly pulses, then the web(s) at the hero, lobbed as a spitter's
+      swing();
+      if (Math.floor(this.st * 10) % 2) b.kickSquash(0, 1, 0.08);
+      if (this.st > SPIDER.spit) {
+        const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = SPIDER.webs[ph];
+        for (let i = 0; i < n; i++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (i ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R });
+        b.kickSquash(0, 1, -1.6); sound.play('spit', 0.7, 1); this.next = 'drop'; this.to('hover');
+      }
+    } else if (this.state === 'warn') {   // over the hero, its eyes red, dust off the ceiling where it will fall; held still its last `lock` s
+      const end = this.drops ? SPIDER.again : SPIDER.warn;
+      if (this.st < end - SPIDER.lock) this.tx = clamp(H.cx, x0, x1);
+      seat(this.tx, hang + (this.drops ? 4 * R : 0), 5);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if ((this.dustT -= dt) <= 0) { this.dustT = 0.07; sparkFx(this.tx + fxRand(-0.4, 0.4) * this.halfW, lv.capY + 0.2 * R, 2, Math.PI / 2, 0.25, [60, 160], [1.5, 2.5], [0.5, 0.9], [PAL.gray, PAL.gray, INK.white], 1); }
+      if (this.st > end) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
+    } else if (this.state === 'dive') {   // down its thread to the floor, squashing its own spiderlings under it
+      setVel(b, 0, SPIDER.dive * R);
+      for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > b.minX && q.minX < b.maxX && q.minY < b.maxY + 4 && q.maxY > b.minY) g.kill(e, false); }
+      if ((b.wallMask & 8) || b.maxY >= lv.floor - 1 || this.st > 1.5) {
+        shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx - this.halfW, lv.floor, IMPACT.puffSpeed + 700); fx.dust(b.cx + this.halfW, lv.floor, IMPACT.puffSpeed + 700);
+        if (ph >= 3 && !this.drops) { this.drops = 1; this.to('warn'); setVel(b, 0, -6 * R); return; }   // its last heart: straight back up a way, and a second drop
+        this.drops = 0; this.next = 'spit'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2);
+        if (!this.dazes++) ui.toast(L2(this.def.hint), 2400);   // the first time: what to do now
+      }
+    } else if (this.state === 'dazed') {   // tangled in its own thread on the floor, struggling: open to a stomp
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (Math.floor(this.st * 8) % 2) b.kickSquash(1, 0, 0.06);
+      if (this.st > SPIDER.tangle * this.help) this.rise();
+    } else if (this.state === 'rise') {   // reeled back up its thread
+      seat(b.cx, hang, 3);
+      if (this.st > SPIDER.reel) this.to('hover');
+    }
+  }
   // The Minecart (BOSSES.cart, CART): rides its rail under the ceiling end to end, lobbing blobs at the hero; at an end it
   // creaks and tips three rocks down. Open from above only: off a ledge high enough, or let go from the moss over a rail's
   // end as it comes under (a ▼ then). Its second phase hurries the bridges and lobs two; its third, faster lifts and a spitter.
@@ -666,6 +722,9 @@ class Game {
     this.followers = []; this.trail = [];   // the freed, following the hero along its way (see followStep)
     this.swarm = [];   // the swarm candy's crowd (swarmUp)
     this.newRun();
+    this.kept = 0; this.first = false; this.seed = 0; this.downWas = false; this.hintAt = 0; this.curAt = 0;   // (set as a level starts or in play, given here: see loosen)
+    this.dieT = this.hang = this.dashT = this.dashCD = this.mantleCD = this.noteK = this.noteT = this.rubT = this.rubY = this.oweThen = this.stars = this.medals =
+      this.bonusGot = this.bonusWhy = this.markSay = this.synSay = this.storyOn = this.adBusy = this.menuR = undefined;   // (and those set only on some turns: a death, a dash, a bonus...)
   }
   newRun() {
     this.world = 0; this.stage = 0; this.mods = MODS(); this.taken = [];
@@ -696,7 +755,7 @@ class Game {
   }
   makeHero() {
     const bs = this.lv.boss, x = bs && bs.def && bs.def.slide ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
-    this.hero = new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6);
+    this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
     this.hero.isHero = true;
     this.startY = this.hero.cy;
   }
@@ -763,6 +822,8 @@ class Game {
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; ui.comboEnd();
+    loosen(this, 'R', 'vjump', 'builtW', 'sinceContact', 'queueT', 'hitstop', 'invuln', 'stateT', 'pruneT', 'winT', 'startY', 'world', 'climbed', 'levelM', 'bonusT',
+      'idleT', 'gunT', 'fallV', 'landV', 'dizzyT', 'joyT', 'flatT', 'wallHold', 'seed', 'hintAt', 'curAt');   // (fractions in play: see loosen)
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
@@ -1486,8 +1547,8 @@ class Game {
   hitBoss() {
     const bs = this.lv.boss, b = bs.body;
     bs.hp--; this.drop(b.cx, b.cy, 5); shake.add(5); sound.play('bosshit', 1, bs.hp > 0 ? 1 : 0.7); splatFx(b.cx, b.maxY - b.R * 0.3, b.R * 0.5, b.color.base, 6);
-    this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo); ui.comboPop(this.combo);
-    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = 1 - 0.06 * (bs.max - bs.hp); ui.toast(tf('bossLeft', { n: bs.hp })); if (bs.state === 'dazed') bs.rise(); return; }
+    this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo);   // (no ×n over a fight, nor «N more!»: the pips say it, owner 2026-10-23)
+    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = Math.max(1 - 0.06 * (bs.max - bs.hp), bs.minGrowth); if (bs.state === 'dazed') bs.rise(); return; }   // smaller each heart, never under 2:1 against the hero
     bs.dead = true; this.kills++; met('boss', this.rc && this.rc.boss ? this.rc.boss : 'lid'); delete save.camp.fails[this.failKey()];
     if (bs.def) ui.toast(L2(bs.def.defeat), 2200);
     splatFx(b.cx, b.cy, b.R * 1.4, bs.ink.base, 24); shake.add(9); haptics.buzz(60);
@@ -1756,7 +1817,7 @@ class Game {
     this.drop(H.cx, H.minY, pay / 5, 5);   // out of the hero as big coins that fly back in: the reward seen (every reward is a multiple of 5)
     sparkFx(H.cx, H.minY, Math.min(36, 6 + 3 * n), -Math.PI / 2, 0.9, [250, 650], [1.5, 3.5], [0.4, 0.8], [INK.coin, INK.coinD, INK.white], 1); shake.add(rw.hp ? 6 : 3);
     if (rw.hp) this.heal(rw.hp);
-    ui.toast(tf('comboPay', { n, c: pay }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);
+    if (!this.lv.boss) ui.toast(tf('comboPay', { n, c: pay }) + (rw.hp ? '  ' + t('comboHp') : ''), 1600);   // (not over a boss fight: owner 2026-10-23)
     haptics.buzz(18); sound.play('combo');
   }
   // The first touch of each kind of surface, and the first sight of the fire, told once ever.
@@ -2930,7 +2991,7 @@ const ui = {
     const news = [intro.news && L2(intro.news), dark].filter(Boolean).join(', ');   // a tip (intro.tip): a thing met before, in this world's look (the worlds' order since 2026-10-21)
     this.toast((game.daily != null ? t('daily') : tf('world', { n: game.mode === 'camp' ? wNo(game.world) : game.world + 1 })) + ' · ' + L2(game.wd.name) + '  ' + game.num + (news ? '\n' + tf(intro.tip ? 'tip' : 'news', { n: news }) : ''), news ? 2800 : 1800);   // and what this level brings
   },
-  comboPop(n) { const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
+  comboPop(n) { if (game.lv && game.lv.boss) return; const e = $('combo'); e.replaceChildren(px('×' + n)); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop', 'show'); },
   comboEnd() { $('combo').classList.remove('show'); },
   hurt() { const e = $('hearts'); e.classList.remove('hit'); void e.offsetWidth; e.classList.add('hit'); },
   coinBump() { const e = $('purse'); e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); },

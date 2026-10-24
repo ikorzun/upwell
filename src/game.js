@@ -276,6 +276,7 @@ class Foe {
     this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
     this.s = this.rect ? (this.rect.x1 - this.rect.x0) / 2 + 1.05 * this.body.R : 0;   // a circler starts on top, in the middle
     this.atk = ''; this.atkT = 0; this.atkCool = 0; this.lap = 0; this.ax = 0; this.ay = 0;   // a Kikimora's leap, a Leshy's whirl (leap, whirl): its stage, time in it, rest after
+    loosen(this, 't', 'stall', 'state', 'shellT', 'wind', 's', 'atk', 'atkT', 'atkCool', 'lap', 'ax', 'ay'); loosen(this.body, 'gScale');   // (see loosen)
   }
   // Soft bodies moving as the hero does, by pushes and their own give rather than gliding on rails: each one inches
   // along in pulses (every `step` s), stretching along its way at each push and settling in between, and keeps upright.
@@ -512,6 +513,7 @@ class Boss {
     this.state = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // rattled: Koschei's bones have shaken to say he rises
     this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
     const [sw, sh] = bossSize(this); this.halfW = sw / 2; this.minGrowth = Math.min(1, (4 * lv.R) / Math.max(sw, sh));   // its drawing's half width; its shrink stops at 2:1 against the hero's 2R
+    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
   open() { const d = this.def; return d && d.spider ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
   to(s) { this.state = s; this.st = 0; }
@@ -720,6 +722,9 @@ class Game {
     this.followers = []; this.trail = [];   // the freed, following the hero along its way (see followStep)
     this.swarm = [];   // the swarm candy's crowd (swarmUp)
     this.newRun();
+    this.kept = 0; this.first = false; this.seed = 0; this.downWas = false; this.hintAt = 0; this.curAt = 0;   // (set as a level starts or in play, given here: see loosen)
+    this.dieT = this.hang = this.dashT = this.dashCD = this.mantleCD = this.noteK = this.noteT = this.rubT = this.rubY = this.oweThen = this.stars = this.medals =
+      this.bonusGot = this.bonusWhy = this.markSay = this.synSay = this.storyOn = this.adBusy = this.menuR = undefined;   // (and those set only on some turns: a death, a dash, a bonus...)
   }
   newRun() {
     this.world = 0; this.stage = 0; this.mods = MODS(); this.taken = [];
@@ -750,7 +755,7 @@ class Game {
   }
   makeHero() {
     const bs = this.lv.boss, x = bs && bs.def && bs.def.slide ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
-    this.hero = new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6);
+    this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
     this.hero.isHero = true;
     this.startY = this.hero.cy;
   }
@@ -817,6 +822,8 @@ class Game {
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; ui.comboEnd();
+    loosen(this, 'R', 'vjump', 'builtW', 'sinceContact', 'queueT', 'hitstop', 'invuln', 'stateT', 'pruneT', 'winT', 'startY', 'world', 'climbed', 'levelM', 'bonusT',
+      'idleT', 'gunT', 'fallV', 'landV', 'dizzyT', 'joyT', 'flatT', 'wallHold', 'seed', 'hintAt', 'curAt');   // (fractions in play: see loosen)
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)

@@ -7,6 +7,18 @@
 
 const VERSION = '0.3.0';
 const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; this is where it starts
+// V8 (the browser's engine) gives a field the kind of the first value put in it, for all the objects made the same way: a timer begun at 0 (a small
+// integer) that later holds a fraction, or a flag first set and later changed, has it remake that family of objects and throw away the optimised
+// code built on them, to compile it again; in play, the first time each such field changes (perf, 2026-10-24: most of the recompilations, ~80-120 a
+// climb). loosen gives the named fields that wider kind at once, their values kept (another value put in, then theirs back): on the first object of a
+// make it is enough, the later ones are made the wider way (doing it again costs nothing).
+function loosen(o, ...keys) {
+  for (const k of keys) {
+    const v = o[k], t = typeof v;
+    if (t === 'number' || t === 'boolean' || t === 'string') { o[k] = t === 'number' ? 0.5 : t === 'boolean' ? !v : v + '.'; o[k] = v; }
+  }
+  return o;
+}
 
 // ── Tuning ───────────────────────────────────────────────────
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
@@ -2158,6 +2170,8 @@ class Level {
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
     this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.rc = null;
+    this.tasks = this.taken = this.gone = this.sig = undefined;   // (a shaft's, Game.setTasks: given here, see loosen)
+    loosen(this, 'l', 'r', 'floor', 'top', 'R', 'cam', 't');   // (fractions in play: see loosen)
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
@@ -2215,7 +2229,7 @@ class Level {
       if (rc ? rc.stash : !o.world.bonus && rnd() < 0.8) this.plan.push({ y: this.floor - H * (rc ? rc.stash : 0.15 + rnd() * 0.55), kind: 'treasure', done: false });
       if (rc && rc.trial) this.plan.push({ y: this.floor - H * rc.trial.at, kind: 'trial', goal: rc.trial.goal, done: false });   // a trial room (TRIAL)
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
-      if (v > 0) this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 };
+      if (v > 0) loosen(this.fire = { y: this.floor + o.h * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0 }, 'y', 'v', 'spitT', 'calm');   // (see loosen)
     } else if (o.kind === 'menu') this.menuAt(o.floorY);   // the menu's (owner, 2026-10-23, the Figma «Main»): nothing in it but the hero
     else this.build(o);
   }
@@ -2228,7 +2242,7 @@ class Level {
     return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false, gone: false, t: 0, dx: 0, dy: 0, hit: false, crumbling: false,   // (every field
       // a rect is given later too, from the start: one shape for all of them, 2-5 before, the physics' loops slower for it: perf)
       kit: undefined, kitWant: undefined, id: undefined, moss: false, board: false, safe: false, mnRoom: undefined, bouncy: false, ac: false, poke: undefined, batsP: undefined, eyesP: undefined,
-      crack: false, key: false, broke: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, spikes: null }, f);
+      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, spikes: null }, f);
   }
   coin(x, y, v) { this.coins.push({ x, y, v, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: this.rng() * TAU }); }
   // The scenes made whole: the boss arena and the two kinds of room.
@@ -2513,7 +2527,7 @@ class Level {
     const due = this.folkAt[0];
     if (due && top < due.y) {
       const ok = rs.filter((r) => steady(r) && r.x1 - r.x0 >= 3 * t && bare(r) && over(r, (due.kind === 'trader' ? 4.6 : 3) * R));
-      if (ok.length) { const r = ok[(fr() * ok.length) | 0]; this.folk.push({ kind: due.kind, x: r.x0 + (r.x1 - r.x0) * (0.3 + 0.4 * fr()), y: r.y0, rect: r }); this.folkAt.shift(); }
+      if (ok.length) { const r = ok[(fr() * ok.length) | 0]; this.folk.push({ kind: due.kind, x: r.x0 + (r.x1 - r.x0) * (0.3 + 0.4 * fr()), y: r.y0, rect: r, body: null, open: false }); this.folkAt.shift(); }
     }
     if (fr() < FOLK.critterP) {
       const bat = fr() < 0.5, under = (r) => !this.rects.some((q) => q !== r && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 >= r.y1 - 1 && q.y0 < r.y1 + 2.5 * R);
@@ -2798,6 +2812,22 @@ class Level {
     }
     for (const b of this.bubbles) if (b.cd > 0) b.cd -= dt;
   }
+}
+// The rects' fields that move or change in play, loosened once on a rect made for it (see loosen): a ledge's first spring, crumble or smash
+// would otherwise remake them all.
+loosen(Level.prototype.box(0, 0, 0, 0), 'x0', 'y0', 'x1', 'y1', 't', 'dx', 'dy', 'flash', 'plank', 'crumble', 'slick', 'spring', 'cap', 'gone', 'hit',
+  'crumbling', 'moss', 'board', 'safe', 'bouncy', 'ac', 'crack', 'key', 'broke', 'paid', 'stair', 'magnet', 'cloud', 'mortar', 'beam', 'cage');
+{ const o = { coins: [], rng: () => 0 }; Level.prototype.coin.call(o, 0, 0, 1); loosen(o.coins[0], 'x', 'y', 'vx', 'vy', 't', 'drop', 'moving'); }   // a coin's too (a dropped one's the same make)
+// The same for the bodies' fields that Gum's Body (gum.js, kept as Gum's) begins at small integers or flags, its face's and its unwedging's (up)
+// too: on the hero, the first body made (Game.makeHero), so no body after it remakes them all in play.
+function loosenBody(b) {
+  loosen(b, 'R', 'growth', 'growthV', 'growthTarget', 'exx', 'eyy', 'exy', 'evxx', 'evyy', 'evxy', 'theta', 'omega', 'rigVx', 'rigVy', 'squeeze', 'squeezeIn',
+    'sqAx', 'sqAy', 'sqTheta', 'ceilT', 'peelT', 'ceilCD', 'wasTouching', 'floorX', 'touching', 'settle', 'offFloorT', 'age', 'impactCD', 'badT', 'foldT',
+    'foldRescue', 'foldCleanT', 'asleep', 'calmT', 'calmV', 'calmW', 'calmRelease', 'slowGrow', 'area', 'targetArea', 'lastGoodX', 'lastGoodY', 'minX', 'maxX',
+    'minY', 'maxY', 'cx', 'cy');
+  loosen(b.up, 'on', 'hold', 't', 'rest', 'crowdT', 'flew');
+  loosen(b.face, 'next', 'bt', 'twice', 'open', 'squint', 'surprise', 'wide', 'lx', 'ly', 'tlx', 'tly', 'wander');
+  return b;
 }
 
 // The hero is gooier than Gum's other bodies: after each substep its wobble (all but the rigid move and spin) dies
@@ -3321,6 +3351,9 @@ Renderer.prototype.makeTarget = function () {
 // One frame of the scene: behind the bodies (wall coats, doors, portal, floor, ledges,
 // spikes, coins, items, drops), the bodies (shadow, cushion, face), in front (puffs,
 // fire, air-jump orbs). World → screen is a shift by uShake = shake − camera.
+// The helpers in draw are made again for each frame; V8 keeps their optimised code only while one of them lives, so a major GC between two frames
+// dropped it and they were all compiled again (perf, 2026-10-24: 10-20 compiles a GC). The last frame's are held till the next frame's are made.
+let drawKept = null;
 Renderer.prototype.draw = function (g, alpha) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
@@ -3333,7 +3366,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const onGrid = (v) => Math.round(v / PIX.size) * PIX.size;   // (on the drawing grid: a picture's dot of 1.5 or 2.5 of its pixels, PIX.fit, leaves no hole)
   const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
     const rows = iconRows(id), s = PIX.size * k / (rows.x2 || 1), x0 = Math.round(x / PIX.size) * PIX.size - rows[0].length * s / 2, y0 = Math.round(y / PIX.size) * PIX.size - rows.length * s / 2;
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } });   // (each edge
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < row.length;) { const c = row[i]; let e = i + 1; while (row[e] === c) e++; if (c !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), ink || PAL[ICON_INK[c]], a, 0, 10, 0); i = e; } }   // (a loop, not a callback made each call: see drawKept) (each edge
     // on the drawing grid)
   };
   const iconSpin = (id, x, y, a, k, th) => {   // an ICONS picture turning about its upright axis (user: bonuses in pixel 3D): its columns drawn in by the
@@ -3341,7 +3374,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // of its width (with its edge gone it shrank to a sliver of a pixel edge on, and blinked out: the tester's «анимация вращения … поломалась»)
     const rows = iconRows(id), P = PIX.size, s = P * k / (rows.x2 || 1), w = rows[0].length, c0 = Math.cos(th), c = (c0 < 0 ? -1 : 1) * Math.max(ICON_SPIN, Math.abs(c0)), x0 = Math.round(x / P) * P, y0 = Math.round(y / P) * P - (rows.length * s) / 2;
     const col = (i) => Math.round(((i - w / 2) * s * c) / P) * P;
-    rows.forEach((row, j) => { for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } });
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < w;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') { const u = x0 + col(i), v = x0 + col(e); if (u !== v) box(Math.min(u, v), onGrid(y0 + j * s), Math.max(u, v), onGrid(y0 + (j + 1) * s), PAL[ICON_INK[q]], a, 0, 10, 0); } i = e; } }
     if (CINE_ON && CINE_ON.bonus === 'E' && a === 1) {   // (the fork's E, in 2D too: its thickness, THICK of its pixels, on the side turned to us: each row's end in that pixel's own ink a tone darker)
       const sn = Math.sin(th), d = Math.round((Math.abs(sn) * CINE_ON.THICK * s * (rows.x2 || 1)) / P) * P;   // (THICK of the 12×12's pixels, a finer picture's too)
       if (d > 0) rows.forEach((row, j) => { let iL = 0, iR = w - 1; while (iL < w && row[iL] === '.') iL++; while (iR > iL && row[iR] === '.') iR--; if (iL >= w) return;
@@ -4999,7 +5032,7 @@ Renderer.prototype.draw = function (g, alpha) {
   if (CINE) this.route = 0;
   const spr = (rows, x, y, ink, k, top) => {   // a CRITTER picture, k game pixels a dot, centred on x, its top (or bottom) at y
     const s = PIX.size * k, x0 = Math.round(x / PIX.size) * PIX.size - (rows[0].length * s) / 2, y0 = Math.round(y / PIX.size) * PIX.size - (top ? 0 : rows.length * s);
-    rows.forEach((row, j) => { for (let i = 0; i < row.length;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); i = e; } });   // (d, m: the ink's dark and
+    for (let j = 0; j < rows.length; j++) { const row = rows[j]; for (let i = 0; i < row.length;) { const q = row[i]; let e = i + 1; while (row[e] === q) e++; if (q !== '.') box(onGrid(x0 + i * s), onGrid(y0 + j * s), onGrid(x0 + e * s), onGrid(y0 + (j + 1) * s), q === 'w' ? INK.white : q === 'k' ? PAL.black : q === 'r' ? PAL.red : ink, q === 'd' ? 1.25 : q === 'm' ? 1.6 : 1, 0, 10, 0); i = e; } }   // (d, m: the ink's dark and
     // mid tones; a box a run of one ink, as cineSpr: a crow with its ring 492 boxes, 255 now: perf)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
@@ -5152,6 +5185,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const b = e.body, t = e.type, V = FOREST_V[t];
     b.look = t + '-' + V; b.lookDir = t === 'kikimora' ? (b.cx < (lv.l + lv.r) / 2 ? 1 : -1) : Math.sign(g.hero.cx - b.cx) || 1;
   };
+  drawKept = [F, disc, box, onGrid, icon, iconSpin, seen, door, hut, farmhouse, funaya, skEyes, skDoorAt, skInside, izba, mnShop, mnStash, pech, brace, aircon, rod, line, mnLamp, mnOre, mnBatsAt, mnBats, mnThing, mnFar, skOak, junkRect, skyRect, panelsRect, villageRect, seaRect, skazkaRect, mineRect, fujiRect, townRect, vaultSpan, spr, look, forestFoe];   // (see drawKept)
   if (lv.boss && !lv.boss.dead && lv.boss.look) look(lv.boss, false);   // its look's parts behind it
   for (const e of lv.enemies) if (FOREST_V[e.type]) forestFoe(e);   // a forest enemy's look, before the bodies are drawn
   for (const e of lv.enemies) if (e.type === 'worm' && seen(e.body.minY - 3 * R, e.body.maxY + 3 * R)) {   // a worm's tubes, behind its knot

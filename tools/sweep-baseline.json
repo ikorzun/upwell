@@ -1,5 +1,5 @@
 {
- "commit": "5b4d6ae",
+ "commit": "aafa503",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -25,7 +25,7 @@
   },
   "c1-4": {
    "result": "clear",
-   "time": 22.5,
+   "time": 22,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -55,7 +55,7 @@
   },
   "c1-8": {
    "result": "clear",
-   "time": 21.5,
+   "time": 19.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
@@ -194,10 +194,10 @@
   },
   "c3-5": {
    "result": "clear",
-   "time": 40.5,
+   "time": 34,
    "heartsLost": 0,
    "stuck": [
-    "rubberwall@147"
+    "rubberwall@66"
    ],
    "hits": []
   },
@@ -276,7 +276,7 @@
   },
   "c4-5": {
    "result": "clear",
-   "time": 22,
+   "time": 24.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -337,12 +337,14 @@
   },
   "c5-3": {
    "result": "clear",
-   "time": 42.5,
+   "time": 42,
    "heartsLost": 0,
    "stuck": [
-    "shelves@70"
+    "comb@189"
    ],
-   "hits": []
+   "hits": [
+    "crawler@pillars"
+   ]
   },
   "c5-4": {
    "result": "clear",
@@ -355,7 +357,7 @@
   },
   "c5-5": {
    "result": "clear",
-   "time": 19.5,
+   "time": 31.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []

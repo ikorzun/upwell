@@ -5105,8 +5105,8 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);
-    else if (f.kind === 'crow') spr(CRITTER[(f.dive ? 'crowDown' : f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : 'crow') + ((f.fly || f.dive ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y,
-      f.dive || (f.wait > CROW.wait && Math.floor((f.wait - CROW.wait) * 5) % 2 === 0) ? PAL.red : th.wall, PIX.keep, false);   // (red as it warns, blinking, and as it dives: CROW)   // a game pixel a dot: about a tile and a half long
+    else if (f.kind === 'crow') spr(CRITTER[(f.dive ? 'crowDive' : f.fly ? (Math.floor(f.t * 9) % 2 ? 'crowUp' : 'crowDown') : f.wait > CROW.wait ? 'crowWarn' : 'crow') + ((f.fly || f.dive ? f.vx : f.dir) > 0 ? '' : 'L')], f.x, f.y,
+      f.dive || (f.wait > CROW.wait && Math.floor((f.wait - CROW.wait) * 5) % 2 === 0) ? PAL.red : th.wall, PIX.keep, false);   // (rearing as it warns, red blinking, and beak first as it dives, red: CROW)   // a game pixel a dot: about a tile and a half long
     else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a flap now and then where it sits; free, its wings going, the ring on it
       const L = f.dir > 0 ? '' : 'L', wing = f.fly ? (Math.floor(f.t * 9) % 2 ? 'rcrowUp' : 'rcrowDown') : f.t % 1.6 < 0.24 ? 'rcrowUp' : 'rcrow';
       spr(CRITTER[wing + L], f.x, f.y, th.wall, PIX.keep, false);

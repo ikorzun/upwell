@@ -3652,7 +3652,9 @@ document.addEventListener('visibilitychange', () => {
   paused = document.hidden; loop.last = performance.now(); sound.sleep(document.hidden || ads.quiet);
   if (paused) { if (perf.active >= 5000) perfSend(loop.last); perf.last = 0; }
   if (paused) { input.clear(); game.togglePause(true); }
+  renderer.still = null;   // (a paused frame drawn again on the way back: a browser may have let its buffer go while hidden)
 });
+window.addEventListener('pageshow', () => { renderer.still = null; });   // (the same, back from the back-forward cache)
 window.addEventListener('blur', () => input.clear());
 window.addEventListener('pagehide', () => game.saveCur(true));   // (a phone's browser may drop the page after this without a word)
 window.addEventListener('resize', queueLayout);

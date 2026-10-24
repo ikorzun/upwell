@@ -862,7 +862,7 @@ const CAMPAIGN = [
     news: { en: 'shop awnings: they bounce', es: 'toldos: rebotan', pt: 'toldos: eles quicam', ja: 'みせの ひさし: はねる' } },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, crumble: 2 }, intro: ['crumble'], enemies: ['crawler', 'tofu', 'spitter', 'shell'], foes: 0.6, pair: 0.15, candy: ['smash', 'smash'], stash: 0.35, seed: 2303,
     },
-  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2, crumble: 1 }, intro: [], enemies: ['crawler', 'shell', 'spitter', 'tofu'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
+  { role: 'peak', len: 33, fire: 0.5, maxD: 3, chunks: { ...STREET, shelves: 3, comb: 3, chimney: 2, overhang: 2, crumble: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'shell', 'spitter', 'tofu'], foes: 0.75, pair: 0.3, candy: ['smash'], seed: 2202 },
   { role: 'bonus', len: 31, bonus: 0, time: 34, seed: 5106 },
   { role: 'twist', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3, lift: 3, movers: 1 }, intro: ['lift'], enemies: ['crawler', 'tofu'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 5103,
     news: { en: 'gondolas move', es: 'las góndolas se mueven', pt: 'as gôndolas se movem', ja: 'ゴンドラが うごく' }, tip: true },
@@ -903,7 +903,7 @@ const CAMPAIGN = [
     news: { en: 'shells: stomp, and they roll', es: 'caparazones: písalos y ruedan', pt: 'cascos: pise e eles rolam', ja: 'こうら: ふむと ころがる' }, tip: true },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.41, maxD: 2, chunks: { ...GLACIER, crumble: 2 }, intro: [], enemies: ['climber', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 4103,
     news: { en: 'climbers on the walls', es: 'trepadores en las paredes', pt: 'escaladores nas paredes', ja: 'かべの カベノボリ' }, tip: true },
-  { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
+  { role: 'peak', len: 29, fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, chimney: 2, rubberwall: 2, twinshaft: 1 }, intro: [], set: 'arena', enemies: ['shell', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },   // (an arena: К4 «А»)
   { role: 'bonus', len: 36, bonus: 1, time: 40, seed: 4104 },
   { role: 'twist', len: 32, sides: [13975, 0], fire: 0.4, maxD: 2, chunks: { ...GLACIER, mosswall: 2 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler'], foes: 0.55, candy: ['smash'], stash: 0.3, seed: 4102,
     news: { en: 'icicles fall', es: 'los carámbanos caen', pt: 'os pingentes caem', ja: 'つららが おちる' }, tip: true },
@@ -926,7 +926,7 @@ const CAMPAIGN = [
     news: { en: 'circlers go round the rocks', es: 'los rondadores rodean las rocas', pt: 'os rondadores rodeiam as pedras', ja: 'グルグルが いわを まわる' } },
   { role: 'apply', len: 40, gate: 'gate2', fire: 0.44, maxD: 2, chunks: { ...SEAP, crumble: 3 }, intro: ['crumble'], enemies: ['circler', 'shell', 'crawler'], foes: 0.6, pair: 0.15, candy: ['smash', 'rainbow'], shop: 0.45, seed: 6103,
     news: { en: 'driftwood gives way', es: 'la madera a la deriva cede', pt: 'a madeira à deriva cede', ja: 'ながれぎは くずれる' }, tip: true },
-  { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], enemies: ['circler', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6102 },
+  { role: 'peak', len: 32, fire: 0.48, maxD: 3, chunks: { ...SEAP, comb: 3, chimney: 2, movers: 1, twinshaft: 1 }, intro: [], set: 'arena', enemies: ['circler', 'climber', 'crawler'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 6102 },
   { role: 'bonus', len: 36, bonus: 2, time: 40, seed: 6104 },   // the combo ladder (was the coin rain, the Mine's and Tokyo's too: the five open worlds' bonuses now combo, rain, rubber, combo, rain)
   { role: 'twist', len: 34, fire: 0.44, maxD: 2, chunks: { ...SEAP, lift: 4, crumble: 3, bridge: 1 }, intro: ['lift'], enemies: ['climber', 'crawler'], foes: 0.5, candy: ['smash'], stash: 0.3, seed: 6106,
     news: { en: 'a river of rafts', es: 'un río de balsas', pt: 'um rio de jangadas', ja: 'いかだの かわ' }, tip: true },
@@ -2109,6 +2109,15 @@ const ARENA = { waves: [2, 3], coins: 6, reach: 6, drop: 5, warn: 2 };   // coin
 // An ambush (owner, round 2: «Начинай все по списку»; my r6: 1-4, «яма с волнами врагов»): a small arena (a), stood on its floor its one wave of `waves`
 // dropping in, shown first as an arena's (ARENA.warn), no mini, `coins` big ones for it; left behind, nothing (1-4's motif)
 const AMBUSH = { waves: [2], coins: 2 };
+// Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
+// an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
+const WAVES = {
+  village: { arena: [['crawler', 'crawler'], ['crawler', 'shell', 'spitter']], ambush: [['crawler', 'shell']] },
+  fuji: { arena: [['crawler', 'crawler'], ['shell', 'crawler', 'shell']], ambush: [['crawler', 'crawler']] },
+  sea: { arena: [['crawler', 'shell'], ['spitter', 'crawler', 'shell']], ambush: [['crawler', 'shell']] },
+  town: { arena: [['crawler', 'shell'], ['spitter', 'crawler', 'shell']], ambush: [['crawler', 'shell']] },
+};
+const wavesOf = (th, small) => { const k = !th ? null : th.village ? 'village' : th.fuji ? 'fuji' : th.sea ? 'sea' : th.town ? 'town' : null; return k ? WAVES[k][small ? 'ambush' : 'arena'] : null; };
 const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
@@ -2663,7 +2672,8 @@ class Level {
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
       else if (ch >= '1' && ch <= '9') this.signs.push({ id: +ch, x: X(k) + t / 2, y: Y(r) - t / 2 });   // a word of the tutorial's, said there
-      else if (ch === 'A' || ch === 'a') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a', floor: undefined, waves: (ch === 'a' ? AMBUSH : ARENA).waves, warnAt: -1, dropAt: -1 });   // (a: AMBUSH)
+      else if (ch === 'A' || ch === 'a') { const kinds = wavesOf(this.theme, ch === 'a'); this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a', floor: undefined,
+        waves: kinds ? kinds.map((q) => q.length) : (ch === 'a' ? AMBUSH : ARENA).waves, kinds, warnAt: -1, dropAt: -1 }); }   // (a: AMBUSH; kinds: its world's waves, WAVES)
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, goal: this.pocketKind === 'trial' ? this.pocketGoal : undefined, side, cd: 0, room: null });

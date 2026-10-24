@@ -5179,6 +5179,11 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     this.route = rt0;
   }
+  // A stash room's way out kept clear (UPwell, handover 23's QA: «keep the way out clear»): its backdrop never over the exit's arch, a margin round it (in tiles,
+  // from the room's left wall and floor): a post starts over the arch, a lump of the lava tube by it is left out
+  const exitT = lv.kind === 'treasure' && lv.exit ? ((t) => [(lv.exit.x0 - lv.l) / t - 0.3, (lv.floor - lv.exit.y1) / t - 0.3, (lv.exit.x1 - lv.l) / t + 0.3, (lv.floor - lv.exit.y0) / t + 0.4])(lv.tile) : null;
+  const overExit = (u0, v0, u1, v1) => !!exitT && u0 < exitT[2] && u1 > exitT[0] && v0 < exitT[3] && v1 > exitT[1];
+  const postFoot = (u0, u1, v1) => (overExit(u0, 0, u1, v1) ? exitT[3] : 0);
   if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.village) {   // the Village's stash room: the cellar under a farmhouse (Д97 «А», Д110
     // «C»'s layout), as a few big flat shapes at a quarter on a quiet black (owner: «Фоны в подарочных комнатах выглядят грязно: предметы не читаются, пиксели
     // лезут в глаза, выглядит как грязь»; its sheet was dark dithered mush): two posts and the beam over them, braces; three shelves on the back wall, jars on the
@@ -5186,7 +5191,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32;
     const bx = (u0, v0, u1, v1, c, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
     const el = (u, v, ru, rv, c, a = LT) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
-    bx(0.6, 0, 1.3, 20.6, PAL.orange); bx(14.7, 0, 15.4, 20.6, PAL.orange); bx(0, 20.6, 16, 21.2, PAL.orange);   // its posts and the beam
+    bx(0.6, postFoot(0.6, 1.3, 20.6), 1.3, 20.6, PAL.orange); bx(14.7, postFoot(14.7, 15.4, 20.6), 15.4, 20.6, PAL.orange); bx(0, 20.6, 16, 21.2, PAL.orange);   // its posts and the beam
     line(X(1.3), Y(18.4), X(3.4), Y(20.6), PAL.orange, WD, 3); line(X(14.7), Y(18.4), X(12.6), Y(20.6), PAL.orange, WD, 3);   // braces
     for (const [v, kind] of [[15, 'jar'], [10.5, 'sack'], [6, 'low']]) {   // the shelves, each on two brackets, what is on it
       bx(2.4, v - 0.28, 10.4, v, PAL.orange); for (const u of [3, 9.6]) bx(u, v - 1.0, u + 0.3, v - 0.28, PAL.orange);
@@ -5204,7 +5209,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.2, LT = 1.32, G = PAL.gray;
     const bx = (u0, v0, u1, v1, c = G, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
     const el = (u, v, ru, rv, c = G, a = WD) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
-    bx(1, 0, 1.6, 19); bx(14.4, 0, 15, 19); bx(0.7, 19, 15.3, 19.6); line(X(1.6), Y(17), X(3.4), Y(19), G, WD, 3); line(X(14.4), Y(17), X(12.6), Y(19), G, WD, 3);   // posts, beam, braces
+    bx(1, postFoot(1, 1.6, 19), 1.6, 19); bx(14.4, postFoot(14.4, 15, 19), 15, 19); bx(0.7, 19, 15.3, 19.6); line(X(1.6), Y(17), X(3.4), Y(19), G, WD, 3); line(X(14.4), Y(17), X(12.6), Y(19), G, WD, 3);   // posts, beam, braces
     for (let i = 0; i <= 7; i++) { const q = i / 7; el(4 + 6 * q, 17 - 13 * q, 1.3 * (0.8 + 0.3 * Math.sin(i * 1.7)), 1.17); }   // the vein: a band of rock lumps
     for (let i = 0; i < 14; i++) { const q = (i + 0.5) / 14, u = 4 + 6 * q + 0.45 * Math.sin(i * 2.3), v = 17 - 13 * q + 0.39 * Math.cos(i * 1.9); bx(u - 0.1, v - 0.1, u + 0.1, v + 0.1, PAL.purple, LT); }   // its glints
     line(X(6), Y(1), X(7), Y(3.2), G, WD, 2); line(X(6.4), Y(3), X(7.6), Y(3.4), G, WD, 3);   // a pickaxe leaning
@@ -5218,7 +5223,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const bx = (u0, v0, u1, v1, c = G, a = WD) => box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0);
     const el = (u, v, ru, rv, c = G, a = WD) => F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0);
     const tube = () => {   // the lava tube's walls and roof, lumps along a U
-      for (let v = 0; v <= 20; v += 1.4) { el(0.3, v, 0.9, 0.8); el(15.7, v + 0.7, 0.9, 0.8); }
+      for (let v = 0; v <= 20; v += 1.4) { if (!overExit(-0.6, v - 0.8, 1.2, v + 0.8)) el(0.3, v, 0.9, 0.8); if (!overExit(14.8, v - 0.1, 16.6, v + 1.5)) el(15.7, v + 0.7, 0.9, 0.8); }
       for (let u = 0.5; u <= 15.5; u += 1.3) el(u, 20.6 - 0.35 * Math.sin(u * 0.9), 1.0, 0.8);
     };
     const icicle = (u, v, len) => { for (let k = 0; k < 4; k++) { const f = 1 - k / 4; bx(u - 0.16 * f, v - (k + 1) * len / 4, u + 0.16 * f, v - (k * len) / 4, B, LT); } };   // hanging from v down

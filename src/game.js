@@ -776,8 +776,11 @@ class Game {
     lv.ensure(-Infinity);
     lv.coins.forEach((c, i) => { c.id = i; }); lv.folk.forEach((f, i) => { f.id = i; }); lv.rects.forEach((r, i) => { r.id = i; });   // each its number (Game.saveCur): taken
     lv.taken = []; lv.gone = []; lv.sig = [lv.rects.length, lv.coins.length, lv.folk.length].join();   // and gone kept by them; the level's measure, to know it again
+    if (lv.theme.fuji) kitAtLeast(lv, 'bell'); else if (lv.theme.sea) kitAtLeast(lv, 'lighthouse');   // a bell, a lighthouse on every level of their worlds (owner, У5 «А»)
     const kits = (kind) => lv.rects.filter((r) => { const k = kitThing(lv, r); return k && k.kind === kind && k.y > lv.capY && k.y < lv.floor; }).length;   // the kits' (kitThing): the ones the hero can get to
-    for (const [id, of] of [['cage', folk('cage')], ['crow', folk('crow')], ['neon', lv.theme.town ? neonSigns(lv).length : 0], ['lantern', kits('lantern')], ['bell', kits('bell')], ['lamp', kits('lamp')], ['lighthouse', kits('lighthouse')]]) if (of) lv.tasks.push({ id, n: 0, of });
+    for (const [id, of] of [['cage', folk('cage')], ['crow', Math.min(5, folk('crow'))], ['neon', lv.theme.town ? Math.min(5, neonSigns(lv).length) : 0],   // (Tokyo's: five crows and five
+      // signs for the star, the rest there for fun: owner, 2026-10-24, У4 «А»; they were 3-13 and 4-18 a level)
+      ['lantern', kits('lantern')], ['bell', kits('bell')], ['lamp', kits('lamp')], ['lighthouse', kits('lighthouse')]]) if (of) lv.tasks.push({ id, n: 0, of });
   }
   task(id) {   // one more of task `id` done (in the shaft only: the flip side's crows are not its); the last of it rings, and says so with its picture
     const q = !this.well && this.lv.tasks && this.lv.tasks.find((o) => o.id === id);
@@ -1204,8 +1207,20 @@ class Game {
         if (f.fly) { f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R) lv.folk.splice(i, 1); }
       }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
-        if (!f.fly && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
-        if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
+        if (!f.fly && !f.dive && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
+        else if (f.kind === 'crow' && !f.fly && !f.dive && lv.theme.town && this.stage > 0) {   // Tokyo's: one waited under dives (CROW)
+          f.wait = Math.abs(H.cx - f.x) < CROW.x * R && H.cy > f.y && H.cy < f.y + CROW.y * R && f.y > lv.cam + (view.hudB || 0) ? (f.wait || 0) + dt : 0;
+          if (f.wait > CROW.wait + CROW.warn) {
+            const dx = H.cx - f.x, dy = H.cy - f.y, l = Math.hypot(dx, dy) || 1;
+            f.dive = true; f.t = 0; f.vx = (dx / l) * CROW.speed * R; f.vy = (dy / l) * CROW.speed * R; sound.play('airjump', 0.7, 0.6);
+            this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id);   // (off its wire: as one scared)
+          }
+        }
+        if (f.dive) {
+          f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt;
+          if (Math.hypot(H.cx - f.x, H.cy - f.y) < H.R + CROW.r * R) this.hurt(H.cx - f.x, H.cy - f.y, 'crow');
+          if (f.t > CROW.flight || f.y > lv.cam + view.h + R || f.x < lv.l - R || f.x > lv.r + R) { f.dive = false; f.fly = true; f.vx = (f.vx < 0 ? -1 : 1) * 120; f.vy = -200; }   // past: off it flies
+        } else if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
       } else if (f.kind === 'bug') {
         const r = f.rect;
         if (r.gone) { lv.folk.splice(i, 1); continue; }

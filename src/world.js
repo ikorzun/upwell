@@ -5310,8 +5310,8 @@ Renderer.prototype.draw = function (g, alpha) {
   if (CINE) this.route = 0;
   // A sheet's sprite (path A; owner 2026-10-24: natural things from the sheets' own pixels): its rows of ICON_INK letters ('.' clear), a sheet pixel two game
   // pixels (the sheets drew the hero half size), left to right or mirrored, at alpha a
-  const sprAt = (rows, x, y, flip = false, a = 1) => {
-    const s = 2 * PIX.base, n = rows[0].length;
+  const sprAt = (rows, x, y, flip = false, a = 1, s = 2 * PIX.base) => {   // (s: a sheet pixel's size, 2 game pixels where the sheet drew the hero half size)
+    const n = rows[0].length;
     rows.forEach((r, j) => { for (let i = 0; i < n;) { const ch = r[i]; let e = i + 1; while (r[e] === ch) e++; if (ch !== '.') { const u = flip ? x + (n - e) * s : x + i * s; box(u, y + j * s, u + (e - i) * s, y + (j + 1) * s, PAL[ICON_INK[ch]], a, 0, 10, 0); } i = e; } });
   };
   const HB = HAZ_SPR[th.hazard] && HAZ_SPR[th.hazard].blob, hazBlob = (x, y, flip, a = 1) => {   // what a world's own hazard throws (К13: a piece of its burst), rimmed red (danger)
@@ -5321,7 +5321,8 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const IC = th.ice === 'village' ? VDROP_SPR['ABCDEF'[window.__vd != null ? window.__vd : VDROP_V]] : ICE_SPR[th.ice], sn2 = (v) => Math.round(v / PIX.size) * PIX.size;
   const icicle = th.glass ? (x, y) => { box(x - 0.06 * R, y, x + 0.06 * R, y + 0.35 * R, PAL.gray, 1, 0, 10, 0); disc(x, y + 0.45 * R, 0.2 * R, INK.spike, 1); }   // the Skyscraper's: a bolt hanging off a girder, its red head down
-    : IC ? (x, y, falling) => { const r = falling ? IC.fall : IC.hang; sprAt(r, sn2(x - r[0].length * PIX.base), sn2(y)); }   // the world's own icicle off its sheet (ICE_SPR), its root at y
+    : IC ? (x, y, falling) => { const r = falling ? IC.fall : IC.hang; sprAt(r, sn2(x - (r[0].length * PIX.base) / 2), sn2(y), false, 1, PIX.base); }   // the world's own icicle off its sheet
+    // (ICE_SPR), its root at y; a sheet pixel one game pixel, so it is as wide as what hurts (ICICLE.r; at 2x it was three times as big)
     : (x, y) => { const hl = 0.3 * R, hd = 0.3 * R; F(x, y + hd, hl, 0, 0, -hd, INK.spike, 1, 6, hl, hd, 2 * hl); };   // a red spike pointing down, its root at y
   // Where an arena's (or an ambush's) wave waits (К8 «А», the Level Design Book: an ambush is fair when it can be seen first): the world's own thing just over
   // where its enemies drop from (ARENA.drop R over its middle), there from the start (HOLD_SPR), shaking from when the wave is shown (warnAt), emptied once it
@@ -5382,10 +5383,13 @@ Renderer.prototype.draw = function (g, alpha) {
     const u = (T + fw.ph) % (FIREWALL.on + FIREWALL.off), on = u >= FIREWALL.off, warn = !on && u >= FIREWALL.off - FIREWALL.warn, d = fw.side === 1 ? 1 : -1, wx = fw.side === 1 ? lv.l : lv.r, t = lv.tile, P = PIX.size;
     const WS = WALL_SPR[th.wallHaz];
     if (WS) {   // the world's own (path A, WALL_SPR): its stretch asleep down the wall, flickering as it is about to; bursting out of it, jittering a pixel
-      const s2 = 2 * PIX.base, A = WS.asleep, Bu = WS.burst, at = (rows) => (d > 0 ? snap(wx) : snap(wx) - rows[0].length * s2);
+      // A sheet pixel one game pixel; its burst narrowed, column by nearest column, to FIREWALL.reach and 0.3 tile more (the sheets drew it 4-8 times as far as it
+      // hurts: a burst a little bigger than its harm, never far bigger)
+      const s2 = PIX.base, A = WS.asleep, n = Math.round(((FIREWALL.reach + 0.3) * t) / s2), at = (rows) => (d > 0 ? snap(wx) : snap(wx) - rows[0].length * s2);
+      const Bu = WS.burst[0].length <= n ? WS.burst : WS.fit && WS.fit[0].length === n ? WS.fit : (WS.fit = WS.burst.map((r) => Array.from({ length: n }, (_, i) => r[Math.floor((i * r.length) / n)]).join('')));
       const cut = (rows, y, k) => (k % 2 ? rows.slice().reverse() : rows).slice(0, Math.min(rows.length, Math.ceil((fw.y1 - y) / s2)));   // (every other copy upside down: no repeat shows)
-      for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(A, y, k), at(A), snap(y), d < 0, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.55) : on ? 1 : 0.8);
-      if (on) for (let y = fw.y0, k = 0; y < fw.y1; y += Bu.length * s2, k++) sprAt(cut(Bu, y, k), at(Bu) + d * (Math.floor(T * 12 + k) % 2) * s2, snap(y), d < 0, 1);
+      for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(A, y, k), at(A), snap(y), d < 0, warn ? (Math.floor(T * 5 + k) % 2 ? 1 : 0.55) : on ? 1 : 0.8, s2);
+      if (on) for (let y = fw.y0, k = 0; y < fw.y1; y += Bu.length * s2, k++) sprAt(cut(Bu, y, k), at(Bu) + d * (Math.floor(T * 12 + k) % 2) * s2, snap(y), d < 0, 1, s2);
       continue;
     }
     box(snap(Math.min(wx, wx + d * 0.18 * t)), snap(fw.y0), snap(Math.max(wx, wx + d * 0.18 * t)), snap(fw.y1), INK.fire, warn || on ? 1 : 0.5, 0, 10, 0);   // its seam, smouldering red (seen
@@ -5477,7 +5481,7 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart; a falling stalactite
     if (s.rock) { F(s.x, lv.floor + 1, s.r * 1.3, 0, 0, s.r * 0.35, INK.dark, 1, 0); disc(s.x, s.y, s.r, PAL.gray, 1); disc(s.x - 0.3 * s.r, s.y - 0.3 * s.r, 0.3 * s.r, PAL.white, 1); continue; }   // the Minecart's rocks, a shadow under each on the floor
-    if (s.icicle) { icicle(s.x, s.y - (IC ? IC.fall.length * PIX.base : 0.3 * R), true); continue; }   // (the sheet's: centred on it)
+    if (s.icicle) { icicle(s.x, IC ? s.y + s.r - IC.fall.length * PIX.base : s.y - 0.3 * R, true); continue; }   // (the sheet's: its tip at the bottom of what hurts, its streaks over it)
     if (s.bone) { const an = T * 7 + s.x * 0.05, ca = Math.cos(an) * s.r, sa = Math.sin(an) * s.r; F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1); line(s.x - ca, s.y - sa, s.x + ca, s.y + sa, INK.spike, 1, 2); for (const q of [-1, 1]) for (const p of [-1, 1]) disc(s.x + q * ca + p * 0.35 * sa, s.y + q * sa - p * 0.35 * ca, 0.32 * s.r, INK.spike, 1); continue; }   // Koschei's: a bone, spinning, red
     F(s.x, s.y, s.r * 1.8, 0, 0, s.r * 1.8, INK.spike, 0.3, 1);
     if (s.fire && HB) { hazBlob(s.x, s.y, Math.floor(T * 6 + s.x * 0.01) % 2 === 1); continue; }   // (tumbling: turned over now and then)

@@ -4076,7 +4076,7 @@ function start() {
   layout();
   started = true;
   game.toMenu();
-  { const lm = location.search.match(/[?&]level=(\d+)-(\d+)/); if (lm) window.__up.camp((+lm[1] - 1) * 30 + (+lm[2] - 1) * 3 + 1); }   // straight into a campaign level, to try it (e.g. ?level=3-4)
+  { const lm = location.search.match(/[?&]level=(\d+)-(\d+)/); if (lm) game.playLevel((+lm[1] - 1) * 30 + (+lm[2] - 1) * 3 + 1); }   // straight into a campaign level, to try it (e.g. ?level=3-4), as the menu's Continue (its cards on first)
   if (/[?&]cards\b/.test(location.search)) { const ids = Object.keys(STORY), show = (k) => { if (k < ids.length) game.story(ids[k], () => show(k + 1), true); }; show(0); }   // every story card in turn, seen or not
   if (/[?&]play=crypt\b/.test(location.search)) window.__up.go(CRYPT.at[0], CRYPT.at[1]);   // the Crypt by itself, to look at
   if (/[?&]play=tokyo\b/.test(location.search)) { game.preview = TOKYO; window.__up.go(1, 0); }   // Tokyo by itself, to look at (a run in it)

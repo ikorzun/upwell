@@ -583,6 +583,12 @@ const BOSS = { size: 2.1, hp: 6, angry: 2.0, dropEvery: 3.2, spawnEvery: 4.6, ma
 // In its arena a ceiling holds `hold` s longer: time to hang over a rail's end and wait for it. It keeps still its first `calm` s.
 const CART = { size: 2.2, pass: [4, 3.4, 2.6], spit: 2.5, wind: 0.6, creak: 0.8, rock: 0.35, crumble: [0.35, 4.5], lifts: 1.5, hold: 2, calm: 2.5 };
 const PUCK = { slide: 3.2, every: 4, shells: [1, 2, 2], rest: [2.6, 2, 0.8], wind: 0.7, dash: [13, 17, 21], icicles: [0, 0, 1], flip: 2.5, calm: 2.5 };
+// Tsurara-onna (BOSSES.puck, Fuji's, world 3; owner 2026-10-24: all bosses redone, the difficulty's curve kept): she creeps over the ice
+// at the hero at `creep` R/s, to `keep` R off it, her moves taking turns. Icicles: her arms up, red, a chime, `cast` s; then `n` icicles `gap` R apart
+// shake over the hero `shake` s and fall. A slide: she backs off flashing with a scrape, `wind` s, then dashes at `dash` R/s to the far wall and sticks
+// there frozen `stun` s, the only time a stomp hurts her (else her top is hard ice). From her second phase the wall shakes `wallIce`
+// icicles down; on her last heart (`twice`) she dashes back the other way after `again` s before she sticks. Still her first `calm` s.
+const ICE = { creep: 2.4, keep: 2.5, rest: [2.0, 1.8, 1.6, 1.5], cast: 1.0, n: [3, 3, 4, 5], gap: 3, shake: 1.0, wind: 1.0, again: 0.6, dash: [13, 15, 17, 19], stun: 2.0, wallIce: [0, 2, 2, 2], twice: 3, calm: 2.5 };
 // The Tsuchigumo (BOSSES.cart, the Cave's; owner 2026-10-23: «Очень легкий босс… Зачем вагонетки внизу не понятно», the fight redone
 // to the plan's rules: a hit earned after its own move, every move told by a pose and a sound): it hangs by its thread `high` R over
 // the floor, swinging `swing` of the width, and takes turns. A web: its belly pulses `spit` s with a hiss, then `webs` by phase are
@@ -908,18 +914,19 @@ const BOSSES = {
     top: { en: 'Not now. Wait till it lands!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
     hint: { en: 'Dizzy! Jump on it!', es: '¡Mareado! ¡Salta encima!', pt: 'Tonto! Pule em cima!', ja: 'めが まわってる！ とびのれ！' },   // the first time it sits dizzy
     how: { en: 'Dodge its drop, then stomp it', es: 'Esquiva su caída y písalo', pt: 'Desvie da queda e pise nele', ja: 'おちてくるのを よけて、ふみつけろ' } },   // after three losses
-  // Fuji's: a Tsurara-onna on the Puck's slide (the plan's §5.4): over the ice, beaten by her own shells (PUCK, Boss.slide). The first three bosses'
+  // Fuji's: a Tsurara-onna over the ice, her icicles and her slide into the wall (ICE, Boss.glide; owner 2026-10-24: all bosses redone; the shells gone).
+  // (Before: the Puck's slide, beaten by her own shells; the first three bosses'
   // five hearts and the Cork's phases (owner, 2026-10-20: her round body kept, the fight softened, worlds 1-3 not hard).
-  puck: { name: { en: 'Tsurara-onna', es: 'Tsurara-onna', pt: 'Tsurara-onna', ja: 'つららおんな' }, ink: 'gray', design: 'dome', size: 2.4, slide: true, hp: 5, phase: (hp) => (hp >= 4 ? 0 : hp >= 2 ? 1 : 2),
+  puck: { name: { en: 'Tsurara-onna', es: 'Tsurara-onna', pt: 'Tsurara-onna', ja: 'つららおんな' }, ink: 'gray', design: 'dome', size: 2.4, glide: ICE, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'Cold hands. Colder heart.', es: 'Manos frías. Corazón más frío.', pt: 'Mãos frias. Coração mais frio.', ja: 'つめたい て。もっと つめたい こころ。' },
       { en: 'Stay a while. Freeze with me.', es: 'Quédate un rato. Congélate conmigo.', pt: 'Fique um pouco. Congele comigo.', ja: 'ゆっくり していって。いっしょに こおろう。' },
       { en: 'My icicles never melt.', es: 'Mis carámbanos nunca se derriten.', pt: 'Meus pingentes de gelo nunca derretem.', ja: 'わたしの つららは とけない。' }],
     quip: [{ en: 'Frozen solid. How pretty.', es: 'Congelado del todo. Qué bonito.', pt: 'Congelado inteiro. Que lindo.', ja: 'カチコチ。きれいね。' },
       { en: 'Shh. Winter is long here.', es: 'Shh. Aquí el invierno es largo.', pt: 'Psiu. Aqui o inverno é longo.', ja: 'しーっ。ここの ふゆは ながいの。' }],
     defeat: { en: 'Melting… so spring has come.', es: 'Me derrito… llegó la primavera.', pt: 'Derretendo… a primavera chegou.', ja: 'とけていく… はるが きたのね。' },
-    top: { en: 'Hard on top. Roll a shell at her!', es: 'Arriba es dura. ¡Lánzale un caparazón!', pt: 'Em cima é dura. Role um casco nela!', ja: 'うえは かたい。こうらを ぶつけろ！' },   // the first bounce off its dome
-    hint: { en: 'Flipped! Land on her belly!', es: '¡Volteada! ¡Salta en su panza!', pt: 'Virada! Pule na barriga!', ja: 'ひっくりかえった！ おなかに のれ！' },   // the first time it is turned
-    how: { en: 'Roll a shell into her, then stomp her', es: 'Lánzale un caparazón y luego písala', pt: 'Role um casco nela e depois pise', ja: 'こうらを ぶつけて、ふもう' } },   // after three losses
+    top: { en: 'Hard as ice. Wait till she hits the wall!', es: 'Dura como el hielo. ¡Espera a que choque!', pt: 'Dura como gelo. Espere ela bater na parede!', ja: 'こおりで かたい。かべに ぶつかるまで まて！' },   // the first bounce off her
+    hint: { en: 'Frozen to the wall! Stomp her!', es: '¡Pegada a la pared! ¡Písala!', pt: 'Presa na parede! Pise nela!', ja: 'かべに はりついた！ ふみつけろ！' },   // the first time she sticks
+    how: { en: 'Jump her slide, then stomp her', es: 'Salta su embestida y písala', pt: 'Pule o deslize dela e pise nela', ja: 'すべってくるのを とんで、ふみつけろ' } },   // after three losses
   // The Cave's: a Tsuchigumo hanging by its thread in an empty cave (SPIDER, Boss.hang; owner 2026-10-23: the fight redone, the lifts,
   // bridges and rail gone): four hearts, each earned while it lies tangled after its drop.
   cart: { name: { en: 'Tsuchigumo', es: 'Tsuchigumo', pt: 'Tsuchigumo', ja: 'つちぐも' }, ink: 'orange', design: 'loaf', size: CART.size, hang: SPIDER, hp: 4, phase: (hp) => (hp >= 4 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
@@ -1077,7 +1084,7 @@ const CAMPAIGN = [
   { role: 'peak', len: 32, sides: [0, 110785], gate: 'gate3w', fire: 0.45, maxD: 3, chunks: { ...GLACIER, comb: 3, rubberwall: 1, twinshaft: 1 }, intro: [], set: 'icicles', enemies: ['climber', 'crawler', 'nurikabe'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 4102 },
   { role: 'rest', len: 22, fire: 0.33, maxD: 2, chunks: { stairs: 3, planks: 3, shelves: 2, pillars: 2, icewall: 1 }, intro: [], enemies: ['shell'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 4104,
     },
-  { role: 'boss', boss: 'puck', ice: true },   // an ice floor, icicles over it
+  { role: 'boss', boss: 'puck', glide: true, par: 45 },   // Tsurara-onna's (owner, 2026-10-24): packed snow (her slide is hers: a floor of ice made every dodge a slither), two ledges, her icicles only when she calls them; par: its time medal
 ] },
 // World 4, the Sea (owner, 2026-10-20: rivers, the sea and an island between Fuji and Tokyo; its kit in the renderer, see THEMES.sea): where the
 // climb begins to get harder (the owner's 10-15 minute rule keeps worlds 1-3 gentle). One new thing a level: wet rock, rafts riding the streams,
@@ -5578,7 +5585,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // round it, behind it, only what its setting hangs it on: the tram's wire, the spider's thread, the crane's cable and hook.
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
-    const d = df.rail || df.slide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    const d = df.rail || df.slide || df.glide ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
     if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
       const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
       F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);

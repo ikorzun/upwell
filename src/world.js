@@ -2049,6 +2049,69 @@ const CHUNKS = {
     '............',
     '............',
     '............'] },
+  // Fuji's bonus caves (owner З3 «А», after the Mine's, one world at a time), its ice cave's own things (Narusawa's, Worlds' look): its slick ice, its walls of
+  // ice that hold nothing, and its bells (BELLS, the trail's). As the Mine's: 21 rows, the bottom 8 clear for the throw in, the way out the hole in the left wall
+  caveColumns: { d: 1, kind: 'cave', rows: [   // a gift: three ice pillars (slick, I) zigzagging up to the left, coins on each and in the air where you hop or slide
+    '............',   // off one onto the next, three big ones on the top one (15 tiles: a full jump from it keeps under a 375×667's cap)
+    '............',
+    '............',
+    '............',
+    '............',
+    'OOO.........',
+    'III.o.......',
+    '.....o......',
+    '....ooo.....',
+    '....III.o...',
+    '.........o..',
+    '........ooo.',
+    '........III.',
+    '............', '............', '............', '............', '............', '............', '............', '............'] },
+  caveFall: { d: 1, kind: 'cave', rows: [   // a gift: a frozen waterfall down the right wall (]: ice holds nothing) with a column of coins along it, two big ones at its
+    '............',   // top: up the three rock ledges, then off the top one onto the ice, sliding down it through the coins (from the floor alone a third of them)
+    '..........O]',
+    '..........O]',
+    '..........o]',
+    '..........o]',
+    '......ooo.o]',
+    '......###.o]',
+    '..........o]',
+    '...ooo....o]',
+    '...###....o]',
+    '..........o]',
+    'ooo.......o]',
+    '###.......o]',
+    '............', '............', '............', '............', '............', '............', '............', '............'] },
+  caveShafts: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins on a rock floor; two shafts up to it. The one right under it is ice (I, slick: nothing holds
+    '............',   // on, a climb slides down) and comes up under its floor; the other is rock both sides: up it from wall to wall and out on top beside the vault.
+    '............',   // The gap between the two, rock and ice, doesn't climb. The rock by the left wall solid (a gap there dropped you on the way out, and out)
+    '............',
+    '.......OOOO.',
+    '.......OOOO.',
+    '###..#######',
+    '###..#######',
+    '###..#..I..I',
+    '###..#..I..I',
+    '###..#..I..I',
+    '###..#..I..I',
+    '###..#..I..I',
+    '###..#..I..I',
+    '............', '............', '............', '............', '............', '............', '............', '............'] },
+  caveBells: { d: 1, kind: 'cave', rows: [   // a puzzle: a vault of big coins on the left wall shut by a gate of ice (G); three bells (BELLS) to ring in their order,
+    '............',   // 一 二 三 (big to small): 一 under the vault (a jump from the floor), 二 under the high ledge (a jump from the low one), 三 at the low ledge's far
+    '............',   // end (a jump from the floor); bottom up they come 三 二 一. Rung in order the gate melts; a wrong one and all fall quiet. The way in: a double jump
+    '............',   // from the floor beside it. Its floor two thick and its roof run along it: no coin in the magnet's reach from outside
+    '............',
+    '............',
+    '............',
+    '#####...###.',
+    '....G....5..',
+    '....G.......',
+    'OOOOG.......',
+    'OOOOG.......',
+    '#####.......',
+    '#####...####',
+    '...4......6.',
+    '............', '............', '............', '............', '............', '............', '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -2554,7 +2617,8 @@ const AMBUSH = { waves: [2], coins: 2 };
 // Each world's bonus caves (the stash rooms, kind 'treasure'; owner, З1 «В»): its gift rooms and its puzzle rooms, by its world's id (the Village's
 // world kept the Mine's old id). Two gifts, then a puzzle, never the same room twice running (Game.enterRoom). A world not here keeps the five old
 // heaps of coins (Level.build).
-const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] } };   // (the Village's, 'mine'; the Mine's, 'cave')
+const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] },
+  ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] } };   // (the Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice')
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {
@@ -2565,11 +2629,15 @@ const WAVES = {
 };
 const wavesOf = (th, small) => { const k = !th ? null : th.village ? 'village' : th.fuji ? 'fuji' : th.sea ? 'sea' : th.town ? 'town' : null; return k ? WAVES[k][small ? 'ambush' : 'arena'] : null; };
 const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
+// Fuji's bells in a cave (caveBells; '4' '5' '6' under a ledge: 一 二 三, big to small): each hangs on a `rope` (tiles) from the ledge's underside, `w` half wide
+// and `h` tall (tiles) by its number; the hero bumping into one rings it, its pitch `rate` (the chime's). Rung in their order (一 二 三) the room's ice gate ('G')
+// melts; a wrong one and all three fall quiet, to start again (owner З2 «А»: a mistake costs nothing). None rings the room's first `calm` s (the throw in)
+const BELLS = { rope: 0.3, w: [0.8, 0.65, 0.5], h: [1.35, 1.1, 0.85], rate: [0.6, 0.8, 1.05], calm: 1.2 };
 const MIRROR = { '<': '>', '>': '<', '[': ']', ']': '[', '{': '}', '}': '{', '(': ')', ')': '(' };
 // The well is COLS tiles wide: each chunk's columns 1, 4, 7 and 10 are doubled (spread out and
 // even under mirroring; the walls' columns 0 and 11 stay as they are), and a coin, big coin,
 // spring or door in a doubled column is not copied.
-const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
+const COLS = 16, WIDEN = [1, 4, 7, 10], ONCE = new Set(['o', 'O', 'S', 'B', 'A', 'a', 'Y', 'e', 'p', 'n', 'r', 'h', '1', '2', '3', '4', '5', '6', 'P', 'Q', 'V']), FOE_LETTER = { e: 'crawler', p: 'spitter', n: 'nurikabe' };   // an enemy a chunk puts on the ledge under its letter
 for (const id in CHUNKS) {
   CHUNKS[id].rows = CHUNKS[id].rows.map((row) => [...row].map((ch, k) => {
     if (!WIDEN.includes(k)) return ch;
@@ -2651,7 +2719,7 @@ function shuffled(rnd, list) {
 // sticks, little friction), spring (throws the hero up), cap (the ceiling over an exit).
 class Level {
   constructor() {
-    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
+    this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
@@ -2666,7 +2734,7 @@ class Level {
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
-    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
+    this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
     this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
@@ -2730,7 +2798,7 @@ class Level {
     return Object.assign({ x0, y0, x1, y1, plank: false, move: null, crumble: false, slick: false, spring: false, cap: false, gone: false, t: 0, dx: 0, dy: 0, hit: false, crumbling: false,   // (every field
       // a rect is given later too, from the start: one shape for all of them, 2-5 before, the physics' loops slower for it: perf)
       kit: undefined, kitWant: undefined, id: undefined, moss: false, board: false, safe: false, mnRoom: undefined, bouncy: false, ac: false, poke: undefined, batsP: undefined, eyesP: undefined,
-      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, spikes: null }, f);
+      crack: false, key: false, broke: false, paid: false, flash: 0, stair: false, magnet: false, cloud: false, mortar: false, beam: false, cage: false, gate: false, spikes: null }, f);
   }
   coin(x, y, v) { this.coins.push({ x, y, v, vx: 0, vy: 0, drop: false, moving: false, t: 0, ph: this.rng() * TAU }); }
   // The scenes made whole: the boss arena and the two kinds of room.
@@ -3068,7 +3136,7 @@ class Level {
       return mirror ? MIRROR[ch] || ch : ch;
     };
     const X = (k) => l + k * t, Y = (r) => base - r * t;   // a column's left edge; a row's bottom edge (its top is Y(r + 1))
-    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true }, H: { cage: true }, Z: { cage: true, crack: true }, U: { mortar: true }, L: { beam: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
+    const SOLID = { '#': {}, I: { slick: true }, C: { crumble: true }, X: { crack: true }, T: { stair: true }, H: { cage: true }, Z: { cage: true, crack: true }, U: { mortar: true }, L: { beam: true }, G: { gate: true, slick: true } }, used = new Set(), key = (r, k) => r * 16 + k, from = this.rects.length, spikesFrom = this.spikes.length;
     const runEnd = (r, k, ch) => { let k1 = k; while (at(r, k1 + 1) === ch && !used.has(key(r, k1 + 1))) k1++; return k1; };
     for (let r = 0; r < H; r++) for (let k = 0; k < COLS; k++) {
       const ch = at(r, k), first = at(r, k - 1) !== ch;
@@ -3092,6 +3160,7 @@ class Level {
       } else if (ch === 'S') { const cx = X(k) + t / 2; this.rects.push(this.box(cx - 0.7 * R, Y(r) - 0.36 * R, cx + 0.7 * R, Y(r), { spring: true })); }
       else if (ch === 'o' || ch === 'O') this.coin(X(k) + t / 2, Y(r) - t / 2, ch === 'O' ? 5 : 1);
       else if (ch === 'Y') this.icicles.push({ x: X(k) + t / 2, y: Y(r + 1), state: 'hang', t: 0 });
+      else if (ch === '4' || ch === '5' || ch === '6') this.bells.push({ x: X(k) + t / 2, y: Y(r + 1), n: +ch - 3, rung: false, in: false, t: -9 });   // a bell off the ledge over it (BELLS)
       else if (ch === 'V') {   // a seesaw's pivot (SEESAW): its post down to the block under it, a seat at each end of its beam
         let rr = r - 1; while (rr >= 0 && !SOLID[at(rr, k)]) rr--;
         const py = Y(r) - t / 2, sw = { px: X(k) + t / 2, py, L: SEESAW.L * t, th: 0, om: 0, foot: rr >= 0 ? Y(rr + 1) : py + 2 * t, y0: py - (SEESAW.L + 2) * t, y1: py + (SEESAW.L + 2) * t };
@@ -5884,6 +5953,18 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const c of lv.icicles) if (seen(c.y - R, c.y + R)) {   // shaking loose: it sways about its root, harder as it goes (a pine cone more, ice a little), then falls
     const g = c.state === 'shake' ? 1 - clamp((c.t || 0) / ICICLE.shake, 0, 1) : 0, amp = th.ice === 'village' ? 3 : 1.5;
     icicle(c.x, c.y, false, g ? amp * (0.4 + 0.6 * g) * Math.sin(T * (9 + 6 * g)) : 0);
+  }
+  for (const b of lv.bells) if (seen(b.y, b.y + 2 * lv.tile)) {   // Fuji's cave bells (BELLS): a rope from the ledge, a bell its number's size, grey till rung in order, then
+    // orange; rung, it swings about its rope and its sound goes out in rings; its number (一 二 三, the trail posts' glyphs) on it in black
+    const t = lv.tile, q = PIX.size, i = b.n - 1, w = BELLS.w[i] * t, h = BELLS.h[i] * t, u = T - b.t, top = sn2(b.y + BELLS.rope * t);
+    const sw = u < 1.6 ? sn2(Math.sin(u * 11) * 0.14 * t * (1 - u / 1.6)) : 0, x = sn2(b.x) + sw, c = u < 0.12 ? PAL.white : b.rung ? PAL.orange : PAL.gray;
+    box(sn2(b.x) - q / 2, sn2(b.y), sn2(b.x) + q / 2, top, PAL.gray, 1, 0, 10, 0);   // the rope (straight: the swing is the bell's)
+    box(x - sn2(0.62 * w), top, x + sn2(0.62 * w), top + sn2(0.3 * h), c, 1, 0, 10, 0);   // its shoulder
+    box(x - sn2(w), top + sn2(0.3 * h), x + sn2(w), top + sn2(0.82 * h), c, 1, 0, 10, 0);   // its waist
+    box(x - sn2(1.18 * w), top + sn2(0.82 * h), x + sn2(1.18 * w), top + sn2(h), c, 1, 0, 10, 0);   // its lip
+    const gl = POST_NUM[b.n].split('/'), p = gl.length * 2 * q < 0.7 * h ? 2 * q : q, gx = x - (gl[0].length * p) / 2, gy = top + sn2(0.55 * h) - (gl.length * p) / 2;   // (its glyph's pixel two game px where it fits)
+    gl.forEach((row, j) => { for (let k = 0; k < row.length; k++) if (row[k] === '#') box(gx + k * p, gy + j * p, gx + (k + 1) * p, gy + (j + 1) * p, PAL.black, 1, 0, 10, 0); });
+    for (let k = 0; k < 2; k++) { const f = (u - k * 0.25) / 1.1; if (f > 0 && f < 1) F(x, top + 0.6 * h, (0.6 + 2.2 * f) * t, 0, 0, (0.6 + 2.2 * f) * t, PAL.orange, 1 - f, 4); }
   }
   const xg = lv.crossing;
   if (xg && seen(xg.y0 - R, xg.y1 + R)) {   // a level crossing: rails along the band's foot, the lights by the walls, and the train

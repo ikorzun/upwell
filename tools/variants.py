@@ -718,6 +718,37 @@ ELEMENTS = {
     'village-bamboo': dict(world='village', kind='prop', what='a bamboo forest: tall stalks in rows with their leaves, seen behind the shaft', plane='back',
                            where='far behind the play, the stalks rising up the whole height of the shaft', material='bamboo stalks with their nodes, leaves at the top',
                            size='stalks a third of a tile thick, many tiles tall', inks='green stalks and leaves, faint', scene=VILLAGE_AT + ' in front of it'),
+    # The Village from the Iya Valley (Tokushima, Shikoku) in spring, round 2 (owner 2026-10-24: Д87 «В», Д89 «А», Д90 «В», Д93 «А», Д94 «А», Д95 «А»)
+    'village-kaya': dict(world='village', kind='prop', what='kaya stacks of the Iya valley: silver grass (susuki) cut and stood in small cone-shaped stacks on a sloping field, '
+                         'tied near the top, the way Nishi-Awa farmers keep it to lay on their fields', where='two or three stacks standing on the top of a ledge',
+                         material='dry grass stems, a straw tie, a few loose stems', size='each stack about 0.8 tiles wide and 1.3 tiles tall',
+                         inks='pale straw in grey and orange dither with darker stems, a black tie (never yellow: yellow is a coin; never white: white is an edge to stand on)',
+                         scene=VILLAGE_AT),
+    'village-koirope': dict(world='village', kind='prop', what="koinobori strung on a rope across a gorge, as over the river at Oboke in spring: a row of carp streamers "
+                            "hanging from one rope from wall to wall, flying in the wind", where='a thin rope from one wall of the shaft to the other, high over a ledge',
+                            material='cloth carps with big round eyes, a thin rope', size='the rope across the whole 14-tile shaft, each carp about 1.5 tiles long',
+                            inks='carps in black, orange and blue with scale patterns in grey or black, black eyes in grey rings (no white, never red), a thin grey rope',
+                            scene=VILLAGE_AT),
+    'village-beasts': dict(world='village', kind='prop', what='the wild animals of the Iya valley, cute: a Japanese macaque sitting, a sika deer standing and a wild boar '
+                           'snuffling, in every cell the three side by side, the macaque left, the deer in the middle, the boar right, the same style for all three',
+                           where='standing on the top of a ledge', material='fur, little hooves, a stubby tail, the deer\'s small antlers',
+                           size='the macaque about 0.9 tiles tall, the deer about 1.4 tiles long and 1.4 tiles tall, the boar about 1.3 tiles long and 0.8 tiles tall',
+                           inks='the macaque grey with an orange face (never red: red is danger), the deer orange with grey spots (never white: white is an edge to stand on), '
+                           'the boar dark grey and black, black eyes', scene=VILLAGE_AT),
+    'village-statue': dict(world='village', kind='prop', what="the Peeing Boy statue of the Iya gorge: a small bronze statue of a little boy standing on the very edge of a "
+                           "rock high over the gorge, peeing in a thin arc into the drop, cheeky and cute", where="on the top of a ledge at its free end, the arc falling past its edge",
+                           material='weathered bronze, a little rock under his feet', size='the boy about 0.8 tiles tall, his rock about 1 tile wide',
+                           inks='the bronze in grey with a blue-green patina dither (no white, never red), the arc single blue pixels', scene=VILLAGE_AT),
+    'village-yamazakura': dict(world='village', kind='prop', what='a wild mountain cherry (yamazakura) of the Iya slopes in bloom: pale blossoms mixed with reddish-brown new '
+                               'leaves, a tall uneven trunk, a few petals drifting', where='on the top of a ledge at its wall end',
+                               material='a dark trunk with horizontal bark bands, clouds of blossom with new leaves among them', size='about 4 tiles wide and 5 tiles tall',
+                               inks=SAKURA + ', the new leaves orange (never red), a grey or black trunk, falling petals single purple pixels', scene=VILLAGE_AT),
+    'village-vinebridge': dict(world='village', kind='ledge', what='a kazurabashi, the vine bridge of the Iya valley woven from thick hardy-kiwi vines, its wooden slats '
+                               'laid with wide gaps between them, its handrails and side nets of vines', does='a row of slats you stand on, that crumble a moment after you '
+                               'touch them and come back a while later', material='thick twisted vines, rough wooden slats', size='5 tiles long, a third of a tile thick',
+                               place='the bridge strung between the two walls of the shaft', main='grey',
+                               vary='the vine ropes and how they twist, the slats and gaps, the side nets, its sag, how it is tied to the walls',
+                               rule="Grey is this world's mark for what crumbles, so it is its main colour."),
     'village-far': dict(world='village', kind='prop', what='the countryside far away: terraced hills, a village of thatched roofs and sakura, seen far behind the shaft',
                         plane='back', where='far behind everything, low and faint, so the play reads over it', material='hills, terraces, roofs, trees',
                         size='about 14 tiles wide and 6 tiles tall', inks='a faint orange and a faint purple dither on the black', scene=VILLAGE_AT + ' in front of it'),

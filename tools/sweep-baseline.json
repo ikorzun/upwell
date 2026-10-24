@@ -1,5 +1,5 @@
 {
- "commit": "0bc18ac",
+ "commit": "0af97fc",
  "made": "2026-10-24",
  "levels": {
   "c1-1": {
@@ -11,34 +11,33 @@
   },
   "c1-2": {
    "result": "clear",
-   "time": 29.5,
+   "time": 22,
    "heartsLost": 0,
-   "stuck": [
-    "mosswall@120"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c1-3": {
    "result": "clear",
-   "time": 29.5,
-   "heartsLost": 1,
+   "time": 23,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "@spitwall"
-   ]
+   "hits": []
   },
   "c1-4": {
    "result": "clear",
-   "time": 32,
+   "time": 21,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-5": {
    "result": "clear",
-   "time": 21,
+   "time": 48.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "mosswall@72",
+    "iciclerun@135"
+   ],
    "hits": []
   },
   "c1-6": {
@@ -50,7 +49,7 @@
   },
   "c1-7": {
    "result": "clear",
-   "time": 31.5,
+   "time": 39.5,
    "heartsLost": 0,
    "stuck": [
     "fork@35"
@@ -59,11 +58,11 @@
   },
   "c1-8": {
    "result": "clear",
-   "time": 15,
+   "time": 19.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "spitter@stairs"
+    "crawler@gate3w"
    ]
   },
   "c1-9": {
@@ -91,9 +90,11 @@
   },
   "c2-2": {
    "result": "clear",
-   "time": 14.5,
+   "time": 36.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "overhang@149"
+   ],
    "hits": []
   },
   "c2-3": {
@@ -105,14 +106,14 @@
   },
   "c2-4": {
    "result": "clear",
-   "time": 28,
+   "time": 28.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-5": {
    "result": "clear",
-   "time": 19,
+   "time": 21,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -128,22 +129,22 @@
   },
   "c2-7": {
    "result": "clear",
-   "time": 47.5,
+   "time": 49,
    "heartsLost": 0,
    "stuck": [
-    "rubberwall@17",
-    "rubberwall@134"
+    "rubberwall@111",
+    "comb@163"
    ],
    "hits": []
   },
   "c2-8": {
    "result": "clear",
-   "time": 27,
-   "heartsLost": 1,
-   "stuck": [],
-   "hits": [
-    "spikes@gate3"
-   ]
+   "time": 39.5,
+   "heartsLost": 0,
+   "stuck": [
+    "mosswall@163"
+   ],
+   "hits": []
   },
   "c2-9": {
    "result": "clear",
@@ -172,32 +173,36 @@
   },
   "c3-2": {
    "result": "clear",
-   "time": 43,
-   "heartsLost": 1,
+   "time": 30.5,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "crawler@iceblocks"
-   ]
+   "hits": []
   },
   "c3-3": {
    "result": "clear",
-   "time": 23,
+   "time": 38.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "comb@172"
+   ],
    "hits": []
   },
   "c3-4": {
    "result": "clear",
-   "time": 35,
+   "time": 48.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "icewall@173"
+   ],
    "hits": []
   },
   "c3-5": {
    "result": "clear",
-   "time": 24.5,
+   "time": 34,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "rubberwall@66"
+   ],
    "hits": []
   },
   "c3-6": {
@@ -209,21 +214,19 @@
   },
   "c3-7": {
    "result": "clear",
-   "time": 29.5,
-   "heartsLost": 1,
+   "time": 30,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "crawler@iceblocks"
-   ]
+   "hits": []
   },
   "c3-8": {
    "result": "clear",
-   "time": 33,
-   "heartsLost": 1,
-   "stuck": [],
-   "hits": [
-    "shot@icicles"
-   ]
+   "time": 47.5,
+   "heartsLost": 0,
+   "stuck": [
+    "rubberwall@146"
+   ],
+   "hits": []
   },
   "c3-9": {
    "result": "clear",
@@ -234,14 +237,10 @@
   },
   "c3-10": {
    "result": "won",
-   "time": 68.5,
-   "heartsLost": 3,
+   "time": 47.5,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "boss@hover",
-    "shot@warn",
-    "shell@hover"
-   ],
+   "hits": [],
    "boss": "Tsurara-onna",
    "dealt": "5/5"
   },
@@ -268,14 +267,16 @@
   },
   "c4-4": {
    "result": "clear",
-   "time": 29.5,
-   "heartsLost": 0,
+   "time": 31.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": []
+   "hits": [
+    "circler@comb"
+   ]
   },
   "c4-5": {
    "result": "clear",
-   "time": 22,
+   "time": 24.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -289,7 +290,7 @@
   },
   "c4-7": {
    "result": "clear",
-   "time": 20.5,
+   "time": 18.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -336,16 +337,18 @@
   },
   "c5-3": {
    "result": "clear",
-   "time": 42.5,
+   "time": 42,
    "heartsLost": 0,
    "stuck": [
-    "shelves@70"
+    "comb@189"
    ],
-   "hits": []
+   "hits": [
+    "crawler@pillars"
+   ]
   },
   "c5-4": {
    "result": "clear",
-   "time": 41.5,
+   "time": 42,
    "heartsLost": 0,
    "stuck": [
     "spring@114"
@@ -354,10 +357,12 @@
   },
   "c5-5": {
    "result": "clear",
-   "time": 19.5,
-   "heartsLost": 0,
+   "time": 32,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": []
+   "hits": [
+    "crawler@comb"
+   ]
   },
   "c5-6": {
    "result": "clear",
@@ -368,20 +373,16 @@
   },
   "c5-7": {
    "result": "clear",
-   "time": 39.5,
+   "time": 23.5,
    "heartsLost": 0,
-   "stuck": [
-    "spring@187"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c5-8": {
    "result": "clear",
-   "time": 40,
+   "time": 27.5,
    "heartsLost": 0,
-   "stuck": [
-    "planks@67"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c5-9": {

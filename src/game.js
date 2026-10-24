@@ -570,7 +570,7 @@ class Foe {
 // for a moment: then it hurts to touch.
 class Boss {
   constructor(lv, def) {   // def: a campaign boss's (BOSSES); the random run's summit boss has none
-    const lk = def && def.look, R = lv.R * ((lk && lk.size) || (def && def.size) || BOSS.size), slide = !!(def && (def.slide || def.glide || def.quake)), rail = def && def.rail && lv.rail;   // lk: its look (LOOKS)   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
+    const lk = def && def.look, R = lv.R * ((lk && lk.size) || (def && def.size) || BOSS.size), slide = !!(def && (def.slide || def.glide || def.quake || def.street)), rail = def && def.rail && lv.rail;   // lk: its look (LOOKS)   // the Puck: on the floor, to one side of the hero; the Minecart: on its rail
     this.ink = def && def.ink ? { id: 'boss', base: PAL[def.ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink)
     this.body = new Body(designById((lk && lk.design) || (def && def.design) || 'cat'), this.ink, rail ? rail.x1 : slide ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, rail ? rail.y - 0.75 * R : slide ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = slide ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
@@ -582,12 +582,13 @@ class Boss {
     const [sw, sh] = bossSize(this); this.halfW = sw / 2; this.minGrowth = Math.min(1, (4 * lv.R) / Math.max(sw, sh));   // its drawing's half width; its shrink stops at 2:1 against the hero's 2R
     loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
-  open() { const d = this.def; return d && (d.hang || d.glide || d.quake) ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
+  open() { const d = this.def; return d && (d.hang || d.glide || d.quake || d.street) ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
   to(s) { this.state = s; this.st = 0; }
   think(dt, g) {
     if (this.def && this.def.hang) { this.hang(dt, g); return; }
     if (this.def && this.def.glide) { this.glide(dt, g); return; }
     if (this.def && this.def.quake) { this.quake(dt, g); return; }
+    if (this.def && this.def.street) { this.street(dt, g); return; }
     if (this.def && this.def.slide) { this.slide(dt, g); return; }
     if (this.def && this.def.rail) { this.ride(dt, g); return; }
     const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
@@ -638,7 +639,7 @@ class Boss {
     }
   }
   rise() {
-    const b = this.body, slide = this.def && (this.def.slide || this.def.quake); this.to('rise'); b.gScale = slide || (this.def && this.def.glide) ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); this.rattled = false;
+    const b = this.body, slide = this.def && (this.def.slide || this.def.quake); this.to('rise'); b.gScale = slide || (this.def && (this.def.glide || this.def.street)) ? 1 : 0; b.squeezeIn = 0; b.kickSquash(0, 1, -1.2); this.rattled = false;
     if (slide) { turnOver(b); b.up.fails = 0; setVel(b, 0, -3 * b.R); }   // the Puck: back on its feet with a hop
   }
   // Tsurara-onna (BOSSES.puck, ICE): she creeps over the ice at the hero, her moves taking turns: icicles called down over the hero after
@@ -732,6 +733,39 @@ class Boss {
       if (Math.floor(this.st * 8) % 2) b.kickSquash(1, 0, 0.06);
       if (this.st > F.flop * this.help) this.rise();
     } else if (this.state === 'rise' && this.st > 0.5) this.to('hover');   // back on its belly with a hop
+  }
+  // The Tsukumo Tram (BOSSES.tram, TRAMRUN): at a stop it rings twice with its headlight red, then rushes along the floor to the other end
+  // (jump it, or be up on a ledge); there its doors open, the only time a stomp on its roof hurts it, its pantograph throwing sparks at
+  // the hero. Its last heart runs it back once more before it stops.
+  street(dt, g) {
+    const F = this.def.street, b = this.body, lv = g.lv, R = lv.R, H = g.hero, ph = this.def.phase(this.hp);
+    const x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;
+    b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);
+    if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
+    if (this.t < F.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first, while its name is up
+    if (ph > this.phSeen) { this.phSeen = ph; shake.add(5); sound.play('chime', 0.9, 0.6); }   // a new phase: a low bell and a shake
+    if (this.state === 'hover' || this.state === 'rise') {   // at a stop, doors shut: its bell next
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (this.st > (this.state === 'rise' ? F.close : 0.2)) { this.to('warn'); this.dir = b.cx > (lv.l + lv.r) / 2 ? -1 : 1; sound.play('chime', 0.8, 1.6); }
+    } else if (this.state === 'warn') {   // ding-ding, its headlight red: the rush to come
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (this.st > 0.25 && this.st - dt <= 0.25) sound.play('chime', 0.8, 1.6);
+      if (Math.floor(this.st * 12) % 2) b.kickSquash(1, 0, 0.06);
+      b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (this.st > (this.drops ? F.again : F.warn)) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.4); }
+    } else if (this.state === 'dive') {   // along the floor to the other end
+      addVel(b, (this.dir * F.rush[ph] * R - b.rigVx) * Math.min(1, 8 * dt), 0);
+      if ((this.dir > 0 ? b.cx < x1 : b.cx > x0) && !(b.wallMask & (this.dir > 0 ? 2 : 1)) && this.st < 2.5) return;
+      shake.add(6); sound.play('stomp', 0.8, 0.6); fx.dust(this.dir > 0 ? b.maxX : b.minX, lv.floor, IMPACT.puffSpeed + 700);
+      if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // its last heart: straight back once more
+      this.drops = 0; this.to('dazed'); setVel(b, 0, 0); b.kickSquash(1, 0, 1.2); sound.play('chime', 0.7, 1.2);
+      const x = b.cx, y = b.minY, n = F.sparks[ph];
+      for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 1.6 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R, fire: true }); }   // the pantograph's sparks at the hero
+      if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
+    } else if (this.state === 'dazed') {   // at the stop, doors open: open to a stomp on its roof
+      addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
+      if (this.st > F.stop * this.help) this.to('rise');   // (rise: its doors shut, `close` s)
+    }
   }
   // The Puck (BOSSES.puck, PUCK): slides the ice to and fro flicking out shells, winds up (backing off, flat, flashing)
   // and dashes over to the far wall, which shakes icicles down from its second phase. Only a rolling shell turns it (flip).
@@ -926,7 +960,7 @@ class Game {
     return a;
   }
   makeHero() {
-    const bs = this.lv.boss, x = bs && bs.def && (bs.def.slide || bs.def.glide || bs.def.quake) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
+    const bs = this.lv.boss, x = bs && bs.def && (bs.def.slide || bs.def.glide || bs.def.quake || bs.def.street) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
     this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
     this.hero.isHero = true;
     this.startY = this.hero.cy;
@@ -1377,7 +1411,7 @@ class Game {
         if (puck && (A === puck || B === puck) && A !== hero && B !== hero) continue;   // the Puck slides through its own shells (a rolling one turns it over: rolling)
         if (A.maxX + sk2 < B.minX || B.maxX + sk2 < A.minX || A.maxY + sk2 < B.minY || B.maxY + sk2 < A.minY) continue;
         const withHero = A === hero || B === hero;
-        const solid = lv.boss && !(lv.boss.def && (lv.boss.def.slide || lv.boss.def.glide || lv.boss.def.quake || lv.boss.def.rail)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
+        const solid = lv.boss && !(lv.boss.def && (lv.boss.def.slide || lv.boss.def.glide || lv.boss.def.quake || lv.boss.def.street || lv.boss.def.rail)) && (A === lv.boss.body || B === lv.boss.body);   // but never through the boss: it would end up inside it, stuck (the Puck's dash, the Minecart's end would pin it to a wall)
         if (withHero && this.invuln > 0 && !solid && playing && !A.ghost && !B.ghost) {   // a hit hero passes through for a moment, but a stomp from over one still counts (Game.blinkMeet)
           const o = A === hero ? B : A; if (o.maxX > hero.minX && o.minX < hero.maxX && o.maxY > hero.minY && o.minY < hero.maxY) o.blinkHero = true; continue;
         }
@@ -1643,11 +1677,11 @@ class Game {
     const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
     if (e.type === 'nurikabe' && !can && above) { this.bounceOff(e); return; }   // its hard top, hanging or going: a bounce, nothing more (CRUSH)
     if (boss && e.def && e.def.top && !can && H.cy < b.cy - 0.2 * b.R && dx < b.R) { this.bounceOff(e); return; }   // the Puck's hard dome: a bounce, nothing more
-    if (boss && e.def && (e.def.rail || e.def.hang || e.def.glide || e.def.quake) && e.angry > 0) return;   // just hit, red: it only pushes (the stomp's high bounce passes it going back up)   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
+    if (boss && e.def && (e.def.rail || e.def.hang || e.def.glide || e.def.quake || e.def.street) && e.angry > 0) return;   // just hit, red: it only pushes (the stomp's high bounce passes it going back up)   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
     if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow') || this.power('swarm')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
-    else if (boss && e.state === 'dive' && e.def && (e.def.slide || e.def.glide)) this.hurt(-e.dir * 0.4, -1, 'boss');   // the Puck's dash: thrown up and back over it
+    else if (boss && e.state === 'dive' && e.def && (e.def.slide || e.def.glide || e.def.street)) this.hurt(-e.dir * 0.4, -1, 'boss');   // the Puck's dash: thrown up and back over it
     else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
   }

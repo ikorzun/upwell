@@ -3199,11 +3199,11 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // Effects and music made with ElevenLabs (tools/audio.py). One Web Audio context, made on the first key press or
 // touch (browsers keep sound off until then). Effects play with a little random pitch; music loops and cross-fades:
 // calm in the menu and the shop, a climb of each world's own in the shaft, the bonus levels', the stash's, boss at the
-// summit, quieter while paused or over (each fetched when first wanted, the last four kept: all of them decoded are ~170 MB). It sleeps
+// summit, quieter while paused or over (each fetched when first wanted, the last four kept: mono at 32 kHz and decoded at that rate, ~7 MB each). It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
   'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'chime'];   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
-const MUSIC_VOL = 0.4, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
+const MUSIC_VOL = 0.4, MUSIC_RATE = 32000, MUSIC_PAD = 0.1, FX_VOL = 0.7, CLIMBS = ['climb', 'ice', 'mine', 'void'], PENTA = [0, 2, 4, 7, 9];
 const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', junk: 'junk', skazka: 'skazka', sea: 'sea' };   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
@@ -3219,12 +3219,16 @@ const sound = {
     for (const n of SOUNDS) this.load(n, 'assets/sfx/' + n + '.mp3');
     for (const n of ['calm', WORLD_MUSIC[game.wd.id] || 'climb']) this.fetchMusic(n);   // the menu's, and its world's climb
   },
-  load(name, path) { return fetch(path).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then((a) => this.ctx.decodeAudioData(a)).then((b) => { this.bufs[name] = b; return true; }).catch(() => false); },
+  load(name, path, rate) { return fetch(path).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then((a) => this.decoder(rate).decodeAudioData(a)).then((b) => { this.bufs[name] = b; return true; }).catch(() => false); },
+  decoder(rate) {   // the music decoded at its own rate, in an offline context: not resampled up to the device's 48 kHz (owner: «100 мб это очень много»: four
+    // kept tracks were ~90 MB at 44.1 kHz stereo made 48, ~28 now mono at 32); the device's own context where there is no offline one
+    try { return (rate && window.OfflineAudioContext && (this.dec || (this.dec = new OfflineAudioContext(1, 1, rate)))) || this.ctx; } catch (e) { return this.ctx; }
+  },
   fetchMusic(name) {
     const a = this.asked[name];
     if (a === true || (a && performance.now() < a)) return;   // in hand or on its way (a failed one: again in a while)
     this.asked[name] = true;
-    this.load('m:' + name, 'assets/music/' + name + '.mp3').then((ok) => {   // over four kept: the longest unplayed one goes (fetched again if wanted)
+    this.load('m:' + name, 'assets/music/' + name + '.mp3', MUSIC_RATE).then((ok) => {   // over four kept: the longest unplayed one goes (fetched again if wanted)
       if (!ok) { this.asked[name] = performance.now() + 15000; return; }   // (cut off, by the network or the page going to the back: tried again)
       const kept = Object.keys(this.bufs).filter((k) => k.startsWith('m:')).map((k) => k.slice(2));
       if (kept.length <= 4) return;
@@ -3262,7 +3266,8 @@ const sound = {
     s.buffer = b; s.playbackRate.value = rate * (0.96 + 0.08 * Math.random()); g.gain.value = vol;
     s.connect(g); g.connect(this.fx); s.start();
   },
-  // A loop starts and ends where its sound does (an MP3 has a little silence padded at both ends).
+  // A loop starts and ends where its sound does (an MP3 has a little silence padded at both ends), less the MUSIC_PAD it carries on each side: its
+  // last 0.1 s before it and its first after it (tools/audio.py), so the codec's edges lie outside the loop and the seam does not click.
   music(name) {
     const b = this.bufs['m:' + name];
     if (this.track === name) return;
@@ -3274,7 +3279,7 @@ const sound = {
     while (a < z && Math.abs(d[a]) < 1e-4) a++;
     while (z > a && Math.abs(d[z]) < 1e-4) z--;
     const src = c.createBufferSource(), gain = c.createGain();
-    src.buffer = b; src.loop = true; src.loopStart = a / b.sampleRate; src.loopEnd = z / b.sampleRate;
+    src.buffer = b; src.loop = true; src.loopStart = a / b.sampleRate + MUSIC_PAD; src.loopEnd = (z + 1) / b.sampleRate - MUSIC_PAD;
     gain.gain.value = 0; gain.gain.setTargetAtTime(1, t, 0.4);
     src.connect(gain); gain.connect(this.mus); src.start(t, src.loopStart);
     this.track = name; this.src = src; this.gain = gain;

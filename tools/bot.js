@@ -133,7 +133,9 @@ function play(p, st) {
     input.set('jump', jumped && t < p.jumpAt + p.hold);
     step();
     if (g.state === 'play' && g.onFloor()) st.stand = Math.max(st.stand, heightOf(g.hero.floorY));
-    if (live && run) { run.frames++; if ((g.hero.wallMask & 3) && !(g.hero.wallMask & 8)) run.wallFrames++; if (g.flatT > 0 && !run.flat) run.flats++; run.flat = g.flatT > 0; }   // the moves really played: how much of it on a wall, off any floor; flattened by a pestle (MOCHI)
+    if (live && run) { run.frames++; if ((g.hero.wallMask & 3) && !(g.hero.wallMask & 8)) run.wallFrames++; if (g.flatT > 0 && !run.flat) run.flats++; run.flat = g.flatT > 0; }   // the moves really played: how much of it on a wall, off any
+    if (live && run) { const on = g.state === 'play' && g.onFloor(); if (on && !run.wasOn) run.out.landings.push([chunkAt(g.hero.cy), Math.floor((g.hero.cx - g.lv.l) / tileOf()), +heightOf(g.hero.floorY).toFixed(1)]); run.wasOn = on; }   // each landing
+    // really played, for the landing map (owner, К10 «А»): [its chunk, its column, its height] floor; flattened by a pestle (MOCHI)
   }
 }
 // The jumps really played, and how many were off a wall (the hero's own surface: a climb that never needs one is a ladder)
@@ -232,7 +234,8 @@ let run = null;
 function start(world, stage = 0, s = 1, opts = {}) {
   seed = opts.order != null ? opts.order : s;   // (`order`: a seed of its own for the parts' order and the play's chances, the level still laid on `s`)
   const real = Math.random; Math.random = random;   // built on the bot's seed too: a tier's three parts in an order of their own (campMerge), a boss's arena
-  try { if (opts.daily) __up.daily(s, stage); else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s); }   // a campaign level (its recipe; the map's column, see campAt) or a random run's
+  try { if (opts.daily) __up.daily(s, stage); else if (opts.camp && opts.parts) { g.playLevel(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s, opts.parts); ui.hideAll(); } else if (opts.camp) __up.camp(world * 30 + stage * 3 + (opts.col != null ? opts.col : 1), s); else __up.go(world, stage, s); }   // (`parts`: a tier's
+  // three parts in this order, [0, 2, 1] the calm, the fierce, the plain from the bottom: К10's every order)   // a campaign level (its recipe; the map's column, see campAt) or a random run's
   finally { Math.random = real; }
   g.makeHero();   // a fresh body, so a level plays the same whatever was played before it
   seed = opts.order != null ? opts.order : s;   // and the play's chances from the seed again: the build makes a new hero (its Face: 2 Math.random) only when R
@@ -249,8 +252,8 @@ function start(world, stage = 0, s = 1, opts = {}) {
   killed = {};
   const spawned = {};
   for (const e of lv.spawns) spawned[e.type] = (spawned[e.type] || 0) + 1;
-  run = { opts, spawned, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, frames: 0, wallFrames: 0, jumps: 0, wallJumps: 0, floorJumps: 0, rebounds: 0, flats: 0, flat: false, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
-    out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [], boss: bs ? { name: bs.def ? bs.def.name.en : 'Lid', max: bs.max, dealt: [] } : null } };
+  run = { opts, spawned, wasOn: true, t: 0, best: 0, bestT: 0, decisions: 0, safeSum: 0, frames: 0, wallFrames: 0, jumps: 0, wallJumps: 0, floorJumps: 0, rebounds: 0, flats: 0, flat: false, hp: g.hp, startHp: g.hp, foes: lv.spawns.length, coins0: lv.coins.length, top: lv.portal ? heightOf(lv.portal.y) : 0,
+    out: { world, stage, seed: s, chunks: lv.placed.map((c) => c.id).join(' '), stuck: [], hits: [], landings: [], order: (g.rc && g.rc.order) || null, boss: bs ? { name: bs.def ? bs.def.name.en : 'Lid', max: bs.max, dealt: [] } : null } };
   return { started: true, foes: run.foes };
 }
 function advance(ms = 30000) {

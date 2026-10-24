@@ -173,7 +173,13 @@ const campMerge = (w, s, rc, order) => {   // a tier's level: its calm, plain an
   order = order || (w < 3 ? [0, ...shuffled(Math.random, [1, 2])] : shuffled(Math.random, [0, 1, 2]));   // (worlds 1-3: the calm part first, at the bottom, the plain and the
   // fierce over it in either order; owner, К1 «А»: a level starts slow. From world 4, any order)
   const parts = order.map((c) => campAt(w * 30 + s * 3 + c).rc);
-  return Object.assign({}, rc, { order, len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })) });
+  // Its rewards for its length (owner, 2026-10-24: «мало лавок», «мало бонусов… играть стало скучно»): a shop in every one, a caged friend in every one, the
+  // trader in every other, and its parts' candies, filled to CANDIES.n from its world's lot (CANDY_POOL)
+  const pool = CANDY_POOL[CAMPAIGN[w].world.id] || CANDY_POOL.any, candy = [...new Set(parts.flatMap((p) => p.candy || []))].slice(0, CANDIES.n - 1);   // (no kind twice)
+  for (let k = 0; candy.length < CANDIES.n && k < 2 * pool.length; k++) { const c = pool[(s + k) % pool.length]; if (!candy.includes(c)) candy.push(c); }
+  if (!candy.includes('rainbow') && !candy.includes('grow')) candy[candy.length - 1] = s % 2 ? 'grow' : 'rainbow';   // (a rainbow or a big Mochi in every one)
+  return Object.assign({}, rc, { order, len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })),
+    candy, shop: rc.shop || 0.55, cage: true, trader: s % 2 === 0 });
 };
 const campWorlds = () => { const out = []; for (let w = 0; w < CAMP_OPEN; w++) if (gated(w) || campOpen(w * 30 + 1)) out.push(w); return out; };   // the worlds open (a bonus world always: its tab shows its stars)
 const opened = (u) => save.bank >= u.at;
@@ -2624,6 +2630,9 @@ const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for 
 let storyLook = STORY_LIVE;   // the first level of the load, seen or not)
 // A card's colours (К6): its world's ink over black as the game draws the world (DEPTH: the frame's band a quarter of the way from black to
 // the ink, the corners the ink), white, red and yellow as everywhere; the Moon's cards in the pack's own lavender; the Dark Forest grey.
+// Black or white, whichever stands out more on a colour (WCAG's contrast; the story card's button, ui.story)
+const inkOn = (hex) => { const lum = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }, [r, g, b] = [1, 3, 5].map((i) => lum(parseInt(hex.slice(i, i + 2), 16))), L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return (L + 0.05) / (0.0137 + 0.05) >= (1.05) / (L + 0.05) ? '#141414' : '#f3f3f3'; };   // (#141414's luminance 0.0137)
 const STORY_INK = { moon: { I: '#201638', W: '#f7f3ee', L: '#ab80e5', R: '#f34545', G: '#ffb642', bg: '#0b0716' } };
 for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8ff'], ['sea', '#6fe0ee'], ['tokyo', '#c996ff'], ['blocks', '#c8c8c8'], ['sky', '#c996ff'], ['skazka', '#c8c8c8']]) {
   const a = [1, 3, 5].map((i) => parseInt(ink.slice(i, i + 2), 16)), I = '#' + a.map((v) => Math.round(20 + (v - 20) * 0.25).toString(16).padStart(2, '0')).join('');
@@ -3219,15 +3228,18 @@ const ui = {
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
     const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink]; this.storyArgs = [c, done];   // (laid again on a resize: Game.resized)
-    const box = Math.min(view.w - 16, (view.h - 180) * 2 / 3), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;   // (the view as
-    card.style.width = w * k + 'px'; card.style.height = h * k + 'px';   // layout measured it: a CSS 100vh is taller than the page under iOS Safari's bar) whole pixels: a whole number of the
-    // screen's to each of the art's cells, the most that fits a 2:3 box (cards drawn on finer grids a little smaller), unless that loses over 30% of it (then as it fits)
     for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
     const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); this.storyArgs = null; done(); }), 'next');
+    next.style.background = f.L; next.style.color = inkOn(f.L);   // the button in the card's own colour, its words in the one of black and white that stands out on it (owner, 2026-10-24)
     clip.setAttribute('role', 'img'); clip.setAttribute('aria-label', L2(c.title));
     tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); card.append(tilt);
+    p.append(card, title, next);   // (laid first with no height: what is left over its title is the card's)
+    // As big as the phone allows (owner, 2026-10-24: «Карточка истории или босса должна занимать на телефоне максимальное количество места»): edge to edge or
+    // as tall as is left over its title and button, in whole pixels: a whole number of the screen's to each of the art's cells, unless that loses over 30% of it
+    const room = title.getBoundingClientRect().top - p.getBoundingClientRect().top - parseFloat(getComputedStyle(p).paddingTop) - parseFloat(getComputedStyle(card).marginBottom) - 12;
+    const box = Math.min(view.w, room * w / h), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;
+    card.style.width = w * k + 'px'; card.style.height = h * k + 'px';
     if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);
-    p.append(card, title, next);
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had
     const p = this.panel('result');

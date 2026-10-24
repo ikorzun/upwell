@@ -783,17 +783,18 @@ const ENEMY = {
   komori: { design: 'round', color: 'goo', size: 0.72, grav: 0, stomp: true, coins: 4, speed: 0, step: 0.8, move: 'swoop' },   // the Mine's diving bat, its look KOMORI_V (KOMORI)
   skull: { design: 'dome', color: 'goo', size: 1.1, grav: 1, stomp: true, coins: 5, speed: 40, step: 0.8, move: 'crawl' },   // a skull in black goo, dripping (SKULL; the Crypt's)
   // the square ones (owner, 2026-10-22: «еще нужны квадратные враги», all three he picked): jelly cubes ('cube')
-  tumbler: { design: 'cube', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 4, speed: 0, step: 1, move: 'tumble' },   // a yokan somersaulting along its ledge (TUMBLE)
+  tumbler: { design: 'cube', color: 'red', size: 0.65, grav: 1, stomp: true, coins: 4, speed: 0, step: 1, move: 'tumble' },   // a yokan somersaulting along its ledge (TUMBLE); its body
+  // the size of its drawing (handover 19: drawn 27×29 CSS px on a 393 phone, the body 37 across at 0.8 R: hit where nothing was drawn), as the nurikabe's (36×32, 51 at 1.1 R)
   tofu: { design: 'cube', color: 'red', size: 0.95, grav: 1, stomp: true, coins: 2, speed: 32, step: 0.9, move: 'crawl' },   // a soft cube: stomped, it falls into four (TOFU)
   tofuMini: { design: 'cube', color: 'red', size: 0.45, grav: 1, stomp: true, coins: 1, speed: 48, step: 0.45, move: 'crawl', safe: 0.8 },   // (slower, harmless its first 0.8 s: the same; was 70, 0.35 s)
-  nurikabe: { design: 'cube', color: 'red', size: 1.1, grav: 0, stomp: true, coins: 6, speed: 0, step: 1, move: 'crush' },   // a wall yokai hanging over its ledge, it drops on the hero under it (CRUSH)
+  nurikabe: { design: 'cube', color: 'red', size: 0.75, grav: 0, stomp: true, coins: 6, speed: 0, step: 1, move: 'crush' },   // a wall yokai hanging over its ledge, it drops on the hero under it (CRUSH)
 };
 // A tumbler: sits `rest` s on its ledge (crouching its last `crouch`), then somersaults `hop` R ahead, up and over in `air` s, turning at the ledge's end. Sitting it
 // is stomped; in the air its corners hurt. A nurikabe: hangs `up` tiles over its ledge (less if a ceiling is nearer); the hero under it (within `reach` R of its
 // sides), it shakes `warn` s, falls at `fall` times gravity, lies `down` s (stomped only then; from over it before, the hero bounces off its top), rises at
 // `rise` R/s. A tofu stomped: `n` small ones, thrown apart
 const TUMBLE = { rest: 1.8, crouch: 0.45, air: 0.45, hop: 2.0 };   // (owner, 2026-10-23: «квадратных врагов тяжело одолеть, точно нужно проще»: it sits longer, crouches clearer, hops shorter; was 1.1, 0.3, 2.4)
-const CRUSH = { up: 3.6, reach: 1.2, warn: 0.85, fall: 2.2, down: 2.4, rise: 2.2 };   // (the same: it shakes longer, falls slower, lies longer; was 0.55, 3, 1.4)
+const CRUSH = { up: 3.6, reach: 1.55, warn: 0.85, fall: 2.2, down: 2.4, rise: 2.2 };   // (reach 1.55, was 1.2: with its body now 0.75 R the hero under it still within 2.3 R; before that it shook longer, fell slower, lay longer, was 0.55, 3, 1.4)
 const TOFU = { n: 4 };
 const SPRITE_EYES = {}, spriteEyes = (id) => SPRITE_EYES[id] || (SPRITE_EYES[id] = (() => {   // where a sprite's eyes are (its 'o' cells), in game pixels from its middle
   const rows = FOE_SPRITES[id]; let n = 0, x = 0, y = 0;

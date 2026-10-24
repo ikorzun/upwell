@@ -932,6 +932,14 @@ ELEMENTS = {
                            size='2 tiles across', main='orange (a baked crust)', scene=SKAZKA_AT,
                            vary='the crust (its shading, a shine of glaze, cracks, a dusting of flour, a darker baked bottom) and the face (the eyes, the brows, a '
                            'cheeky grin, a sly smile, a scared look, rosy cheeks in orange); nothing on it but the bun itself: no hat, no arms, no legs'),
+    # Ume, Mochi's friend of story card VI (the rainy Tokyo street by a vending machine): an umeboshi, a red pickled plum, round and soft like Mochi; he waits on
+    # 5-3 by the vending machine, and comes along after the can (UPwell's bf03669); his look path A (UPwell's leaf a placeholder)
+    'tokyo-ume': dict(world='tokyo', kind='hero', what="Ume, Mochi's friend: an umeboshi, a little red pickled plum come alive, round and soft like Mochi, a stalk with one "
+                      "small green ume leaf on his crown, a kind gentle face; in story card VI he sits in the rain by a vending machine in a Tokyo backstreet",
+                      size='1.8 tiles across, a little smaller than the hero', main='red #f43e34 (his own colour; in this game he is the one friendly red thing)',
+                      scene='a Tokyo backstreet ledge in the rain at night, a glowing vending machine at the wall, Mochi (a white round blob) beside him for scale',
+                      vary='his wrinkles (an umeboshi is wrinkled: soft dents in his skin), his leaf and stalk, his face (the eyes, a little smile, rosy cheeks), '
+                      'a shine on him; nothing on him but himself: no hat, no arms, no legs'),
     'tokyo-bonsai': dict(world='tokyo', kind='prop', what='a bonsai, a small gnarled pine in a shallow pot',
                          where='on the top of a ledge at its wall end, as on a balcony', material='a twisted trunk, clouds of needles, a glazed pot',
                          size='about 1.5 tiles wide and 1.5 tiles tall, pot included',

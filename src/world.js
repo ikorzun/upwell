@@ -664,6 +664,11 @@ const TANUKI = { high: 13, swing: 0.16, follow: 0.6, spit: 1.2, webs: [0, 1, 1, 
 const NUPPE = { high: 12, swing: 0.18, follow: 0.3, spit: 0.7, webs: [0, 1, 2, 2], warn: 0.75, lock: 0.6, track: 8, again: 0.5, dive: 36, tangle: 1.6, reel: 0.8, rest: [1.5, 1.4, 1.3, 1.2], calm: 2.5,
   lings: [0, 0, 0, 0], ling: 'crawler', splat: [1, 2, 2, 3], twice: 3, shadow: true, sweep: { warn: 0.7, dur: 1.2, low: 7.2 },
   snd: { spit: ['bubble', 0.7, 0.4], warn: ['crumble', 0.6, 1.6], sweep: ['crumble', 0.8, 1.1], phase: ['bubble', 0.9, 0.35] } };
+// The Lid (BOSSES.lid, the random run's summit; owner 2026-10-24: all bosses redone): a hanging boss too (Boss.hang), the last of a run
+// that can be long, so on the later bosses' tells. It lobs its goo, then drops where its shadow grows and lies `tangle` s; its second
+// phase on calls a crawler down each phase; its last heart drops it twice.
+const LIDF = { high: 12, swing: 0.24, follow: 0.4, spit: 0.8, webs: [1, 2, 2, 3], warn: 0.9, lock: 0.7, track: 7, again: 0.6, dive: 34, tangle: 1.8, reel: 0.8, rest: [1.6, 1.5, 1.4, 1.3], calm: 2.5,
+  lings: [0, 1, 1, 1], ling: 'crawler', twice: 3, shadow: true, snd: { spit: ['spit', 0.6, 0.7], warn: ['crumble', 0.6, 1.2], phase: ['bosshit', 0.6, 0.6] } };
 
 // ── Looks ────────────────────────────────────────────────────
 // The canvas is pixel art: one game pixel is `size` CSS px (the canvas is that much smaller
@@ -1046,7 +1051,8 @@ const BOSSES = {
     hint: { en: 'Doors open! Stomp the roof!', es: '¡Puertas abiertas! ¡Pisa el techo!', pt: 'Portas abertas! Pise no teto!', ja: 'ドアが ひらいた！ やねを ふめ！' },   // the first stop
     how: { en: 'Jump the tram, stomp it at a stop', es: 'Salta el tranvía y písalo en la parada', pt: 'Pule o bonde e pise na parada', ja: 'でんしゃを とんで、ていしゃで ふめ' } },   // after three losses
   // The random run's summit: the Lid (the plan's last boss, its first look): goo from the start, then helpers, then twice the goo.
-  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, ink: 'blue', hp: 6, phase: (hp) => (hp >= 5 ? 1 : hp >= 3 ? 2 : 3),
+  lid: { name: { en: 'The Lid', es: 'La Tapa', pt: 'A Tampa', ja: 'フタ' }, ink: 'blue', hang: LIDF, hp: 6, phase: (hp) => (hp >= 6 ? 0 : hp >= 4 ? 1 : hp >= 2 ? 2 : 3),
+    top: { en: 'Not now. Wait till it lands!', es: '¡Ahora no! Espera a que caiga.', pt: 'Agora não! Espere ele cair.', ja: 'いまは だめ。おちるまで まて！' },   // the first stomp that clangs off it
     intro: [{ en: 'Nothing up there. I checked.', es: 'Arriba no hay nada. Lo comprobé.', pt: 'Lá em cima não tem nada. Eu vi.', ja: 'うえには なにも ないよ。' },
       { en: 'The sky? Just a story.', es: '¿El cielo? Solo un cuento.', pt: 'O céu? Só uma história.', ja: 'そら？ ただの おはなし。' },
       { en: 'Climb all you like. I stay shut.', es: 'Trepa cuanto quieras. Sigo cerrada.', pt: 'Suba o quanto quiser. Fico fechada.', ja: 'いくら のぼっても あかないよ。' }],
@@ -2651,7 +2657,7 @@ class Level {
       const p = LEVEL.plank * R;   // two ledges a jump up, to drop onto it from; the middle clear, where it dives
       if (this.rc && this.rc.moss) for (const side of [1, 2]) this.coats.push({ side, y0: this.capY - 4000, y1: this.floor, kind: 'moss' });   // a campaign arena's walls hold
       if (this.rc && this.rc.street) { this.rects.push(this.box(cx - W * 0.18, at(0.3), cx + W * 0.18, at(0.3) + p, { plank: true })); return; }   // the Tram's: one ledge in the middle, away from its stops at the ends
-      if (this.rc && (this.rc.hang || this.rc.bare)) return;   // a hanging boss's (Boss.hang), or a bare arena: the floor and the walls; what does nothing in the fight is not there (the plan)
+      if (!this.rc || this.rc.hang || this.rc.bare) return;   // a hanging boss's (Boss.hang; the random run's Lid too, with no recipe), or a bare arena: the floor and the walls; what does nothing in the fight is not there (the plan)
       if (this.rc && this.rc.rail) {   // the Minecart's: moss under the ceiling at both ends, its rail under them, two crumbling bridges midway, two lifts lower
         const top = this.floor + Math.max(CAM.floorShow, o.keep || 0) - o.h + CAM.top, cr = CART.size * R, end = 1.1 * cr + 0.6 * R, mx = 2 * end;   // (top: the arena's top in sight, under the HUD; end: its stop, clear of the wall)
         for (const [x0, x1] of [[this.l, this.l + mx], [this.r - mx, this.r]]) this.rects.push(this.box(x0, top, x1, top + 0.45 * R, { moss: true }));

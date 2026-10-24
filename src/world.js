@@ -439,7 +439,10 @@ const SPIDER = { high: 12, swing: 0.28, spit: 1.0, webs: [1, 1, 2, 2], warn: 1.2
 // and scaled up with hard edges), the camera moves in whole game pixels, and everything is
 // drawn in the nine inks of the palette sheet (research/refs), flat or as 1-bit patterns
 // of one ink over another.
-const PIX = { size: matchMedia('(pointer: coarse)').matches ? 1.5 : 2, get keep() { return this.base / this.size; } };   // a phone's screen is small and sharp: finer there (1 was too fine)
+// A phone's game pixel a whole number of its screen's (owner, 2026-10-24: «Масштабирование всегда должно попадать пиксель в пиксель на всех устройствах»):
+// 1.5 CSS px was 4.5 of an iPhone's, its lines 4 and 5 by turns; the nearest whole number to 1.5 CSS px (at 3 a tie: PIX_TIE, `?pb=` to try another)
+const PIX_TIE = 4, phonePx = () => { const d = window.devicePixelRatio || 1, q = +new URLSearchParams(location.search).get('pb'), n = q > 0 ? q : Math.abs(1.5 * d - 4.5) < 1e-6 ? PIX_TIE : Math.max(1, Math.round(1.5 * d)); return n / d; };
+const PIX = { size: matchMedia('(pointer: coarse)').matches ? phonePx() : 2, get keep() { return this.base / this.size; } };   // a phone's screen is small and sharp: finer there (1 was too fine)
 PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized to (a phone's 1.5, a computer's 2) whatever the drawing's: a sprite's dot PIX.keep times its pixels
 // A computer's drawing grid (owner, 2026-10-23: «на мониторах ретина на десктопе графика тоже должны быть как на телефоне», his Д1 «А»): a game pixel a whole
 // number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen

@@ -3478,8 +3478,10 @@ function layout() {
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
   PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
-  const W0 = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), W = coarse ? W0 : Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = vh, left = Math.round((vw - W) / 2);   // a phone held upright: all of its width
-  // (a computer's column a whole number of game pixels across, so each is as many of the screen's as the next)
+  const d = window.devicePixelRatio || 1, W0 = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), W = Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = Math.floor(vh / PIX.size + 1e-6) * PIX.size;   // a phone
+  // held upright: all of its width; a whole number of game pixels across and down, on the screen's own pixels (left), so each is as many of them as the next
+  // (owner: «пиксель в пиксель на всех устройствах»; a phone's was its full width and height, a game pixel 4.5 of an iPhone's, lines 4 and 5 by turns)
+  const left = Math.round(((vw - W) / 2) * d) / d;
   view.w = W; view.h = H; view.left = left; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key

@@ -243,6 +243,24 @@ const FUJI_DOOR = { shop: [15, 33, 29, 45], stash: [40, 40, 28, 42] };   // [col
 const POST_NUM = { 1: '......./......./......./#######/......./......./.......', 2: '......./.#####./......./......./......./#######/.......', 3: '#######/......./.#####./......./......./#######/.......', 4: '#######/#..#..#/#..#..#/#.#.#.#/##...##/#.....#/#######', 5: '#######/...#.../...#.../.#####./..#..#./..#..#./#######', 6: '...#.../....#../#######/......./..#.#../.#...#./#.....#', 7: '..#..../..#..../#######/..#..../..#..../..#...#/...####', 9: '..#..../#####../..#.#../..#.#../.#..#../.#..#.#/#...###' };
 const KIT_TEND = { lantern: 'lantern', bell: 'bell', lamp: 'lamp', lighthouse: 'lighthouse' };   // the task a thing is (Game.setTasks, Game.task), owner: lanterns, bells, the Mine's lamps, the Sea's lighthouses
 const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as the neon
+const kitAvoid = (lv, r, rows = 1) => {   // what r's thing may not be: the kinds in the nearest row of things under it (two rows where a world has four kinds or
+  // more), within a screen: what is seen one after another; and those already decided across at its height (the one to its left at its very height first).
+  // Decided in that order, bottom up, so the same whatever asks first
+  const t = lv.tile, out = new Set(), below = [];
+  for (const q of lv.rects) {
+    if (q === r || q.gone || q.cap) continue;
+    const dy = q.y0 - r.y0;
+    if (dy > 28 * t || dy < -0.5 * t || (Math.abs(dy) <= 0.5 * t && !(q.x0 < r.x0))) continue;
+    const kq = kitThing(lv, q);
+    if (!kq) continue;
+    if (Math.abs(dy) <= 1.5 * t) out.add(kq.kind);
+    if (dy > 0.5 * t) below.push([dy, kq.kind]);
+  }
+  below.sort((a, b) => a[0] - b[0]);
+  let row = 0, top = -Infinity;
+  for (const [dy, kind] of below) { if (dy > top + 1.5 * t) { if (++row > rows) break; top = dy; } out.add(kind); }
+  return out;
+};
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
@@ -251,41 +269,56 @@ const kitThing = (lv, r) => {
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
   const steady = (min) => !(r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.crack || r.cage || r.slick || r.magnet) && (wl || wr) && !(wl && wr) && w >= min * t   // (a row across the shaft is a way through: the tutorial's helmet breaks one)
     && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
-  let out = null;
-  if (th.village) {   // by a hash of its height, so that two ledges a beat apart are not alike
-    const k = Math.floor(((Math.imul(Math.round(b / t), 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    if (r.kitWant === 'lantern' && steady(4) && room(0, 4, 4.4)) out = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t };   // asked for by its chunk (CHUNKS kit)
-    else if (k === 0 && steady(2.6) && room(0, 4.6, 4.9)) out = { kind: 'sakura' };
-    else if (k === 1 && steady(3) && room(0, 3.5, 3.8)) out = { kind: 'scarecrow' };
-    else if (k === 2 && steady(4) && room(0, 4, 4.4)) out = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t };
-    else if (k === 4 && steady(2.2) && room(0, 4.4, 5.3)) out = { kind: 'koinobori' };
-    if (out && out.kind !== 'lantern' && lv.rc && lv.rc.sparse) {   // a `sparse` level's: one a band of about two screens (the shrines, the task, aside)
-      const band = Math.floor((lv.floor - b) / (50 * t)), used = (lv.propBands = lv.propBands || new Set());
-      if (used.has(band)) out = null; else used.add(band);
-    }
-  } else if (th.mines) {   // the Mine's by a hash of its height: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore
-    // in the wall behind it, a cart on its rails, the miners' tools, a winch
-    const k = Math.floor(((Math.imul(Math.round(b / t) + 3, 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5;   // the props but the lamps (a task) on half their ledges: about four in six with
-    // a thing on them, as the Village (the rule book's detail: «Сократить до 4 из 6»)
-    if ((k === 0 || k === 3) && steady(1.8) && room(0, 1.6, 2.6)) out = { kind: 'lamp', x: X(0.5), y: b - 2.0 * t };
-    else if (half && k === 1 && steady(2.6) && room(0, 2.6, 2.0)) out = { kind: 'cart' };
-    else if (half && k === 2 && steady(2.4) && room(0, 2.2, 2.0)) out = { kind: 'ore' };
-    else if (half && k === 4 && steady(2.4) && room(0, 2.4, 2.0)) out = { kind: 'tools' };
-    else if (half && k === 5 && steady(3.0) && room(0, 2.8, 3.4)) out = { kind: 'winch' };
-  } else if (th.sea) {   // the Sea's props by a hash of its height (see its back layer)
-    const k = Math.floor(((Math.imul(Math.round(b / t) + 7, 0x9e3779b1) >>> 0) / 4294967296) * 6), fx = wl ? r.x1 : r.x0;
-    if (k === 0 && steady(3.3) && room(0, 3.4, 5.4)) out = { kind: 'lighthouse', x: X(2.3), y: b - 3.5 * t };   // (its lamp's place: the task's, see its drawing)
-    else if (k === 1 && steady(4.2) && room(0, 4.3, 2.9)) out = { kind: 'net' };
-    else if (k === 2 && steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)) out = { kind: 'gull' };
-    else if (k === 3 && steady(2.8) && room(0, 2.7, 2.6)) out = { kind: 'octopus' };
-    else if (k === 4 && steady(3) && room(0, 3, 4.9)) out = { kind: 'flags' };
-  } else if (th.skazka) {   // the Dark Forest's: Baba Yaga's fence (its skulls' eyes the dark's lights) by a hash of its height, on two ledges in six with room
-    const k = Math.floor(((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) / 4294967296) * 6);
-    if ((k === 0 || k === 3) && steady(3.2) && room(0, 3.2, 3.5)) out = { kind: 'fence' };
-  } else if (th.fuji && r.plank && !r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t
-    && ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3) out = { kind: 'bell', x: wl ? r.x1 - 0.3 * t : r.x0 + 0.3 * t, y: r.y0 - 1.4 * t };   // (on one
-    // boardwalk in three; its bell up on a pilgrim's staff at the free end, by the hero standing there: d45 «Б», d52 E)
+  // Each world's things by a hash of its height (so that two ledges a beat apart are not alike), a slot k of six: [k, kind, its room, where its task is]. The
+  // owner's rule (2026-10-24: «Животные или объекты не должны встречаться друг за другом: миру нужно разнообразие в расположении… во всех мирах»): never the
+  // kind of the thing next under it, nor of one across at its height; a repeat gives way to the next slot's kind that fits, an empty slot stays empty
+  let out = null, k = -1, opts = null;
+  const hk = (salt) => Math.floor(((Math.imul(Math.round(b / t) + salt, 0x9e3779b1) >>> 0) / 4294967296) * 6);
+  if (th.village) {
+    if (r.kitWant === 'lantern' && steady(4) && room(0, 4, 4.4)) return (r.kit = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t });   // asked for by its chunk (CHUNKS kit)
+    k = hk(0); opts = [[0, 'sakura', () => steady(2.6) && room(0, 4.6, 4.9)], [1, 'scarecrow', () => steady(3) && room(0, 3.5, 3.8)],
+      [2, 'lantern', () => steady(4) && room(0, 4, 4.4), () => ({ x: X(0.63), y: b - 1.3 * t })], [4, 'koinobori', () => steady(2.2) && room(0, 4.4, 5.3)]];
+  } else if (th.mines) {   // the Mine's: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore in the wall behind it, a cart on
+    // its rails, the miners' tools, a winch; the props but the lamps on half their ledges: about four in six with a thing on them, as the Village (the rule book's
+    // detail: «Сократить до 4 из 6»)
+    const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, lamp = [() => steady(1.8) && room(0, 1.6, 2.6), () => ({ x: X(0.5), y: b - 2.0 * t })];
+    k = hk(3); opts = [[0, 'lamp', ...lamp], [3, 'lamp', ...lamp], [1, 'cart', () => half && steady(2.6) && room(0, 2.6, 2.0)], [2, 'ore', () => half && steady(2.4) && room(0, 2.2, 2.0)],
+      [4, 'tools', () => half && steady(2.4) && room(0, 2.4, 2.0)], [5, 'winch', () => half && steady(3.0) && room(0, 2.8, 3.4)]];
+  } else if (th.sea) {   // the Sea's (see its back layer)
+    const fx = wl ? r.x1 : r.x0;
+    k = hk(7); opts = [[0, 'lighthouse', () => steady(3.3) && room(0, 3.4, 5.4), () => ({ x: X(2.3), y: b - 3.5 * t })],   // (its lamp's place: the task's, see its drawing)
+      [1, 'net', () => steady(4.2) && room(0, 4.3, 2.9)], [2, 'gull', () => steady(2.2) && clear(Math.min(fx, fx - d * 1.0 * t), b - 2.2 * t, Math.max(fx, fx - d * 1.0 * t), b - 1)],
+      [3, 'octopus', () => steady(2.8) && room(0, 2.7, 2.6)], [4, 'flags', () => steady(3) && room(0, 3, 4.9)]];
+  } else if (th.skazka) {   // the Dark Forest's: Baba Yaga's fence (its skulls' eyes the dark's lights) on two ledges in six with room
+    const fence = () => steady(3.2) && room(0, 3.2, 3.5);
+    k = hk(13); opts = [[0, 'fence', fence], [3, 'fence', fence]];
+  } else if (th.town) {   // Tokyo's: a vending machine in a niche at a ledge's wall end, a bonsai in its pot, by a beat of its height (a third of them neither)
+    const m = ((Math.round(b / t) % 3) + 3) % 3, base = !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key) && (wl || wr);
+    const door = (x0, y0, x1, y1) => lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1), vx = wl ? lv.l + 0.2 * t : lv.r - 1.6 * t, cx = wx + d * 0.85 * t;
+    const acNear = lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < lv.l + lv.r) === wl && q.y0 < b && q.y0 + (AC.h + AC.brace) * t > b - 1.7 * t);
+    k = m === 2 ? -1 : m; opts = [[0, 'vending', () => base && w >= 3 * t && !door(vx - 0.15 * t, b - 2.4 * t, vx + 1.55 * t, b)],
+      [1, 'bonsai', () => base && w >= 2 * t && !acNear && !door(cx - 0.9 * t, b - 1.7 * t, cx + 0.9 * t, b) && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))]];
+  } else if (th.fuji && r.plank) {   // Fuji's bell on one boardwalk in three, up on a pilgrim's staff at its free end by the hero standing there (d45 «Б», d52 E; the task)
+    if (!r.move && !r.bouncy && !r.slick && !r.crumble && !r.crack && wl !== wr && w >= 3 * t && ((Math.imul(Math.round(b / t) + 5, 0x9e3779b1) >>> 0) / 4294967296) < 1 / 3)
+      { k = 0; opts = [[0, 'bell', () => true, () => ({ x: wl ? r.x1 - 0.3 * t : r.x0 + 0.3 * t, y: r.y0 - 1.4 * t })]]; }
+  } else if (th.fuji) {   // Fuji's things on its ledges' wall ends (the owner's letters d51-d61, FUJI_SPR): a tent (its snow rabbit by it), a snowman, a serow or a fox, the
+    // pilgrims' stones, persimmons drying, a bare larch
+    const fox = ((Math.imul(Math.round(b / t) + 11, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, beast = () => w >= 2.9 * t && room(0, 2.9, 2.6);
+    k = hk(0); opts = [[0, 'tent', () => w >= 4.7 * t && room(0, 4.7, 2.8)], [1, 'snowman', () => room(0, 2.2, 2.9)], [2, fox ? 'fox' : 'serow', beast], [2, fox ? 'serow' : 'fox', beast],
+      [3, 'stelae', () => w >= 4.0 * t && room(0, 4.0, 3.6)], [4, 'persimmons', () => w >= 3.4 * t && room(0.3, 3.5, 4.3)], [5, 'larch', () => w >= 3.6 * t && room(0, 4.8, 4.9)]];
+    if (!steady(2.4)) opts = null;
+  }
+  if (opts && k >= 0) {
+    r.kit = null;   // (deciding it: what is under it is decided first and never asks back)
+    const avoid = kitAvoid(lv, r, new Set(opts.map((q) => q[1])).size >= 4 ? 2 : 1), fits = (q) => q[2]() && !avoid.has(q[1]);
+    let o = opts.filter((q) => q[0] === k).find(fits);
+    if (!o && opts.some((q) => q[0] === k && q[2]())) for (let i = 1; i < 6 && !o; i++) o = opts.filter((q) => q[0] === (k + i) % 6).find(fits);   // a repeat: the next slot's
+    out = o ? Object.assign({ kind: o[1] }, o[3] ? o[3]() : {}) : null;
+  }
+  if (out && th.village && out.kind !== 'lantern' && lv.rc && lv.rc.sparse) {   // a `sparse` level's: one a band of about two screens (the shrines, the task, aside)
+    const band = Math.floor((lv.floor - b) / (50 * t)), used = (lv.propBands = lv.propBands || new Set());
+    if (used.has(band)) out = null; else used.add(band);
+  }
   return (r.kit = out);
 };
 const wireY = (lv, k, x) => { const t = lv.tile, x0 = lv.l + WIRE.inset * t, u = (x - x0) / (lv.r - lv.l - 2 * WIRE.inset * t); return (k * WIRE.arm + WIRE.drop) * t + WIRE.sag * t * 4 * u * (1 - u); };   // the kinds of candy; each lasts its `time` (+ CANDIES.plus a Long charge; all 3 s longer than at first, user)
@@ -3729,7 +3762,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
       // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is
       // for what you take), the slot under the front
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
-      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 3 * t || !seen(r.y0 - 3 * t, r.y0) || mod(Math.round(r.y0 / t), 3)) continue;
+      if (!seen(r.y0 - 3 * t, r.y0) || (kitThing(lv, r) || {}).kind !== 'vending') continue;   // (where: kitThing's, never twice in a row, the owner's rule)
       const w = 1.4 * t, h = 2.2 * t, x0 = wl ? lv.l + 0.2 * t : lv.r - 0.2 * t - w, y0 = r.y0 - h;
       if (atDoor(x0 - 0.15 * t, y0 - 0.2 * t, x0 + w + 0.15 * t, r.y0)) continue;
       const g0 = snap(wl ? x0 + 0.1 * w : x0 + 0.36 * w), g1 = snap(g0 + 0.54 * w), c0 = snap(wl ? x0 + 0.72 * w : x0 + 0.12 * w);
@@ -3746,8 +3779,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     for (const r of lv.rects) {   // a bonsai at the wall end of some other steady ledges, as on a balcony (the owner's pick, research/variants/tokyo-bonsai-1.png F):
       // a shallow grey pot, an orange trunk in an S and its branches, pads of green needles shaded down to the right; not under an air conditioner, nor by a cage or Moti
       const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
-      if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || !(wl || wr) || r.x1 - r.x0 < 2 * t || !seen(r.y0 - 2 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 1
-        || acNear(wl, r.y0 - 1.7 * t, r.y0) || lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))) continue;
+      if (!seen(r.y0 - 2 * t, r.y0) || (kitThing(lv, r) || {}).kind !== 'bonsai') continue;   // (where: kitThing's, never twice in a row, the owner's rule)
       const d = wl ? 1 : -1, cx = snap((wl ? lv.l : lv.r) + d * 0.85 * t), by = r.y0 - 0.3 * t, X = (u) => cx + d * u * t, Y = (v) => by - v * t;
       if (atDoor(cx - 0.9 * t, r.y0 - 1.7 * t, cx + 0.9 * t, r.y0)) continue;
       const sw = CINE ? cinePoke(g, lv, r, 'bonsai', cx - 0.9 * t, r.y0 - 1.6 * t, cx + 0.9 * t, r.y0) : 0, SB = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways)
@@ -3872,7 +3904,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     // Hokkaido's, not Fuji's). In the midground (solid, no white, no yellow but a
     // light's core), on ledges' wall ends by turns of height, true to the real mountain (owner 2026-10-23/24, his letters; FUJI_SPR): a tent
     // with a snow rabbit by it, a snowman (D), a serow or a fox, the pilgrims' stone monuments, persimmons drying on strings off a beam (E), a bare larch.
-    const t = kitT, P = kitP, mod = (k, n) => ((k % n) + n) % n;
+    const t = kitT, P = kitP;
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);
     const clear = (x0, y0, x1, y1) => !atDoor(x0, y0, x1, y1) && !lv.rects.some((q) => !q.gone && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
     const rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork, the rule book: far off behind, the kamakura flat, the props small with
@@ -3934,9 +3966,10 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
     }
     for (const r of lv.rects) {
       if (!seen(r.y0 - 6 * t, r.y0) || !steady(r, 2.4)) continue;
-      const k = mod(Math.round(r.y0 / t), 6), wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
+      const kk = kitThing(lv, r); if (!kk) continue;   // (which thing: kitThing's, never the one next under it, the owner's rule)
+      const k = kk.kind, wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
       const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);
-      if (k === 0 && w >= 4.7 * t && room(0, 4.7, 2.8)) {   // a mountaineer's tent (d53 B; the owner's d38: the kamakura goes, a tent, lit warm with no flame),
+      if (k === 'tent') {   // a mountaineer's tent (d53 B; the owner's d38: the kamakura goes, a tent, lit warm with no flame),
         // its snow rabbit by it (B, its ears of snow now: d37 «А»)
         L(0); const id = 'tent', wd = sprW(id); F(X(0.3 + wd / 2), snap(b - 0.7 * t), 1.5 * t, 0, 0, 0.9 * t, PAL.orange, 0.22 + 0.05 * Math.sin(T * 2.2 + b), 1);   // (flat: thin lines
         // all round it; the warm light breathing behind its door)
@@ -3948,7 +3981,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           for (const e of [-1, 1]) for (let j = 0; j < 5; j++) box(snap(ux + e * (0.12 + 0.05 * j) * t), snap(b - uh - (0.1 + 0.1 * j) * t), snap(ux + e * (0.12 + 0.05 * j) * t) + 3 * P, snap(b - uh - (0.1 + 0.1 * j) * t) + 3 * P, PAL.gray, 1, 0, 10, 0);
           for (const e of [-1, 1]) box(snap(ux + e * 0.22 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.22 * t) + 2 * P, snap(b - 0.62 * uh) + 3 * P, PAL.orange, 1, 0, 10, 0);
         }
-      } else if (k === 1 && room(0, 2.2, 2.9)) {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
+      } else if (k === 'snowman') {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
         L(4); const sw = CINE ? cinePoke(g, lv, r, 'snowman', Math.min(X(0.3), X(1.9)), b - 2.8 * t, Math.max(X(0.3), X(1.9)), b) : 0, SH = (v) => (sw ? snap(sw * v * t) : 0);   // (poked: he
         // sways, his bucket the most)
         const sx = X(1.1);
@@ -3956,13 +3989,11 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
         box(snap(sx - 0.42 * t) + SH(2.6), snap(b - 2.2 * t), snap(sx + 0.42 * t) + SH(2.6), snap(b - 2.06 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx - 0.32 * t) + SH(2.9), snap(b - 2.72 * t), snap(sx + 0.32 * t) + SH(2.9), snap(b - 2.2 * t), PAL.purple, 1, 0, 10, 0);
         for (const e of [-1, 1]) box(snap(sx + e * 0.2 * t) - P + SH(1.8), snap(b - 1.86 * t), snap(sx + e * 0.2 * t) + 2 * P + SH(1.8), snap(b - 1.72 * t), PAL.black, 1, 0, 10, 0);
         box(snap(sx - 0.48 * t) + SH(1.24), snap(b - 1.32 * t), snap(sx + 0.48 * t) + SH(1.24), snap(b - 1.16 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx + 0.08 * t) + SH(1.0), snap(b - 1.16 * t), snap(sx + 0.26 * t) + SH(1.0), snap(b - 0.72 * t), PAL.purple, 1, 0, 10, 0);
-      } else if (k === 2 && w >= 2.9 * t && room(0, 2.9, 2.6)) {   // a serow or a fox by turns of height (d54 E; d46 «Г»: Fuji's own beasts, the Nagano monkey gone)
-        L(4); const fox = (((Math.round(r.y0 / t) * 7) >> 1) + (wl ? 0 : 1)) % 2 === 1;   // (by turns of height, and the other one at the other wall at the
-        // same height: never a pair of twins)
-        fspr(fox ? 'fox' : 'serow', X(0.3), b, !wl);
-      } else if (k === 3 && w >= 4.0 * t && room(0, 4.0, 3.6)) {   // the Fuji-ko pilgrims' stone monuments (d55 F; d48 «Б»), their rope grey
+      } else if (k === 'serow' || k === 'fox') {   // a serow or a fox (d54 E; d46 «Г»: Fuji's own beasts, the Nagano monkey gone), never twice in a row (kitThing)
+        L(4); fspr(k, X(0.3), b, !wl);
+      } else if (k === 'stelae') {   // the Fuji-ko pilgrims' stone monuments (d55 F; d48 «Б»), their rope grey
         L(4); fspr('stelae', X(0.3), b, !wl);
-      } else if (k === 4 && w >= 3.4 * t && room(0.3, 3.5, 4.3)) {   // persimmons drying (E): strings off a beam on a knee brace, purple ties and tassels
+      } else if (k === 'persimmons') {   // persimmons drying (E): strings off a beam on a knee brace, purple ties and tassels
         const by = snap(b - 4.1 * t);
         L(4); box(Math.min(X(0), X(3.3)), by, Math.max(X(0), X(3.3)), by + snap(0.2 * t), PAL.gray, 1, 0, 10, 0); L(0); brace(wx, d, by + snap(0.2 * t), snap(0.8 * t), 2 * P, PAL.gray);   // (the beam
         // and the fruit small; the brace, the strings, the ties and the tassels flat)
@@ -3971,7 +4002,7 @@ Renderer.prototype.draw = function (g, alpha, dots, nDots) {
           for (let j = 0; j < 4; j++) { const fy = snap(by + (0.7 + 0.5 * j) * t); L(4); disc(sx + P / 2, fy, 0.2 * t, PAL.orange, 1); L(0); box(sx - P, fy - snap(0.24 * t), sx + 2 * P, fy - snap(0.16 * t), PAL.green, 1, 0, 10, 0); }
           for (const e of [-1, 0, 1]) rod(sx, snap(b - 1.4 * t), sx + e * 0.14 * t, snap(b - 1.12 * t), PAL.purple);   // its tassel
         }
-      } else if (k === 5 && w >= 3.6 * t && room(0, 4.8, 4.9)) {   // a bare larch of the tree line, bent by the wind, snow on its boughs (d56 E; d49 «Б»: no green)
+      } else if (k === 'larch') {   // a bare larch of the tree line, bent by the wind, snow on its boughs (d56 E; d49 «Б»: no green)
         const id = 'larch', SW = CINE ? cinePoke(g, lv, r, 'pine', Math.min(X(0.2), X(4.6)), b - 4.7 * t, Math.max(X(0.2), X(4.6)), b) : 0;   // (poked, it sways, its top the most)
         L(0); fspr(id, X(0.2), b, !wl, SW ? (u) => snap(SW * u * kitP / t * t) : null);   // (flat: its boughs thin)
       }

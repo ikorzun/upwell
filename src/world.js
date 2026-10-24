@@ -2738,7 +2738,7 @@ class Level {
         if (q) this.folk.push({ kind: 'ribbon', x, y: q.y0, rect: q, dir: x < (this.l + this.r) / 2 ? 1 : -1, fly: false, t: 0 });
       } else if (ch === 'h') this.fizz.push({ x: X(k) + t / 2, y: Y(r) - 1.3 * R, r: 0.5 * R, taken: false, kind: 'smash', again: true });   // the helmet, to come back (Game.gun)
       else if (ch >= '1' && ch <= '9') this.signs.push({ id: +ch, x: X(k) + t / 2, y: Y(r) - t / 2 });   // a word of the tutorial's, said there
-      else if (ch === 'A' || ch === 'a') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a' });   // (a: AMBUSH)
+      else if (ch === 'A' || ch === 'a') this.arenas.push({ x: X(k) + t / 2, y: Y(r) - t / 2, on: false, done: false, wave: 0, foes: [], small: ch === 'a', floor: undefined, waves: (ch === 'a' ? AMBUSH : ARENA).waves, warnAt: -1, dropAt: -1 });   // (a: AMBUSH)
       else if (ch === 'B') {   // a door into the wall, standing on the ledge under it: square to the ledge and the wall
         const side = k === 0 ? 1 : 2, w = DOOR.w * R, y1 = Y(r), x0 = side === 1 ? l - LEVEL.wall : this.r - w, x1 = side === 1 ? l + w : this.r + LEVEL.wall;
         this.bubbles.push({ x0, x1, y0: y1 - DOOR.h * R, y1, x: (x0 + x1) / 2, y: y1 - DOOR.h * R / 2, kind: this.pocketKind, goal: this.pocketKind === 'trial' ? this.pocketGoal : undefined, side, cd: 0, room: null });
@@ -2780,6 +2780,8 @@ class Level {
         if (q.x1 - q.x0 < 0.5 * R) this.spikes.splice(j, 1);
       }
     }
+    for (const a of this.arenas) if (a.floor === undefined) a.floor = this.rects.filter((r) => r.x0 < a.x && r.x1 > a.x && r.y0 > a.y).sort((p, q) => p.y0 - q.y0)[0] || null;   // an arena's
+    // floor, the first block under its mark (owner, К8 «А»: a world's prop holds its waiting wave over it; Game.arenaWave drops it there)
     // A vault's cage (H, Z) as thin as it is drawn (the owner's pick, research/variants/tokyo-vault-1-px.png F), so nothing solid is out of sight: its walls a post
     // 0.4 tiles thick on its floor's side, reaching up to its roof, a bar 0.3 thick at the roof's top (where it is stood on), and its cracked floor a plate 0.35
     // thick at its foot (where a head-butt from below breaks it); the vault only opens up inside

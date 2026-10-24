@@ -582,10 +582,10 @@ class Boss {
     const [sw, sh] = bossSize(this); this.halfW = sw / 2; this.minGrowth = Math.min(1, (4 * lv.R) / Math.max(sw, sh));   // its drawing's half width; its shrink stops at 2:1 against the hero's 2R
     loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
-  open() { const d = this.def; return d && d.spider ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
+  open() { const d = this.def; return d && d.hang ? this.state === 'dazed' : (d && d.rail) ? this.angry <= 0 : this.state === 'dazed' || (this.state === 'hover' && this.angry <= 0 && !(d && d.slide)); }   // a stomp hurts it (the Puck: only turned over; the Minecart: always, from above)
   to(s) { this.state = s; this.st = 0; }
   think(dt, g) {
-    if (this.def && this.def.spider) { this.spider(dt, g); return; }
+    if (this.def && this.def.hang) { this.hang(dt, g); return; }
     if (this.def && this.def.slide) { this.slide(dt, g); return; }
     if (this.def && this.def.rail) { this.ride(dt, g); return; }
     const b = this.body, lv = g.lv, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, k = this.angry > 0 ? 1.8 : 1, R = lv.R;
@@ -675,55 +675,58 @@ class Boss {
     }
     if (this.st > PUCK.rest[ph] * (this.angry > 0 ? 0.6 : 1)) { this.dir = Math.sign(H.cx - b.cx) || 1; this.to('warn'); sound.play('crumble', 0.6, 0.5); }   // at the hero, after a scrape
   }
-  // The Tsuchigumo (BOSSES.cart, SPIDER): it swings by its thread under the ceiling, lobs a web at the hero, then drops onto it and
-  // lies tangled on the floor, the only time a stomp hurts it; it reels back up. A move's warning is a pose and a sound together. Its
-  // first hit calls two spiderlings down; its last heart drops it twice running. (Its dust is a look only: fxRand, not the game's chances.)
-  spider(dt, g) {
+  // A boss that hangs over the arena and drops (def.hang, its numbers: the Tsuchigumo's SPIDER, the Bake-danuki's TANUKI): it sways under
+  // the ceiling, lobs `webs` at the hero after its spit's warning, then drops onto it and lies on the floor (tangled in its thread, or
+  // dizzy), the only time a stomp hurts it; it goes back up. A move's warning is a pose and a sound together. A new phase calls `lings`
+  // down; from phase `twice` it drops twice running. (Its dust is a look only: fxRand, not the game's chances.)
+  hang(dt, g) {
+    const F = this.def.hang;
     const b = this.body, lv = g.lv, R = lv.R, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, H = g.hero, ph = this.def.phase(this.hp);
-    const hang = lv.floor - R * SPIDER.high, x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;
+    const hang = lv.floor - R * F.high, x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;
     const seat = (tx, ty, k) => { const q = Math.min(1, k * dt); addVel(b, ((tx - b.cx) * 3 - b.rigVx) * q, ((ty - b.cy) * 3 - b.rigVy) * q); };   // pulled to (tx, ty) on its thread
-    const swing = () => seat(cx + Math.sin(this.t * 0.55) * W * SPIDER.swing, hang + Math.sin(this.t * 1.1) * 0.3 * R, 2.4);
+    const mid = cx + (F.follow || 0) * (clamp(H.cx, x0, x1) - cx);   // its sway's middle: the arena's, or drawn `follow` of the way over the hero
+    const swing = () => seat(mid + Math.sin(this.t * 0.55) * W * F.swing, hang + Math.sin(this.t * 1.1) * 0.3 * R, 2.4);
     b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);   // upright always: lying tangled too, its eyes up at the hero
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
-    if (this.t < SPIDER.calm) { seat(cx, hang, 4); return; }   // still at first, while its name is up
-    if (ph > this.phSeen) {   // a heart lost into a new phase: a hiss and a shake, so the fight is seen to change; the first calls the spiderlings
-      this.phSeen = ph; shake.add(5); sound.play('spit', 0.9, 0.55);
-      if (ph === 1) for (const f of [0.22, 0.78]) lv.enemies.push(new Foe({ type: 'crawler', x: lv.l + f * W, y: lv.capY + 2 * R }, lv));
+    if (this.t < F.calm) { seat(cx, hang, 4); return; }   // still at first, while its name is up
+    if (ph > this.phSeen) {   // a heart lost into a new phase: its sound and a shake, so the fight is seen to change; and its helpers down
+      this.phSeen = ph; shake.add(5); sound.play(...F.snd.phase);
+      for (let k = 0; k < (F.lings[ph] || 0); k++) lv.enemies.push(new Foe({ type: F.ling, x: lv.l + (k % 2 ? 0.78 : 0.22) * W, y: lv.capY + 2 * R }, lv));
     }
     if (this.state === 'hover') {   // swinging, its next move after its rest
       swing();
-      if (this.st > SPIDER.rest[ph]) { const drop = this.next === 'drop'; this.to(drop ? 'warn' : 'spit'); sound.play(drop ? 'crumble' : 'spit', 0.6, drop ? 1.6 : 0.5); }   // a creak, or a hiss
+      if (this.st > F.rest[ph]) { const drop = this.next === 'drop' || !F.webs[ph]; this.to(drop ? 'warn' : 'spit'); this.tx = b.cx; sound.play(...(drop ? F.snd.warn : F.snd.spit)); }   // its drop's sound, or its spit's
     } else if (this.state === 'spit') {   // its belly pulses, then the web(s) at the hero, lobbed as a spitter's
       swing();
       if (Math.floor(this.st * 10) % 2) b.kickSquash(0, 1, 0.08);
-      if (this.st > SPIDER.spit) {
-        const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = SPIDER.webs[ph];
+      if (this.st > F.spit) {
+        const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = F.webs[ph];
         for (let i = 0; i < n; i++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (i ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R });
         b.kickSquash(0, 1, -1.6); sound.play('spit', 0.7, 1); this.next = 'drop'; this.to('hover');
       }
     } else if (this.state === 'warn') {   // over the hero, its eyes red, dust off the ceiling where it will fall; held still its last `lock` s
-      const end = this.drops ? SPIDER.again : SPIDER.warn;
-      if (this.st < end - SPIDER.lock) this.tx = clamp(H.cx, x0, x1);
+      const end = this.drops ? F.again : F.warn;
+      if (this.st < end - F.lock) this.tx += clamp(clamp(H.cx, x0, x1) - this.tx, -F.track * R * dt, F.track * R * dt);   // after the hero no faster than `track` R/s: a hero who runs gets clear
       seat(this.tx, hang + (this.drops ? 4 * R : 0), 5);
       b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
-      if ((this.dustT -= dt) <= 0) { this.dustT = 0.07; sparkFx(this.tx + fxRand(-0.4, 0.4) * this.halfW, lv.capY + 0.2 * R, 2, Math.PI / 2, 0.25, [60, 160], [1.5, 2.5], [0.5, 0.9], [PAL.gray, PAL.gray, INK.white], 1); }
+      if (F.dust && (this.dustT -= dt) <= 0) { this.dustT = 0.07; sparkFx(this.tx + fxRand(-0.4, 0.4) * this.halfW, lv.capY + 0.2 * R, 2, Math.PI / 2, 0.25, [60, 160], [1.5, 2.5], [0.5, 0.9], [PAL.gray, PAL.gray, INK.white], 1); }
       if (this.st > end) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.5); }
     } else if (this.state === 'dive') {   // down its thread to the floor, squashing its own spiderlings under it
-      setVel(b, 0, SPIDER.dive * R);
+      setVel(b, 0, F.dive * R);
       for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > b.minX && q.minX < b.maxX && q.minY < b.maxY + 4 && q.maxY > b.minY) g.kill(e, false); }
       if ((b.wallMask & 8) || b.maxY >= lv.floor - 1 || this.st > 1.5) {
         shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx - this.halfW, lv.floor, IMPACT.puffSpeed + 700); fx.dust(b.cx + this.halfW, lv.floor, IMPACT.puffSpeed + 700);
-        if (ph >= 3 && !this.drops) { this.drops = 1; this.to('warn'); setVel(b, 0, -6 * R); return; }   // its last heart: straight back up a way, and a second drop
+        if (ph >= F.twice && !this.drops) { this.drops = 1; this.to('warn'); this.tx = b.cx; setVel(b, 0, -6 * R); return; }   // its last heart: straight back up a way, and a second drop
         this.drops = 0; this.next = 'spit'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2);
-        if (!this.dazes++) ui.toast(L2(this.def.hint), 2400);   // the first time: what to do now
+        if (!this.dazes++) ui.toast(this.def.hint ? L2(this.def.hint) : t('bossHint'), 2400);   // the first time: what to do now
       }
     } else if (this.state === 'dazed') {   // tangled in its own thread on the floor, struggling: open to a stomp
       addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
       if (Math.floor(this.st * 8) % 2) b.kickSquash(1, 0, 0.06);
-      if (this.st > SPIDER.tangle * this.help) this.rise();
+      if (this.st > F.tangle * this.help) this.rise();
     } else if (this.state === 'rise') {   // reeled back up its thread
       seat(b.cx, hang, 3);
-      if (this.st > SPIDER.reel) this.to('hover');
+      if (this.st > F.reel) this.to('hover');
     }
   }
   // The Minecart (BOSSES.cart, CART): rides its rail under the ceiling end to end, lobbing blobs at the hero; at an end it
@@ -1546,7 +1549,7 @@ class Game {
     const boss = e === this.lv.boss, can = boss ? e.open() : e.canStomp();
     if (e.type === 'nurikabe' && !can && above) { this.bounceOff(e); return; }   // its hard top, hanging or going: a bounce, nothing more (CRUSH)
     if (boss && e.def && e.def.top && !can && H.cy < b.cy - 0.2 * b.R && dx < b.R) { this.bounceOff(e); return; }   // the Puck's hard dome: a bounce, nothing more
-    if (boss && e.def && e.def.rail && e.angry > 0) return;   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
+    if (boss && e.def && (e.def.rail || e.def.hang) && e.angry > 0) return;   // just hit, red: it only pushes (the stomp's high bounce passes it going back up)   // the Minecart red, just hit: it only pushes (a bounce off the moss over it lands on it again)
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
     if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow') || this.power('swarm')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it

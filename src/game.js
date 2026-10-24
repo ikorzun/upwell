@@ -170,7 +170,8 @@ const campNextId = () => {   // where Continue goes: the last one played again i
 const campMerge = (w, s, rc, order) => {   // a tier's level: its calm, plain and fierce versions one over another, in a new order each time (or
   // `order`, a level under way's: Game.resume), all as long
   if (s === 0 || rc.boss || rc.bonus != null) return rc;   // (the first and the boss alone; a bonus race stays one race)
-  order = order || shuffled(Math.random, [0, 1, 2]);
+  order = order || (w < 3 ? [0, ...shuffled(Math.random, [1, 2])] : shuffled(Math.random, [0, 1, 2]));   // (worlds 1-3: the calm part first, at the bottom, the plain and the
+  // fierce over it in either order; owner, К1 «А»: a level starts slow. From world 4, any order)
   const parts = order.map((c) => campAt(w * 30 + s * 3 + c).rc);
   return Object.assign({}, rc, { order, len: parts.reduce((n, p) => n + p.len, 0), stash: Math.max(...parts.map((p) => p.stash || 0)) || rc.stash, zones: parts.map((p) => ({ foes: p.foes, pair: p.pair || 0 })) });
 };

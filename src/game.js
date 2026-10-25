@@ -3249,9 +3249,9 @@ const ui = {
   // no tabs, bigger blocks, each in detail): upgrades and their pairs, candies, enemies, bosses, a card each with its picture,
   // its name and what it does or says; what is not met yet a dim '?'. The feed scrolls by touch (it alone: see the touch guard).
   // The story's cards (owner, 2026-10-25: «кнопку Cards, она ведет на экран открытых карт, которые в порядке сюжета и можно свайпать. Закрытые карты сильно
-  // пикселизованы и с замком»): every card in the story's order, a swipe from one to the next (scroll-snap); one seen whole, tapped it plays as it did; one not
+  // пикселизованы и с замком»): every card in the story's order, a swipe from one to the next (scroll-snap); one seen whole and alive in the middle (no full screen on a tap: owner, «Фулскрин карты не нужен»); one not
   // yet seen its picture in a few big blocks, dimmed, a lock on it, no title
-  album(at) {
+  album() {
     const p = this.panel('album'), strip = el('div', 'astrip'), ids = STORY_ORDER.filter((id) => STORY[id]).concat(Object.keys(STORY).filter((id) => !STORY_ORDER.includes(id)));
     const seen = (id) => !!save.seen['card_' + id], n = ids.filter(seen).length;
     p.append(cap(el('div', 'head', t('album')), 'album'), strip, el('div', 'label', tf('albumOpen', { n, m: ids.length })), cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
@@ -3268,7 +3268,6 @@ const ui = {
         fig = el('div', 'scard acard');
         for (const [v, x] of Object.entries(f)) fig.style.setProperty('--s' + v, x);
         im.className = 'astill'; clip.append(im); tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt);
-        fig.addEventListener('click', () => game.story(id, () => this.album(id), true));
         cells.push({ cell, c, fig, tilt, clip });
       } else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
         fig = el('div', 'acard shut');
@@ -3278,7 +3277,7 @@ const ui = {
       }
       cell.append(fig, el('div', 'atitle', open ? L2(c.title) : '???'));
       strip.append(cell);
-      if (id === at || (!at && open)) go = cell;   // (back from a card: at it; else at the furthest one seen)
+      if (open) go = cell;   // (at the furthest one seen)
     }
     const wake = () => {   // the card in the middle alive, the one before it still (one at a time: a phone's breath)
       const mid = strip.getBoundingClientRect().left + strip.clientWidth / 2, k = cells.find((q) => { const r = q.cell.getBoundingClientRect(); return r.left < mid && r.right > mid; });

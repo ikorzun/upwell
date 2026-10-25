@@ -2896,7 +2896,7 @@ function cardLight(p, tx, ty) {   // a plane's light for this tilt (in steps of 
   }
   g.putImageData(img, 0, 0); return key;
 }
-function cardLive(c, card, tilt, clip, title, next) {
+function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (settled: no coming-in, as a card swiped to in the album)
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
   const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
   const st = { alive: true, raf: 0, t0: 0, in0: 0, tx: 0, ty: 0, vx: 0, vy: 0, gx: 0, gy: 0, lastIn: -1e9, last: 0, ready: false };
@@ -2986,7 +2986,7 @@ function cardLive(c, card, tilt, clip, title, next) {
     if (!st.alive) return;
     st.raf = requestAnimationFrame(step);
     if (!st.ready) { st.last = now; return; }
-    if (!st.t0) st.t0 = st.in0 = now;   // (the coming-in from the first frame its pictures are there)
+    if (!st.t0) st.t0 = st.in0 = now - (settled ? 1e4 : 0);   // (the coming-in from the first frame its pictures are there)
     const dt = Math.min(0.05, (now - st.last) / 1000), t = (now - st.t0) / 1000, a = (now - st.in0) / 1000, K = kd(); st.last = now;
     let gx = st.gx, gy = st.gy;   // the tilt's goal: the finger, else after a while untouched a slow figure of eight; none under «reduce motion»
     if (still) { gx = 0; gy = 0; } else if (now - st.lastIn > CARD.idle) { gx = 0.55 * Math.sin(t * 0.55); gy = 0.35 * Math.sin(t * 1.1); }
@@ -3257,12 +3257,21 @@ const ui = {
     p.append(cap(el('div', 'head', t('album')), 'album'), strip, el('div', 'label', tf('albumOpen', { n, m: ids.length })), cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
     const [w0, h0] = STORY.moon_fall.cells, room = Math.max(160, strip.getBoundingClientRect().height - 40), W = Math.round(Math.min(view.w - 64, (room * w0) / h0)), H = Math.round((W * h0) / w0);
     strip.style.setProperty('--aw', W + 'px'); strip.style.setProperty('--ah', H + 'px');
+    const cells = [];
     let go = null;
     for (const id of ids) {
-      const c = STORY[id], open = seen(id), cell = el('div', 'acell'), fig = el('div', 'acard' + (open ? '' : ' shut')), im = new Image();
+      const c = STORY[id], open = seen(id), cell = el('div', 'acell'), im = new Image();
       im.src = c.still;
-      if (open) { im.className = 'astill'; fig.append(im); fig.addEventListener('click', () => game.story(id, () => this.album(id), true)); }
-      else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
+      let fig;
+      if (open) {   // as the story shows it: its frame, its number, and alive (its planes' parallax, its motion) when it is the one in the middle
+        const f = STORY_INK[c.ink], [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
+        fig = el('div', 'scard acard');
+        for (const [v, x] of Object.entries(f)) fig.style.setProperty('--s' + v, x);
+        im.className = 'astill'; clip.append(im); tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt);
+        fig.addEventListener('click', () => game.story(id, () => this.album(id), true));
+        cells.push({ cell, c, fig, tilt, clip });
+      } else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
+        fig = el('div', 'acard shut');
         const cv = document.createElement('canvas'); cv.width = 9; cv.height = Math.round((9 * h0) / w0); cv.className = 'astill';
         im.onload = () => { const g = cv.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, cv.width, cv.height); };
         fig.append(cv, iconEl('lock'));
@@ -3271,7 +3280,15 @@ const ui = {
       strip.append(cell);
       if (id === at || (!at && open)) go = cell;   // (back from a card: at it; else at the furthest one seen)
     }
-    if (go) requestAnimationFrame(() => strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }));
+    const wake = () => {   // the card in the middle alive, the one before it still (one at a time: a phone's breath)
+      const mid = strip.getBoundingClientRect().left + strip.clientWidth / 2, k = cells.find((q) => { const r = q.cell.getBoundingClientRect(); return r.left < mid && r.right > mid; });
+      if (!k || k === this.albumLive) return;
+      if (this.live) this.live.stop();
+      this.albumLive = k; this.live = cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
+    };
+    let tm = 0; strip.addEventListener('scroll', () => { clearTimeout(tm); tm = setTimeout(wake, 140); }, { passive: true });
+    this.albumLive = null;
+    requestAnimationFrame(() => { if (go) strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }); setTimeout(wake, 60); });
   },
   book() {
     this.mapAt = 'book';

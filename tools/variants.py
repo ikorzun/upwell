@@ -1743,6 +1743,164 @@ ELEMENTS.update({   # Tokyo's (Golden Gai's) hazards in frames, as the Village's
                             'the front\'s top edge changes.',
                             inks='the flames red outside and orange inside, the smoke grey dither (never white), the band red and orange'),
 })
+ELEMENTS.update({   # the Mine's (Iwami Ginzan) hazards in frames, as the Village's
+    'mine-water-frames': dict(world='mine', kind='hazframes', what='groundwater breaking out of a crack in the rock wall of the old silver mine: asleep the crack '
+                              'only drips; for half a second it beads and trickles as a warning; then a jet of water spurts out of it into the shaft for about one '
+                              'second, hurting whoever is in it, and it drips again',
+                              refdesc='the shaft\'s left wall in the Mine (grey diagonal stripes on black, a white inner edge) with the same stretch of wall shown '
+                              'three times as it is drawn now: asleep (blue drips down the wall), warning (their outer edges red) and bursting (short flat blue jets '
+                              'with red rims)',
+                              frames='A asleep: a jagged lip of grey rock jutting out of the wall\'s white inner edge with a black crack across it, a wet streak (a '
+                              'thin solid run of blue 2 art pixels wide) running down from the crack just right of the wall\'s white edge, a drop of water swelling '
+                              'at the crack\'s lip; B asleep: the same, the drop let go and fallen 4 art pixels lower down the streak, a new small drop just starting '
+                              'at the lip (A and B loop slowly as it sleeps); C about to burst: the same rock, water beading out of the whole crack and trickling '
+                              'down in two or three thin runs, the beads\' outer edges red (held still for half a second as the warning); D bursting: a short stubby '
+                              'jet of water spurting straight out of the crack into the shaft (as short as the jets in the attached image), a little thicker at the '
+                              'crack, its top and bottom edges red, reaching exactly 12 art pixels out from the wall, its end breaking into a few drops; E gushing: '
+                              'the same jet, its end broken into drops another way, a drop falling off its underside, the same reach; F gushing again: a third shape '
+                              'of the same jet\'s end and drops (D, E and F loop as it gushes)',
+                              scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (grey diagonal stripes '
+                              'on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the crack and its rock on the wall\'s '
+                              'inner edge, centred in the cell\'s height',
+                              size='the stretch of wall is exactly 28 art pixels tall (112 image pixels) with one crack in its middle, and nothing of it reaches '
+                              'further out from the wall\'s white inner edge than 12 art pixels (48 image pixels): the rock, the drips and the warning at most 6 art '
+                              'pixels out, the jet exactly 12, about 6 art pixels thick at the crack. The jet is short and stubby: it ends 12 art pixels (48 image '
+                              'pixels) from the white edge, only as far as the wall strip is wide, a tenth of the cell\'s width; even its drops stay inside those 12 '
+                              'art pixels, and everything further right is plain black air in every frame. The game stacks the stretch down the wall, so its top and '
+                              'bottom rows must join seamlessly',
+                              motion='Water is heavy: the jet spurts out straight and level and its end breaks into drops that fall in short arcs; drops only ever '
+                              'fall, never float up; a drop swells before it lets go; the rock and the crack never move.',
+                              inks='the rock grey with the black crack, the water blue with aqua glints, the drips and the trickle blue, the warning\'s bead edges '
+                              'red, the jet blue with an aqua core and red top and bottom edges (danger), its drops blue and aqua (never white)'),
+    'mine-flood-frames': dict(world='mine', kind='hazframes', what='one surge on the front of the old mine\'s flood of dark groundwater that rises up the shaft from '
+                              'below: the flood\'s front is a choppy band of blue water with a red top edge, and along it the water wells up in surges, each '
+                              'swelling, bursting into foam at its top and falling back, each at its own beat',
+                              refdesc='the front of the rising flood as it is drawn now in the game: a choppy band of blue water with a red top edge, grey stones '
+                              'tumbling in it, a few bubbles and a spout of water thrown up over it',
+                              frames='A a low smooth swell just welling up out of the front, its top edge red as the front\'s; B the swell higher and rounder, a dome '
+                              'of water; C at its highest (it slows at the top), its crown breaking into a cap of foam, a bubble rising off it; D the crown bursting: '
+                              'the foam flung up and out in two or three clumps, the dome starting to sink, the bubble higher; E falling back: the dome low and wide, '
+                              'the foam clumps falling back onto it, the bubble popping into a small ring; F the front almost level again, a little foam on it (A to '
+                              'F loop as the surge\'s life)',
+                              scene='a straight stretch of the flood\'s front 28 art pixels wide across the lower third of the cell, its top edge red over blue water '
+                              'with grey stones in it, flat and level at the same height in every cell, the surge welling up out of its middle; plain black air above',
+                              size='the surge at most 12 art pixels wide at its base and at most 14 art pixels tall over the front\'s top edge (56 image pixels); at '
+                              'the stretch\'s left and right ends the front stays flat in every frame',
+                              motion='Water is heavy: the swell rises slowly, slows at its top and falls back under gravity; its foam and drops arc down, never '
+                              'float; only the bubble rises; nothing below the front\'s top edge changes.',
+                              inks='the water one flat solid blue with a single aqua glint along its top (no dither and no black inside it: a big clean shape), its '
+                              'top edge red as the front\'s (danger), the foam aqua and grey in two or three big clumps (never white), the bubble an aqua ring, the '
+                              'band blue with grey stones'),
+})
+ELEMENTS.update({
+    'fuji-wallice-frames': dict(world='fuji', kind='hazframes', what='a frost crust of rime and ice on the shaft\'s wall that thrusts out a fan of sharp ice '
+                                'shards: asleep it is a quiet crust of rime pressed to the wall, a glint wandering slowly over it; it cracks for half a second as a '
+                                'warning; then the shards thrust out of it into the shaft and stay out for about one second, hurting whoever is in them, and draw '
+                                'back into it',
+                                refdesc='the shaft\'s left wall on Mount Fuji (blue diagonal stripes on black, a white inner edge) with the same stretch of wall shown '
+                                'three times as it is drawn now: bursting (blue ice shards with red points), warning (red marks) and asleep (a few white specks '
+                                'and glints)',
+                                frames='A asleep: the frost crust pressed to the wall, lumpy white rime over blue ice with black gaps, in three or four clusters along '
+                                'the stretch, and one small white glint (a plus of 3 by 3 art pixels) on it in its upper third; B asleep: exactly the same crust, '
+                                'only the glint moved 6 art pixels further down along it (A and B loop slowly as it sleeps); C about to burst: the same crust as A '
+                                'without the glint, cracked: short red cracks across each cluster and its outermost points red (held still for half a second as '
+                                'the warning); D bursting: from each cluster a fan of three or four sharp ice shards radiating out, half out: each shard reaches '
+                                'only 6 art pixels out from the wall, its point red; E the same fans fully out, the longest shard of each reaching exactly 12 art '
+                                'pixels out from the wall; F exactly E, plus one small white glint on one shard (D, E and F play once as it thrusts out, F held)',
+                                scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (blue diagonal '
+                                'stripes on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the hazard on the '
+                                'wall\'s inner edge, centred in the cell\'s height',
+                                size='the stretch of wall is exactly 32 art pixels tall (two tiles: 128 image pixels) and nothing of it reaches further out from the '
+                                'wall\'s white inner edge than 12 art pixels (48 image pixels): asleep and warning at most 8 art pixels out, the half-out shards in '
+                                'D 6, the shards in E and F exactly 12. The game stacks the stretch down the wall, so its top and bottom rows must join seamlessly',
+                                motion='Ice is rigid: the shards slide straight out of the crust along their own axis, each a long thin wedge, and never bend, '
+                                'wobble or flicker; the crust never moves, only the glint travels over it.',
+                                inks='the crust white rime over blue ice with black gaps, the shards blue with a white upper edge and a red point (danger), the '
+                                'cracks red, the glint white; white is allowed here: it is ice and rime'),
+    'fuji-avalanche-frames': dict(world='fuji', kind='hazframes', what='one puff of powder snow on the front of the avalanche that rises up the shaft from below: '
+                                  'the front is a ragged crest of broken snow with a red rim (its danger edge), and along it puffs of powder snow are thrown up off '
+                                  'the rolling front, billow and settle back, each at its own beat',
+                                  refdesc='the front of the rising avalanche as it is drawn now in the game: a ragged red rim over white and grey broken snow slabs, '
+                                  'black night above',
+                                  frames='A a small low puff just lifting off the front; B growing, rolling forward and up as one round billow; C at its tallest, '
+                                  'two or three round billows like a cauliflower; D the billows loosening, their tops breaking into clumps drifting forward; E '
+                                  'settling back down, a few thin grey clumps sinking towards the front; F almost gone, low clumps merging into the front (A to F '
+                                  'loop as the puff\'s life)',
+                                  scene='a straight stretch of the avalanche\'s front 28 art pixels wide across the lower third of the cell: its top edge a red '
+                                  'rim over white and grey snow, flat and level at the same height in every cell, the puff rising out of its middle; plain black '
+                                  'air above',
+                                  size='the puff at most 14 art pixels wide and at most 14 art pixels tall over the front\'s top edge (56 image pixels); at the '
+                                  'stretch\'s left and right ends the front stays flat in every frame',
+                                  motion='Powder snow billows: round clumps that swell and roll forward as they rise, slow at the top, then thin out and sink back '
+                                  'as falling snow does; never a solid block, never sharp spikes; nothing below the front\'s top edge changes.',
+                                  inks='the puff white on its upper billows and grey dither below and where it thins, a little blue shadow, no red on the puff '
+                                  '(only the front\'s rim is red); the front white, grey and its red rim; white is allowed here: it is snow'),
+    'fuji-icicle-frames': dict(world='fuji', kind='hazframes', what='an icicle hanging under an icy ledge: when the hero passes under it, it shakes, it snaps off '
+                               'at its root, it falls straight down (its red tip at the bottom hurts) and it shatters where it lands',
+                               refdesc='one icicle hanging under the icy ledge as it is drawn now in the game: a white snow cap at its root, blue ice with a '
+                               'white streak, a red tip',
+                               frames='A hanging still; B a short black crack across its root, the icicle tilted so its tip is 1 art pixel to the left; C the '
+                               'same, its tip 1 art pixel to the right (B and C alternate as it shakes); D falling: the icicle without its root, upright, its red '
+                               'tip down, the broken-off root left under the ledge as a short white and blue stump; E landed: the icicle shattered into 6 or 7 '
+                               'sharp ice shards flying out sideways and up and a white burst of ice dust at the impact, no red; F the shards lower and spread '
+                               'wider, about to vanish, no red (E and F as it breaks: landed, it no longer hurts)',
+                               scene='the underside of a blue icy ledge with a white top edge across the top of the cell (as in the attached image); in A to D '
+                               'the icicle hangs from it in the middle of the cell; in E and F it shatters on a plain flat grey ground line near the bottom of '
+                               'the cell',
+                               size='the icicle exactly 12 art pixels wide and 21 art pixels long, as in the attached image (48 by 84 image pixels); the shards '
+                               'in E and F each 2 to 4 art pixels',
+                               motion='Ice is rigid: it swings about its root and never squashes or stretches; it falls straight; its shards fly out in arcs '
+                               'and fall back down.',
+                               inks='the icicle blue with a white snow cap and a white streak, its tip red (danger) only while it hangs and falls, the shards '
+                               'blue and white only (no grey, no red), the ice dust white; white is allowed here: it is ice'),
+})
+ELEMENTS.update({   # the TV Tower's hazards in frames; their references found by default, research/variants/ref-tt-lightning-frames.png (its wall in its
+    # three states as drawn, 4 x 4 image px a game px) and ref-tt-storm-frames.png (its front, halved: 4 x 4 a band px)
+    'tt-lightning-frames': dict(world='tokyotower', kind='hazframes', what='lightning running down the lightning rod\'s cable on the steel of Tokyo Tower in a summer '
+                                'storm: asleep it is a plain grey cable clamped down the shaft\'s wall; it glows for half a second as a warning; then the bolt leaps '
+                                'out of the cable into the shaft for about one second, hurting whoever is in it, and it sleeps again',
+                                refdesc='the shaft\'s left wall on the TV Tower (purple diagonal stripes on black, a white inner edge) with the same stretch of wall '
+                                'shown three times as it is drawn now: asleep (a grey cable with grey clamps down the wall\'s inner edge), warning (the cable\'s '
+                                'outer edge red) and bursting (a short bolt, light inside with a red edge, and small grey sparks)',
+                                frames='A asleep: the grey cable running straight down the wall\'s inner edge, two grey clamps bolting it to the wall, and a faint '
+                                'charge on it: one small grey spark (2 by 4 art pixels) beside the cable just under the upper clamp; B asleep: the same, the spark '
+                                'just under the lower clamp (A and B alternate slowly as it sleeps: the charge creeping down the cable); C about to strike: the same '
+                                'cable and clamps, the cable\'s outer edge glowing red along its whole length, a few small grey and red sparks at each clamp (held '
+                                'still for half a second as the warning); D striking: a bolt of lightning leaps out of the cable at the upper clamp and runs down '
+                                'beside the cable to the lower clamp as a tall, narrow jagged zigzag, jutting out at its corners but never further than 12 art '
+                                'pixels (48 image pixels) from the wall\'s white inner edge, one short fork off it; E: the same bolt still lit between the same two '
+                                'clamps, its corners in other places and its fork elsewhere, the same reach; F: a third path of the same bolt, still lit, the same '
+                                'reach (D, E and F loop fast as it strikes: the bolt never goes dark between them)',
+                                scene='the shaft\'s left wall as a strip 10 art pixels wide down the left edge of the cell, as tall as the cell (purple diagonal '
+                                'stripes on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the cable on the wall\'s '
+                                'inner edge, centred in the cell\'s height',
+                                size='the stretch of cable is exactly 48 art pixels tall (192 image pixels) with its two clamps 24 art pixels apart, and nothing of it '
+                                'reaches further out from the wall\'s white inner edge than 12 art pixels (48 image pixels): asleep and warning at most 6 art pixels '
+                                'out, the bolt a narrow zigzag between the clamps at most 12 (most of the cell stays empty black air). The game stacks the stretch '
+                                'down the wall, so its top and bottom rows must join seamlessly',
+                                motion='Lightning is instant and jagged: the bolt is one connected zigzag of straight segments with sharp corners and one or two '
+                                'short forks, the same thickness all along, its root always at a clamp on the cable; the cable and its clamps never move.',
+                                inks='the cable and clamps grey with black bolt holes, the spark grey, the warning edge red, the bolt light grey inside with red '
+                                'along its edges (the danger edge; never white: white is what you stand on), the sparks grey and red'),
+    'tt-storm-frames': dict(world='tokyotower', kind='hazframes', what='one billow on the front of the storm cloud that rises up the shaft from below: the storm\'s '
+                            'front is a ragged band of grey cloud dithered with black with a red crackle of lightning along its top edge, and along it billows of '
+                            'cloud swell up, curl over and roll back in, each at its own beat',
+                            refdesc='the front of the rising storm cloud as it is drawn now in the game: a ragged red crackle along the top of a band of grey '
+                            'cloud dithered with black, black air above with faint grey dots',
+                            frames='A a small low swell of cloud just rising out of the front; B swelling up into a rounded heap, leaning a little forward; C a '
+                            'tall round billow, its top starting to curl over; D at its tallest, curled over like a breaking wave of cloud, a short red fork of '
+                            'lightning inside it (the only frame with lightning inside); E rolling back in, sinking and flattening, a small torn-off wisp of '
+                            'grey cloud just above it; F low again, the wisp gone (A to F loop as the billow\'s life)',
+                            scene='a straight stretch of the storm\'s front 32 art pixels wide across the lower third of the cell, its top edge a red crackle '
+                            'with grey cloud dithered with black under it, flat and level at the same height in every cell, the billow rising out of its '
+                            'middle; plain black air above',
+                            size='the billow at most 14 art pixels wide at its base and at most 12 art pixels tall over the front\'s top edge (48 image '
+                            'pixels); at the stretch\'s left and right ends the front stays flat in every frame',
+                            motion='A storm cloud billows: it swells up in soft round heaps that curl forward and roll back in, heavy and slow, never a solid '
+                            'block and never a flame; its top edge a ragged red crackle as the front\'s; nothing below the front\'s top edge changes.',
+                            inks='the cloud grey dithered with black (never white: white clouds are what you stand on here), its top edge a red crackle (the '
+                            'danger edge), the lightning fork red, the wisp grey dither'),
+})
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}

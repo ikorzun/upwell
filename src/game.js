@@ -944,8 +944,9 @@ const WET = { flood: { why: 'water', ink: PAL.blue, body: { id: 'die', base: PAL
   bog: { why: 'bog', ink: PAL.gray, body: { id: 'die', base: PAL.gray, deep: PAL.black } } };   // (the Dark Forest's black bog, Д277 «А»: no flame's orange there, orange is the hero's and the lights')   // (the TV Tower's storm cloud, Д165: «Thunderstruck!»; Д239 E: the kill the red bolt,
   // the hero the cloud's grey struck red, its sparks and splats the bolt's red: red is danger)
 // A wall hazard that kills in words of its own, not its world's rising one's (Worlds, handover 33: the Danchi's scalding steam is no flood, the Dark Forest's
-// thorns no bog): the hit's `why` and the hero's colour held a beat in it (DIE.body)
-const WALL_WHY = { steampipe: 'steam', thorns: 'thorns' };
+// thorns no bog; the Sea's sharp corals and Fuji's ice shards prick as the thorns do): the hit's `why` and the hero's colour held a beat in it (DIE.body).
+// The Mine's groundwater soaks, the TV Tower's bolt strikes, the Village's and Tokyo's burn: their worlds' own words
+const WALL_WHY = { steampipe: 'steam', thorns: 'thorns', coral: 'thorns', wallice: 'thorns' };
 const hazInk = (th) => (WET[th.hazard] ? WET[th.hazard].ink : INK.flame);
 const dieBody = (why, th) => (why === 'fire' && WET[th.hazard] ? WET[th.hazard].body : DIE.body[why]);
 const deadKey = (why, th) => 'dead_' + (why === 'fire' && WET[th.hazard] ? WET[th.hazard].why : why);

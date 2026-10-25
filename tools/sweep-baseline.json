@@ -1,5 +1,5 @@
 {
- "commit": "8f6dd6d+changes",
+ "commit": "cf7ab44",
  "made": "2026-10-25",
  "levels": {
   "c1-1": {
@@ -486,11 +486,11 @@
   },
   "c6-10": {
    "result": "won",
-   "time": 56.5,
+   "time": 57.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "boss@hover"
+    "crawler@dazed"
    ],
    "boss": "Nuppeppo",
    "dealt": "5/5"
@@ -655,12 +655,12 @@
   },
   "c8-10": {
    "result": "won",
-   "time": 41,
+   "time": 52.5,
    "heartsLost": 2,
    "stuck": [],
    "hits": [
     "shot@hover",
-    "shot@hover"
+    "boss@throw"
    ],
    "boss": "Koschei",
    "dealt": "6/6"

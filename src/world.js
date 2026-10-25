@@ -1785,6 +1785,7 @@ ICONS.bubble = '............/....pppp..../..pppppppp../.ppwwpppppp./.pwwppppppp.
 ICONS.maxhp = ICONS.heart;
 ICONS.taskCrow = '............/............/.......sss../......sswsss/.....ssssss./..ssssssss../.ssssssssss./sssssssss.../..ssssss..../....s.s...../....s.s...../...ss.ss....';   // a level's tasks (Game.task): the crows,
 ICONS.taskNeon = '............/.ss........./..s.pppppp../..sspwwwwp../..s.pwkkwp../..s.pwwwwp../..s.pwkkwp../..s.pwwwwp../..s.pppppp../..s........./.ss........./............';   // Tokyo's task: a bar's lightbox lit on its iron arm (Golden Gai, Д207 A; it was the neon)
+ICONS.lock = '............/....ssss..../...s....s.../...s....s.../...s....s.../..yyyyyyyy../..yyyyyyyy../..yyykkyyy../..yyykkyyy../..yyyykyyy../..yyyyyyyy../............';   // a card not seen yet (ui.album)
 ICONS.taskCage = '............/.....ss...../.ssssssssss./.s..s..s..s./.s..s..s..s./.s.gsggsg.s./.sgksggskgs./.sggsggsggs./.sggsggsggs./.ssssssssss./............/............';   // a friend in a cage,
 ICONS.taskLantern = '............/.....ss...../...ssssss.../..ssssssss../....soos..../....soos..../....ssss..../.....ss...../.....ss...../....ssss..../...ssssss.../............';   // a Village shrine's lantern lit,
 ICONS.taskLamp = '............/.....ss...../....s..s..../...ssssss.../...soooos.../...soyyos.../...soyyos.../...soooos.../...ssssss.../....ssss..../............/............';   // the Mine's lamps (its task)
@@ -3213,7 +3214,7 @@ function shuffled(rnd, list) {
 class Level {
   constructor() {
     this.kind = 'well'; this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.plates = null; this.gates = null; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
+    this.pickups = []; this.enemies = []; this.shots = []; this.breaks = []; this.nearBuf = []; this.boss = null; this.spots = []; this.runes = []; this.under = false;
     this.l = 0; this.r = 1; this.floor = 0; this.top = 0; this.R = 30; this.cam = 0; this.t = 0;
     this.portal = null; this.exit = null; this.capY = -Infinity; this.endY = -Infinity; this.fire = null; this.plan = [];
     this.world = WORLDS[0]; this.theme = THEMES.cave; this.stage = 0; this.hard = false; this.dark = false; this.intro = []; this.foeTypes = null; this.komori = false; this.rc = null;
@@ -3228,7 +3229,7 @@ class Level {
     const rc = this.rc = o.recipe || null;   // a campaign level is made by its recipe; a run's, by its world and stage
     this.dark = o.kind === 'well' ? (rc ? !!rc.dark : !!(o.world.dark && o.world.dark.includes(this.stage))) : o.kind === 'boss' && !!(rc && rc.dark);   // a boss's arena only by its recipe (Koschei's)
     this.rects = []; this.spikes = []; this.coats = []; this.coins = []; this.spawns = []; this.bubbles = []; this.arenas = []; this.icicles = []; this.bells = []; this.plates = null; this.gates = null; this.winds = []; this.kines = []; this.wheels = []; this.seesaws = []; this.fireWalls = [];
-    this.pickups = []; this.enemies = []; this.shots = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
+    this.pickups = []; this.enemies = []; this.shots = []; this.breaks = []; this.boss = null; this.spots = []; this.rings = []; this.neonLit = new Map(); this.tended = new Map(); this.crossing = null; this.under = false; this.rail = null; this.crumbleTime = 0; this.crumbleBack = 0;
     const sr = mulberry32((o.seed ^ 0x51ed270b) >>> 0);   // the flip side's spot, by its own generator: the shaft is laid as before
     this.spotAt = o.kind === 'well' && o.height && !rc && !o.world.bonus && sr() < UNDER.p ? this.floor - o.height * (UNDER.at[0] + sr() * (UNDER.at[1] - UNDER.at[0])) : null; this.spotRng = sr;
     const ru = this.runeRng = mulberry32((o.seed ^ 0x6d2b79f5) >>> 0), cw = CAMPAIGN.find((c) => c.world === o.world), n = !cw || o.kind !== 'well' || !o.height ? 0 : rc ? rc.runes || 0 : ru() < RUNE.p ? 1 : 0;   // its runes (RUNE), by their own generator too
@@ -3966,6 +3967,7 @@ Body.prototype.collideLevel = function (lv, h) {
       const r = near[k], x0 = r.x0 - sk, x1 = r.x1 + sk, y0 = r.y0 - sk, y1 = r.y1 + sk;
       if (x[i] <= x0 || x[i] >= x1 || y[i] <= y0 || y[i] >= y1) continue;
       let face = 0;
+      if (r.plank && r === this.dropRect && this.dropT > 0) continue;   // (the hero let through it: down on a plank, DROP)
       if (r.plank) {   // from above only: a point that was under its top passes; a body whose bottom was under its top passes whole, but not off the plank it stands
         // on (tester: «падаю вниз сквозь края тонких платформ»: landed near an end, the body sagged past it, its bottom went under the top and the plank let it all through)
         const up = Math.min(0, r.dy || 0);   // (one that rose this step, as a seesaw's seat or a mill's board: met at its top as it was)
@@ -4796,7 +4798,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const DOOR_INK = { r: [PAL.red, LIT], y: [PAL.yellow, 1] };   // (a door's: its red the shop's mark, muted as a thing's (К6: bright red is danger's), its yellow a window's light)
   const postId = (n) => {   // the station post with its numeral: n's rows made once (a level of no station keeps the sheet's 八)
     const id = 'post' + n; if (FUJI_SPR[id] || !POST_NUM[n]) return FUJI_SPR[id] ? id : 'post';
-    const rows = FUJI_SPR.post.split('/').map((row) => [...row]), gl = POST_NUM[n].split('/');
+    const rows = sprRows('post').map((row) => [...row]), gl = POST_NUM[n].split('/');   // (its rows as sprRows keeps them: a level without a numeral drawn first had made the string an object)
     for (let j = 0; j < 7; j++) for (let i = 0; i < 7; i++) rows[30 + j][7 + i] = gl[j][i] === '#' ? 'k' : 'o';
     FUJI_SPR[id] = rows.map((r) => r.join('')).join('/'); return id;
   };
@@ -5099,11 +5101,6 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   if (CINE) { this.route = 1; cineBack(this, lv, cam, H, box, F, T); }   // (the cinematic fork: from here what the kits draw DIM goes behind, the rest is a small thing in depth; see cine.js)
   const kitT = lv.tile, kitP = PIX.size, snap = (v) => Math.round(v / kitP) * kitP;
-  const swayAt = (r, kind, S, wx, b, d, ox = S.dx) => {   // (declared before its first use, Tokyo's GAI things: a const used before it threw mid-frame)   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
-    // (owner, 2026-10-25: «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
-    if (!r || !SWAY.includes(kind)) return null; const q = PIX.base, n = S.rows[0].length, xa = d > 0 ? wx + ox * q : wx - (ox + n) * q;
-    const sw = cinePoke(g, lv, r, kind, xa, b - S.rows.length * q, xa + n * q, b); return sw ? (u) => snap(sw * u * q) : null;
-  };
   const brace = (wx, d, y0, h, s, c) => {   // a knee brace off the wall at wx out toward d, from y0 down h, a pixel clear of the wall: a leg down
     // the wall, a bar along its top and a strut s wide between their ends (Tokyo's slabs, its air conditioners)
     const P = kitP, xs = (a, b) => [snap(Math.min(wx + d * a, wx + d * b)), snap(Math.max(wx + d * a, wx + d * b))], [l0, l1] = xs(P, P + s), [b0, b1] = xs(P, P + h);
@@ -5296,8 +5293,8 @@ Renderer.prototype.draw = function (g, alpha) {
       box(x + snap(0.04 * t), ey, x + snap(0.1 * t), ey + P, G, 1, 0, 10, 0);   // eyes shut
     }
   };
-  const lastRow = (rows) => { let j = rows.length - 1; while (j >= 0 && !/[^.]/.test(rows[j])) j--; return j; };   // (a part's lowest drawn row: its foot over it)
-  const fleeDraw = (r, Fr, cx, foot, bird, free) => {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
+  function lastRow(rows) { let j = rows.length - 1; while (j >= 0 && !/[^.]/.test(rows[j])) j--; return j; }   // (a part's lowest drawn row: its foot over it)
+  function fleeDraw(r, Fr, cx, foot, bird, free) {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
     // живность убегать»): sitting (false: its caller draws it) till the hero comes near, then its sheet's frames (Worlds': A crouched or startled, B off, C–F the
     // loop; each frame one width, its head on one column) along its way, facing it (the sheets face right); gone till its ledge has been out of view (FLEE_GO)
     if (!Fr) return false; const T = lv.t, H = g.hero, t = kitT, q = PIX.base, W = Fr[0].rows[0].length;
@@ -5320,6 +5317,11 @@ Renderer.prototype.draw = function (g, alpha) {
     if (e > FLEE_GO.life || (bird ? foot - up < lv.cam - 2 * t : top > lv.cam + view.h + t)) { s.gone = true; return true; }
     vsp(Fk.rows, snap(x - half), snap(top), s.dir < 0, 1, q, true);
     return true;
+  };
+  function swayAt(r, kind, S, wx, b, d, ox = S.dx) {   // (declarations, not consts: hoisted, as kits drawn above them call them; a const here was a TDZ in Tokyo's frame)   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
+    // (owner, 2026-10-25: «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
+    if (!r || !SWAY.includes(kind)) return null; const q = PIX.base, n = S.rows[0].length, xa = d > 0 ? wx + ox * q : wx - (ox + n) * q;
+    const sw = cinePoke(g, lv, r, kind, xa, b - S.rows.length * q, xa + n * q, b); return sw ? (u) => snap(sw * u * q) : null;
   };
   const iwLit = (S) => {   // a thing's lights: its orange and yellow clusters of 4 pixels or more, their middles (once)
     if (!S.lit) { S.lit = []; const seen2 = new Set(), n = S.rows[0].length; S.rows.forEach((row, y) => [...row].forEach((ch, x) => { if (!'oy'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
@@ -7271,21 +7273,17 @@ Renderer.prototype.draw = function (g, alpha) {
       if (n) disc(tube[n - 1][0], tube[n - 1][1], WORM.tip * R, [PAL.blue, PAL.yellow, INK.spike, PAL.blue][k], 1);
     });
   }
-  if (IC && IC.brk) {   // what falls breaks where it lands (frames, path A): where each falling one last was is kept, and gone from the shots it breaks there, its
-    // pieces flying out, two frames; one gone off its ledge leaves its stalk's stub there (UPwell's drop, Game: the draw only watches it)
-    const DW = this.drops || (this.drops = new WeakMap()), D = DW.get(lv) || (DW.set(lv, { fall: new Map(), hang: new Map(), stubs: [], brk: [] }), DW.get(lv));   // (per level: a room and back keeps them)
+  if (IC && IC.brk) {   // what falls breaks where it lands (frames, path A): Game's lv.breaks (where a fallen one ended: a ledge, the floor, the hero, the fire), its
+    // pieces flying out on what it landed on, two frames; one gone off its ledge leaves its stalk's stub there (the draw watches lv.icicles for that)
+    const DW = this.drops || (this.drops = new WeakMap()), D = DW.get(lv) || (DW.set(lv, { hang: new Map(), stubs: [] }), DW.get(lv));   // (per level: a room and back keeps them)
     for (const c of lv.icicles) D.hang.set(c, [c.x, c.y]);
     for (const [c, p] of D.hang) if (!lv.icicles.includes(c)) { D.stubs.push(p); D.hang.delete(c); }
-    for (const s of lv.shots) if (s.icicle) D.fall.set(s, [s.x, s.y + s.r]);
-    for (const [s, p] of D.fall) if (!lv.shots.includes(s)) {
-      const r = lv.near(p[1] - R, p[1] + R).find((q) => !q.gone && !q.plank && q.x0 < p[0] && q.x1 > p[0] && q.y0 >= p[1] - R);
-      D.brk.push({ x: p[0], y: r ? r.y0 : p[1], t: lv.t }); D.fall.delete(s);
-    }
     for (const [x, y] of D.stubs) if (seen(y, y + R)) sprAt(IC.hang.slice(0, 2), sn2(x - (IC.hang[0].length * PIX.base) / 2), sn2(y), false, 1, PIX.base);
-    for (let i = D.brk.length - 1; i >= 0; i--) {
-      const b = D.brk[i], f = Math.floor((lv.t - b.t) / 0.11), rows = IC.brk[f];
-      if (!rows) { if (f >= IC.brk.length) D.brk.splice(i, 1); continue; }
-      if (seen(b.y - R, b.y)) sprAt(rows, sn2(b.x) - IC.brkX * PIX.base, sn2(b.y) - rows.length * PIX.base, false, 1, PIX.base);
+    for (const b of lv.breaks || []) {
+      const rows = b.kind === 'drop' && IC.brk[Math.floor((lv.t - b.t) / 0.11)];
+      if (!rows || !seen(b.y - 2 * R, b.y + R)) continue;
+      if (b.foot == null) { const r = lv.near(b.y - R, b.y + R).find((q) => !q.gone && !q.plank && q.x0 < b.x && q.x1 > b.x && q.y0 >= b.y - R); b.foot = r ? r.y0 : b.y; }   // (its foot on the ledge it went into)
+      sprAt(rows, sn2(b.x) - IC.brkX * PIX.base, sn2(b.foot) - rows.length * PIX.base, false, 1, PIX.base);
     }
   }
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart; a falling stalactite

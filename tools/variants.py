@@ -1056,6 +1056,85 @@ ELEMENTS = {
                        inks='tubes in one or two of purple, blue, green and orange, their glow a dither halo of the same ink; a black or grey box behind',
                        scene=LEDGE_AT + ' below it', text='a short katakana word (ラーメン, スシ or カラオケ) or a simple pictogram'),
 }
+# The Dark Forest's own hazards (owner, 2026-10-25, Д277 «А»: thorny brambles on its walls that shoot out their thorns; the kikimora's black bog rising from
+# below, root-like hands reaching up out of it): black, white and grey as the world (colour only for danger: red), crooked (SHAPES)
+ELEMENTS.update({
+    'skazka-thorns': dict(world='skazka', kind='wallhaz', what='thorny brambles (ternovnik, the blackthorn thicket of the Russian tales) growing on the shaft\'s wall, '
+                          'that shoot out their thorns', why='in the tales the dark forest is alive and does not let a runaway pass: its thorn thickets close in '
+                          'on the path and claw at whoever runs by',
+                          asleep='a crooked tangle of black bramble stems pressed to the wall, knotted and twisted, short grey thorns on them, quiet',
+                          bursting='long sharp thorns shooting straight out of the bramble into the shaft, rigid as needles, black and grey, their points red',
+                          vary='the bramble (a tangle of crooked stems, a knotted vine with a few withered leaves, a twisted root studded with thorns, a dense '
+                          'hedge of stems), the thorns\' shape when they shoot out (long straight needles, hooked claws, a fan of spikes, a cluster of crooked '
+                          'spines)',
+                          inks='the stems and thorns black, each outlined in grey so it reads on the black night, white only as a few small glints where a stem '
+                          'or a thorn catches the light; red only on the thorns\' points (danger); no orange, no green, no other colour: this world is black, '
+                          'white and grey'),
+    'skazka-bog': dict(world='skazka', kind='hazard', what='the kikimora\'s black bog, the swamp of the Russian tales, rising up the shaft: black bog water with '
+                       'rotten roots, reeds and bog bubbles in it, and gnarled root-like hands with long clawing fingers reaching up out of it',
+                       why='the swamp is the kikimora\'s home, and in the tales a bog drags down whoever strays from the path; here it rises up the shaft '
+                       'after the Kolobok',
+                       vary='its surface (a sluggish ripple, a heaving swell, bubbles bursting), the root-hands reaching out of it (one big gnarled hand, '
+                       'several small clutching ones, roots with knuckles like fingers), what floats in it (a rotten log, a tuft of reeds, a skull, bubbles), '
+                       'the water under it (black dithered with grey downwards), and what it throws up the shaft (a gob of black mud, a clawing root-hand, a '
+                       'bursting bog bubble)',
+                       inks='the water black, its surface outlined in grey with a few small white glints (each at least 2 by 2 art pixels, just under its red '
+                       'edge, never a white line: white is an edge to stand on), grey ripples and bubbles, darker downwards through black and grey dither; '
+                       'the root-hands black, outlined in grey, grey knuckles; a line of red along its top (the danger edge: the black bog must read against '
+                       'the black night); no orange, no green, no blue: this world is black, white and grey. Every line and shape at least 2 art pixels '
+                       'thick: solid filled shapes (the hands and roots black with a grey outline 2 pixels thick, the bubbles grey rings 2 pixels thick), never '
+                       'thin 1-pixel line drawings; the water a grey dither on black (rows of dots, a checker), densest just under the red edge and thinning '
+                       'downwards, so the bog reads as a mass and not as empty night; no white lines in it'),
+})
+
+# The Dark Forest's hazards in frames, as the Village's (owner, 2026-10-25: «Проработай еще лучше опасности, раздели их красиво кадрам ассетов и анимируй»);
+# their references found by default, research/variants/ref-skazka-thorns-frames.png (its wall in its three states as drawn, 4 x 4 image px a game px)
+# and ref-skazka-bog-frames.png (its front, halved: 4 x 4 a band px); the two design sheets' was a fresh shot of 8-5, ref-skazka-now.png (--ref)
+ELEMENTS.update({
+    'skazka-thorns-frames': dict(world='skazka', kind='hazframes', what='thorny brambles (ternovnik) on the shaft\'s wall in a dark forest of the Russian tales: '
+                                 'asleep it is a crooked tangle of bramble stems pressed to the wall, short thorns on them; for half a second its thorns\' points '
+                                 'turn red as a warning; then long sharp thorns shoot straight out of it into the shaft and stay out, rigid, for about one second, '
+                                 'hurting whoever is in them, then draw back in, and it sleeps again',
+                                 refdesc='the shaft\'s left wall in the Dark Forest (grey diagonal stripes on black, a white inner edge) with the same stretch of wall '
+                                 'shown three times as it is drawn now: asleep (crooked grey bramble stems pressed to the wall), warning (their outermost pixels red) '
+                                 'and bursting (short grey needles with red points among the stems)',
+                                 frames='A asleep: the crooked bramble stems pressed to the wall, knotted, black with a grey outline, short grey thorns on them, one '
+                                 'small white glint on a knot; B asleep: the same stems, the glint on another knot and two thorn tips one art pixel further out, as '
+                                 'if the bramble stirs (A and B alternate slowly as it sleeps); C about to shoot: the same stems as A, every thorn\'s point red '
+                                 '(held still for half a second as the warning); D shooting: four or five long straight thorns thrust half way out of the bramble, '
+                                 'about 6 art pixels from the wall\'s inner edge, grey with black cores, their points red; E: the same thorns out to exactly 12 art '
+                                 'pixels from the wall, straight and rigid, their points red; F: the same as E, a small white glint along one thorn (D, E and F '
+                                 'play once as the thorns shoot out; F is held while they hurt)',
+                                 scene='the shaft\'s left wall as a strip 10 art pixels wide down the left edge of the cell, as tall as the cell (grey diagonal stripes '
+                                 'on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the bramble on the wall\'s inner '
+                                 'edge, centred in the cell\'s height',
+                                 size='the stretch of wall is exactly 32 art pixels tall (two tiles: 128 image pixels) and nothing of it reaches further out from the '
+                                 'wall\'s white inner edge than 12 art pixels (48 image pixels): asleep and warning at most 8 art pixels out, the thorns exactly 12. '
+                                 'The game stacks the stretch down the wall, so its top and bottom rows must join seamlessly',
+                                 motion='A thorn is rigid: it shoots straight out along its own line and never bends, squashes or flickers; the stems never move but '
+                                 'for the glint and the thorn tips; nothing sways like grass.',
+                                 inks='the stems black with a grey outline (so they read on the black night), the thorns grey with black cores, white only as one or '
+                                 'two small glints, red only on the thorns\' points (the danger edge); no orange, no green: this world is black, white and grey'),
+    'skazka-bog-frames': dict(world='skazka', kind='hazframes', what='one root-hand on the front of the kikimora\'s black bog that rises up the shaft from below: '
+                              'the bog\'s front is a wavy red edge over black bog water with a grey scum just under it, and along it gnarled root-like hands reach '
+                              'up out of the bog, grasp at the air and sink back, each at its own beat',
+                              refdesc='the front of the rising bog as it is drawn now in the game: a thin wavy red edge with grey scum under it, the black bog below, '
+                              'black night above with faint grey dots',
+                              frames='A the bog bulging, a knobbly root tip just breaking the surface, a ring of ripple round it; B the root-hand rising, a gnarled '
+                              'wrist, its long fingers curled shut; C taller, its fingers spreading open like clawing roots, reaching up; D at its tallest, its '
+                              'fingers clenching shut on nothing, two drops of black bog falling off it; E sinking back, only the clenched fist and its knuckles '
+                              'above the surface, a bubble beside it; F the last knuckle going under, the bubble popping, a ripple (A to F loop as the hand\'s life)',
+                              scene='a straight stretch of the bog\'s front 32 art pixels wide across the lower third of the cell, its top edge a wavy red line with '
+                              'grey scum under it and black bog water below, flat and level at the same height in every cell, the hand rising out of its middle; '
+                              'plain black air above',
+                              size='the hand at most 10 art pixels wide at its wrist and at most 14 art pixels tall over the front\'s top edge (56 image pixels), its '
+                              'fingers 2 art pixels thick; at the stretch\'s left and right ends the front stays flat in every frame',
+                              motion='A root-hand is slow and heavy, wooden: it rises out of the bog, opens, grasps and sinks back along one line, its wrist always '
+                              'rooted in the bog; it never flies off and never flickers; nothing below the front\'s top edge changes.',
+                              inks='the hand black with a grey outline 2 pixels thick (so it reads on the black night), grey knuckles, at most one small white glint '
+                              'on it; its fingertips red only in D, as it grasps (danger); the drops and the bubble grey; the front a red edge with grey scum; no '
+                              'orange, no green: this world is black, white and grey'),
+})
 
 # A boss: its fight (does), its size, where the cell shows it (place), its colour (main: BOSSES' ink), the rigid parts it may have,
 # the three yokai of its world it may be (two cells each) and the inks' rule there.
@@ -1586,6 +1665,89 @@ ELEMENTS.update({
                            'cones with a side branch)',
                            inks='the corals grey and orange in flat areas, a few aqua polyps (never green: green is moss you can hold; never purple: purple is a stash), '
                            'the spikes\' points red (the danger edge), the rock wall aqua'),
+})
+# The Danchi's own hazards (the owner's pick, 2026-10-25, Д276 «Б»): a burst boiler pipe blasting scalding steam on its walls, a burst water main flooding
+# its stairwell from below; its reference a fresh shot of 6-5 (research/variants/ref-danchi.png, 4 x 4 image px a game px)
+ELEMENTS.update({
+    'danchi-steampipe': dict(world='danchi', kind='wallhaz', what='an old hot-water pipe from the block\'s boiler room, clamped to the raw concrete wall of a 1960s '
+                             'danchi block, burst at a joint and blasting out scalding steam', reach='only three quarters of a tile (12 art pixels)',
+                             why='the estate\'s boilers and their pipes are as old as the blocks; one pipe has cracked at a joint, and now and then the pressure '
+                             'blasts scalding steam out of it',
+                             asleep='a grey pipe running down the wall close to its white inner edge, held by clamps, a cracked joint (a bolted flange) in its '
+                             'middle with a drip and a thin grey wisp of steam leaking out, no more than 8 art pixels out from the wall',
+                             bursting='a jet of scalding steam blasting straight out of the cracked joint into the shaft and billowing into round puffs, grey '
+                             'dither, a red edge along its outline where it hurts, exactly 12 art pixels (48 image pixels) long from the wall\'s white inner edge '
+                             'and no further',
+                             vary='the pipe (wrapped in lagging and tape, bare with rust patches, two pipes side by side, a pipe with a valve wheel, a pipe with a '
+                             'small pressure gauge), the joint (a bolted flange, a cracked elbow, a split seam), the steam\'s shape (a straight jet, a fan of '
+                             'puffs, rolling round billows, a curling plume)',
+                             inks='the pipe and its clamps grey with black, its lagging grey, rust only a few orange dots (orange marks blocks that crumble here), '
+                             'the steam grey dither (never white: white is an edge to stand on), its danger edge red, the wall grey'),
+    'danchi-watermain': dict(world='danchi', kind='hazard', what='a burst water main flooding the estate\'s stairwell: murky water rising up the shaft, grey soap '
+                             'suds floating on it, the estate\'s own junk bobbing on and in it: a child\'s rubber ball, a plastic bucket, a slipper, a sodai-gomi '
+                             'chair (big rubbish put out for collection), a rolled-up futon',
+                             why='the old water main under the 1960s blocks has burst, and the water floods up the stairwell faster than you can climb',
+                             vary='its surface (choppy little waves, a slow heavy swell, a churning boil with suds), its suds (a line of grey foam, clumps, bubbles), '
+                             'what floats on and in it (a ball, a bucket, slippers, a chair, a futon, a bicycle wheel, a cardboard box), the murky water under it, '
+                             'and what it throws up the shaft (a gush of water with a ball in it, a slipper flung up, a spray of suds)',
+                             inks='the water murky and in big flat masses, no random noise and no single loose pixels: under the suds a regular checker of blue and '
+                             'black (every other pixel, as the game shades), darker downwards as the checker thins to rows of blue dots and then to black (never a '
+                             'solid bright blue: blue marks springs and moving platforms here); its suds and foam grey in flat clumps (never white: white is an '
+                             'edge to stand on), the junk grey with small pieces of orange and blue, a red line along its top edge (danger)'),
+})
+ELEMENTS.update({   # the Danchi's hazards in frames, as the Village's; their references found by default, research/variants/ref-dc-steam-frames.png (its wall
+    # in its three states as drawn, 4 x 4 image px a game px) and ref-dc-watermain-frames.png (its front, halved: 4 x 4 a band px)
+    'dc-steam-frames': dict(world='danchi', kind='hazframes', what='an old hot-water pipe from the block\'s boiler room on the raw concrete wall of a danchi '
+                            'stairwell, cracked at a bolted joint: asleep it only leaks a thin wisp of steam; for half a second it hisses as a warning; then '
+                            'scalding steam blasts out of the crack into the shaft for about one second, hurting whoever is in it, and it only leaks again',
+                            refdesc='the shaft\'s left wall in the Danchi (grey diagonal stripes on black, a white inner edge) with the same stretch of wall shown '
+                            'three times as it is drawn now: asleep (a grey pipe with clamps down the wall\'s inner edge), warning (its outer edge red) and '
+                            'bursting (a column of grey steam puffs with red edges)',
+                            frames='A asleep: a grey pipe 4 art pixels wide running straight down the wall\'s inner edge, one bolted flange joint across it in '
+                            'the middle of the stretch (6 art pixels wide, a black crack in it), a thin wisp of grey steam (2 art pixels wide) curling up from '
+                            'the crack; B asleep: the same, only the wisp drifted further up and leaning the other way (A and B loop slowly as it leaks); C about '
+                            'to burst: the same pipe and flange, the crack\'s edge red, two short grey puffs spitting out of it, a drop of water falling under '
+                            'it (held still for half a second as the warning); D bursting: a jet of scalding steam blasts straight out of the crack and billows '
+                            'into round puffs that fill the whole stretch above and below the flange, reaching exactly 12 art pixels out from the wall, its '
+                            'outer outline red where it hurts; E: the same billowing jet, its puffs rolled on upward and swollen another way, the same reach; '
+                            'F: a third shape of the same billowing puffs, the same reach (D, E and F loop as it blasts)',
+                            scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (grey diagonal '
+                            'stripes on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the pipe on the wall\'s '
+                            'inner edge, its flange centred in the cell\'s height',
+                            size='the stretch of wall is exactly 32 art pixels tall (two tiles: 128 image pixels) with the flange in its middle, and nothing of '
+                            'it reaches further out from the wall\'s white inner edge than 12 art pixels (48 image pixels): the pipe, the flange, the wisp and '
+                            'the warning at most 8 art pixels out, the steam exactly 12 and no further: a narrow column of puffs as tall as the stretch, most '
+                            'of the cell plain black air. The game stacks the stretch down the wall, so its top and bottom rows must join seamlessly (the '
+                            'pipe runs on through both)',
+                            motion='Steam is a hot gas under pressure: it blasts out level from the crack and at once billows up and out into round soft puffs '
+                            'that swell and roll upward as they leave it, never a solid block and never a flame; the pipe and its flange never move.',
+                            inks='the pipe and the flange grey with black bolt holes and a black crack, the wisp grey dither, the warning edge red, the steam '
+                            'grey dithered with black (never white: white is an edge to stand on) with red along its outer outline (the danger edge), the drop '
+                            'grey'),
+    'dc-watermain-frames': dict(world='danchi', kind='hazframes', what='one surge on the front of the flood from a burst water main that rises up the estate\'s '
+                                'stairwell from below: the flood\'s front is a ragged band of grey suds edged red over murky blue water, and along it the '
+                                'water wells up in surges, each one carrying a child\'s small rubber ball up out of the water, tossing it and letting it fall '
+                                'back in, each at its own beat',
+                                refdesc='the front of the rising flood as it is drawn now in the game: a ragged red edge over a band of grey suds, murky blue '
+                                'water under it, black depths below with a sunk chair',
+                                frames='A a low swell of murky water just welling up out of the front, the ball floating on it, half sunk; B the swell higher and '
+                                'rounder, a dome of water lifting the ball; C at its highest (it slows at the top), its crown breaking into grey suds, the ball '
+                                'tossed up off it into the air; D the crown burst into two or three clumps of grey suds, the dome starting to sink, the ball at '
+                                'its highest over it; E falling back: the dome low and wide, the suds falling back onto it, the ball dropping back towards the '
+                                'water; F the front almost level again, the ball landed and floating half sunk, a little grey suds round it (A to F loop as the '
+                                'surge\'s life)',
+                                scene='a straight stretch of the flood\'s front 28 art pixels wide across the lower third of the cell, its ragged red top edge '
+                                'over grey suds and murky blue water, flat and level at the same height in every cell, the surge welling up out of its middle; '
+                                'plain black air above',
+                                size='the surge at most 14 art pixels wide at its base and at most 16 art pixels tall over the front\'s top edge (64 image '
+                                'pixels), the ball round and exactly 6 art pixels across; at the stretch\'s left and right ends the front stays flat in every '
+                                'frame',
+                                motion='Water is heavy: the swell rises slowly, slows at its top and falls back under gravity; the ball is one rigid object, the '
+                                'same pixels in every frame, carried up by the water, tossed and falling back down in an arc, never floating up on its own; the '
+                                'suds arc down; nothing below the front\'s top edge changes.',
+                                inks='the water murky blue in big flat clumps with grey suds (no white), its top edge red as the front\'s (danger), the suds '
+                                'grey in two or three big clumps, the ball orange with one grey stripe round it (no red, no white, no yellow: it is junk, not a '
+                                'coin), the band grey suds over blue'),
 })
 # A hazard's frames (owner 2026-10-25: «Проработай еще лучше опасности, раздели их красиво кадрам ассетов и анимируй»): six frames of one hazard, every
 # cell the same place at the game's own size (drawn bigger and shrunk, they turned to mush), its reference the game's own picture at 4 x 4 image pixels an

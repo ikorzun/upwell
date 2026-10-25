@@ -5077,6 +5077,11 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   if (CINE) { this.route = 1; cineBack(this, lv, cam, H, box, F, T); }   // (the cinematic fork: from here what the kits draw DIM goes behind, the rest is a small thing in depth; see cine.js)
   const kitT = lv.tile, kitP = PIX.size, snap = (v) => Math.round(v / kitP) * kitP;
+  const swayAt = (r, kind, S, wx, b, d, ox = S.dx) => {   // (declared before its first use, Tokyo's GAI things: a const used before it threw mid-frame)   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
+    // (owner, 2026-10-25: «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
+    if (!r || !SWAY.includes(kind)) return null; const q = PIX.base, n = S.rows[0].length, xa = d > 0 ? wx + ox * q : wx - (ox + n) * q;
+    const sw = cinePoke(g, lv, r, kind, xa, b - S.rows.length * q, xa + n * q, b); return sw ? (u) => snap(sw * u * q) : null;
+  };
   const brace = (wx, d, y0, h, s, c) => {   // a knee brace off the wall at wx out toward d, from y0 down h, a pixel clear of the wall: a leg down
     // the wall, a bar along its top and a strut s wide between their ends (Tokyo's slabs, its air conditioners)
     const P = kitP, xs = (a, b) => [snap(Math.min(wx + d * a, wx + d * b)), snap(Math.max(wx + d * a, wx + d * b))], [l0, l1] = xs(P, P + s), [b0, b1] = xs(P, P + h);
@@ -5293,11 +5298,6 @@ Renderer.prototype.draw = function (g, alpha) {
     if (e > FLEE_GO.life || (bird ? foot - up < lv.cam - 2 * t : top > lv.cam + view.h + t)) { s.gone = true; return true; }
     vsp(Fk.rows, snap(x - half), snap(top), s.dir < 0, 1, q, true);
     return true;
-  };
-  const swayAt = (r, kind, S, wx, b, d, ox = S.dx) => {   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
-    // (owner, 2026-10-25: «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
-    if (!r || !SWAY.includes(kind)) return null; const q = PIX.base, n = S.rows[0].length, xa = d > 0 ? wx + ox * q : wx - (ox + n) * q;
-    const sw = cinePoke(g, lv, r, kind, xa, b - S.rows.length * q, xa + n * q, b); return sw ? (u) => snap(sw * u * q) : null;
   };
   const iwLit = (S) => {   // a thing's lights: its orange and yellow clusters of 4 pixels or more, their middles (once)
     if (!S.lit) { S.lit = []; const seen2 = new Set(), n = S.rows[0].length; S.rows.forEach((row, y) => [...row].forEach((ch, x) => { if (!'oy'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
@@ -7098,20 +7098,19 @@ Renderer.prototype.draw = function (g, alpha) {
       // whole, the guide's clusters; nearest-pixel picking broke them into specks)
       const cut0 = (B) => { if (B[0].length <= n) return B; let c0 = 0; while (c0 < B[0].length - 1 && B.every((r) => r[c0] === '.')) c0++; c0 = Math.max(0, c0 - 1); return B.map((r) => r.slice(c0, c0 + n).padEnd(n, '.')); };
       if (!WS.fit || WS.fit.n !== n) WS.fit = { n, A: GUIDE ? pxClean(cut0(WS.asleep)) : fit(WS.asleep), Bu: WS.cut ? pxClean(cut0(WS.burst)) : GUIDE ? pxClean(fit(WS.burst)) : fit(WS.burst) };
-      if (WS.tips && !WS.fit.Aw) WS.fit.Aw = WS.fit.A.map((r) => { const e = r.search(/[^.][.]*$/); return e < 0 ? r : r.slice(0, e) + 'r' + r.slice(e + 1); });   // (warning: each row's
-      // outermost pixel red, the corals' tips: owner via UPwell, «the tips go red»)   // (made smaller: its new specks cleaned, the cluster rule)
+      if (!WS.fit.Aw) WS.fit.Aw = WS.fit.A.map((r) => { const e = r.search(/[^.][.]*$/); return e < 0 ? r : r.slice(0, e) + 'r' + r.slice(e + 1); });   // (warning: each row's
+      // outermost pixel red, its tips: every world's, as the corals' (owner via UPwell, «the tips go red»))   // (made smaller: its new specks cleaned, the cluster rule)
       const A = WS.fit.A, Bu = WS.fit.Bu;
-      const cut = (rows, y, k) => (k % 2 && !WS.keep ? rows.slice().reverse() : rows).slice(0, Math.min(rows.length, Math.ceil((fw.y1 - y) / s2)));   // (every other copy upside down: no
-      // repeat shows; a panel with its meter never upside down: keep)
-      // Its warning a glow swelling and ebbing twice a second (blinking past 3 a second is the digest's limit); its burst thrust out of the wall in 0.12 s (slow out)
-      // and drawn back into it at the end (slow in), the wall hiding what is in it; out, each stretch licks a pixel further now and then, each at its own beat
-      const wa = WS.solid ? 1 : warn ? 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(T * 2 * Math.PI * 2 - Math.PI / 2)) : on ? 1 : 0.8;   // (solid: whole, its tips' red the warning)
+      const cut = (rows, y) => rows.slice(0, Math.min(rows.length, Math.ceil((fw.y1 - y) / s2)));   // (each copy upright: no mirror tiling, owner's animation rule)
+      // Its warning its tips gone red, steady; its burst thrust out of the wall in 0.12 s (slow out) and drawn back into it at the end (slow in), the wall
+      // hiding what is in it
+      const wa = 1;   // (whole, never sieved: the 0.8 sieve broke every asleep strip into specks; the warning its tips gone red, steady)
       const Aw = warn && WS.fit.Aw ? WS.fit.Aw : A;
-      for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(Aw, y, k), at(A), snap(y), d < 0, wa, s2);
+      for (let y = fw.y0, k = 0; y < fw.y1; y += A.length * s2, k++) sprAt(cut(Aw, y), at(A), snap(y), d < 0, wa, s2);
       if (on) {
         const tin = u - FIREWALL.off, tout = FIREWALL.on - tin, ein = Math.min(1, tin / 0.12), eout = Math.min(1, tout / 0.12), e = Math.min(1 - (1 - ein) * (1 - ein), eout * eout), W0 = Bu[0].length;
         for (let y = fw.y0, k = 0; y < fw.y1; y += Bu.length * s2, k++) {
-          const o = Math.max(0, Math.min(W0, Math.round((1 - e) * W0) + (e >= 1 && Math.sin(T * 7 + k * 1.9) > 0.55 ? 1 : 0))), rows = cut(Bu, y, k), cutR = o ? rows.map((r) => r.slice(o)) : rows;
+          const o = Math.max(0, Math.min(W0, Math.round((1 - e) * W0))), rows = cut(Bu, y), cutR = o ? rows.map((r) => r.slice(o)) : rows;   // (no pixel of jitter: the guide's time rule)
           if (o < W0) sprAt(cutR, d > 0 ? snap(wx) : snap(wx) - (W0 - o) * s2, snap(y), d < 0, 1, s2);
         }
       }

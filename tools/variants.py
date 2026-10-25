@@ -1698,6 +1698,51 @@ ELEMENTS.update({
                             inks='the crest aqua water with white foam on its lip and grey foam shading, a red line along its top edge while it stands (the danger '
                             'edge, as on the band); the spray white and aqua drops, no red (it no longer hurts once broken); the band red, white, grey and aqua'),
 })
+ELEMENTS.update({   # Tokyo's (Golden Gai's) hazards in frames, as the Village's
+    'gai-panel-frames': dict(world='tokyo', kind='hazframes', what='an old electrical panel (a grey metal fuse box) on the wall of a bar in Golden Gai, its cables '
+                             'running up and down the wall: asleep it is shut and quiet; for half a second as a warning its door springs ajar and a spark sits in the '
+                             'gap; then it shorts out and an electric arc of sparks crackles out of it into the shaft for about one second, hurting whoever is in it, '
+                             'and it is quiet again',
+                             refdesc='the shaft\'s wall in Tokyo (purple diagonal stripes on black, a thin white inner edge) with the same stretch of wall shown '
+                             'three times as it is drawn now: asleep (two grey panels with purple cables), warning (their outer edge red) and bursting (orange, '
+                             'white and red sparks over them)',
+                             frames='A asleep: the panel shut, a small orange pilot lamp on its front lit, a loose cable end hanging under it; B asleep: the same, the '
+                             'pilot lamp dark grey and the loose cable end swung one art pixel (A and B alternate slowly as it sleeps); C about to burst: the same '
+                             'panel, its door sprung ajar by 2 art pixels at its outer edge (so 8 art pixels out in all), a small red and orange spark in the gap '
+                             '(held still for half a second as the warning); D bursting: the door open, an electric arc leaping out of the gap at the panel\'s top '
+                             'and back in at its bottom, a jagged zigzag of orange edged with red bowing out in front of the panel, taller than it is long: its '
+                             'farthest point exactly 12 art pixels from the wall, only 4 art pixels beyond the open door, a few small grey and orange sparks round '
+                             'it; E the arc crackling: the same arc, its zigzag path different, the same reach, the sparks in other places; F crackling again: a '
+                             'third zigzag path (D, E and F loop fast as it sparks: the arc stays lit, only its path changes)',
+                             scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (purple diagonal stripes '
+                             'on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the panel on the wall\'s inner edge, '
+                             'centred in the cell\'s height',
+                             size='the stretch of wall is exactly 36 art pixels tall (144 image pixels): the panel 6 art pixels wide and 20 tall in its middle, its '
+                             'cables running from it up and down to the stretch\'s top and bottom, so the stretch stacks down the wall with its top and bottom rows '
+                             'joining seamlessly; nothing reaches further out from the wall\'s white inner edge than 12 art pixels (48 image pixels): asleep and '
+                             'warning at most 8 art pixels out, the arc exactly 12 (it stays close to the panel, up and down its open door, never far out into '
+                             'the shaft)',
+                             motion='Electricity jumps: the arc is a jagged zigzag that leaps out of the panel\'s gap and back into it, never a smooth curve and never '
+                             'a cloud; from frame to frame its path jumps to a new zigzag but it never goes dark; the sparks fly out in short straight dashes; the '
+                             'panel never moves, only its door.',
+                             inks='the panel grey with black seams and a few dark scorch marks, its cables purple and black, the pilot lamp orange, the arc orange '
+                             'edged with red (the danger edge), the sparks orange and grey (no white, no yellow), the wall purple'),
+    'gai-fire-frames': dict(world='tokyo', kind='hazframes', what='one tongue of flame on the front of the fire in the back alleys of Golden Gai that rises up the '
+                            'shaft from below: the fire\'s front is a ragged band of red over orange under a haze of grey smoke, and along it tongues of flame are '
+                            'born, rise, tear off at the top and sink, each at its own beat',
+                            refdesc='the front of the rising fire as it is drawn now in the game: a ragged band, red on top and orange below, grey smoke in a dotted '
+                            'dither over it, the black burnt ground with red embers and a fallen blue sign under it',
+                            frames='A a small low lick just rising out of the front; B growing taller, leaning a little; C tall, its tip flickering; D at its tallest, '
+                            'its tip tearing off as a separate small flame just above it; E sinking back, the torn-off flame higher up and smaller, turning into a '
+                            'puff of grey smoke; F low again, the smoke gone (A to F loop as the tongue\'s life)',
+                            scene='a straight stretch of the fire\'s front 24 art pixels wide across the lower third of the cell, its top edge red and orange under '
+                            'it, flat and level at the same height in every cell, the tongue rising out of its middle; plain black air above',
+                            size='the tongue at most 10 art pixels wide at its base and at most 20 art pixels tall over the front\'s top edge (80 image pixels); at '
+                            'the stretch\'s left and right ends the front stays flat in every frame',
+                            motion='Fire rises: the tongue licks upward and narrows to its tip, a red outline round an orange core, never a solid block; nothing below '
+                            'the front\'s top edge changes.',
+                            inks='the flames red outside and orange inside, the smoke grey dither (never white), the band red and orange'),
+})
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}

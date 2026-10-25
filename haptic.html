@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- A haptics check for a phone (owner, 2026-10-25: «Сделай проверку щелчка»): which way of a buzz this phone's browser lets a page use. Not part of the game. -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Проверка щелчка</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #141414; color: #f3f3f3; font: 17px/1.4 -apple-system, system-ui, sans-serif; padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px); }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ver { color: #c8c8c8; margin: 0 0 20px; font-size: 15px; }
+  .test { border: 2px solid #c8c8c8; border-radius: 12px; padding: 14px; margin: 0 0 12px; }
+  .test b { display: block; margin-bottom: 4px; }
+  .test p { margin: 0 0 12px; color: #c8c8c8; font-size: 15px; }
+  button { width: 100%; min-height: 56px; font: 600 18px system-ui, sans-serif; color: #141414; background: #ffed57; border: 0; border-radius: 10px; }
+  button:active { background: #faa23e; }
+  .row { display: flex; align-items: center; gap: 12px; }
+  input[switch] { transform: scale(1.6); transform-origin: left center; margin: 6px 24px 6px 4px; }
+  .out { margin-top: 8px; font-size: 15px; color: #6fe0ee; min-height: 1.4em; }
+</style>
+</head>
+<body>
+<h1>Проверка щелчка</h1>
+<p class="ver" id="ver"></p>
+
+<div class="test"><b>1. Нажми переключатель сам</b><p>Так щёлкает всегда, если телефон вообще умеет (iOS 18 и новее).</p>
+  <div class="row"><input type="checkbox" switch id="sw1"><span>← нажимай</span></div></div>
+
+<div class="test"><b>2. Переключатель нажимает страница, сразу по кнопке</b><p>Так игра могла бы щёлкать на нажатие прыжка.</p>
+  <button id="b2">Нажми</button><div class="out" id="o2"></div></div>
+
+<div class="test"><b>3. Переключатель нажимает страница через секунду</b><p>Так нужно для ударов и приземлений: в эти моменты пальца на экране нет.</p>
+  <button id="b3">Нажми и подожди секунду</button><div class="out" id="o3"></div></div>
+
+<div class="test"><b>4. Обычная вибрация браузера</b><p>Работает на Android; Safari на iPhone её не умеет.</p>
+  <button id="b4">Нажми</button><div class="out" id="o4"></div></div>
+
+<p class="ver">Напиши, после каких номеров был щелчок.</p>
+
+<label id="hidden" aria-hidden="true" style="display:none"><input type="checkbox" switch></label>
+<script>
+  const m = navigator.userAgent.match(/OS (\d+)_(\d+)(?:_(\d+))?/), ios = m ? m[1] + '.' + m[2] + (m[3] ? '.' + m[3] : '') : null;
+  document.getElementById('ver').textContent = (ios ? 'iOS ' + ios : 'не iOS') + ' · ' + (/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent) ? 'не Safari' : /Safari/.test(navigator.userAgent) ? 'Safari' : 'встроенный браузер');
+  const lab = document.getElementById('hidden'), say = (id, t) => { document.getElementById(id).textContent = t; };
+  document.getElementById('b2').addEventListener('click', () => { lab.click(); say('o2', 'нажато — был щелчок?'); });
+  document.getElementById('b3').addEventListener('click', () => { say('o3', 'жди…'); setTimeout(() => { lab.click(); say('o3', 'нажато через секунду — был щелчок?'); }, 1000); });
+  document.getElementById('b4').addEventListener('click', () => { const ok = 'vibrate' in navigator && navigator.vibrate(60); say('o4', ok ? 'вибрация отправлена — почувствовал?' : 'этот браузер вибрацию не умеет'); });
+</script>
+</body>
+</html>

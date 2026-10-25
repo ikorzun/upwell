@@ -1469,7 +1469,7 @@ const CAMPAIGN = [
 // the Moon, a friend helped find it: Mochi's story since fedc427; the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'The city\'s lights hid the Moon.\nA friend helped find it again.', es: 'Las luces de la ciudad ocultaron la Luna.\nUn amigo ayudó a encontrarla.', pt: 'As luzes da cidade esconderam a Lua.\nUm amigo ajudou a encontrá-la.', ja: 'まちの あかりが つきを かくした。\nともだちが また みつけて くれた。' }, levels: [
   { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, aircons: false, seed: 3111,
-    news: { en: 'neon signs light up as you pass', es: 'los neones se encienden al pasar', pt: 'os neons acendem quando você passa', ja: 'ネオンは ちかよると つく' } },
+    news: { en: 'bar signs light up as you pass', es: 'los letreros de los bares se encienden al pasar', pt: 'os letreiros dos bares acendem quando você passa', ja: 'バーの かんばんは ちかよると つく' } },
   { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler', 'shell'], foes: 0.6, candy: [], aircons: false, seed: 2101,
     news: { en: 'crows: scare them, never wait under them', es: 'cuervos: espántalos, no esperes debajo', pt: 'corvos: espante, não espere embaixo', ja: 'カラス: おどかそう。したで またないで' } },
   { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], episode: 'umeVend', enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,   // (Ume's treat: UME)

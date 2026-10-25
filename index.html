@@ -124,6 +124,8 @@
   .grid2 > .chip .tx, .grid2 > .chip .cap { white-space: nowrap; }   /* one line each (fitBig makes a long one smaller) */
   .grid2 > :last-child:nth-child(odd) { grid-column: span 2; }   /* an odd one out: the whole row */
   .row3 { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; align-self: stretch; }   /* Map, Book, Daily: one row of equal cells, however many */
+  .pair { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; align-self: stretch; }   /* two settings on one row (2.5D, CRT), or one the whole row */
+  .pair > .big { min-width: 0; }
   .row3 > .chip { min-width: 0; padding-left: 2px; padding-right: 2px; }
   .row3 > .chip .tx, .row3 > .chip .cap { white-space: nowrap; }
   .row3 > .chip .cap { letter-spacing: 0; padding-left: 0; }   /* (its caption at the font's 12 px floor: no spacing, so a 320-px phone's third of a row holds it) */
@@ -354,6 +356,6 @@
 <script src="src/world.js"></script>
 <script src="src/cine.js"></script>
 <script src="src/game.js"></script>
-<script src="src/fx.js"></script>   <!-- screen filters, a try: nothing without ?fx= (see fx.js) -->
+<script src="src/fx.js"></script>   <!-- screen filters: the settings' CRT, and the ?fx= tries (see fx.js) -->
 </body>
 </html>

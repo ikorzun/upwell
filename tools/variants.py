@@ -1151,239 +1151,6 @@ ELEMENTS.update({
                          'for tiny glints; his eyes orange, as small lights; red only on what hurts, his blade and the spikes of his crown.'),
 })
 
-# Tokyo from Shinjuku Golden Gai, round 2 (owner 2026-10-24: Д150 «А» the place, Д151–Д158 what to take; research/tokyo/tokyo-attributes.md): six takes of
-# each picked thing, for the game's code to cut or draw (Worlds, branch gai-real)
-GAI_PLACE = ('in Shinjuku Golden Gai, the tiny Tokyo quarter of some two hundred little bars in two-storey wooden houses along six narrow alleys, '
-             'steep stairs up to the second floors, lightboxes on iron arms, paper lanterns, noren curtains, tin awnings, meters and pipes on the walls')
-GAI_AT = 'a purple wooden ledge with a white top edge sticking out of the wall'
-GAI_RULE = ('In this world blue marks moving platforms and grey chequered blocks crumble, so use those only for small details; never yellow (the coins\' colour) '
-            'and never red (danger).')
-GAI_FAR = ('a faint dim tone of each ink on the black in big flat shapes (no dither, no fine speckle), the houses and roofs a dim purple and grey, lanterns and lit '
-           'windows a small orange glow (never red, never yellow), trees a dim green, nets a dim blue')
-ELEMENTS.update({
-    'gai-far1': dict(world='tokyo', kind='prop', plane='back', what="the far view behind the shaft as the climb goes up through Shinjuku Golden Gai, a tiny quarter of "
-                     "two-storey wooden bars along narrow alleys, seen flat like a doll's house cut open, a different scene in each cell, left to right, top to bottom: "
-                     "A the Shiki-no-michi promenade at the quarter's edge, a winding paved path under trees, the old rails of the No. 13 tram showing under its paving; "
-                     "B the ground of an alley: stacked plastic crates, bins, rubbish bags under a blue crow net, a manhole cover, a crow; "
-                     "C the ground floors of the bars: short noren curtains, round paper lanterns, narrow doors covered in stickers, small signs; "
-                     "D a tiny bar cut open: one counter, five round stools, plain jars on a shelf, a steep stair going up beside it; "
-                     "E the second floors: warm lit windows, small lightboxes on iron arms over the alley; "
-                     "F the roofs: corrugated tin roofs, water tanks on legs, a TV antenna, a utility pole with sagging wires and two crows on them",
-                     where='far behind everything, low and faint, so the play reads over it', material='old wood, tin, paper, plastic, wires',
-                     size='about 14 tiles wide and 6 tiles tall', inks=GAI_FAR, scene=GAI_AT + ' in front of it'),
-    'gai-far2': dict(world='tokyo', kind='prop', plane='back', what="the far view behind the shaft near the top of Shinjuku Golden Gai, a different scene in each cell, "
-                     "left to right, top to bottom: A the Tori-no-ichi fair at Hanazono shrine on a November night: a tall wall of glowing paper lanterns in rows, "
-                     "stalls under awnings hung with big kumade rakes of good luck; B over the low roofs of the quarter: the dark trees of Hanazono shrine and the top "
-                     "of its torii among them, the glow of the city far off on the clouds; C the open night sky over the quarter: a big moon, a few long clouds, stars, "
-                     "only the last roof edges and wires along the very bottom; D the fair again, seen another way: the shrine's steps between two walls of lanterns, "
-                     "a stall of rakes; E the shrine's trees and the torii again, nearer, a stone lantern; F the night sky again, the moon half behind a long cloud, "
-                     "a crow flying", where='far behind everything, low and faint, so the play reads over it',
-                     material='paper lanterns, stalls, kumade rakes, trees, a torii, the moon, clouds', size='about 14 tiles wide and 6 tiles tall',
-                     inks=GAI_FAR + '; the torii orange (never red); the kumade rakes orange and purple (never yellow: gold is what you take)',
-                     scene=GAI_AT + ' in front of it'),
-    'gai-eave': dict(world='tokyo', kind='ledge', what='the basic ledge ' + GAI_PLACE + ': a wooden eave of a bar\'s second floor, or a tin awning over a bar\'s door, '
-                     'sticking out of the shaft wall', does='solid on every side: you stand on it, cling to its sides and jump off it',
-                     material='old timber boards and rafters, or corrugated tin sheet on iron brackets', size='4 tiles long and 1 tile thick',
-                     main="purple (the world's own colour: the wood and the tin)", rule=GAI_RULE,
-                     vary='three wooden eaves (A rafter ends in a row under its board edge, B a deep eave with a gutter along its front, C an eave on two wooden '
-                     'brackets with a hook under its free end) and three tin awnings (D corrugated tin on two iron brackets, E a tin hood bent down at its free end, '
-                     'F patched tin sheets over an old wooden frame): their silhouettes, undersides and how they are fixed to the wall'),
-    'gai-signboard': dict(world='tokyo', kind='ledge', what="a thin platform hanging free across the alley " + GAI_PLACE + ": a long wooden sign-board of a bar, "
-                          'hung on two wires from somewhere above', does='a thin platform: you jump up through it from below and stand on it',
-                          material='painted wood or tin in a thin frame, two wires', size='4 tiles long and a third of a tile thick',
-                          place='the board in the middle of the shaft, clear of the wall, its two wires going up out of the cell', main='purple or grey (old painted wood)',
-                          rule=GAI_RULE + ' Its face carries no letters: only a few plain glyph blocks (squares, circles, bars) in another ink.',
-                          vary='the board\'s shape and edges, its frame, the plain glyph blocks on its face, how the wires hold it (rings, hooks, a short chain, a crossbar)'),
-    'gai-pulley': dict(world='tokyo', kind='ledge', what="a moving platform " + GAI_PLACE + ": a blue plastic crate hung on ropes from a little pulley that runs along "
-                       'a rope stretched across the alley, the way crates of drinks are hauled up to a bar\'s second floor',
-                       does='a thin platform that rides sideways along its row, from wall to wall and back, carrying you; you jump up through it from below and stand on it',
-                       material='a plastic crate, rope, an iron pulley wheel', size='3 tiles long and half a tile thick, its ropes going up to the pulley about 2 tiles over it',
-                       place='the crate hanging in the middle of the shaft on its ropes, the pulley on a rope across the shaft above it', main='blue (blue marks platforms that move)',
-                       rule="Blue is this world's mark for what moves, so it is its main colour; grey only for the ropes and the pulley; never yellow and never red.",
-                       vary='the crate (a beer crate with handholds, a slatted crate, a crate with plain round jars in it, two crates side by side, a crate on a board), '
-                       'the pulley (one wheel, a block of two wheels, a hook on a trolley) and how the ropes hold the crate'),
-    'gai-lightbox': dict(world='tokyo', kind='prop', what='the lightbox of a little bar of Golden Gai, a small box sign on an iron arm sticking out of the wall over the alley, '
-                         'drawn twice in each cell: unlit (dim grey) on the left and lit on the right, as the hero lights it by coming near; its face shows the bar\'s name '
-                         'as a few plain glyph blocks (squares, circles, triangles, bars), never letters',
-                         where='hanging off the shaft wall on its iron arm, a tile or two over a ledge', material='a sheet-metal box with a frosted face lit from inside, an iron arm and brackets',
-                         size='about 1.2 tiles wide and 1.8 tiles tall, its arm about 1 tile long',
-                         inks='unlit: the box grey and black, its glyph blocks dark; lit: its face white, purple, aqua or blue with the glyph blocks in another of those, a dither '
-                         'halo of the face\'s ink round it (never red, never yellow, never orange); the arm grey',
-                         scene=GAI_AT + ' below it'),
-    'gai-panel': dict(world='tokyo', kind='wallhaz', what='an old electrical panel on the wooden wall of a bar in Golden Gai, its meter and its fuses, shorting out and spraying sparks',
-                      why='the old wooden quarter is wired with tangled cables and worn-out fuse boxes; as the fire climbs the shaft, the panels short out and spit sparks',
-                      asleep='a narrow upright grey metal panel flush on the wall, only 10 art pixels wide and about 28 tall, a meter dial on it, cables up and down, quiet, a few dark scorch marks',
-                      bursting='a short dense spray of sparks and arcs bursting out of the front of the panel, only 12 art pixels long (here it reaches 0.7 tiles, not one and a half), '
-                      'its outer tips and edges red',
-                      vary='the panel (a fuse box with a lid, a meter on a board, a row of old porcelain fuses, a junction box with cables), the spray\'s shape (a fan of sparks, '
-                      'a zigzag arc, a shower of spark crosses)', inks='the panel grey and black, the sparks orange and grey with white only on their hottest cores, red along the spray\'s '
-                      'edge where it hurts (the danger edge), the wall\'s wood purple'),
-    'gai-crates': dict(world='tokyo', kind='prop', what='plastic beer crates stacked by a bar\'s back door in Golden Gai, some empty bottles in them shown as plain round jars',
-                       where='on the top of a ledge at its wall end', material='moulded plastic crates with handholds', size='about 1.5 tiles wide and 1.8 tiles tall',
-                       inks='the crates blue, grey and purple (never red, never yellow), the jars grey', scene=GAI_AT),
-    'gai-bags': dict(world='tokyo', kind='prop', what='rubbish bags heaped by a bar\'s door in Golden Gai, under a blue net against the crows',
-                     where='on the top of a ledge at its wall end', material='plastic rubbish bags, a blue mesh net, a weight on its edge', size='about 2 tiles wide and 1.2 tiles tall',
-                     inks='the bags grey (never white), the net blue, a knot or two black', scene=GAI_AT),
-    'gai-bicycle': dict(world='tokyo', kind='prop', what='an old bicycle (a mamachari with a front basket) parked by the wall in a Golden Gai alley',
-                        where='on the top of a ledge at its wall end', material='a steel frame, two wheels, a wire basket, a bell', size='about 2.5 tiles wide and 1.5 tiles tall',
-                        inks='the frame grey or purple, the wheels black with grey spokes, the basket grey', scene=GAI_AT),
-    'gai-meters': dict(world='tokyo', kind='prop', what='a pair on the wooden wall of a bar in Golden Gai: a gas meter and an electric meter with their pipes and cables, '
-                       'and under them a fire extinguisher standing on the ledge by the wall', where='on the shaft wall over a ledge, the extinguisher at the ledge\'s wall end',
-                       material='metal meters with dials, pipes, cables; a fire extinguisher', size='the meters about 1.2 tiles wide and 1 tile tall, the extinguisher about half a tile wide and 1 tile tall',
-                       inks='the meters and pipes grey and black; the extinguisher grey with only a small red mark on it (never all red: red is danger); a dial\'s glint grey',
-                       scene=GAI_AT + ' below them'),
-    'gai-neko': dict(world='tokyo', kind='prop', what='a small window of a bar in the wall of a Golden Gai house, lit warm from inside, a maneki-neko (a lucky beckoning cat '
-                     'with one paw raised) sitting in it', where='set in the shaft wall over a ledge', material='a wooden window frame, glass, a ceramic cat',
-                     size='about 1.5 tiles wide and 1.5 tiles tall', inks='the frame purple and grey, the window\'s light orange (a light), the cat light grey (never white) '
-                     'with an orange bib and a small orange coin (never yellow, never red), black eyes', scene=GAI_AT + ' below it'),
-    'gai-shop': dict(world='tokyo', kind='prop', what="the front of a tiny izakaya in a Golden Gai alley, a way into the game's shop: a narrow two-storey wooden front, "
-                     "a short noren curtain in its doorway, a round paper lantern or a lightbox by the door, a door covered in stickers, a tin awning over it",
-                     where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
-                     material='old dark timber, a tin awning, a noren, a paper lantern, stickers', size='about 3.5 tiles wide and 3.5 tiles tall',
-                     inks="the wood purple and dark grey, the noren red with a simple white coin on it (the shop's mark), the lantern orange with a dither halo (never red), "
-                     "the stickers small blocks of blue, purple and grey", scene=GAI_AT),
-    'gai-stash': dict(world='tokyo', kind='prop', what="the way into the game's secret stash in Golden Gai: a narrow door open on a steep stair going straight up to a bar's "
-                      "second floor, a soft purple light glowing down the stair from above", where='built against the shaft wall at the wall end of a ledge, standing on the ledge',
-                      material='old timber, a narrow door, steep wooden steps, a bare bulb', size='about 2.5 tiles wide and 3.5 tiles tall',
-                      inks="the wood purple and dark grey, the stair's light purple with a dither halo (purple is the stash's mark), no red", scene=GAI_AT),
-    'gai-stashroom': dict(world='tokyo', kind='prop', plane='back', what="the inside of the secret stash in Golden Gai, seen as one whole game screen: a tiny bar on a second "
-                          "floor, barely wider than its counter: one counter, five round stools, shelves of plain round jars on the back wall, a lamp hanging over the "
-                          "counter, the top of the steep stair in the floor, coins to collect hanging in the room; nobody drinking",
-                          where='the whole room behind the play: its back wall, the counter and the shelves; the ledges in it are the counter and shelves',
-                          material='old wood, a counter, stools, jars, a lamp', size='the whole room, about 16 tiles wide and 26 tiles tall',
-                          inks='big flat shapes of one dim tone each on the black (no dither, no fine speckle): dim purple wood, dim grey jars, the lamp a small orange glow, '
-                          'a purple glow up the stair (the stash), gold coins', scene=GAI_AT + ' as a shelf in the room'),
-    'gai-tram': dict(world='tokyo', kind='prop', what='the old Tokyo streetcar of the No. 13 line, which ran along Golden Gai till 1970: one tram car of the 1960s in flat side '
-                     'view, its trolley pole up, its round headlight, a row of windows lit warm inside, its route number plate', where='running along rails across the shaft at a level crossing',
-                     material='a steel car body, windows, a trolley pole, wheels on bogies', size='about 7 tiles long and 2.5 tiles tall, its trolley pole above',
-                     inks='the body green or orange with a grey stripe along it (never yellow, never red), its roof grey, the windows lit orange, the wheels black and grey, '
-                     'the headlight grey with a small white core', scene='grey rails along the bottom of the cell, ' + GAI_AT + ' over the tram'),
-})
-
-
-# The TV Tower from Tokyo Tower, round 2 (owner 2026-10-24: Д160 «А» the place, Д161–Д168 what to take, Д168 «Б»: the world stays purple, only the far tower and
-# the floodlights orange; research/tower/tower-attributes.md): six takes of each picked thing, for the game's code to cut or draw (Worlds, branch tower-real).
-# Run with --ref research/variants/ref-tokyotower.png (the Skyscraper's purple in the game)
-WORLDS['tokyotower'] = ('the TV Tower', 'Tokyo Tower in Shiba, Tokyo, at night, cosy and cute, kawaii, true to the real tower of 1958: a steel lattice on four arched legs, '
-                        'angles and X bracing, gusset plates with rivets, its outside stair of some 600 steps in flights with landings, the Main Deck at 150 m, the Top '
-                        'Deck at 250 m, the antenna on top; the night painters with their brushes, the floodlights of its Landmark Light, Zojo-ji temple at its foot. In '
-                        'this game its steel is the world\'s purple, never orange', 'purple #c996ff',
-                        'blue marks moving platforms, springs and rubber walls, white clouds dissolve under you, green is moss you can hold on to, orange is only the '
-                        'warm light of the floodlights', 'the black night high over Tokyo, nothing far off')
-TT_AT = 'a purple steel truss ledge with a white top edge sticking out of the wall'
-TT_RULE = ('In this world blue marks moving platforms, springs and rubber walls, white clouds dissolve under you and green is moss you can hold on to, so use those only '
-           'for tiny details; the tower\'s steel is the world\'s purple, never orange (orange is only the floodlights\' light) and never red (danger); never yellow (the coins\' colour).')
-TT_FAR = ('each thing in one or two faint dim tones on the black in big flat shapes (no dither noise, no fine speckle): the tower itself a dim orange (the only orange), '
-          'other steel and buildings a dim purple and grey, trees a dim green, the city\'s lit windows small dim blue and purple dots, white lights a dim grey (never white), '
-          'no red, no yellow')
-TT_PROPS = ('two things side by side on the same ledge, a tile of air between them: {a} on the left, at the ledge\'s wall end, and {b} on the right, with the hero '
-            'for scale standing at the ledge\'s free end to the right of both (each cell a different take on both things)')
-ELEMENTS.update({
-    'tt-far1': dict(world='tokyotower', kind='prop', plane='back', what="the far view behind the shaft as the climb goes up Tokyo Tower from its foot, a different scene "
-                    "in each cell, left to right, top to bottom: A the great wooden main gate of Zojo-ji temple (Sangedatsumon, two storeys under big tiled roofs), rows "
-                    "of small stone jizo statues in knitted caps with pinwheels in front of them, the tower rising far behind the gate; B Shiba Park: round trees and "
-                    "lawns, carp streamers (koinobori) on ropes, the low box of the Foot Town building between the tower's legs behind the trees; C the tower's four "
-                    "arched legs spreading from the ground, the outside stair starting on Foot Town's roof and going up into the lattice; D flights of the outside stair "
-                    "zigzagging up inside the lattice, landings with rails, small lamps; E the Main Deck, a wide two-storey box with bands of windows round the tower, the "
-                    "city's lights far below it; F the lattice narrowing over the Main Deck, two night painters on safety ropes painting the steel with brushes, their "
-                    "buckets hanging", where='far behind everything, low and faint, so the play reads over it',
-                    material='a temple gate, stone statues, trees, steel lattice, stairs, a deck, the city', size='about 14 tiles wide and 7 tiles tall', inks=TT_FAR,
-                    scene=TT_AT + ' in front of it'),
-    'tt-far2': dict(world='tokyotower', kind='prop', plane='back', what="the far view behind the shaft near the top of Tokyo Tower, a different scene in each cell, left "
-                    "to right, top to bottom: A the night: low clouds drifting through the narrowing tower, its steel half hidden in them, a few floodlights glowing "
-                    "through; B the Top Deck, a small box with a ring of windows high on the tower, its crown of small lights on its roof (the Diamond Tiara); C the "
-                    "antenna mast on the very top, its broadcast panels, the lightning rod at its tip, stars and a big round moon; D the clouds again, seen from further "
-                    "off: the upper tower standing out of a sea of clouds, the Main Deck's ring of windows glowing under them; E the Top Deck again, closer, its crown "
-                    "of lights and its windows; F the antenna again, looking up its mast from below at the stars, the moon beside it",
-                    where='far behind everything, low and faint, so the play reads over it', material='steel lattice, clouds, a deck, an antenna, the night sky',
-                    size='about 14 tiles wide and 7 tiles tall', inks=TT_FAR + '; clouds a dim grey, stars small dim grey dots, the moon a dim grey disc', scene=TT_AT + ' in front of it'),
-    'tt-truss': dict(world='tokyotower', kind='ledge', what='the basic ledge, a truss of the steel lattice of Tokyo Tower sticking out of the shaft wall: two chords of '
-                     'steel angle, bracing between them, gusset plates with rivets at the joints, a big gusset plate where it meets the wall',
-                     does='solid on every side: you stand on it, cling to its sides and jump off it', material='steel angles and plates, rivets, painted purple',
-                     size='4 tiles long and 1 tile thick', main='purple (the steel)', rule=TT_RULE,
-                     vary='the bracing between the chords (X crosses, a zigzag Warren truss, K bracing, a double lattice of small diamonds, verticals and diagonals, a plate '
-                     'girder with round lightening holes), the gusset plates and their rivets, how it meets the wall (a big gusset, a knee brace under it, a bolted '
-                     'flange) and how its free end is finished'),
-    'tt-landing': dict(world='tokyotower', kind='ledge', what='a landing of the outside stair of Tokyo Tower sticking out of the wall: a steel grating floor on brackets, '
-                       'a handrail on posts along its free side, a toe board', does='a thin platform: you jump up through it from below and stand on it',
-                       material='a steel grating, a handrail, posts, brackets', size='4 tiles long and a third of a tile thick, its rail about 0.8 tiles over it',
-                       place='the landing sticking out of that wall', main='purple (the steel)',
-                       rule=TT_RULE + ' Its rail is thin and grey or purple, never white: only the floor\'s top edge is white.',
-                       vary='its floor (bars, a mesh, checker plate), its rail and posts (one rail, two rails, a mesh panel, a rail with a small sign plate), its brackets '
-                       'under it (a knee brace, a hanger rod up the wall, a deep cantilever) and one small detail (a lamp, a fire bucket, a coiled hose)'),
-    'tt-stair': dict(world='tokyotower', kind='ledge', what='a flight of the outside stair of Tokyo Tower, its square steel steps rising one tile at a time from the left '
-                     'to the right, each step one tile wide and one tile tall, five of them, the first at the wall, a handrail along them',
-                     does='solid steps: you walk up them; the top of each step is where you stand', material='steel treads (grating or checker plate), stringers, a handrail on posts',
-                     size='each step 1 tile wide and 1 tile tall, five steps, so the flight is 5 tiles wide and 5 tiles tall', place='the flight rising to the right from the wall',
-                     main='purple (the steel)', rule=TT_RULE + ' The top edge of every step is white (you stand on it); the handrail is thin and grey, never white.',
-                     vary='each step\'s face (an open grating box, a checker plate tread over a dark riser, a frame with a cross, a solid plate with rivets), the stringer '
-                     '(a solid zigzag, a diagonal beam under the steps, none), the handrail and its posts, and one small detail (a step number plate with plain glyph '
-                     'blocks, a small lamp, a chain)'),
-    'tt-flood': dict(world='tokyotower', kind='prop', what='a floodlight of Tokyo Tower\'s Landmark Light, fixed to the steel lattice, drawn twice in each cell: unlit (cold, '
-                     'dark) on the left and lit on the right, as the hero lights it by coming near; one kind in each cell: A a round sodium floodlight on a U bracket, '
-                     'B a square box floodlight with a visor over it, C two small round lamps on a short bar, D a floodlight on a short arm with its cable looping down, '
-                     'E a lamp inside a wire cage guard, F a long narrow floodlight bar',
-                     where='fixed to the shaft wall (the steel lattice) over a ledge', material='a steel housing, a glass front, a bracket, a cable',
-                     size='about 1 tile wide and 1 tile tall', inks='unlit: grey and black, its glass dark grey; lit: its glass orange with a yellow core and a dither halo of '
-                     'orange round it, a warm sodium light: a light of the dark; its bracket grey or purple', scene=TT_AT + ' below it'),
-    'tt-lightning': dict(world='tokyotower', kind='wallhaz', what='lightning running down the lightning rod\'s cable on the steel of the tower',
-                         why='summer storms over Tokyo are fierce; the tower carries a lightning rod on its tip, and its cable runs down the steel to the earth',
-                         asleep='a dim grey cable clamped along the wall, a few clamps on it, quiet', bursting='a white jagged zigzag of lightning leaping out of the cable '
-                         'into the shaft, red along its edges where it hurts, a few sparks',
-                         vary='the cable and its clamps (one cable, a cable in a conduit, a flat strap on insulators), the bolt\'s shape (one zigzag, a forked bolt, a '
-                         'crackling arc, a cluster of short jags)', inks='the cable grey, the bolt white with red along its edges (the danger edge), sparks grey, the wall\'s steel purple'),
-    'tt-storm': dict(world='tokyotower', kind='hazard', what='a storm cloud rising up the shaft from below: a dark grey churning mass of cloud from wall to wall, red '
-                     'lightning crackling along its top', why='a summer thunderstorm climbs the tower after you (in August 2018 there were 1246 lightning strikes in ten '
-                     'minutes round Tokyo)', vary='its billows (round heaps, flat layers, curls), how the red lightning runs along its top (a zigzag line, forks, '
-                     'sparks), what it throws up (a forked bolt, a small dark cloud with a spark in it, a ball of lightning)',
-                     inks='the cloud dark grey and grey dithered with black (never white: white clouds are what you stand on here), the lightning along its top red '
-                     '(danger), a few grey sparks'),
-    'tt-binosign': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='a coin-operated binocular of the Main Deck on its post (a viewer with two eyepieces, '
-                        'a coin slot, a step to stand on)', b='a small step-number sign of the outside stair on a short post, its number shown only as two or three plain '
-                        'glyph blocks (squares, bars), no digits, no letters'),
-                        where='on the top of a ledge', material='painted steel, glass, a coin box; a small sign plate on a post',
-                        size='the binocular about 1 tile wide and 1.6 tiles tall, the sign about 1 tile wide and 1 tile tall',
-                        inks='the binocular grey and purple (never blue: blue moves here), its lenses black with a grey glint; the sign grey with purple glyph blocks; no orange', scene=TT_AT),
-    'tt-paintbox': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='the night painters\' things: two or three paint cans with the tower\'s paint dripping '
-                        'down their sides, a wide brush laid across one, a rag', b='the electrician\'s carry box of spare floodlight lamps, its lid open, round glass lamps '
-                        'in it, a coil of cable on it'),
-                        where='on the top of a ledge', material='tin cans, paint, a brush; a steel box, glass lamps, a cable',
-                        size='the cans about 1.2 tiles wide and 0.8 tiles tall, the box about 1.2 tiles wide and 0.9 tiles tall',
-                        inks='the cans grey with purple paint (the tower\'s), the brush grey and black; the box grey and purple, its lamps unlit pale grey glass with black (never '
-                        'orange: they are unlit), the cable black', scene=TT_AT),
-    'tt-antcrow': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='digital broadcast antenna panels on a short mast (tall flat panels in a row, cables '
-                       'down from them, a small dish)', b='a crow perched on the ledge, cute, its feathers ruffled by the wind'),
-                       where='on the top of a ledge', material='steel panels, a mast, cables; black feathers',
-                       size='the antenna about 1.5 tiles wide and 2 tiles tall, the crow about 0.8 tiles wide and 0.8 tiles tall',
-                       inks='the panels grey with black seams, the mast purple, the cables black; the crow black with a grey edge and a grey beak, its eye a grey dot', scene=TT_AT),
-    'tt-shrine': dict(world='tokyotower', kind='prop', what="Tower Daijingu, the tower's own little Shinto shrine on its Main Deck: a small wooden hokora with a tiny "
-                      "roof, a small torii in front of it, a rack of ema votive plaques, a shimenawa rope with paper streamers",
-                      where='on the top of a ledge at its wall end', material='wood, a little roof, a torii, ema plaques, a straw rope, paper',
-                      size='about 2 tiles wide and 2 tiles tall',
-                      inks='the hokora grey and purple, the torii purple or grey stone (never orange: in this world orange is only the floodlights\' light; never red), '
-                      'the ema plaques grey with purple marks, the paper streamers grey', scene=TT_AT),
-    'tt-shop': dict(world='tokyotower', kind='prop', what="the Main Deck's souvenir counter of Tokyo Tower, a way into the game's shop: a counter with shelves behind it "
-                    "of little tower models and keychains on hooks, a red noren curtain hung over its open doorway, a sign board over it with plain glyph blocks",
-                    where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
-                    material='a counter, shelves, little tower models, keychains, a noren, a sign board', size='about 3.5 tiles wide and 3 tiles tall',
-                    inks="the counter and shelves grey and purple, the little tower models grey and purple (never orange: only the far tower is), a red noren with a "
-                    "simple white coin on it (the shop's mark), the sign's glyph blocks purple", scene=TT_AT),
-    'tt-stash': dict(world='tokyotower', kind='prop', what="a steel service hatch in the shaft of Tokyo Tower, the way into the game's secret stash: a riveted square or "
-                     "round hatch with a hand wheel or a lever, bolted to the steel, its slits and gaps glowing a soft purple from inside",
-                     where='set in the shaft wall at the wall end of a ledge, standing on the ledge', material='riveted steel plate, a hand wheel, hinges, bolts',
-                     size='about 2.5 tiles wide and 3 tiles tall', inks='grey steel, black rivets and slits, a purple glow with a dither halo from its gaps (purple is the '
-                     'stash\'s mark)', scene=TT_AT),
-    'tt-topdeck': dict(world='tokyotower', kind='prop', plane='back', what="the inside of the secret stash at the top of Tokyo Tower, seen as one whole game screen: the "
-                       "Top Deck's room of 2018, its walls and ceiling covered in faceted mirrors (triangles and diamonds), lines of LED lights running across them, the "
-                       "city's lights through its windows, coins to collect hanging in the room",
-                       where='the whole room behind the play: its walls and ceiling; the ledges in it are steel shelves',
-                       material='faceted mirror panels, LED strips, window frames', size='the whole room, about 16 tiles wide and 26 tiles tall',
-                       inks='big flat shapes of one dim tone each on the black (no dither, no fine speckle): dim purple and dim grey mirror facets, the LED lines a dim purple, '
-                       'the windows small dim blue dots, gold coins', scene=TT_AT + ' as a shelf in the room'),
-})
-
-
-
 # The Sea from Enoshima, round 2 (owner 2026-10-24: Д140 «А» the place, Д141–Д148 what to take; research/sea/sea-attributes.md): six takes of each picked
 # thing, for the game's code to cut or draw (Worlds, branch sea-real). Run with --ref research/variants/ref-sea.png: its world is the Sea's
 WORLDS['enoshima'] = ('the Sea', 'the island of Enoshima in Sagami Bay, Japan, on a summer night, cosy and cute, kawaii, true to the real island as it is today '
@@ -1507,6 +1274,237 @@ ELEMENTS.update({
                      'with rope, F a big stone slab carved with waves; and how it shows it will open (a crack, a knot, a seam of light)'),
 })
 
+# Tokyo from Shinjuku Golden Gai, round 2 (owner 2026-10-24: Д150 «А» the place, Д151–Д158 what to take; research/tokyo/tokyo-attributes.md): six takes of
+# each picked thing, for the game's code to cut or draw (Worlds, branch gai-real)
+GAI_PLACE = ('in Shinjuku Golden Gai, the tiny Tokyo quarter of some two hundred little bars in two-storey wooden houses along six narrow alleys, '
+             'steep stairs up to the second floors, lightboxes on iron arms, paper lanterns, noren curtains, tin awnings, meters and pipes on the walls')
+GAI_AT = 'a purple wooden ledge with a white top edge sticking out of the wall'
+GAI_RULE = ('In this world blue marks moving platforms and grey chequered blocks crumble, so use those only for small details; never yellow (the coins\' colour) '
+            'and never red (danger).')
+GAI_FAR = ('a faint dim tone of each ink on the black in big flat shapes (no dither, no fine speckle), the houses and roofs a dim purple and grey, lanterns and lit '
+           'windows a small orange glow (never red, never yellow), trees a dim green, nets a dim blue')
+ELEMENTS.update({
+    'gai-far1': dict(world='tokyo', kind='prop', plane='back', what="the far view behind the shaft as the climb goes up through Shinjuku Golden Gai, a tiny quarter of "
+                     "two-storey wooden bars along narrow alleys, seen flat like a doll's house cut open, a different scene in each cell, left to right, top to bottom: "
+                     "A the Shiki-no-michi promenade at the quarter's edge, a winding paved path under trees, the old rails of the No. 13 tram showing under its paving; "
+                     "B the ground of an alley: stacked plastic crates, bins, rubbish bags under a blue crow net, a manhole cover, a crow; "
+                     "C the ground floors of the bars: short noren curtains, round paper lanterns, narrow doors covered in stickers, small signs; "
+                     "D a tiny bar cut open: one counter, five round stools, plain jars on a shelf, a steep stair going up beside it; "
+                     "E the second floors: warm lit windows, small lightboxes on iron arms over the alley; "
+                     "F the roofs: corrugated tin roofs, water tanks on legs, a TV antenna, a utility pole with sagging wires and two crows on them",
+                     where='far behind everything, low and faint, so the play reads over it', material='old wood, tin, paper, plastic, wires',
+                     size='about 14 tiles wide and 6 tiles tall', inks=GAI_FAR, scene=GAI_AT + ' in front of it'),
+    'gai-far2': dict(world='tokyo', kind='prop', plane='back', what="the far view behind the shaft near the top of Shinjuku Golden Gai, a different scene in each cell, "
+                     "left to right, top to bottom: A the Tori-no-ichi fair at Hanazono shrine on a November night: a tall wall of glowing paper lanterns in rows, "
+                     "stalls under awnings hung with big kumade rakes of good luck; B over the low roofs of the quarter: the dark trees of Hanazono shrine and the top "
+                     "of its torii among them, the glow of the city far off on the clouds; C the open night sky over the quarter: a big moon, a few long clouds, stars, "
+                     "only the last roof edges and wires along the very bottom; D the fair again, seen another way: the shrine's steps between two walls of lanterns, "
+                     "a stall of rakes; E the shrine's trees and the torii again, nearer, a stone lantern; F the night sky again, the moon half behind a long cloud, "
+                     "a crow flying", where='far behind everything, low and faint, so the play reads over it',
+                     material='paper lanterns, stalls, kumade rakes, trees, a torii, the moon, clouds', size='about 14 tiles wide and 6 tiles tall',
+                     inks=GAI_FAR + '; the torii orange (never red); the kumade rakes orange and purple (never yellow: gold is what you take)',
+                     scene=GAI_AT + ' in front of it'),
+    'gai-eave': dict(world='tokyo', kind='ledge', what='the basic ledge ' + GAI_PLACE + ': a wooden eave of a bar\'s second floor, or a tin awning over a bar\'s door, '
+                     'sticking out of the shaft wall', does='solid on every side: you stand on it, cling to its sides and jump off it',
+                     material='old timber boards and rafters, or corrugated tin sheet on iron brackets', size='4 tiles long and 1 tile thick',
+                     main="purple (the world's own colour: the wood and the tin)", rule=GAI_RULE,
+                     vary='three wooden eaves (A rafter ends in a row under its board edge, B a deep eave with a gutter along its front, C an eave on two wooden '
+                     'brackets with a hook under its free end) and three tin awnings (D corrugated tin on two iron brackets, E a tin hood bent down at its free end, '
+                     'F patched tin sheets over an old wooden frame): their silhouettes, undersides and how they are fixed to the wall'),
+    'gai-signboard': dict(world='tokyo', kind='ledge', what="a thin platform hanging free across the alley " + GAI_PLACE + ": a long wooden sign-board of a bar, "
+                          'hung on two wires from somewhere above', does='a thin platform: you jump up through it from below and stand on it',
+                          material='painted wood or tin in a thin frame, two wires', size='4 tiles long and a third of a tile thick',
+                          place='the board in the middle of the shaft, clear of the wall, its two wires going up out of the cell', main='purple or grey (old painted wood)',
+                          rule=GAI_RULE + ' Its face carries no letters: only a few plain glyph blocks (squares, circles, bars) in another ink.',
+                          vary='the board\'s shape and edges, its frame, the plain glyph blocks on its face, how the wires hold it (rings, hooks, a short chain, a crossbar)'),
+    'gai-pulley': dict(world='tokyo', kind='ledge', what="a moving platform " + GAI_PLACE + ": a blue plastic crate hung on ropes from a little pulley that runs along "
+                       'a rope stretched across the alley, the way crates of drinks are hauled up to a bar\'s second floor',
+                       does='a thin platform that rides sideways along its row, from wall to wall and back, carrying you; you jump up through it from below and stand on it',
+                       material='a plastic crate, rope, an iron pulley wheel', size='3 tiles long and half a tile thick, its ropes going up to the pulley about 2 tiles over it',
+                       place='the crate hanging in the middle of the shaft on its ropes, the pulley on a rope across the shaft above it', main='blue (blue marks platforms that move)',
+                       rule="Blue is this world's mark for what moves, so it is its main colour; grey only for the ropes and the pulley; never yellow and never red.",
+                       vary='the crate (a beer crate with handholds, a slatted crate, a crate with plain round jars in it, two crates side by side, a crate on a board), '
+                       'the pulley (one wheel, a block of two wheels, a hook on a trolley) and how the ropes hold the crate'),
+    'gai-lightbox': dict(world='tokyo', kind='prop', what='the lightbox of a little bar of Golden Gai, a small box sign on an iron arm sticking out of the wall over the alley, '
+                         'drawn twice in each cell: unlit (dim grey) on the left and lit on the right, as the hero lights it by coming near; its face shows the bar\'s name '
+                         'as a few plain glyph blocks (squares, circles, triangles, bars), never letters',
+                         where='hanging off the shaft wall on its iron arm, a tile or two over a ledge', material='a sheet-metal box with a frosted face lit from inside, an iron arm and brackets',
+                         size='about 1.2 tiles wide and 1.8 tiles tall, its arm about 1 tile long',
+                         inks='unlit: the box grey and black, its glyph blocks dark; lit: its face white, purple, aqua or blue with the glyph blocks in another of those, a dither '
+                         'halo of the face\'s ink round it (never red, never yellow, never orange); the arm grey',
+                         scene=GAI_AT + ' below it'),
+    'gai-panel': dict(world='tokyo', kind='wallhaz', what='an old electrical panel on the wooden wall of a bar in Golden Gai, its meter and its fuses, shorting out and spraying sparks',
+                      why='the old wooden quarter is wired with tangled cables and worn-out fuse boxes; as the fire climbs the shaft, the panels short out and spit sparks',
+                      asleep='a narrow upright grey metal panel flush on the wall, only 10 art pixels wide and about 28 tall, a meter dial on it, cables up and down, quiet, a few dark scorch marks',
+                      bursting='a short dense spray of sparks and arcs bursting out of the front of the panel, only 12 art pixels long (here it reaches 0.7 tiles, not one and a half), '
+                      'its outer tips and edges red',
+                      vary='the panel (a fuse box with a lid, a meter on a board, a row of old porcelain fuses, a junction box with cables), the spray\'s shape (a fan of sparks, '
+                      'a zigzag arc, a shower of spark crosses)', inks='the panel grey and black, the sparks orange and grey with white only on their hottest cores, red along the spray\'s '
+                      'edge where it hurts (the danger edge), the wall\'s wood purple'),
+    'gai-crates': dict(world='tokyo', kind='prop', what='plastic beer crates stacked by a bar\'s back door in Golden Gai, some empty bottles in them shown as plain round jars',
+                       where='on the top of a ledge at its wall end', material='moulded plastic crates with handholds', size='about 1.5 tiles wide and 1.8 tiles tall',
+                       inks='the crates blue, grey and purple (never red, never yellow), the jars grey', scene=GAI_AT),
+    'gai-bags': dict(world='tokyo', kind='prop', what='rubbish bags heaped by a bar\'s door in Golden Gai, under a blue net against the crows',
+                     where='on the top of a ledge at its wall end', material='plastic rubbish bags, a blue mesh net, a weight on its edge', size='about 2 tiles wide and 1.2 tiles tall',
+                     inks='the bags grey (never white), the net blue, a knot or two black', scene=GAI_AT),
+    'gai-bicycle': dict(world='tokyo', kind='prop', what='an old bicycle (a mamachari with a front basket) parked by the wall in a Golden Gai alley',
+                        where='on the top of a ledge at its wall end', material='a steel frame, two wheels, a wire basket, a bell', size='about 2.5 tiles wide and 1.5 tiles tall',
+                        inks='the frame grey or purple, the wheels black with grey spokes, the basket grey', scene=GAI_AT),
+    'gai-meters': dict(world='tokyo', kind='prop', what='a pair on the wooden wall of a bar in Golden Gai: a gas meter and an electric meter with their pipes and cables, '
+                       'and under them a fire extinguisher standing on the ledge by the wall', where='on the shaft wall over a ledge, the extinguisher at the ledge\'s wall end',
+                       material='metal meters with dials, pipes, cables; a fire extinguisher', size='the meters about 1.2 tiles wide and 1 tile tall, the extinguisher about half a tile wide and 1 tile tall',
+                       inks='the meters and pipes grey and black; the extinguisher grey with only a small red mark on it (never all red: red is danger); a dial\'s glint grey',
+                       scene=GAI_AT + ' below them'),
+    'gai-neko': dict(world='tokyo', kind='prop', what='a small window of a bar in the wall of a Golden Gai house, lit warm from inside, a maneki-neko (a lucky beckoning cat '
+                     'with one paw raised) sitting in it', where='set in the shaft wall over a ledge', material='a wooden window frame, glass, a ceramic cat',
+                     size='about 1.5 tiles wide and 1.5 tiles tall', inks='the frame purple and grey, the window\'s light orange (a light), the cat light grey (never white) '
+                     'with an orange bib and a small orange coin (never yellow, never red), black eyes', scene=GAI_AT + ' below it'),
+    'gai-shop': dict(world='tokyo', kind='prop', what="the front of a tiny izakaya in a Golden Gai alley, a way into the game's shop: a narrow two-storey wooden front, "
+                     "a short noren curtain in its doorway, a round paper lantern or a lightbox by the door, a door covered in stickers, a tin awning over it",
+                     where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
+                     material='old dark timber, a tin awning, a noren, a paper lantern, stickers', size='about 3.5 tiles wide and 3.5 tiles tall',
+                     inks="the wood purple and dark grey, the noren red with a simple white coin on it (the shop's mark), the lantern orange with a dither halo (never red), "
+                     "the stickers small blocks of blue, purple and grey", scene=GAI_AT),
+    'gai-stash': dict(world='tokyo', kind='prop', what="the way into the game's secret stash in Golden Gai: a narrow door open on a steep stair going straight up to a bar's "
+                      "second floor, a soft purple light glowing down the stair from above", where='built against the shaft wall at the wall end of a ledge, standing on the ledge',
+                      material='old timber, a narrow door, steep wooden steps, a bare bulb', size='about 2.5 tiles wide and 3.5 tiles tall',
+                      inks="the wood purple and dark grey, the stair's light purple with a dither halo (purple is the stash's mark), no red", scene=GAI_AT),
+    'gai-stashroom': dict(world='tokyo', kind='prop', plane='back', what="the inside of the secret stash in Golden Gai, seen as one whole game screen: a tiny bar on a second "
+                          "floor, barely wider than its counter: one counter, five round stools, shelves of plain round jars on the back wall, a lamp hanging over the "
+                          "counter, the top of the steep stair in the floor, coins to collect hanging in the room; nobody drinking",
+                          where='the whole room behind the play: its back wall, the counter and the shelves; the ledges in it are the counter and shelves',
+                          material='old wood, a counter, stools, jars, a lamp', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                          inks='big flat shapes of one dim tone each on the black (no dither, no fine speckle): dim purple wood, dim grey jars, the lamp a small orange glow, '
+                          'a purple glow up the stair (the stash), gold coins', scene=GAI_AT + ' as a shelf in the room'),
+    'gai-tram': dict(world='tokyo', kind='prop', what='the old Tokyo streetcar of the No. 13 line, which ran along Golden Gai till 1970: one tram car of the 1960s in flat side '
+                     'view, its trolley pole up, its round headlight, a row of windows lit warm inside, its route number plate', where='running along rails across the shaft at a level crossing',
+                     material='a steel car body, windows, a trolley pole, wheels on bogies', size='about 7 tiles long and 2.5 tiles tall, its trolley pole above',
+                     inks='the body green or orange with a grey stripe along it (never yellow, never red), its roof grey, the windows lit orange, the wheels black and grey, '
+                     'the headlight grey with a small white core', scene='grey rails along the bottom of the cell, ' + GAI_AT + ' over the tram'),
+})
+
+# The TV Tower from Tokyo Tower, round 2 (owner 2026-10-24: Д160 «А» the place, Д161–Д168 what to take, Д168 «Б»: the world stays purple, only the far tower and
+# the floodlights orange; research/tower/tower-attributes.md): six takes of each picked thing, for the game's code to cut or draw (Worlds, branch tower-real).
+# Run with --ref research/variants/ref-tokyotower.png (the Skyscraper's purple in the game)
+WORLDS['tokyotower'] = ('the TV Tower', 'Tokyo Tower in Shiba, Tokyo, at night, cosy and cute, kawaii, true to the real tower of 1958: a steel lattice on four arched legs, '
+                        'angles and X bracing, gusset plates with rivets, its outside stair of some 600 steps in flights with landings, the Main Deck at 150 m, the Top '
+                        'Deck at 250 m, the antenna on top; the night painters with their brushes, the floodlights of its Landmark Light, Zojo-ji temple at its foot. In '
+                        'this game its steel is the world\'s purple, never orange', 'purple #c996ff',
+                        'blue marks moving platforms, springs and rubber walls, white clouds dissolve under you, green is moss you can hold on to, orange is only the '
+                        'warm light of the floodlights', 'the black night high over Tokyo, nothing far off')
+TT_AT = 'a purple steel truss ledge with a white top edge sticking out of the wall'
+TT_RULE = ('In this world blue marks moving platforms, springs and rubber walls, white clouds dissolve under you and green is moss you can hold on to, so use those only '
+           'for tiny details; the tower\'s steel is the world\'s purple, never orange (orange is only the floodlights\' light) and never red (danger); never yellow (the coins\' colour).')
+TT_FAR = ('each thing in one or two faint dim tones on the black in big flat shapes (no dither noise, no fine speckle): the tower itself a dim orange (the only orange), '
+          'other steel and buildings a dim purple and grey, trees a dim green, the city\'s lit windows small dim blue and purple dots, white lights a dim grey (never white), '
+          'no red, no yellow')
+TT_PROPS = ('two things side by side on the same ledge, a tile of air between them: {a} on the left, at the ledge\'s wall end, and {b} on the right, with the hero '
+            'for scale standing at the ledge\'s free end to the right of both (each cell a different take on both things)')
+ELEMENTS.update({
+    'tt-far1': dict(world='tokyotower', kind='prop', plane='back', what="the far view behind the shaft as the climb goes up Tokyo Tower from its foot, a different scene "
+                    "in each cell, left to right, top to bottom: A the great wooden main gate of Zojo-ji temple (Sangedatsumon, two storeys under big tiled roofs), rows "
+                    "of small stone jizo statues in knitted caps with pinwheels in front of them, the tower rising far behind the gate; B Shiba Park: round trees and "
+                    "lawns, carp streamers (koinobori) on ropes, the low box of the Foot Town building between the tower's legs behind the trees; C the tower's four "
+                    "arched legs spreading from the ground, the outside stair starting on Foot Town's roof and going up into the lattice; D flights of the outside stair "
+                    "zigzagging up inside the lattice, landings with rails, small lamps; E the Main Deck, a wide two-storey box with bands of windows round the tower, the "
+                    "city's lights far below it; F the lattice narrowing over the Main Deck, two night painters on safety ropes painting the steel with brushes, their "
+                    "buckets hanging", where='far behind everything, low and faint, so the play reads over it',
+                    material='a temple gate, stone statues, trees, steel lattice, stairs, a deck, the city', size='about 14 tiles wide and 7 tiles tall', inks=TT_FAR,
+                    scene=TT_AT + ' in front of it'),
+    'tt-far2': dict(world='tokyotower', kind='prop', plane='back', what="the far view behind the shaft near the top of Tokyo Tower, a different scene in each cell, left "
+                    "to right, top to bottom: A the night: low clouds drifting through the narrowing tower, its steel half hidden in them, a few floodlights glowing "
+                    "through; B the Top Deck, a small box with a ring of windows high on the tower, its crown of small lights on its roof (the Diamond Tiara); C the "
+                    "antenna mast on the very top, its broadcast panels, the lightning rod at its tip, stars and a big round moon; D the clouds again, seen from further "
+                    "off: the upper tower standing out of a sea of clouds, the Main Deck's ring of windows glowing under them; E the Top Deck again, closer, its crown "
+                    "of lights and its windows; F the antenna again, looking up its mast from below at the stars, the moon beside it",
+                    where='far behind everything, low and faint, so the play reads over it', material='steel lattice, clouds, a deck, an antenna, the night sky',
+                    size='about 14 tiles wide and 7 tiles tall', inks=TT_FAR + '; clouds a dim grey, stars small dim grey dots, the moon a dim grey disc', scene=TT_AT + ' in front of it'),
+    'tt-truss': dict(world='tokyotower', kind='ledge', what='the basic ledge, a truss of the steel lattice of Tokyo Tower sticking out of the shaft wall: two chords of '
+                     'steel angle, bracing between them, gusset plates with rivets at the joints, a big gusset plate where it meets the wall',
+                     does='solid on every side: you stand on it, cling to its sides and jump off it', material='steel angles and plates, rivets, painted purple',
+                     size='4 tiles long and 1 tile thick', main='purple (the steel)', rule=TT_RULE,
+                     vary='the bracing between the chords (X crosses, a zigzag Warren truss, K bracing, a double lattice of small diamonds, verticals and diagonals, a plate '
+                     'girder with round lightening holes), the gusset plates and their rivets, how it meets the wall (a big gusset, a knee brace under it, a bolted '
+                     'flange) and how its free end is finished'),
+    'tt-landing': dict(world='tokyotower', kind='ledge', what='a landing of the outside stair of Tokyo Tower sticking out of the wall: a steel grating floor on brackets, '
+                       'a handrail on posts along its free side, a toe board', does='a thin platform: you jump up through it from below and stand on it',
+                       material='a steel grating, a handrail, posts, brackets', size='4 tiles long and a third of a tile thick, its rail about 0.8 tiles over it',
+                       place='the landing sticking out of that wall', main='purple (the steel)',
+                       rule=TT_RULE + ' Its rail is thin and grey or purple, never white: only the floor\'s top edge is white.',
+                       vary='its floor (bars, a mesh, checker plate), its rail and posts (one rail, two rails, a mesh panel, a rail with a small sign plate), its brackets '
+                       'under it (a knee brace, a hanger rod up the wall, a deep cantilever) and one small detail (a lamp, a fire bucket, a coiled hose)'),
+    'tt-stair': dict(world='tokyotower', kind='ledge', what='a flight of the outside stair of Tokyo Tower, its square steel steps rising one tile at a time from the left '
+                     'to the right, each step one tile wide and one tile tall, five of them, the first at the wall, a handrail along them',
+                     does='solid steps: you walk up them; the top of each step is where you stand', material='steel treads (grating or checker plate), stringers, a handrail on posts',
+                     size='each step 1 tile wide and 1 tile tall, five steps, so the flight is 5 tiles wide and 5 tiles tall', place='the flight rising to the right from the wall',
+                     main='purple (the steel)', rule=TT_RULE + ' The top edge of every step is white (you stand on it); the handrail is thin and grey, never white.',
+                     vary='each step\'s face (an open grating box, a checker plate tread over a dark riser, a frame with a cross, a solid plate with rivets), the stringer '
+                     '(a solid zigzag, a diagonal beam under the steps, none), the handrail and its posts, and one small detail (a step number plate with plain glyph '
+                     'blocks, a small lamp, a chain)'),
+    'tt-flood': dict(world='tokyotower', kind='prop', what='a floodlight of Tokyo Tower\'s Landmark Light, fixed to the steel lattice, drawn twice in each cell: unlit (cold, '
+                     'dark) on the left and lit on the right, as the hero lights it by coming near; one kind in each cell: A a round sodium floodlight on a U bracket, '
+                     'B a square box floodlight with a visor over it, C two small round lamps on a short bar, D a floodlight on a short arm with its cable looping down, '
+                     'E a lamp inside a wire cage guard, F a long narrow floodlight bar',
+                     where='fixed to the shaft wall (the steel lattice) over a ledge', material='a steel housing, a glass front, a bracket, a cable',
+                     size='about 1 tile wide and 1 tile tall', inks='unlit: grey and black, its glass dark grey; lit: its glass orange with a yellow core and a dither halo of '
+                     'orange round it, a warm sodium light: a light of the dark; its bracket grey or purple', scene=TT_AT + ' below it'),
+    'tt-lightning': dict(world='tokyotower', kind='wallhaz', what='lightning running down the lightning rod\'s cable on the steel of the tower',
+                         why='summer storms over Tokyo are fierce; the tower carries a lightning rod on its tip, and its cable runs down the steel to the earth',
+                         asleep='a dim grey cable clamped along the wall, a few clamps on it, quiet', bursting='a white jagged zigzag of lightning leaping out of the cable '
+                         'into the shaft, red along its edges where it hurts, a few sparks',
+                         vary='the cable and its clamps (one cable, a cable in a conduit, a flat strap on insulators), the bolt\'s shape (one zigzag, a forked bolt, a '
+                         'crackling arc, a cluster of short jags)', inks='the cable grey, the bolt white with red along its edges (the danger edge), sparks grey, the wall\'s steel purple'),
+    'tt-storm': dict(world='tokyotower', kind='hazard', what='a storm cloud rising up the shaft from below: a dark grey churning mass of cloud from wall to wall, red '
+                     'lightning crackling along its top', why='a summer thunderstorm climbs the tower after you (in August 2018 there were 1246 lightning strikes in ten '
+                     'minutes round Tokyo)', vary='its billows (round heaps, flat layers, curls), how the red lightning runs along its top (a zigzag line, forks, '
+                     'sparks), what it throws up (a forked bolt, a small dark cloud with a spark in it, a ball of lightning)',
+                     inks='the cloud dark grey and grey dithered with black (never white: white clouds are what you stand on here), the lightning along its top red '
+                     '(danger), a few grey sparks'),
+    'tt-binosign': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='a coin-operated binocular of the Main Deck on its post (a viewer with two eyepieces, '
+                        'a coin slot, a step to stand on)', b='a small step-number sign of the outside stair on a short post, its number shown only as two or three plain '
+                        'glyph blocks (squares, bars), no digits, no letters'),
+                        where='on the top of a ledge', material='painted steel, glass, a coin box; a small sign plate on a post',
+                        size='the binocular about 1 tile wide and 1.6 tiles tall, the sign about 1 tile wide and 1 tile tall',
+                        inks='the binocular grey and purple (never blue: blue moves here), its lenses black with a grey glint; the sign grey with purple glyph blocks; no orange', scene=TT_AT),
+    'tt-paintbox': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='the night painters\' things: two or three paint cans with the tower\'s paint dripping '
+                        'down their sides, a wide brush laid across one, a rag', b='the electrician\'s carry box of spare floodlight lamps, its lid open, round glass lamps '
+                        'in it, a coil of cable on it'),
+                        where='on the top of a ledge', material='tin cans, paint, a brush; a steel box, glass lamps, a cable',
+                        size='the cans about 1.2 tiles wide and 0.8 tiles tall, the box about 1.2 tiles wide and 0.9 tiles tall',
+                        inks='the cans grey with purple paint (the tower\'s), the brush grey and black; the box grey and purple, its lamps unlit pale grey glass with black (never '
+                        'orange: they are unlit), the cable black', scene=TT_AT),
+    'tt-antcrow': dict(world='tokyotower', kind='prop', what=TT_PROPS.format(a='digital broadcast antenna panels on a short mast (tall flat panels in a row, cables '
+                       'down from them, a small dish)', b='a crow perched on the ledge, cute, its feathers ruffled by the wind'),
+                       where='on the top of a ledge', material='steel panels, a mast, cables; black feathers',
+                       size='the antenna about 1.5 tiles wide and 2 tiles tall, the crow about 0.8 tiles wide and 0.8 tiles tall',
+                       inks='the panels grey with black seams, the mast purple, the cables black; the crow black with a grey edge and a grey beak, its eye a grey dot', scene=TT_AT),
+    'tt-shrine': dict(world='tokyotower', kind='prop', what="Tower Daijingu, the tower's own little Shinto shrine on its Main Deck: a small wooden hokora with a tiny "
+                      "roof, a small torii in front of it, a rack of ema votive plaques, a shimenawa rope with paper streamers",
+                      where='on the top of a ledge at its wall end', material='wood, a little roof, a torii, ema plaques, a straw rope, paper',
+                      size='about 2 tiles wide and 2 tiles tall',
+                      inks='the hokora grey and purple, the torii purple or grey stone (never orange: in this world orange is only the floodlights\' light; never red), '
+                      'the ema plaques grey with purple marks, the paper streamers grey', scene=TT_AT),
+    'tt-shop': dict(world='tokyotower', kind='prop', what="the Main Deck's souvenir counter of Tokyo Tower, a way into the game's shop: a counter with shelves behind it "
+                    "of little tower models and keychains on hooks, a red noren curtain hung over its open doorway, a sign board over it with plain glyph blocks",
+                    where='built against the shaft wall at the wall end of a ledge, standing on the ledge, its doorway facing the play',
+                    material='a counter, shelves, little tower models, keychains, a noren, a sign board', size='about 3.5 tiles wide and 3 tiles tall',
+                    inks="the counter and shelves grey and purple, the little tower models grey and purple (never orange: only the far tower is), a red noren with a "
+                    "simple white coin on it (the shop's mark), the sign's glyph blocks purple", scene=TT_AT),
+    'tt-stash': dict(world='tokyotower', kind='prop', what="a steel service hatch in the shaft of Tokyo Tower, the way into the game's secret stash: a riveted square or "
+                     "round hatch with a hand wheel or a lever, bolted to the steel, its slits and gaps glowing a soft purple from inside",
+                     where='set in the shaft wall at the wall end of a ledge, standing on the ledge', material='riveted steel plate, a hand wheel, hinges, bolts',
+                     size='about 2.5 tiles wide and 3 tiles tall', inks='grey steel, black rivets and slits, a purple glow with a dither halo from its gaps (purple is the '
+                     'stash\'s mark)', scene=TT_AT),
+    'tt-topdeck': dict(world='tokyotower', kind='prop', plane='back', what="the inside of the secret stash at the top of Tokyo Tower, seen as one whole game screen: the "
+                       "Top Deck's room of 2018, its walls and ceiling covered in faceted mirrors (triangles and diamonds), lines of LED lights running across them, the "
+                       "city's lights through its windows, coins to collect hanging in the room",
+                       where='the whole room behind the play: its walls and ceiling; the ledges in it are steel shelves',
+                       material='faceted mirror panels, LED strips, window frames', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                       inks='big flat shapes of one dim tone each on the black (no dither, no fine speckle): dim purple and dim grey mirror facets, the LED lines a dim purple, '
+                       'the windows small dim blue dots, gold coins', scene=TT_AT + ' as a shelf in the room'),
+})
+
+
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.
 In play: {does}. Material: {material}. Size: {size}; {grid}
@@ -1588,6 +1586,69 @@ ELEMENTS.update({
                            'cones with a side branch)',
                            inks='the corals grey and orange in flat areas, a few aqua polyps (never green: green is moss you can hold; never purple: purple is a stash), '
                            'the spikes\' points red (the danger edge), the rock wall aqua'),
+})
+# A hazard's frames (owner 2026-10-25: «Проработай еще лучше опасности, раздели их красиво кадрам ассетов и анимируй»): six frames of one hazard, every
+# cell the same place at the game's own size (drawn bigger and shrunk, they turned to mush), its reference the game's own picture at 4 x 4 image pixels an
+# art pixel; cut path A (Worlds), played by the hazard's own clock (its mechanics unchanged). Run with --ref <its reference>
+HAZFRAMES = """Pixel-art animation sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
+The attached image is a real screenshot of the game at its own scale (one art pixel is 4 x 4 image pixels): {refdesc}. Copy its pixel size, its colours and its line weights exactly, and keep the hazard's idea, but draw it better: clearer shapes, livelier.
+The hazard: {what}.
+Draw six animation frames of it in a 3 x 2 grid of equal cells read left to right, top to bottom, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner: {frames}.
+Every cell shows exactly the same place at the same spot in the cell, so the six frames lie exactly on top of each other: {scene}. Its size, exactly as in the game: {size}.
+From frame to frame only what moves changes; everything else stays pixel for pixel the same. {motion}
+Build it from flat shapes in clusters of at least 2 x 2 art pixels: simple shapes that read at a glance on a phone screen, no single loose pixels, no fine noise, no motion blur, no speed lines, no glow.
+{style} Use only these colours: {inks9}. Its colours: {inks}. Red only for danger; yellow only for things you can take; no white except where said. No perspective, no 3D, no text other than the six letters."""
+ELEMENTS.update({
+    'vil-wallfire-frames': dict(world='village', kind='hazframes', what='dry grass tufts on the shaft\'s earthen wall that catch fire from the sparks of the field '
+                                'burning below: asleep it is a plain seam of dry grass pressed to the wall; it smoulders for half a second as a warning; then flames '
+                                'roar out of it into the shaft for about one second, hurting whoever is in them, and it sleeps again',
+                                refdesc='the shaft\'s left wall in the Village (orange diagonal stripes on black, a white inner edge) with the same stretch of wall shown '
+                                'three times as it is drawn now: asleep (a seam of grey dry grass stalks), warning (their tips red) and bursting (red and orange flames)',
+                                frames='A asleep: the dry grass tufts pressed to the wall, grey and orange stalks with black scorch marks, two or three dim orange embers; '
+                                'B asleep: the same tufts swayed by a draft, only their tips one art pixel further up the shaft (A and B loop slowly as it sleeps); '
+                                'C about to burst: the same tufts as A, their tips glowing red, the embers bright orange, a short grey wisp of smoke rising (held still '
+                                'for half a second as the warning); D bursting: tongues of flame thrust out of the tufts along the whole stretch, licking up as fire '
+                                'does, reaching exactly 11 art pixels out from the wall; E the flames flickering: the same tongues, each a different height and its tip '
+                                'curled another way, the same reach; F flickering again: a third shape of the same tongues (D, E and F loop fast as it burns)',
+                                scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (orange diagonal stripes '
+                                'on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the hazard on the wall\'s inner edge, '
+                                'centred in the cell\'s height',
+                                size='the stretch of wall is exactly 32 art pixels tall (two tiles: 128 image pixels) and nothing of it reaches further out from the '
+                                'wall\'s white inner edge than 11 art pixels (44 image pixels): asleep and warning at most 8 art pixels out, the flames exactly 11. The '
+                                'game stacks the stretch down the wall, so its top and bottom rows must join seamlessly',
+                                motion='Fire rises: the flames lick upward as they reach out of the wall, each tongue a red outline round an orange core, its tip curling '
+                                'up; the grass sways from its roots, and the roots stay put.',
+                                inks='the dry grass grey and orange with black scorch marks, embers orange, the warning tips red, the flames red outside and orange '
+                                'inside, smoke grey dither (never white)'),
+    'vil-noyaki-frames': dict(world='village', kind='hazframes', what='one tongue of flame on the front of the spring field fire (noyaki) that rises up the shaft '
+                              'from below: the fire\'s front is a ragged band of red over orange, and along it tongues of flame are born, rise, tear off at the top '
+                              'and sink, each at its own beat',
+                              refdesc='the front of the rising fire as it is drawn now in the game: a ragged band, red on top and orange below, the black burnt ground '
+                              'with red embers under it',
+                              frames='A a small low lick just rising out of the front; B growing taller, leaning a little; C tall, its tip flickering; D at its tallest, '
+                              'its tip tearing off as a separate small flame just above it; E sinking back, the torn-off flame higher up and smaller, turning into a '
+                              'puff of grey smoke; F low again, the smoke gone (A to F loop as the tongue\'s life)',
+                              scene='a straight stretch of the fire\'s front 24 art pixels wide across the lower third of the cell, its top edge red and orange under '
+                              'it, flat and level at the same height in every cell, the tongue rising out of its middle; plain black air above',
+                              size='the tongue at most 10 art pixels wide at its base and at most 20 art pixels tall over the front\'s top edge (80 image pixels); at '
+                              'the stretch\'s left and right ends the front stays flat in every frame',
+                              motion='Fire rises: the tongue licks upward and narrows to its tip, a red outline round an orange core, never a solid block; nothing below '
+                              'the front\'s top edge changes.',
+                              inks='the flames red outside and orange inside, the smoke grey dither (never white), the band red and orange'),
+    'vil-cone-frames': dict(world='village', kind='hazframes', what='a heavy pine cone hanging on a short stalk under an earthen terrace ledge: when the hero passes '
+                            'under it, it shakes, its stalk snaps, it falls straight down (its red point at the bottom hurts) and it breaks apart where it lands',
+                            refdesc='three pine cones hanging under an orange earthen ledge as they are drawn now in the game: orange scales with black gaps, a red '
+                            'point at the bottom',
+                            frames='A hanging still; B its stalk cracking, a red crack in the stalk, the cone tilted so its bottom is 2 art pixels to the left; C the '
+                            'same, its bottom 2 art pixels to the right (B and C alternate as it shakes); D falling: the cone without its stalk, upright, its red '
+                            'point down, the broken stalk stub left under the ledge; E landed: the cone bursting apart into 5 or 6 loose scales flying out sideways '
+                            'and up, a little red at the impact; F the scales lower and spread wider, about to vanish (E and F as it breaks)',
+                            scene='the underside of an orange earthen ledge across the top of the cell (orange dither on black, as in the attached image); in A to D '
+                            'the cone hangs from it in the middle of the cell; in E and F it breaks on a plain flat grey ground line near the bottom of the cell',
+                            size='the cone exactly 15 art pixels wide and 25 art pixels long with its stalk, as in the attached image (60 by 100 image pixels); the '
+                            'scales in E and F each 2 to 4 art pixels',
+                            motion='A cone is rigid: it swings about its stalk and never squashes or stretches; it falls straight; its scales fly in arcs.',
+                            inks='the cone orange with black gaps between its scales, its point red (danger), the crack red, the stalk orange'),
 })
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
@@ -1702,7 +1763,7 @@ def prompt(el: str, ref: bool = False) -> str:
             'face': 'a face that reads at a glance on a phone (big eyes, an angry brow, a mouth)',
             'body': f"a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {e.get('parts', '')}",
             'tone': 'Cute and a little spooky, never gory: the game is for everyone.'}   # a boss's defaults (Koschei has his own: not a yokai, the Kolobok)
-    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE, 'hazard': HAZARD, 'wallhaz': WALLHAZ, 'drop': DROP, 'holder': HOLDER, 'frames': ANIM}[e['kind']].format(**{'reach': 'about one and a half tiles', 'foe_tone': 'Creepy and crooked, never gory: the game is for everyone.', **slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
+    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE, 'hazard': HAZARD, 'wallhaz': WALLHAZ, 'drop': DROP, 'holder': HOLDER, 'frames': ANIM, 'hazframes': HAZFRAMES}[e['kind']].format(**{'reach': 'about one and a half tiles', 'foe_tone': 'Creepy and crooked, never gory: the game is for everyone.', **slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
     if e['world'] in SHAPES:   # a world drawn crooked (the Dark Forest): its shapes slanted and jagged, not built of tidy rectangles
         out = re.sub(r'Build every variant from flat rectangles and a few circles: big simple shapes[^.]*\.', SHAPES[e['world']], out)

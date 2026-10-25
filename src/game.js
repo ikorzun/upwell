@@ -21,7 +21,7 @@ const STR = {
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', depth: '2.5D', crt: 'CRT', album: 'Cards', albumOpen: '{n} of {m} open', on: 'on', off: 'off',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', shake: 'Shake', depth: '2.5D', crt: 'CRT', album: 'Cards', stylePixel: 'Pixel', styleWes: 'Anderson', on: 'on', off: 'off',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
     random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', station: 'Station {n}', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_water: 'Soaked!', dead_snow: 'Snowed under!', dead_storm: 'Thunderstruck!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', week: 'This week', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
   },
@@ -38,7 +38,7 @@ const STR = {
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
-    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', depth: '2.5D', crt: 'CRT', album: 'Cartas', albumOpen: '{n} de {m} abiertas', on: 'sí', off: 'no',
+    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', shake: 'Temblor', depth: '2.5D', crt: 'CRT', album: 'Cartas', stylePixel: 'Píxel', styleWes: 'Anderson', on: 'sí', off: 'no',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
     random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', station: 'Estación {n}', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_water: '¡Empapado!', dead_snow: '¡Bajo la nieve!', dead_storm: '¡Fulminado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Diario', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', week: 'Esta semana', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
   },
@@ -55,7 +55,7 @@ const STR = {
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
-    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', depth: '2.5D', crt: 'CRT', album: 'Cartas', albumOpen: '{n} de {m} abertas', on: 'sim', off: 'não',
+    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', shake: 'Tremor', depth: '2.5D', crt: 'CRT', album: 'Cartas', stylePixel: 'Pixel', styleWes: 'Anderson', on: 'sim', off: 'não',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
     random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', station: 'Estação {n}', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_water: 'Encharcado!', dead_snow: 'Soterrado na neve!', dead_storm: 'Fulminado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Diário', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', week: 'Esta semana', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
   },
@@ -72,7 +72,7 @@ const STR = {
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
-    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', depth: 'りったい', crt: 'ブラウンかん', album: 'カード', albumOpen: '{m}まいの うち {n}まい', on: 'オン', off: 'オフ',
+    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', shake: 'ゆれ', depth: 'りったい', crt: 'ブラウンかん', album: 'カード', stylePixel: 'ドット', styleWes: 'アンダーソン', on: 'オン', off: 'オフ',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
     random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', station: '{n} ごうめ', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_water: 'びしょぬれ！', dead_snow: 'ゆきに うもれた！', dead_storm: 'かみなりに うたれた！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'デイリー', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', week: 'こんしゅう', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
   },
@@ -2896,6 +2896,24 @@ function cardLight(p, tx, ty) {   // a plane's light for this tilt (in steps of 
   }
   g.putImageData(img, 0, 0); return key;
 }
+function wesLive(card) {   // a Wes Anderson still in the album, alive: tipped toward the finger, untouched a slow figure of eight, by cardLive's spring (CARD); a sheen
+  // of light across it as it tips; none under «reduce motion»
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches, st = { alive: true, tx: 0, ty: 0, vx: 0, vy: 0, gx: 0, gy: 0, lastIn: -1e9, last: performance.now(), t0: performance.now() };
+  const move = (e) => { const r = card.getBoundingClientRect(); st.gx = ((e.clientX - r.left) / r.width - 0.5) * 2; st.gy = ((e.clientY - r.top) / r.height - 0.5) * 2; st.lastIn = performance.now(); };
+  const leave = () => { st.gx = 0; st.gy = 0; };
+  card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
+  const step = (now) => {
+    if (!st.alive) return; st.raf = requestAnimationFrame(step);
+    const dt = Math.min(0.05, (now - st.last) / 1000), t = (now - st.t0) / 1000; st.last = now;
+    let gx = st.gx, gy = st.gy; if (still) { gx = 0; gy = 0; } else if (now - st.lastIn > CARD.idle) { gx = 0.55 * Math.sin(t * 0.55); gy = 0.35 * Math.sin(t * 1.1); }
+    st.vx += (CARD.w0 * CARD.w0 * (gx - st.tx) - 2 * CARD.z * CARD.w0 * st.vx) * dt; st.tx += st.vx * dt;
+    st.vy += (CARD.w0 * CARD.w0 * (gy - st.ty) - 2 * CARD.z * CARD.w0 * st.vy) * dt; st.ty += st.vy * dt;
+    card.style.transform = still ? '' : `perspective(700px) rotateX(${(-st.ty * CARD.tilt).toFixed(2)}deg) rotateY(${(st.tx * CARD.tilt).toFixed(2)}deg)`;
+    card.style.setProperty('--gx', (50 + st.tx * 40).toFixed(1) + '%'); card.style.setProperty('--ga', Math.min(0.35, Math.hypot(st.tx, st.ty) * 0.4).toFixed(3));
+  };
+  st.raf = requestAnimationFrame(step);
+  return { stop() { st.alive = false; cancelAnimationFrame(st.raf); card.style.transform = ''; card.style.setProperty('--ga', 0); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
+}
 function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (settled: no coming-in, as a card swiped to in the album)
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
   const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
@@ -3253,20 +3271,29 @@ const ui = {
   // yet seen its picture in a few big blocks, dimmed, a lock on it, no title
   album() {
     const p = this.panel('album'), strip = el('div', 'astrip'), ids = STORY_ORDER.filter((id) => STORY[id]).concat(Object.keys(STORY).filter((id) => !STORY_ORDER.includes(id)));
-    const seen = (id) => !!save.seen['card_' + id], n = ids.filter(seen).length;
-    p.append(cap(el('div', 'head', t('album')), 'album'), strip, el('div', 'label', tf('albumOpen', { n, m: ids.length })), cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
+    const seen = (id) => !!save.seen['card_' + id], n = ids.filter(seen).length, wes = save.cardStyle === 'wes';
+    const head = el('div', 'ahead'), shut = button('', 'setBtn aclose', () => this.menu()), x = el('img');   // its header: a cross back to the menu (left), its name, how many are open (right)
+    x.src = 'assets/ui/close.svg'; x.alt = ''; x.draggable = false; shut.append(x); shut.setAttribute('aria-label', t('goBack'));
+    head.append(shut, cap(el('div', 'head', t('album')), 'album'), el('div', 'acount', n + '/' + ids.length));
+    const style = el('div', 'pair'), pick = (k) => { save.cardStyle = k; persist(); track('settings_changed', { setting: 'cardStyle', value: k }); this.album(); };   // the style, pixels or
+    // Wes Anderson's puppets (owner, 2026-10-25: «переключатель стиля с пиксельного на уэса андерсона: вместо кнопки бэк»), the one on yellow
+    style.append(cap(button(t('stylePixel'), 'big thumb' + (wes ? ' alt' : ''), () => pick('pixel')), 'stylePixel'), cap(button(t('styleWes'), 'big thumb' + (wes ? '' : ' alt'), () => pick('wes')), 'styleWes'));
+    p.append(head, strip, style);
     const [w0, h0] = STORY.moon_fall.cells, room = Math.max(160, strip.getBoundingClientRect().height - 40), W = Math.round(Math.min(view.w - 64, (room * w0) / h0)), H = Math.round((W * h0) / w0);
     strip.style.setProperty('--aw', W + 'px'); strip.style.setProperty('--ah', H + 'px');
     const cells = [];
     let go = null;
     for (const id of ids) {
-      const c = STORY[id], open = seen(id), cell = el('div', 'acell'), im = new Image();
-      im.src = c.still;
+      const c = STORY[id], open = seen(id), cell = el('div', 'acell'), im = new Image(), src = wes ? c.still.replace('assets/cards/', 'assets/cards/anderson/').replace(/\.png$/, '.jpg') : c.still;
+      im.src = src;
       let fig;
-      if (open) {   // as the story shows it: its frame, its number, and alive (its planes' parallax, its motion) when it is the one in the middle
+      if (open && wes) {   // the puppet film's still, alive in the middle (a tilt by the finger, a slow sway)
+        fig = el('div', 'acard wes'); im.className = 'astill'; fig.append(im);
+        cells.push({ cell, c, fig, wes: true });
+      } else if (open) {   // as the story shows it: its frame, its number, and alive (its planes' parallax, its motion) when it is the one in the middle
         const f = STORY_INK[c.ink], [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
         fig = el('div', 'scard acard');
-        for (const [v, x] of Object.entries(f)) fig.style.setProperty('--s' + v, x);
+        for (const [v, x2] of Object.entries(f)) fig.style.setProperty('--s' + v, x2);
         im.className = 'astill'; clip.append(im); tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt);
         cells.push({ cell, c, fig, tilt, clip });
       } else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
@@ -3283,7 +3310,7 @@ const ui = {
       const mid = strip.getBoundingClientRect().left + strip.clientWidth / 2, k = cells.find((q) => { const r = q.cell.getBoundingClientRect(); return r.left < mid && r.right > mid; });
       if (!k || k === this.albumLive) return;
       if (this.live) this.live.stop();
-      this.albumLive = k; this.live = cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
+      this.albumLive = k; this.live = k.wes ? wesLive(k.fig) : cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
     };
     let tm = 0; strip.addEventListener('scroll', () => { clearTimeout(tm); tm = setTimeout(wake, 140); }, { passive: true });
     this.albumLive = null;

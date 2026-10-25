@@ -1806,6 +1806,53 @@ ELEMENTS.update({
                                inks='the icicle blue with a white snow cap and a white streak, its tip red (danger) only while it hangs and falls, the shards '
                                'blue and white only (no grey, no red), the ice dust white; white is allowed here: it is ice'),
 })
+ELEMENTS.update({   # the TV Tower's hazards in frames; their references found by default, research/variants/ref-tt-lightning-frames.png (its wall in its
+    # three states as drawn, 4 x 4 image px a game px) and ref-tt-storm-frames.png (its front, halved: 4 x 4 a band px)
+    'tt-lightning-frames': dict(world='tokyotower', kind='hazframes', what='lightning running down the lightning rod\'s cable on the steel of Tokyo Tower in a summer '
+                                'storm: asleep it is a plain grey cable clamped down the shaft\'s wall; it glows for half a second as a warning; then the bolt leaps '
+                                'out of the cable into the shaft for about one second, hurting whoever is in it, and it sleeps again',
+                                refdesc='the shaft\'s left wall on the TV Tower (purple diagonal stripes on black, a white inner edge) with the same stretch of wall '
+                                'shown three times as it is drawn now: asleep (a grey cable with grey clamps down the wall\'s inner edge), warning (the cable\'s '
+                                'outer edge red) and bursting (a short bolt, light inside with a red edge, and small grey sparks)',
+                                frames='A asleep: the grey cable running straight down the wall\'s inner edge, two grey clamps bolting it to the wall, and a faint '
+                                'charge on it: one small grey spark (2 by 4 art pixels) beside the cable just under the upper clamp; B asleep: the same, the spark '
+                                'just under the lower clamp (A and B alternate slowly as it sleeps: the charge creeping down the cable); C about to strike: the same '
+                                'cable and clamps, the cable\'s outer edge glowing red along its whole length, a few small grey and red sparks at each clamp (held '
+                                'still for half a second as the warning); D striking: a bolt of lightning leaps out of the cable at the upper clamp and runs down '
+                                'beside the cable to the lower clamp as a tall, narrow jagged zigzag, jutting out at its corners but never further than 12 art '
+                                'pixels (48 image pixels) from the wall\'s white inner edge, one short fork off it; E: the same bolt still lit between the same two '
+                                'clamps, its corners in other places and its fork elsewhere, the same reach; F: a third path of the same bolt, still lit, the same '
+                                'reach (D, E and F loop fast as it strikes: the bolt never goes dark between them)',
+                                scene='the shaft\'s left wall as a strip 10 art pixels wide down the left edge of the cell, as tall as the cell (purple diagonal '
+                                'stripes on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the cable on the wall\'s '
+                                'inner edge, centred in the cell\'s height',
+                                size='the stretch of cable is exactly 48 art pixels tall (192 image pixels) with its two clamps 24 art pixels apart, and nothing of it '
+                                'reaches further out from the wall\'s white inner edge than 12 art pixels (48 image pixels): asleep and warning at most 6 art pixels '
+                                'out, the bolt a narrow zigzag between the clamps at most 12 (most of the cell stays empty black air). The game stacks the stretch '
+                                'down the wall, so its top and bottom rows must join seamlessly',
+                                motion='Lightning is instant and jagged: the bolt is one connected zigzag of straight segments with sharp corners and one or two '
+                                'short forks, the same thickness all along, its root always at a clamp on the cable; the cable and its clamps never move.',
+                                inks='the cable and clamps grey with black bolt holes, the spark grey, the warning edge red, the bolt light grey inside with red '
+                                'along its edges (the danger edge; never white: white is what you stand on), the sparks grey and red'),
+    'tt-storm-frames': dict(world='tokyotower', kind='hazframes', what='one billow on the front of the storm cloud that rises up the shaft from below: the storm\'s '
+                            'front is a ragged band of grey cloud dithered with black with a red crackle of lightning along its top edge, and along it billows of '
+                            'cloud swell up, curl over and roll back in, each at its own beat',
+                            refdesc='the front of the rising storm cloud as it is drawn now in the game: a ragged red crackle along the top of a band of grey '
+                            'cloud dithered with black, black air above with faint grey dots',
+                            frames='A a small low swell of cloud just rising out of the front; B swelling up into a rounded heap, leaning a little forward; C a '
+                            'tall round billow, its top starting to curl over; D at its tallest, curled over like a breaking wave of cloud, a short red fork of '
+                            'lightning inside it (the only frame with lightning inside); E rolling back in, sinking and flattening, a small torn-off wisp of '
+                            'grey cloud just above it; F low again, the wisp gone (A to F loop as the billow\'s life)',
+                            scene='a straight stretch of the storm\'s front 32 art pixels wide across the lower third of the cell, its top edge a red crackle '
+                            'with grey cloud dithered with black under it, flat and level at the same height in every cell, the billow rising out of its '
+                            'middle; plain black air above',
+                            size='the billow at most 14 art pixels wide at its base and at most 12 art pixels tall over the front\'s top edge (48 image '
+                            'pixels); at the stretch\'s left and right ends the front stays flat in every frame',
+                            motion='A storm cloud billows: it swells up in soft round heaps that curl forward and roll back in, heavy and slow, never a solid '
+                            'block and never a flame; its top edge a ragged red crackle as the front\'s; nothing below the front\'s top edge changes.',
+                            inks='the cloud grey dithered with black (never white: white clouds are what you stand on here), its top edge a red crackle (the '
+                            'danger edge), the lightning fork red, the wisp grey dither'),
+})
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}

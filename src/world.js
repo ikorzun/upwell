@@ -1445,7 +1445,7 @@ const LOOKS = {
   cart: ['C', 'round', 2.2],   // the Cave's: Tsuchigumo on its thread (redrawn 1:1 from its cell, owner 2026-10-25: a sheet pixel a game pixel, never grown; its body the round of it, its legs out)
   puck: ['F', 'round'],   // Fuji's: Tsurara-onna, her spikes swept back
   namazu: ['D', 'round', 2.5],   // the Sea's: Onamazu, arched, the stone on its back (its body the round of its drawing at 1:1, its middle, so it flips in place)
-  koschei: ['A', 'round', 2.38],   // the Dark Forest's: Koschei the bony king, his sword out (its body the round of its drawing at 1:1, its middle)
+  koschei: ['A', 'round', 2.14],   // the Dark Forest's: Koschei the bony king, his sword out (its body the round of its drawing at 1:1, its middle: 74 px wide redrawn, 2026-10-25, so 2.14 R on an iPhone, no wider than he is)
   tram: ['E', 'tram'],   // Tokyo's: a tsukumogami tram
   crane: ['F', 'round', 2.74],   // the Danchi's: Nuppeppo in its ropes (its body the round of its drawing; redrawn 1:1, owner 2026-10-25)
   pigeon: ['A', 'tengu'],   // the Sky's: a Karasu-tengu

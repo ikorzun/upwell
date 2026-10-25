@@ -585,7 +585,7 @@ class Boss {
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
     this.state = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // rattled: Koschei's bones have shaken to say he rises
     this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
-    const [sw, sh] = bossSize(this); this.halfW = sw / 2; this.minGrowth = Math.min(1, (4 * lv.R) / Math.max(sw, sh));   // its drawing's half width; its shrink stops at 2:1 against the hero's 2R
+    this.halfW = bossSize(this)[0] / 2;   // its drawing's half width
     loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
   open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)
@@ -1840,7 +1840,7 @@ class Game {
     const bs = this.lv.boss, b = bs.body;
     bs.hp--; this.drop(b.cx, b.cy, 5); shake.add(5); sound.play('bosshit', 1, bs.hp > 0 ? 1 : 0.7); splatFx(b.cx, b.maxY - b.R * 0.3, b.R * 0.5, b.color.base, 6);
     this.combo++; this.bestCombo = Math.max(this.bestCombo, this.combo);   // (no ×n over a fight, nor «N more!»: the pips say it, owner 2026-10-23)
-    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; b.growthTarget = Math.max(1 - 0.06 * (bs.max - bs.hp), bs.minGrowth); if (bs.state === 'dazed') bs.rise(); return; }   // smaller each heart, never under 2:1 against the hero
+    if (bs.hp > 0) { bs.angry = BOSS.angry; b.color = FOE_COLOR.red; if (bs.state === 'dazed') bs.rise(); return; }   // its size kept (owner, 2026-10-25: «Можно не уменьшать босса после удара»): the pips and its red say the hit
     bs.dead = true; this.kills++; met('boss', this.rc && this.rc.boss ? this.rc.boss : 'lid'); delete save.camp.fails[this.failKey()];
     if (bs.def) ui.toast(L2(bs.def.defeat), 2200);
     splatFx(b.cx, b.cy, b.R * 1.4, bs.ink.base, 24); shake.add(9); haptics.buzz(60);

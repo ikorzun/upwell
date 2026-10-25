@@ -7445,7 +7445,10 @@ Renderer.prototype.draw = function (g, alpha) {
         for (let i = 0; i < TG.n; i++) {
           const per = life * (1.3 + 0.6 * steady(i, 71)), u = lv.t + steady(i, 72) * per, c = Math.floor(u / per), f = Math.floor((u - c * per) * TG.fps);
           if (f >= TG.frames.length) continue;   // (resting)
-          const xc = lv.l + tw * s + ((i + steady(c, 73 + i)) / TG.n) * (W - 2 * tw * s), g = Math.max(0, Math.min(cols - 1, Math.round((xc - start) / s)));
+          // (`pad` [left, right]: how far its root keeps off each wall, sheet columns, its width by default; `gap`: a lick as wide as a wave's crest kept in its own
+          // share, never over its neighbour's)
+          const pl = (TG.pad ? TG.pad[0] : tw) * s, sw = (W - pl - (TG.pad ? TG.pad[1] : tw) * s) / TG.n, rr = steady(c, 73 + i);
+          const xc = lv.l + pl + (TG.gap ? i * sw + rr * Math.max(0, sw - TG.gap * s) : (i + rr) * sw), g = Math.max(0, Math.min(cols - 1, Math.round((xc - start) / s)));
           const x = start + (g - TG.base) * s, yb = y0 + (S.front - 1) * s - L[g] * s;
           if (yb - th * s < bot && yb > top) sprAt(TG.frames[f], x, yb - (th - 1) * s, false, 1, s);
         }

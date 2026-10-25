@@ -123,6 +123,10 @@
   .grid2 > .chip { min-width: 0; }
   .grid2 > .chip .tx, .grid2 > .chip .cap { white-space: nowrap; }   /* one line each (fitBig makes a long one smaller) */
   .grid2 > :last-child:nth-child(odd) { grid-column: span 2; }   /* an odd one out: the whole row */
+  .row3 { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; align-self: stretch; }   /* Map, Book, Daily: one row of equal cells, however many */
+  .row3 > .chip { min-width: 0; padding-left: 2px; padding-right: 2px; }
+  .row3 > .chip .tx, .row3 > .chip .cap { white-space: nowrap; }
+  .row3 > .chip .cap { letter-spacing: 0; padding-left: 0; }   /* (its caption at the font's 12 px floor: no spacing, so a 320-px phone's third of a row holds it) */
   .chip .inl { display: inline-flex; align-items: center; gap: 6px; --p: 2; }   /* a picture and its words on one line, caption-sized (the bonus world's stars) */
   * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }   /* Safari: a held finger selects nothing */
 

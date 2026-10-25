@@ -155,6 +155,11 @@ const campOpen = (i) => {
   if (gated(w) ? lineStars() < CAMP_STARS[CAMPAIGN[w].world.id] : lineBefore(w) >= 0 && !(st[lineBefore(w) * 30 + 28] > 0)) return false;   // its stars, or the boss before it on the line
   return s === 0 || st[i - 3] > 0;   // the first, or the one under it cleared
 };
+const campAfter = (i) => {   // where a level cleared goes on to: the next of its own world, open, cleared or not (owner, 2026-10-25: 1-1 played again from the map
+  // went on to the furthest level, not to 1-2); past a world's last, as Continue (campNextId)
+  const a = campAt(i); if (a && a.s < 9) { const n = a.w * 30 + (a.s + 1) * 3 + 1; if (campOpen(n)) return n; }
+  return campNextId();
+};
 const campNextId = () => {   // where Continue goes: the last one played again if lost, else the one over it, else the highest open one not
   // cleared in the last world open: always on, never back down
   const st = save.camp.stars, L = save.camp.last | 0, a = campAt(L);
@@ -2297,7 +2302,7 @@ class Game {
     this.state = 'wait'; ui.hideAll();   // (an ad may come here: nothing goes on under it)
     if (this.oweThen) { const f = this.oweThen; this.oweThen = null; f(); return; }   // a card owed from a game shut on its pick: then on where the player was going
     ads.between(() => {
-      if (this.mode === 'camp') { this.playLevel(campNextId()); return; }   // on into the next level (owner: no map between them)
+      if (this.mode === 'camp') { this.playLevel(campAfter(this.ci)); return; }   // on into the next level (owner: no map between them)
       this.state = 'play'; this.stateT = 0;
       if (this.stage === 2 && BONUS[this.world]) { this.startBonus(BONUS[this.world]); return; }   // a world done: its bonus level first
       if (++this.stage >= 3) { this.stage = 0; this.world++; }
@@ -2348,7 +2353,7 @@ class Game {
     ads.between(() => this.goOn());
   }
   goOn() {
-    if (this.mode === 'camp') { this.campKeep(); persist(); this.playLevel(campNextId()); return; }   // (the doubled coins in the purse); on into the next level
+    if (this.mode === 'camp') { this.campKeep(); persist(); this.playLevel(campAfter(this.ci)); return; }   // (the doubled coins in the purse); on into the next level
     this.bonus = null; this.levelM = 0; this.stage = 0; this.world++; this.state = 'play'; this.stateT = 0;
     this.buildLevel(false); this.saveRun();
     ui.hideAll(); ui.banner();
@@ -2400,7 +2405,7 @@ class Game {
     c.stars[i] = Math.max(c.stars[i] || 0, n);
     this.campKeep(); persist();
   }
-  campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(campNextId())); }   // on from a level played again: into the next one
+  campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(campAfter(this.ci))); }   // on from a level played again: into the next one
   campAgain() { if (this.state !== 'dead') return; pmsg('level_failed', this.lvl()); this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci)); }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;
@@ -3091,10 +3096,11 @@ const ui = {
     let line = null;
     if (perk) { line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1])); p.append(line); }   // on one line (owner): smaller, if it must, to fit
     const r = save.run, c = save.camp, ni = campNextId(), next = campAt(ni), begun = c.stars.some((n) => n > 0), done = c.stars[CAMP_END] > 0;
-    const grid = el('div', 'grid2');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid)
-    if (begun && !done) grid.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
-    if (begun) grid.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
-    if (begun) grid.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => (r && r.daily === today && !r.world && r.bonus < 0 ? game.continueRun() : game.startRun(true))), 'daily'));   // the day's well (today's try kept: on with it), and its best
+    const grid = el('div', 'grid2'), row = el('div', 'row3');   // once the campaign is begun, the rest in one grid of equal cells, two across (the user: not a pyramid);
+    // Map, Book and Daily in one row over it always (owner, 2026-10-25: «кнопки Map Book Daily всегда должны быть в одну строку»)
+    if (begun && !done) row.append(cap(button(t('map'), 'chip', () => this.map()), 'map'));
+    if (begun) row.append(cap(button(t('book'), 'chip', () => this.book()), 'book'));
+    if (begun) row.append(cap(button(t('daily') + (save.days && save.days[today] ? ' · ' + save.days[today] + ' ' + t('m') : ''), 'chip', () => (r && r.daily === today && !r.world && r.bonus < 0 ? game.continueRun() : game.startRun(true))), 'daily'));   // the day's well (today's try kept: on with it), and its best
     const bw = CAMPAIGN.findIndex((_, w) => gated(w));   // the bonus world (CAMP_STARS): its chip, the stars it wants while shut, its map once open
     if (begun && bw >= 0 && bw < CAMP_OPEN) {
       const need = CAMP_STARS[CAMPAIGN[bw].world.id], shut = !campOpen(bw * 30 + 1), name = L2(CAMPAIGN[bw].world.name);
@@ -3113,7 +3119,9 @@ const ui = {
     week.append(px(t('week')));
     for (let k = 0; k < 7; k++) week.append(el('i', k < wk.days.length ? 'on' : MARKS.at.includes(k + 1) ? 'pay' : null));
     if (begun) p.append(week);
-    if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }   // a long one smaller, on one line
+    if (row.children.length) { p.append(row); for (const c of row.children) fitBig(c, 1.2);   // a long one smaller, on one line, and the three of one size: the smallest
+      const q = Math.min(...[...row.children].map((c) => parseFloat(getComputedStyle(c).getPropertyValue('--p')) || 4)); for (const c of row.children) c.style.setProperty('--p', q); }
+    if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }
     const cur = save.cur && campOpen(save.cur.ci) ? save.cur : null, at = cur && campAt(cur.ci);   // a level under way (Game.saveCur): on with it first, from its height
     if (cur) p.append(cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1) + ' · ' + Math.floor(cur.m) + ' ' + t('m'), 'big thumb', () => goOwed(() => game.resume())), 'continue'));
     else if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again

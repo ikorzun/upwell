@@ -1601,6 +1601,12 @@ class Game {
     for (const r of gates) if (!r.gone) { r.gone = true; r.latched = latch; fx.ring((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 1.8 * this.R, INK.coin); }
     sound.play('chime', 0.7, latch ? 1.3 : 0.9); shake.add(latch ? 4 : 2); haptics.buzz(latch ? 30 : 15);
   }
+  // A Tokyo cave's shutter switch pulled (SHUTTER): the shutter rolls up for its while
+  pullSwitch(s) {
+    const lv = this.lv, sh = lv.rects.filter((r) => r.shutter && !r.gone && !r.latched); s.on = true; s.t = lv.t; s.tick = lv.t + 0.5;
+    sound.play('click', 0.8, 0.8); haptics.buzz(15);
+    if (sh.length) { this.gateOpen(sh, false); for (const r of sh) r.tg = lv.t; }
+  }
   // A cave bell rung (BELLS): the next in their order (一 二 三) lights up; a wrong one and all fall quiet, to start again; one already lit only sounds. All
   // three: the room's ice gate ('G') melts
   ringBell(b) {
@@ -1621,6 +1627,18 @@ class Game {
       const t = lv.tile, i = b.n - 1, y0 = b.y + BELLS.rope * t, inn = H.maxX > b.x - BELLS.w[i] * t && H.minX < b.x + BELLS.w[i] * t && H.minY < y0 + BELLS.h[i] * t && H.maxY > y0;
       if (inn && !b.in && lv.t > BELLS.calm) this.ringBell(b);
       b.in = inn;
+    }
+    for (const s of lv.switches) {   // Tokyo's shutter switches (SHUTTER): one the hero bumps rolls the shutter up; its time out, it rolls down again
+      const t = lv.tile, inn = H.maxX > s.x - SHUTTER.w * t && H.minX < s.x + SHUTTER.w * t && H.maxY > s.y - SHUTTER.h * t && H.minY < s.y;
+      if (inn && !s.in && !s.on && lv.t > SHUTTER.calm) this.pullSwitch(s);
+      s.in = inn;
+      if (!s.on) continue;
+      const left = s.t + SHUTTER.open - lv.t, sh = lv.rects.filter((r) => r.shutter);
+      if (left > 0 && lv.t >= s.tick) { s.tick = lv.t + (left < 1.5 ? 0.25 : 0.5); sound.play('click', left < 1.5 ? 0.6 : 0.4, left < 1.5 ? 1.5 : 1.1); }   // (its ticking, faster at the end)
+      const inGate = (r) => H.maxX > r.x0 && H.minX < r.x1 && H.maxY > r.y0 && H.minY < r.y1;
+      const behind = (r) => H.maxY > r.y0 && H.minY < r.y1 && ((r.x0 + r.x1) / 2 - lv.l < lv.r - (r.x0 + r.x1) / 2 ? H.cx < r.x0 : H.cx > r.x1);   // (more than half in the vault it shuts)
+      if (sh.some(behind)) { s.on = false; for (const r of sh) r.latched = true; continue; }   // in behind it: it stays up for good (no way to be shut in)
+      if (left <= 0 && !sh.some(inGate)) { s.on = false; for (const r of sh) if (r.gone && !r.latched) { r.gone = false; r.tg = lv.t; } sound.play('crumble', 0.5, 0.7); shake.add(2); }
     }
     const pl = lv.plates || (lv.plates = lv.rects.filter((r) => r.plate));   // the Sea's clam shells (CLAM), a room's: each frame, what is on each
     if (pl.length) {

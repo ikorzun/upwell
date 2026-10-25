@@ -4776,7 +4776,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const DOOR_INK = { r: [PAL.red, LIT], y: [PAL.yellow, 1] };   // (a door's: its red the shop's mark, muted as a thing's (К6: bright red is danger's), its yellow a window's light)
   const postId = (n) => {   // the station post with its numeral: n's rows made once (a level of no station keeps the sheet's 八)
     const id = 'post' + n; if (FUJI_SPR[id] || !POST_NUM[n]) return FUJI_SPR[id] ? id : 'post';
-    const rows = FUJI_SPR.post.split('/').map((row) => [...row]), gl = POST_NUM[n].split('/');
+    const rows = sprRows('post').map((row) => [...row]), gl = POST_NUM[n].split('/');   // (its rows as sprRows keeps them: a level without a numeral drawn first had made the string an object)
     for (let j = 0; j < 7; j++) for (let i = 0; i < 7; i++) rows[30 + j][7 + i] = gl[j][i] === '#' ? 'k' : 'o';
     FUJI_SPR[id] = rows.map((r) => r.join('')).join('/'); return id;
   };
@@ -5271,8 +5271,8 @@ Renderer.prototype.draw = function (g, alpha) {
       box(x + snap(0.04 * t), ey, x + snap(0.1 * t), ey + P, G, 1, 0, 10, 0);   // eyes shut
     }
   };
-  const lastRow = (rows) => { let j = rows.length - 1; while (j >= 0 && !/[^.]/.test(rows[j])) j--; return j; };   // (a part's lowest drawn row: its foot over it)
-  const fleeDraw = (r, Fr, cx, foot, bird, free) => {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
+  function lastRow(rows) { let j = rows.length - 1; while (j >= 0 && !/[^.]/.test(rows[j])) j--; return j; }   // (a part's lowest drawn row: its foot over it)
+  function fleeDraw(r, Fr, cx, foot, bird, free) {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
     // живность убегать»): sitting (false: its caller draws it) till the hero comes near, then its sheet's frames (Worlds': A crouched or startled, B off, C–F the
     // loop; each frame one width, its head on one column) along its way, facing it (the sheets face right); gone till its ledge has been out of view (FLEE_GO)
     if (!Fr) return false; const T = lv.t, H = g.hero, t = kitT, q = PIX.base, W = Fr[0].rows[0].length;
@@ -5296,7 +5296,7 @@ Renderer.prototype.draw = function (g, alpha) {
     vsp(Fk.rows, snap(x - half), snap(top), s.dir < 0, 1, q, true);
     return true;
   };
-  const swayAt = (r, kind, S, wx, b, d, ox = S.dx) => {   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
+  function swayAt(r, kind, S, wx, b, d, ox = S.dx) {   // (declarations, not consts: hoisted, as kits drawn above them call them; a const here was a TDZ in Tokyo's frame)   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
     // (owner, 2026-10-25: «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
     if (!r || !SWAY.includes(kind)) return null; const q = PIX.base, n = S.rows[0].length, xa = d > 0 ? wx + ox * q : wx - (ox + n) * q;
     const sw = cinePoke(g, lv, r, kind, xa, b - S.rows.length * q, xa + n * q, b); return sw ? (u) => snap(sw * u * q) : null;

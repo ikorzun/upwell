@@ -1562,6 +1562,11 @@ ELEMENTS.update({
                            frames='A startled, sitting up straight, its face turned to look; B springing away on all fours; C running on all fours, its legs '
                            'stretched; D running, its legs gathered under it; E running, legs stretched; F running, legs gathered (C, D, E, F loop as its run, the '
                            'monkey the same in all four)', ground='the monkey on a plain thin grey ground line', inks='grey fur, an orange face, black eyes'),
+    'dc-catsit': dict(world='danchi', kind='frames', who='a small grey stray cat, startled and running', motion='sitting still, calm, as it waits by its bowl before '
+                      'anything startles it', frames='A sitting upright facing right, its tail curled round its front paws; B the same pose, its tail tip lifted; C the '
+                      'same, its head turned a little toward us; D the same, its eyes shut; E the same, its ears turned back; F the same, its tail curled the other '
+                      'way (A to F an idle loop: the body the same in all six, the same cat and size as in the attached image)',
+                      ground='the cat on a plain thin grey ground line', inks='a grey cat, black eyes, no white'),
 })
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}

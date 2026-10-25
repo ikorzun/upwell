@@ -76,11 +76,11 @@
   .langs .chip { text-transform: none; }   /* 日本語 as it is written */
   #album { background: var(--ink); justify-content: flex-end; padding: calc(env(safe-area-inset-top, 0px) + 12px) 0 calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the story's cards (ui.album) */
   #album > .big { align-self: stretch; margin: 0 12px; }
-  .astrip { flex: 1; min-height: 0; align-self: stretch; display: flex; align-items: center; gap: 16px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; padding: 0 calc(50% - var(--aw, 240px) / 2); scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .astrip { touch-action: pan-x; overscroll-behavior: contain; flex: 1; min-height: 0; align-self: stretch; display: flex; align-items: center; gap: 16px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; padding: 0 calc(50% - var(--aw, 240px) / 2); scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .astrip::-webkit-scrollbar { display: none; }
   .acell { flex: none; scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .acard { position: relative; width: var(--aw, 240px); height: var(--ah, 360px); border-radius: 20px; overflow: hidden; background: #000; }
-  .acard.scard { overflow: visible; margin-bottom: 0; background: none; }   /* an open one: the story card's own (its tilt and planes), at the album's size */
+  .acard.scard { overflow: visible; margin-bottom: 0; background: none; touch-action: pan-x; }   /* an open one: the story card's own (its tilt and planes), at the album's size; a swipe on it scrolls the album (the story's own card keeps none) */
   .acard.scard .sclip .astill { position: absolute; inset: 0; }   /* (its still under its planes till it is alive) */
   .acard .astill { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
   .acard.shut .astill { opacity: 0.55; }

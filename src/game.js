@@ -4043,7 +4043,7 @@ $('pauseBtn').addEventListener('click', (e) => { e.stopPropagation(); game.toggl
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 // Safari (user: it got in the way): a finger anywhere over the game, the stick and swipes included, must never start a
 // selection, the loupe or a callout. Only buttons keep their default: their click needs it. Pointer events still come.
-for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
+for (const type of ['touchstart', 'touchmove']) document.addEventListener(type, (e) => { if (!(e.target.closest && e.target.closest('button, .feed, .astrip'))) e.preventDefault(); }, { passive: false });   // (the book's feed scrolls)
 for (const type of ['selectstart', 'contextmenu']) document.addEventListener(type, (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {

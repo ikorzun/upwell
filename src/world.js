@@ -1768,6 +1768,7 @@ ICONS.bubble = '............/....pppp..../..pppppppp../.ppwwpppppp./.pwwppppppp.
 ICONS.maxhp = ICONS.heart;
 ICONS.taskCrow = '............/............/.......sss../......sswsss/.....ssssss./..ssssssss../.ssssssssss./sssssssss.../..ssssss..../....s.s...../....s.s...../...ss.ss....';   // a level's tasks (Game.task): the crows,
 ICONS.taskNeon = '............/.ss........./..s.pppppp../..sspwwwwp../..s.pwkkwp../..s.pwwwwp../..s.pwkkwp../..s.pwwwwp../..s.pppppp../..s........./.ss........./............';   // Tokyo's task: a bar's lightbox lit on its iron arm (Golden Gai, Д207 A; it was the neon)
+ICONS.lock = '............/....ssss..../...s....s.../...s....s.../...s....s.../..yyyyyyyy../..yyyyyyyy../..yyykkyyy../..yyykkyyy../..yyyykyyy../..yyyyyyyy../............';   // a card not seen yet (ui.album)
 ICONS.taskCage = '............/.....ss...../.ssssssssss./.s..s..s..s./.s..s..s..s./.s.gsggsg.s./.sgksggskgs./.sggsggsggs./.sggsggsggs./.ssssssssss./............/............';   // a friend in a cage,
 ICONS.taskLantern = '............/.....ss...../...ssssss.../..ssssssss../....soos..../....soos..../....ssss..../.....ss...../.....ss...../....ssss..../...ssssss.../............';   // a Village shrine's lantern lit,
 ICONS.taskLamp = '............/.....ss...../....s..s..../...ssssss.../...soooos.../...soyyos.../...soyyos.../...soooos.../...ssssss.../....ssss..../............/............';   // the Mine's lamps (its task)

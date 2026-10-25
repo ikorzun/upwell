@@ -4196,6 +4196,48 @@ const rampOf = (th) => {
   });
   return out;
 };
+// The light by level in a lit world (owner, 2026-10-24/25: Д272 «А» the light by level, Д273 «А» the lamps, Д274 «Б» its bands by the height in the
+// level, not the screen; Д270 «Г», Д271 «Б»: no air, haze, shadow or ledge volume; his look on the questions page v60): over the drawn screen
+// (uScene) once, as the dark's light by steps. A world's story of light (LIGHT_LOOK: lo its first level, hi its last, each [the level's top, its foot])
+// in two hard bands: the play and the props as drawn, or a step toward the black (the ramps' mid, 0.68); a ledge lit as a whole by its middle, so a
+// ledge keeps its tone while the camera climbs; red, yellow and white (danger, what you take, the hero and the edges) always whole, and what is behind
+// (a quarter, DEPTH) its own; in the step down, a lamp's core (the kits' lights, a door's, the fire's top) warm. ?light=0: as drawn, to compare
+const LIGHT_ON = !/[?&]light=0\b/.test(location.search);
+const LIGHT_LOOK = (th) => th.village ? { lo: [1, 1], hi: [1, 0.34] }   // morning to evening: the shade climbs the level
+  : th.fuji ? { lo: [0.67, 0.34], hi: [1.3, 1] }   // the night climb, then the summit's sunrise (goraiko) from the top down
+  : th.sea ? { lo: [1, 1], hi: [0.34, 1] }   // the day, then the sunset: the light low, off the water
+  : th.town ? { lo: [0.67, 0.67], hi: [0.67, 0.67] }   // the night: the lamps' warmth on the play round them
+  : th.danchi ? { lo: [1, 0.67], hi: [1, 0.67] }   // overcast
+  : th.glass ? { lo: [0.67, 1.3], hi: [0.34, 1] }   // dusk, lit from below (the floodlights)
+  : null;
+const LIGHT_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
+uniform sampler2D uScene; uniform vec4 uLights[32]; uniform int uN; uniform vec2 uFire; uniform vec4 uBand, uRects[24]; uniform int uNR;
+void main() {
+  ivec2 g = cell();
+  vec2 p = vec2(g) + 0.5;
+  vec3 c = texelFetch(uScene, ivec2(gl_FragCoord.xy), 0).rgb;
+  int k = 0; float tk = 0.0, best = 1e9;
+  for (int i = 1; i < ${Object.keys(PAL).length}; i++) {
+    vec3 d = PAL[i] - PAL[0]; float t = clamp(dot(c - PAL[0], d) / dot(d, d), 0.0, 1.0); vec3 e = c - (PAL[0] + t * d); float err = dot(e, e);
+    if (err < best) { best = err; k = i; tk = t; }
+  }
+  if (tk < 0.4 || (tk > 0.8 && (k == 1 || k == 3 || k == 8))) { o = vec4(c, 1.0); return; }   // the black and what is behind; red, yellow, white
+  float y = p.y;
+  for (int i = 0; i < 24; i++) {   // a ledge by its middle
+    if (i >= uNR) break;
+    vec4 r = uRects[i];
+    if (p.x >= r.x && p.x < r.z && p.y >= r.y && p.y < r.w) { y = 0.5 * (r.y + r.w); break; }
+  }
+  float a = mix(uBand.x, uBand.y, clamp((y - uBand.z) / max(uBand.w - uBand.z, 1.0), 0.0, 1.0));
+  if (a * 3.0 + 0.5 >= 3.0) { o = vec4(c, 1.0); return; }   // in the light: as drawn
+  float lit = clamp((p.y - uFire.x) / uFire.y + 1.0, 0.0, 1.0);
+  for (int i = 0; i < 32; i++) {
+    if (i >= uN) break;
+    vec4 L = uLights[i];
+    lit = max(lit, 1.0 - clamp((length(p - L.xy) - L.z) / max(L.w - L.z, 1.0), 0.0, 1.0));
+  }
+  o = vec4(lit >= 1.0 ? min(c * 0.84 + vec3(0.2, 0.16, 0.104), vec3(1.0)) : PAL[0] + (c - PAL[0]) * 0.68, 1.0);   // a lamp's core warm, else a step down
+}`;
 // A shadow in its own colour (owner, 2026-10-24: «Для теней возьми не просто серый цвет, а подмешивай основной цвет, чтобы не было грязных цветов»): its ink
 // darker with its hue kept and fuller; an ink with no hue (white, grey) toward the world's own (uShade, shadeTint), so no shadow is a grey
 const SHADE_GLSL = `uniform vec3 uShade;
@@ -4521,7 +4563,7 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
 Renderer.prototype.init = function () {
   if (!gumInit.call(this)) return false;
-  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pRamp = program(this.gl, BG_VS, RAMP_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
+  try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pRamp = program(this.gl, BG_VS, RAMP_FS); this.pLight = program(this.gl, BG_VS, LIGHT_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
   try { this.pFeat = program(this.gl, FEAT_VS_PAL, FEAT_FS_PAL); } catch (err) { console.error(err); }   // (the sprites' palette snap a corner, not a fragment: FEAT_VS_PAL)
   this.darkBuf = new Float32Array(128);   // 32 lights (the Dark Forest's eyes and fences as well as the coins)
   this.target = null;
@@ -7389,6 +7431,28 @@ Renderer.prototype.draw = function (g, alpha) {
     gl.bindVertexArray(this.emptyVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (ramp) { gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND); }
+  } else if (LIGHT_ON && !CINE && !menu && lv.kind === 'well' && this.pLight && this.target.scene && LIGHT_LOOK(th)) {   // a lit world's light by level (LIGHT_FS)
+    const lk = LIGHT_LOOK(th), lt = g.mode === 'camp' ? clamp(g.stage / 9, 0, 1) : clamp(g.stage / 2, 0, 1), L = this.darkBuf, Rp = R / P;
+    let n = 0;
+    const light = (x, y, r0, r1) => { if (n < 32 && y > top - r1 * R && y < bot + r1 * R) { L.set([x / P, y / P, r0 * Rp, r1 * Rp], n * 4); n++; } };   // (the dark's)
+    if (lv.portal) light(lv.portal.x, lv.portal.y, 2, 4);
+    for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);
+    if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) light((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 1.2, 3.4); }
+    for (const [x, y, r0 = 0.9, r1 = 2.6] of vlamps) light(x, y, r0, r1);
+    const RB = this.lightRects || (this.lightRects = new Float32Array(96));
+    let nr = 0;
+    for (const r of lv.near(top, bot)) { if (nr >= 24) break; RB.set([r.x0 / P, r.y0 / P, r.x1 / P, r.y1 / P], nr * 4); nr++; }
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.target.sceneFb);
+    gl.blitFramebuffer(0, 0, lw, lh, 0, 0, lw, lh, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.disable(gl.BLEND);
+    const pl = this.pLight; gl.useProgram(pl.p); grid(pl.u);
+    gl.uniform4fv(pl.u['uLights[0]'], L); gl.uniform1i(pl.u.uN, n); gl.uniform2f(pl.u.uFire, lv.fire ? lv.fire.y / P : 1e9, (3 * R) / P);
+    gl.uniform4f(pl.u.uBand, lk.lo[0] + (lk.hi[0] - lk.lo[0]) * lt, lk.lo[1] + (lk.hi[1] - lk.lo[1]) * lt, lv.endY / P, lv.floor / P);
+    gl.uniform4fv(pl.u['uRects[0]'], RB); gl.uniform1i(pl.u.uNR, nr);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.target.scene); gl.uniform1i(pl.u.uScene, 0);
+    gl.bindVertexArray(this.emptyVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND);
   }
   gl.bindVertexArray(null);
   if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)

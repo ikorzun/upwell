@@ -1540,6 +1540,28 @@ ELEMENTS.update({
                         'their run, each cat the same in all four)',
                         ground='the orange bench only in A and B, the cats on a plain thin grey ground line in C to F, the dark grey cat half a body behind the '
                         'orange one', inks='a dark grey cat and an orange cat, black eyes and stripes, no white'),
+    'tt-crowfly': dict(world='tokyotower', kind='frames', who='a crow, a small black bird with a grey outline, perched on a purple steel beam',
+                       motion='taking off from its beam and flying away up and to the right',
+                       frames='A crouching on the beam ready to spring, wings closed; B springing off, wings half open, its legs still hanging; C flying, its wings '
+                       'fully up; D flying, its wings spread level; E flying, its wings fully down; F flying, its wings spread level again (C, D, E, F loop as its '
+                       'flap, its body the same in all four, its legs tucked)',
+                       ground='nothing under it (no beam drawn)', inks='a black crow with a grey outline and grey highlights, a dark grey beak'),
+    'dc-catrun': dict(world='danchi', kind='frames', who='a small grey stray cat sitting on a concrete ledge next to its blue food bowl',
+                      motion='startled and running away to the right',
+                      frames='A startled, ears up, back arched, still sitting where it was; B leaping away; C running, its legs stretched out; D running, its legs '
+                      'gathered under it; E running, legs stretched; F running, legs gathered (C, D, E, F loop as its run, the cat the same in all four)',
+                      ground='no bowl and no ledge drawn, the cat on a plain thin grey ground line', inks='a grey cat, black eyes, no white'),
+    'fj-foxrun': dict(world='fuji', kind='frames', who='a red fox in the snow, orange with a grey tail tip and a little snow on its back, standing',
+                      motion='startled and running away to the right',
+                      frames='A startled, head up, ears up, still standing where it was; B leaping away; C running, its legs stretched out, its tail streaming; '
+                      'D running, its legs gathered under it; E running, legs stretched; F running, legs gathered (C, D, E, F loop as its run, the fox the same '
+                      'in all four)', ground='the fox on a plain thin grey ground line', inks='an orange fox, its tail tip and the snow on its back grey, black '
+                      'eye and nose'),
+    'vil-macaquerun': dict(world='village', kind='frames', who='a Japanese macaque, a grey monkey with an orange face, sitting hunched',
+                           motion='startled and running away on all fours to the right',
+                           frames='A startled, sitting up straight, its face turned to look; B springing away on all fours; C running on all fours, its legs '
+                           'stretched; D running, its legs gathered under it; E running, legs stretched; F running, legs gathered (C, D, E, F loop as its run, the '
+                           'monkey the same in all four)', ground='the monkey on a plain thin grey ground line', inks='grey fur, an orange face, black eyes'),
 })
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}

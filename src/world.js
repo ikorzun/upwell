@@ -421,7 +421,7 @@ const VOL_ON = !/[?&]novol\b/.test(location.search);   // volume on every sheet 
 const shadeTint = (th) => (th && th.shade) || (!th || [PAL.gray, PAL.white, PAL.black].includes(th.wall) ? PAL.blue : th.wall);   // the ink a white's or a grey's shadow
 // takes (SHADE_GLSL): the world's own (its walls'), a cool blue where its walls are grey; a theme's `shade` over it (the Dark Forest's grey: black and white there)
 const VOL_LUM = { k: 0, w: 1, s: 0.75, g: 0.6, d: 0.45, b: 0.55, c: 0.8, o: 0.7, y: 0.9, r: 0.45, p: 0.55, a: 0.8, G: 0.4 };
-const VOL_BANDS = new WeakMap(), VOL_RECTS = new WeakMap(), VOL_KEEP = 'krRyY';
+const VOL_BANDS = new WeakMap(), VOL_RECTS = new WeakMap(), VOL_KEEP = 'krRyYW';   // ('W': a boss's eye white, kept white: BOSS_EYE)
 const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 shadow, 0 its own ink, and black's always), once a sprite and a side
   let C = VOL_BANDS.get(rows); if (!C) VOL_BANDS.set(rows, (C = {})); const key = flip ? 'l' : 'r'; if (C[key]) return C[key];
   const H = rows.length, W = rows[0].length, at = (i, j) => (flip ? rows[j][W - 1 - i] : rows[j][i]), inside = new Uint8Array(W * H), d = new Float32Array(W * H);
@@ -1447,7 +1447,7 @@ const LOOKS = {
   cart: ['C', 'round', 2.2],   // the Cave's: Tsuchigumo on its thread (redrawn 1:1 from its cell, owner 2026-10-25: a sheet pixel a game pixel, never grown; its body the round of it, its legs out)
   puck: ['F', 'round'],   // Fuji's: Tsurara-onna, her spikes swept back
   namazu: ['D', 'round', 2.5],   // the Sea's: Onamazu, arched, the stone on its back (its body the round of its drawing at 1:1, its middle, so it flips in place)
-  koschei: ['A', 'round', 2.38],   // the Dark Forest's: Koschei the bony king, his sword out (its body the round of its drawing at 1:1, its middle)
+  koschei: ['A', 'round', 2.14],   // the Dark Forest's: Koschei the bony king, his sword out (its body the round of its drawing at 1:1, its middle: 74 px wide redrawn, 2026-10-25, so 2.14 R on an iPhone, no wider than he is)
   tram: ['E', 'tram'],   // Tokyo's: a tsukumogami tram
   crane: ['F', 'round', 2.74],   // the Danchi's: Nuppeppo in its ropes (its body the round of its drawing; redrawn 1:1, owner 2026-10-25)
   pigeon: ['A', 'tengu'],   // the Sky's: a Karasu-tengu
@@ -4325,15 +4325,22 @@ const KOMORI_SPR = {
 };
 Object.assign(FOE_SPRITES, KOMORI_SPR);
 const BOSS_FIT = { 'probka-F': ['b', 0.5, 0, 1, 1], 'cart-C': ['o', 0.44, 0, 1], 'puck-F': ['s', 0.5, 1, 1, 1], 'tram-E': ['g', 0.55, -1, 1, 1], 'crane-F': ['o', 0.57, 0, 1], 'pigeon-A': ['s', 0.55, -1, 1, 1], 'namazu-D': ['o', 0.5, 1, 1], 'koschei-A': ['s', 0.5, 0, 1] };   // [its ink, its body's place down it, the way its cell has it face (0: at you), its pixel in game pixels (none: fitted over its body)]
-const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
+const drawSprite = (d, rows, flip, fit, vol) => {   // a box for each run of one ink; vol: in volume (VOL), a run of one ink and one step a box
   const H = rows.length, W = rows[0].length, m = flip ? -1 : 1, sh = d.b.s;
   if (fit && !sh.ext) sh.ext = [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
   const k = fit && !fit[3] ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : ((fit ? fit[3] : 1) * PIX.base) / d.b.R, cy = (fit ? fit[1] : 0.62) * H;   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
   const o = fit ? (0.5 * PIX.size) / d.b.R : 0.004;   // its boxes' overlap: half a pixel on a boss, whose body is not under it to fill the seams when it squashes
   const hp = d.b.heap || 0, rt = d.b.rattle ? d.b.heapT || 0 : 0, yb = (H - cy) * k, sq = 1 - 0.4 * hp, wx = 1 + 0.3 * hp;   // a heap of bones (Koschei dazed): his rows sunk (his body squashes too) and strewn sideways, rattling before he rises
+  const ink = (ch) => (fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : ch === 'd' ? PAL.gray : ch === 'W' ? PAL.white : PAL[ICON_INK[ch]]), tn = (ch, v) => (ch === 'd' ? 4 : ch === 'k' ? 0 : volTone(v));   // ('d': a sheet's dark grey, grey a tone down)
+  if (vol && !hp) {   // in volume, its boxes merged down (volRects, mirrored already as seen): lit from the top left in its own ink's shade (owner, 2026-10-25: «Нужен объем»)
+    const R = volRects(rows, flip);
+    for (let q = 0; q < R.length; q += 6) d.shape(10, ((R[q] + R[q + 1]) / 2 - W / 2) * k, ((R[q + 2] + R[q + 3]) / 2 - cy) * k, ((R[q + 1] - R[q]) / 2) * k + o, 0, 0, ((R[q + 3] - R[q + 2]) / 2) * k + o, ink(R[q + 4]), tn(R[q + 4], R[q + 5]));
+    return true;
+  }
+  const B = vol ? volBands(rows, flip) : null, st = (i, j) => (B ? B[j * W + (flip ? W - 1 - i : i)] : 0);   // (a heap's rows go their own ways: its steps a pixel's)
   rows.forEach((row, j) => {
     const dy = hp ? yb - (yb - (j + 0.5 - cy) * k) * sq : (j + 0.5 - cy) * k, jx = hp ? (((Math.imul(j + 7, 2654435761) >>> 0) / 4294967296 - 0.5) * 18 * hp + (rt ? Math.sin(rt * 45 + j * 1.7) * 1.2 : 0)) * k : 0;
-    for (let i = 0; i < W;) { const ch = row[i]; let e = i + 1; while (row[e] === ch) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k * wx + jx, dy, ((e - i) / 2) * k * wx + o, 0, 0, 0.5 * k * sq + o, fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : ch === 'd' ? PAL.gray : PAL[ICON_INK[ch]], ch === 'd' ? 4 : 0); i = e; }   // ('d': a sheet's dark grey, grey a tone down)
+    for (let i = 0; i < W;) { const ch = row[i], v = st(i, j); let e = i + 1; while (row[e] === ch && st(e, j) === v) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k * wx + jx, dy, ((e - i) / 2) * k * wx + o, 0, 0, 0.5 * k * sq + o, ink(ch), B ? tn(ch, v) : ch === 'd' ? 4 : 0); i = e; }
   });
   return true;
 };
@@ -4435,6 +4442,20 @@ for (const id of [...Object.keys(K9_SPR), ...Object.keys(UME_SPR)]) LOOK_FACE[id
 // grid; the guide: a sprite may shrink by nearest-pixel sampling, never grow): its rows sampled down to its body's size, once a size, cleaned
 // (pxClean), and drawn a pixel a game pixel (its fit's scale over the growth its body's frame carries); over its full size it stays 1:1.
 const BOSS_LOOK = new Set(Object.keys(LOOKS).map((k) => k + '-' + LOOKS[k][0])), BOSS_SHRINK = new Map();
+// In volume its eyes stay white (the guide: eyes and key marks kept, not shaded): a boss's white patch no bigger than `BOSS_EYE` pixels (4 ways: an eye's white,
+// a rib, a window's frame) is 'W', a white VOL_KEEP keeps; its big whites (a hood, a belly) are lit and shaded as the rest of it
+const BOSS_EYE = 150;
+for (const id of BOSS_LOOK) {
+  const rows = FOE_SPRITES[id]; if (!rows) continue;
+  const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H);
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+    if (g[j][i] !== 'w' || seen[j * W + i]) continue;
+    const cells = [], st = [[i, j]]; seen[j * W + i] = 1;
+    while (st.length) { const [x, y] = st.pop(); cells.push([x, y]); for (const [u, v] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) if (u >= 0 && v >= 0 && u < W && v < H && !seen[v * W + u] && g[v][u] === 'w') { seen[v * W + u] = 1; st.push([u, v]); } }
+    if (cells.length <= BOSS_EYE) for (const [x, y] of cells) g[y][x] = 'W';
+  }
+  FOE_SPRITES[id] = g.map((r) => r.join(''));
+}
 // (fit[4]: one drawn 1:1 at an iPhone's size that was fitted over its body before, as Bake-danuki, Tsurara-onna, the Tram, the Karasu-tengu, is made smaller
 // to the size its fitted drawing had wherever a game pixel is bigger against R, as K9's are to theirs: so its fight, which reads its size, is the same on
 // every screen; never bigger than 1:1)
@@ -4451,7 +4472,7 @@ const bossRows = (id, g) => {
 for (const id in FOE_SPRITES) if (!K9_SPR[id] && !UME_SPR[id]) {
   const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0);
   LOOK_FACE[id] = BOSS_LOOK.has(id) && fit && fit[3]
-    ? (d) => { const g = Math.max(0.05, d.b.growth), q = fit[4] ? bossFit(id, d.b) : 1; return drawSprite(d, bossRows(id, g * q), flip(d), [fit[0], fit[1], fit[2], fit[3] / g]); }
+    ? (d) => { const g = Math.max(0.05, d.b.growth), q = fit[4] ? bossFit(id, d.b) : 1; return drawSprite(d, bossRows(id, g * q), flip(d), [fit[0], fit[1], fit[2], fit[3] / g], VOL_ON); }   // (in volume: ?novol flat)
     : (d) => drawSprite(d, FOE_SPRITES[id], flip(d), fit);
 }   // the forest's face right; a boss as its cell has it
 // A boss's drawing's width and height in world px at its full size, as drawSprite lays it (BOSS_FIT's whole scale, or fitted over its

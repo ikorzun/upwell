@@ -7129,9 +7129,12 @@ Renderer.prototype.draw = function (g, alpha) {
         // and gone when it stops (UPwell's hit, Game: its reach all the while), the warning its anticipation, a moment of smoulder after it its follow-through
         if (!FR.fit || FR.fit.n !== n) { const p = (B) => (GUIDE ? pxClean(cut0(B)) : cut0(B)); FR.fit = { n, idle: FR.idle.map(p), warn: p(FR.warn), burn: FR.burn.map(p) }; FR.fit.after = FR.fit.warn.map((r) => r.replace(/r/g, 'o')); }   // (after: its tips orange,
         // no red: it no longer hurts)
-        const f = FR.fit, h = f.idle[0].length, after = !on && u < 0.15;
+        // (`once`: a rigid thing, ice or coral: its burst frames played once as it thrusts out and its last held, never looping (a flicker is fire's, not a
+        // spike's); after, the same frames back the other way as it draws in, no longer hurting)
+        const f = FR.fit, h = f.idle[0].length, after = !on && u < 0.15, nb = f.burn.length, tin = u - FIREWALL.off;
         for (let y = fw.y0, k = 0; y < fw.y1; y += h * s2, k++) {
-          const rows = on ? f.burn[(Math.floor(T * FR.fps.burn) + k) % f.burn.length] : warn ? f.warn : after ? f.after : f.idle[(Math.floor(T * FR.fps.idle) + k) % f.idle.length];
+          const rows = FR.once ? (on ? f.burn[Math.min(nb - 1, Math.floor(tin * FR.fps.burn))] : warn ? f.warn : after ? f.burn[Math.max(0, nb - 1 - Math.floor((u / 0.15) * nb))] : f.idle[(Math.floor(T * FR.fps.idle) + k) % f.idle.length])
+            : on ? f.burn[(Math.floor(T * FR.fps.burn) + k) % nb] : warn ? f.warn : after ? f.after : f.idle[(Math.floor(T * FR.fps.idle) + k) % f.idle.length];
           sprAt(cut(rows, y), at(rows), snap(y), d < 0, 1, s2);
         }
         continue;

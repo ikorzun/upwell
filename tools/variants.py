@@ -1650,6 +1650,55 @@ ELEMENTS.update({
                             motion='A cone is rigid: it swings about its stalk and never squashes or stretches; it falls straight; its scales fly in arcs.',
                             inks='the cone orange with black gaps between its scales, its point red (danger), the crack red, the stalk orange'),
 })
+ELEMENTS.update({   # the Mine's (Iwami Ginzan) hazards in frames, as the Village's
+    'mine-water-frames': dict(world='mine', kind='hazframes', what='groundwater breaking out of a crack in the rock wall of the old silver mine: asleep the crack '
+                              'only drips; for half a second it beads and trickles as a warning; then a jet of water spurts out of it into the shaft for about one '
+                              'second, hurting whoever is in it, and it drips again',
+                              refdesc='the shaft\'s left wall in the Mine (grey diagonal stripes on black, a white inner edge) with the same stretch of wall shown '
+                              'three times as it is drawn now: asleep (blue drips down the wall), warning (their outer edges red) and bursting (short flat blue jets '
+                              'with red rims)',
+                              frames='A asleep: a jagged lip of grey rock jutting out of the wall\'s white inner edge with a black crack across it, a wet streak (a '
+                              'thin solid run of blue 2 art pixels wide) running down from the crack just right of the wall\'s white edge, a drop of water swelling '
+                              'at the crack\'s lip; B asleep: the same, the drop let go and fallen 4 art pixels lower down the streak, a new small drop just starting '
+                              'at the lip (A and B loop slowly as it sleeps); C about to burst: the same rock, water beading out of the whole crack and trickling '
+                              'down in two or three thin runs, the beads\' outer edges red (held still for half a second as the warning); D bursting: a short stubby '
+                              'jet of water spurting straight out of the crack into the shaft (as short as the jets in the attached image), a little thicker at the '
+                              'crack, its top and bottom edges red, reaching exactly 12 art pixels out from the wall, its end breaking into a few drops; E gushing: '
+                              'the same jet, its end broken into drops another way, a drop falling off its underside, the same reach; F gushing again: a third shape '
+                              'of the same jet\'s end and drops (D, E and F loop as it gushes)',
+                              scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (grey diagonal stripes '
+                              'on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the crack and its rock on the wall\'s '
+                              'inner edge, centred in the cell\'s height',
+                              size='the stretch of wall is exactly 28 art pixels tall (112 image pixels) with one crack in its middle, and nothing of it reaches '
+                              'further out from the wall\'s white inner edge than 12 art pixels (48 image pixels): the rock, the drips and the warning at most 6 art '
+                              'pixels out, the jet exactly 12, about 6 art pixels thick at the crack. The jet is short and stubby: it ends 12 art pixels (48 image '
+                              'pixels) from the white edge, only as far as the wall strip is wide, a tenth of the cell\'s width; even its drops stay inside those 12 '
+                              'art pixels, and everything further right is plain black air in every frame. The game stacks the stretch down the wall, so its top and '
+                              'bottom rows must join seamlessly',
+                              motion='Water is heavy: the jet spurts out straight and level and its end breaks into drops that fall in short arcs; drops only ever '
+                              'fall, never float up; a drop swells before it lets go; the rock and the crack never move.',
+                              inks='the rock grey with the black crack, the water blue with aqua glints, the drips and the trickle blue, the warning\'s bead edges '
+                              'red, the jet blue with an aqua core and red top and bottom edges (danger), its drops blue and aqua (never white)'),
+    'mine-flood-frames': dict(world='mine', kind='hazframes', what='one surge on the front of the old mine\'s flood of dark groundwater that rises up the shaft from '
+                              'below: the flood\'s front is a choppy band of blue water with a red top edge, and along it the water wells up in surges, each '
+                              'swelling, bursting into foam at its top and falling back, each at its own beat',
+                              refdesc='the front of the rising flood as it is drawn now in the game: a choppy band of blue water with a red top edge, grey stones '
+                              'tumbling in it, a few bubbles and a spout of water thrown up over it',
+                              frames='A a low smooth swell just welling up out of the front, its top edge red as the front\'s; B the swell higher and rounder, a dome '
+                              'of water; C at its highest (it slows at the top), its crown breaking into a cap of foam, a bubble rising off it; D the crown bursting: '
+                              'the foam flung up and out in two or three clumps, the dome starting to sink, the bubble higher; E falling back: the dome low and wide, '
+                              'the foam clumps falling back onto it, the bubble popping into a small ring; F the front almost level again, a little foam on it (A to '
+                              'F loop as the surge\'s life)',
+                              scene='a straight stretch of the flood\'s front 28 art pixels wide across the lower third of the cell, its top edge red over blue water '
+                              'with grey stones in it, flat and level at the same height in every cell, the surge welling up out of its middle; plain black air above',
+                              size='the surge at most 12 art pixels wide at its base and at most 14 art pixels tall over the front\'s top edge (56 image pixels); at '
+                              'the stretch\'s left and right ends the front stays flat in every frame',
+                              motion='Water is heavy: the swell rises slowly, slows at its top and falls back under gravity; its foam and drops arc down, never '
+                              'float; only the bubble rises; nothing below the front\'s top edge changes.',
+                              inks='the water one flat solid blue with a single aqua glint along its top (no dither and no black inside it: a big clean shape), its '
+                              'top edge red as the front\'s (danger), the foam aqua and grey in two or three big clumps (never white), the bubble an aqua ring, the '
+                              'band blue with grey stones'),
+})
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}

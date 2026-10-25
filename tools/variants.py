@@ -1056,6 +1056,85 @@ ELEMENTS = {
                        inks='tubes in one or two of purple, blue, green and orange, their glow a dither halo of the same ink; a black or grey box behind',
                        scene=LEDGE_AT + ' below it', text='a short katakana word (ラーメン, スシ or カラオケ) or a simple pictogram'),
 }
+# The Dark Forest's own hazards (owner, 2026-10-25, Д277 «А»: thorny brambles on its walls that shoot out their thorns; the kikimora's black bog rising from
+# below, root-like hands reaching up out of it): black, white and grey as the world (colour only for danger: red), crooked (SHAPES)
+ELEMENTS.update({
+    'skazka-thorns': dict(world='skazka', kind='wallhaz', what='thorny brambles (ternovnik, the blackthorn thicket of the Russian tales) growing on the shaft\'s wall, '
+                          'that shoot out their thorns', why='in the tales the dark forest is alive and does not let a runaway pass: its thorn thickets close in '
+                          'on the path and claw at whoever runs by',
+                          asleep='a crooked tangle of black bramble stems pressed to the wall, knotted and twisted, short grey thorns on them, quiet',
+                          bursting='long sharp thorns shooting straight out of the bramble into the shaft, rigid as needles, black and grey, their points red',
+                          vary='the bramble (a tangle of crooked stems, a knotted vine with a few withered leaves, a twisted root studded with thorns, a dense '
+                          'hedge of stems), the thorns\' shape when they shoot out (long straight needles, hooked claws, a fan of spikes, a cluster of crooked '
+                          'spines)',
+                          inks='the stems and thorns black, each outlined in grey so it reads on the black night, white only as a few small glints where a stem '
+                          'or a thorn catches the light; red only on the thorns\' points (danger); no orange, no green, no other colour: this world is black, '
+                          'white and grey'),
+    'skazka-bog': dict(world='skazka', kind='hazard', what='the kikimora\'s black bog, the swamp of the Russian tales, rising up the shaft: black bog water with '
+                       'rotten roots, reeds and bog bubbles in it, and gnarled root-like hands with long clawing fingers reaching up out of it',
+                       why='the swamp is the kikimora\'s home, and in the tales a bog drags down whoever strays from the path; here it rises up the shaft '
+                       'after the Kolobok',
+                       vary='its surface (a sluggish ripple, a heaving swell, bubbles bursting), the root-hands reaching out of it (one big gnarled hand, '
+                       'several small clutching ones, roots with knuckles like fingers), what floats in it (a rotten log, a tuft of reeds, a skull, bubbles), '
+                       'the water under it (black dithered with grey downwards), and what it throws up the shaft (a gob of black mud, a clawing root-hand, a '
+                       'bursting bog bubble)',
+                       inks='the water black, its surface outlined in grey with a few small white glints (each at least 2 by 2 art pixels, just under its red '
+                       'edge, never a white line: white is an edge to stand on), grey ripples and bubbles, darker downwards through black and grey dither; '
+                       'the root-hands black, outlined in grey, grey knuckles; a line of red along its top (the danger edge: the black bog must read against '
+                       'the black night); no orange, no green, no blue: this world is black, white and grey. Every line and shape at least 2 art pixels '
+                       'thick: solid filled shapes (the hands and roots black with a grey outline 2 pixels thick, the bubbles grey rings 2 pixels thick), never '
+                       'thin 1-pixel line drawings; the water a grey dither on black (rows of dots, a checker), densest just under the red edge and thinning '
+                       'downwards, so the bog reads as a mass and not as empty night; no white lines in it'),
+})
+
+# The Dark Forest's hazards in frames, as the Village's (owner, 2026-10-25: «Проработай еще лучше опасности, раздели их красиво кадрам ассетов и анимируй»);
+# their references found by default, research/variants/ref-skazka-thorns-frames.png (its wall in its three states as drawn, 4 x 4 image px a game px)
+# and ref-skazka-bog-frames.png (its front, halved: 4 x 4 a band px); the two design sheets' was a fresh shot of 8-5, ref-skazka-now.png (--ref)
+ELEMENTS.update({
+    'skazka-thorns-frames': dict(world='skazka', kind='hazframes', what='thorny brambles (ternovnik) on the shaft\'s wall in a dark forest of the Russian tales: '
+                                 'asleep it is a crooked tangle of bramble stems pressed to the wall, short thorns on them; for half a second its thorns\' points '
+                                 'turn red as a warning; then long sharp thorns shoot straight out of it into the shaft and stay out, rigid, for about one second, '
+                                 'hurting whoever is in them, then draw back in, and it sleeps again',
+                                 refdesc='the shaft\'s left wall in the Dark Forest (grey diagonal stripes on black, a white inner edge) with the same stretch of wall '
+                                 'shown three times as it is drawn now: asleep (crooked grey bramble stems pressed to the wall), warning (their outermost pixels red) '
+                                 'and bursting (short grey needles with red points among the stems)',
+                                 frames='A asleep: the crooked bramble stems pressed to the wall, knotted, black with a grey outline, short grey thorns on them, one '
+                                 'small white glint on a knot; B asleep: the same stems, the glint on another knot and two thorn tips one art pixel further out, as '
+                                 'if the bramble stirs (A and B alternate slowly as it sleeps); C about to shoot: the same stems as A, every thorn\'s point red '
+                                 '(held still for half a second as the warning); D shooting: four or five long straight thorns thrust half way out of the bramble, '
+                                 'about 6 art pixels from the wall\'s inner edge, grey with black cores, their points red; E: the same thorns out to exactly 12 art '
+                                 'pixels from the wall, straight and rigid, their points red; F: the same as E, a small white glint along one thorn (D, E and F '
+                                 'play once as the thorns shoot out; F is held while they hurt)',
+                                 scene='the shaft\'s left wall as a strip 10 art pixels wide down the left edge of the cell, as tall as the cell (grey diagonal stripes '
+                                 'on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the bramble on the wall\'s inner '
+                                 'edge, centred in the cell\'s height',
+                                 size='the stretch of wall is exactly 32 art pixels tall (two tiles: 128 image pixels) and nothing of it reaches further out from the '
+                                 'wall\'s white inner edge than 12 art pixels (48 image pixels): asleep and warning at most 8 art pixels out, the thorns exactly 12. '
+                                 'The game stacks the stretch down the wall, so its top and bottom rows must join seamlessly',
+                                 motion='A thorn is rigid: it shoots straight out along its own line and never bends, squashes or flickers; the stems never move but '
+                                 'for the glint and the thorn tips; nothing sways like grass.',
+                                 inks='the stems black with a grey outline (so they read on the black night), the thorns grey with black cores, white only as one or '
+                                 'two small glints, red only on the thorns\' points (the danger edge); no orange, no green: this world is black, white and grey'),
+    'skazka-bog-frames': dict(world='skazka', kind='hazframes', what='one root-hand on the front of the kikimora\'s black bog that rises up the shaft from below: '
+                              'the bog\'s front is a wavy red edge over black bog water with a grey scum just under it, and along it gnarled root-like hands reach '
+                              'up out of the bog, grasp at the air and sink back, each at its own beat',
+                              refdesc='the front of the rising bog as it is drawn now in the game: a thin wavy red edge with grey scum under it, the black bog below, '
+                              'black night above with faint grey dots',
+                              frames='A the bog bulging, a knobbly root tip just breaking the surface, a ring of ripple round it; B the root-hand rising, a gnarled '
+                              'wrist, its long fingers curled shut; C taller, its fingers spreading open like clawing roots, reaching up; D at its tallest, its '
+                              'fingers clenching shut on nothing, two drops of black bog falling off it; E sinking back, only the clenched fist and its knuckles '
+                              'above the surface, a bubble beside it; F the last knuckle going under, the bubble popping, a ripple (A to F loop as the hand\'s life)',
+                              scene='a straight stretch of the bog\'s front 32 art pixels wide across the lower third of the cell, its top edge a wavy red line with '
+                              'grey scum under it and black bog water below, flat and level at the same height in every cell, the hand rising out of its middle; '
+                              'plain black air above',
+                              size='the hand at most 10 art pixels wide at its wrist and at most 14 art pixels tall over the front\'s top edge (56 image pixels), its '
+                              'fingers 2 art pixels thick; at the stretch\'s left and right ends the front stays flat in every frame',
+                              motion='A root-hand is slow and heavy, wooden: it rises out of the bog, opens, grasps and sinks back along one line, its wrist always '
+                              'rooted in the bog; it never flies off and never flickers; nothing below the front\'s top edge changes.',
+                              inks='the hand black with a grey outline 2 pixels thick (so it reads on the black night), grey knuckles, at most one small white glint '
+                              'on it; its fingertips red only in D, as it grasps (danger); the drops and the bubble grey; the front a red edge with grey scum; no '
+                              'orange, no green: this world is black, white and grey'),
+})
 
 # A boss: its fight (does), its size, where the cell shows it (place), its colour (main: BOSSES' ink), the rigid parts it may have,
 # the three yokai of its world it may be (two cells each) and the inks' rule there.

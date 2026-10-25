@@ -929,6 +929,7 @@ const CAUSE = { noyaki: 'causeNoyaki', flood: 'causeFlood', avalanche: 'causeAva
 // below, said once at the start of a world's first level of it, as the tutorial's words (owner, 2026-10-25: «Напиши подписи в начале уровня так же, как в обучении
 // прыжок»; the facts the worlds' research: Iya's slash-and-burn, Iwami's flooded drifts, Fuji's yukishiro, the 2017 typhoon surge at Enoshima, Golden Gai's 2016
 // fire, Tokyo's summer storms; the Tram's line No. 13, gone in 1970, at its fight)
+const BREAK_T = 0.6;   // s a fallen icicle's, cone's or bolt's break stays in lv.breaks for its shatter (Worlds' frames)
 const DROP = { t: 0.3, v: 3 };   // down on a plank: let through it `t` s, pushed down at `v` R/s
 const STORY_ORDER = ['moon_fall', 'arrive_mine', 'village_crow', 'boss_probka', 'arrive_cave', 'boss_cart', 'mine_lamp', 'arrive_ice', 'boss_puck', 'fuji_bell', 'arrive_sea',
   'boss_namazu', 'sea_lighthouse', 'arrive_tokyo', 'city_friendship', 'boss_tram', 'arrive_blocks', 'boss_crane', 'danchi_lantern', 'arrive_sky', 'boss_pigeon', 'sky_clouds',
@@ -2102,8 +2103,13 @@ class Game {
       let gone = s.wave ? s.x < lv.l || s.x > lv.r : s.y > lv.floor || s.y > lv.cam + view.h + 100 || (s.vy > 0 && lv.fire && s.y > lv.fire.y);   // a blob falls into the fire
       if (!s.wave) for (const r of lv.near(s.y, s.y)) if (!r.plank && s.x > r.x0 && s.x < r.x1) gone = true;
       if (Math.hypot(H.cx - s.x, H.cy - s.y) < H.R * H.growth * 0.8 + s.r) { this.hurt(H.cx - s.x, H.cy - s.y, s.icicle || s.rock ? 'icicle' : s.fire ? 'fire_blob' : 'shot'); gone = true; }
-      if (gone) { splatFx(s.x, s.y, s.r * 2, s.fire ? hazInk(lv.theme) : INK.spike, 4); sh.splice(i, 1); }
+      if (gone) {
+        splatFx(s.x, s.y, s.r * 2, s.fire ? hazInk(lv.theme) : INK.spike, 4); sh.splice(i, 1);
+        if ((s.icicle || s.rock) && s.y < lv.cam + view.h + 100 && lv.breaks) lv.breaks.push({ x: s.x, y: s.y, t: lv.t, kind: 'drop', ink: s.ink || null });   // where a fallen one breaks
+        // (on a ledge, the floor, the hero or into the fire, not off the screen's foot): Worlds draws its shatter from lv.breaks
+      }
     }
+    if (lv.breaks && lv.breaks.length) { let k = 0; for (const b of lv.breaks) if (lv.t - b.t < BREAK_T) lv.breaks[k++] = b; lv.breaks.length = k; }   // (a break kept BREAK_T s)
   }
   collect(dt) {
     const H = this.hero, cs = this.lv.coins, mR = COIN.magnet * this.R * this.mods.magnet, cr = COIN.r * this.R, k = Math.exp(-COIN.drag * dt);

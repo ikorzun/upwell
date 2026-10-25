@@ -353,7 +353,7 @@ Renderer.prototype.cinePost = function (g, lv, sx, sy, vlamps) {
 // The digest's §8: the juice medium, a peak only for a hard poke; it starts at once and is over in about a second; the world remembers (petals lying, the
 // crow gone); with the system asking for less motion nothing sways and less is shed. A rustle with each (a short soft gust), wings with the crow.
 const POKE = { reach: 1.0, cool: 1.0, decay: 3.0, freq: 10, back: 18, still: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
-  kinds: { sakura: { sway: 0.06, shed: 'petal', n: 8 }, scarecrow: { sway: 0.09, bird: true }, koinobori: { sway: 0.05 }, kaya: { sway: 0.05 }, persimmons: { sway: 0.3 }, baskets: { sway: 0.05 }, rods: { sway: 0.06 }, bags: { sway: 0.04 }, net: { sway: 0.12 }, bonsai: { sway: 0.08, shed: 'needle', n: 5 },
+  kinds: { sakura: { sway: 0.06, shed: 'petal', n: 8 }, scarecrow: { sway: 0.3, bird: true }, koinobori: { sway: 0.05 }, kaya: { sway: 0.05 }, persimmons: { sway: 0.3 }, baskets: { sway: 0.05 }, rods: { sway: 0.06 }, bags: { sway: 0.04 }, net: { sway: 0.12 }, bonsai: { sway: 0.08, shed: 'needle', n: 5 },
     bats: { sway: 0, bats: true }, cart: { sway: 0.06, clunk: true },   // (the Mine's: sleeping bats wake and fly off, a cart rocks on its rails)
     bell: { sway: 0.05, ding: true }, pine: { sway: 0.06, shed: 'snow', n: 6 }, snowman: { sway: 0.07 },   // (Fuji's: a rung bell nudged dings low, a pine sheds snow, a
     gull: { sway: 0, bird: true, grey: true }, flags: { sway: 0.05 }, raft: { sway: 0, splash: true },   // (the Sea's: a gull flies off its post, the big-catch flags
@@ -367,7 +367,7 @@ function cinePoke(g, lv, r, kind, x0, y0, x1, y1, perch) {
   const H = g.hero, t = lv.tile, T = lv.t, P = r.poke || (r.poke = { t: -9, s: 0, d: 1, was: false, back: 0 });
   const m = POKE.reach * t, inside = g.state === 'play' && H.maxX > x0 - m && H.minX < x1 + m && H.maxY > y0 - m && H.minY < y1 + m;
   if (inside && !P.was && T - P.t > POKE.cool) {
-    P.t = T; P.s = Math.min(1, 0.4 + ((CINE && CINE.hv) || 0) / (10 * lv.R)); P.d = H.cx < (x0 + x1) / 2 ? 1 : -1;
+    P.t = T; P.s = Math.min(1, 0.4 + (CINE ? CINE.hv || 0 : Math.hypot(H.rigVx || 0, H.rigVy || 0)) / (10 * lv.R));   // (as hard as the hero comes: 2D by his own speed) P.d = H.cx < (x0 + x1) / 2 ? 1 : -1;
     if (k.shed && CINE) for (let i = 0, n = Math.max(1, Math.round(k.n * P.s * (POKE.still ? 0.4 : 1))); i < n; i++)
       CINE.fx.push({ k: k.shed, x: x0 + Math.random() * (x1 - x0), y: k.under ? y1 : y0 + Math.random() * (y1 - y0) * 0.5, vx: P.d * (15 + Math.random() * 35), vy: 5 + Math.random() * 20, ph: Math.random() * 6.28, on: r, life: 0 });
     if (k.bird && perch && P.back <= T && CINE) { CINE.fx.push({ k: 'bird', x: perch[0], y: perch[1], vx: P.d * (90 + Math.random() * 50), vy: -(150 + Math.random() * 60), life: 0, ink: k.grey ? PAL.gray : null }); P.back = T + POKE.back; if (typeof sound !== 'undefined') sound.play('airjump', 0.25, 1.9); }

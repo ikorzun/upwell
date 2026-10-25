@@ -7272,12 +7272,13 @@ Renderer.prototype.draw = function (g, alpha) {
     icicle(c.x, c.y, false, g ? amp * (0.4 + 0.6 * g) * Math.sin(T * (9 + 6 * g)) : 0);
   }
   for (const s of lv.switches) if (seen(s.y - 2 * lv.tile, s.y)) {   // Tokyo's shutter switches (SHUTTER; Worlds' look to come): a box on a post, its lamp aqua
-    // when it is ready; pulled, its lever down and the lamp orange, blinking faster as the shutter's time runs out
+    // when it is ready; pulled, its lever down and the lamp orange, blinking faster as the shutter's time runs out (2.5 times a second at most: the owner's 3 Hz
+    // rule, Worlds' note); done (its shutter up for good), its lever down and the lamp dark
     const t = lv.tile, q = PIX.size, x = sn2(s.x), w = sn2(SHUTTER.w * t), h = sn2(SHUTTER.h * t), top = sn2(s.y) - h, bh = sn2(0.45 * h), left = s.on ? s.t + SHUTTER.open - lv.t : 0;
-    const lamp = !s.on ? PAL.aqua : Math.floor(lv.t * (left < 1.5 ? 8 : 3)) % 2 ? PAL.black : PAL.orange;
+    const lamp = s.done ? PAL.black : !s.on ? PAL.aqua : Math.floor(lv.t * (left < 1.5 ? 5 : 3)) % 2 ? PAL.black : PAL.orange;
     box(x - q, top + bh, x + q, sn2(s.y), PAL.gray, 1, 0, 10, 0); box(x - w, top, x + w, top + bh, PAL.gray, 1, 0, 10, 0);   // its post, its box
     box(x - w + q, top + q, x - q, top + bh - q, lamp, 1, 0, 10, 0);   // its lamp
-    const ly = s.on ? top + bh - q : top; box(x + w, ly, x + w + 2 * q, ly + 2 * q, PAL.white, 1, 0, 10, 0); box(x + w - q, top + bh / 2 - q / 2, x + w, top + bh / 2 + q / 2, PAL.gray, 1, 0, 10, 0);   // its lever, up or down
+    const ly = s.on || s.done ? top + bh - q : top; box(x + w, ly, x + w + 2 * q, ly + 2 * q, PAL.white, 1, 0, 10, 0); box(x + w - q, top + bh / 2 - q / 2, x + w, top + bh / 2 + q / 2, PAL.gray, 1, 0, 10, 0);   // its lever, up or down
   }
   for (const b of lv.bells) if (seen(b.y, b.y + 2 * lv.tile)) {   // Fuji's cave bells (BELLS): a rope from the ledge, a bell its number's size, grey till rung in order, then
     // orange; rung, it swings about its rope and its sound goes out in rings; its number (一 二 三, the trail posts' glyphs) on it in black

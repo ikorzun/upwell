@@ -1637,14 +1637,14 @@ class Game {
     }
     for (const s of lv.switches) {   // Tokyo's shutter switches (SHUTTER): one the hero bumps rolls the shutter up; its time out, it rolls down again
       const t = lv.tile, inn = H.maxX > s.x - SHUTTER.w * t && H.minX < s.x + SHUTTER.w * t && H.maxY > s.y - SHUTTER.h * t && H.minY < s.y;
-      if (inn && !s.in && !s.on && lv.t > SHUTTER.calm) this.pullSwitch(s);
+      if (inn && !s.in && !s.on && !s.done && lv.t > SHUTTER.calm) this.pullSwitch(s);   // (done: its shutter up for good, nothing left to pull)
       s.in = inn;
       if (!s.on) continue;
       const left = s.t + SHUTTER.open - lv.t, sh = lv.rects.filter((r) => r.shutter);
       if (left > 0 && lv.t >= s.tick) { s.tick = lv.t + (left < 1.5 ? 0.25 : 0.5); sound.play('click', left < 1.5 ? 0.6 : 0.4, left < 1.5 ? 1.5 : 1.1); }   // (its ticking, faster at the end)
       const inGate = (r) => H.maxX > r.x0 && H.minX < r.x1 && H.maxY > r.y0 && H.minY < r.y1;
       const behind = (r) => H.maxY > r.y0 && H.minY < r.y1 && ((r.x0 + r.x1) / 2 - lv.l < lv.r - (r.x0 + r.x1) / 2 ? H.cx < r.x0 : H.cx > r.x1);   // (more than half in the vault it shuts)
-      if (sh.some(behind)) { s.on = false; for (const r of sh) r.latched = true; continue; }   // in behind it: it stays up for good (no way to be shut in)
+      if (sh.some(behind)) { s.on = false; s.done = true; for (const r of sh) r.latched = true; continue; }   // in behind it: it stays up for good (no way to be shut in)
       if (left <= 0 && !sh.some(inGate)) { s.on = false; for (const r of sh) if (r.gone && !r.latched) { r.gone = false; r.tg = lv.t; } sound.play('crumble', 0.5, 0.7); shake.add(2); }
     }
     const pl = lv.plates || (lv.plates = lv.rects.filter((r) => r.plate));   // the Sea's clam shells (CLAM), a room's: each frame, what is on each

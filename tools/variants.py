@@ -1567,6 +1567,27 @@ ELEMENTS.update({
                       'same, its head turned a little toward us; D the same, its eyes shut; E the same, its ears turned back; F the same, its tail curled the other '
                       'way (A to F an idle loop: the body the same in all six, the same cat and size as in the attached image)',
                       ground='the cat on a plain thin grey ground line', inks='a grey cat, black eyes, no white'),
+    # The Sea's wall hazard as sharp corals (owner, 2026-10-25, of the blowhole on the site: «Справа над героем опасность плохо выглядит, давай менять на острые
+    # кораллы»; UPwell's brief: asleep low clumps, the tips red as it warns, bursting sharp branches out to the reach; its mechanics the blowhole's)
+    'eno-coralwall': dict(world='enoshima', kind='wallhaz', what='sharp corals growing on the rock wall of a sea cave, as on the reefs of Sagami Bay',
+                          why='the warm Kuroshio current brings corals to the rocks round Enoshima; when the surge comes, their sharp branches stab out of the wall',
+                          asleep='low rounded clumps of coral lying flat on the wall, calm, a few small polyps on them', bursting='sharp pointed coral branches thrust '
+                          'straight out of the wall into the shaft, their points red where they hurt, unmistakably not to be touched',
+                          vary='the clumps asleep (round brain-coral domes, low fans, short fingers, knobbly crusts), the branches bursting (antler branches, a row of '
+                          'spikes, sea-fan blades, a spray of needle points)',
+                          inks='the corals grey and orange, a few aqua polyps (never green: green is moss you can hold; never purple: purple is a stash), the burst\'s '
+                          'points red (the danger edge), the rock wall aqua'),
+    'eno-coralwall2': dict(world='enoshima', kind='wallhaz', what='sharp corals growing on the rock wall of a sea cave, as on the reefs of Sagami Bay',
+                           reach='only three quarters of a tile (12 art pixels)',
+                           why='the warm Kuroshio current brings corals to the rocks round Enoshima; when the surge comes, their sharp points stab out of the wall',
+                           asleep='low flat clumps of coral pressed to the wall, no more than 10 art pixels out from it, each clump one flat colour with a darker '
+                           'outline, a few small round polyps on them, no dither inside a clump', bursting='three to five sharp cone-shaped coral spikes thrust '
+                           'straight out of the wall, each exactly 12 art pixels long from the wall to its point and 4 to 6 art pixels thick at its base, flat '
+                           'colours, its last 3 pixels red (where it hurts), unmistakably not to be touched',
+                           vary='the clumps asleep (domes, low fans, knobbly crusts, finger stubs), the spikes bursting (straight cones, curved horns, cones in pairs, '
+                           'cones with a side branch)',
+                           inks='the corals grey and orange in flat areas, a few aqua polyps (never green: green is moss you can hold; never purple: purple is a stash), '
+                           'the spikes\' points red (the danger edge), the rock wall aqua'),
 })
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
@@ -1590,7 +1611,7 @@ Build every variant from flat rectangles and a few circles: big simple shapes th
 # A world's hazard on its walls (FIREWALL in the game: a stretch of wall that sleeps, glows, then bursts out a tile into the shaft and hurts) and what falls
 # from under its ledges (icicles); both drawn from these sheets' own pixels (owner 2026-10-24: «Обнови все природные опасности…»)
 WALLHAZ = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
-{refnote}A hazard on the shaft's walls in the world "{world}" ({mood}): {what}. Why it is there: {why}. A stretch of the wall about 3 tiles tall sleeps, then bursts out about one and a half tiles into the shaft for a moment and hurts whoever is in it, then sleeps again.
+{refnote}A hazard on the shaft's walls in the world "{world}" ({mood}): {what}. Why it is there: {why}. A stretch of the wall about 3 tiles tall sleeps, then bursts out {reach} into the shaft for a moment and hurts whoever is in it, then sleeps again.
 {grid}
 Draw six different design variants of this same hazard in a 3 x 2 grid of equal cells, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner.
 Each cell is a scene from the game: {night}, the shaft's left wall as a strip about 1 tile wide down the left edge of the cell ({ink_name} dithered with black, a white inner edge), and on that wall the same hazard twice, one above the other: in the upper half of the cell the stretch asleep ({asleep}), in the lower half the same stretch bursting ({bursting}), reaching about one and a half tiles out into the shaft. At the right of the cell the hero for scale on a small ledge with a white top edge: {hero_scale}. Nothing else in the cell.
@@ -1681,7 +1702,7 @@ def prompt(el: str, ref: bool = False) -> str:
             'face': 'a face that reads at a glance on a phone (big eyes, an angry brow, a mouth)',
             'body': f"a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {e.get('parts', '')}",
             'tone': 'Cute and a little spooky, never gory: the game is for everyone.'}   # a boss's defaults (Koschei has his own: not a yokai, the Kolobok)
-    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE, 'hazard': HAZARD, 'wallhaz': WALLHAZ, 'drop': DROP, 'holder': HOLDER, 'frames': ANIM}[e['kind']].format(**{'foe_tone': 'Creepy and crooked, never gory: the game is for everyone.', **slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
+    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE, 'hazard': HAZARD, 'wallhaz': WALLHAZ, 'drop': DROP, 'holder': HOLDER, 'frames': ANIM}[e['kind']].format(**{'reach': 'about one and a half tiles', 'foe_tone': 'Creepy and crooked, never gory: the game is for everyone.', **slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
     if e['world'] in SHAPES:   # a world drawn crooked (the Dark Forest): its shapes slanted and jagged, not built of tidy rectangles
         out = re.sub(r'Build every variant from flat rectangles and a few circles: big simple shapes[^.]*\.', SHAPES[e['world']], out)

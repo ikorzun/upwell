@@ -88,6 +88,7 @@ const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350
 const overFoe = (H, b) => H.maxY < b.cy;
 const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
+const SWAY = ['baskets', 'rods', 'bags'];   // the light things off sheets at a wall end that sway when the hero passes (swayAt, POKE.kinds)
 const CLOUD_FROM = 5;   // the TV Tower's clouds (free planks that give way) only from its sixth level up: no cloud round its foot (Worlds, handover 27)
 const DOOR_GAP = 30;   // tiles between a level's shop door and its stash door at least: a tall phone's screen (28.7 tiles) and the draw margin
 const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]], n: 3 };   // plus: s a candy lasts longer with 'long'; at: the parts of a level's height its candies are laid in (the fizz gun gone, owner 2026-10-22: «удалим пистолет, он лишний как смысл»)
@@ -396,6 +397,7 @@ const VIL2 = {   // the Village from the Iya valley, its owner's picks of round 
     boar: { base: 21, rows: ['............dsd.ds...............', '.......ddddddddddddddd..d........', '.....ddsdkdskkkkdsksdsd..s.......', '.....ddkkddddddkddkdskdd.d.......', '....dsdddsdddsdsdsksssdsd........', '...ddddddkkkdkkdddkksdddddd......', '..dsdsdkdsdsdsdkksdkkkdsdsd......', '.dddddddsdkksddddddddddddddd.....', 'd.dddsdsdsdddsdddsdddsdsdsds.....', '..ddddddddddddddddddddddwkdd.....', '..dsdsdsdsdsdsdsdsdsdsdsdddsd....', '..dddddddddddddddddddddddddddd...', '..dddsdddsdddsdddsdddsdddsdsdssss', '..dddddddddddddddddddddddd...ssks', '..dsdsdkdsdsdsdsdsdsdsdsddds.ssss', '..ddd.ddd......ddd..dd.......sss.', '..dd..dsd......dds..ds...........', '..dd...ddd.....ddd...dd..........'] },
   },
   kaya: { base: 49, rows: ['...............o..........................................', '...........oo..oo..o......................................', '...........oo..oo.oo......................................', '.........o..oo.oodo..oo...................................', '.........oo.oo.oooo.do.................do..o..............', '..........o..ooooos.o...............o..oo..d..............', '..........ds.ssooskoo...............oo.oo.do..............', '..........ds.dsooskoo............d..oo.oo.oo..............', '...........dodsossoo.............oo..ssoo.os..o...........', '............sososss................o.sooooskoo............', '............sssosss................o..ooooskoo............', '............sssosss.................o.ssoskss.............', '........d...sssosss.................sossososs.............', '........o..o........................sossosos..............', '.........ooo.....do..................sssosss..............', '............dd.o.oo..d...............sssosss..............', '............os.o.ds..oo..............sssosss..............', '............os.o..s..dd.....................ooo...........', '...........ookdod.sd.................sd.d.sdooos..........', '...........skksoo.do.................ssdo.ss...ss.........', '..........oskdsossoss............dd..skoo.ss....ds........', '.........dosossossoss.ddd.......o..dssdooddsd.....d.......', '.........oosoosossoss.dooo......o..sskssoskss.............', '.........doosssossosso...o.........dskssososs..o..........', '.....doodssosssosssossd...........dssossossosd..dd........', '.....ooksokksssossskdsd...........oosossossoss..ssd.ooo...', '...sskkksookssoossskooo...........oodossossosss...oo......', '...dskkksoodssoosssdoood.........dookossossosss....o......', '.....doosooosooosssoosso.........oosksssossskss...........', '...dooossdossookssssksss.........ssskssoosssosss..........', '..oooooosoossooosssoosss........ossossooosssosss..........', '..oookkookoosososssoodos........ossossooosssosss..........', 'ooo..ssskkoososooksookos........sssossoosossooksoo.o......', 'ooo..ssskdoosdsooksoskdso.......oskossooskssokksod........', '.....ooskooosksooksoskdooo......oskssoooskdsssksss........', '...oooosksossksskkssskdooo......ooosskosokdossksos........', '..dooooskssskkssdkssskssoo......skosskdsokdossksosd.......', '..o..ssoksssoksssksssksssd......skssokdsokdsssksoos.......', 'oo...sssdssokdsssososkdoss......skssokdsokdsssossos.......', '.....oosdsssdsssoososo.osd.do...okssodssokdssoo.sooo......', '.....oo.ososoossoosooo.soo......oossooososdssso.sooo......', '.....os.ssoooosssdooss.so.......odssooososdssso.sos.oo....', '...d.os.ssosooosokooss.oo.d.....oossooossooosoo.sos..oo...', '.....os.ssosooosooooss.oo.o.....o.osooossooosoo.sos..oo...', '.....oo.ssosooosoososs.ss..od...o.ossoossoososs.sso..oooo.', '...d..o.ssoo.ooso.ssos.o........o.osoooso.dsoss.ooo....ooo', '...d..o.oooo.oooo.sooo.o........o.oooooso.dsooo.oo.....ooo'] },   // kaya stacks, shaggy (Д104 «D»)
+  scarecrow: { dx: 4, base: 59, rows: ["..................o.o.ooo.................", "................ooooooooooo...............", "................ooooooooooo...............", "..............ookkookooo.ooo..............", "..............oookoooooo.oooo.............", ".............oo.oo.oo.oo.oo.oo............", "..........................................", "........oooo...................ooo........", ".......ooooooooooooooooooooooooooooo......", ".....ooooooooooooooooooooooooooooooooo....", "....ooooooooooooooooooooooooooooooooooo...", "..........................................", "...............sssssssssssss..............", "..............ssssssssssossss.............", "..............ssss.sssss.ssss.............", "..............ssss.sssss.ssss.............", ".............BB...........................", ".............BBBBBBB.BBBBBBBB.............", "..............BBBBBBBBBBBBBBB.............", "oooooo..BBBBBBkkBBkkkkkkBBBBkBBBBB..oooooo", "ooooooo.BBBBBkkkBBkkkkkkBkBkkBBBBB.ooooooo", "..ooooo.BBBBBBBkkkBBBBBBBBkBBBBBBB.ooooo..", "ooooooo.BBBBBBBBBkBBBBBBB.BBBBBBBB.ooooooo", "ooooooo.BBBBBBBBBB........BBBBBBBB.ooooooo", "..o.....BBBBBBBBBBBBB.B.BBBBBBBBBB.....oo.", ".o......BBBBBBBBBBBBB.BBBBBBBBBBBB.....ooo", "........BBBBB.BBBBBBB.BBBBBB.BBBBB........", "........BBBB..BBBBBBB.BBBBBB...BBB........", "........BBB...BBBBBBB.BBBBBB...BBB........", "..............BBBBBBB.BBBBBB..............", "..............BBBBBBB.BBBBBB..............", "...............BBBBBB.BBBBBB..............", "..........................................", "..........................................", "...............BBB.BB.B.BBBB..............", "...............BBB.BB.B..BBB..............", "...............BBB.BB.B..BBB..............", "...............BBBBBB.BBBBBB..............", "...............BBBBBB.BBBBBB..............", "...............BBBBBB.BBBBBB..............", "...............BBBBBB.BBBBBB..............", "...............BBBBB...BBBB...............", "..........................................", "....................oo....................", "....................oko...................", ".....................oo...................", "....................oko...................", "....................oo....................", "....................oko...................", "....................ooo...................", "....................oko...................", "....................oo....................", "....................oko...................", "....................ooo...................", "....................oko...................", "....................oo....................", "....................oko...................", ".....................oo...................", "....................o.o..................."] },   // the kakashi F off village-scarecrow-1-px.png, path A (owner, 2026-10-25: «Снеговика и пугало перерисуй по листам жпт»), its coat indigo for F's red (red is danger), the rice and the flower the kit's own
   statue: { end: 22, base: 81, rows: ['dd........................................................................', 'od........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '..........................................................................', '.............ddd..........................................................', '..........ddsssss.d.......................................................', '..........dsdsdsdss.......................................................', '.........ssdsdsdssss......................................................', '........dsdsdsdsdsdsdo....................................................', '........sssssdsdddsds.....................................................', '.......sdsdsdddsdsdkd.....................................................', '.......dskddssssssss......................................................', '.......ddssddsdddsdo......................................................', '........sksssssdkds.......................................................', '........dsdsdsssdsd.......................................................', '.........dsdsssssyy.......................................................', '..........dddsdsddd.......................................................', '.........dsdsdsdsd........................................................', '.......sdsdsksds..........................................................', '......sdsssds.............................................................', '......dssddsssdss.........................................................', '....sdsskdsssssss.........................................................', '...ddsssdsdsdsds..........................................................', '...dsssksdsdssss.s........................................................', '...ddsdkdsdsdsdods........................................................', '...dsdsskdssssssods.......................................................', '....dsdsskdsdsdsokd.......................................................', '.....dsdssdsssssokss......................................................', '.......ddsdsdsdsskdd......................................................', '.......dkdssddsssdsd......................................................', '.......sdscsykdkddd.......................................................', '.......dsssdsykdso........................................................', '........dsdsdydsdod.......db..............................................', '.........dsssssssss........b.dd...........................................', '..........dsdsssdsd..........bb...........................................', '..........sdcdkdsd..............bb........................................', '.........sdsdkdsd.........................................................', '.........dsssksss.................dd......................................', '.........sdsksds..................db......................................', '.........dsdkds.....................b.....................................', '........dsdyokd...........................................................', '........ddsssdss........................................................dd', '........................................................................dd', '....sssssssssssssso.......................................................', '...sdsdsdsdsdsdsssdo......................................................', '.dsssssssssssssssssss.....................................................', '.ddsdsdsdsdsdsdsdsssdo....................................................', '.dsdsdsdsdsdsssssssds.....................................................', '.ddsdkdkdsdddddsdkddd.....................................................', '..sdsd.dsdsdsdsdsdsds.....................................................'] },   // the Peeing Boy on his rock (Д105 «A»); end: the ledge's end, from its left
   rope: { carps: [   // koinobori on a rope across the shaft, long carps streaming in the wind (Д106 «F»): where along the rope (u), how far under it (hang)
     { u: 0.18, hang: 5, rows: ['......bbb...............', 'bbbbbbbbbb..............', 'bbbbkkkbbbb.............', 'bbb.bbbkbbb.............', '.bb.bkkbkbbb............', '.bb.bkkbkbbb............', '.bbkbbbkbbbbb...........', '.bbbbkkbbbbbb...........', '.bbbbbbbbbkbbb..........', '..bbbb.bbkbb............', '..bkbbbbkbbbbb..........', '..bbb.bbbbbbbbb.........', '...bbbbbbbbbbbb.........', '...bb.bbkbbbkkb.........', '...bbbbkbbbbbbb.........', '....bbbbbbbbbbb.........', '....bbbbbkbbbbbb........', '.....bbbbbbbkbb.........', '.....bbbbbbbbbbb........', '......bkbbk.bbb.........', '......bbbkbbkbbbb.......', '.......bkbbbbbkkb.......', '.......bbbbbbbbbbb......', '........bbb..b..bb......', '........bb...bb.bb......', '.........bb...b..bb.....', '.........bb...bb.bbb....', '..........bb...b..bbb...', '..........bb...bb..bb...', '...........bb...bb..bbb.', '...........bbb...bb..bbb', '............bb....bb..bb', '..................b.....'] },
@@ -419,7 +421,7 @@ const VOL_ON = !/[?&]novol\b/.test(location.search);   // volume on every sheet 
 const shadeTint = (th) => (th && th.shade) || (!th || [PAL.gray, PAL.white, PAL.black].includes(th.wall) ? PAL.blue : th.wall);   // the ink a white's or a grey's shadow
 // takes (SHADE_GLSL): the world's own (its walls'), a cool blue where its walls are grey; a theme's `shade` over it (the Dark Forest's grey: black and white there)
 const VOL_LUM = { k: 0, w: 1, s: 0.75, g: 0.6, d: 0.45, b: 0.55, c: 0.8, o: 0.7, y: 0.9, r: 0.45, p: 0.55, a: 0.8, G: 0.4 };
-const VOL_BANDS = new WeakMap(), VOL_RECTS = new WeakMap(), VOL_KEEP = 'krRyY';
+const VOL_BANDS = new WeakMap(), VOL_RECTS = new WeakMap(), VOL_KEEP = 'krRyYW';   // ('W': a boss's eye white, kept white: BOSS_EYE)
 const volBands = (rows, flip) => {   // each pixel's step (-2 deep shadow, -1 shadow, 0 its own ink, and black's always), once a sprite and a side
   let C = VOL_BANDS.get(rows); if (!C) VOL_BANDS.set(rows, (C = {})); const key = flip ? 'l' : 'r'; if (C[key]) return C[key];
   const H = rows.length, W = rows[0].length, at = (i, j) => (flip ? rows[j][W - 1 - i] : rows[j][i]), inside = new Uint8Array(W * H), d = new Float32Array(W * H);
@@ -748,6 +750,7 @@ const HAZ_SPR = {   // cut from research/variants/<sheet>-1-px.png, path A (each
 
 };
 const FUJI_SPR = {
+  snowman: '...........pppppppppppp........./...........ppkpppppppkp........./...........pkkppppkpkpp........./..........pkppppppppppp........./..........pppkppppppppp........./..........pkpppppppppppp......../.........ppkpppppppppppp......../..........pppppppppppppp......../..........pkppkppkkpppkp......../..........pkppkkpkkppkkp......../........ppppppppkpppppppp......./........p.ppppppp.ppppppp......./................................/........wwwwwwwwwwwwwwwww......./.......wwwwwwwwwwwwwwwwww......./......wwwwwwwwwwwwwwwwwwwww...../......wwwwwwwkkkwwwwwwkkkww...../.....wwwwwwwwkkkwwwwwwkkkwww..../.....wwwwwwwwkkkwwwwwwkkkwww..../.....wwwwwwwwkkkwwwwwwkkkwww..../.....wwwwwwwwkkkwwwwwwkkkwww..../.....wwwwwwwwwwwwwwwwwwwwwww..../......wwwwwwwwwwwwwwwwwwwww...../.......wwwwwwkwkwwwwwkwwwww...../......ppkppppkppkpppkppkkppp..../.....ppkpkkppppppppppppppppp..../.....ppkppkpppkppppppppppppp..../......ppkppkpkppkppppppkkppp..../.....wkppkpppppkkpppppppkp.p..../....wwwkppkpkpkkkppkppkpp......./...wwwwwwwwkkkkkkkppkkpkkwwww.../...wwwwwwwwwwwwwkkppkkpkkwwww.../.wwwwwwwwwwwwwwwkppkppkpwwwwwww./.wwwwwwwwwwwwwwwkkppkkpkkwwwwww./.wwwwwwwwwwwwwwwkkkpkkpkkwwwwww./wwwwwwwwwwwwwwwwkppkppkpwwwwwwww/wwwwwwwwwwwwwwwwkkkpkpppkwwwwwww/wwwwwwwwwwwwwwwwkkkpkkpkkwwwwwww/wwwwwwwwwwwwwwwwkppkkkkkwwwwwwww/wwwwwwwwwwwwwwwwwkkkwkwkwwwwwwww/wwwwwwwwwwwwwwwwwkwwwwwwwwwwwwww/wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww/wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww/.wwwwwwwwwwwwwwwwwwwwwwwwwwwwww./.wwwwwwwwwwwwwwwwwwwwwwwwwwwwww./.wwwwwwwwwwwwwwwwwwwwwwwwwwwww../...wwwwwwwwwwwwwwwwwwwwwwwwww.../...wwwwwwwwwwwwwwwwwwwwwwwwww.../.....wwwwwwwwwwwwwwwwwwwwww...../.......wwwwwwwwwwwwwwwww......../........wwwwwwwwwwwwwwww........',   // the snowman D (fuji-yukidaruma-1-px.png, path A; owner, 2026-10-25: «Снеговика и пугало перерисуй по листам жпт»)
   tent: '.................................pp..pp............................/................................ppp....p.........................../...............................pppppp.pkp........................../...............................ppkkpkpkkp........................../.............................ppppppppkpp.........................../.............................ppppppppp...p........................./............................pppppppppp...pp......................../...........................ppppppp.pppp.pkkp......................./..........................ppppppp..pppppkkp.p....................../..........................ppkpppp..pppppkp........................./.........................ppppppp....ppppkpp.pp...................../........................pppppppp....pppppkkpkpp..................../.......................ppppppppp....pppppppppkpp.................../.......................pkpppkppp....pppppppkpkkp.................../.....................gppppppppp......ppppppkkkpkpg................./...................g..ppppppppp......ppppppkppkpkkg................/......................ppppppppp......ppppppppkppkkg................/..................g..pppkpppkpp......pppppppkkpkppkgg............../................gg..ppppppppppp.......pppppkppkpkkp..gg............/...............gkg.ppppppppppp........ppppppppkpkpkp.gg............/...............gg.ppppppppppppp.o.o...ppppppppkkpkkp..g............/..............g...ppkpppkpppkp...oko..ppppppkppkkkp....gg........../.............g...ppppppppppppp..oko...ppppppkppkpkkp....g........../............g....ppppppppppppp...oko...pppppppppkkpkpp...g........./...........g....pppppppppppppp..oooo...pppppppppkkkpkkp...g......../...........g....ppppkpppkpppkp...ooo....ppppppppkkkpkkp............/.........gg....pppppppppppppp...oooo....pppppppppppkpp.....gg....../........g......pkkkkppppppppp...oooo....ppppppppppkpkkp.....gg...../.......gg.....pgkggkppppppppp...oooo....ppppppppppkppkp......g...../......gg.....pggggggkpppkpppp...oooo.....pppppppppp..pkp.....gg..../.....g......ppggggg.g.ppppppp...oooo.....pppppppppp...p.pp....g..../.....g.........g.g.....ppppp....oooo.....ppppppppppp.....p.....g.../...gg..............ggg.ppppp....ooo......ppppppppppp...p..p....gg../..gg.......ggggg.gggkg...ppp.....oko.....ppppppppppp.p...pkp....g../ggg.......gggggg.gggg.g..ppp....oko.......ppppppppppp.p...p.....ggg/.g.......ppggg.g.g.g.....ppp.....oko.......pppppppppp.....p..p...g./g.........p..............pp.......o........ppppppppppp.ppp.pp.....g',
   serow: '............................g....../.................................../...................ggg..g.ggg....../...................gkgg...gggg.g.../...................ggkggggggggg..../....................gggggkkkgggg.../...................ggkggkkkkkggg.../..............wwww.gggggkkkkkkgg.../...........wwwwwwbggggggggkkkkggg../..........wwwwwwbgggggggggkkkkggg../........wwwwwwwwgggggggggggkkggggg./.......wbbwbbwbgggggggggggggggggggg/......wwbbbbgbggggggggggggggggggg../.....wbbggggggggggggggggggggggggggg/....ggggwgggggggggggggggggkkggggg../....ggggggggggggkggggggggggg......./...gggggggggggggggggggggggggg....../..ggggggggggggggggggggggggggg....../..ggggggggggggggggggggggggggg....../.gggggggggggggggggggggggggggg....../.gggggggggggggggggggggggggggg....../.gggggggggggggggggggggggggggg....../g.gggggggggggggggggggggggggg......./..gggggggggggggggggggggggggg......./..ggggggggggggggggggggggggg......../..ggggggggggggggggggggggggg......../..ggggggggggggggggggggggggg......../..ggggggggggggggggggggggggg......../..ggggggggggggg.gggggggggg........./...gggggggggggg.gggggggg.........../...gggggg.ggggg.ggggg.gkg........../....ggggg.......gggg...gg........../....ggggkggg....ggggg.ggg........../....ggg.ggkg.....ggg..gg.........../....gg..ggg......ggg..gg.........../.................gkg.............../....g...g.........g................/.................gkg.............../..................g................/...................g...............',
   fox: '.................................oo....o..../.................................oo....o..../..................................oooooo..../..................................ooooooo.../................................ooooooooo.../................................ooooookoo.../................................ooooookkooo./...............................ooooooooooooo/................wwwwwww....ww.oooooooooooooo/..............wwwwwwwwwwwwwwwooooooooooooooo/..........ooooboowgbgwwwwwgoooooooooooooooo./........oooooooooooooogooooooooooooooo....../.......ooooooooooooooooooooooooooooooo....../......oooooooooooooooooooooooooooooooo....../.....oooooooooooooooooooooooooooooooo......./.....oooooooooooooooooooooooooooooooo......./....oooooooooooooooooooooooooooooooo......../...gggooooo.ooooooooooooooooooooooo........./...gggogooo.ooooooooooooooooooooooo........./..ggggggoo...ooooookkooooo.ooooooo........../.gggggggg....oooooooo......ooo..oo........../.ggggggg....oooooooo.......ooo.ooo........../ggggggg....ooooooooo.......ooo.ooo........../.ggggg.....ooo..oo.........oo...oo........../..g........ooo..oo.........oo...oo........../...........ooo...o.........oo...oo........../............g..............oo...............',
@@ -886,7 +889,7 @@ const kitThing = (lv, r) => {
   } else if (th.fuji) {   // Fuji's things on its ledges' wall ends (the owner's letters d51-d61, FUJI_SPR): a tent (its snow rabbit by it), a snowman, a serow or a fox, the
     // pilgrims' stones, persimmons drying, a bare larch
     const fox = ((Math.imul(Math.round(b / t) + 11, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, beast = () => w >= 2.9 * t && room(0, 2.9, 2.6);
-    k = hk(0); opts = [[0, 'tent', () => w >= 4.7 * t && room(0, 4.7, 2.8)], [1, 'snowman', () => room(0, 2.2, 2.9)], [2, fox ? 'fox' : 'serow', beast], [2, fox ? 'serow' : 'fox', beast],
+    k = hk(0); opts = [[0, 'tent', () => w >= 4.7 * t && room(0, 4.7, 2.8)], [1, 'snowman', () => room(0, 2.2, 3.3)], [2, fox ? 'fox' : 'serow', beast], [2, fox ? 'serow' : 'fox', beast],
       [3, 'stelae', () => w >= 4.0 * t && room(0, 4.0, 3.6)], [4, 'persimmons', () => w >= 3.4 * t && room(0.3, 3.5, 4.3)], [5, 'larch', () => w >= 3.6 * t && room(0, 4.8, 4.9)]];
     if (!steady(2.4)) opts = null;
   }
@@ -965,7 +968,6 @@ const GATE = { at: [0.55, 0.65], run: ['gate', 'gate2', 'gate3', 'gate3'] };
 // the run's levels past the Cave, at `at` of the height, a band `h` of the view tall with rails along its foot. On screen it rests
 // `rest` s (from, to), rings and flashes `warn` s, then the train, `len` views long, goes through at `v` views a second, and hurts.
 const TRAIN = { p: 0.45, at: [0.3, 0.7], h: 0.11, rest: [4, 7], warn: 1.6, len: 2.5, v: 2.2 };
-const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
 const CRUMBLE = { time: 0.55, back: 3, board: 0.45 };   // gives way `time` s after a touch, is back `back` s later; a rope bridge's board (D) `board` tiles deep
 // (its tremble before it goes, and an air conditioner's, 5 a second, growing: under the 6-12 a second of jitter the owner bans, «вся анимация подчиняется объекту»)
 const SLICK = { fr: 0.03 };
@@ -1465,7 +1467,7 @@ const LOOKS = {
   cart: ['C', 'round', 2.2],   // the Cave's: Tsuchigumo on its thread (redrawn 1:1 from its cell, owner 2026-10-25: a sheet pixel a game pixel, never grown; its body the round of it, its legs out)
   puck: ['F', 'round'],   // Fuji's: Tsurara-onna, her spikes swept back
   namazu: ['D', 'round', 2.5],   // the Sea's: Onamazu, arched, the stone on its back (its body the round of its drawing at 1:1, its middle, so it flips in place)
-  koschei: ['A', 'round', 2.38],   // the Dark Forest's: Koschei the bony king, his sword out (its body the round of its drawing at 1:1, its middle)
+  koschei: ['A', 'round', 2.14],   // the Dark Forest's: Koschei the bony king, his sword out (its body the round of its drawing at 1:1, its middle: 74 px wide redrawn, 2026-10-25, so 2.14 R on an iPhone, no wider than he is)
   tram: ['E', 'tram'],   // Tokyo's: a tsukumogami tram
   crane: ['F', 'round', 2.74],   // the Danchi's: Nuppeppo in its ropes (its body the round of its drawing; redrawn 1:1, owner 2026-10-25)
   pigeon: ['A', 'tengu'],   // the Sky's: a Karasu-tengu
@@ -1489,7 +1491,7 @@ const CAMPAIGN = [
 // the Moon, a friend helped find it: Mochi's story since fedc427; the tapestries go with their worlds, owner).
 { world: TOKYO, runes: 'HWu', lore: { en: 'The city\'s lights hid the Moon.\nA friend helped find it again.', es: 'Las luces de la ciudad ocultaron la Luna.\nUn amigo ayudó a encontrarla.', pt: 'As luzes da cidade esconderam a Lua.\nUm amigo ajudou a encontrá-la.', ja: 'まちの あかりが つきを かくした。\nともだちが また みつけて くれた。' }, levels: [
   { role: 'teach', len: 33, fire: 0.37, calm: 8, maxD: 2, chunks: { stairs: 2, planks: 3, pillars: 2 }, intro: ['spring'], enemies: ['crawler'], foes: 0.5, candy: [], safe: true, aircons: false, seed: 3111,
-    news: { en: 'neon signs light up as you pass', es: 'los neones se encienden al pasar', pt: 'os neons acendem quando você passa', ja: 'ネオンは ちかよると つく' } },
+    news: { en: 'bar signs light up as you pass', es: 'los letreros de los bares se encienden al pasar', pt: 'os letreiros dos bares acendem quando você passa', ja: 'バーの かんばんは ちかよると つく' } },
   { role: 'teach', len: 42, pair: 0.1, gate: 'gate', fire: 0.46, maxD: 2, chunks: STREET, intro: [], enemies: ['crawler', 'shell'], foes: 0.6, candy: [], aircons: false, seed: 2101,
     news: { en: 'crows: scare them, never wait under them', es: 'cuervos: espántalos, no esperes debajo', pt: 'corvos: espante, não espere embaixo', ja: 'カラス: おどかそう。したで またないで' } },
   { role: 'teach', len: 37, fire: 0.46, maxD: 2, chunks: { ...STREET, shelves: 3 }, intro: ['shelves'], episode: 'umeVend', enemies: ['crawler', 'shell', 'spitter'], foes: 0.65, candy: [], aircons: false, seed: 5101,   // (Ume's treat: UME)
@@ -4385,15 +4387,22 @@ const KOMORI_SPR = {
 };
 Object.assign(FOE_SPRITES, KOMORI_SPR);
 const BOSS_FIT = { 'probka-F': ['b', 0.5, 0, 1, 1], 'cart-C': ['o', 0.44, 0, 1], 'puck-F': ['s', 0.5, 1, 1, 1], 'tram-E': ['g', 0.55, -1, 1, 1], 'crane-F': ['o', 0.57, 0, 1], 'pigeon-A': ['s', 0.55, -1, 1, 1], 'namazu-D': ['o', 0.5, 1, 1], 'koschei-A': ['s', 0.5, 0, 1] };   // [its ink, its body's place down it, the way its cell has it face (0: at you), its pixel in game pixels (none: fitted over its body)]
-const drawSprite = (d, rows, flip, fit) => {   // a box for each run of one ink
+const drawSprite = (d, rows, flip, fit, vol) => {   // a box for each run of one ink; vol: in volume (VOL), a run of one ink and one step a box
   const H = rows.length, W = rows[0].length, m = flip ? -1 : 1, sh = d.b.s;
   if (fit && !sh.ext) sh.ext = [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
   const k = fit && !fit[3] ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : ((fit ? fit[3] : 1) * PIX.base) / d.b.R, cy = (fit ? fit[1] : 0.62) * H;   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
   const o = fit ? (0.5 * PIX.size) / d.b.R : 0.004;   // its boxes' overlap: half a pixel on a boss, whose body is not under it to fill the seams when it squashes
   const hp = d.b.heap || 0, rt = d.b.rattle ? d.b.heapT || 0 : 0, yb = (H - cy) * k, sq = 1 - 0.4 * hp, wx = 1 + 0.3 * hp;   // a heap of bones (Koschei dazed): his rows sunk (his body squashes too) and strewn sideways, rattling before he rises
+  const ink = (ch) => (fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : ch === 'd' ? PAL.gray : ch === 'W' ? PAL.white : PAL[ICON_INK[ch]]), tn = (ch, v) => (ch === 'd' ? 4 : ch === 'k' ? 0 : volTone(v));   // ('d': a sheet's dark grey, grey a tone down)
+  if (vol && !hp) {   // in volume, its boxes merged down (volRects, mirrored already as seen): lit from the top left in its own ink's shade (owner, 2026-10-25: «Нужен объем»)
+    const R = volRects(rows, flip);
+    for (let q = 0; q < R.length; q += 6) d.shape(10, ((R[q] + R[q + 1]) / 2 - W / 2) * k, ((R[q + 2] + R[q + 3]) / 2 - cy) * k, ((R[q + 1] - R[q]) / 2) * k + o, 0, 0, ((R[q + 3] - R[q + 2]) / 2) * k + o, ink(R[q + 4]), tn(R[q + 4], R[q + 5]));
+    return true;
+  }
+  const B = vol ? volBands(rows, flip) : null, st = (i, j) => (B ? B[j * W + (flip ? W - 1 - i : i)] : 0);   // (a heap's rows go their own ways: its steps a pixel's)
   rows.forEach((row, j) => {
     const dy = hp ? yb - (yb - (j + 0.5 - cy) * k) * sq : (j + 0.5 - cy) * k, jx = hp ? (((Math.imul(j + 7, 2654435761) >>> 0) / 4294967296 - 0.5) * 18 * hp + (rt ? Math.sin(rt * 45 + j * 1.7) * 1.2 : 0)) * k : 0;
-    for (let i = 0; i < W;) { const ch = row[i]; let e = i + 1; while (row[e] === ch) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k * wx + jx, dy, ((e - i) / 2) * k * wx + o, 0, 0, 0.5 * k * sq + o, fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : ch === 'd' ? PAL.gray : PAL[ICON_INK[ch]], ch === 'd' ? 4 : 0); i = e; }   // ('d': a sheet's dark grey, grey a tone down)
+    for (let i = 0; i < W;) { const ch = row[i], v = st(i, j); let e = i + 1; while (row[e] === ch && st(e, j) === v) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k * wx + jx, dy, ((e - i) / 2) * k * wx + o, 0, 0, 0.5 * k * sq + o, ink(ch), B ? tn(ch, v) : ch === 'd' ? 4 : 0); i = e; }
   });
   return true;
 };
@@ -4495,6 +4504,20 @@ for (const id of [...Object.keys(K9_SPR), ...Object.keys(UME_SPR)]) LOOK_FACE[id
 // grid; the guide: a sprite may shrink by nearest-pixel sampling, never grow): its rows sampled down to its body's size, once a size, cleaned
 // (pxClean), and drawn a pixel a game pixel (its fit's scale over the growth its body's frame carries); over its full size it stays 1:1.
 const BOSS_LOOK = new Set(Object.keys(LOOKS).map((k) => k + '-' + LOOKS[k][0])), BOSS_SHRINK = new Map();
+// In volume its eyes stay white (the guide: eyes and key marks kept, not shaded): a boss's white patch no bigger than `BOSS_EYE` pixels (4 ways: an eye's white,
+// a rib, a window's frame) is 'W', a white VOL_KEEP keeps; its big whites (a hood, a belly) are lit and shaded as the rest of it
+const BOSS_EYE = 150;
+for (const id of BOSS_LOOK) {
+  const rows = FOE_SPRITES[id]; if (!rows) continue;
+  const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H);
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+    if (g[j][i] !== 'w' || seen[j * W + i]) continue;
+    const cells = [], st = [[i, j]]; seen[j * W + i] = 1;
+    while (st.length) { const [x, y] = st.pop(); cells.push([x, y]); for (const [u, v] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) if (u >= 0 && v >= 0 && u < W && v < H && !seen[v * W + u] && g[v][u] === 'w') { seen[v * W + u] = 1; st.push([u, v]); } }
+    if (cells.length <= BOSS_EYE) for (const [x, y] of cells) g[y][x] = 'W';
+  }
+  FOE_SPRITES[id] = g.map((r) => r.join(''));
+}
 // (fit[4]: one drawn 1:1 at an iPhone's size that was fitted over its body before, as Bake-danuki, Tsurara-onna, the Tram, the Karasu-tengu, is made smaller
 // to the size its fitted drawing had wherever a game pixel is bigger against R, as K9's are to theirs: so its fight, which reads its size, is the same on
 // every screen; never bigger than 1:1)
@@ -4511,7 +4534,7 @@ const bossRows = (id, g) => {
 for (const id in FOE_SPRITES) if (!K9_SPR[id] && !UME_SPR[id]) {
   const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0);
   LOOK_FACE[id] = BOSS_LOOK.has(id) && fit && fit[3]
-    ? (d) => { const g = Math.max(0.05, d.b.growth), q = fit[4] ? bossFit(id, d.b) : 1; return drawSprite(d, bossRows(id, g * q), flip(d), [fit[0], fit[1], fit[2], fit[3] / g]); }
+    ? (d) => { const g = Math.max(0.05, d.b.growth), q = fit[4] ? bossFit(id, d.b) : 1; return drawSprite(d, bossRows(id, g * q), flip(d), [fit[0], fit[1], fit[2], fit[3] / g], VOL_ON); }   // (in volume: ?novol flat)
     : (d) => drawSprite(d, FOE_SPRITES[id], flip(d), fit);
 }   // the forest's face right; a boss as its cell has it
 // A boss's drawing's width and height in world px at its full size, as drawSprite lays it (BOSS_FIT's whole scale, or fitted over its
@@ -4641,12 +4664,13 @@ Renderer.prototype.draw = function (g, alpha) {
   // over its world's back with no walls, the menu's ink under the colours' row as before (owner, 2026-10-24: «Слишком шумно. Верни как было, оставь
   // анимацию, а вместо градиента за моти используй фон локации»)
   const menu = g.state === 'menu', farR = [];
-  const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base, vol = false) => {   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
+  const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base, vol = false, sh = null) => {   // (sh(u): a row u of its pixels up shifted so far, as fspr's: a sway)   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
     if (vol && VOL_ON) {   // a thing or an animal in volume (VOL; its callers say so): its boxes of one ink and one step (volRects), as seen
       const R = volRects(rows, flip);
-      for (let k = 0; k < R.length; k += 6) { const ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = x + R[k] * s;
-        box(u, y + R[k + 2] * s, x + R[k + 1] * s, y + R[k + 3] * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, ch === 'k' ? 0 : volTone(R[k + 5])); }
+      for (let k = 0; k < R.length; k += 6) { const ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, H = rows.length;
+        for (let j = R[k + 2], j1 = R[k + 3]; j < j1;) { const dx = sh ? sh(H - j) : 0; let je = j + 1; while (je < j1 && sh && sh(H - je) === dx) je++;
+          box(x + R[k] * s + dx, y + j * s, x + R[k + 1] * s + dx, y + je * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, ch === 'k' ? 0 : volTone(R[k + 5])); j = je; } }
       return;
     }
     const P = PIX.size, toned = Math.abs(s - P) < 1e-6 && !window.__vspPlain, n = rows[0].length, R = vspRects(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows, toned);   // (window.__vspPlain: plain boxes, to compare; behind: no specks,
@@ -4654,7 +4678,8 @@ Renderer.prototype.draw = function (g, alpha) {
     const par = (Math.round(x / P) + Math.round(y / P) + (flip ? n - 1 : 0)) & 1;   // (the world's checker parity at its corner: tone 4 is (x + y) even, 7 odd)
     for (let k = 0; k < R.length; k += 6) { const i = R[k], e = R[k + 1], j0 = R[k + 2], j1 = R[k + 3], ch = R[k + 4], lc = ch === 'd' ? 's' : ch.toLowerCase(), dk = lc !== ch, u = flip ? x + (n - e) * s : x + i * s, t0 = R[k + 5];
       const tn = t0 >= 20 ? (t0 >= 30 ? 0 : 10) + (((t0 & 1) + par) & 1 ? 7 : 4) : 0;
-      box(u, y + j0 * s, u + (e - i) * s, y + j1 * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, tn); }
+      for (let j = j0; j < j1;) { const dx = sh ? sh(rows.length - j) : 0; let je = j + 1; while (je < j1 && sh && sh(rows.length - je) === dx) je++;
+        box(u + dx, y + j * s, u + (e - i) * s + dx, y + je * s, PAL[ICON_INK[lc]], dk ? (a > 1 ? 1 + 0.5 * (a - 1) : a < 1 ? 0.5 * a : 1.5) : a, 0, 10, tn); j = je; } }
   };
   const onGrid = (v) => Math.round(v / PIX.size) * PIX.size;   // (on the drawing grid: a picture's dot of 1.5 or 2.5 of its pixels, PIX.fit, leaves no hole)
   const icon = (id, x, y, a, k, ink) => {   // an ICONS picture centred on (x, y), a dot k game pixels across, a box per run of one ink (all in `ink`, if given)
@@ -5080,9 +5105,9 @@ Renderer.prototype.draw = function (g, alpha) {
     F((x0 + x1) / 2, (y0 + y1) / 2, ax, ay, (-ay / l) * hw, (ax / l) * hw, c, a, 10, l, hw, tn);
   };
   const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon, Golden Gai's far
-  const gaiAt = (S, wx, b, d, a = 1) => {   // a Golden Gai thing (GAI) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall
+  const gaiAt = (S, wx, b, d, a = 1, sh = null) => {   // a Golden Gai thing (GAI) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + S.dx * q : snap(wx) - (S.dx + n) * q;
-    vsp(S.rows, x0, snap(b) - S.base * q, d < 0, a, q, a === 1 && !S.flat);
+    vsp(S.rows, x0, snap(b) - S.base * q, d < 0, a, q, a === 1 && !S.flat, sh);
   };
   const gaiFar = () => {   // Golden Gai far off, by level (TFAR): screen-fixed, low, at a quarter (DIM), two game pixels a sheet pixel, centred, its foot at farY (as the
     // Mine's MFAR)
@@ -5180,7 +5205,7 @@ Renderer.prototype.draw = function (g, alpha) {
       // bicycle, rubbish bags under a crow net, the meters and an extinguisher, a lucky cat in a bar's window
       if (r.gone || !seen(r.y0 - 5 * t, r.y0 + t)) continue;
       const p = kitThing(lv, r);
-      if (p && GAI[p.kind]) { const wl = r.x0 <= lv.l + 1; gaiAt(GAI[p.kind], wl ? lv.l : lv.r, r.y0, wl ? 1 : -1); }
+      if (p && GAI[p.kind]) { const wl = r.x0 <= lv.l + 1, S = GAI[p.kind]; gaiAt(S, wl ? lv.l : lv.r, r.y0, wl ? 1 : -1, 1, swayAt(r, p.kind, S, wl ? lv.l : lv.r, r.y0, wl ? 1 : -1)); }   // (its bags sway, SWAY)
     }
     if (CINE) this.route = 1;
   }
@@ -5241,10 +5266,15 @@ Renderer.prototype.draw = function (g, alpha) {
       if (cl.length >= 4) S.lit.push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
     return S.lit;
   };
-  const iwAt = (S, wx, b, d, a = 1, ox = S.dx, base = S.base) => {   // an Iwami thing (IW) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall; its orange and yellow (a
+  const swayAt = (r, kind, S, wx, b, d, ox = S.dx) => {   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
+    // (owner, 2026-10-25: «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
+    if (!r || !SWAY.includes(kind)) return null; const q = PIX.base, n = S.rows[0].length, xa = d > 0 ? wx + ox * q : wx - (ox + n) * q;
+    const sw = cinePoke(g, lv, r, kind, xa, b - S.rows.length * q, xa + n * q, b); return sw ? (u) => snap(sw * u * q) : null;
+  };
+  const iwAt = (S, wx, b, d, a = 1, ox = S.dx, base = S.base, sh = null) => {   // an Iwami thing (IW) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall; its orange and yellow (a
     // flame, a lit window) lights of the dark
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + ox * q : snap(wx) - (ox + n) * q, y0 = snap(b) - base * q;
-    vsp(S.rows, x0, y0, d < 0, a, q, a === 1 && !S.flat);
+    vsp(S.rows, x0, y0, d < 0, a, q, a === 1 && !S.flat, sh);
     iwLit(S);
     for (const [u, v] of S.lit) vlamps.push([d > 0 ? x0 + (u + 0.5) * q : x0 + (n - u - 0.5) * q, y0 + (v + 0.5) * q, 0.4, 1.4]);
     return [x0, y0];
@@ -5289,7 +5319,7 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const [a, b] of L[key]) vlamps.push([x0 + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
   };
   const mnThing = (kind, wx, b, d, r) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
-    if (IW[kind]) { iwAt(IW[kind], wx, b, d); return; }   // (Iwami's, IW)
+    if (IW[kind]) { iwAt(IW[kind], wx, b, d, 1, IW[kind].dx, IW[kind].base, swayAt(r, kind, IW[kind], wx, b, d)); return; }   // (Iwami's, IW; its baskets sway, SWAY)
     const rt = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork: thin parts flat, the bodies small, what is under the ledge behind)
     const roll = kind === 'cart' && r ? cinePoke(g, lv, r, 'cart', Math.min(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b - 1.1 * kitT, Math.max(wx + d * 0.3 * kitT, wx + d * 2.7 * kitT), b) : 0;
     const t = kitT, P = kitP, px = P / t, G = PAL.gray, K = PAL.black, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t), R = (u) => X(u) + snap(roll * 3 * t);   // (a cart rocked: its body)
@@ -5432,14 +5462,9 @@ Renderer.prototype.draw = function (g, alpha) {
           for (const e of [-1, 1]) for (let j = 0; j < 5; j++) box(snap(ux + e * (0.12 + 0.05 * j) * t), snap(b - uh - (0.1 + 0.1 * j) * t), snap(ux + e * (0.12 + 0.05 * j) * t) + 3 * P, snap(b - uh - (0.1 + 0.1 * j) * t) + 3 * P, PAL.gray, 1, 0, 10, 0);
           for (const e of [-1, 1]) box(snap(ux + e * 0.22 * t) - P, snap(b - 0.62 * uh), snap(ux + e * 0.22 * t) + 2 * P, snap(b - 0.62 * uh) + 3 * P, PAL.orange, 1, 0, 10, 0);
         }
-      } else if (k === 'snowman') {   // a snowman (D): two snowballs, a purple bucket on his head, a purple scarf, coal eyes
-        L(4); const sw = cinePoke(g, lv, r, 'snowman', Math.min(X(0.3), X(1.9)), b - 2.8 * t, Math.max(X(0.3), X(1.9)), b), SH = (v) => (sw ? snap(sw * v * t) : 0);   // (poked: he
-        // sways, his bucket the most)
-        const sx = X(1.1);
-        disc(sx + SH(0.68), snap(b - 0.68 * t), 0.75 * t, PAL.gray, 1); disc(sx + SH(1.72), snap(b - 1.72 * t), 0.5 * t, PAL.gray, 1);
-        box(snap(sx - 0.42 * t) + SH(2.6), snap(b - 2.2 * t), snap(sx + 0.42 * t) + SH(2.6), snap(b - 2.06 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx - 0.32 * t) + SH(2.9), snap(b - 2.72 * t), snap(sx + 0.32 * t) + SH(2.9), snap(b - 2.2 * t), PAL.purple, 1, 0, 10, 0);
-        for (const e of [-1, 1]) box(snap(sx + e * 0.2 * t) - P + SH(1.8), snap(b - 1.86 * t), snap(sx + e * 0.2 * t) + 2 * P + SH(1.8), snap(b - 1.72 * t), PAL.black, 1, 0, 10, 0);
-        box(snap(sx - 0.48 * t) + SH(1.24), snap(b - 1.32 * t), snap(sx + 0.48 * t) + SH(1.24), snap(b - 1.16 * t), PAL.purple, 1, 0, 10, 0); box(snap(sx + 0.08 * t) + SH(1.0), snap(b - 1.16 * t), snap(sx + 0.26 * t) + SH(1.0), snap(b - 0.72 * t), PAL.purple, 1, 0, 10, 0);
+      } else if (k === 'snowman') {   // a snowman (D) off its sheet (FUJI_SPR; owner, 2026-10-25: «Снеговика и пугало перерисуй по листам жпт»): poked, he sways, his bucket the most
+        const sw = cinePoke(g, lv, r, 'snowman', Math.min(X(0.2), X(2.2)), b - 3.2 * t, Math.max(X(0.2), X(2.2)), b);
+        L(4); fspr('snowman', X(0.2), b, !wl, sw ? (u) => snap(sw * u * kitP) : null);
       } else if (k === 'serow' || k === 'fox') {   // a serow or a fox (d54 E; d46 «Г»: Fuji's own beasts, the Nagano monkey gone), never twice in a row (kitThing)
         const wpx = (sprRows(k) ? sprRows(k)[0].length : 0) * PIX.base, x0 = X(0.3), x1 = wl ? x0 + wpx : x0 - wpx, nb = notice(g, lv, r, Math.min(x0, x1), b - 1.6 * t, Math.max(x0, x1), b);
         const turn = nb.face !== null && nb.face !== !wl;   // (it faces into the room; turned to the hero, mirrored in its own place: NOTICE)
@@ -5450,10 +5475,12 @@ Renderer.prototype.draw = function (g, alpha) {
         const by = snap(b - 4.1 * t);
         L(4); box(Math.min(X(0), X(3.3)), by, Math.max(X(0), X(3.3)), by + snap(0.2 * t), PAL.gray, 1, 0, 10, 0); L(0); brace(wx, d, by + snap(0.2 * t), snap(0.8 * t), 2 * P, PAL.gray);   // (the beam
         // and the fruit small; the brace, the strings, the ties and the tassels flat)
-        for (const u of [1.0, 1.6, 2.2, 2.8]) {
-          const sx = X(u); L(0); box(sx, by + snap(0.2 * t), sx + P, snap(b - 1.4 * t), PAL.gray, 1, 0, 10, 0); box(sx - P, by + snap(0.2 * t), sx + 2 * P, by + snap(0.45 * t), PAL.purple, 1, 0, 10, 0);
-          for (let j = 0; j < 4; j++) { const fy = snap(by + (0.7 + 0.5 * j) * t); L(4); disc(sx + P / 2, fy, 0.2 * t, PAL.orange, 1); L(0); box(sx - P, fy - snap(0.24 * t), sx + 2 * P, fy - snap(0.16 * t), PAL.green, 1, 0, 10, 0); }
-          for (const e of [-1, 0, 1]) rod(sx, snap(b - 1.4 * t), sx + e * 0.14 * t, snap(b - 1.12 * t), PAL.purple);   // its tassel
+        const sw = cinePoke(g, lv, r, 'persimmons', Math.min(X(0.6), X(3.2)), by, Math.max(X(0.6), X(3.2)), b - 1.1 * t), ty = by + snap(0.2 * t), SX = (y) => (sw ? snap(sw * (y - ty)) : 0);   // (poked,
+        // the strings swing off the beam, their ends the most: owner, 2026-10-25, «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
+        for (const [k2, u] of [1.0, 1.6, 2.2, 2.8].entries()) {
+          const sx = X(u), ey = snap(b - 1.4 * t), lag = 1 - 0.12 * k2; L(0); if (sw) rod(sx, ty, sx + lag * SX(ey), ey, PAL.gray); else box(sx, ty, sx + P, ey, PAL.gray, 1, 0, 10, 0); box(sx - P, ty, sx + 2 * P, by + snap(0.45 * t), PAL.purple, 1, 0, 10, 0);
+          for (let j = 0; j < 4; j++) { const fy = snap(by + (0.7 + 0.5 * j) * t), fx = sx + snap(lag * SX(fy)); L(4); disc(fx + P / 2, fy, 0.2 * t, PAL.orange, 1); L(0); box(fx - P, fy - snap(0.24 * t), fx + 2 * P, fy - snap(0.16 * t), PAL.green, 1, 0, 10, 0); }
+          const tx = sx + snap(lag * SX(ey)); for (const e of [-1, 0, 1]) rod(tx, ey, tx + e * 0.14 * t, snap(b - 1.12 * t), PAL.purple);   // its tassel
         }
       } else if (k === 'larch') {   // a bare larch of the tree line, bent by the wind, snow on its boughs (d56 E; d49 «Б»: no green)
         const id = 'larch', SW = cinePoke(g, lv, r, 'pine', Math.min(X(0.2), X(4.6)), b - 4.7 * t, Math.max(X(0.2), X(4.6)), b);   // (poked, it sways, its top the most)
@@ -5552,8 +5579,9 @@ Renderer.prototype.draw = function (g, alpha) {
         iwAt(S, wx, b, d, 1, dx, S.base);
       } else if (p.kind === 'net') {   // fishing nets drying, sagging between two poles, round glass floats in them
         const pole = (u, h) => bx(u, 0, u + 0.14, h, PAL.orange, 2), sag = (u0, u1, v, s) => { for (let i = 0; i < 12; i++) { const q0 = i / 12, q1 = (i + 1) / 12; ln(u0 + (u1 - u0) * q0, v - s * 4 * q0 * (1 - q0), u0 + (u1 - u0) * q1, v - s * 4 * q1 * (1 - q1), PAL.orange); } };
-        pole(1.3, 2.2); pole(3.6, 2.2); L(0); sag(1.4, 3.65, 2.15, 0.3); for (let i = 0; i < 8; i++) { const q = (i + 0.5) / 8, u = 1.45 + 2.15 * q, top = 2.1 - 0.3 * 4 * q * (1 - q); bx(u - 0.14, top - 0.9 - 0.25 * Math.sin(q * Math.PI), u + 0.14, top, PAL.gray, 4); }   // the net, its mesh
-        L(4); float(1.9, 1.6, PAL.blue); float(2.5, 1.15, PAL.green); float(3.15, 1.6, PAL.purple);
+        const nw = cinePoke(g, lv, r, 'net', Math.min(X(1.3), X(3.7)), Y(2.3), Math.max(X(1.3), X(3.7)), b), NO = nw ? nw * 2 : 0;   // (poked, the mesh flutters, its floats with it)
+        pole(1.3, 2.2); pole(3.6, 2.2); L(0); sag(1.4, 3.65, 2.15, 0.3); for (let i = 0; i < 8; i++) { const q = (i + 0.5) / 8, u = 1.45 + 2.15 * q + NO * Math.sin(q * Math.PI), top = 2.1 - 0.3 * 4 * q * (1 - q); bx(u - 0.14, top - 0.9 - 0.25 * Math.sin(q * Math.PI), u + 0.14, top, PAL.gray, 4); }   // the net, its mesh
+        L(4); float(1.9 + NO, 1.6, PAL.blue); float(2.5 + NO, 1.15, PAL.green); float(3.15 + NO, 1.6, PAL.purple);
       } else if (p.kind === 'kite') {   // a black kite (tobi) on its post at the ledge's free end, looking out over the shaft (ENO kite, Д188 A; for the gull, Д146
         // «А»); it notices the hero (NOTICE): hops off its post and back, turns to him about the post's middle; the post stays
         const S = ENO.kite, q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(fx) - (n + 1) * q : snap(fx) + q, y0 = snap(b) - S.base * q, P2 = enoParts(S, true);
@@ -5564,7 +5592,7 @@ Renderer.prototype.draw = function (g, alpha) {
         const nb = notice(g, lv, r, x0, y0, x0 + n * q, b);
         vsp(P2.bot, x0, y0, d < 0, 1, q, true); vsp(P2.top, x0, y0 - snap(nb.dy), nb.face === null ? d < 0 : nb.face, 1, q, true);
       } else if (p.kind === 'sazae' || p.kind === 'rods') {   // a grill of sazae on its coals (its coals a light), the anglers' rods and bucket, at the ledge's wall end (ENO)
-        iwAt(ENO[p.kind], wx, b, d, 1, enoDx(p.kind, t));
+        const S = ENO[p.kind], ox = enoDx(p.kind, t); iwAt(S, wx, b, d, 1, ox, S.base, swayAt(r, p.kind, S, wx, b, d, ox));   // (the rods sway, SWAY)
       } else {   // the big-catch flags (tairyo-bata) on a pole, a ball on its top: a fish, dots, a check (the sheets' white grey, their red orange)
         const flag = (v, c, pat) => { const u0 = 0.85, u1 = 2.75, v0 = v, v1 = v + 0.72; bx(u0, v0, u1, v1, c); bx(u1 - 0.12, v0 + 0.3, u1, v0 + 0.42, PAL.black); bx(0.72, v1 - 0.1, u0, v1 - 0.04, PAL.gray); bx(0.72, v0 + 0.04, u0, v0 + 0.1, PAL.gray);   // a flag, a swallowtail, its ties
           if (pat === 'fish') { el(1.8, (v0 + v1) / 2, 0.45, 0.2, PAL.black); bx(2.2, v0 + 0.2, 2.4, v1 - 0.2, PAL.black); bx(1.55, (v0 + v1) / 2 + 0.05, 1.55 + px, (v0 + v1) / 2 + 0.05 + px, c); }
@@ -5835,12 +5863,12 @@ Renderer.prototype.draw = function (g, alpha) {
       if (!p) continue;
       if (CINE) this.route = 4;   // (the cinematic fork: a sakura, a scarecrow, a lantern, a koinobori: small things in depth, whole)
       const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
-      const pk = { sakura: [0.4, 4.2, 4.6], scarecrow: [0.2, 2.9, 3.8], koinobori: [0.7, 4.4, 5.3] }[p.kind], sw = pk ? cinePoke(g, lv, r, p.kind, Math.min(X(pk[0]), X(pk[1])), Y(pk[2]), Math.max(X(pk[0]), X(pk[1])), b, p.kind === 'scarecrow' ? [X(2.75), Y(2.55)] : null) : 0;
+      const pk = { sakura: [0.4, 4.2, 4.6], scarecrow: [0.2, 2.9, 3.8], koinobori: [0.7, 4.4, 5.3], kaya: [0, 2.8, 3.0] }[p.kind], sw = pk ? cinePoke(g, lv, r, p.kind, Math.min(X(pk[0]), X(pk[1])), Y(pk[2]), Math.max(X(pk[0]), X(pk[1])), b, p.kind === 'scarecrow' ? [X(2.75), Y(2.55)] : null) : 0;
       const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its top the most; see cinePoke)
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => { const q = SW((v0 + v1) / 2); box(Math.min(X(u0), X(u1)) + q, Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)) + q, Y(Math.min(v0, v1)), c, a, 0, 10, tn); };   // by tiles out from the wall and up from the ledge
       const el = (u, v, ru, rv, c) => { const xu = X(u) + SW(v); if (CINE && CINE.on('vol')) { F(xu + snap(0.14 * ru * t), Y(v) + snap(0.18 * rv * t), ru * t, 0, 0, rv * t, c, 1.45, 0); F(xu - snap(0.05 * ru * t), Y(v) - snap(0.06 * rv * t), 0.93 * ru * t, 0, 0, 0.93 * rv * t, c, 1, 0); F(xu - snap(0.32 * ru * t), Y(v) - snap(0.36 * rv * t), 0.42 * ru * t, 0, 0, 0.36 * rv * t, PAL.white, 0.42, 0); return; } F(xu, Y(v), ru * t, 0, 0, rv * t, c, 1, 0); }, ln = (u0, v0, u1, v1, c, wp = 1, tn = 0) => line(X(u0) + SW(v0), Y(v0), X(u1) + SW(v1), Y(v1), c, 1, wp, tn);   // (the cinematic fork: in volume, swaying)
       if (p.kind === 'sakura' || p.kind === 'beast' || p.kind === 'kaya' || p.kind === 'statue' || p.kind === 'koinobori') {   // the Iya valley's, off their sheets (VIL2, round 2)
-        const q = PIX.base, at = (S, dx) => { const n = S.rows[0].length, x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q); vsp(S.rows, x, snap(b - S.base * q), !wl, 1, q, true); };
+        const q = PIX.base, at = (S, dx) => { const n = S.rows[0].length, x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q); vsp(S.rows, x, snap(b - S.base * q), !wl, 1, q, true, sw ? (u) => snap(sw * u * q) : null); };   // (poked: a cherry or the kaya sway, the top the most)
         if (p.kind === 'sakura') { const S = vil2('cherry'); at(S, S.dx); }   // a mountain cherry (Д94 «А»)
         else if (p.kind === 'beast') {   // one of the three (Д90 «В»); it notices the hero (NOTICE): hops, turns to him
           const S = vil2('beast')[p.a || ['macaque', 'deer', 'boar'][((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) >>> 9) % 3]], dx = Math.round((0.6 * t) / q), n = S.rows[0].length;
@@ -5864,14 +5892,9 @@ Renderer.prototype.draw = function (g, alpha) {
           [3.95, 3.18, 0.35, 0.25], [0.72, 2.62, 0.45, 0.33], [1.25, 2.72, 0.45, 0.32], [2.75, 2.02, 0.4, 0.3], [3.25, 2.07, 0.4, 0.3]]) el(u, v, ru, rv, PAL.purple);   // purple: the nearest the inks have to pink
         for (const [u, v] of [[1.3, 4.2], [2.1, 4.05], [3.35, 3.35], [0.85, 2.65], [3.0, 2.05], [1.7, 3.9]]) bx(u, v, u + 2 * px, v + px, PAL.gray);   // light specks in it
         for (let i = 0; i < 4; i++) { const q = (T * 0.22 + i / 4) % 1, u = [2.2, 3.5, 0.9, 2.9][i] + 0.25 * Math.sin(T * 1.1 + i * 2), v = 1.9 * (1 - q); bx(u, v, u + px, v + px, PAL.purple); }   // a petal drifting down
-      } else if (p.kind === 'scarecrow') {   // a scarecrow (kakashi, F) in young rice: its pole straw-wrapped, trousers and coat indigo, straw hands, a cloth face, a straw hat
-        bx(1.44, 0, 1.67, 1.15, th.block, 2);
-        bx(1.12, 1.1, 1.98, 1.62, PAL.blue); bx(1.54, 1.1, 1.54 + px, 1.45, PAL.black);
-        bx(0.7, 1.62, 2.34, 2.73, PAL.blue); bx(1.54, 1.65, 1.54 + px, 2.6, PAL.black); for (const v of [2.0, 2.3]) bx(1.72, v, 1.72 + px, v + px, PAL.black);
-        for (const [u0, u1] of [[0.42, 0.7], [2.34, 2.62]]) bx(u0, 2.12, u1, 2.5, PAL.blue);
-        for (const [u0, u1] of [[0.16, 0.42], [2.62, 2.88]]) bx(u0, 2.08, u1, 2.54, th.block, 3);
-        bx(1.07, 2.73, 2.03, 3.02, PAL.gray); for (const u of [1.32, 1.74]) bx(u, 2.86, u + px, 2.86 + 2 * px, PAL.black); bx(1.42, 2.8, 1.66, 2.8 + px, PAL.black);   // (F's face half red)
-        bx(0.47, 3.0, 2.66, 3.2, th.block); bx(1.0, 3.2, 2.1, 3.62, th.block, 1); bx(1.2, 3.62, 1.9, 3.72, th.block);
+      } else if (p.kind === 'scarecrow') {   // a scarecrow (kakashi, F) in young rice, off its sheet (VIL2; owner, 2026-10-25): poked, it sways, its hat the most
+        const S = vil2('scarecrow'), q = PIX.base, n = S.rows[0].length, x = wl ? snap(wx + S.dx * q) : snap(wx - (S.dx + n) * q);
+        vsp(S.rows, x, snap(b - S.base * q), !wl, 1, q, true, sw ? (u) => snap(sw * u * q) : null);
         for (const [u, h, l] of [[0.45, 0.7, -0.08], [0.62, 0.95, 0.05], [0.88, 0.6, 0.1], [1.12, 0.8, -0.05], [2.05, 0.75, 0.06], [2.75, 0.9, -0.06], [2.98, 0.65, 0.08], [3.25, 0.8, 0.03]]) ln(u, 0, u + l, h, PAL.green);
         if (CINE && CINE.on('poke') && cinePerched(r, lv.t)) cineSpr(box, CRITTER[d > 0 ? 'crow' : 'crowL'], X(2.75) + SW(2.55), Y(2.55), th.wall);   // (the cinematic fork: a crow on its hand, off when the hero comes)
         ln(2.3, 0, 2.3, 0.85, PAL.green); bx(2.18, 0.85, 2.42, 1.09, PAL.purple); bx(2.29, 0.95, 2.29 + px, 0.95 + px, PAL.black);   // a flower (F's yellow: yellow is for what you take)

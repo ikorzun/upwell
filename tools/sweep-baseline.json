@@ -1,6 +1,6 @@
 {
- "commit": "fff9549+changes",
- "made": "2026-10-24",
+ "commit": "8f6dd6d+changes",
+ "made": "2026-10-25",
  "levels": {
   "c1-1": {
    "result": "clear",
@@ -74,11 +74,12 @@
   },
   "c1-10": {
    "result": "won",
-   "time": 25,
-   "heartsLost": 1,
+   "time": 25.5,
+   "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "shot@hover"
+    "boss@dive",
+    "boss@dive"
    ],
    "boss": "Bake-danuki",
    "dealt": "3/3"
@@ -157,11 +158,11 @@
   },
   "c2-10": {
    "result": "won",
-   "time": 33,
+   "time": 32.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "shot@hover"
+    "boss@hover"
    ],
    "boss": "Tsuchigumo",
    "dealt": "4/4"
@@ -239,11 +240,11 @@
   },
   "c3-10": {
    "result": "won",
-   "time": 37.5,
+   "time": 36.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "boss@cast"
+    "boss@hover"
    ],
    "boss": "Tsurara-onna",
    "dealt": "4/4"
@@ -315,12 +316,12 @@
   },
   "c4-10": {
    "result": "won",
-   "time": 35.5,
+   "time": 34.5,
    "heartsLost": 3,
    "stuck": [],
    "hits": [
     "shot@hover",
-    "boss@dive",
+    "shot@hover",
     "boss@hover"
    ],
    "boss": "Onamazu",
@@ -399,7 +400,7 @@
   },
   "c5-10": {
    "result": "won",
-   "time": 29.5,
+   "time": 30,
    "heartsLost": 0,
    "stuck": [],
    "hits": [],
@@ -485,10 +486,12 @@
   },
   "c6-10": {
    "result": "won",
-   "time": 57,
-   "heartsLost": 0,
+   "time": 56.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": [],
+   "hits": [
+    "boss@hover"
+   ],
    "boss": "Nuppeppo",
    "dealt": "5/5"
   },
@@ -569,11 +572,11 @@
   },
   "c7-10": {
    "result": "won",
-   "time": 59,
+   "time": 60,
    "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "shot@hover",
+    "boss@hover",
     "boss@dive"
    ],
    "boss": "Karasu-tengu",
@@ -652,12 +655,12 @@
   },
   "c8-10": {
    "result": "won",
-   "time": 47,
+   "time": 41,
    "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "boss@hover",
-    "boss@hover"
+    "shot@hover",
+    "shot@hover"
    ],
    "boss": "Koschei",
    "dealt": "6/6"

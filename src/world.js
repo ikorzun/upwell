@@ -88,6 +88,10 @@ const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350
 const overFoe = (H, b) => H.maxY < b.cy;
 const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
+const FLEE_GO = { reach: 2.2, bird: [0.12, 0.1, 10], small: [0.2, 0.12, 11], fly: [2.5, 7, 1.5, 6], run: 7, fall: 30, life: 3.5, back: 0.6 };   // an animal that
+// flees the hero (fleeDraw): within `reach` tiles it goes; a bird crouches bird[0] s, springs bird[1] s, then flaps at bird[2] a second while it flies up and
+// away (fly: tiles out a + b·u², up c + d·u²); a small one is startled small[0] s, leaps small[1] s, then runs run tiles/s along its ledge to its free end and
+// off it, falling at `fall` tiles/s²; gone off screen or after `life` s, back once its ledge has been out of view `back` s
 const SWAY = ['baskets', 'rods', 'bags'];   // the light things off sheets at a wall end that sway when the hero passes (swayAt, POKE.kinds)
 const CLOUD_FROM = 5;   // the TV Tower's clouds (free planks that give way) only from its sixth level up: no cloud round its foot (Worlds, handover 27)
 const DOOR_GAP = 30;   // tiles between a level's shop door and its stash door at least: a tall phone's screen (28.7 tiles) and the draw margin
@@ -5260,6 +5264,31 @@ Renderer.prototype.draw = function (g, alpha) {
       box(x + snap(0.04 * t), ey, x + snap(0.1 * t), ey + P, G, 1, 0, 10, 0);   // eyes shut
     }
   };
+  const lastRow = (rows) => { let j = rows.length - 1; while (j >= 0 && !/[^.]/.test(rows[j])) j--; return j; };   // (a part's lowest drawn row: its foot over it)
+  const fleeDraw = (r, Fr, cx, foot, bird, free) => {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
+    // живность убегать»): sitting (false: its caller draws it) till the hero comes near, then its sheet's frames (Worlds': A crouched or startled, B off, C–F the
+    // loop; each frame one width, its head on one column) along its way, facing it (the sheets face right); gone till its ledge has been out of view (FLEE_GO)
+    if (!Fr) return false; const T = lv.t, H = g.hero, t = kitT, q = PIX.base, W = Fr[0].rows[0].length;
+    let s = r.flee; if (s && s.gone && T - (r.fleeSeen ?? T) > FLEE_GO.back) s = r.flee = null; r.fleeSeen = T;
+    if (!s) {
+      const m = FLEE_GO.reach * t, x0 = cx - (W * q) / 2, x1 = cx + (W * q) / 2, y0 = foot - Fr[0].rows.length * q;
+      if (!(g.state === 'play' && H.maxX > x0 - m && H.minX < x1 + m && H.maxY > y0 - m && H.minY < foot + m)) return false;
+      s = r.flee = { t: T, dir: bird || !free ? (H.cx < cx ? 1 : -1) : free, gone: false };
+      if (typeof sound !== 'undefined') sound.play('airjump', bird ? 0.25 : 0.15, bird ? 1.9 : 2.4);
+    }
+    if (s.gone) return true;
+    const [ta, tb, fps] = bird ? FLEE_GO.bird : FLEE_GO.small, e = T - s.t, u = Math.max(0, e - ta), k = e < ta ? 0 : e < ta + tb ? 1 : 2 + (Math.floor((e - ta - tb) * fps) % 4), Fk = Fr[k];
+    const hr = (f) => f.hr ?? (f.hr = Math.max(0, f.rows.findIndex((row) => row[Math.min(row.length - 1, f.ax)] !== '.')));   // (its head's row: a bird's flight held by its head)
+    let dx = 0, up = 0;
+    if (bird) { dx = (FLEE_GO.fly[0] * u + FLEE_GO.fly[1] * u * u) * t; up = (FLEE_GO.fly[2] * u + FLEE_GO.fly[3] * u * u) * t; }
+    else { dx = FLEE_GO.run * u * t; const end = (s.dir > 0 ? r.x1 - cx : cx - r.x0) + (W * q) / 2; if (dx > end) { const fu = (dx - end) / (FLEE_GO.run * t); up = -0.5 * FLEE_GO.fall * t * fu * fu; } }
+    const half = (W * q) / 2, x = Math.max(lv.l + half, Math.min(lv.r - half, cx + s.dir * dx));
+    if (!bird && Math.abs(H.cy - (foot - H.R)) < 2 * H.R) up += Math.max(0, 1 - ((x - H.cx) / (half + 1.2 * H.R)) ** 2) * 1.6 * H.R;   // (its way past the hero on its ledge: a leap over him)
+    const top = k < 2 || !bird ? foot - up - Fk.rows.length * q : foot - up - (Fr[1].rows.length - hr(Fr[1])) * q - hr(Fk) * q;
+    if (e > FLEE_GO.life || (bird ? foot - up < lv.cam - 2 * t : top > lv.cam + view.h + t)) { s.gone = true; return true; }
+    vsp(Fk.rows, snap(x - half), snap(top), s.dir < 0, 1, q, true);
+    return true;
+  };
   const swayAt = (r, kind, S, wx, b, d, ox = S.dx) => {   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
     // (owner, 2026-10-25: «Если объекты в виде веревок, дерева или чего-то легкого, они тоже должны колыхаться от движения героя»)
     if (!r || !SWAY.includes(kind)) return null; const q = PIX.base, n = S.rows[0].length, xa = d > 0 ? wx + ox * q : wx - (ox + n) * q;
@@ -5466,9 +5495,10 @@ Renderer.prototype.draw = function (g, alpha) {
         const sw = cinePoke(g, lv, r, 'snowman', Math.min(X(0.2), X(2.2)), b - 3.2 * t, Math.max(X(0.2), X(2.2)), b);
         L(4); fspr('snowman', X(0.2), b, !wl, sw ? (u) => snap(sw * u * kitP) : null);
       } else if (k === 'serow' || k === 'fox') {   // a serow or a fox (d54 E; d46 «Г»: Fuji's own beasts, the Nagano monkey gone), never twice in a row (kitThing)
-        const wpx = (sprRows(k) ? sprRows(k)[0].length : 0) * PIX.base, x0 = X(0.3), x1 = wl ? x0 + wpx : x0 - wpx, nb = notice(g, lv, r, Math.min(x0, x1), b - 1.6 * t, Math.max(x0, x1), b);
-        const turn = nb.face !== null && nb.face !== !wl;   // (it faces into the room; turned to the hero, mirrored in its own place: NOTICE)
-        L(4); fspr(k, turn ? x1 : x0, b - snap(nb.dy), turn ? wl : !wl);
+        const wpx = (sprRows(k) ? sprRows(k)[0].length : 0) * PIX.base, x0 = X(0.3), x1 = wl ? x0 + wpx : x0 - wpx;
+        L(4); if (k === 'fox' && fleeDraw(r, FLEE.fox, (x0 + x1) / 2, b, false, d)) continue;   // (the fox runs off: FLEE_GO; the serow stands)
+        const nb = notice(g, lv, r, Math.min(x0, x1), b - 1.6 * t, Math.max(x0, x1), b), turn = nb.face !== null && nb.face !== !wl;   // (it faces into the room; turned to the hero, mirrored in its own place: NOTICE)
+        fspr(k, turn ? x1 : x0, b - snap(nb.dy), turn ? wl : !wl);
       } else if (k === 'stelae') {   // the Fuji-ko pilgrims' stone monuments (d55 F; d48 «Б»), their rope grey
         L(4); fspr('stelae', X(0.3), b, !wl);
       } else if (k === 'persimmons') {   // persimmons drying (E): strings off a beam on a knee brace, purple ties and tassels
@@ -5585,12 +5615,18 @@ Renderer.prototype.draw = function (g, alpha) {
       } else if (p.kind === 'kite') {   // a black kite (tobi) on its post at the ledge's free end, looking out over the shaft (ENO kite, Д188 A; for the gull, Д146
         // «А»); it notices the hero (NOTICE): hops off its post and back, turns to him about the post's middle; the post stays
         const S = ENO.kite, q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(fx) - (n + 1) * q : snap(fx) + q, y0 = snap(b) - S.base * q, P2 = enoParts(S, true);
-        const nb = notice(g, lv, r, x0, y0, x0 + n * q, b), fb = nb.face === null ? d < 0 : nb.face, pc = x0 + (d < 0 ? n - 1 - P2.pcm : P2.pcm) * q;   // (its sheet faces right)
-        vsp(P2.bot, x0, y0, d < 0, 1, q, true); vsp(P2.top, snap(pc - (fb ? n - 1 - P2.pcm : P2.pcm) * q), y0 - snap(nb.dy), fb, 1, q, true);
+        const pc = x0 + (d < 0 ? n - 1 - P2.pcm : P2.pcm) * q, ft = y0 + (lastRow(P2.top) + 1) * q;   // (its foot: the post's top)
+        vsp(P2.bot, x0, y0, d < 0, 1, q, true);
+        if (!fleeDraw(r, ENO.kiteFly, pc, ft, true, 0)) {   // (a bird its size flies off: FLEE_GO)
+          const nb = notice(g, lv, r, x0, y0, x0 + n * q, b), fb = nb.face === null ? d < 0 : nb.face;   // (its sheet faces right)
+          vsp(P2.top, snap(pc - (fb ? n - 1 - P2.pcm : P2.pcm) * q), y0 - snap(nb.dy), fb, 1, q, true);
+        }
       } else if (p.kind === 'cats') {   // the island's cats asleep on their bench (ENO cats, Д190 B); they notice the hero (NOTICE): hop, turn to him; the bench stays
         const S = ENO.cats, q = PIX.base, n = S.rows[0].length, ox = enoDx('cats', t), x0 = d > 0 ? snap(wx) + ox * q : snap(wx) - (ox + n) * q, y0 = snap(b) - S.base * q, P2 = enoParts(S, false);
-        const nb = notice(g, lv, r, x0, y0, x0 + n * q, b);
-        vsp(P2.bot, x0, y0, d < 0, 1, q, true); vsp(P2.top, x0, y0 - snap(nb.dy), nb.face === null ? d < 0 : nb.face, 1, q, true);
+        vsp(P2.bot, x0, y0, d < 0, 1, q, true);
+        if (!fleeDraw(r, ENO.catsRun, x0 + (n * q) / 2, y0 + (lastRow(P2.top) + 1) * q, false, d)) {   // (they run off along the ledge: FLEE_GO)
+          const nb = notice(g, lv, r, x0, y0, x0 + n * q, b); vsp(P2.top, x0, y0 - snap(nb.dy), nb.face === null ? d < 0 : nb.face, 1, q, true);
+        }
       } else if (p.kind === 'sazae' || p.kind === 'rods') {   // a grill of sazae on its coals (its coals a light), the anglers' rods and bucket, at the ledge's wall end (ENO)
         const S = ENO[p.kind], ox = enoDx(p.kind, t); iwAt(S, wx, b, d, 1, ox, S.base, swayAt(r, p.kind, S, wx, b, d, ox));   // (the rods sway, SWAY)
       } else {   // the big-catch flags (tairyo-bata) on a pole, a ball on its top: a fish, dots, a check (the sheets' white grey, their red orange)
@@ -5872,7 +5908,10 @@ Renderer.prototype.draw = function (g, alpha) {
         if (p.kind === 'sakura') { const S = vil2('cherry'); at(S, S.dx); }   // a mountain cherry (Д94 «А»)
         else if (p.kind === 'beast') {   // one of the three (Д90 «В»); it notices the hero (NOTICE): hops, turns to him
           const S = vil2('beast')[p.a || ['macaque', 'deer', 'boar'][((Math.imul(Math.round(b / t) + 13, 0x9e3779b1) >>> 0) >>> 9) % 3]], dx = Math.round((0.6 * t) / q), n = S.rows[0].length;
-          const x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q), nb = notice(g, lv, r, x, b - S.rows.length * q, x + n * q, b); vsp(S.rows, x, snap(b - S.base * q - nb.dy), nb.face === null ? !wl : nb.face, 1, q, true);
+          const x = wl ? snap(wx + dx * q) : snap(wx - (dx + n) * q), mac = S === vil2('beast').macaque;
+          if (!(mac && fleeDraw(r, FLEE.macaque, x + (n * q) / 2, snap(b - S.base * q) + S.rows.length * q, false, wl ? 1 : -1))) {   // (the macaque runs off: FLEE_GO; the deer and the boar stand)
+            const nb = notice(g, lv, r, x, b - S.rows.length * q, x + n * q, b); vsp(S.rows, x, snap(b - S.base * q - nb.dy), nb.face === null ? !wl : nb.face, 1, q, true);
+          }
         }
         else if (p.kind === 'kaya') at(vil2('kaya'), Math.round((0.4 * t) / q));   // kaya stacks (Д87 «В»)
         else if (p.kind === 'statue') { const S = vil2('statue'), n = S.rows[0].length, ex = wl ? r.x1 : r.x0; vsp(S.rows, wl ? snap(ex - S.end * q) : snap(ex - (n - S.end) * q), snap(b - S.base * q), !wl, 1, q, true); }   // at the ledge's end (Д93 «А»)
@@ -5997,11 +6036,12 @@ Renderer.prototype.draw = function (g, alpha) {
         L(4); pot(1.6, 0.3, 0.35); L(0); leaves(1.6, 0.35, 4);
       } else if (p.kind === 'cat') {   // a stray cat (cat C, mk-cat) sitting by its bowl (blue, muted: the sheet's red bowl; and the sheet's ginger cat grey: orange
         // is crumbling here)
-        const u = 0.7, nb = notice(g, lv, r, Math.min(X(u - 0.5), X(u + 0.4)), Y(1), Math.max(X(u - 0.5), X(u + 0.4)), b), h = nb.dy / t;   // (it notices the hero: a hop, NOTICE)
+        const u = 0.7; bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE);   // its bowl (flat: thin)
+        if (fleeDraw(r, FLEE.cat, X(u), b, false, d)) continue;   // (it runs off: FLEE_GO)
+        const nb = notice(g, lv, r, Math.min(X(u - 0.5), X(u + 0.4)), Y(1), Math.max(X(u - 0.5), X(u + 0.4)), b), h = nb.dy / t;   // (it notices the hero: a hop, NOTICE)
         L(4); F(X(u), Y(0.3 + h), 0.22 * t, 0, 0, 0.3 * t, G, 1, 0); F(X(u + 0.05), Y(0.72 + h), 0.16 * t, 0, 0, 0.14 * t, G, 1, 0);   // its body, its head (small)
         L(0); for (const e of [-0.08, 0.12]) bx(u + e, 0.82 + h, u + e + 0.07, 0.95 + h, G); for (const e of [-0.02, 0.1]) bx(u + e, 0.72 + h, u + e + 0.03, 0.75 + h, K); ln(u - 0.2, 0.05 + h, u - 0.45, 0.35 + h, G, 2);   // its ears, its eyes,
         // its tail (flat: too small for depth)
-        bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE);   // its bowl (flat: thin)
       }
     }
     L(3); dcFar();
@@ -6067,7 +6107,9 @@ Renderer.prototype.draw = function (g, alpha) {
       if (p.kind === 'flood') twFlood(wl ? lv.l : lv.r, p.y, d, lv.tended.has(r));
       else if (p.kind === 'crow') {   // the crow on the beam (Д245 A) notices the hero (NOTICE): a hop, it turns to him
         const S = TW.crow, q = PIX.base, n = S.rows[0].length, ox = twDx(S), wx = snap(wl ? lv.l : lv.r), x0 = d > 0 ? wx + ox * q : wx - (ox + n) * q;
-        const nb = notice(g, lv, r, x0, snap(r.y0) - S.base * q, x0 + n * q, r.y0); vsp(S.rows, x0, snap(r.y0 - S.base * q - nb.dy), nb.face === null ? d < 0 : nb.face, 1, q, true);
+        if (!fleeDraw(r, TW.crowFly, x0 + (n * q) / 2, snap(r.y0 - S.base * q) + S.rows.length * q, true, 0)) {   // (it flies off: FLEE_GO)
+          const nb = notice(g, lv, r, x0, snap(r.y0) - S.base * q, x0 + n * q, r.y0); vsp(S.rows, x0, snap(r.y0 - S.base * q - nb.dy), nb.face === null ? d < 0 : nb.face, 1, q, true);
+        }
       }
       else if (TW[p.kind]) { const S = TW[p.kind]; iwAt(S, wl ? lv.l : lv.r, r.y0, d, 1, twDx(S)); }
     }

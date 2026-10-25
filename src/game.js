@@ -1048,12 +1048,11 @@ class Game {
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0; this.rushed = false;   // a beaten boss's win still to come is the old level's (rushed: the fire's speed-up heard, К2)
-    this.thrown = 0; this.wallHold = 0;   // (a throw out of a room, or its hold on the wall, the old level's: the next hero stuck to a wall; review)
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
     this.safes = [{ r: null, dx: view.w / 2 }];   // a fall before any ledge comes back to the floor
     fx.n = 0; ui.comboEnd();
     loosen(this, 'R', 'vjump', 'builtW', 'sinceContact', 'queueT', 'hitstop', 'invuln', 'stateT', 'pruneT', 'winT', 'startY', 'world', 'climbed', 'levelM', 'bonusT',
-      'idleT', 'gunT', 'fallV', 'landV', 'dizzyT', 'joyT', 'flatT', 'wallHold', 'seed', 'hintAt', 'curAt', 'rushed');   // (fractions in play: see loosen)
+      'idleT', 'gunT', 'fallV', 'landV', 'dizzyT', 'joyT', 'flatT', 'seed', 'hintAt', 'curAt', 'rushed');   // (fractions in play: see loosen)
   }
   // A level's tasks (owner: the third star is every coin and these too), each { id, n done, of }: what it has of them, counted with it all
   // laid (a shaft with an end is laid whole here, in under a millisecond): its cage, its crows (Tokyo's, on the wires), its neon (neonSigns)
@@ -1403,8 +1402,6 @@ class Game {
       this.invuln -= dt;
       if (this.invuln <= 0 && playing && (this.blinkHold || 0) < HEALTH.hold && this.insideFoe()) { this.blinkHold = (this.blinkHold || 0) + dt; this.invuln = 0.5 * dt; }
     } else this.blinkHold = 0;
-    if (this.thrown && (hero.wallMask & (this.thrown > 0 ? 2 : 1))) { this.thrown = 0; this.wallHold = ROOM_THROW.hold; hero.kickSquash(1, 0, 1.6); shake.add(5); haptics.buzz(20); sound.play('land', 0.9, 0.7); }   // splat on the far wall,
-    if (this.wallHold > 0) { this.wallHold -= dt; setVel(hero, 0, 0); }   // and held there a moment, no bounce back (then the wall as ever)
     if (playing) for (const r of lv.near(hero.cy - MAGNET.range * this.R, hero.cy + MAGNET.range * this.R)) if (r.magnet && hero.cx > r.x0 - this.R && hero.cx < r.x1 + this.R) {   // a magnet ledge pulls the hero in, more the nearer
       const d = hero.cy < r.y0 ? r.y0 - hero.maxY : hero.minY - r.y1, k = 1 - clamp(d / (MAGNET.range * this.R), 0, 1);
       if (d > 1) addVel(hero, 0, (hero.cy < r.y0 ? 1 : -1) * MAGNET.pull * this.R * k * dt);
@@ -2171,7 +2168,8 @@ class Game {
     this.bankDrops();   // in the purse at once: they are for the shop in there
     this.well = this.lv; this.door = bub; this.lv = bub.room; this.lv.exit.armed = false; this.lv.cam = this.lv.floor + this.roomFloor() - view.h;   // (as it was built, the view as it is now)
     this.placeHero(this.lv.exit.x, this.lv.exit.y - 0.2 * this.R); this.regroup();
-    this.thrown = this.lv.exit.side === 1 ? 1 : -1; setVel(this.hero, this.thrown * ROOM_THROW.vx * this.R, -ROOM_THROW.up * this.vjump); this.rising = false;   // thrown hard across, onto the far wall, and stuck there (user)
+    setVel(this.hero, 0, 0); this.rising = false;   // in at its door and on its floor there, not thrown across onto the far wall (owner, 2026-10-25: «При входе в магазин или пешеру
+    // героя … притягивает к противоположной стене, убери это»)
     this.hero.squeezeIn = 0; ui.flash(); ui.toast(this.lv.trial ? tf('trialGo', { n: this.lv.trial.n, s: this.lv.trial.time }) : t(bub.kind), this.lv.trial ? 2400 : 1400); sound.play('bubble'); sound.play('airjump', 0.7, 0.6);
   }
   // A world's next bonus cave (CAVES; owner, З1 «В»): two gift rooms, then a puzzle, counted per world from play to play (save.caves); of each kind not the
@@ -3286,11 +3284,14 @@ const ui = {
     clip.setAttribute('role', 'img'); clip.setAttribute('aria-label', L2(c.title));
     tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); card.append(tilt);
     p.append(card, title, next);   // (laid first with no height: what is left over its title is the card's)
+    for (let q = 3; title.scrollWidth > p.clientWidth - 24 && q > 1.5;) { q -= 0.25; title.style.setProperty('--p', q); }   // its title on one line (owner, 2026-10-25: «текст под карточкой
+    // всегда в 1 строку»): a long one a step smaller till it fits
     // As big as the phone allows (owner, 2026-10-24: «Карточка истории или босса должна занимать на телефоне максимальное количество места»): edge to edge or
     // as tall as is left over its title and button, in whole pixels: a whole number of the screen's to each of the art's cells, unless that loses over 30% of it
     const room = title.getBoundingClientRect().top - p.getBoundingClientRect().top - parseFloat(getComputedStyle(p).paddingTop) - parseFloat(getComputedStyle(card).marginBottom) - 12;
-    const box = Math.min(view.w, room * w / h), fit = box / w, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, k = whole >= 0.7 * fit ? whole : fit;
-    card.style.width = w * k + 'px'; card.style.height = h * k + 'px';
+    const [w0, h0] = STORY.moon_fall.cells, box = Math.min(view.w, room * w0 / h0), fit = box / w0, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, W = w0 * (whole >= 0.7 * fit ? whole : fit);
+    card.style.width = W + 'px'; card.style.height = W * h / w + 'px';   // every card as wide as the first, the moon's (owner, 2026-10-25: «все карточки включая боссов должны быть
+    // размером как первая карточка с луной»): its size worked out on the moon's cells, the rest scaled to it
     if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);
   },
   bonusEnd(why, n, doubled) {   // a bonus level's coins; ×2 for an ad while there are some and an ad to be had

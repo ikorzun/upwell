@@ -945,7 +945,6 @@ const GATE = { at: [0.55, 0.65], run: ['gate', 'gate2', 'gate3', 'gate3'] };
 // the run's levels past the Cave, at `at` of the height, a band `h` of the view tall with rails along its foot. On screen it rests
 // `rest` s (from, to), rings and flashes `warn` s, then the train, `len` views long, goes through at `v` views a second, and hurts.
 const TRAIN = { p: 0.45, at: [0.3, 0.7], h: 0.11, rest: [4, 7], warn: 1.6, len: 2.5, v: 2.2 };
-const ROOM_THROW = { vx: 60, up: 0.85, hold: 0.45 };   // into a room the hero is thrown across at `vx` R/s, up at `up` of a jump: onto the far wall high, stuck there `hold` s (user)
 const CRUMBLE = { time: 0.55, back: 3, board: 0.45 };   // gives way `time` s after a touch, is back `back` s later; a rope bridge's board (D) `board` tiles deep
 // (its tremble before it goes, and an air conditioner's, 5 a second, growing: under the 6-12 a second of jitter the owner bans, «вся анимация подчиняется объекту»)
 const SLICK = { fr: 0.03 };

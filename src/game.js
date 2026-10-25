@@ -929,6 +929,7 @@ const CAUSE = { noyaki: 'causeNoyaki', flood: 'causeFlood', avalanche: 'causeAva
 // below, said once at the start of a world's first level of it, as the tutorial's words (owner, 2026-10-25: «Напиши подписи в начале уровня так же, как в обучении
 // прыжок»; the facts the worlds' research: Iya's slash-and-burn, Iwami's flooded drifts, Fuji's yukishiro, the 2017 typhoon surge at Enoshima, Golden Gai's 2016
 // fire, Tokyo's summer storms; the Tram's line No. 13, gone in 1970, at its fight)
+const DROP = { t: 0.3, v: 3 };   // down on a plank: let through it `t` s, pushed down at `v` R/s
 const RISE_HINT = { flood: 'riseWater', tide: 'riseWater', avalanche: 'riseSnow', storm: 'riseStorm' };   // (storm: the TV Tower's cloud, tower-real)   // what rises from below, by its world (the Sea's a typhoon surge at high tide, Д145; Tokyo's the wooden quarter burning, Д155: fire)
 const WALL_HINT = { crackwater: 'waterWall', coral: 'coralWall', wallice: 'iceWall', sparkpanel: 'sparkWall', lightning: 'boltWall' };   // (sparkpanel: Golden Gai's, Д154 «Б», gai-real; lightning: the TV Tower's rod, Д164, tower-real)   // a wall hazard's hint by what bursts out (the Mine's groundwater, Д118: no gas; the Sea's blowholes; Fuji's ice)
 const WET = { flood: { why: 'water', ink: PAL.blue, body: { id: 'die', base: PAL.blue, deep: PAL.black } }, tide: { why: 'water', ink: PAL.white, body: { id: 'die', base: PAL.aqua, deep: PAL.black } },
@@ -987,7 +988,7 @@ class Game {
   makeHero() {
     const bs = this.lv.boss, x = bs && bs.def && (bs.def.glide || bs.def.quake || bs.def.street || bs.def.bone) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
     this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
-    this.hero.isHero = true;
+    this.hero.isHero = true; this.hero.dropT = 0; this.hero.dropRect = null;   // (dropT, dropRect: a plank it is let through, DROP)
     this.startY = this.hero.cy;
   }
   placeHero(x, y) {
@@ -1384,7 +1385,11 @@ class Game {
     this.downWas = input.down;
     const H = this.hero, d = input.dir, floor = this.onFloor(), top = H.stuck > 0 && glueSide(H) === 4;
     H.pressX = d; H.crawl = top && d !== 0;   // only a body hanging from a ceiling alone creeps along it
-    const crouch = input.down && floor;   // down on a floor: squashed flat, ready for a high jump (see jump)
+    const plank = floor && H.floorRect && H.floorRect.plank && !H.floorRect.gone ? H.floorRect : null;
+    if (input.down && plank && !(H.dropT > 0)) { H.dropRect = plank; H.dropT = DROP.t; addVel(H, 0, DROP.v * this.R); }   // down on a plank: through it (owner, 2026-10-25:
+    // «На такого типа платформах движения стика вниз пусть протягивает героя вниз»), plank after plank while it is held
+    if (H.dropT > 0) H.dropT -= dt;
+    const crouch = input.down && floor && !plank;   // down on a floor: squashed flat, ready for a high jump (see jump); on a plank it drops through instead
     if (crouch !== this.crouch) { this.crouch = crouch; H.sqAx = 0; H.sqAy = 1; H.squeezeIn = crouch ? CROUCH.squeeze : 0; }
     if (this.flatT > 0) { H.sqAx = 0; H.sqAy = 1; H.squeezeIn = MOCHI.squeeze; }   // flat under a pestle (MOCHI): as flat as the body goes, whatever the crouch
     if (input.down) H.stickCD = Math.max(H.stickCD || 0, 0.05);

@@ -3949,6 +3949,7 @@ Body.prototype.collideLevel = function (lv, h) {
       const r = near[k], x0 = r.x0 - sk, x1 = r.x1 + sk, y0 = r.y0 - sk, y1 = r.y1 + sk;
       if (x[i] <= x0 || x[i] >= x1 || y[i] <= y0 || y[i] >= y1) continue;
       let face = 0;
+      if (r.plank && r === this.dropRect && this.dropT > 0) continue;   // (the hero let through it: down on a plank, DROP)
       if (r.plank) {   // from above only: a point that was under its top passes; a body whose bottom was under its top passes whole, but not off the plank it stands
         // on (tester: «падаю вниз сквозь края тонких платформ»: landed near an end, the body sagged past it, its bottom went under the top and the plank let it all through)
         const up = Math.min(0, r.dy || 0);   // (one that rose this step, as a seesaw's seat or a mill's board: met at its top as it was)

@@ -1517,6 +1517,30 @@ Vary between the variants: {vary}. Make the six clearly different from each othe
 Build every variant from flat rectangles and a few circles: big simple shapes that read at a glance on a phone screen, no fine noise.
 {style} Use only these colours: {inks9}. The world's own colour is {ink}. {rule} White only for edges you stand on or cling to and for the hero; red only for danger; yellow only for things you can take. No perspective, no 3D, no text other than the six letters."""
 
+# An animal's frames of motion (owner 2026-10-25: «Такого размера птица должна улетать, а мелкая живность убегать»): six frames of the one already
+# drawn in the game (its picture the attached reference, scratchpad flee/ref-<el>.png, at 4 x 4 image pixels a game pixel), its design kept, only its pose
+# changing; UPwell moves it, the frames are cut path A (Worlds). Run with --ref <its reference>
+ANIM = """Pixel-art animation sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
+The attached image shows {who} exactly as it is drawn in the game, at the game's scale (one art pixel is 4 x 4 image pixels). Keep its design exactly: the same creature, the same size in art pixels, the same colours, the same shapes, markings and dither, the same pixel grid; only its pose changes.
+Draw six frames of it {motion}, in a 3 x 2 grid of equal cells read left to right, top to bottom, each cell labelled A, B, C, D, E or F in small white pixel letters in its top-left corner: {frames}.
+Each cell: a plain black background (#141414), the creature in flat side view facing right, at exactly the scale of the attached image, {ground}.
+Build it from the same flat shapes as the attached image: big simple shapes, no fine noise, no motion blur, no speed lines, no shadow, no glow.
+{style} Use only these colours: {inks9}. Its colours: {inks}. White only for tiny glints; no red; no yellow. No perspective, no 3D, no text other than the six letters."""
+ELEMENTS.update({
+    'eno-kitefly': dict(world='enoshima', kind='frames', who='a black kite, a bird of prey, perched on a short orange post',
+                        motion='taking off from its post and flying away up and to the right',
+                        frames='A crouching on the post ready to spring, wings closed; B springing off the post, wings half open, its legs still hanging; C flying, '
+                        'its wings fully up; D flying, its wings spread level; E flying, its wings fully down; F flying, its wings spread level again (C, D, E, F '
+                        'loop as its flap, its body the same in all four, its legs tucked)',
+                        ground='the orange post only in A and B', inks='grey and dark grey feathers, a black eye, its hooked beak and feet orange'),
+    'eno-catsrun': dict(world='enoshima', kind='frames', who='two stray cats, a dark grey one and an orange one, asleep together on an orange bench',
+                        motion='waking and running away to the right, together',
+                        frames='A both awake and startled, ears up, backs arched, still on the bench; B both leaping off the bench; C both running, their legs '
+                        'stretched out; D both running, their legs gathered under them; E running, legs stretched; F running, legs gathered (C, D, E, F loop as '
+                        'their run, each cat the same in all four)',
+                        ground='the orange bench only in A and B, the cats on a plain thin grey ground line in C to F, the dark grey cat half a body behind the '
+                        'orange one', inks='a dark grey cat and an orange cat, black eyes and stripes, no white'),
+})
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}
@@ -1630,7 +1654,7 @@ def prompt(el: str, ref: bool = False) -> str:
             'face': 'a face that reads at a glance on a phone (big eyes, an angry brow, a mouth)',
             'body': f"a body that is one soft rounded shape (in the game it squashes and wobbles) with a few rigid parts round it: {e.get('parts', '')}",
             'tone': 'Cute and a little spooky, never gory: the game is for everyone.'}   # a boss's defaults (Koschei has his own: not a yokai, the Kolobok)
-    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE, 'hazard': HAZARD, 'wallhaz': WALLHAZ, 'drop': DROP, 'holder': HOLDER}[e['kind']].format(**{'foe_tone': 'Creepy and crooked, never gory: the game is for everyone.', **slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
+    out = {'ledge': LEDGE, 'prop': PROP, 'boss': BOSS, 'hero': HERO, 'foe': FOE, 'hazard': HAZARD, 'wallhaz': WALLHAZ, 'drop': DROP, 'holder': HOLDER, 'frames': ANIM}[e['kind']].format(**{'foe_tone': 'Creepy and crooked, never gory: the game is for everyone.', **slab, **boss, **e, 'hero_short': hero_short, 'hero_scale': hero_scale, 'world': name, 'mood': mood, 'ink': ink, 'ink_name': ink.split()[0], 'night': night, 'inks9': WORLD_INKS.get(e['world'], INKS9), 'text': text, 'plane': plane,
                                                                 'grid': GRIDNOTE, 'style': STYLE, 'refnote': REFNOTE if ref else ''})
     if e['world'] in SHAPES:   # a world drawn crooked (the Dark Forest): its shapes slanted and jagged, not built of tidy rectangles
         out = re.sub(r'Build every variant from flat rectangles and a few circles: big simple shapes[^.]*\.', SHAPES[e['world']], out)

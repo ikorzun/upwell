@@ -1056,6 +1056,36 @@ ELEMENTS = {
                        inks='tubes in one or two of purple, blue, green and orange, their glow a dither halo of the same ink; a black or grey box behind',
                        scene=LEDGE_AT + ' below it', text='a short katakana word (ラーメン, スシ or カラオケ) or a simple pictogram'),
 }
+# The Dark Forest's own hazards (owner, 2026-10-25, Д277 «А»: thorny brambles on its walls that shoot out their thorns; the kikimora's black bog rising from
+# below, root-like hands reaching up out of it): black, white and grey as the world (colour only for danger: red), crooked (SHAPES)
+ELEMENTS.update({
+    'skazka-thorns': dict(world='skazka', kind='wallhaz', what='thorny brambles (ternovnik, the blackthorn thicket of the Russian tales) growing on the shaft\'s wall, '
+                          'that shoot out their thorns', why='in the tales the dark forest is alive and does not let a runaway pass: its thorn thickets close in '
+                          'on the path and claw at whoever runs by',
+                          asleep='a crooked tangle of black bramble stems pressed to the wall, knotted and twisted, short grey thorns on them, quiet',
+                          bursting='long sharp thorns shooting straight out of the bramble into the shaft, rigid as needles, black and grey, their points red',
+                          vary='the bramble (a tangle of crooked stems, a knotted vine with a few withered leaves, a twisted root studded with thorns, a dense '
+                          'hedge of stems), the thorns\' shape when they shoot out (long straight needles, hooked claws, a fan of spikes, a cluster of crooked '
+                          'spines)',
+                          inks='the stems and thorns black, each outlined in grey so it reads on the black night, white only as a few small glints where a stem '
+                          'or a thorn catches the light; red only on the thorns\' points (danger); no orange, no green, no other colour: this world is black, '
+                          'white and grey'),
+    'skazka-bog': dict(world='skazka', kind='hazard', what='the kikimora\'s black bog, the swamp of the Russian tales, rising up the shaft: black bog water with '
+                       'rotten roots, reeds and bog bubbles in it, and gnarled root-like hands with long clawing fingers reaching up out of it',
+                       why='the swamp is the kikimora\'s home, and in the tales a bog drags down whoever strays from the path; here it rises up the shaft '
+                       'after the Kolobok',
+                       vary='its surface (a sluggish ripple, a heaving swell, bubbles bursting), the root-hands reaching out of it (one big gnarled hand, '
+                       'several small clutching ones, roots with knuckles like fingers), what floats in it (a rotten log, a tuft of reeds, a skull, bubbles), '
+                       'the water under it (black dithered with grey downwards), and what it throws up the shaft (a gob of black mud, a clawing root-hand, a '
+                       'bursting bog bubble)',
+                       inks='the water black, its surface outlined in grey with a few small white glints (each at least 2 by 2 art pixels, just under its red '
+                       'edge, never a white line: white is an edge to stand on), grey ripples and bubbles, darker downwards through black and grey dither; '
+                       'the root-hands black, outlined in grey, grey knuckles; a line of red along its top (the danger edge: the black bog must read against '
+                       'the black night); no orange, no green, no blue: this world is black, white and grey. Every line and shape at least 2 art pixels '
+                       'thick: solid filled shapes (the hands and roots black with a grey outline 2 pixels thick, the bubbles grey rings 2 pixels thick), never '
+                       'thin 1-pixel line drawings; the water a grey dither on black (rows of dots, a checker), densest just under the red edge and thinning '
+                       'downwards, so the bog reads as a mass and not as empty night; no white lines in it'),
+})
 
 # A boss: its fight (does), its size, where the cell shows it (place), its colour (main: BOSSES' ink), the rigid parts it may have,
 # the three yokai of its world it may be (two cells each) and the inks' rule there.

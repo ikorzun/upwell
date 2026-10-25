@@ -5387,14 +5387,19 @@ Renderer.prototype.draw = function (g, alpha) {
     if (!s) {
       const m = FLEE_GO.reach * t, x0 = cx - (W * q) / 2, x1 = cx + (W * q) / 2, y0 = foot - Fr[0].rows.length * q;
       if (!(g.state === 'play' && H.maxX > x0 - m && H.minX < x1 + m && H.maxY > y0 - m && H.minY < foot + m)) return false;
-      s = r.flee = { t: T, dir: bird || !free ? (H.cx < cx ? 1 : -1) : free, gone: false };
+      let dir = bird || !free ? (H.cx < cx ? 1 : -1) : free;
+      if (bird && (dir > 0 ? lv.r - cx : cx - lv.l) < 4 * t) dir = -dir;   // (a bird off to the open side of the shaft, not at a wall: Game.awayDir)
+      s = r.flee = { t: T, dir, gone: false };
       if (typeof sound !== 'undefined') sound.play('airjump', bird ? 0.25 : 0.15, bird ? 1.9 : 2.4);
     }
     if (s.gone) return true;
     const [ta, tb, fps] = bird ? FLEE_GO.bird : FLEE_GO.small, e = T - s.t, u = Math.max(0, e - ta), k = e < ta ? 0 : e < ta + tb ? 1 : 2 + (Math.floor((e - ta - tb) * fps) % 4), Fk = Fr[k];
     const hr = (f) => f.hr ?? (f.hr = Math.max(0, f.rows.findIndex((row) => row[Math.min(row.length - 1, f.ax)] !== '.')));   // (its head's row: a bird's flight held by its head)
     let dx = 0, up = 0;
-    if (bird) { dx = (FLEE_GO.fly[0] * u + FLEE_GO.fly[1] * u * u) * t; up = (FLEE_GO.fly[2] * u + FLEE_GO.fly[3] * u * u) * t; }
+    if (bird) {   // out toward the room it has, easing off as it nears the wall (it banks up, never into the wall: owner, «птицы улетают в стену…»)
+      const raw = (FLEE_GO.fly[0] * u + FLEE_GO.fly[1] * u * u) * t, rm = Math.max(0, (s.dir > 0 ? lv.r - cx : cx - lv.l) - (W * q) / 2 - 0.6 * t);
+      dx = rm > 0 ? rm * (1 - Math.exp(-raw / rm)) : 0; up = (FLEE_GO.fly[2] * u + FLEE_GO.fly[3] * u * u) * t;
+    }
     else { dx = FLEE_GO.run * u * t; const end = (s.dir > 0 ? r.x1 - cx : cx - r.x0) + (W * q) / 2; if (dx > end) { const fu = (dx - end) / (FLEE_GO.run * t); up = -0.5 * FLEE_GO.fall * t * fu * fu; } }
     const half = (W * q) / 2, x = Math.max(lv.l + half, Math.min(lv.r - half, cx + s.dir * dx));
     if (!bird && Math.abs(H.cy - (foot - H.R)) < 2 * H.R) up += Math.max(0, 1 - ((x - H.cx) / (half + 1.2 * H.R)) ** 2) * 1.6 * H.R;   // (its way past the hero on its ledge: a leap over him)

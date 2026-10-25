@@ -1506,7 +1506,7 @@ class Game {
       else if (f.kind === 'ribbon') {   // the crow with the red ring (RIBBON): a touch frees it; then off it flies
         f.t += dt;
         if (!f.fly && Math.abs(H.cx - f.x) < RIBBON.reach * R && H.maxY > f.y - 2 * R && H.minY < f.y) this.untangle(f);
-        if (f.fly) { f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R) lv.folk.splice(i, 1); }
+        if (f.fly) { this.flyOff(f, dt); if (f.y < lv.cam - 2 * R) lv.folk.splice(i, 1); }
       }
       else if (f.kind === 'bat' || f.kind === 'crow') {   // a crow off its wire as a bat off its ledge
         if (!f.fly && !f.dive && near(f.x, f.y, FOLK.flee * R)) this.scare(f);
@@ -1521,8 +1521,8 @@ class Game {
         if (f.dive) {
           f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt;
           if (Math.hypot(H.cx - f.x, H.cy - f.y) < H.R + CROW.r * R) this.hurt(H.cx - f.x, H.cy - f.y, 'crow');
-          if (f.t > CROW.flight || f.y > lv.cam + view.h + R || f.x < lv.l - R || f.x > lv.r + R) { f.dive = false; f.fly = true; f.vx = (f.vx < 0 ? -1 : 1) * 120; f.vy = -200; }   // past: off it flies
-        } else if (f.fly) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
+          if (f.t > CROW.flight || f.y > lv.cam + view.h + R || f.x < lv.l - R || f.x > lv.r + R) { f.dive = false; f.fly = true; f.vx = this.awayDir(f.x, f.vx < 0 ? -1 : 1) * 120; f.vy = -200; }   // past: off it flies
+        } else if (f.fly) { f.t += dt; this.flyOff(f, dt); if (f.y < lv.cam - 2 * R || f.x < lv.l - R || f.x > lv.r + R) lv.folk.splice(i, 1); }
       } else if (f.kind === 'bug') {
         const r = f.rect;
         if (r.gone) { lv.folk.splice(i, 1); continue; }
@@ -1547,16 +1547,25 @@ class Game {
   }
   untangle(f) {   // the crow with the red ring set free (RIBBON): sparks, its thanks and coins, off up it flies with the ring on it, and the story's card II
     const R = this.R, lv = this.lv;   // a moment after
-    f.fly = true; f.t = 0; f.vx = f.dir * 70; f.vy = -190;
+    f.fly = true; f.t = 0; f.dir = this.awayDir(f.x, f.dir); f.vx = f.dir * 70; f.vy = -190;   // (to the open side: flyOff)
     if (lv.gone && !this.well) lv.gone.push(f.id);
     sparkFx(f.x, f.y - R, 14, -Math.PI / 2, Math.PI, [120, 360], [1.4, 3], [0.3, 0.6], [INK.white, PAL.red], 0.6); fx.ring(f.x, f.y - R, 1.6 * R, INK.white);
     sound.play('bubble', 0.9, 1.4); sound.play('buy', 0.6, 1.2); haptics.buzz(16);
     this.drop(f.x, f.y - 2 * R, FOLK.coins); ui.toast(L2(RIBBON.thanks) + '\n' + tf('freedCoins', { n: FOLK.coins }), 2400);
     this.cardDue = { id: 'village_crow', t: RIBBON.card };
   }
+  // A bird's or a bat's way off (owner, 2026-10-25: «птицы улетают в стену и это выглядит глупо. Для живого окружения должна быть разумная траектория
+  // движения»): away from the hero, but if a wall is that way within 4 R, to the open side of the shaft instead; up and away, climbing faster as it goes;
+  // nearing a wall it banks up along it, never into it; gone off the top of the screen
+  awayDir(x, d = x < this.hero.cx ? -1 : 1) { const lv = this.lv; return (d < 0 ? x - lv.l : lv.r - x) < 4 * this.R ? -d : d; }
+  flyOff(f, dt) {
+    const lv = this.lv, R = this.R, room = f.vx < 0 ? f.x - lv.l : lv.r - f.x;
+    if (room < 3 * R) f.vx *= Math.max(0, Math.min(1, (room - R) / (2 * R)));   // (its way along the wall bends up: it turns, it does not hit)
+    f.vy -= 160 * dt; f.x += f.vx * dt; f.y += f.vy * dt;
+  }
   scare(f) {   // a bat or a crow off its perch, away from the hero (a crow: one of the level's tasks, Game.task)
-    const H = this.hero, lv = this.lv;
-    f.fly = true; f.vx = (f.x < H.cx ? -1 : 1) * fxRand(80, 140); f.vy = -fxRand(140, 220);
+    const lv = this.lv;
+    f.fly = true; f.vx = this.awayDir(f.x) * fxRand(80, 140); f.vy = -fxRand(140, 220);
     if (f.kind === 'crow') { this.task('crow'); if (lv.gone && !this.well) lv.gone.push(f.id); }
   }
   // Tokyo's neon (neonSign) and the kits' things (kitThing: a Village lantern lit, a Fuji bell rung, a Mine lamp lit) between y0 and

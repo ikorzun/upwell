@@ -126,6 +126,7 @@
   .row3 { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; align-self: stretch; }   /* Map, Book, Daily: one row of equal cells, however many */
   .pair { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; align-self: stretch; }   /* two settings on one row (2.5D, CRT), or one the whole row */
   .pair > .big { min-width: 0; }
+  .pair > .big .cap { white-space: nowrap; letter-spacing: 0.05em; }   /* its caption on one line too, on a 320-px phone's half row */
   .row3 > .chip { min-width: 0; padding-left: 2px; padding-right: 2px; }
   .row3 > .chip .tx, .row3 > .chip .cap { white-space: nowrap; }
   .row3 > .chip .cap { letter-spacing: 0; padding-left: 0; }   /* (its caption at the font's 12 px floor: no spacing, so a 320-px phone's third of a row holds it) */

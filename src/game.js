@@ -192,6 +192,15 @@ const opened = (u) => save.bank >= u.at;
 const shakeOn = () => (save.shake === undefined ? !matchMedia('(prefers-reduced-motion: reduce)').matches : save.shake);
 const shakeAdd = shake.add.bind(shake);
 shake.add = (a) => { if (shakeOn()) shakeAdd(a); };
+// A buzz on an iPhone too (owner, 2026-10-25: «shake не работает»): Safari has no navigator.vibrate, but since iOS 18 a switch toggled taps the phone's haptic
+// engine, so a hidden one is clicked in its place (as the ios-haptics package does; older iPhones feel nothing). Both kinds only while Shake is on.
+{ const buzz0 = haptics.buzz.bind(haptics);
+  if (!haptics.ok && /iP(hone|ad|od)/.test(navigator.userAgent || '') || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent || '') && !haptics.ok)) {
+    const lab = document.createElement('label'), sw = document.createElement('input'); sw.type = 'checkbox'; sw.setAttribute('switch', ''); lab.setAttribute('aria-hidden', 'true'); lab.style.display = 'none'; lab.append(sw);
+    document.addEventListener('DOMContentLoaded', () => document.body.append(lab)); if (document.body) document.body.append(lab);
+    haptics.ok = true; haptics.buzz = (ms, gap = 45) => { if (!shakeOn() || paused) return; const now = performance.now(); if (now - haptics.last < Math.max(gap, 70)) return; haptics.last = now; try { lab.click(); } catch (e) { /* none here */ } };
+  } else haptics.buzz = (ms, gap) => { if (shakeOn()) buzz0(ms, gap); };
+}
 function loadSave(s) {
   if (s && typeof s === 'object') Object.assign(save, s);
   const obj = (o) => o && typeof o === 'object' && !Array.isArray(o), num = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -3147,7 +3156,8 @@ const ui = {
     const crt = cap(button('CRT: ' + t(save.crt === false ? 'off' : 'on'), 'big thumb alt', () => { save.crt = save.crt === false; persist(); track('settings_changed', { setting: 'crt', value: save.crt }); if (window.fxRetro) fxRetro(); again(); }), 'crt');   // the
     // screen's scanlines and its split when hurt (fx.js)
     const row = el('div', 'pair'); row.append(...(d25 ? [d25, crt] : [crt]));   // with 2.5D on one row (owner, 2026-10-25: «рядом с 2.5d в одну строку»)
-    return [langs, snd, shk, row];
+    const row1 = el('div', 'pair'); row1.append(snd, shk);   // sound and shake on one row too (owner, 2026-10-25: «В одну строку»)
+    return [langs, row1, row];
   },
   cards(list) {
     const p = this.panel('cards');

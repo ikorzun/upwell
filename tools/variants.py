@@ -2063,6 +2063,36 @@ ELEMENTS.update({   # the TV Tower's hazards in frames; their references found b
                             inks='the cloud grey dithered with black (never white: white clouds are what you stand on here), its top edge a red crackle (the '
                             'danger edge), the lightning fork red, the wisp grey dither'),
 })
+# Tokyo's bonus caves (UPwell's rooms, main f928548; the look Worlds'): the shutter's switch and the pachinko board's pins, six takes each for the game's code
+# to draw while the owner picks. Their references found by default, research/variants/ref-tcave-switch.png and ref-tcave-pins.png (fresh shots of the rooms,
+# 4 x 4 image px a game px)
+TCAVE_AT = 'a purple floor with a white top edge along the bottom of the cell, the back wall of a tiny Golden Gai bar dim behind (a counter, stools, a stair)'
+ELEMENTS.update({
+    'tcave-switch': dict(world='tokyo', kind='prop', what="the switch of a roll-down steel shop shutter (a shatta) in the back room of a tiny Golden Gai bar, the one the "
+                         "shopkeeper works to roll the shutter up; the hero bumps it to pull it, and then the shutter rolls up for a few seconds. Drawn twice in each cell: "
+                         "ready on the left (its lever, handle or chain up, a small aqua lamp lit) and just pulled on the right (its lever, handle or chain pulled down, "
+                         "the lamp orange). A different real switch in each cell: A a key switch box with three buttons (up, stop, down) and a key in it, on a short "
+                         "post; B a pull chain with a T handle hanging from a small box on a post; C a lever box with a lever on its side; D a pull cord with a round "
+                         "weight on its end, over a little pulley on a post; E a pushbutton pillar with one big button on top; F a small box on a pole with a "
+                         "handle on its front",
+                         where='standing on the floor of the room, on its own short post or pole', material='grey steel boxes and posts, a key, buttons, a chain or a cord, a small lamp',
+                         size='small: about 0.7 tiles wide and 0.9 tiles tall in all, post included (11 by 14 art pixels): the hero is three times its width',
+                         inks='grey and black steel; the lamp aqua when ready and orange when pulled (never red, never yellow); buttons, handle or weight black or blue; '
+                         'no white anywhere on it', scene=TCAVE_AT),
+    'tcave-pins': dict(world='tokyo', kind='ledge', what="the pins of a pachinko board turned into ledges, in the back room of a tiny Golden Gai bar: short rails studded with "
+                       "brass pachinko nails (kugi), staggered up the room as the nails of a pachinko machine are, and at the top the jackpot, a wider ledge that is a pachinko "
+                       "tulip (an orange tulip catcher, its two petals open) or a start chucker (a pocket with a little lamp), three big gold coins on it",
+                       does='thin platforms: you stand on them and jump from pin to pin up the room', material='brass nails, a brass or chrome rail, the plywood of a pachinko board',
+                       size='each pin 2 to 3 tiles long and a quarter of a tile thick; the jackpot 4 tiles long',
+                       place='five pins staggered at different heights in the middle of the cell, clear of the wall, a gold coin over each, and the jackpot at the top with three big gold coins on it',
+                       main='orange (brass) or grey (chrome)',
+                       rule='In this world blue marks moving platforms, so use it only for small details; the brass is orange, never '
+                       'yellow (yellow is only the coins); never red (danger).',
+                       vary='the rail (a brass strip, a chrome strip, a row of nail heads, the edge of the board\'s plywood), the nails (a row standing under it, a fringe '
+                       'of short ones, a V of nails), a little windmill spinner (kazaguruma) on one of them, the jackpot (a tulip with open petals, a start chucker with '
+                       'a lamp, a tulip on a rail); in one variant (F) a faint pachinko board behind the pins: its round frame rail and guide rails in one dim purple at a '
+                       'quarter of its strength, no detail'),
+})
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}

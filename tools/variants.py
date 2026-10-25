@@ -1587,6 +1587,89 @@ ELEMENTS.update({
                            inks='the corals grey and orange in flat areas, a few aqua polyps (never green: green is moss you can hold; never purple: purple is a stash), '
                            'the spikes\' points red (the danger edge), the rock wall aqua'),
 })
+# The Danchi's own hazards (the owner's pick, 2026-10-25, Д276 «Б»): a burst boiler pipe blasting scalding steam on its walls, a burst water main flooding
+# its stairwell from below; its reference a fresh shot of 6-5 (research/variants/ref-danchi.png, 4 x 4 image px a game px)
+ELEMENTS.update({
+    'danchi-steampipe': dict(world='danchi', kind='wallhaz', what='an old hot-water pipe from the block\'s boiler room, clamped to the raw concrete wall of a 1960s '
+                             'danchi block, burst at a joint and blasting out scalding steam', reach='only three quarters of a tile (12 art pixels)',
+                             why='the estate\'s boilers and their pipes are as old as the blocks; one pipe has cracked at a joint, and now and then the pressure '
+                             'blasts scalding steam out of it',
+                             asleep='a grey pipe running down the wall close to its white inner edge, held by clamps, a cracked joint (a bolted flange) in its '
+                             'middle with a drip and a thin grey wisp of steam leaking out, no more than 8 art pixels out from the wall',
+                             bursting='a jet of scalding steam blasting straight out of the cracked joint into the shaft and billowing into round puffs, grey '
+                             'dither, a red edge along its outline where it hurts, exactly 12 art pixels (48 image pixels) long from the wall\'s white inner edge '
+                             'and no further',
+                             vary='the pipe (wrapped in lagging and tape, bare with rust patches, two pipes side by side, a pipe with a valve wheel, a pipe with a '
+                             'small pressure gauge), the joint (a bolted flange, a cracked elbow, a split seam), the steam\'s shape (a straight jet, a fan of '
+                             'puffs, rolling round billows, a curling plume)',
+                             inks='the pipe and its clamps grey with black, its lagging grey, rust only a few orange dots (orange marks blocks that crumble here), '
+                             'the steam grey dither (never white: white is an edge to stand on), its danger edge red, the wall grey'),
+    'danchi-watermain': dict(world='danchi', kind='hazard', what='a burst water main flooding the estate\'s stairwell: murky water rising up the shaft, grey soap '
+                             'suds floating on it, the estate\'s own junk bobbing on and in it: a child\'s rubber ball, a plastic bucket, a slipper, a sodai-gomi '
+                             'chair (big rubbish put out for collection), a rolled-up futon',
+                             why='the old water main under the 1960s blocks has burst, and the water floods up the stairwell faster than you can climb',
+                             vary='its surface (choppy little waves, a slow heavy swell, a churning boil with suds), its suds (a line of grey foam, clumps, bubbles), '
+                             'what floats on and in it (a ball, a bucket, slippers, a chair, a futon, a bicycle wheel, a cardboard box), the murky water under it, '
+                             'and what it throws up the shaft (a gush of water with a ball in it, a slipper flung up, a spray of suds)',
+                             inks='the water murky and in big flat masses, no random noise and no single loose pixels: under the suds a regular checker of blue and '
+                             'black (every other pixel, as the game shades), darker downwards as the checker thins to rows of blue dots and then to black (never a '
+                             'solid bright blue: blue marks springs and moving platforms here); its suds and foam grey in flat clumps (never white: white is an '
+                             'edge to stand on), the junk grey with small pieces of orange and blue, a red line along its top edge (danger)'),
+})
+ELEMENTS.update({   # the Danchi's hazards in frames, as the Village's; their references found by default, research/variants/ref-dc-steam-frames.png (its wall
+    # in its three states as drawn, 4 x 4 image px a game px) and ref-dc-watermain-frames.png (its front, halved: 4 x 4 a band px)
+    'dc-steam-frames': dict(world='danchi', kind='hazframes', what='an old hot-water pipe from the block\'s boiler room on the raw concrete wall of a danchi '
+                            'stairwell, cracked at a bolted joint: asleep it only leaks a thin wisp of steam; for half a second it hisses as a warning; then '
+                            'scalding steam blasts out of the crack into the shaft for about one second, hurting whoever is in it, and it only leaks again',
+                            refdesc='the shaft\'s left wall in the Danchi (grey diagonal stripes on black, a white inner edge) with the same stretch of wall shown '
+                            'three times as it is drawn now: asleep (a grey pipe with clamps down the wall\'s inner edge), warning (its outer edge red) and '
+                            'bursting (a column of grey steam puffs with red edges)',
+                            frames='A asleep: a grey pipe 4 art pixels wide running straight down the wall\'s inner edge, one bolted flange joint across it in '
+                            'the middle of the stretch (6 art pixels wide, a black crack in it), a thin wisp of grey steam (2 art pixels wide) curling up from '
+                            'the crack; B asleep: the same, only the wisp drifted further up and leaning the other way (A and B loop slowly as it leaks); C about '
+                            'to burst: the same pipe and flange, the crack\'s edge red, two short grey puffs spitting out of it, a drop of water falling under '
+                            'it (held still for half a second as the warning); D bursting: a jet of scalding steam blasts straight out of the crack and billows '
+                            'into round puffs that fill the whole stretch above and below the flange, reaching exactly 12 art pixels out from the wall, its '
+                            'outer outline red where it hurts; E: the same billowing jet, its puffs rolled on upward and swollen another way, the same reach; '
+                            'F: a third shape of the same billowing puffs, the same reach (D, E and F loop as it blasts)',
+                            scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (grey diagonal '
+                            'stripes on black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the pipe on the wall\'s '
+                            'inner edge, its flange centred in the cell\'s height',
+                            size='the stretch of wall is exactly 32 art pixels tall (two tiles: 128 image pixels) with the flange in its middle, and nothing of '
+                            'it reaches further out from the wall\'s white inner edge than 12 art pixels (48 image pixels): the pipe, the flange, the wisp and '
+                            'the warning at most 8 art pixels out, the steam exactly 12 and no further: a narrow column of puffs as tall as the stretch, most '
+                            'of the cell plain black air. The game stacks the stretch down the wall, so its top and bottom rows must join seamlessly (the '
+                            'pipe runs on through both)',
+                            motion='Steam is a hot gas under pressure: it blasts out level from the crack and at once billows up and out into round soft puffs '
+                            'that swell and roll upward as they leave it, never a solid block and never a flame; the pipe and its flange never move.',
+                            inks='the pipe and the flange grey with black bolt holes and a black crack, the wisp grey dither, the warning edge red, the steam '
+                            'grey dithered with black (never white: white is an edge to stand on) with red along its outer outline (the danger edge), the drop '
+                            'grey'),
+    'dc-watermain-frames': dict(world='danchi', kind='hazframes', what='one surge on the front of the flood from a burst water main that rises up the estate\'s '
+                                'stairwell from below: the flood\'s front is a ragged band of grey suds edged red over murky blue water, and along it the '
+                                'water wells up in surges, each one carrying a child\'s small rubber ball up out of the water, tossing it and letting it fall '
+                                'back in, each at its own beat',
+                                refdesc='the front of the rising flood as it is drawn now in the game: a ragged red edge over a band of grey suds, murky blue '
+                                'water under it, black depths below with a sunk chair',
+                                frames='A a low swell of murky water just welling up out of the front, the ball floating on it, half sunk; B the swell higher and '
+                                'rounder, a dome of water lifting the ball; C at its highest (it slows at the top), its crown breaking into grey suds, the ball '
+                                'tossed up off it into the air; D the crown burst into two or three clumps of grey suds, the dome starting to sink, the ball at '
+                                'its highest over it; E falling back: the dome low and wide, the suds falling back onto it, the ball dropping back towards the '
+                                'water; F the front almost level again, the ball landed and floating half sunk, a little grey suds round it (A to F loop as the '
+                                'surge\'s life)',
+                                scene='a straight stretch of the flood\'s front 28 art pixels wide across the lower third of the cell, its ragged red top edge '
+                                'over grey suds and murky blue water, flat and level at the same height in every cell, the surge welling up out of its middle; '
+                                'plain black air above',
+                                size='the surge at most 14 art pixels wide at its base and at most 16 art pixels tall over the front\'s top edge (64 image '
+                                'pixels), the ball round and exactly 6 art pixels across; at the stretch\'s left and right ends the front stays flat in every '
+                                'frame',
+                                motion='Water is heavy: the swell rises slowly, slows at its top and falls back under gravity; the ball is one rigid object, the '
+                                'same pixels in every frame, carried up by the water, tossed and falling back down in an arc, never floating up on its own; the '
+                                'suds arc down; nothing below the front\'s top edge changes.',
+                                inks='the water murky blue in big flat clumps with grey suds (no white), its top edge red as the front\'s (danger), the suds '
+                                'grey in two or three big clumps, the ball orange with one grey stripe round it (no red, no white, no yellow: it is junk, not a '
+                                'coin), the band grey suds over blue'),
+})
 # A hazard's frames (owner 2026-10-25: «Проработай еще лучше опасности, раздели их красиво кадрам ассетов и анимируй»): six frames of one hazard, every
 # cell the same place at the game's own size (drawn bigger and shrunk, they turned to mush), its reference the game's own picture at 4 x 4 image pixels an
 # art pixel; cut path A (Worlds), played by the hazard's own clock (its mechanics unchanged). Run with --ref <its reference>

@@ -7324,8 +7324,8 @@ Renderer.prototype.draw = function (g, alpha) {
     // a post (A), a pull chain's T handle off a box (B), a lever box (C), a cord's weight over a pulley (D), a pushbutton pillar (E), a box on a pole, its handle in a
     // slot (F). Ready, its lamp aqua; pulled, its handle down (A: its up button pressed, blue) and the lamp orange, blinking as the placeholder's did, on and off three times a
     // second (1.5 Hz), and in the last 1.5 s five (2.5 Hz: under the owner's 3 Hz; the placeholder's eight were 4 Hz) as the clicks quicken. Grey steel, no white
-    const t = lv.tile, q = PIX.size, x = sn2(s.x), w = sn2(SHUTTER.w * t), h = sn2(SHUTTER.h * t), foot = sn2(s.y), top = foot - h, on = s.on, G = PAL.gray, K = PAL.black, Bl = PAL.blue;
-    const left = on ? s.t + SHUTTER.open - lv.t : 0, lamp = !on ? PAL.aqua : Math.floor((lv.t - s.t) * (left < 1.5 ? 5 : 3)) % 2 ? K : PAL.orange;
+    const t = lv.tile, q = PIX.size, x = sn2(s.x), w = sn2(SHUTTER.w * t), h = sn2(SHUTTER.h * t), foot = sn2(s.y), top = foot - h, on = s.on || s.done, G = PAL.gray, K = PAL.black, Bl = PAL.blue;   // (done, its shutter up for good: pulled, its lamp dark)
+    const left = on ? s.t + SHUTTER.open - lv.t : 0, lamp = s.done ? K : !on ? PAL.aqua : Math.floor((lv.t - s.t) * (left < 1.5 ? 5 : 3)) % 2 ? K : PAL.orange;
     const X = (u) => sn2(x + u * w), Y = (v) => sn2(top + v * h), bx = (u0, v0, u1, v1, c) => box(X(u0), Y(v0), X(u1), Y(v1), c, 1, 0, 10, 0);
     const lit = (u, v) => box(X(u), Y(v), X(u) + 2 * q, Y(v) + 2 * q, lamp, 1, 0, 10, 0), post = (u, v) => box(X(u) - q, Y(v), X(u) + q, foot, G, 1, 0, 10, 0);
     const L = TCV_V.sw;

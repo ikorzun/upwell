@@ -6041,10 +6041,9 @@ Renderer.prototype.draw = function (g, alpha) {
         // is crumbling here)
         const u = 0.7; bx(1.1, 0, 1.4, 0.1, PAL.blue, MUTE);   // its bowl (flat: thin)
         if (fleeDraw(r, FLEE.cat, X(u), b, false, d)) continue;   // (it runs off: FLEE_GO)
-        const nb = notice(g, lv, r, Math.min(X(u - 0.5), X(u + 0.4)), Y(1), Math.max(X(u - 0.5), X(u + 0.4)), b), h = nb.dy / t;   // (it notices the hero: a hop, NOTICE)
-        L(4); F(X(u), Y(0.3 + h), 0.22 * t, 0, 0, 0.3 * t, G, 1, 0); F(X(u + 0.05), Y(0.72 + h), 0.16 * t, 0, 0, 0.14 * t, G, 1, 0);   // its body, its head (small)
-        L(0); for (const e of [-0.08, 0.12]) bx(u + e, 0.82 + h, u + e + 0.07, 0.95 + h, G); for (const e of [-0.02, 0.1]) bx(u + e, 0.72 + h, u + e + 0.03, 0.75 + h, K); ln(u - 0.2, 0.05 + h, u - 0.45, 0.35 + h, G, 2);   // its ears, its eyes,
-        // its tail (flat: too small for depth)
+        const S = FLEE.cat.sit, q = PIX.base, n = S.rows[0].length, x0 = snap(X(u) - (n * q) / 2), nb = notice(g, lv, r, x0, b - S.rows.length * q, x0 + n * q, b);   // sitting, off its sheet at its
+        // run frames' size (Worlds, dc-catsit A); it notices the hero (NOTICE): a hop, it turns to him
+        L(4); vsp(S.rows, x0, snap(b - S.rows.length * q - nb.dy), nb.face === null ? !wl : nb.face, 1, q, true);
       }
     }
     L(3); dcFar();

@@ -1650,6 +1650,54 @@ ELEMENTS.update({
                             motion='A cone is rigid: it swings about its stalk and never squashes or stretches; it falls straight; its scales fly in arcs.',
                             inks='the cone orange with black gaps between its scales, its point red (danger), the crack red, the stalk orange'),
 })
+# The Sea's hazards in frames (owner, 2026-10-25: «…раздели их красиво кадрам ассетов и анимируй»): its sharp corals on the wall (eno-coralwall2's design,
+# owner: «давай менять на острые кораллы») and a breaking crest on its spring tide's front
+ELEMENTS.update({
+    'eno-coral-frames': dict(world='enoshima', kind='hazframes', what='sharp corals on the rock wall of a sea cave, as on the reefs of Sagami Bay: asleep they are '
+                             'low clumps of coral pressed to the wall, their small polyps swaying in the water; for half a second their tips turn red as a warning; '
+                             'then sharp coral spikes thrust straight out of the wall into the shaft and stay out for about one second, hurting whoever is in '
+                             'them, then draw back in, and it sleeps again',
+                             refdesc='the shaft\'s left wall in the Sea (aqua diagonal stripes on black, a white inner edge) with the same stretch of wall shown three '
+                             'times as it is drawn now: asleep (low orange coral clumps), warning (their tips red) and bursting (a row of spikes, their points red)',
+                             frames='A asleep: three low coral clumps pressed to the wall, grey and orange in flat areas, small aqua polyps on them like tiny tufts; '
+                             'B asleep: the same clumps, only their polyps swayed by the water, each polyp leaning one art pixel the other way (A and B loop slowly as '
+                             'it sleeps); C about to burst: the same clumps as A, the outer tip of each clump gone red (held still for half a second as the warning); '
+                             'D bursting: a sharp cone-shaped coral spike thrusting straight out of the middle of each clump, only its red point out past the clump, '
+                             '4 art pixels from the wall; E the same spikes further out, 8 art pixels from the wall; F the same spikes all the way out, exactly 12 art '
+                             'pixels from the wall to their points (D, E and F play once as they thrust out; F is held while it hurts)',
+                             scene='the shaft\'s left wall as a strip 12 art pixels wide down the left edge of the cell, as tall as the cell (aqua diagonal stripes on '
+                             'black, a one-pixel white inner edge, as in the attached image), plain black air to its right; the hazard on the wall\'s inner edge, '
+                             'centred in the cell\'s height',
+                             size='the stretch of wall is exactly 36 art pixels tall (144 image pixels) with three clumps on it, each about 11 art pixels tall; the '
+                             'clumps at most 5 art pixels out from the wall\'s white inner edge (20 image pixels), so the spikes\' red points show past them in D; '
+                             'each spike 5 art pixels thick at its base, narrowing to a one-pixel point, its last 3 art pixels red; nothing reaches further out than '
+                             '12 art pixels (48 image pixels). The game stacks the stretch down the wall, so its top and bottom rows must join seamlessly',
+                             motion='Coral is rigid: the spikes slide straight out of the clumps, never bending, squashing or wobbling; the clumps stay put in every '
+                             'frame; only the polyps sway, from their roots.',
+                             inks='the clumps grey and orange in flat areas with a few small aqua polyps on them (never green: green is moss you can hold; never '
+                             'purple: purple is a stash; no white: white is an edge you stand on), the spikes orange with grey bands, their points red (the danger '
+                             'edge), the warning tips red, the rock wall aqua'),
+    'eno-tide-frames': dict(world='enoshima', kind='hazframes', what='one breaking crest on the front of the spring tide that rises up the shaft from below: the '
+                            'tide\'s front is a band of aqua water with white and grey foam on its crests and a red line along its top (the danger edge), and along '
+                            'it crests rise, curl over to the right, break into spray and fall back, each at its own beat',
+                            refdesc='the front of the rising tide as it is drawn now in the game: aqua water with white and grey foam crests edged in red on top, '
+                            'curls in the water under them, the dark sea with blue dither below',
+                            frames='A a low swell just rising out of the front; B the swell taller, its top leaning to the right; C the crest curling over to the '
+                            'right, a lip of white foam over a hollow, like a small curl of the band; D the lip breaking: it plunges down onto the front, spray '
+                            'thrown up and to the right as a few white and aqua drops; E the spray falling back down under gravity, the drops lower and further '
+                            'right, the crest sunk back into the front; F the last drops landing on the front, a little white foam on it, the front flat again '
+                            '(A to F loop as the crest\'s life)',
+                            scene='a straight stretch of the tide\'s front 32 art pixels wide across the lower third of the cell, its top edge a red line over white '
+                            'and grey foam over aqua water, flat and level at the same height in every cell, the crest rising out of its middle; plain black air '
+                            'above',
+                            size='the crest at most 14 art pixels wide at its base and at most 14 art pixels tall over the front\'s top edge (56 image pixels); its '
+                            'spray within 10 art pixels right of the crest and at most 16 art pixels over the front; each drop 2 x 2 art pixels; at the stretch\'s '
+                            'left and right ends the front stays flat in every frame',
+                            motion='Water is heavy: the crest rises slowly, curls over and breaks to the right; its spray flies in arcs and falls back under gravity, '
+                            'slowing at the top of its arc; nothing below the front\'s top edge changes.',
+                            inks='the crest aqua water with white foam on its lip and grey foam shading, a red line along its top edge while it stands (the danger '
+                            'edge, as on the band); the spray white and aqua drops, no red (it no longer hurts once broken); the band red, white, grey and aqua'),
+})
 PROP = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}A prop of the world "{world}" ({mood}): {what}. It is decor behind the play: nothing stands on it and it does nothing in play. It sits {where}. {plane}
 Material: {material}. Size: {size}; {grid}

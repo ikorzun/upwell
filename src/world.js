@@ -1606,11 +1606,6 @@ const LOOKS = {
 };
 for (const k in LOOKS) BOSSES[k].look = { id: k + '-' + LOOKS[k][0], design: LOOKS[k][1], size: LOOKS[k][2] };
 const FOREST_V = { kikimora: 'C', leshy: 'B' };   // the Dark Forest's enemies (owner, 2026-10-20: «1c 2b»): a Kikimora with her broom, a Leshy with fly agarics
-const SKR_V = (() => {   // the Dark Forest's stash room, inside Baba Yaga's hut (owner Д280 «1»), six takes while the owner picks (research/variants/skazka-caveroom-1.png);
-  // ?skr=C shows another
-  const m = location.search.match(/[?&]skr=([A-F])/);
-  return { room: m ? m[1] : 'A' };
-})();
 const CAVE = { stairs: 4, planks: 3, shelves: 2, pillars: 3, comb: 2, overhang: 1, chimney: 1, spring: 1 };   // the Cave's own chunks, before moss and rubber
 const GLACIER = { icewall: 3, iceblocks: 3, stairs: 2, planks: 2, shelves: 1, pillars: 2, comb: 2, chimney: 2, overhang: 1, spring: 1 };   // the Glacier's, with its ice
 const STREET = { stairs: 3, planks: 2, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1 };   // Tokyo's first levels': its chunks before its awnings, gondolas and rubber
@@ -5989,8 +5984,8 @@ Renderer.prototype.draw = function (g, alpha) {
     // «1»; research/variants/skazka-caveroom-1.png), as the cellar is drawn: big flat shapes at a quarter on a quiet black, black and white only, crooked and cut
     // through with black like Bilibin's ink line: walls of crooked log courses (a step darker), the ceiling's beam, the great clay stove, her mortar and pestle,
     // a broom, a shelf of skulls whose sockets glow, bunches of herbs; the only colour small lights (the sockets, the stove's embers, a candle, a cat's eyes);
-    // by take (SKR_V.room). Nothing over the way out (overExit)
-    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.24, LG = 1.08, G = PAL.gray, K = PAL.black, O = PAL.orange, L = SKR_V.room;
+    // Take A (the owner's pick, Д284 «A»). Nothing over the way out (overExit)
+    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.24, LG = 1.08, G = PAL.gray, K = PAL.black, O = PAL.orange;
     const ex = (u0, v0, u1, v1) => overExit(Math.min(u0, u1), Math.min(v0, v1), Math.max(u0, u1), Math.max(v0, v1));
     const bx = (u0, v0, u1, v1, c = G, a = WD) => { if (!ex(u0, v0, u1, v1)) box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0); };
     const el = (u, v, ru, rv, c = G, a = WD) => { if (!ex(u - ru, v - rv, u + ru, v + rv)) F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0); };
@@ -6049,49 +6044,9 @@ Renderer.prototype.draw = function (g, alpha) {
     };
     const candle = (u, v) => { const fh = 0.3 + 0.05 * Math.sin(T * 2.4 + u); bx(u - 0.12, v, u + 0.12, v + 0.6); bx(u - 0.28, v, u + 0.28, v + 0.1);   // a candle, lit, its flame
       bx(u - 0.07, v + 0.66, u + 0.07, v + 0.66 + fh, O, 1); bx(u - 0.03, v + 0.7, u + 0.03, v + 0.8, PAL.yellow, 1); };   // wavering (under half a beat a second)
-    if (L === 'A') {   // the stove on the right, its chimney bent up to the beam; her mortar and the broom by it; the shelf of skulls; herbs off the beam
-      logs(20.2); beam(20.6); stove(9.6, 5.9, 7.2, -0.3); chimney([[12.6, 7.2], [13.3, 11.5], [12.4, 15.8], [12.9, 20.3]]);
-      mortar(5.7); broom(8.0, 0.8); shelf(1.0, 6.6, 13.0, 3); for (const [u, len, k] of [[3.0, 2.4, 1], [5.3, 2.0, -1], [15.0, 2.2, 1]]) herb(u, 20.2, len, 1, k);
-    } else if (L === 'B') {   // her mortar big in the middle, its pestle up; a broom, a cauldron; the shelf of skulls, an antlered skull on the wall, herbs, a crooked window
-      logs(20.2); beam(20.6, 0.15); mortar(8.0, 1.35); broom(11.8, 0.6);
-      el(4.9, 0.95, 1.05, 0.95); bx(3.75, 1.7, 6.05, 2.0); ln(4.0, 1.85, 5.8, 1.85, 0.08, K, 1);   // the cauldron
-      shelf(1.0, 6.2, 12.4, 3, -0.1);
-      { const u = 3.6, v = 16.0; for (const e of [-1, 1]) { ln(u + e * 0.3, v + 0.45, u + e * 1.3, v + 1.7, 0.17); ln(u + e * 1.3, v + 1.7, u + e * 1.05, v + 2.7, 0.14); ln(u + e * 0.85, v + 1.15, u + e * 0.5, v + 1.95, 0.14); ln(u + e * 1.25, v + 1.6, u + e * 1.95, v + 2.05, 0.14); }   // an antlered
-        el(u, v, 0.42, 0.62); bx(u - 0.18, v - 0.98, u + 0.18, v - 0.5); eyes(u, v + 0.05, 0.17); }   // skull, its sockets lit
-      pq(13.6, 14.6, 1.1, 0.12, 0.08, 1.2); pq(13.6, 14.6, 0.85, 0.1, 0.08, 0.95, K, 1); ln(13.62, 13.7, 13.7, 15.5, 0.12); ln(12.8, 14.5, 14.45, 14.7, 0.12);   // the window: night through it
-      for (const [u, len, k] of [[11.2, 2.4, 1], [15.0, 2.0, -1]]) herb(u, 20.2, len, 1, k);
-    } else if (L === 'C') {   // the stove bigger, a skull on its shoulder, its vent; its chimney tall; a cobweb in the corner; herbs; a shelf of two skulls
-      logs(20.2); beam(20.6); stove(9.0, 6.6, 8.0, 0.25, { vent: [14.2, 6.0] }); skull(13.3, 8.3, 0.95, true); chimney([[11.0, 8.0], [10.4, 12.5], [11.4, 16.5], [12.0, 20.3]], 1.4);
-      web(0, 20.2, 1, 3.0); shelf(1.2, 5.8, 12.0, 2); for (const [u, len, k] of [[5.6, 2.6, -1], [7.8, 2.1, 1]]) herb(u, 20.2, len, 1, k);
-    } else if (L === 'D') {   // the roof's rafters over a tie beam, herbs off it, a cage with a skull in it; a shelf with skulls and a candle; the black cat on a stool by the stove
-      logs(17.8); ln(-0.5, 17.4, 8.0, 23.2, 0.85); ln(16.5, 17.4, 8.0, 23.2, 0.85); pq(8, 17.9, 8.5, -0.15, 0, 0.36);   // the rafters, the tie beam
-      for (const [u, len, k] of [[2.8, 2.3, 1], [5.4, 2.0, -1]]) herb(u, 17.6, len, 1, k);
-      { const u = 10.9, v = 17.6, hg = 1.6; ln(u, v, u, v - 0.7, 0.08); el(u, v - 1.15, 0.95, 0.5); el(u, v - 1.15, 0.72, 0.32, K, 1); bx(u - 0.95, v - 1.15 - hg, u + 0.95, v - 1.15); bx(u - 0.78, v - 1.0 - hg, u + 0.78, v - 1.25, K, 1);   // a cage hung
-        skull(u, v - 1.0 - hg, 0.8); for (const du of [-0.42, 0, 0.42]) ln(u + du, v - 1.2, u + du, v - 1.0 - hg, 0.08); bx(u - 1.08, v - 1.15 - hg, u + 1.08, v - 0.98 - hg); }   // off the rafter, a skull in it
-      shelf(1.2, 7.0, 11.5, 2, 0.12, 3.7); candle(6.1, 11.6);
-      bx(4.1, 2.55, 6.3, 2.85); ln(4.5, 2.6, 4.1, 0, 0.16); ln(5.9, 2.6, 6.3, 0, 0.16);   // a stool
-      el(5.2, 3.55, 0.72, 0.72, K, 1); el(5.35, 4.55, 0.5, 0.45, K, 1); tri(5.05, 5.08, 0.14, 0.16, -0.04, K, 1); tri(5.65, 5.08, 0.14, 0.16, 0.04, K, 1); ln(4.55, 3.1, 3.9, 4.2, 0.16, K, 1);   // the cat
-      skEyes(X(5.35), Y(4.6), 0.9, 7);
-      stove(10.1, 5.6, 7.0, -0.2); chimney([[12.8, 7.0], [13.4, 11.0], [12.6, 14.5], [12.9, 18.3]]);
-    } else if (L === 'E') {   // the beam on braces, herbs; a cartwheel hung from it with bones dangling; a shelf of skulls; a table, a skull on it, its cloth; a jar, a barrel
-      logs(20.2); beam(20.6, 0.1); ln(0, 17.4, 2.8, 20.4, 0.32); ln(16, 17.6, 13.4, 20.4, 0.32);
-      for (const [u, len, k] of [[3.4, 2.4, 1], [5.6, 2.0, -1]]) herb(u, 20.2, len, 1, k);
-      { const u = 10.6, v = 15.6, r = 1.6; ln(u - 0.55 * r, v + 0.83 * r, u - 0.3, 20.2, 0.06); ln(u + 0.55 * r, v + 0.83 * r, u + 0.3, 20.2, 0.06);   // a cartwheel on two strings
-        el(u, v, r, r); el(u, v, 0.8 * r, 0.8 * r, K, 1); for (const a of [0.2, 1.25, 2.3]) ln(u + Math.cos(a) * 0.82 * r, v + Math.sin(a) * 0.82 * r, u - Math.cos(a) * 0.82 * r, v - Math.sin(a) * 0.82 * r, 0.12); el(u, v, 0.24 * r, 0.24 * r);
-        for (const [du, len] of [[-0.6, 1.4], [0, 2.0], [0.6, 1.2]]) { const x = u + du * r, y = v - Math.sqrt(1 - du * du) * r; ln(x, y, x, y - 0.5 * len, 0.06); ln(x - 0.06, y - 0.5 * len, x + 0.06, y - len, 0.16); el(x + 0.06, y - len, 0.14, 0.1); } }   // bones off it
-      shelf(1.2, 5.8, 11.6, 2);
-      pq(8.1, 4.55, 3.1, -0.1, 0, 0.18); ln(5.6, 4.4, 5.2, 0, 0.18); ln(10.6, 4.3, 11.0, 0, 0.18);   // the table, its legs splayed
-      bx(7.0, 2.3, 9.3, 4.4); for (const [a, b] of [[7.0, 7.6], [8.6, 9.3]]) tri((a + b) / 2, 2.15, (b - a) / 2, 0.15, 0, K, 1);   // its cloth hanging, ragged, a tree cut in it
-      ln(8.15, 2.6, 8.15, 4.1, 0.1, K, 1); for (const v of [3.0, 3.5]) { ln(8.15, v, 7.6, v + 0.45, 0.08, K, 1); ln(8.15, v, 8.7, v + 0.45, 0.08, K, 1); }
-      skull(9.9, 4.73, 1, true); el(4.0, 1.1, 0.85, 1.05); bx(3.72, 2.05, 4.28, 2.5); bx(3.6, 2.45, 4.4, 2.65);   // a jar
-      pq(12.9, 1.3, 1.13, 0, 0.06, 1.43, K, 1); pq(12.9, 1.3, 1.0, 0, 0.06, 1.3); for (const v of [0.45, 2.15]) ln(11.9, v, 13.95, v + 0.05, 0.1, K, 1); el(12.95, 2.6, 1.0, 0.16);   // a barrel
-    } else {   // a crooked frame with a skull painted in it, a cobweb; the shelf of skulls and a candle; herbs; a broom leaning; the stove, its oven fork by it
-      logs(20.2); beam(20.6, -0.25); web(16, 20.2, -1, 2.6);
-      pq(3.4, 16.2, 1.3, 0.22, -0.16, 1.6); pq(3.4, 16.2, 1.02, 0.17, -0.13, 1.3, K, 1); el(3.38, 16.5, 0.5, 0.45); bx(3.12, 15.55, 3.62, 15.95); eyes(3.38, 16.45, 0.2, 0.08);   // the frame
-      shelf(1.0, 6.8, 11.0, 2, 0.1, 3.7); candle(5.9, 11.07); herb(13.8, 20.2, 2.4, 1, 1); broom(7.9, 1.0);
-      stove(9.8, 5.8, 7.0, -0.35); chimney([[12.0, 7.0], [11.4, 11.2], [12.6, 15.4], [13.0, 20.3]]);
-      ln(15.6, 0, 15.0, 5.0, 0.4, K, 1); ln(15.6, 0, 15.0, 5.0, 0.16); ln(15.0, 5.0, 14.4, 6.1, 0.14); ln(15.0, 5.0, 15.5, 6.15, 0.14); ln(14.5, 5.55, 15.45, 5.6, 0.14);   // the oven fork (ukhvat)
-    }
+    // the stove on the right, its chimney bent up to the beam; her mortar and the broom by it; the shelf of skulls; herbs off the beam
+    logs(20.2); beam(20.6); stove(9.6, 5.9, 7.2, -0.3); chimney([[12.6, 7.2], [13.3, 11.5], [12.4, 15.8], [12.9, 20.3]]);
+    mortar(5.7); broom(8.0, 0.8); shelf(1.0, 6.6, 13.0, 3); for (const [u, len, k] of [[3.0, 2.4, 1], [5.3, 2.0, -1], [15.0, 2.2, 1]]) herb(u, 20.2, len, 1, k);
   }
   if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.village) {   // the Village's stash room: the cellar under a farmhouse (Д97 «А», Д110
     // «C»'s layout), as a few big flat shapes at a quarter on a quiet black (owner: «Фоны в подарочных комнатах выглядят грязно: предметы не читаются, пиксели

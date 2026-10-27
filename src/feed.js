@@ -30,6 +30,8 @@ const FEED = {
   // совмещения и финала»): its bits (a line of 4+ more), as the game's sparkFx in its own colours: CSS px/s, s, px/s² down, their speed's part lost a second, the
   // part in white; a white ring round the line for ring s (a line of 4+ a wider one)
   confetti: { n: 24, star: 24, life: [1.4, 2.2], g: 260 },   // the result's: bits, and more a star, in the four foods' colours, falling slow and fluttering
+  fin: { big: 1.5, feet: 61, band: 75 },   // the result (the Figma «Feed-full»): Moti half as big again as over the board (its 300 to «Feed»'s 200), his feet so far
+  // over the foods, the dark from so far over his feet
 };
 const FEED_SET = ['sakura', 'matcha', 'taiyaki', 'imo'];   // the brief's first four (#01, #02, #05, #19): four shapes and colours apart
 // The foods and blockers (the owner's concept sheet, research/feed-moti/foods-sheet.webp), each on its own GPT grid, one of the sheet's dots one sprite
@@ -277,11 +279,12 @@ else {
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const anim = (e, frames, ms, ease = 'ease-out') => (e && e.animate ? e.animate(frames, { duration: still ? Math.min(ms, 90) : ms, easing: ease }).finished.catch(() => {}) : Promise.resolve());
   var feed = {   // (var: a global, as game.js asks for it by name)
-    active: false, st: null, busy: false, sel: -1, cur: -1, els: [], box: null, hud: {}, keys: false, idle: 0, hinting: false, flying: [], fat: 0,
+    active: false, st: null, busy: false, sel: -1, cur: -1, els: [], box: null, hud: {}, keys: false, idle: 0, hinting: false, flying: [], fat: 0, fin: 0, xb: null,
     newRun() {
       const seed = (Math.random() * 4294967296) >>> 0;
       this.rng = mulberry32(seed);
-      this.st = { b: FL.fresh(this.rng, FEED_SET, true), moves: FEED.moves, score: 0, full: 0, swaps: 0, cascades: 0, done: false, t0: performance.now(), first: 0, seed, fav: FL.fav(today) };
+      this.st = { b: FL.fresh(this.rng, FEED_SET, true), moves: FEED.moves, score: 0, full: 0, swaps: 0, cascades: 0, done: false, t0: performance.now(), first: 0, seed, fav: FL.fav(today), ate: {} };   // (ate:
+      // how many of each food he has eaten, for the result)
     },
     rec() { const f = save.feed; return f && typeof f === 'object' ? f : (save.feed = { day: -1, best: 0 }); },   // kept in the save: the UTC day his coins were last given, the best score
     open() {   // a tap on Moti: the board under him, a run under way taken up again
@@ -306,7 +309,8 @@ else {
     mount(p, logo) {   // its view in the menu panel (ui.menu asks, while it is open), the Figma «Feed» (owner, 2026-10-27: «переделать экран метча по макету»): no
       // logo; the close a white disc at the top right; Moti; the bar of fullness, under it the day's favourite (×2 score) and the count; the board
       if (this.busy) this.dirty = true;   // (made again in the middle of a move: once more when it is over, from the board as it ends)
-      logo.remove();
+      logo.remove(); this.fin = 0;
+      if (this.st.done && this.st.told) { this.result(p); return; }   // (the run over: its result in the board's place)
       const W = document.documentElement.clientWidth, st = this.st, n = FEED.n, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / n)), dpr = devicePixelRatio || 1;   // (the page's
       // width: the game's view is cut to its pixel grid)
       const k = Math.max(1, Math.floor((cell * dpr) / FEED.widest)), food = (FEED.food * k) / dpr, kh = Math.max(1, Math.floor((32 * dpr) / FEED.food));   // a food as big as
@@ -322,11 +326,10 @@ else {
       const x = button('', 'fm-x', () => this.close()), xi = el('img'); xi.src = 'assets/ui/close-24.svg'; xi.alt = ''; xi.draggable = false; x.append(xi); x.setAttribute('aria-label', t('goBack'));
       const box = el('div', 'fm-board'); box.setAttribute('role', 'grid'); box.setAttribute('aria-label', t('feedMoves'));
       wrap.append(hud, box); p.append(x, wrap);
-      this.box = box; this.hud = { bar: fill, count, fav }; this.els = [];
+      this.box = box; this.hud = { bar: fill, count, fav }; this.els = []; this.xb = x;
       st.b.forEach((q, i) => this.els.push(this.tile(q, i)));
       this.meter();
       this.wire(box);
-      if (st.done && st.told) this.result();
       const y0 = p.getBoundingClientRect().top, top = bar.getBoundingClientRect().top - y0;
       game.menuFit(top, x.getBoundingClientRect().top - y0, top - FEED.band);   // Moti over the bar, the dark band from a little over it (the Figma's)
     },
@@ -432,7 +435,7 @@ else {
     },
     async eat(ph) {   // one phase: its foods eaten (Moti's bite), then the rest down and new ones in
       const st = this.st, c = this.cellPx, b = game.hero;
-      st.full += ph.gone.length; st.score += FL.score(ph, st.fav);
+      st.full += ph.gone.length; st.score += FL.score(ph, st.fav); for (const f of ph.foods) st.ate[FL.food(f)] = (st.ate[FL.food(f)] || 0) + 1;
       const big = ph.runs.some((r) => r.length >= 4);
       sound.play('coin', 0.45, 1 + 0.08 * Math.min(ph.cascade - 1, 4)); haptics.buzz(big ? 12 : 5);
       for (const i of ph.thawed) this.thaw(i);
@@ -477,38 +480,45 @@ else {
       sound.play(stars >= 2 ? 'buy' : 'coin', 0.8, 1); haptics.buzz(25);
       track('feed_finish', { duration_ms: Math.round(performance.now() - st.t0), score: st.score, fullness: st.full, successful_swaps: st.swaps, cascades: st.cascades, stars });
       track('feed_reward_claim', { utc_day: dayKey(), amount: st.pay, result: st.pay ? 'granted' : 'given_today' });
-      if (!quiet && this.box) this.result();
+      if (!quiet && this.box) Promise.all([this.box.closest('.fm'), this.xb].map((e) => anim(e, [{ opacity: 1 }, { opacity: 0 }], 200))).then(() => { if (this.active && this.st === st) ui.menu(); });   // the board
+      // and its close away, the result in their place (mount)
     },
-    result() {   // over the board: his words, the stars, the score and the best (a new one yellow); his thanks in coins, the day's first time; again, or home
-      // The first time (not a board made again): faded in, the stars popping in one after another and ringing as a level's (ui.starRow), the score counted up,
-      // confetti for a star or more
-      const st = this.st, stars = FL.stars(st.full), end = el('div', 'fm-end'), first = !st.shown; st.shown = true;
-      const sr = el('div', 'fm-stars' + (first ? ' stars' : ''));
-      for (let k = 0; k < 3; k++) {
-        const s = iconEl(k < stars ? 'star' : 'starOff'); sr.append(s); if (!first) continue;
-        if (k < stars) { s.classList.add('won'); setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k); }
+    result(p) {   // the Figma «Feed-full» (1263:1599; owner, 2026-10-27: «финальный экран, когда моти наелся») in the board's place, as a level's Win (ui.win): the
+      // three foods he ate most for its stars (lit as many as he earned, the rest grey; the first time in one after another, ringing), «Mochi is full» and «come
+      // back tomorrow» in yellow, Close the yellow pill; Moti half as big again as over the board (FEED.fin: he swells to it, frame), his feet a little over the
+      // foods, the dark from a little over his feet down; the first time faded in, confetti for a star or more. No score, best, gift or Again, as in it (asked: З20)
+      const st = this.st, stars = FL.stars(st.full), first = !st.shown; st.shown = true;
+      const W = document.documentElement.clientWidth, dpr = devicePixelRatio || 1, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / FEED.n));
+      this.foodPx = (FEED.food * Math.max(1, Math.floor((cell * dpr) / FEED.widest))) / dpr;   // (a food as big as on the board: its pixels whole screen points)
+      const box = el('div', 'wbox fm-fin'), row = el('div', 'wstars fm-stars' + (first ? ' stars' : '')), words = el('div', 'fm-words');
+      box.style.setProperty('--food', this.foodPx + 'px');
+      const ate = Object.keys(st.ate).sort((a, b) => st.ate[b] - st.ate[a] || FEED_SET.indexOf(a) - FEED_SET.indexOf(b));   // (the most eaten first; as many, in the
+      // day's set's order)
+      for (const f of FEED_SET) if (!ate.includes(f)) ate.push(f);
+      ate.slice(0, 3).forEach((f, k) => {
+        const s = el('div', 'fm-star' + (k < stars ? ' won' : ' off')); s.innerHTML = foodSvg(f); row.append(s); if (!first) return;
+        if (k < stars) setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k);
         s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < stars ? ', ' + (1.2 + 0.2 * k) + 's' : '');
-      }
-      const sc = px(tf('feedScore', { n: first && !still ? 0 : st.score })), bs = px(tf('feedBest', { n: this.rec().best || st.score })); bs.classList.add('fm-best'); if (st.best) sc.classList.add('fm-new');
-      end.append(cap(el('div', 'head', t('feedDone')), 'feedDone'), sr, sc, bs);
-      if (st.pay) { const pay = el('div', 'fm-pay'); pay.append(px(tf('feedTreat', { n: st.pay })), iconEl('coin')); end.append(pay); anim(pay, [{ transform: 'scale(0.6)', opacity: 0 }, { transform: 'scale(1.12)', opacity: 1, offset: 0.6 }, { transform: 'none', opacity: 1 }], 320); }
-      const row = el('div', 'pair'); row.append(cap(button(t('feedAgain'), 'big thumb', () => { this.newRun(); ui.menu(); }), 'feedAgain'), cap(button(t('goBack'), 'big thumb alt', () => this.close()), 'goBack'));
-      end.append(row); this.box.append(end);
+      });
+      words.append(el('div', 'head', t('feedDone')), cap(el('div', 'fm-tom', t('feedTomorrow')), 'feedTomorrow'));
+      box.append(row, words); p.append(box, cap(button(t('feedClose'), 'big thumb', () => this.close()), 'feedClose'));
+      const y0 = p.getBoundingClientRect().top, feet = row.getBoundingClientRect().top - y0 - FEED.fin.feet;
+      game.menuFit(feet + MENU_HERO.gap, 0, feet - FEED.fin.band, false, true);   // (his size kept: the bigger one he swells to)
+      this.fin = Math.min(FEED.fin.big, Math.max(1, (feet - MENU_HERO.room) / (MENU_HERO.h * game.R)));   // (no higher than the menu's room over him)
       if (!first) return;
-      anim(end, [{ opacity: 0 }, { opacity: 1 }], 200);
-      if (!still) { const t0 = performance.now() + 300, up = () => { if (!sc.isConnected) return; const u = Math.min(1, Math.max(0, (performance.now() - t0) / 600)); sc.replaceChildren(...px(tf('feedScore', { n: Math.round(st.score * u) })).childNodes); if (u < 1) setTimeout(up, 50); }; up(); }   // (in steps, as the game's)
-      if (stars) confetti(this.box.getBoundingClientRect(), FEED.confetti.n + FEED.confetti.star * stars);
+      anim(box, [{ opacity: 0 }, { opacity: 1 }], 200);
+      if (stars) confetti(p.getBoundingClientRect(), FEED.confetti.n + FEED.confetti.star * stars);
     },
     frame(now) {   // each frame (game.js runFrame, after menuTouch): his eyes on a bite in the air (or the board), his sag by how full he is, eased back at home
       const b = game.hero; if (!b || !game.lv || game.lv.kind !== 'menu') return;
       const dt = Math.min(0.1, Math.max(0, (now - (this.lastF || now)) / 1000)); this.lastF = now;
       const aim = this.active && this.st ? Math.min(1, this.st.full / FEED.stars[2]) : 0;
       this.fat = (this.fat || 0) + (aim - (this.fat || 0)) * Math.min(1, dt * (aim > (this.fat || 0) ? 2.5 : 1.2));
-      const k = smooth(FEED.from, 1, this.fat);
-      if (this.fat > 0.003 || this.sagged) {
-        b.growthTarget = 1 + FEED.wide * k;
+      const k = smooth(FEED.from, 1, this.fat), big = this.active && this.fin ? this.fin : 1;   // (big: the result's Moti, FEED.fin)
+      if (this.fat > 0.003 || this.sagged || big > 1) {
+        b.growthTarget = big * (1 + FEED.wide * k);
         if (k > 0.002) { b.squeezeIn = Math.max(b.squeezeIn, FEED.low * k); b.sqAx = 0; b.sqAy = 1; }
-        this.sagged = this.fat > 0.003; if (!this.sagged) b.growthTarget = 1;
+        this.sagged = this.fat > 0.003 || big > 1; if (!this.sagged) b.growthTarget = 1;
       }
       if (!this.active) return;
       const fly = this.flying[this.flying.length - 1], L = game.heroLook;

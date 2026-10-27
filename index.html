@@ -358,19 +358,10 @@
   .fm-t.sel { box-shadow: inset 0 0 0 var(--dot) var(--white); }
   .fm-t.cur { box-shadow: inset 0 0 0 var(--dot) var(--yellow); }
   .fm-ice { opacity: 0.6; pointer-events: none; }   /* a frozen treat's ice over its food (feed.tile) */
-  .fm-end { position: absolute; inset: 0; z-index: 3; background: rgba(20, 20, 20, 0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; }
-  .fm-end .pair { width: 100%; }
-  .fm-end .big { min-width: 0; padding: 0 10px; }
-  .fm-stars { display: flex; gap: 6px; }
-  .fm-new { color: var(--yellow); }   /* a new best score */
-  .fm-best { color: var(--gray); }
-  .fm-pay { display: flex; align-items: center; gap: 6px; color: var(--yellow); }   /* his coins, the day's first run */
-  .fm-pay .ico { --p: 2; }
   .fm-bite { position: fixed; z-index: 40; pointer-events: none; will-change: transform; }   /* a bite on its way to his mouth (feed.bite) */
   .fm-fx { position: fixed; left: 0; top: 0; z-index: 39; pointer-events: none; image-rendering: pixelated; }   /* a food's bits when eaten, the result's confetti: a food's pixel a pixel of it (feed.js fxStep) */
   .fm-combo { position: absolute; z-index: 2; --p: 3; color: var(--yellow); filter: drop-shadow(0 3px 0 var(--ink)); pointer-events: none; white-space: nowrap; }   /* a cascade's step over where it was eaten (feed.pops), the game's #combo */
   .fm-bite svg { width: 100%; height: 100%; display: block; }
-  .fm-stars .ico { width: 36px; height: 36px; }
   .chip {
     min-height: var(--btnS); min-width: var(--btnS); padding: 4px 10px; border: 0; box-sizing: border-box;
     background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
@@ -418,6 +409,16 @@
   .wdot { color: var(--gray); opacity: 0.5; }   /* between two tasks */
   #cards.win > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Next: the main screen's pill */
   #cards.win > .big.thumb > .cap { font-size: 12px; }
+  .fm-fin { gap: 12px; margin: auto 0 53px; }   /* Feed Moti's result, the Figma «Feed-full» (1263:1599): a Win's box, its foods 12 over its words, 53 over Close */
+  .fm-stars { display: flex; align-items: center; }   /* the foods for its stars in a row (.wstars: their gap) */
+  .fm-star, .fm-star svg { width: var(--food); height: var(--food); display: block; }   /* a food for a star: as big as on the board (feed.result) */
+  .fm-star.off { filter: grayscale(1) brightness(0.45); }   /* a star not earned: its food grey */
+  .stars .fm-star { animation: starIn 0.4s steps(5) both; }   /* in one after another, as a level's stars (delays set in feed.js) */
+  .stars .fm-star.won { animation: starIn 0.4s steps(5) both, starTwinkle 1.4s steps(2) infinite; }
+  .fm-words { display: flex; flex-direction: column; align-items: center; padding: 8px; color: var(--yellow); }
+  .fm-words > .head { --p: 3.44; margin: 0; }   /* «Mochi is full»: the Figma's Inter Bold 33 */
+  .fm-tom { --p: 2.08; text-transform: uppercase; }   /* «come back tomorrow»: Inter Medium 20 */
+  .fm-tom > .cap { font-size: 20px; color: var(--white); opacity: 0.56; }   /* its caption: Inter 20 */
   .card b { color: var(--yellow); }
   .card:active { box-shadow: inset 0 0 0 2px var(--yellow); }
   .rows { width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
@@ -433,7 +434,7 @@
   @keyframes starIn { 0% { transform: scale(0) rotate(-120deg); opacity: 0; } 60% { transform: scale(1.45) rotate(12deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
   @keyframes starTwinkle { 50% { filter: brightness(1.45); } }
   @keyframes payIn { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .pay, .wl.new .ico { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .pay, .wl.new .ico, .stars .fm-star { animation: none; } }
 </style>
 </head>
 <body>

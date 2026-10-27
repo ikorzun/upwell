@@ -2,7 +2,8 @@
 // research/feed-moti): a small match-3 on the home screen, Moti fed what the player matches. Phase A of the brief: the board (5 x 5, four foods, eight
 // moves), its rules, a tap on Moti into it and the way back, the home screen as it was. Phase B: each match's foods one bite flying to his mouth,
 // his eyes on it, his mouth open for it, a munch; the fuller he is the wider and lower he sits (a puddle, never a ball), back as he was at home.
-// Only with ?feed while it is built (FEED_ON).
+// Phase C: the day's favourite food (FL.fav, the four in turn by the UTC day; its points doubled), his coins for the day's first run fed to the end
+// (FEED.pay, once a UTC day, kept in save.feed), the best score, one frozen treat on each board. Only with ?feed while it is built (FEED_ON).
 // The rules and the board are pure (FL, on a flat array of 25), loaded by node too for tools/feed-test.mjs; the view is the menu panel's (ui.menu,
 // feed.mount), its foods SVG at the game's own pixel (PIX.size a dot), Moti the menu's own hero over it (game.menuFit).
 const FEED_ON = typeof location !== 'undefined' && /[?&]feed\b/.test(location.search);
@@ -15,6 +16,8 @@ const FEED = {
   bite: 300, bites: 3, open: 0.55,   // ms a bite's flight to his mouth (the brief's 200-350), at most so many in the air (more: eaten unseen), his mouth open at that part of it
   wide: 0.06, low: 0.33, from: 0.25,   // full (FEED.stars' last): his size up so much, pressed down so much (SQUEEZE: a third flattens him ~10%, bulges him ~7%);
   // the sag starts past that part of the meter (the brief: hungry, then blushing and wider, then satisfied and puddled)
+  favX: 2, pay: 3,   // the day's favourite food's points times so many; the coins of a UTC day's first run fed to the end (the brief: about a tenth of a level's;
+  // a level gives some 20, tools/botrun.mjs. Asked: З14), into the purse and the bank as coins picked up are (Game.campKeep)
 };
 const FEED_SET = ['sakura', 'matcha', 'taiyaki', 'imo'];   // the brief's first four (#01, #02, #05, #19): four shapes and colours apart
 // The foods and blockers (the owner's concept sheet, research/feed-moti/foods-sheet.webp, re-pixelated to 32 x 32 on each one's own grid by
@@ -52,17 +55,20 @@ const FOODS = {
   ink: ['a1f1a32,b342e53,c4f4676,d7864a2,eb092d5,ff7edfb', '................................/................................/................................/...ccb...........ccccc........../..cfb.b.........dcbbbbc...cdb.../.cccb.b........ccb...bb...cbb.../.cbb.b.........cb......a......../..cbb.....dccbcbbbc....c......../...bb...cdcbb..bbbb............./........ccbbaa....bb............/.......ccbb.b...b...bbc......b../...c...cbba.b....b...bbbc...bb../..db...cbb............bbcc...c../..bb...cbb..........a..bbc....../......ccb............bb.bbc...../.....ccbb.bb.............bc...../...cbbbb................b.bb..../.dcbbba.a..........dfc....bbbc../ccbbb.........eb...fff...bb.bc../cb.bb..b......ff...fff....ba.bc./cbb.b.........fe....d.....bb.bc./.cbb.b........d..........bb..bc./..ccbb....................babc../.....cccbb...............bbcc.../........cbb............bbbc...../.dc......bbba...........bc....../cc.b.....cbbb.......b...c......./.bb.....cbbbccbbb......bc...c.../......dbbb....ccbb....bbc..ca.../.....cb.a.......cbbbbbbc...cc.../......bb..........ccbcc........./................................'],
 };
 const FL = {   // the rules, pure: a board is an array of 25 food ids, row by row from the top; null an empty cell (in a resolution only)
+  ice(k) { return typeof k === 'string' && k.startsWith('ice:'); },   // a frozen treat (the brief's #26, phase C): 'ice:' and its food, not swapped, in no line,
+  food(k) { return this.ice(k) ? k.slice(4) : k; },   // its ice gone (once) by a line cleared beside it, a food as any other from then on
   adj(i, j) { const n = FEED.n; return Math.abs((i % n) - (j % n)) + Math.abs(((i / n) | 0) - ((j / n) | 0)) === 1; },
-  runs(b) {   // every line of three or more of one food, across and down: arrays of cells
-    const n = FEED.n, out = [];
-    for (let y = 0; y < n; y++) for (let x = 0; x < n;) { const k = b[y * n + x]; let e = x + 1; while (e < n && k != null && b[y * n + e] === k) e++; if (k != null && e - x >= 3) out.push(Array.from({ length: e - x }, (_, q) => y * n + x + q)); x = e; }
-    for (let x = 0; x < n; x++) for (let y = 0; y < n;) { const k = b[y * n + x]; let e = y + 1; while (e < n && k != null && b[e * n + x] === k) e++; if (k != null && e - y >= 3) out.push(Array.from({ length: e - y }, (_, q) => (y + q) * n + x)); y = e; }
+  runs(b) {   // every line of three or more of one food, across and down: arrays of cells (a frozen one breaks a line, as a gap would)
+    const n = FEED.n, out = [], at = (i) => (this.ice(b[i]) ? null : b[i]);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n;) { const k = at(y * n + x); let e = x + 1; while (e < n && k != null && at(y * n + e) === k) e++; if (k != null && e - x >= 3) out.push(Array.from({ length: e - x }, (_, q) => y * n + x + q)); x = e; }
+    for (let x = 0; x < n; x++) for (let y = 0; y < n;) { const k = at(y * n + x); let e = y + 1; while (e < n && k != null && at(e * n + x) === k) e++; if (k != null && e - y >= 3) out.push(Array.from({ length: e - y }, (_, q) => (y + q) * n + x)); y = e; }
     return out;
   },
   swapped(b, i, j) { const c = b.slice(); [c[i], c[j]] = [c[j], c[i]]; return c; },
-  ok(b, i, j) { return this.adj(i, j) && b[i] != null && b[j] != null && b[i] !== b[j] && this.runs(this.swapped(b, i, j)).length > 0; },   // a swap that makes a line
+  ok(b, i, j) { return this.adj(i, j) && b[i] != null && b[j] != null && !this.ice(b[i]) && !this.ice(b[j]) && b[i] !== b[j] && this.runs(this.swapped(b, i, j)).length > 0; },   // a swap that makes a line
   legal(b) { const n = FEED.n, out = []; for (let i = 0; i < n * n; i++) { if (i % n < n - 1 && this.ok(b, i, i + 1)) out.push([i, i + 1]); if (i + n < n * n && this.ok(b, i, i + n)) out.push([i, i + n]); } return out; },
-  fresh(rng, kinds) {   // a new board: no line on it, two moves at least
+  fresh(rng, kinds, frozen) {   // a new board: no line on it, two moves at least; frozen: one food in the middle nine frozen (the brief: one blocker at most, never a board
+    // that can't be won)
     const n = FEED.n;
     for (;;) {
       const b = [];
@@ -72,9 +78,13 @@ const FL = {   // the rules, pure: a board is an array of 25 food ids, row by ro
         if (y >= 2 && b[i - n] === b[i - 2 * n]) no.push(b[i - n]);
         const can = kinds.filter((k) => !no.includes(k)); b.push(can[(rng() * can.length) | 0]);
       }
-      if (this.legal(b).length >= 2) return b;
+      if (this.legal(b).length < 2) continue;
+      if (!frozen) return b;
+      const mid = [6, 7, 8, 11, 12, 13, 16, 17, 18], at = mid[(rng() * mid.length) | 0], c = b.slice(); c[at] = 'ice:' + b[at];
+      if (this.legal(c).length >= 2) return c;
     }
   },
+  fav(day) { const k = FEED_SET.length; return FEED_SET[((day % k) + k) % k]; },   // the day's favourite food (day: UTC days since 1970), the four in turn: never two days the same
   fall(b, rng, kinds) {   // the foods down their columns over the gaps, new ones in from the top: the board, each one moved [from, to], each one come [to, its start row]
     const n = FEED.n, c = b.slice(), moved = [], come = [];
     for (let x = 0; x < n; x++) {
@@ -84,44 +94,50 @@ const FL = {   // the rules, pure: a board is an array of 25 food ids, row by ro
     }
     return { b: c, moved, come };
   },
-  shuffle(b, rng, kinds) {   // a board with no move left, its foods mixed till it has no line and two moves (a fresh one if that won't come)
-    const ks = b.slice();
+  shuffle(b, rng, kinds) {   // a board with no move left, its foods mixed till it has no line and two moves (a fresh one if that won't come); a frozen one stays
+    // where it is, frozen (the brief: a shuffle takes no blocker away)
+    const at = [], ks = [], c = b.slice();
+    b.forEach((k, i) => { if (!this.ice(k)) { at.push(i); ks.push(k); } });
     for (let t = 0; t < 400; t++) {
       for (let i = ks.length - 1; i > 0; i--) { const j = (rng() * (i + 1)) | 0; [ks[i], ks[j]] = [ks[j], ks[i]]; }
-      if (!this.runs(ks).length && this.legal(ks).length >= 2) return ks.slice();
+      at.forEach((i, q) => { c[i] = ks[q]; });
+      if (!this.runs(c).length && this.legal(c).length >= 2) return c.slice();
     }
-    return this.fresh(rng, kinds);
+    for (;;) { const f = this.fresh(rng, kinds); b.forEach((k, i) => { if (this.ice(k)) f[i] = k; }); if (this.legal(f).length >= 2) return f; }   // (a frozen one breaks no line in: none to check)
   },
-  resolve(b, rng, kinds) {   // a swap made: its lines and every cascade after, in phases (what went, what fell, what came), then a shuffle if no move is left
+  resolve(b, rng, kinds) {   // a swap made: its lines and every cascade after, in phases (what went, what thawed, what fell, what came), then a shuffle if no move is left
     const phases = []; let c = b;
     for (let cascade = 1; cascade < 60; cascade++) {
       const rs = this.runs(c); if (!rs.length) break;
-      const gone = [...new Set(rs.flat())], d = c.slice(); for (const i of gone) d[i] = null;
+      const gone = [...new Set(rs.flat())], d = c.slice(), thawed = []; for (const i of gone) d[i] = null;
+      for (let i = 0; i < d.length; i++) if (this.ice(d[i]) && gone.some((g) => this.adj(g, i))) { d[i] = this.food(d[i]); thawed.push(i); }   // a line gone beside a frozen one: its ice off
       const f = this.fall(d, rng, kinds);
-      phases.push({ cascade, runs: rs, gone, foods: gone.map((i) => c[i]), moved: f.moved, come: f.come, b: f.b });
+      phases.push({ cascade, runs: rs, gone, foods: gone.map((i) => c[i]), thawed, moved: f.moved, come: f.come, b: f.b });
       c = f.b;
     }
     const stuck = !this.legal(c).length;
     if (stuck) c = this.shuffle(c, rng, kinds);
     return { phases, b: c, shuffled: stuck };
   },
-  score(ph) { return ph.gone.length * FEED.pts * Math.min(ph.cascade, FEED.cap); },
+  score(ph, fav) { return ph.foods.reduce((s, k) => s + FEED.pts * (k === fav ? FEED.favX : 1), 0) * Math.min(ph.cascade, FEED.cap); },   // (the day's favourite: its points
+  // doubled, not its fullness: the brief)
   stars(full) { return FEED.stars.filter((s) => full >= s).length; },
 };
 if (typeof module !== 'undefined') module.exports = { FL, FEED, FEED_SET, FOODS };
 else {
   const foodSvgs = {};
-  const foodSvg = (id) => {   // a food as an SVG of its rows, a rect per run of one colour, the colours its own
-    if (foodSvgs[id]) return foodSvgs[id];
+  const foodSvg = (id, skip = '') => {   // a food as an SVG of its rows, a rect per run of one colour, the colours its own (skip: colours left out)
+    if (foodSvgs[id + skip]) return foodSvgs[id + skip];
     const [ps, rs] = FOODS[id], rows = rs.split('/'), pal = {};
     for (const s of ps.split(',')) pal[s[0]] = '#' + s.slice(1);
     let paths = '';
     for (const c in pal) {
+      if (skip.includes(c)) continue;
       let d = '';
       rows.forEach((r, y) => { for (let x = 0; x < r.length;) { if (r[x] !== c) { x++; continue; } let e = x; while (e < r.length && r[e] === c) e++; d += 'M' + x + ' ' + y + 'h' + (e - x) + 'v1h' + (x - e) + 'z'; x = e; } });
       if (d) paths += '<path fill="' + pal[c] + '" d="' + d + '"/>';
     }
-    return (foodSvgs[id] = '<svg viewBox="0 0 ' + rows[0].length + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + paths + '</svg>');
+    return (foodSvgs[id + skip] = '<svg viewBox="0 0 ' + rows[0].length + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + paths + '</svg>');
   };
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
@@ -131,8 +147,9 @@ else {
     newRun() {
       const seed = (Math.random() * 4294967296) >>> 0;
       this.rng = mulberry32(seed);
-      this.st = { b: FL.fresh(this.rng, FEED_SET), moves: FEED.moves, score: 0, full: 0, swaps: 0, cascades: 0, done: false, t0: performance.now(), first: 0, seed };
+      this.st = { b: FL.fresh(this.rng, FEED_SET, true), moves: FEED.moves, score: 0, full: 0, swaps: 0, cascades: 0, done: false, t0: performance.now(), first: 0, seed, fav: FL.fav(today) };
     },
+    rec() { const f = save.feed; return f && typeof f === 'object' ? f : (save.feed = { day: -1, best: 0 }); },   // kept in the save: the UTC day his coins were last given, the best score
     open() {   // a tap on Moti: the board under him, a run under way taken up again
       if (this.active || game.state !== 'menu') return;
       if (!this.st || this.st.done) this.newRun();
@@ -161,10 +178,11 @@ else {
       meter.append(bar, ticks); const meterTxt = el('div', 'fm-mt'); meterTxt.append(px(st.full + '/' + FEED.stars[2]));
       const x = button('', 'setBtn fm-x', () => this.close()), xi = el('img'); xi.src = 'assets/ui/close.svg'; xi.alt = ''; xi.draggable = false; x.append(xi); x.setAttribute('aria-label', t('goBack'));
       const mid = el('div', 'fm-mid'); mid.append(meter, meterTxt);
-      hud.append(mv, mid, x);
+      const fav = el('div', 'fm-fav'); fav.innerHTML = foodSvg(st.fav); fav.append(el('small', 'fm-l', '×' + FEED.favX)); fav.setAttribute('role', 'img'); fav.setAttribute('aria-label', t('feedFav'));   // the day's favourite
+      hud.append(mv, fav, mid, x);
       const box = el('div', 'fm-board'); box.setAttribute('role', 'grid'); box.setAttribute('aria-label', t('feedMoves'));
       wrap.append(hud, box); p.append(wrap);
-      this.box = box; this.hud = { mv, bar, meterTxt }; this.els = [];
+      this.box = box; this.hud = { mv, bar, meterTxt, fav }; this.els = [];
       st.b.forEach((k, i) => this.els.push(this.tile(k, i)));
       this.meter();
       this.wire(box);
@@ -172,8 +190,19 @@ else {
       const y0 = p.getBoundingClientRect().top;
       game.menuFit(hud.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0);   // Moti over the board, smaller if he must be
     },
-    tile(k, i) {   // a food's element at cell i
-      const e = el('div', 'fm-t'); e.innerHTML = foodSvg(k); this.place(e, i); this.box.append(e); return e;
+    tile(k, i) {   // a food's element at cell i; a frozen one's under the sheet's own frozen treat, its ice alone (the treat in it left out), see-through
+      const e = el('div', 'fm-t'); e.innerHTML = foodSvg(FL.food(k)) + (FL.ice(k) ? '<i class="fm-ice">' + foodSvg('frozen', 'e') + '</i>' : '');
+      if (FL.ice(k)) e.classList.add('ice');
+      this.place(e, i); this.box.append(e); return e;
+    },
+    shiver(i) {   // a frozen one won't move: it shivers, nothing spent
+      const d = 2 * PIX.size; sound.play('deny', 0.35, 1.4); haptics.buzz(6); this.sel = -1; this.mark();
+      anim(this.els[i], [{ transform: 'none' }, { transform: `translateX(${d}px)` }, { transform: `translateX(${-d}px)` }, { transform: 'none' }], 200);
+    },
+    thaw(i) {   // a line gone beside it: its ice cracks off, a puff
+      const e = this.els[i], ice = e && e.querySelector('.fm-ice'); if (!ice) return;
+      e.classList.remove('ice'); sound.play('crumble', 0.5, 1.6); haptics.buzz(8);
+      anim(ice, still ? [{ opacity: 0.6 }, { opacity: 0 }] : [{ transform: 'none', opacity: 0.6 }, { transform: 'scale(1.15)', opacity: 0.35, offset: 0.4 }, { transform: 'scale(1.3)', opacity: 0 }], 220).then(() => ice.remove());
     },
     place(e, i) { const c = FEED.cell * PIX.size, n = FEED.n; e.style.left = (i % n) * c + 'px'; e.style.top = ((i / n) | 0) * c + 'px'; },
     meter() {
@@ -207,6 +236,7 @@ else {
         if (d.moved || this.busy || e.type === 'pointercancel') return;
         const i = this.cellAt(e); if (i !== d.i) return;
         if (this.sel >= 0 && FL.adj(this.sel, i)) { const s = this.sel; this.sel = -1; this.mark(); this.swap(s, i); }
+        else if (FL.ice(this.st.b[i])) this.shiver(i);
         else { this.sel = this.sel === i ? -1 : i; this.mark(); haptics.buzz(4); }
       };
       box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
@@ -227,12 +257,13 @@ else {
         else { this.cur = j; this.mark(); }
         return true;
       }
-      if (e.code === 'Space' || e.code === 'Enter') { this.sel = this.sel === this.cur ? -1 : this.cur; this.mark(); return true; }
+      if (e.code === 'Space' || e.code === 'Enter') { if (FL.ice(this.st.b[this.cur])) this.shiver(this.cur); else { this.sel = this.sel === this.cur ? -1 : this.cur; this.mark(); } return true; }
       return false;
     },
     async swap(i, j) {   // try a swap: no line, it goes back and costs nothing; a line, a move spent and all it brings resolved
       const st = this.st;
       if (this.busy || st.done || !FL.adj(i, j)) return;
+      if (FL.ice(st.b[i]) || FL.ice(st.b[j])) { this.shiver(FL.ice(st.b[i]) ? i : j); return; }
       this.busy = true; this.idle = performance.now(); this.unhint();
       const ei = this.els[i], ej = this.els[j], c = FEED.cell * PIX.size, n = FEED.n;
       const dx = ((j % n) - (i % n)) * c, dy = (((j / n) | 0) - ((i / n) | 0)) * c;
@@ -260,9 +291,10 @@ else {
     },
     async eat(ph) {   // one phase: its foods eaten (Moti's bite), then the rest down and new ones in
       const st = this.st, c = FEED.cell * PIX.size, b = game.hero;
-      st.full += ph.gone.length; st.score += FL.score(ph);
+      st.full += ph.gone.length; st.score += FL.score(ph, st.fav);
       const big = ph.runs.some((r) => r.length >= 4);
       sound.play('coin', 0.45, 1 + 0.08 * Math.min(ph.cascade - 1, 4)); haptics.buzz(big ? 12 : 5);
+      for (const i of ph.thawed) this.thaw(i);
       this.bite(ph);   // (flying while the rest fall: the brief's overlap)
       this.meter();
       await Promise.all(ph.gone.map((i) => { const e = this.els[i]; this.els[i] = null; return anim(e, still ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(1.18)', opacity: 1, offset: 0.35 }, { transform: 'scale(0.2)', opacity: 0 }], FEED.pop).then(() => e.remove()); }));
@@ -280,16 +312,24 @@ else {
     finish(quiet) {   // the eighth move resolved: his reaction and the result (quiet: closed meanwhile, the count only)
       const st = this.st; st.done = true;
       if (st.told) return; st.told = true;
-      const stars = FL.stars(st.full), b = game.hero;
+      const stars = FL.stars(st.full), b = game.hero, rec = this.rec();
+      st.pay = rec.day !== today ? FEED.pay : 0; st.best = st.score > (rec.best || 0);   // the day's first run fed to the end, whatever its stars: his coins (once a UTC day)
+      if (st.pay) { rec.day = today; save.bank += st.pay; save.camp.wallet = (save.camp.wallet || 0) + st.pay; if (save.cur) save.cur.coins = (save.cur.coins || 0) + st.pay; }   // (a level under way
+      // takes them up too: Game.resume starts it from its own count)
+      if (st.best) rec.best = st.score;
+      persist();
       if (b) { b.wake(); b.kickSquash(0, 1, -0.7); b.hop(Math.sqrt(2 * WORLD.gravity * (0.25 + 0.15 * stars) * b.R)); b.face.wide = 1; b.face.surprise = 0; }   // full: a happy little hop
       sound.play(stars >= 2 ? 'buy' : 'coin', 0.8, 1); haptics.buzz(25);
       track('feed_finish', { duration_ms: Math.round(performance.now() - st.t0), score: st.score, fullness: st.full, successful_swaps: st.swaps, cascades: st.cascades, stars });
+      track('feed_reward_claim', { utc_day: dayKey(), amount: st.pay, result: st.pay ? 'granted' : 'given_today' });
       if (!quiet && this.box) this.result();
     },
-    result() {   // over the board: his words, the stars, the score; again, or home
+    result() {   // over the board: his words, the stars, the score and the best (a new one yellow); his thanks in coins, the day's first time; again, or home
       const st = this.st, stars = FL.stars(st.full), end = el('div', 'fm-end');
       const sr = el('div', 'fm-stars'); for (let k = 0; k < 3; k++) sr.append(iconEl(k < stars ? 'star' : 'starOff'));
-      end.append(cap(el('div', 'head', t('feedDone')), 'feedDone'), sr, px(tf('feedScore', { n: st.score })));
+      const sc = px(tf('feedScore', { n: st.score })), bs = px(tf('feedBest', { n: this.rec().best || st.score })); bs.classList.add('fm-best'); if (st.best) sc.classList.add('fm-new');
+      end.append(cap(el('div', 'head', t('feedDone')), 'feedDone'), sr, sc, bs);
+      if (st.pay) { const pay = el('div', 'fm-pay'); pay.append(px(tf('feedTreat', { n: st.pay })), iconEl('coin')); end.append(pay); anim(pay, [{ transform: 'scale(0.6)', opacity: 0 }, { transform: 'scale(1.12)', opacity: 1, offset: 0.6 }, { transform: 'none', opacity: 1 }], 320); }
       const row = el('div', 'pair'); row.append(cap(button(t('feedAgain'), 'big thumb', () => { this.newRun(); ui.menu(); }), 'feedAgain'), cap(button(t('goBack'), 'big thumb alt', () => this.close()), 'goBack'));
       end.append(row); this.box.append(end);
     },
@@ -340,9 +380,10 @@ else {
         this.flying.splice(k, 1); this.munch(ph);
       });
     },
-    munch(ph) {   // it is in: a bounce of the cheeks and belly, a little chirp, gladder for a big one and for each step of a cascade
+    munch(ph) {   // it is in: a bounce of the cheeks and belly, a little chirp, gladder for a big one, his favourite (a chime, its sign over the board) and each step of a cascade
       const b = game.hero; if (!b) return;
-      const big = ph.runs.some((q) => q.length >= 4);
+      const fav = !!this.st && ph.foods.includes(this.st.fav), big = fav || ph.runs.some((q) => q.length >= 4);
+      if (fav) { sound.play('chime', 0.45, 1.5); anim(this.hud.fav, [{ transform: 'none' }, { transform: 'scale(1.2)', offset: 0.4 }, { transform: 'none' }], 240); }
       b.kickSquash(0, 1, big ? 0.55 : 0.32); b.face.wide = Math.max(b.face.wide, big ? 1 : 0.6); b.face.surprise = Math.min(b.face.surprise, 0.2);
       sound.play('bubble', big ? 0.7 : 0.5, 1.25 + 0.07 * Math.min(ph.cascade - 1, 4) + (Math.random() - 0.5) * 0.08); haptics.buzz(big ? 14 : 7);
     },

@@ -30,8 +30,9 @@ const FEED = {
   // совмещения и финала»): its bits (a line of 4+ more), as the game's sparkFx in its own colours: CSS px/s, s, px/s² down, their speed's part lost a second, the
   // part in white; a white ring round the line for ring s (a line of 4+ a wider one)
   confetti: { n: 24, star: 24, life: [1.4, 2.2], g: 260 },   // the result's: bits, and more a star, in the four foods' colours, falling slow and fluttering
-  fin: { big: 1.5, feet: 61, band: 75 },   // the result (the Figma «Feed-full»): Moti half as big again as over the board (its 300 to «Feed»'s 200), his feet so far
-  // over the foods, the dark from so far over his feet
+  fin: { big: 1.5, feet: 61, band: 75, breath: 0.02, period: 2.4, pay: 1450, tick: 110 },   // the result (the Figma «Feed-full»): Moti half as big again as over the
+  // board (its 300 to «Feed»'s 200), his feet so far over the foods, the dark from so far over his feet; full, he breathes (his size a breath's part up and down
+  // in period s); the day's gift its coin in at pay ms, counted up a coin each tick ms (owner, З20 «Б»: «добавить максимум приятной анимации на последнем экране»)
 };
 const FEED_SET = ['sakura', 'matcha', 'taiyaki', 'imo'];   // the brief's first four (#01, #02, #05, #19): four shapes and colours apart
 // The foods and blockers (the owner's concept sheet, research/feed-moti/foods-sheet.webp), each on its own GPT grid, one of the sheet's dots one sprite
@@ -270,6 +271,8 @@ else {
     fxCanvas();
   };
   const ring = (x, y, r0, r1) => { bits.push({ ring: true, x, y, r0, r1, t: 0, life: FEED.burst.ring, c: WHITE }); fxCanvas(); };   // a white ring thrown out
+  const shine = (x, y) => { for (let i = 0; i < 12; i++) { const a = fxRand(0, 2 * Math.PI), v = fxRand(60, 170); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, g: 320, drag: 3, t: 0,
+    life: fxRand(0.3, 0.6), s: 2, c: fxRand(0, 1) < 0.5 ? WHITE : '#ffed57' }); } fxCanvas(); };   // a coin's shine: white and yellow bits out round it
   const confetti = (r, n) => {   // the result's: bits in the four foods' colours (their light ones) from over the board, falling slow, fluttering
     const C = FEED.confetti, rr = () => fxRand(0, 1), inks = FEED_SET.flatMap((id) => inksOf(id)).filter((h) => { const [a, b, c] = rgbOf(h); return 0.299 * a + 0.587 * b + 0.114 * c > 90; });
     for (let i = 0, m = Math.round(n * (still ? 0.4 : 1)); i < m; i++) bits.push({ x: r.left + rr() * r.width, y: r.top - rr() * 0.4 * r.height, vx: (2 * rr() - 1) * 40, vy: 30 + rr() * 60, g: C.g, drag: 1.6,
@@ -279,7 +282,7 @@ else {
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const anim = (e, frames, ms, ease = 'ease-out') => (e && e.animate ? e.animate(frames, { duration: still ? Math.min(ms, 90) : ms, easing: ease }).finished.catch(() => {}) : Promise.resolve());
   var feed = {   // (var: a global, as game.js asks for it by name)
-    active: false, st: null, busy: false, sel: -1, cur: -1, els: [], box: null, hud: {}, keys: false, idle: 0, hinting: false, flying: [], fat: 0, fin: 0, xb: null,
+    active: false, st: null, busy: false, sel: -1, cur: -1, els: [], box: null, hud: {}, keys: false, idle: 0, hinting: false, flying: [], fat: 0, fin: 0, xb: null, finLook: null,
     newRun() {
       const seed = (Math.random() * 4294967296) >>> 0;
       this.rng = mulberry32(seed);
@@ -486,7 +489,8 @@ else {
     result(p) {   // the Figma «Feed-full» (1263:1599; owner, 2026-10-27: «финальный экран, когда моти наелся») in the board's place, as a level's Win (ui.win): the
       // three foods he ate most for its stars (lit as many as he earned, the rest grey; the first time in one after another, ringing), «Mochi is full» and «come
       // back tomorrow» in yellow, Close the yellow pill; Moti half as big again as over the board (FEED.fin: he swells to it, frame), his feet a little over the
-      // foods, the dark from a little over his feet down; the first time faded in, confetti for a star or more. No score, best, gift or Again, as in it (asked: З20)
+      // foods, the dark from a little over his feet down; the first time each in after the other, confetti for a star or more; his gift the day's first time (З20 «Б»). No
+      // score, best or Again, as in it
       const st = this.st, stars = FL.stars(st.full), first = !st.shown; st.shown = true;
       const W = document.documentElement.clientWidth, dpr = devicePixelRatio || 1, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / FEED.n));
       this.foodPx = (FEED.food * Math.max(1, Math.floor((cell * dpr) / FEED.widest))) / dpr;   // (a food as big as on the board: its pixels whole screen points)
@@ -496,17 +500,26 @@ else {
       // day's set's order)
       for (const f of FEED_SET) if (!ate.includes(f)) ate.push(f);
       ate.slice(0, 3).forEach((f, k) => {
-        const s = el('div', 'fm-star' + (k < stars ? ' won' : ' off')); s.innerHTML = foodSvg(f); row.append(s); if (!first) return;
+        const s = el('div', 'fm-star' + (k < stars ? ' won' : ' off')), d = 0.15 + 0.3 * k; s.innerHTML = foodSvg(f); row.append(s); if (!first) return;
         if (k < stars) setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k);
-        s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < stars ? ', ' + (1.2 + 0.2 * k) + 's' : '');
+        s.style.animationDelay = d + 's, ' + (d + 0.4) + 's' + (k < stars ? ', ' + (1.2 + 0.2 * k) + 's' : '');   // (in, its landing's squash, its twinkle)
       });
       words.append(el('div', 'head', t('feedDone')), cap(el('div', 'fm-tom', t('feedTomorrow')), 'feedTomorrow'));
-      box.append(row, words); p.append(box, cap(button(t('feedClose'), 'big thumb', () => this.close()), 'feedClose'));
+      let pay = null;
+      if (st.pay) { pay = el('div', 'fm-pay'); pay.append(px(tf('feedTreat', { n: first && !still ? 0 : st.pay })), iconEl('coin')); words.append(pay); }   // his thanks in
+      // coins, the day's first run (З20 «Б»)
+      const close = cap(button(t('feedClose'), 'big thumb', () => this.close()), 'feedClose');
+      box.append(row, words); p.append(box, close); this.finLook = row;
       const y0 = p.getBoundingClientRect().top, feet = row.getBoundingClientRect().top - y0 - FEED.fin.feet;
       game.menuFit(feet + MENU_HERO.gap, 0, feet - FEED.fin.band, false, true);   // (his size kept: the bigger one he swells to)
       this.fin = Math.min(FEED.fin.big, Math.max(1, (feet - MENU_HERO.room) / (MENU_HERO.h * game.R)));   // (no higher than the menu's room over him)
       if (!first) return;
+      box.classList.add('fin-in'); close.classList.add('fin-in');   // (in one after another: the foods, his words, his gift, Close; index.html)
       anim(box, [{ opacity: 0 }, { opacity: 1 }], 200);
+      if (pay && !still) setTimeout(() => {   // the coin in, a shine round it, counted up a coin at a time, ringing; his eyes on it
+        if (!pay.isConnected) return; const r = pay.lastChild.getBoundingClientRect(); this.finLook = pay; ring(r.left + r.width / 2, r.top + r.height / 2, 3, 22); shine(r.left + r.width / 2, r.top + r.height / 2);
+        for (let i = 1; i <= st.pay; i++) setTimeout(() => { if (!pay.isConnected) return; pay.firstChild.replaceWith(px(tf('feedTreat', { n: i }))); sound.play('coin', 0.7, 1 + 0.12 * i); haptics.buzz(6); }, i * FEED.fin.tick);
+      }, FEED.fin.pay);
       if (stars) confetti(p.getBoundingClientRect(), FEED.confetti.n + FEED.confetti.star * stars);
     },
     frame(now) {   // each frame (game.js runFrame, after menuTouch): his eyes on a bite in the air (or the board), his sag by how full he is, eased back at home
@@ -514,7 +527,8 @@ else {
       const dt = Math.min(0.1, Math.max(0, (now - (this.lastF || now)) / 1000)); this.lastF = now;
       const aim = this.active && this.st ? Math.min(1, this.st.full / FEED.stars[2]) : 0;
       this.fat = (this.fat || 0) + (aim - (this.fat || 0)) * Math.min(1, dt * (aim > (this.fat || 0) ? 2.5 : 1.2));
-      const k = smooth(FEED.from, 1, this.fat), big = this.active && this.fin ? this.fin : 1;   // (big: the result's Moti, FEED.fin)
+      const k = smooth(FEED.from, 1, this.fat), big = this.active && this.fin ? this.fin * (still ? 1 : 1 + FEED.fin.breath * Math.sin((2 * Math.PI * now) / (1000 * FEED.fin.period))) : 1;   // (big:
+      // the result's Moti, FEED.fin, breathing)
       if (this.fat > 0.003 || this.sagged || big > 1) {
         b.growthTarget = big * (1 + FEED.wide * k);
         if (k > 0.002) { b.squeezeIn = Math.max(b.squeezeIn, FEED.low * k); b.sqAx = 0; b.sqAy = 1; }
@@ -523,7 +537,9 @@ else {
       if (!this.active) return;
       const fly = this.flying[this.flying.length - 1], L = game.heroLook;
       if (fly) { const p = fly.at(Math.min(1, (now - fly.t0) / fly.ms)); L.x = p.x - view.left; L.y = p.y + game.lv.cam; L.t = now; }
-      else if (this.box && now - (this.lookT || 0) > 400) {   // waiting: on the board (the food in hand, if one is), curious
+      else if (!this.box && this.fin && this.finLook && now - (this.lookT || 0) > 400) {   // the result: on its foods, then on his gift
+        this.lookT = now; const r = this.finLook.getBoundingClientRect(); L.x = r.left + r.width / 2 - view.left; L.y = r.top + r.height / 2 + game.lv.cam; L.t = now;
+      } else if (this.box && now - (this.lookT || 0) > 400) {   // waiting: on the board (the food in hand, if one is), curious
         this.lookT = now; const r = this.box.getBoundingClientRect(), n = FEED.n, i = this.sel >= 0 ? this.sel : -1;
         L.x = (i >= 0 ? r.left + (i % n + 0.5) * r.width / n : r.left + r.width / 2) - view.left; L.y = (i >= 0 ? r.top + (((i / n) | 0) + 0.5) * r.width / n : r.top + r.height / 3) + game.lv.cam; L.t = now;
       }

@@ -413,12 +413,26 @@
   .fm-stars { display: flex; align-items: center; }   /* the foods for its stars in a row (.wstars: their gap) */
   .fm-star, .fm-star svg { width: var(--food); height: var(--food); display: block; }   /* a food for a star: as big as on the board (feed.result) */
   .fm-star.off { filter: grayscale(1) brightness(0.45); }   /* a star not earned: its food grey */
-  .stars .fm-star { animation: starIn 0.4s steps(5) both; }   /* in one after another, as a level's stars (delays set in feed.js) */
-  .stars .fm-star.won { animation: starIn 0.4s steps(5) both, starTwinkle 1.4s steps(2) infinite; }
+  .stars .fm-star { transform-origin: 50% 100%; animation: starIn 0.4s steps(5) both, foodLand 0.45s ease-out forwards; }   /* in one after another, as a level's stars, then
+  a squash as it lands (delays set in feed.js; no backwards fill: its first frame would hold the pop-in still) */
+  .stars .fm-star.won { animation: starIn 0.4s steps(5) both, foodLand 0.45s ease-out forwards, starTwinkle 1.4s steps(2) infinite; }
   .fm-words { display: flex; flex-direction: column; align-items: center; padding: 8px; color: var(--yellow); }
   .fm-words > .head { --p: 3.44; margin: 0; }   /* «Mochi is full»: the Figma's Inter Bold 33 */
   .fm-tom { --p: 2.08; text-transform: uppercase; }   /* «come back tomorrow»: Inter Medium 20 */
   .fm-tom > .cap { font-size: 20px; color: var(--white); opacity: 0.56; }   /* its caption: Inter 20 */
+  .fm-pay { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; --p: 2.08; }   /* his gift, the day's first run (З20 «Б») */
+  .fm-pay .ico { --p: 2; }
+  .fm-fin.fin-in > .fm-words > .head { animation: wordDrop 0.55s ease-out 0.9s both; }   /* the result's entrances (owner, З20: «добавить максимум приятной анимации на последнем
+  экране»): his words dropped in with a bounce, the line and the gift risen in, the coin spun in, Close up from below */
+  .fm-fin.fin-in .fm-tom { animation: wordRise 0.4s ease-out 1.2s both; }
+  .fm-fin.fin-in .fm-pay { animation: wordRise 0.4s ease-out 1.35s both; }
+  .fm-fin.fin-in .fm-pay .ico { animation: coinSpin 0.5s steps(6) 1.45s both; }
+  #menu > .big.thumb.fin-in { animation: pillUp 0.45s ease-out 1.6s both; }
+  @keyframes foodLand { 0% { transform: none; } 30% { transform: scale(1.18, 0.82); } 62% { transform: scale(0.94, 1.07); } 100% { transform: none; } }
+  @keyframes wordDrop { 0% { transform: translateY(-28px) scale(0.9, 1.2); opacity: 0; } 55% { transform: translateY(4px) scale(1.1, 0.88); opacity: 1; } 78% { transform: translateY(-2px) scale(0.97, 1.04); } 100% { transform: none; opacity: 1; } }
+  @keyframes wordRise { 0% { transform: translateY(12px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  @keyframes coinSpin { 0% { transform: scale(0) rotateY(0deg); } 60% { transform: scale(1.3) rotateY(540deg); } 100% { transform: scale(1) rotateY(720deg); } }
+  @keyframes pillUp { 0% { transform: translateY(96px); opacity: 0; } 70% { transform: translateY(-6px); opacity: 1; } 100% { transform: none; opacity: 1; } }
   .card b { color: var(--yellow); }
   .card:active { box-shadow: inset 0 0 0 2px var(--yellow); }
   .rows { width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
@@ -434,7 +448,7 @@
   @keyframes starIn { 0% { transform: scale(0) rotate(-120deg); opacity: 0; } 60% { transform: scale(1.45) rotate(12deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
   @keyframes starTwinkle { 50% { filter: brightness(1.45); } }
   @keyframes payIn { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .pay, .wl.new .ico, .stars .fm-star { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .pay, .wl.new .ico, .stars .fm-star, .fin-in, .fin-in .head, .fin-in .fm-tom, .fin-in .fm-pay, .fin-in .ico { animation: none; } }
 </style>
 </head>
 <body>

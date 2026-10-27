@@ -488,6 +488,17 @@ ELEMENTS = {
                           'it melts away when the puzzle is solved', where='standing on a ledge against the cave wall, from the ledge up to the ledge over it',
                           material='clear blue ice blocks, frost, cracks', size='about 2 tiles wide and 3 tiles tall', inks='white and blue ice in big flat shapes, faint blue dither, '
                           'gold coins faint behind it', scene=FUJI_AT),
+    # The Danchi's stash room inside the estate playground's concrete octopus slide (owner 2026-10-25, Д279 «6»: tako-yama), as the cellar's and Narusawa's
+    'danchi-caveroom': dict(world='danchi', kind='prop', what="the inside of a secret bonus room in a Japanese danchi estate at night: the hollow inside of the playground's "
+                            "big concrete octopus slide (a tako-yama, a classic of Japanese playgrounds of the 1960s and 70s), seen as one whole game screen: its hollow "
+                            "concrete dome over the room, round holes cut through the dome that show the night sky and the estate's blocks of flats outside with their lit "
+                            "windows, the octopus's tentacles as slides curling down from the top of the dome to the ground, small steps and round handholds up its inside "
+                            "walls, raw grey board-formed concrete as the architect Arata Isozaki built, coins to collect hanging in the room",
+                            plane='back', where='the whole room behind the play: its dome, its round holes and its tentacle slides; the ledges in it are concrete shelves; '
+                            'the way out is a low arched hole at the foot of its left wall', material='raw poured concrete, painted concrete, the night seen through round holes',
+                            size='the whole room, about 16 tiles wide and 26 tiles tall',
+                            inks='the concrete in big flat faint grey shapes (no fine speckle), the night through the holes black with a few small lit windows faint orange, '
+                            'a faint purple glow (the stash), gold coins', scene=DANCHI_AT + ' as a shelf in the room'),
     # The Danchi (owner 2026-10-21: world 6 Japanese, «Данчи»), six takes on each
     'danchi-slab': dict(world='danchi', kind='ledge', what='the basic ledge, a slab of raw danchi concrete sticking out of the shaft wall', does='solid on every side: you '
                         'stand on it, cling to its sides and jump off it', material='poured concrete, the seams of its panels, rust and rain stains running down it, '

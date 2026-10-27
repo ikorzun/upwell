@@ -1,4 +1,4 @@
-// Feed Moti's rules (src/feed.js, FL) against the brief's «must pass» list, over many seeded boards, and the fullness two kinds of player reach in
+// Feed Moti's rules (src/feed.js, FL) against the brief's «must pass» list (phase C's frozen treat and favourite too), over many seeded boards, and the fullness two kinds of player reach in
 // eight moves, to set the stars (FEED.stars). Usage: node tools/feed-test.mjs [seeds]   (exits 1 on a failed check)
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
@@ -9,12 +9,15 @@ const N = +(process.argv[2] || 2000), n = FEED.n, kinds = FEED_SET;
 let fails = 0;
 const check = (ok, what) => { if (!ok) { fails++; if (fails < 20) console.log('FAIL', what); } };
 
-// 1. Every starting board: 25 foods of the four, no line, two moves at least
+// 1. Every starting board: 25 foods of the four, no line, two moves at least; one of them frozen, in the middle nine (phase C), never in a move
 for (let s = 1; s <= N; s++) {
-  const b = FL.fresh(mulberry32(s), kinds);
-  check(b.length === n * n && b.every((k) => kinds.includes(k)), `board ${s}: 25 of the four`);
+  const b = FL.fresh(mulberry32(s), kinds, true), ice = b.map((k, i) => (FL.ice(k) ? i : -1)).filter((i) => i >= 0);
+  check(b.length === n * n && b.every((k) => kinds.includes(FL.food(k))), `board ${s}: 25 of the four`);
   check(FL.runs(b).length === 0, `board ${s}: a line at the start`);
   check(FL.legal(b).length >= 2, `board ${s}: fewer than two moves`);
+  check(ice.length === 1 && [6, 7, 8, 11, 12, 13, 16, 17, 18].includes(ice[0]), `board ${s}: one frozen, in the middle (${ice})`);
+  check(FL.legal(b).every(([i, j]) => i !== ice[0] && j !== ice[0]), `board ${s}: a move with the frozen one`);
+  check([ice[0] - 1, ice[0] + 1, ice[0] - n, ice[0] + n].every((j) => !FL.ok(b, ice[0], j) && !FL.ok(b, j, ice[0])), `board ${s}: the frozen one swapped`);
 }
 // 2. A swap that isn't with a neighbour is refused; one that makes no line is refused (it costs nothing: no move is taken before ok)
 {
@@ -38,9 +41,10 @@ for (let s = 1; s <= N; s++) {
 }
 // 4. Gravity and refill keep 5 x 5 and resolve every cascade; the end has no line and a move (a shuffle if it had none)
 for (let s = 1; s <= N; s++) {
-  const rng = mulberry32(1e6 + s), b = FL.fresh(rng, kinds), [i, j] = FL.legal(b)[0], r = FL.resolve(FL.swapped(b, i, j), rng, kinds);
+  const rng = mulberry32(1e6 + s), b = FL.fresh(rng, kinds, true), [i, j] = FL.legal(b)[0], r = FL.resolve(FL.swapped(b, i, j), rng, kinds);
   check(r.phases.length >= 1, `resolve ${s}: the swap's line`);
-  check(r.b.length === n * n && r.b.every((k) => kinds.includes(k)), `resolve ${s}: 25 foods after`);
+  check(r.b.length === n * n && r.b.every((k) => kinds.includes(FL.food(k))), `resolve ${s}: 25 foods after`);
+  check(r.phases.reduce((t, ph) => t + ph.thawed.length, 0) + r.b.filter((k) => FL.ice(k)).length === 1, `resolve ${s}: the frozen one thawed once or still there`);
   check(FL.runs(r.b).length === 0, `resolve ${s}: a line left`);
   check(FL.legal(r.b).length >= 1, `resolve ${s}: no move left`);
   for (const ph of r.phases) check(ph.b.every((k) => k != null) && ph.gone.length >= 3, `resolve ${s}: a phase's board whole`);
@@ -53,20 +57,38 @@ for (let s = 1; s <= N; s++) {
   const sh = FL.shuffle(dead, mulberry32(5), kinds), count = (b) => kinds.map((k) => b.filter((q) => q === k).length).join();
   check(count(sh) === count(dead), 'shuffle keeps the foods'); check(FL.runs(sh).length === 0 && FL.legal(sh).length >= 2, 'shuffle: no line, two moves');
 }
-// 6. Fullness: one a food cleared, cascades too; score 10 a food times the cascade (at most x4)
+// 6. Fullness: one a food cleared, cascades too; score 10 a food times the cascade (at most x4), the day's favourite twice its points, not its fullness
 {
-  const ph = { gone: [1, 2, 3], cascade: 2 }; check(FL.score(ph) === 60, 'score: 3 foods x 10 x2');
-  check(FL.score({ gone: [1, 2, 3], cascade: 9 }) === 120, 'score: the cascade capped at x4');
+  const ph = { gone: [1, 2, 3], foods: ['imo', 'imo', 'imo'], cascade: 2 }; check(FL.score(ph) === 60, 'score: 3 foods x 10 x2');
+  check(FL.score({ gone: [1, 2, 3], foods: ['imo', 'imo', 'imo'], cascade: 9 }) === 120, 'score: the cascade capped at x4');
+  check(FL.score({ gone: [1, 2, 3], foods: ['imo', 'imo', 'imo'], cascade: 1 }, 'imo') === 60 && FL.score({ gone: [1, 2, 3], foods: ['imo', 'imo', 'imo'], cascade: 1 }, 'sakura') === 30, 'score: the favourite x2');
+  const days = Array.from({ length: 8 }, (_, d) => FL.fav(20750 + d));
+  check(days.every((k, d) => kinds.includes(k) && (d === 0 || k !== days[d - 1])) && new Set(days).size === 4, `the favourite: one of the four, never two days the same (${days})`);
+}
+// 6b. The frozen one: a line beside it takes its ice off, once, and it is a food again (in the next lines); a line not beside it leaves it; a shuffle keeps it
+{
+  const A = 'sakura', B = 'matcha', C = 'taiyaki', D = 'imo';
+  const b = [A, A, A, B, C,   D, 'ice:' + C, D, C, B,   B, D, B, D, C,   C, B, D, B, D,   D, C, B, C, B];   // row 0's line over the frozen taiyaki at 6
+  const r = FL.resolve(b, mulberry32(9), kinds), p0 = r.phases[0];
+  check(p0.thawed.length === 1 && p0.thawed[0] === 6 && !p0.gone.includes(6), `thaw: the line over it takes its ice off (${p0.thawed})`);
+  check(r.phases.slice(1).every((ph) => !ph.thawed.length) && r.b.every((k) => !FL.ice(k)), 'thaw: once, and no ice after');
+  check(r.phases.reduce((f, ph) => f + ph.gone.length, 0) === r.phases.reduce((f, ph) => f + ph.foods.length, 0) && p0.gone.length === 3, 'thaw: no fullness for the ice');
+  const far = [A, A, A, B, C,   D, B, D, C, B,   B, D, B, D, C,   C, B, 'ice:' + D, B, D,   D, C, B, C, B];
+  const r2 = FL.resolve(far, mulberry32(9), kinds);
+  check(!r2.phases[0].thawed.length, 'a line far from it leaves its ice');
+  const dead = ['sakura', 'matcha', 'taiyaki', 'imo', 'sakura',   'taiyaki', 'imo', 'sakura', 'matcha', 'taiyaki',   'sakura', 'matcha', 'ice:taiyaki', 'imo', 'sakura',   'taiyaki', 'imo', 'sakura', 'matcha', 'taiyaki',   'sakura', 'matcha', 'taiyaki', 'imo', 'sakura'];
+  const sh = FL.shuffle(dead, mulberry32(5), kinds);
+  check(sh[12] === 'ice:taiyaki' && sh.filter(FL.ice.bind(FL)).length === 1 && FL.runs(sh).length === 0 && FL.legal(sh).length >= 2, 'shuffle: the frozen one stays, frozen');
 }
 // 7. Whole runs of eight moves by two players, the fullness they reach (for FEED.stars)
 const play = (seed, greedy) => {
-  const rng = mulberry32(seed), pick = mulberry32(seed ^ 0x9e3779b9); let b = FL.fresh(rng, kinds), full = 0, score = 0, cas = 0;
+  const rng = mulberry32(seed), pick = mulberry32(seed ^ 0x9e3779b9); let b = FL.fresh(rng, kinds, true), full = 0, score = 0, cas = 0;
   for (let m = 0; m < FEED.moves; m++) {
     const ls = FL.legal(b); if (!ls.length) return null;
     let mv = ls[(pick() * ls.length) | 0];
     if (greedy) { let best = -1; for (const q of ls) { const v = new Set(FL.runs(FL.swapped(b, ...q)).flat()).size + pick() * 0.5; if (v > best) { best = v; mv = q; } } }
     const r = FL.resolve(FL.swapped(b, ...mv), rng, kinds);
-    for (const ph of r.phases) { full += ph.gone.length; score += FL.score(ph); cas = Math.max(cas, ph.cascade); }
+    for (const ph of r.phases) { full += ph.gone.length; score += FL.score(ph, 'imo'); cas = Math.max(cas, ph.cascade); }
     b = r.b;
   }
   return { full, score, cas };

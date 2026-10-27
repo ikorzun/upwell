@@ -895,12 +895,6 @@ const KIT_REACH = NEON_REACH;   // in R: the hero this near a thing tends it, as
 // far F, shop D, stash E; its things his Maekawa picks (d22 «оставить»): spring E, bikes B, mail C, cat C, boxes E; its garden E twice the size (d17, d18; on
 // d10: «too small»): DC_GARDEN
 const DC_GARDEN = 2;
-const DCR_V = (() => {   // the Danchi's stash room inside the playground's concrete octopus slide (owner Д279 «6»), six takes while the owner picks (its sheet
-  // research/variants/danchi-caveroom-1.png); ?dcr=C shows another
-  const v = { room: 'A' }, m = location.search.match(/[?&]dcr=([A-F])/);
-  if (m) v.room = m[1];
-  return v;
-})();
 // The Danchi's own hazards (the owner's pick, 2026-10-25, Д276 «Б»; the takes left to Worlds), path A off their sheets (scratchpad hzd/cut):
 // on its walls an old boiler pipe burst at a joint, blasting scalding steam (danchi-steampipe-1 A: a lagged pipe held by clamps, a straight jet of round
 // puffs, its edge red; cutsp.py): asleep the pipe, bursting the jet over it; steam grey, never white, and no light (it neither burns nor sparks)
@@ -6101,8 +6095,8 @@ Renderer.prototype.draw = function (g, alpha) {
   if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.danchi) {   // the Danchi's stash room: inside the concrete octopus slide of the estate's
     // playground (a tako-yama; Д279 «6»): the dark of its hollow dome, round holes up in it with the night and the blocks' lit windows through them, the octopus
     // in the middle, its tentacles slides curling down, raw grey concrete; as the cellar is drawn: big flat shapes at a quarter on a quiet black (no dither, no
-    // white), nothing over the way out (overExit). By take (DCR_V.room), after the cells of research/variants/danchi-caveroom-1.png
-    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), L = DCR_V.room;
+    // white), nothing over the way out (overExit). Take A (the owner's pick, Д283 «A»), after the cells of research/variants/danchi-caveroom-1.png
+    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t);
     const G = PAL.gray, K = PAL.black, O = PAL.orange, DM = 1.14, BK = 1.08, RM = 1.24, WD = 1.2, LT = 1.32;   // the octopus, the blocks through a hole, a hole's cut
     // edge, a slide's chute, a slide; a window lit LIT, as the estate's far off (dcFar)
     const touch = (u, v, ru, rv) => !!exitT && ((Math.min(Math.max(u, exitT[0]), exitT[2]) - u) / ru) ** 2 + ((Math.min(Math.max(v, exitT[1]), exitT[3]) - v) / rv) ** 2 < 1;   // (an ellipse on the way out)
@@ -6129,48 +6123,12 @@ Renderer.prototype.draw = function (g, alpha) {
     };
     const grip = (u, v) => el(u, v, 0.3, 0.3, G, LT);   // a round handhold
     const beam = (u, v) => { bx(u - 0.6, v - 0.45, u + 0.6, v + 0.45, G, LT); bx(u - 0.38, v - 0.25, u + 0.38, v + 0.25, K, 1); };   // a hollow beam's cut end, open (Isozaki's)
-    if (L === 'A') {   // A: a broad head, a big hole in its brow, its tentacles out to each side (suckers on them), a slide down its middle, arches at its feet
-      hole(3.6, 17.4, 1.3, 1.2); hole(8, 19.2, 2.0, 1.3); hole(12.8, 17.8, 0.9, 0.8);
-      bx(4.6, 0, 11.4, 10.8, G, DM); el(8, 10.8, 4.4, 4.2, G, DM); hole(8, 12.0, 1.2, 1.1, false);
-      arch(4.9, 6.3, 2.2); arch(9.7, 11.1, 2.2);
-      slide(5.0, 10.2, 2.8, 6.0, 4.6, 0.5, 0.9, 0.7, 6, 3); slide(11.0, 10.2, 13.2, 6.0, 11.4, 0.5, 0.9, 0.7, 6, 3);
-      slide(8, 10.6, 8, 5.0, 8, 0.6, 0.65, 1.2, 4);
-    } else if (L === 'B') {   // B: a tall bell, a hole in its head, an S of a slide down its left, steps cut up its middle, an arch at its foot, a tentacle off its right
-      hole(3.8, 17.6, 1.3); hole(8, 19.6, 1.1, 0.8); hole(12.6, 17.8, 1.2);
-      bx(4.6, 0, 11.4, 11.5, G, DM); el(8, 11.5, 3.4, 4.5, G, DM); el(8, 1.5, 5.2, 2.6, G, DM); hole(8, 13.6, 0.9, 0.9, false);
-      for (let k = 0; k < 6; k++) bx(9.3, 2.0 + 1.8 * k, 10.3, 2.4 + 1.8 * k, K, 1);
-      arch(7.2, 8.8, 2.2);
-      beam(5.4, 13.6); slide(5.2, 13.0, 2.6, 10.5, 4.0, 7.0, 0.55, 0.55, 4); slide(4.0, 7.0, 5.8, 4.0, 3.9, 0.6, 0.55, 0.55, 4);
-      slide(10.8, 12.0, 14.8, 7.0, 12.8, 0.5, 0.75, 0.6);
-    } else if (L === 'C') {   // C: a head leaning right, two holes in it, a column of round handholds, a wide slide down its right, the way out its left foot's arch
-      hole(3.6, 17.2, 1.4); hole(8.6, 19.4, 1.2, 0.8); hole(13.2, 17.4, 1.0);
-      bx(0.6, 0, 13.2, 7.0, G, DM); el(3.2, 7.0, 2.6, 3.0, G, DM); el(9.4, 9.0, 4.6, 6.2, G, DM);
-      hole(8.0, 12.0, 0.6, 0.6, false); hole(10.6, 13.4, 0.5, 0.5, false);
-      for (let k = 0; k < 5; k++) grip(8.8, 1.6 + 2.0 * k);
-      slide(12.2, 12.6, 16.4, 6.4, 13.6, 0.5, 1.0, 0.9);
-    } else if (L === 'D') {   // D: a round head, a hole at its top, two tall arches with a slide in each, a rib between them, tentacles down its sides with suckers
-      hole(3.4, 17.4, 1.3); hole(8, 19.4, 1.3, 0.9); hole(12.6, 17.6, 1.3);
-      bx(3.4, 0, 12.6, 11.2, G, DM); el(8, 11.2, 4.6, 4.4, G, DM); hole(8, 13.8, 0.8, 0.8, false);
-      for (const u0 of [4.8, 8.8]) { arch(u0, u0 + 2.4, 8.4); bx(u0 + 0.3, 4.0, u0 + 1.1, 6.6, G, BK); bx(u0 + 0.5, 5.8, u0 + 0.72, 5.98, O, LIT); bx(u0 + 1.4, 4.0, u0 + 2.1, 5.4, G, BK); bx(u0 + 1.6, 4.6, u0 + 1.82, 4.78, O, LIT); }   // the night, blocks
-      slide(6.8, 8.6, 7.0, 4.0, 5.2, 0.4, 0.35, 0.35, 4); slide(9.2, 8.6, 9.0, 4.0, 10.8, 0.4, 0.35, 0.35, 4);
-      bx(7.85, 0, 8.15, 12.6, G, LT);
-      slide(4.0, 9.6, 3.0, 5.0, 3.6, 0.6, 0.7, 0.6, 5, 3); slide(12.0, 9.6, 13.0, 5.0, 12.4, 0.6, 0.7, 0.6, 5, 3);
-    } else if (L === 'E') {   // E: a dome rising to the right, one long slide sweeping from its top down to its left foot, holes, handholds down its right, the way
-      // out at its left foot, the stash's purple glowing in an arch at its other foot (breathing slowly)
-      hole(3.8, 17.4, 1.2); hole(8.2, 19.4, 1.2, 0.8); hole(12.8, 17.8, 1.0);
-      bx(2.0, 0, 13.6, 6.0, G, DM); el(9.6, 7.0, 4.6, 7.6, G, DM); el(4.6, 6.0, 2.6, 3.2, G, DM);
-      hole(8.4, 11.4, 0.7, 0.7, false); hole(11.2, 12.2, 0.55, 0.55, false);
-      arch(9.8, 11.2, 1.8); F(X(10.5), Y(1.2), 1.3 * t, 0, 0, 1.2 * t, PAL.purple, 0.18 + 0.04 * Math.sin(T * 1.6), 1);
-      for (let k = 0; k < 5; k++) grip(13.0, 2.4 + 2.0 * k);
-      beam(12.8, 14.0); slide(12.6, 13.2, 11.8, 2.0, 4.0, 0.6, 0.9, 0.7, 7);
-    } else {   // F: a big hole over its head, the blocks through it, a tall arch down its middle with a slide in it, tentacles curling down either side, small holes
-      hole(8, 18.2, 2.2, 1.6); hole(3.2, 16.4, 1.0); hole(13.0, 15.6, 0.9);
-      bx(4.0, 0, 12.0, 10.5, G, DM); el(8, 10.5, 4.0, 5.2, G, DM);
-      arch(6.9, 9.1, 9.6); slide(8.6, 10.2, 8.8, 5.0, 7.3, 0.4, 0.4, 0.4, 4);
-      slide(4.4, 10.0, 1.4, 6.5, 3.8, 2.0, 0.6, 0.45, 5); slide(3.8, 2.0, 3.6, 0.6, 4.8, 0.9, 0.45, 0.35, 3);   // (curling in at its tip)
-      slide(11.6, 10.0, 14.6, 6.5, 12.2, 2.0, 0.6, 0.45, 5); slide(12.2, 2.0, 12.4, 0.6, 11.2, 0.9, 0.45, 0.35, 3);
-      for (const [u, v, r] of [[5.6, 12.6, 0.45], [10.4, 12.6, 0.45], [5.0, 6.0, 0.4], [11.0, 6.0, 0.4]]) hole(u, v, r, r, false);
-    }
+    // A: a broad head, a big hole in its brow, its tentacles out to each side (suckers on them), a slide down its middle, arches at its feet
+    hole(3.6, 17.4, 1.3, 1.2); hole(8, 19.2, 2.0, 1.3); hole(12.8, 17.8, 0.9, 0.8);
+    bx(4.6, 0, 11.4, 10.8, G, DM); el(8, 10.8, 4.4, 4.2, G, DM); hole(8, 12.0, 1.2, 1.1, false);
+    arch(4.9, 6.3, 2.2); arch(9.7, 11.1, 2.2);
+    slide(5.0, 10.2, 2.8, 6.0, 4.6, 0.5, 0.9, 0.7, 6, 3); slide(11.0, 10.2, 13.2, 6.0, 11.4, 0.5, 0.9, 0.7, 6, 3);
+    slide(8, 10.6, 8, 5.0, 8, 0.6, 0.65, 1.2, 4);
   }
   if (th.village && lv.kind === 'well') {   // the Village's kit (THEMES.mine; the owner's picks, research/variants/village-*-1-px.png, 2026-10-20: the Japanese
     // countryside in spring): each its size on the sheets (64 of their pixels a tile), only where nothing laid stands in front of it. Behind the shaft at a quarter

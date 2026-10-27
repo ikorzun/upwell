@@ -1,10 +1,9 @@
-// The Danchi's stash room inside the estate playground's concrete octopus slide (tako-yama; owner Д279 «6»), six takes while the owner picks (DCR_V.room,
-// ?dcr=C): first the shared purple room (no backdrop: its world's danchi flag off for this shot, for nf), then each take, as a player enters it. Q is none.
+// The Danchi's stash room inside the estate playground's concrete octopus slide (tako-yama; owner Д279 «6», take A: Д283 «A»):
+// first the shared purple room (no backdrop: its world's danchi flag off for this shot, for nf), then the room, as a player enters it. Q is none.
 (() => {
   if (typeof STORY === 'object') for (const k in STORY) save.seen['card_' + k] = 1;
   const g = __up.game, wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
-  window.__steps = ['-', 'A', 'B', 'C', 'D', 'E', 'F'].map((L) => async () => {
-    if (typeof DCR_V === 'object' && L !== '-') DCR_V.room = L;
+  window.__steps = ['-', 'A'].map((L) => async () => {
     const tst = document.getElementById('toast'); if (tst) tst.style.display = 'none';
     __up.camp(162, 0); g.state = 'play'; g.invuln = 1e9;
     const wd = L === '-' ? Object.assign({}, g.lv.world, { theme: Object.assign({}, g.lv.world.theme, { danchi: false }) }) : g.lv.world;

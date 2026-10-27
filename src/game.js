@@ -595,13 +595,14 @@ class Boss {
     this.ink = def && def.ink ? { id: 'boss', base: PAL[def.ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink)
     this.body = new Body(designById((lk && lk.design) || (def && def.design) || 'cat'), this.ink, ground ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, ground ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = ground ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
+    this.body.squish = (def && def.squish) || BOSS.squish;   // drawn less rubbery than its body is (BOSS.squish, writeFace's calmOutline), the Danchi's Nuppeppo not
     this.look = this.body.look = lk ? lk.id : null;   // drawn round it by the renderer (look), on it by writeFace (LOOK_FACE)
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
     this.state = 'hover'; this.was = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // was: its state before (its pose's follow-through, bossPose); rattled: Koschei's bones have shaken to say he rises
     this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
     this.halfW = bossSize(this)[0] / 2;   // its drawing's half width
-    this.pose = this.body.pose = loosen({ n: 1, m: false, turn: false, ink: null, go: false, fly: false, t0: 0, since: 0 }, 't0', 'since');   // its pose (its frame, bossPose): drawn only
+    this.pose = this.body.pose = loosen({ n: 1, m: false, f: 1, fm: false, ft: 0, out: 0, outM: false, outT: 0, turn: false, ink: null, go: false, fly: false, t0: 0, since: 0 }, 'ft', 'outT', 't0', 'since');   // its pose (its frame, bossPose): drawn only
     loosen(this, 't', 'drop', 'call', 'angry', 'state', 'was', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
   open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)

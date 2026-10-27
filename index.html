@@ -132,11 +132,6 @@
   .medal { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--gray); --p: 2; }
   .medal .ico { --p: 3; }
   .row.me b, .row.me span { color: var(--yellow); }   /* the player on the leaderboard */
-  .week { display: flex; align-items: center; gap: 4px; color: var(--gray); }   /* the week's card in the menu */
-  .week .tx { margin-right: 6px; }
-  .week i { width: 10px; height: 10px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch); }
-  .week i.pay { box-shadow: inset 0 0 0 2px var(--yellow); }   /* a mark that pays */
-  .week i.on { background: var(--yellow); box-shadow: none; }
   .build .ico.syn { box-shadow: 0 0 0 2px var(--yellow); }   /* a pair made whole */
   .duo { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }   /* two chips side by side */
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-self: stretch; }   /* the menu's chips: equal cells, two across */
@@ -277,12 +272,31 @@
   .big.alt:active { box-shadow: inset 0 0 0 2px var(--yellow); }   /* pressed: a yellow edge, nothing sinks (owner: no pseudo-volume) */
   .big.thumb { align-self: stretch; }   /* the main button: the width of the screen, at its bottom; the panel's 12 px gap over it, as at its sides (owner: «по вертикали расстояние между кнопками такое же, сколько по краям от кнопки») */
   #menu { background: none; pointer-events: none; justify-content: flex-end; }   /* (owner, 2026-10-23, the Figma «Main») its backdrop and the hero drawn under it (Renderer.drawMenu), a finger through it to the hero (menuTouch); its buttons take theirs */
+  /* The main screen as the Figma «Main» (owner, 2026-10-27: «переделай главный экран, размеры кнопок, расстояния и т.д. бери с макета, тип шрифта
+     текущий из кода, размеры с макета»): its frame 393 wide, a px a CSS px. From the bottom: the main button 16 px from the edges, 16 over it the bar of
+     Map, Cards, Book and Daily (56 tall, 8 more in from the sides), 20 over that the perk, 12 over that the colours' circles. The words in the game's own
+     fonts at the mockup's sizes as tall as its Inter's capitals (VT323's are 0.56 of its size, Inter's 0.73: 17 → 22 px, 20 → 26) */
+  #menu { gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
+  #menu .pickers { margin-bottom: 8px; }   /* (its circles 40 in their 48-px buttons: 12 px over the perk) */
+  #menu .perk { margin-bottom: 20px; }
+  #menu .row3 { gap: 0; margin: 0 8px 16px; height: 56px; border: 1px solid var(--yellow); box-sizing: border-box; }   /* one bar of four cells, a yellow line round and between them */
+  #menu .row3 > .chip { --p: 1.76; height: 100%; min-height: 0; padding: 4px 2px; background: none; box-shadow: none; clip-path: none; }
+  #menu .row3 > .chip + .chip { border-left: 1px solid var(--yellow); }
+  #menu .row3 > .chip:active { background: rgba(255, 237, 87, 0.12); }   /* pressed: a yellow glow in its cell */
+  #menu .row3 > .chip .cap { color: var(--white); opacity: 0.56; }
+  #menu .k-map { color: var(--white); }
+  #menu .k-cards { color: var(--purple); }
+  #menu .k-book { color: var(--blue); }
+  #menu .k-daily { color: var(--green); }
+  #menu .grid2 { margin-bottom: 16px; }
+  #menu .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* a pill, 64 tall */
+  #menu .big.thumb > .cap { font-size: 12px; }   /* (the Figma's 10; DotGothic16 no smaller than 12 px: under that its 16-px grid blurs) */
   #topTint { display: none; position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #696d85; pointer-events: none; z-index: 70; }   /* (owner, 2026-10-23: «На сафари и ios градиент должен уходить под остров») iOS 26 Safari tints the bar over the page by a fixed element at its top (theme-color it no longer reads): the menu's backdrop's top ink there, and the bottom left as it is */
   @media (pointer: coarse) { html.menuTop #topTint { display: block; } }
   #settings { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the menu's settings, as a pause */
-  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 22px); left: 50%; transform: translateX(-50%); width: min(calc(302.336px / 1.5), calc(100% - 134px)); height: auto; }   /* the Figma's sizes at 1.5 of its px to a CSS px (its frame: a 402-pt iPhone, 603 wide) */
-  .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 13px); right: 15px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its ring centred level with the logo */
-  .setBtn img { width: calc(64px / 1.5); height: auto; }
+  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 9px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 9 under the safe area */
+  .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 0px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its 40-px ring 4 under the safe area and 12 in from the side, in a 48-px button */
+  .setBtn img { width: 40px; height: auto; }
   .setBtn:active img { filter: brightness(0.8); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }

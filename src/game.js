@@ -598,13 +598,14 @@ class Boss {
     this.look = this.body.look = lk ? lk.id : null;   // drawn round it by the renderer (look), on it by writeFace (LOOK_FACE)
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
-    this.state = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // rattled: Koschei's bones have shaken to say he rises
+    this.state = 'hover'; this.was = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // was: its state before (its pose's follow-through, bossPose); rattled: Koschei's bones have shaken to say he rises
     this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
     this.halfW = bossSize(this)[0] / 2;   // its drawing's half width
-    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
+    this.pose = this.body.pose = loosen({ n: 1, m: false, turn: false, ink: null, go: false, fly: false, t0: 0, since: 0 }, 't0', 'since');   // its pose (its frame, bossPose): drawn only
+    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'was', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
   open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)
-  to(s) { this.state = s; this.st = 0; }
+  to(s) { this.was = this.state; this.state = s; this.st = 0; }
   think(dt, g) {
     if (this.def && this.def.hang) { this.hang(dt, g); return; }
     if (this.def && this.def.glide) { this.glide(dt, g); return; }
@@ -807,9 +808,7 @@ class Boss {
     const flash = () => { b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink; };   // 2.5 flashes a second: under WCAG's 3
     b.wake(); this.t += dt; this.st += dt; turnUp(b, 6, dt);
     if (this.angry > 0 && (this.angry -= dt) <= 0) b.color = this.ink;
-    b.heap = this.state === 'rise' ? (this.st < F.heap - 0.4 ? Math.min(1, this.st / 0.12) : Math.max(0, (F.heap - this.st) / 0.4)) : 0;   // broken by a stomp: a heap, then together again
-    b.rattle = this.state === 'rise' && this.st > F.heap - 0.9 && this.st < F.heap - 0.4; b.heapT = this.t;
-    if (b.rattle && !this.rattled) { this.rattled = true; sound.play('crumble', 0.6, 1.5); }   // the warning: his bones rattle, then fly together
+    if (this.state === 'rise' && this.st > F.heap - 0.9 && this.st < F.heap - 0.4 && !this.rattled) { this.rattled = true; sound.play('crumble', 0.6, 1.5); }   // broken by a stomp, a heap (bossPose): the warning, his bones rattle, then fly together
     if (this.t < F.calm) { addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0); return; }   // still at first, while his name is up
     if (ph > this.phSeen) { this.phSeen = ph; shake.add(6); sound.play('crumble', 0.9, 0.5); }   // a new phase: a rattle and a shake
     if (ph >= F.skulls && (this.call -= dt) <= 0) { this.call = BOSS.spawnEvery; if (lv.enemies.length < BOSS.maxMinions) lv.enemies.push(new Foe({ type: this.def.minion, x: (lv.l + lv.r) / 2, y: lv.capY + 2 * R }, lv)); }

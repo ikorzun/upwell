@@ -4918,7 +4918,7 @@ const bossPose = (bs, R, mid) => {   // mid: the arena's middle
     else if ((s === 'hover' || s === 'crouch') && bs.was === 'warn' && st < POSE.after) { n = 4; idle = false; }   // his last slam's
     else if (s === 'crouch') n = 5;
     else if (s === 'dive') n = 6;
-    else if (s === 'hover' && going()) n = stride();   // his wriggle
+    else if (s === 'hover' && going()) n = Q ? 2 : stride();   // his wriggle (with in-betweens: its four frames, BOSS_FRAMES seq)
   } else if (df.street) {   // the Tram (its frame 8, drawn three-quarter, off its side view: not used)
     if (hit) { n = 7; idle = false; }
     else if (s === 'dazed') n = st < POSE.after ? 6 : 5;   // its pantograph's sparks, then its doors open
@@ -4928,15 +4928,15 @@ const bossPose = (bs, R, mid) => {   // mid: the arena's middle
     if (s === 'dazed') n = 7;   // his beak in the floor
     else if (hit) { n = 8; idle = false; }
     else if (s === 'fan') n = 3;
-    else if (s === 'gust') n = Math.floor(st / POSE.fan) % 2 ? 3 : 4;   // his fan swept down, raised, swept again
+    else if (s === 'gust') n = Q ? 4 : Math.floor(st / POSE.fan) % 2 ? 3 : 4;   // his fan swept down, raised, swept again (with in-betweens: in its seq)
     else if (s === 'flick') n = 5;
-    else if (after('flick')) { n = 2; idle = false; }   // the feathers flung
+    else if (after('flick')) { n = Q ? 5 : 2; idle = false; }   // the feathers flung (with in-betweens: its flick's follow-through)
     else if (s === 'warn') n = 8;   // bristling: his swoop to come
     else if (s === 'dive') n = 6;
     else {   // flying: beating his wings to climb (pulled free, still at first, his sway's way up: Boss.sky), gliding down
       const climb = s === 'rise' || bs.t < df.sky.calm || Math.cos(bs.t * 1.3) < 0;
       if (climb && !P.fly) P.t0 = bs.t; P.fly = climb;
-      n = climb && (bs.t - P.t0) % (POSE.beat[0] + POSE.beat[1]) >= POSE.beat[0] ? 1 : 2;
+      n = Q ? (climb ? 1 : 2) : climb && (bs.t - P.t0) % (POSE.beat[0] + POSE.beat[1]) >= POSE.beat[0] ? 1 : 2;   // (with in-betweens: a wingbeat in four frames, a glide in its seq)
     }
   } else if (df.bone) {   // Koschei
     const F = df.bone;
@@ -4945,18 +4945,18 @@ const bossPose = (bs, R, mid) => {   // mid: the arena's middle
     else if (s === 'throw' || after('throw')) { n = 4; idle = false; }
     else if (s === 'warn') n = bs.drops || st > F.swarn - 0.25 ? 5 : 3;   // his sword up, then drawn back (a second sweep's straight from back)
     else if (s === 'sweep') n = 6;
-    else if (s === 'hover' && going()) n = stride();   // his steps
+    else if (s === 'hover' && going()) n = Q ? 2 : stride();   // his steps (with in-betweens: four frames a stride)
   }
   const F = df.hang || df.glide || df.quake || df.sky || df.bone, soon = s === 'hover' && F && F.rest && st > F.rest[df.phase(bs.hp)] - POSE.min;
   if (idle && (n !== P.n || m !== P.m) && (bs.t - P.since < POSE.min || soon || bs.t - P.ft < POSE.sub)) { n = P.n; m = P.m; }   // an idle change waits: no pose under `min` s, none just before a move
   if (n !== P.n || m !== P.m) {
-    const o = Q && Q[P.n] && Q[P.n].out;   // a pose left through a frame of its own (its lean back through half, its dive flattened as it lands)
-    if (o) { P.out = o[0]; P.outM = P.m; P.outT = bs.t + o[1]; }
+    const o = Q && Q[P.n] && Q[P.n].out;   // a pose left through a frame of its own (its lean back through half, its dive flattened as it lands), into pose o[2] only (none: any)
+    if (o && (!o[2] || o[2] === n)) { P.out = o[0]; P.outM = P.m; P.outT = bs.t + o[1]; P.outTurn = P.turn; }
     P.since = bs.t;
   }
   P.n = n; P.m = m; P.turn = turn; P.ink = ink;
-  if (P.out && bs.t < P.outT) { P.f = P.out; P.fm = P.outM; }   // the frame drawn: f, mirrored fm
-  else { P.out = 0; const f = Q && Q[n] ? seqFrame(Q[n], bs.t - P.since) : n; if (f !== P.f || m !== P.fm) P.ft = bs.t; P.f = f; P.fm = m; }
+  if (P.out && bs.t < P.outT) { P.f = P.out; P.fm = P.outM; P.turn = P.outTurn; }   // the frame drawn: f, mirrored fm (an out frame as its pose was turned)
+  else { P.out = 0; const f = Q && Q[n] ? (soon && n === P.n && !P.out ? P.f : seqFrame(Q[n], bs.t - P.since)) : n; if (f !== P.f || m !== P.fm) P.ft = bs.t; P.f = f; P.fm = m; }   // (no new frame at rest just before a move either)
 };
 const gumWriteFace = Renderer.prototype.writeFace;
 // The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units

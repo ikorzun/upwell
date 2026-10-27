@@ -34,6 +34,9 @@ SCRIPT = os.path.expanduser('~/.claude/skills/gpt-image/scripts/gpt_image.py')
 
 # world: (name, what it is like, its own ink, what the other inks already mean there, what is behind it all)
 WORLDS = {
+    # (the random run's summit, where the Lid waits: the top of the shaft, bare grey stone, the sky shut over it)
+    'summit': ('the Summit', 'the very top of the shaft at the end of a long climb: bare grey stone, a few stars, and over it all the sky shut by the Lid',
+               'grey #c8c8c8', 'blue marks moving platforms, purple marks springs', 'the plain black night, a few faint stars, nothing far off'),
     'tokyo': ('Tokyo', 'a Japanese suburb at night: narrow alleys between small houses and apartment blocks, power lines, vending '
               'machines, shop signs', 'purple #c996ff', 'blue marks moving platforms and grey blocks crumble', 'the plain black night, nothing far off'),
     # (owner 2026-10-19: the Cave and the Glacier Japanese too, cute and cosy; the Glacier as on Mount Fuji)
@@ -1230,6 +1233,28 @@ ELEMENTS.update({
                      rule='In this world white is wet rock you slip on, green is seaweed you hold on to, purple marks springs and grey blocks crumble: those only for small '
                      'details; orange marks boats and moving planks, but the boss is orange all over; aqua is the world\'s own, the sea and its rocks, never the boss.'),
     # (owner 2026-10-21: Koschei's fight «b»: he dives, falls apart into a heap of bones, rebuilds; the last heart the broken needle)
+    # (owner 2026-10-27: «нужно придумать ей самый отвратительный вид и самое сложное хаотичное поведение»: the Lid, the random run's last boss)
+    'boss-lid': dict(world='summit', kind='boss', what="the Lid, the last boss of the whole climb, the thing that shuts the sky over the shaft",
+                     as_what='the most disgusting yokai you can think of, the thing that shut the sky: a lid over the world, gone rotten',
+                     does='it hangs under the top of the shaft, swaying and dripping, and its moves come in no order: it spits goo, rains filth, drops onto the floor where its '
+                     'shadow grows, rushes along the floor, calls crawlers out of itself, splits into pieces that crawl back together; after a drop it lies there wobbling a '
+                     'moment, the only time a stomp hurts it.',
+                     size='about 6 tiles across and 4 to 5 tiles tall: three times the hero across and more than twice his height',
+                     place='hanging under the top of the cell, over the middle of the shaft, slime dripping from it in strings, the bare grey floor along the bottom with the hero on it',
+                     main='its own sickly colour (blue, green or purple, each variant its own: the summit is grey, so none of them means anything else here)',
+                     parts='a cracked lid on top of it (a pot lid, a manhole cover, a barrel lid, an eyelid), teeth, strings of slime, hair, many eyes, flies, as each take has them',
+                     takes='six different disgusting yokai, one cell each',
+                     yokai='A: Hyakume, a lump of flesh under a cracked pot lid covered in a hundred eyes of all sizes, cloudy and blinking out of time, some of them weeping goo; '
+                     'B: Akaname, the filth-licker, squeezing out from under a rusty manhole cover, a huge drooling tongue, matted hair, grime and slime dripping; '
+                     'C: a rotten pickle-barrel lid, the tsukemono gone bad under it: mould in blotches, worms poking out, flies circling, brine dripping; '
+                     'D: a giant swollen eyelid over the sky, half open on a cloudy, veined eyeball (its veins purple, never red), a stye on its rim, its lashes like spider legs, sticky tears; '
+                     'E: a patchwork of the eight bosses the hero beat, stitched together under a pot lid: a catfish whisker, spider legs, bones, a tanuki tail, a crow wing, stitches; '
+                     'F: Futakuchi-onna\'s second mouth, a lid of a scalp with a huge gaping mouth under it full of crooked teeth, its long hair reaching out like tentacles.',
+                     pairs='Each cell is a different creature, and none is a plain round blob: each reads at a glance as its yokai.',
+                     face='a face that reads at a glance on a phone (eyes, a mouth, as each yokai has them)',
+                     tone='Truly disgusting in a gross-out cartoon way, the most revolting thing in the game: slime, drool, mould, warts, flies, matted hair, crooked teeth (its slime in its own '
+                     'colour or aqua, never yellow: yellow is for things you take). Gross, never gory: no blood, no guts, no wounds, nothing that hurts to look at; the game is for everyone.',
+                     rule='The summit is grey: grey only for its lid and small details; the boss\'s own colour is all over it.'),
     'boss-koschei': dict(world='skazka', kind='boss', what='Koschei the Deathless, the boss of the Dark Forest (c8-10)',
                          as_what='Koschei the Deathless, the bony sorcerer-king of the Russian tales, whose death is hidden far away in a needle',
                          does='he hovers high in the middle of the shaft, swaying in his tattered cloak, dropping bones and calling small skulls; then he shakes over the hero, '

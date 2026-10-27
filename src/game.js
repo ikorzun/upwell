@@ -595,6 +595,7 @@ class Boss {
     this.ink = def && def.ink ? { id: 'boss', base: PAL[def.ink], deep: PAL.black } : FOE_COLOR.boss;   // its own colour (BOSSES: ink)
     this.body = new Body(designById((lk && lk.design) || (def && def.design) || 'cat'), this.ink, ground ? lv.r - 1.3 * R : (lv.l + lv.r) / 2, ground ? lv.floor - R : lv.floor - lv.R * BOSS.high, R, 0.4);
     this.body.gScale = ground ? 1 : 0; this.body.sticky = false; this.body.face.frown = true; this.dir = -1; this.topped = 0;
+    this.body.squish = (def && def.squish) || BOSS.squish;   // drawn less rubbery than its body is (BOSS.squish, writeFace's calmOutline), the Danchi's Nuppeppo not
     this.look = this.body.look = lk ? lk.id : null;   // drawn round it by the renderer (look), on it by writeFace (LOOK_FACE)
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;

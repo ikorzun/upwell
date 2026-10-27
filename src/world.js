@@ -1144,7 +1144,11 @@ const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
 // A boss's defaults (BOSSES has its own): its body's `size` R, its hearts, `angry` s red after a hit (it only pushes then), its
 // `coins`, the win's `winDelay` s, a stomp's `bounce` of a jump's speed, where it starts, `high` R over the floor, and the
 // minions it calls (Koschei's skulls): one every `spawnEvery` s, `maxMinions` at most. Its fight is its own (BOSSES: hang, glide, quake, street, sky, bone).
-const BOSS = { size: 2.1, hp: 6, angry: 2.0, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9, high: 12 };
+// `squish`: how much of its body's give (squash, stretch, wobble, sag) its drawing shows, Gum's 1: every boss but the Danchi's less rubbery (owner,
+// 2026-10-27: «все боссы, кроме данчи, должны быть менее резиновыми, т.е. срезать у них свойства сквиша минимум в 2 раза»; Nuppeppo, no bones and all
+// wobble, keeps Gum's: BOSSES.crane.squish). Its drawing only (writeFace's calmOutline): its body, and so its fight, is Gum's (a body squashed less in
+// play made Onamazu's and Koschei's fights much harder for the bot).
+const BOSS = { size: 2.1, hp: 6, angry: 2.0, spawnEvery: 4.6, maxMinions: 2, coins: 40, winDelay: 2.2, bounce: 1.9, high: 12, squish: 0.5 };
 // The Tsuchigumo's and the Tram's body (`size` R), and a falling rock's R (`rock`: Onamazu's quake).
 const CART = { size: 2.2, rock: 0.35 };
 // Tsurara-onna (BOSSES.puck, Fuji's, world 3; owner 2026-10-24: all bosses redone, the difficulty's curve kept): she creeps over the ice
@@ -1570,7 +1574,7 @@ const BOSSES = {
     hint: { en: 'Beak stuck! Stomp it!', es: '¡Pico atascado! ¡Písalo!', pt: 'Bico preso! Pise nele!', ja: 'くちばしが ささった！ ふめ！' },   // the first time its beak sticks
     how: { en: 'Brace the wind, dodge the swoop, stomp', es: 'Resiste el viento, esquiva y pisa', pt: 'Aguente o vento, desvie e pise', ja: 'かぜに たえ、きゅうこうかを よけて、ふめ' } },   // after three losses
   // The Danchi's: a Nuppeppo on the Cork's dive (hover, warn, dive, dazed, rise), a load swinging on a crane's ropes.
-  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', hang: NUPPE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
+  crane: { name: { en: 'Nuppeppo', es: 'Nuppeppo', pt: 'Nuppeppo', ja: 'ぬっぺっぽう' }, ink: 'orange', design: 'loaf', hang: NUPPE, hp: 5, squish: 1, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'No bones. All wobble.', es: 'Sin huesos. Pura gelatina.', pt: 'Sem ossos. Pura gelatina.', ja: 'ほね なし。ぜんぶ ぷるぷる。' },
       { en: 'Who needs a face anyway?', es: '¿Quién necesita una cara?', pt: 'Quem precisa de rosto?', ja: 'かおなんて いる？' },
       { en: 'Wobble, wobble… splat!', es: 'Tiembla, tiembla… ¡plaf!', pt: 'Treme, treme… plaft!', ja: 'ぷるぷる… べちゃっ！' }],
@@ -4947,7 +4951,26 @@ const kolobokFace = (dot, f) => {
   const [ex, ey] = f.eye, [rx, ry] = f.eyeR;
   for (let side = -1; side <= 1; side += 2) dot(side * (Math.abs(ex) + rx * 1.3), ey + ry * 1.9, 0.16, 0.11, PAL.red);   // rosy cheeks
 };
+// A boss drawn less rubbery than its body is (BOSS.squish): its outline's give against its rest shape at its size (turned to fit it best) drawn `q` of
+// it, its bottom where its body's is (and its side on a wall it is pressed to), so it stands where it stands. Its body, and so its fight, untouched.
+const CALM_X = new Float64Array(64), CALM_Y = new Float64Array(64);
+let calmDx = 0, calmDy = 0;
+const calmOutline = (b, X, Y, cx, cy, q) => {
+  const s = b.s, n = b.n, k = b.R * Math.max(0.05, b.growth);
+  let sc = 0, sd = 0;
+  for (let i = 0; i < n; i++) { const rx = s.rx[i] * k, ry = s.ry[i] * k, px = X[i] - cx, py = Y[i] - cy; sc += rx * px + ry * py; sd += rx * py - ry * px; }
+  const a = Math.atan2(sd, sc), c = Math.cos(a), si = Math.sin(a);
+  let bot = -Infinity, bot2 = -Infinity, l = Infinity, l2 = Infinity, r = -Infinity, r2 = -Infinity;
+  for (let i = 0; i < n; i++) {
+    const rx = s.rx[i] * k, ry = s.ry[i] * k, gx = cx + c * rx - si * ry, gy = cy + si * rx + c * ry, x = gx + q * (X[i] - gx), y = gy + q * (Y[i] - gy);
+    CALM_X[i] = x; CALM_Y[i] = y;
+    if (Y[i] > bot) bot = Y[i]; if (y > bot2) bot2 = y; if (X[i] < l) l = X[i]; if (x < l2) l2 = x; if (X[i] > r) r = X[i]; if (x > r2) r2 = x;
+  }
+  calmDx = b.wallMask & 1 ? l - l2 : b.wallMask & 2 ? r - r2 : 0; calmDy = bot - bot2;
+  for (let i = 0; i < n; i++) { CALM_X[i] += calmDx; CALM_Y[i] += calmDy; }
+};
 Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
+  if (b.squish < 1) { calmOutline(b, X, Y, cx, cy, b.squish); X = CALM_X; Y = CALM_Y; cx += calmDx; cy += calmDy; }   // a boss: drawn less rubbery (calmOutline)
   const s = b.s, f = s.face, fc = b.face, ink = THEME.ink, P0 = this.p0, P1 = this.p1, P2 = this.p2;
   const frame = (ux, uy, ax, ay, bx, by) => { mapPoint(s, X, Y, cx, cy, ux, uy, P0); mapPoint(s, X, Y, cx, cy, ux + ax, uy + ay, P1); mapPoint(s, X, Y, cx, cy, ux + bx, uy + by, P2); };
   const put = (r, g, bl, type, p1, p2, p3) => this.feat(P0.x, P0.y, P1.x - P0.x, P1.y - P0.y, P2.x - P0.x, P2.y - P0.y, r, g, bl, 1, type, p1 || 0, p2 || 0, p3 || 0);

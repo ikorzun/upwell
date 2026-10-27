@@ -3170,9 +3170,9 @@ const ui = {
     const bw = CAMPAIGN.findIndex((_, w) => gated(w));   // the bonus world (CAMP_STARS): its chip, the stars it wants while shut, its map once open
     if (begun && bw >= 0 && bw < CAMP_OPEN) {
       const need = CAMP_STARS[CAMPAIGN[bw].world.id], shut = !campOpen(bw * 30 + 1), name = L2(CAMPAIGN[bw].world.name);
-      const b = button('', 'chip' + (shut ? ' locked' : ''), () => (shut ? ui.toast(tf('starsFor', { n: need - lineStars(), w: name }), 2200, 'starOff') : this.map(bw))), w = px(L2(CAMPAIGN[bw].world.short || CAMPAIGN[bw].world.name));   // (its short name in the bar: the Figma's «FOREST»)
+      const b = button('', 'chip' + (shut ? ' locked' : ''), () => (shut ? ui.toast(tf('starsFor', { n: need - lineStars(), w: name }), 2200, 'starOff') : this.map(bw))), w = px(L2(CAMPAIGN[bw].world.name));
       if (shut) { const k = el('span', 'need'); k.append(iconEl('starOff'), px(lineStars() + '/' + need)); w.append(k); }   // after its name, dimmer: a star and the count (the Figma «Main-random»)
-      const c = document.createElement('small'); c.className = 'cap'; c.lang = lang !== 'ja' ? 'ja' : 'en'; c.textContent = (CAMPAIGN[bw].world.short || CAMPAIGN[bw].world.name)[c.lang];   // its name in the other script, as cap()
+      const c = document.createElement('small'); c.className = 'cap'; c.lang = lang !== 'ja' ? 'ja' : 'en'; c.textContent = CAMPAIGN[bw].world.name[c.lang];   // its name in the other script, as cap()
       b.append(w, c); b.classList.add('capped'); grid.append(b);
     }
     if (r && r.daily == null && ALL) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one

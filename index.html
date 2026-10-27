@@ -25,7 +25,7 @@
   @font-face { font-family: 'DotGothic16'; src: url('assets/fonts/dotgothic16.woff2') format('woff2'); font-display: block; }
   :root {
     --ink: #141414; --red: #f43e34; --blue: #5bb8ff; --yellow: #ffed57; --green: #339c39; --purple: #c996ff; --orange: #faa23e; --gray: #c8c8c8; --white: #f3f3f3;
-    --lime: #b4d64e; --track: #272627; --on: #c0ff47; --off: #fe4648;   /* Feed Moti's bar of fullness and its track (the Figma «Feed») */
+    --lime: #b4d64e; --track: #272627; --on: #c0ff47; --off: #fe4648; --veil: rgba(20, 20, 20, 0.96);   /* Feed Moti's bar of fullness and its track (the Figma «Feed») */
     --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
     --btnL: 64px; --btnS: 48px;   /* the two sizes of every button (owner: «все кнопки должны быть только 2 размеров»): a big one, the width of its panel, and a small one (48: a finger's)) */
     --amber: #ffc300;   /* the chosen colour's ring in the menu (the Figma «Main»'s) */
@@ -82,14 +82,10 @@
   .ahead { position: relative; align-self: stretch; min-height: var(--btnS); display: flex; align-items: center; justify-content: center; margin: 0 12px; }   /* the cross, the name, the count */
   .ahead .aclose { position: absolute; left: 0; top: 50%; transform: translateY(-50%); right: auto; }
   .ahead .acount { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); --p: 3; color: var(--white); }
-  .acard.wes { box-shadow: 0 0 0 2px #2a2a2a; }
-  .acard.wes .astill { object-fit: cover; image-rendering: auto; }
-  .acard.wes::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,var(--ga, 0)) 50%, transparent 65%); background-size: 250% 100%; background-position: var(--gx, 50%) 0; }   /* a sheen as it tips */
   .astrip { touch-action: pan-x; overscroll-behavior: contain; flex: 1; min-height: 0; align-self: stretch; display: flex; align-items: center; gap: 16px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; padding: 0 calc(50% - var(--aw, 240px) / 2); scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .astrip::-webkit-scrollbar { display: none; }
   .acell { flex: none; scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .acard { position: relative; width: var(--aw, 240px); height: var(--ah, 360px); border-radius: 20px; overflow: hidden; background: #000; }
-  .acard.wes { touch-action: pan-x; }
   .acard.scard { overflow: visible; margin-bottom: 0; background: none; touch-action: pan-x; }   /* an open one: the story card's own (its tilt and planes), at the album's size; a swipe on it scrolls the album (the story's own card keeps none) */
   .acard.scard .sclip .astill { position: absolute; inset: 0; }   /* (its still under its planes till it is alive) */
   .acard .astill { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
@@ -290,7 +286,14 @@
   #menu .k-cards { color: var(--purple); }
   #menu .k-book { color: var(--blue); }
   #menu .k-daily { color: var(--green); }
-  #menu .grid2 { margin-bottom: 16px; }
+  #menu .grid2 { gap: 0; margin: 0 8px 16px; border-left: 1px solid var(--yellow); border-top: 1px solid var(--yellow); }   /* the bar's next rows (the Figma «Main-random»): two cells a
+     row in its lines, the bonus world's (its stars after its name, dimmer), the random run, the hard tier, the endless climb */
+  #menu .grid2.under { margin-top: -16px; border-top: 0; }   /* (right under its four cells: their bottom line its top) */
+  #menu .grid2 > .chip { --p: 1.76; height: 56px; min-height: 0; padding: 4px 2px; background: none; box-shadow: none; clip-path: none; color: var(--white); border-right: 1px solid var(--yellow); border-bottom: 1px solid var(--yellow); }
+  #menu .grid2 > .chip.on { color: var(--yellow); }
+  #menu .grid2 > .chip:active { background: rgba(255, 237, 87, 0.12); }
+  #menu .grid2 > .chip .cap { color: var(--white); opacity: 0.56; }
+  #menu .grid2 .need { display: inline-flex; align-items: center; gap: 2px; margin-left: 0.35em; opacity: 0.6; }
   #menu .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* a pill, 64 tall */
   #menu .big.thumb > .cap { font-size: 12px; }   /* (the Figma's 10; DotGothic16 no smaller than 12 px: under that its 16-px grid blurs) */
   #topTint { display: none; position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #696d85; pointer-events: none; z-index: 70; }   /* (owner, 2026-10-23: «На сафари и ios градиент должен уходить под остров») iOS 26 Safari tints the bar over the page by a fixed element at its top (theme-color it no longer reads): the menu's backdrop's top ink there, and the bottom left as it is */
@@ -398,6 +401,23 @@
   .mast.won, .mast.new { color: var(--yellow); }
   .mast.new .ico { animation: starIn 0.4s steps(5) 1.5s both, starTwinkle 1.4s steps(2) 2s infinite; }   /* one won now: in after the stars */
   .stars .pay { animation: payIn 0.3s steps(3) 1.1s both; }   /* what they paid, once they are all in */
+  /* A level cleared as the Figma «Win» (owner, 2026-10-27), a px a CSS px: all dark (--veil, the mockup's 0.96); its stars 60 px (the 12-px star five
+     times), 7 apart; 22 under them «Level cleared!» in yellow (Inter 33 → VT323 43, its caption 24); 22 under it a line each of what it asked for (Inter
+     24.75 → VT323 32, the game's 24-px pictures for the mockup's emoji); the yellow pill 60 under them at the bottom (its main screen's) */
+  #cards.win { background: var(--veil); justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
+  .wbox { display: flex; flex-direction: column; align-items: center; gap: 22px; margin: auto 0 60px; }
+  .wstars { gap: 7px; --p: 5; }
+  .wbox > .head { --p: 3.44; margin: 0; padding: 8px; color: var(--yellow); }
+  .wbox > .head > .cap { font-size: 24px; color: var(--white); opacity: 0.56; }
+  .wlines { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px; --p: 2.58; color: var(--white); }
+  .wl, .wl > span { display: flex; align-items: center; gap: 8px; }
+  .wl .ico { --p: 2; }
+  .wl.not, .wl .not { color: var(--gray); }   /* not done: grey */
+  .wl.pay { color: var(--yellow); }
+  .wl.new .ico { animation: starIn 0.4s steps(5) 1.5s both, starTwinkle 1.4s steps(2) 2s infinite; }   /* a medal won now: in after the stars */
+  .wdot { color: var(--gray); opacity: 0.5; }   /* between two tasks */
+  #cards.win > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Next: the main screen's pill */
+  #cards.win > .big.thumb > .cap { font-size: 12px; }
   .card b { color: var(--yellow); }
   .card:active { box-shadow: inset 0 0 0 2px var(--yellow); }
   .rows { width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
@@ -413,7 +433,7 @@
   @keyframes starIn { 0% { transform: scale(0) rotate(-120deg); opacity: 0; } 60% { transform: scale(1.45) rotate(12deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
   @keyframes starTwinkle { 50% { filter: brightness(1.45); } }
   @keyframes payIn { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .pay { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .pay, .wl.new .ico { animation: none; } }
 </style>
 </head>
 <body>

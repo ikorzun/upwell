@@ -3,11 +3,11 @@
 // moves), its rules, a tap on Moti into it and the way back, the home screen as it was. Phase B: each match's foods one bite flying to his mouth,
 // his eyes on it, his mouth open for it, a munch; the fuller he is the wider and lower he sits (a puddle, never a ball), back as he was at home.
 // Phase C: the day's favourite food (FL.fav, the four in turn by the UTC day; its points doubled), his coins for the day's first run fed to the end
-// (FEED.pay, once a UTC day, kept in save.feed), the best score, one frozen treat on each board. Only with ?feed while it is built (FEED_ON).
+// (FEED.pay, once a UTC day, kept in save.feed), the best score, one frozen treat on each board. In the game for all since 2026-10-27 (owner: «добавляй
+// кормление моти в основную игру»).
 // The rules and the board are pure (FL, on a flat array of 25), loaded by node too for tools/feed-test.mjs; the view is the menu panel's (ui.menu,
 // feed.mount; the Figma «Feed», 1254:1525: no logo, the close a white disc, a thin bar of fullness, the favourite and the count under it, a board of
 // 70-px cells), its foods SVG at a whole number of the screen's points a pixel, Moti the menu's own hero over it (game.menuFit).
-const FEED_ON = typeof location !== 'undefined' && /[?&]feed\b/.test(location.search);
 const FEED = {
   n: 5, moves: 8, pts: 10, cap: 4,   // the board's side; the moves a run; points a food cleared, times its cascade's depth (x1, x2, x3, at most x4)
   stars: [30, 50, 70],   // fullness for one, two, three stars (the brief's 6/12/18 can't miss: eight moves clear 24 at least). tools/feed-test.mjs: random

@@ -1469,7 +1469,7 @@ const SEA = Object.assign({}, WORLDS[1], { id: 'sea', name: { en: 'Sea', es: 'Ma
 // The Dark Forest (owner, 2026-10-20: a bonus world of scary Russian fairy tales, a dark forest with skulls, Baba Yaga, Kikimora, Koschei, Leshy, the stove;
 // very gloomy, very scary, very dark; on its levels the hero is a Kolobok): dark on every level, its kit to the owner's picks (research/variants/skazka-*).
 // It opens at 180 stars (CAMP_STARS), off the line; ?play=skazka to look at it.
-const SKAZKA = Object.assign({}, WORLDS[1], { id: 'skazka', name: { en: 'Dark Forest', es: 'Bosque oscuro', pt: 'Floresta sombria', ja: 'くらい もり' }, theme: THEMES.skazka, dark: [0, 1, 2], maxD: 2,
+const SKAZKA = Object.assign({}, WORLDS[1], { id: 'skazka', name: { en: 'Dark Forest', es: 'Bosque oscuro', pt: 'Floresta sombria', ja: 'くらい もり' }, short: { en: 'Forest', es: 'Bosque', pt: 'Floresta', ja: 'もり' }, theme: THEMES.skazka, dark: [0, 1, 2], maxD: 2,
   chunks: { stairs: 2, planks: 3, shelves: 2, pillars: 2, comb: 2, chimney: 1, spring: 1, lift: 1, movers: 2, crumble: 2, mosswall: 2, rest: 1, vault: 1 },
   enemies: { skull: 3, crawler: 2, kikimora: 1, spitter: 1, leshy: 1 }, intro: [{}, {}, {}] });   // its climber a Kikimora, its circler a Leshy (owner, 2026-10-20)
 // A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about

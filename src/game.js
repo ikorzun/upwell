@@ -21,7 +21,7 @@ const STR = {
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', feedMoves: 'moves', feedDone: 'Mochi is full!', feedScore: 'Score {n}', feedAgain: 'Again', feedFav: "Today's favourite: points ×2", feedBest: 'Best {n}', feedTreat: 'Gift +{n}', feedX2: '×2 score', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
-    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', depth: '2.5D', crt: 'CRT', album: 'Cards', stylePixel: 'Pixel', styleWes: 'Magic', on: 'on', off: 'off',
+    nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', depth: '2.5D', crt: 'CRT', album: 'Cards', on: 'on', off: 'off',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
     random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', station: 'Station {n}', worldDone: 'World cleared!', soon: 'World {n} is on its way', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_water: 'Soaked!', dead_snow: 'Snowed under!', dead_storm: 'Thunderstruck!', dead_bog: 'Swamped!', dead_steam: 'Scalded!', dead_thorns: 'Pricked!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
   },
@@ -38,7 +38,7 @@ const STR = {
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', feedMoves: 'jugadas', feedDone: '¡Mochi lleno!', feedScore: 'Puntos {n}', feedAgain: 'Otra vez', feedFav: 'Su favorito de hoy: puntos ×2', feedBest: 'Récord {n}', feedTreat: 'Regalo +{n}', feedX2: '×2 puntos', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
-    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', depth: '2.5D', crt: 'CRT', album: 'Cartas', stylePixel: 'Píxel', styleWes: 'Magia', on: 'sí', off: 'no',
+    nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', depth: '2.5D', crt: 'CRT', album: 'Cartas', on: 'sí', off: 'no',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
     random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', station: 'Estación {n}', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_water: '¡Empapado!', dead_snow: '¡Bajo la nieve!', dead_storm: '¡Fulminado!', dead_bog: '¡Empantanado!', dead_steam: '¡Escaldado!', dead_thorns: '¡Pinchado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Diario', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
   },
@@ -55,7 +55,7 @@ const STR = {
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', feedMoves: 'jogadas', feedDone: 'Mochi cheio!', feedScore: 'Pontos {n}', feedAgain: 'De novo', feedFav: 'O favorito de hoje: pontos ×2', feedBest: 'Recorde {n}', feedTreat: 'Presente +{n}', feedX2: '×2 pontos', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
-    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', depth: '2.5D', crt: 'CRT', album: 'Cartas', stylePixel: 'Pixel', styleWes: 'Magia', on: 'sim', off: 'não',
+    nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', depth: '2.5D', crt: 'CRT', album: 'Cartas', on: 'sim', off: 'não',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
     random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', station: 'Estação {n}', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_water: 'Encharcado!', dead_snow: 'Soterrado na neve!', dead_storm: 'Fulminado!', dead_bog: 'Atolado!', dead_steam: 'Escaldado!', dead_thorns: 'Espetado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Diário', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
   },
@@ -72,7 +72,7 @@ const STR = {
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', feedMoves: 'のこり', feedDone: 'モチ まんぷく！', feedScore: 'スコア {n}', feedAgain: 'もういちど', feedFav: 'きょうの だいすき: ポイント ×2', feedBest: 'ベスト {n}', feedTreat: 'おれい +{n}', feedX2: 'スコア ×2', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
-    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', depth: 'りったい', crt: 'ブラウンかん', album: 'カード', stylePixel: 'ドット', styleWes: 'マジック', on: 'オン', off: 'オフ',
+    nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', depth: 'りったい', crt: 'ブラウンかん', album: 'カード', on: 'オン', off: 'オフ',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
     random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', station: '{n} ごうめ', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_water: 'びしょぬれ！', dead_snow: 'ゆきに うもれた！', dead_storm: 'かみなりに うたれた！', dead_bog: 'ぬまに しずんだ！', dead_steam: 'じょうきで やけど！', dead_thorns: 'トゲに ささった！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'デイリー', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
   },
@@ -2932,24 +2932,6 @@ function cardLight(p, tx, ty) {   // a plane's light for this tilt (in steps of 
   }
   g.putImageData(img, 0, 0); return key;
 }
-function wesLive(card) {   // a Wes Anderson still in the album, alive: tipped toward the finger, untouched a slow figure of eight, by cardLive's spring (CARD); a sheen
-  // of light across it as it tips; none under «reduce motion»
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches, st = { alive: true, tx: 0, ty: 0, vx: 0, vy: 0, gx: 0, gy: 0, lastIn: -1e9, last: performance.now(), t0: performance.now() };
-  const move = (e) => { const r = card.getBoundingClientRect(); st.gx = ((e.clientX - r.left) / r.width - 0.5) * 2; st.gy = ((e.clientY - r.top) / r.height - 0.5) * 2; st.lastIn = performance.now(); };
-  const leave = () => { st.gx = 0; st.gy = 0; };
-  card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
-  const step = (now) => {
-    if (!st.alive) return; st.raf = requestAnimationFrame(step);
-    const dt = Math.min(0.05, (now - st.last) / 1000), t = (now - st.t0) / 1000; st.last = now;
-    let gx = st.gx, gy = st.gy; if (still) { gx = 0; gy = 0; } else if (now - st.lastIn > CARD.idle) { gx = 0.55 * Math.sin(t * 0.55); gy = 0.35 * Math.sin(t * 1.1); }
-    st.vx += (CARD.w0 * CARD.w0 * (gx - st.tx) - 2 * CARD.z * CARD.w0 * st.vx) * dt; st.tx += st.vx * dt;
-    st.vy += (CARD.w0 * CARD.w0 * (gy - st.ty) - 2 * CARD.z * CARD.w0 * st.vy) * dt; st.ty += st.vy * dt;
-    card.style.transform = still ? '' : `perspective(700px) rotateX(${(-st.ty * CARD.tilt).toFixed(2)}deg) rotateY(${(st.tx * CARD.tilt).toFixed(2)}deg)`;
-    card.style.setProperty('--gx', (50 + st.tx * 40).toFixed(1) + '%'); card.style.setProperty('--ga', Math.min(0.35, Math.hypot(st.tx, st.ty) * 0.4).toFixed(3));
-  };
-  st.raf = requestAnimationFrame(step);
-  return { stop() { st.alive = false; cancelAnimationFrame(st.raf); card.style.transform = ''; card.style.setProperty('--ga', 0); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
-}
 function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (settled: no coming-in, as a card swiped to in the album)
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
   const D = c.was ? w / c.was[0] : 1, Dr = Math.max(1, Math.round(D));   // its cells to one of the cut its motion, threads and lids were made on (STORY's `was`: the
@@ -3186,9 +3168,10 @@ const ui = {
     const bw = CAMPAIGN.findIndex((_, w) => gated(w));   // the bonus world (CAMP_STARS): its chip, the stars it wants while shut, its map once open
     if (begun && bw >= 0 && bw < CAMP_OPEN) {
       const need = CAMP_STARS[CAMPAIGN[bw].world.id], shut = !campOpen(bw * 30 + 1), name = L2(CAMPAIGN[bw].world.name);
-      const b = button(name, 'chip' + (shut ? ' locked' : ''), () => (shut ? ui.toast(tf('starsFor', { n: need - lineStars(), w: name }), 2200, 'starOff') : this.map(bw)));
-      if (shut) { const row = el('span', 'inl'); row.append(iconEl('starOff'), px(lineStars() + '/' + need)); b.append(row); }   // under its name, small as a caption: a star and the count
-      grid.append(b);
+      const b = button('', 'chip' + (shut ? ' locked' : ''), () => (shut ? ui.toast(tf('starsFor', { n: need - lineStars(), w: name }), 2200, 'starOff') : this.map(bw))), w = px(L2(CAMPAIGN[bw].world.short || CAMPAIGN[bw].world.name));   // (its short name in the bar: the Figma's «FOREST»)
+      if (shut) { const k = el('span', 'need'); k.append(iconEl('starOff'), px(lineStars() + '/' + need)); w.append(k); }   // after its name, dimmer: a star and the count (the Figma «Main-random»)
+      const c = document.createElement('small'); c.className = 'cap'; c.lang = lang !== 'ja' ? 'ja' : 'en'; c.textContent = (CAMPAIGN[bw].world.short || CAMPAIGN[bw].world.name)[c.lang];   // its name in the other script, as cap()
+      b.append(w, c); b.classList.add('capped'); grid.append(b);
     }
     if (r && r.daily == null && ALL) grid.append(cap(button(t('random') + ' · ' + (r.world >= WORLDS.length ? L2(SUMMIT.name) : (r.world + 1) + '-' + (r.stage + 1)), 'chip', () => game.continueRun()), 'random'));   // a kept run to go on with, or a new one
     else if (begun && ALL) grid.append(cap(button(t('random'), 'chip', () => game.startRun()), 'random'));
@@ -3200,7 +3183,7 @@ const ui = {
     if (row.children.length) { p.append(row); for (const c of row.children) fitBig(c, 1.2, 8);   // (its cells' 2-px sides: 8 px free round the words)
         // a long one smaller, on one line, and the three of one size: the smallest
       const q = Math.min(...[...row.children].map((c) => parseFloat(getComputedStyle(c).getPropertyValue('--p')) || 4)); for (const c of row.children) c.style.setProperty('--p', q); }
-    if (grid.children.length) { p.append(grid); for (const c of grid.children) fitBig(c, 1.5); }
+    if (grid.children.length) { if (row.children.length) grid.classList.add('under'); p.append(grid); for (const c of grid.children) fitBig(c, 1.2, 8); }   // (under the four: the bar's next rows)
     const cur = save.cur && campOpen(save.cur.ci) ? save.cur : null, at = cur && campAt(cur.ci);   // a level under way (Game.saveCur): on with it first, from its height
     if (cur) p.append(cap(button(t('continue') + ' · ' + wNo(at.w) + '-' + (at.s + 1) + ' · ' + Math.floor(cur.m) + ' ' + t('m'), 'big thumb', () => goOwed(() => game.resume())), 'continue'));
     else if (done) p.append(cap(button(t('map'), 'big thumb', () => this.map()), 'map'));   // the world is all done: its map, to play its levels again
@@ -3237,9 +3220,12 @@ const ui = {
     const row = el('div', 'pair'); row.append(...(d25 ? [d25, crt] : [snd, crt]));   // with 2.5D on one row (owner, 2026-10-25: «рядом с 2.5d в одну строку»); the sound
     return d25 ? [langs, snd, row] : [langs, row];   // with it where there is no 2.5D (Shake gone: owner, «Убери настройку shake»)
   },
-  cards(list) {
-    const p = this.panel('cards');
-    this.starRow(p); this.stationLine(p);
+  cards(list) {   // a level cleared the first time: its Win, then the upgrade to take (one owed with no level cleared: straight to that)
+    if (game.stars) { this.win(() => this.picks(list)); return; }
+    this.picks(list);
+  },
+  picks(list) {
+    const p = this.panel('cards'); p.classList.remove('win');
     p.append(cap(el('div', 'head', t('pick')), 'pick'));
     for (const u of list) {
       const [name, desc] = L2(u.name), c = button('', 'card', () => game.pick(u)), d = el('span');
@@ -3248,42 +3234,41 @@ const ui = {
       p.append(c);
     }
   },
-  cleared() {   // a campaign level played again: its stars, then on (an upgrade is for the first time only)
-    const p = this.panel('cards');
-    this.starRow(p); this.stationLine(p);
-    p.append(cap(el('div', 'head', t('cleared')), 'cleared'), cap(button(t('next'), 'big thumb', () => game.campNext()), 'next'));
+  cleared() { this.win(() => game.campNext()); },   // a campaign level played again: its Win, then on (an upgrade is for the first time only)
+  // A level cleared as the Figma «Win» (1262:1542; owner, 2026-10-27: «вместо эмодзи игровые иконки, шрифт пиксельный из текущей реализации»): all dark, its
+  // stars big, popping in one after another and ringing, «Level cleared!» in yellow, then a line each of what it asked for in the game's own pictures (its
+  // tasks, its coins, its time and no heart lost, MEDAL: grey till won, one won now popping in after the stars; the week's day, Fuji's station), Next a yellow
+  // pill at the bottom doing `next`
+  win(next) {
+    const p = this.panel('cards'), box = el('div', 'wbox'), lines = el('div', 'wlines'), st = game.stars, md = game.medals; p.classList.add('win');
+    const line = (cls, ...kids) => { const e = el('div', 'wl' + (cls ? ' ' + cls : '')); e.append(...kids); lines.append(e); return e; };
+    if (st) {
+      const row = el('div', 'stars wstars');
+      for (let k = 0; k < 3; k++) {
+        const s = iconEl(k < st.n ? 'star' : 'starOff');
+        if (k < st.n) { s.classList.add('won'); setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k); }
+        s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : ''); row.append(s);
+      }
+      box.append(row);
+    }
+    box.append(cap(el('div', 'head', t('cleared')), 'cleared'));
+    if (st && st.tasks.length) { const e = line(''); st.tasks.forEach((q, i) => { if (i) e.append(el('span', 'wdot', '•')); const s = el('span', q.n >= q.of ? null : 'not'); s.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); e.append(s); }); }
+    if (st) line('', iconEl('coin'), px(tf('starLine', { c: st.coins.join('/') })));
+    if (md) for (const [bit, on, off, text] of [[1, 'clock', 'clockOff', tf('medalTime', { p: md.par }) + (md.got & 1 ? '' : ' · ' + Math.ceil(md.t))], [2, 'heart', 'heartOff', t('medalClean')]]) {
+      const won = (md.got | md.had) & bit, fresh = md.got & bit && !(md.had & bit);
+      line(won ? (fresh ? 'new' : '') : 'not', iconEl(won ? on : off), px(text));
+      if (fresh) setTimeout(() => sound.play('chime', 0.9, bit === 1 ? 1.5 : 1.7), 1500 + 200 * bit);
+    }
+    const m = game.markSay; if (m) { game.markSay = null; line(m.pay ? 'pay' : '', px(m.text)); }   // the week's mark (Game.markDay), once
+    if (lines.children.length) box.append(lines);
+    this.stationLine(box);
+    p.append(box, cap(button(t('next'), 'big thumb', next), 'next'));
   },
   stationLine(p) {   // Fuji's levels its trail's stations, 1 to 9 (owner, К12 «А»: its far view a compass of the climb, and the station said at each end)
     const g = game, n = Math.floor((g.ci % 30) / 3) + 1;
     if (g.mode === 'camp' && g.lv && g.lv.theme && g.lv.theme.fuji && n >= 1 && n <= 9) p.append(el('div', 'label station', tf('station', { n })));
   },
   markLine(p) { const m = game.markSay; if (!m) return; game.markSay = null; const e = el('div', 'label mark' + (m.pay ? ' pay' : ''), m.text); p.append(e); },   // the week's mark (Game.markDay), once
-  starRow(p) {
-    const st = game.stars;
-    if (st) {   // the level's stars, what they paid and what they were for
-      const row = el('div', 'stars');
-      for (let k = 0; k < 3; k++) {   // one after another, popping in; each earned one rings higher, then twinkles
-        const s = iconEl(k < st.n ? 'star' : 'starOff');
-        if (k < st.n) s.classList.add('won'); s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : '');
-        row.append(s);
-        if (k < st.n) setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k);
-      }
-      const pay = px('+' + st.pay); pay.classList.add('pay'); row.append(pay);
-      p.append(row, el('div', 'label', tf('starLine', { c: st.coins.join('/') })));
-      if (st.tasks.length) { const tr = el('div', 'tasks'); tr.append(...st.tasks.map(taskEl)); p.append(tr); }   // and its tasks, done or not
-    }
-    const md = game.medals;
-    if (md) {   // its mastery medals (MEDAL): the time (the par, and the time it took when missed) and no heart lost; one won now pops in after the stars
-      const row = el('div', 'mastery');
-      for (const [bit, on, off, text] of [[1, 'clock', 'clockOff', tf('medalTime', { p: md.par }) + (md.got & 1 ? '' : ' · ' + Math.ceil(md.t))], [2, 'heart', 'heartOff', t('medalClean')]]) {
-        const fresh = md.got & bit && !(md.had & bit), chip = el('div', 'mast' + (fresh ? ' new' : (md.got | md.had) & bit ? ' won' : ''));
-        chip.append(iconEl((md.got | md.had) & bit ? on : off), px(text)); row.append(chip);
-        if (fresh) setTimeout(() => sound.play('chime', 0.9, bit === 1 ? 1.5 : 1.7), 1500 + 200 * bit);
-      }
-      p.append(row);
-    }
-    this.markLine(p);
-  },
   campDead() {   // a campaign level lost: why, in a word; again (free), on from the last ledge for coins (not at a boss), or the menu
     const p = this.panel('result'), g = game, price = g.revivePrice(), boss = !!(g.rc && g.rc.boss), why = g.deathWhy();
     const def = g.lv.boss && g.lv.boss.def;
@@ -3316,26 +3301,20 @@ const ui = {
   // yet seen its picture in a few big blocks, dimmed, a lock on it, no title
   album() {
     const p = this.panel('album'), strip = el('div', 'astrip'), ids = STORY_ORDER.filter((id) => STORY[id]).concat(Object.keys(STORY).filter((id) => !STORY_ORDER.includes(id)));
-    const seen = (id) => !!save.seen['card_' + id], n = ids.filter(seen).length, wes = save.cardStyle === 'wes';
+    const seen = (id) => !!save.seen['card_' + id], n = ids.filter(seen).length;
     const head = el('div', 'ahead'), shut = button('', 'setBtn aclose', () => this.menu()), x = el('img');   // its header: a cross back to the menu (left), its name, how many are open (right)
     x.src = 'assets/ui/close.svg'; x.alt = ''; x.draggable = false; shut.append(x); shut.setAttribute('aria-label', t('goBack'));
     head.append(shut, cap(el('div', 'head', t('album')), 'album'), el('div', 'acount', n + '/' + ids.length));
-    const style = el('div', 'pair'), pick = (k) => { save.cardStyle = k; persist(); track('settings_changed', { setting: 'cardStyle', value: k }); this.album(); };   // the style, pixels or
-    // Wes Anderson's puppets (owner, 2026-10-25: «переключатель стиля с пиксельного на уэса андерсона: вместо кнопки бэк»), the one on yellow
-    style.append(cap(button(t('stylePixel'), 'big thumb' + (wes ? ' alt' : ''), () => pick('pixel')), 'stylePixel'), cap(button(t('styleWes'), 'big thumb' + (wes ? '' : ' alt'), () => pick('wes')), 'styleWes'));
-    p.append(head, strip, style);
+    p.append(head, strip);   // (every card in pixels: the style's switch gone, owner 2026-10-27: «У карточек внизу убери переключатель стиля, все карточки только пиксельные»)
     const [w0, h0] = STORY.moon_fall.cells, room = Math.max(160, strip.getBoundingClientRect().height - 40), W = Math.round(Math.min(view.w - 64, (room * w0) / h0)), H = Math.round((W * h0) / w0);
     strip.style.setProperty('--aw', W + 'px'); strip.style.setProperty('--ah', H + 'px');
     const cells = [];
     let go = null;
     for (const id of ids) {
-      const c = STORY[id], open = seen(id), cell = el('div', 'acell'), im = new Image(), src = wes ? c.still.replace('assets/cards/', 'assets/cards/anderson/').replace(/\.png$/, '.jpg') : c.still;
+      const c = STORY[id], open = seen(id), cell = el('div', 'acell'), im = new Image(), src = c.still;
       im.src = src;
       let fig;
-      if (open && wes) {   // the puppet film's still, alive in the middle (a tilt by the finger, a slow sway)
-        fig = el('div', 'acard wes'); im.className = 'astill'; fig.append(im);
-        cells.push({ cell, c, fig, wes: true });
-      } else if (open) {   // as the story shows it: its frame, its number, and alive (its planes' parallax, its motion) when it is the one in the middle
+      if (open) {   // as the story shows it: its frame, its number, and alive (its planes' parallax, its motion) when it is the one in the middle
         const f = STORY_INK[c.ink], [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
         fig = el('div', 'scard acard');
         for (const [v, x2] of Object.entries(f)) fig.style.setProperty('--s' + v, x2);
@@ -3355,7 +3334,7 @@ const ui = {
       const mid = strip.getBoundingClientRect().left + strip.clientWidth / 2, k = cells.find((q) => { const r = q.cell.getBoundingClientRect(); return r.left < mid && r.right > mid; });
       if (!k || k === this.albumLive) return;
       if (this.live) this.live.stop();
-      this.albumLive = k; this.live = k.wes ? wesLive(k.fig) : cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
+      this.albumLive = k; this.live = cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
     };
     let tm = 0; strip.addEventListener('scroll', () => { clearTimeout(tm); tm = setTimeout(wake, 140); }, { passive: true });
     this.albumLive = null;
@@ -4032,7 +4011,7 @@ const menuTouch = {
     if (b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
     if (!this.on()) cancel = true;   // (the menu shut under it, the settings say: let go where it is, not flung)
     if (p.mode === 'press') {
-      if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) { this.poke(b, p); if (typeof feed !== 'undefined' && FEED_ON) feed.open(); }   // a tap: Feed Moti (feed.js)
+      if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) { this.poke(b, p); if (typeof feed !== 'undefined') feed.open(); }   // a tap: Feed Moti (feed.js)
       else {
         b.releaseDent(p.dent, DENT.pressRecover);
         if (!cancel && p.sq > 0.04) { b.kickSquash(b.sqAx, b.sqAy, -SQUEEZE.rebound * p.sq); b.hop(SQUEEZE.hop * p.sq); haptics.buzz(8 + 20 * p.sq, 0); }

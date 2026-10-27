@@ -131,20 +131,71 @@ const FL = {   // the rules, pure: a board is an array of 25 food ids, row by ro
 };
 if (typeof module !== 'undefined') module.exports = { FL, FEED, FEED_SET, FOODS };
 else {
-  const foodSvgs = {};
-  const foodSvg = (id, skip = '') => {   // a food as an SVG of its rows, a rect per run of one colour, the colours its own (skip: colours left out)
-    if (foodSvgs[id + skip]) return foodSvgs[id + skip];
-    const [ps, rs] = FOODS[id], rows = rs.split('/'), pal = {};
-    for (const s of ps.split(',')) pal[s[0]] = '#' + s.slice(1);
-    let paths = '';
-    for (const c in pal) {
-      if (skip.includes(c)) continue;
-      let d = '';
-      rows.forEach((r, y) => { for (let x = 0; x < r.length;) { if (r[x] !== c) { x++; continue; } let e = x; while (e < r.length && r[e] === c) e++; d += 'M' + x + ' ' + y + 'h' + (e - x) + 'v1h' + (x - e) + 'z'; x = e; } });
-      if (d) paths += '<path fill="' + pal[c] + '" d="' + d + '"/>';
+  const rgbOf = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const FOOD_VOL = { R: 8, tilt: 1, lo: 0.4, steps: [2, 3] };   // a food's volume, its own few numbers (a food is 48 px, a sheet thing 8-24: the game's dome left a
+  // food's flat middle all in shadow, a pixel in two): a pillow's rim R px wide (flat inside it), its normals' tilt, the shadow's light (the deep shadow's VOL's), the
+  // shadow's and the deep shadow's colours so many tones down its own (the game's shadeOf turned the pale pinks grey-violet)
+  const volOf = (rows, pal) => {   // the game's volume on a food (owner, 2026-10-27: «на объекты в покорми моти нужно добавить объем, как делали это с игровыми
+    // объектами»), as volBands lays it on a sheet thing (world.js, VOL): a height from its edge (a pillow, FOOD_VOL) and its own tones' lightness, smoothed, its
+    // normals lit from the upper left; each pixel's step -2 (its deep shadow), -1 (its shadow a pixel in two) or 0 (its own); a near-black (its outline) none, a
+    // hole in it (the sheet's dark between a leaf and its mochi) no edge; no lone step
+    const H = rows.length, W = rows[0].length, at = (i, j) => rows[j][i], lum = {}, keep = {};
+    for (const c in pal) { const [r, g, b] = rgbOf(pal[c]); lum[c] = (0.299 * r + 0.587 * g + 0.114 * b) / 255; keep[c] = lum[c] < 0.14; }
+    const outside = new Uint8Array(W * H), st = [];   // (the clear reached from its sides; the rest inside, its holes too)
+    for (let i = 0; i < W; i++) st.push(i, (H - 1) * W + i); for (let j = 0; j < H; j++) st.push(j * W, j * W + W - 1);
+    while (st.length) { const q = st.pop(), i = q % W; if (outside[q] || at(i, (q / W) | 0) !== '.') continue; outside[q] = 1; if (i > 0) st.push(q - 1); if (i < W - 1) st.push(q + 1); if (q >= W) st.push(q - W); if (q < W * (H - 1)) st.push(q + W); }
+    const inside = new Uint8Array(W * H), d = new Float32Array(W * H);
+    for (let q = 0; q < W * H; q++) { inside[q] = outside[q] ? 0 : 1; d[q] = inside[q] ? 1e4 : 0; }
+    for (let pass = 0; pass < 2; pass++) for (let n = 0; n < W * H; n++) {   // the distance to its edge (a chamfer, both ways)
+      const q = pass ? W * H - 1 - n : n, i = q % W, j = (q / W) | 0; if (!inside[q]) continue; const s = pass ? 1 : -1;
+      for (const [di, dj, c] of [[s, 0, 1], [0, s, 1], [s, s, 1.4], [-s, s, 1.4]]) { const x = i + di, y = j + dj; const v = x < 0 || y < 0 || x >= W || y >= H ? 0 : d[y * W + x]; if (v + c < d[q]) d[q] = v + c; }
     }
-    return (foodSvgs[id + skip] = '<svg viewBox="0 0 ' + rows[0].length + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + paths + '</svg>');
+    const R = FOOD_VOL.R, rim = (x) => { const u = Math.min(Math.max(x - 0.5, 0), R); return Math.sqrt(R * R - (R - u) * (R - u)); };   // (a quarter circle up from the edge)
+    const h = new Float32Array(W * H), hs = new Float32Array(W * H), get = (a, i, j) => (i < 0 || j < 0 || i >= W || j >= H ? 0 : a[j * W + i]);
+    for (let q = 0; q < W * H; q++) if (inside[q]) h[q] = rim(d[q]) + VOL.detail * ((lum[at(q % W, (q / W) | 0)] ?? 0.5) - 0.5);
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { let t = 0, n = 0; for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { t += get(h, i + x, j + y) * (x || y ? 1 : 2); n += x || y ? 1 : 2; } hs[j * W + i] = t / n; }
+    const out = new Int8Array(W * H), [lx, ly, lz] = VOL.L, shaded = (i, j) => inside[j * W + i] && at(i, j) !== '.' && !keep[at(i, j)];
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+      if (!shaded(i, j)) continue;
+      const gx = (get(hs, i + 1, j - 1) + 2 * get(hs, i + 1, j) + get(hs, i + 1, j + 1) - get(hs, i - 1, j - 1) - 2 * get(hs, i - 1, j) - get(hs, i - 1, j + 1)) / 8;
+      const gy = (get(hs, i - 1, j + 1) + 2 * get(hs, i, j + 1) + get(hs, i + 1, j + 1) - get(hs, i - 1, j - 1) - 2 * get(hs, i, j - 1) - get(hs, i + 1, j - 1)) / 8;
+      const nx = -gx * FOOD_VOL.tilt, ny = -gy * FOOD_VOL.tilt, m = Math.hypot(nx, ny, 1), L = (nx * lx + ny * ly + lz) / m;
+      out[j * W + i] = L < VOL.deep ? -2 : L < FOOD_VOL.lo ? -1 : 0;
+    }
+    for (let pass = 0; pass < 2; pass++) for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {   // no lone step (the pixel guide's clusters): one like none of its eight takes theirs
+      if (!shaded(i, j)) continue; const cnt = { '-2': 0, '-1': 0, 0: 0 }; let same = 0;
+      for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { if (!x && !y) continue; const X = i + x, Y = j + y; if (X < 0 || Y < 0 || X >= W || Y >= H || !shaded(X, Y)) continue; const v = out[Y * W + X]; cnt[v]++; if (v === out[j * W + i]) same++; }
+      if (!same && cnt['-2'] + cnt['-1'] + cnt[0]) out[j * W + i] = +Object.keys(cnt).reduce((a, b) => (cnt[b] > cnt[a] ? b : a));
+    }
+    return out;
   };
+  const hsv = (h) => { const [r, g, b] = rgbOf(h).map((v) => v / 255), mx = Math.max(r, g, b), c = mx - Math.min(r, g, b);   // [hue, saturation, lightness]
+    const hu = !c ? 0 : mx === r ? ((g - b) / c) % 6 : mx === g ? (b - r) / c + 2 : (r - g) / c + 4; return [(hu * 60 + 360) % 360, mx ? c / mx : 0, 0.299 * r + 0.587 * g + 0.114 * b]; };
+  const rampOf = (pal, c, n) => {   // the n-th darker of c's own tones (its hue within 30 degrees, or both all but hueless; no outline), the darkest if fewer, null if none
+    const [h, s, l] = hsv(pal[c]), fam = Object.keys(pal).filter((k) => { const [h2, s2, l2] = hsv(pal[k]); if (k === c || l2 >= l - 0.03 || l2 < 0.14) return false;
+      if (s < 0.15 || s2 < 0.15) return s < 0.15 && s2 < 0.25; const dh = Math.abs(h - h2); return Math.min(dh, 360 - dh) < 30; }).sort((a, b) => hsv(pal[b])[2] - hsv(pal[a])[2]);
+    return fam.length ? pal[fam[Math.min(n, fam.length) - 1]] : null;
+  };
+  const shadeHex = (h) => {   // a tone with none darker of its own: SHADE_GLSL's shadeOf (world.js), darker and fuller, a hueless one toward the cool blue (shadeTint's), a thing's 0.35
+    const [r, g, b] = rgbOf(h), tint = PAL.blue.map((v) => v * 255), mx = Math.max(r, g, b), sat = mx ? (mx - Math.min(r, g, b)) / mx : 0, f = (1 - sat) * 0.35;
+    const s = [r * 0.6, g * 0.6, b * 0.6], l = 0.299 * s[0] + 0.587 * s[1] + 0.114 * s[2], c = [r, g, b];
+    return '#' + [0, 1, 2].map((k) => { const v = Math.min(255, Math.max(0, l + (s[k] - l) * 1.35)); return Math.round(v + ((c[k] * 0.72 + tint[k]) / 2 - v) * f).toString(16).padStart(2, '0'); }).join('');
+  };
+  const foodSvgs = {};
+  const foodSvg = (id, skip = '', vol = VOL_ON) => {   // a food as an SVG of its rows, a rect per run of one colour, the colours its own (skip: colours left out), in the
+    // game's volume (vol: VOL_ON, ?novol none)
+    const key = id + skip + (vol ? '+' : ''); if (foodSvgs[key]) return foodSvgs[key];
+    const [ps, rs] = FOODS[id], rows = rs.split('/'), pal = {}, dark = {};
+    for (const s of ps.split(',')) pal[s[0]] = '#' + s.slice(1);
+    for (const c in pal) dark[c] = FOOD_VOL.steps.map((n) => rampOf(pal, c, n) || shadeHex(pal[c]));
+    const W = rows[0].length, steps = vol ? volOf(rows, pal) : null, out = (c) => c === '.' || skip.includes(c);
+    const ink = (c, i, j) => { const v = steps ? steps[j * W + i] : 0; return v === -2 ? dark[c][1] : v === -1 && (i + j) % 2 ? dark[c][0] : pal[c]; };   // a pixel's colour
+    const runs = {};
+    rows.forEach((r, y) => { for (let x = 0; x < r.length;) { if (out(r[x])) { x++; continue; } const k = ink(r[x], x, y); let e = x + 1; while (e < r.length && !out(r[e]) && ink(r[e], e, y) === k) e++; runs[k] = (runs[k] || '') + 'M' + x + ' ' + y + 'h' + (e - x) + 'v1h' + (x - e) + 'z'; x = e; } });
+    let paths = ''; for (const k in runs) paths += '<path fill="' + k + '" d="' + runs[k] + '"/>';
+    return (foodSvgs[key] = '<svg viewBox="0 0 ' + W + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + paths + '</svg>');
+  };
+  window.feedSvg = { foodSvg, volOf };   // (for checks)
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const anim = (e, frames, ms, ease = 'ease-out') => (e && e.animate ? e.animate(frames, { duration: still ? Math.min(ms, 90) : ms, easing: ease }).finished.catch(() => {}) : Promise.resolve());

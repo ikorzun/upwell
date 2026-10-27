@@ -2791,6 +2791,99 @@ const CHUNKS = {
     '.........===',
     '............', '............',
     '........N...'] },
+  // The Danchi's bonus caves (after Tokyo's, one world at a time; in its stash room inside the playground's octopus slide, Worlds' DC_ROOM): its
+  // stairwell (T, stairs as on its levels: «stairs: just walk up»), the octopus's handholds, and the shutter's race (SHUTTER) up its flights or off its
+  // spring rider. As the others: 21 rows, the way out the hole in the left wall (nothing to fall down within 3 tiles of it). Learnt building them: a
+  // flight seals the floor under its low end (its triangle reached only from its high end), a spring's throw is fixed (SPRING.v: 16 tiles off a block
+  // 1 up, against an air jump's 14.4), a crumble takes any touch (a jump's arc grazing its side brings it down)
+  caveSteps: { d: 1, kind: 'cave', rows: [   // a gift: the stairwell (T, stairs: walk up them), one long flight up the room to the right wall, then a hop up and left onto a short
+    '............',   // flight back over it (three tiles' headroom over the long one and more), a coin over every step, big coins on the top landing (to the left wall,
+    '............',   // 15 tiles up); down by the short flight, off its end onto the long one
+    '............',
+    '............',
+    '............',
+    '..OOO.o.....',
+    '######To....',
+    '.......To...',
+    '........To..',
+    '.........T..',
+    '............',
+    '..........oT',
+    '.........oT.',
+    '........oT..',
+    '.......oT...',
+    '......oT....',
+    '.....oT.....',
+    '....oT......',
+    '...oT.......',
+    '..oT........',
+    '..T.........'] },
+  caveRungs: { d: 1, kind: 'cave', rows: [   // a gift: up the octopus by the handholds on its inside wall (planks, up through them from under), a zigzag of them, a coin over each
+    '............',   // and on the hops, the big coins over the top one: a jump for them
+    '............',
+    '............',
+    '............',
+    '......OO....',
+    '......OO....',
+    '............',
+    '............',
+    '......==o...',
+    '.........o..',
+    '..........o.',
+    '.........==.',
+    '........o...',
+    '.......o....',
+    '......==....',
+    '.....o......',
+    '....o.......',
+    '...==.......',
+    '............',
+    '............',
+    '............'] },
+  caveRace: { d: 1, kind: 'cave', rows: [   // a puzzle: caveSteps' two flights; the switch (N) on the long flight's top step at the right wall, the vault high on the left behind
+    '............',   // a shutter (G), its floor 16 tiles up (over a jump and an air jump from the floor): bump it, the hop onto the short flight, up it, onto the sill
+    '######......',   // and in (2.8 s of the shutter's 5). Its floor two thick, its roof a row clear of its coins, the room's wall its back: none in the magnet's reach
+    '.....G......',
+    'OOOO.G......',
+    'OOOO.G......',
+    '#######.....',
+    '#######.....',
+    '.......T....',
+    '........T...',
+    '.........T..',
+    '...........N',
+    '...........T',
+    '..........T.',
+    '.........T..',
+    '........T...',
+    '.......T....',
+    '......T.....',
+    '.....T......',
+    '....T.......',
+    '...T........',
+    '..T.........'] },
+  caveRider: { d: 1, kind: 'cave', rows: [   // a puzzle: the vault high on the right behind a shutter, its floor 14 tiles up (an air jump's top 14.4); its switch on the floor
+    '............',   // under it; the spring rider (S on its block) out at x5, its throw (16 tiles) 2.5 tiles clear of the vault's edge: bump, run, ride, across at
+    '............',   // the top, in (2.7-3.1 s); jump held through the throw cuts it
+    '............',
+    '.......#####',
+    '.......G....',
+    '.......GOOOO',
+    '.......GOOOO',
+    '.......#####',
+    '.......#####',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '....S.......',
+    '....#....N..'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -3298,8 +3391,8 @@ const AMBUSH = { waves: [2], coins: 2 };
 // heaps of coins (Level.build).
 const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] },
   ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] }, sea: { gift: ['caveSpouts', 'caveRafts'], puzzle: ['caveShell', 'caveKeel'] },
-  tokyo: { gift: ['caveAwnings', 'cavePins'], puzzle: ['caveShutter', 'caveRush'] } };   // (the Village's, 'mine';
-// the Mine's, 'cave'; Fuji's, 'ice'; the Sea's, 'sea'; Tokyo's, 'tokyo')
+  tokyo: { gift: ['caveAwnings', 'cavePins'], puzzle: ['caveShutter', 'caveRush'] }, blocks: { gift: ['caveSteps', 'caveRungs'], puzzle: ['caveRace', 'caveRider'] } };   // (the
+// Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice'; the Sea's, 'sea'; Tokyo's, 'tokyo'; the Danchi's, 'blocks')
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {

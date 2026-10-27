@@ -342,6 +342,8 @@
   .fm-pay { display: flex; align-items: center; gap: 6px; color: var(--yellow); }   /* his coins, the day's first run */
   .fm-pay .ico { --p: 2; }
   .fm-bite { position: fixed; z-index: 40; pointer-events: none; will-change: transform; }   /* a bite on its way to his mouth (feed.bite) */
+  .fm-fx { position: fixed; left: 0; top: 0; z-index: 39; pointer-events: none; image-rendering: pixelated; }   /* a food's bits when eaten, the result's confetti: a food's pixel a pixel of it (feed.js fxStep) */
+  .fm-combo { position: absolute; z-index: 2; --p: 3; color: var(--yellow); filter: drop-shadow(0 3px 0 var(--ink)); pointer-events: none; white-space: nowrap; }   /* a cascade's step over where it was eaten (feed.pops), the game's #combo */
   .fm-bite svg { width: 100%; height: 100%; display: block; }
   .fm-stars .ico { width: 36px; height: 36px; }
   .chip {

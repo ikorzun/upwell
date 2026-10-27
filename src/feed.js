@@ -22,6 +22,14 @@ const FEED = {
   // the sag starts past that part of the meter (the brief: hungry, then blushing and wider, then satisfied and puddled)
   favX: 2, pay: 3,   // the day's favourite food's points times so many; the coins of a UTC day's first run fed to the end (the brief: about a tenth of a level's;
   // a level gives some 20, tools/botrun.mjs. Asked: З14), into the purse and the bank as coins picked up are (Game.campKeep)
+  jelly: { hz: 4.5, damp: 0.24, max: 0.28, land: 0.1, row: 0.035, swap: 0.13, pick: 0.12, thaw: 0.14, hint: 0.07 },   // a food's spring (owner, 2026-10-27:
+  // «добавить приятную анимацию, можно сделать объекта с похожей физикой как моти»): its strain (+ taller, - wider, its area kept) rings at hz, damped so, at most
+  // max; a kick's bend at its most: a landing (and each row more it fell), a swap's stretch its way, one picked up, its ice off, a hint's nudge
+  soft: { sakura: 1, matcha: 1, taiyaki: 0.5, imo: 0.45 },   // how much each gives (a mochi all of it; a baked fish and a baked sweet potato half); a frozen one none
+  burst: { n: 10, big: 16, sp: [140, 420], life: [0.4, 0.8], g: 900, drag: 3, white: 0.25, ring: 0.3 },   // a food eaten (owner: «и конечно же добавить эффекты
+  // совмещения и финала»): its bits (a line of 4+ more), as the game's sparkFx in its own colours: CSS px/s, s, px/s² down, their speed's part lost a second, the
+  // part in white; a white ring round the line for ring s (a line of 4+ a wider one)
+  confetti: { n: 24, star: 24, life: [1.4, 2.2], g: 260 },   // the result's: bits, and more a star, in the four foods' colours, falling slow and fluttering
 };
 const FEED_SET = ['sakura', 'matcha', 'taiyaki', 'imo'];   // the brief's first four (#01, #02, #05, #19): four shapes and colours apart
 // The foods and blockers (the owner's concept sheet, research/feed-moti/foods-sheet.webp), each on its own GPT grid, one of the sheet's dots one sprite
@@ -193,10 +201,79 @@ else {
     const runs = {};
     rows.forEach((r, y) => { for (let x = 0; x < r.length;) { if (out(r[x])) { x++; continue; } const k = ink(r[x], x, y); let e = x + 1; while (e < r.length && !out(r[e]) && ink(r[e], e, y) === k) e++; runs[k] = (runs[k] || '') + 'M' + x + ' ' + y + 'h' + (e - x) + 'v1h' + (x - e) + 'z'; x = e; } });
     let paths = ''; for (const k in runs) paths += '<path fill="' + k + '" d="' + runs[k] + '"/>';
-    return (foodSvgs[key] = '<svg viewBox="0 0 ' + W + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + paths + '</svg>');
+    const foot = (100 * (rows.reduce((m, r, y) => (/[^.]/.test(r) ? y : m), 0) + 1)) / rows.length;   // (its lowest pixel's bottom: where it bends from, jig)
+    return (foodSvgs[key] = '<svg viewBox="0 0 ' + W + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true" style="transform-origin:50% ' + foot + '%">' + paths + '</svg>');
   };
-  window.feedSvg = { foodSvg, volOf };   // (for checks)
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const jel = new Map();   // the foods in a wobble: a food's svg -> [its strain, its speed]
+  let jelRaf = 0, jelLast = 0;
+  const jig = (e, kick) => {   // a food's tile kicked (the bend it rises to: + taller, - wider), by its own give: none frozen, none with reduced motion
+    const s = !still && e && !e.classList.contains('ice') && e.firstElementChild, k = s ? FEED.soft[e.dataset.food] ?? 0.6 : 0; if (!k) return;
+    const J = FEED.jelly, w = 2 * Math.PI * J.hz, p = jel.get(s) || [0, 0];
+    p[1] += (kick * k * w) / 0.72; jel.set(s, p);   // (the push's speed for that bend at its first swing, damped by its first quarter turn)
+    if (!jelRaf) jelRaf = requestAnimationFrame(wobble);
+  };
+  const wobble = (now) => {   // each frame one wobbles: a damped spring (Moti's give, one number a food), its svg scaled from its foot; still again, no transform at all
+    // (its pixels whole screen points again)
+    const J = FEED.jelly, w = 2 * Math.PI * J.hz, dt = jelLast ? Math.min(0.25, (now - jelLast) / 1000) : 1 / 60; jelLast = now;
+    for (const [s, p] of jel) {
+      for (let left = dt; left > 1e-6; left -= 1 / 60) { const h = Math.min(1 / 60, left); p[1] += (-w * w * p[0] - 2 * J.damp * w * p[1]) * h; p[0] += p[1] * h; }   // (in real time on a slow
+      // frame too: in steps a 60th of a second at most)
+      if (!s.isConnected || (Math.abs(p[0]) < 0.004 && Math.abs(p[1]) < 0.06)) { s.style.transform = ''; jel.delete(s); continue; }
+      const a = Math.max(-J.max, Math.min(J.max, p[0])); s.style.transform = 'scale(' + (1 - 0.8 * a).toFixed(4) + ',' + (1 + a).toFixed(4) + ')';
+    }
+    jelRaf = jel.size ? requestAnimationFrame(wobble) : 0; if (!jelRaf) jelLast = 0;
+  };
+  const WHITE = '#' + PAL.white.map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
+  const foodInks = {};
+  const inksOf = (id) => {   // a food's own colours, each as many times as its pixels (a bit's picked from them: its tones as much as they are on it)
+    if (foodInks[id]) return foodInks[id];
+    const [ps, rs] = FOODS[id], pal = {}, out = []; for (const q of ps.split(',')) pal[q[0]] = '#' + q.slice(1);
+    for (const c of rs) if (pal[c]) out.push(pal[c]); return (foodInks[id] = out);
+  };
+  const bits = []; let fxc = null, fxRaf = 0, fxLast = 0;
+  window.feedSvg = { foodSvg, volOf, bits };   // (for checks)
+  const fxCanvas = () => {   // the bits' canvas over the screen, a food's pixel its pixel (whole screen points): made at the first bit, gone with the board (feed.close)
+    const dpr = devicePixelRatio || 1, k = Math.max(1, Math.round((feed.foodPx * dpr) / FEED.food)), W = Math.ceil((innerWidth * dpr) / k), H = Math.ceil((innerHeight * dpr) / k);
+    if (!fxc) { fxc = document.createElement('canvas'); fxc.className = 'fm-fx'; document.body.append(fxc); }
+    if (fxc.width !== W || fxc.height !== H || fxc.k !== k) { fxc.width = W; fxc.height = H; fxc.k = k; fxc.style.width = (W * k) / dpr + 'px'; fxc.style.height = (H * k) / dpr + 'px'; }
+    if (!fxRaf) fxRaf = requestAnimationFrame(fxStep);
+  };
+  const ringPx = (x, cx, cy, r) => { for (let a = 0, n = Math.max(8, Math.ceil(2 * Math.PI * r)); a < n; a++) x.fillRect(Math.round(cx + r * Math.cos((2 * Math.PI * a) / n)), Math.round(cy + r * Math.sin((2 * Math.PI * a) / n)), 1, 1); };
+  const fxStep = (now) => {   // each frame bits fly: on with their speed's loss and their fall (a confetti's flutter), drawn as whole pixels, the last third of its life one
+    // smaller; none left: the canvas clear and still
+    const dt = fxLast ? Math.min(0.25, (now - fxLast) / 1000) : 1 / 60, c = fxc; fxLast = now;
+    if (!c) { fxRaf = 0; fxLast = 0; return; }
+    const x = c.getContext('2d'), s = (devicePixelRatio || 1) / c.k; x.clearRect(0, 0, c.width, c.height);
+    for (let i = bits.length - 1; i >= 0; i--) {
+      const b = bits[i]; b.t += dt;
+      if (b.t > b.life) { bits.splice(i, 1); continue; }
+      if (b.t < 0) continue;   // (one still to come)
+      x.fillStyle = b.c;
+      if (b.ring) { ringPx(x, b.x * s, b.y * s, (b.r0 + (b.r1 - b.r0) * Math.sqrt(b.t / b.life)) * s); continue; }
+      const d = Math.exp(-b.drag * dt); b.vx *= d; b.vy = b.vy * d + b.g * dt; b.x += (b.vx + (b.fl ? b.fl[2] * Math.sin(b.t * b.fl[0] + b.fl[1]) : 0)) * dt; b.y += b.vy * dt;
+      const z = b.t > 0.66 * b.life ? Math.max(1, b.s - 1) : b.s, flat = b.fl && Math.cos(b.t * b.fl[0] + b.fl[1]) > 0, zw = b.fl && !flat ? Math.max(1, z - 1) : z, zh = flat ? Math.max(1, z - 1) : z;   // (a confetti's
+      // bit turning over: long across, then up and down)
+      x.fillRect(Math.round(b.x * s - zw / 2), Math.round(b.y * s - zh / 2), zw, zh);
+    }
+    fxRaf = bits.length ? requestAnimationFrame(fxStep) : 0; if (!fxRaf) fxLast = 0;
+  };
+  const burst = (x, y, id, big) => {   // a food eaten at (x, y), the page's CSS px: its bits thrown out and up in its own colours, a few white, as the game's sparkFx
+    const B = FEED.burst, ink = inksOf(id), n = Math.round((big ? B.big : B.n) * (still ? 0.4 : 1)), r = () => fxRand(0, 1);   // (a look's chances, fxRand's)
+    if (bits.length > 400) return;   // (a phone's budget, as the game's)
+    for (let i = 0; i < n; i++) {
+      const a = -Math.PI / 2 + (2 * r() - 1) * 1.7, v = B.sp[0] + r() * (B.sp[1] - B.sp[0]);
+      bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: B.g, drag: B.drag, t: 0, life: B.life[0] + r() * (B.life[1] - B.life[0]), s: r() < 0.4 ? 3 : 2, c: r() < B.white ? WHITE : ink[(r() * ink.length) | 0] });
+    }
+    fxCanvas();
+  };
+  const ring = (x, y, r0, r1) => { bits.push({ ring: true, x, y, r0, r1, t: 0, life: FEED.burst.ring, c: WHITE }); fxCanvas(); };   // a white ring thrown out
+  const confetti = (r, n) => {   // the result's: bits in the four foods' colours (their light ones) from over the board, falling slow, fluttering
+    const C = FEED.confetti, rr = () => fxRand(0, 1), inks = FEED_SET.flatMap((id) => inksOf(id)).filter((h) => { const [a, b, c] = rgbOf(h); return 0.299 * a + 0.587 * b + 0.114 * c > 90; });
+    for (let i = 0, m = Math.round(n * (still ? 0.4 : 1)); i < m; i++) bits.push({ x: r.left + rr() * r.width, y: r.top - rr() * 0.4 * r.height, vx: (2 * rr() - 1) * 40, vy: 30 + rr() * 60, g: C.g, drag: 1.6,
+      t: -rr() * 0.6, life: C.life[0] + rr() * (C.life[1] - C.life[0]), s: rr() < 0.5 ? 3 : 2, c: inks[(rr() * inks.length) | 0], fl: [4 + rr() * 4, rr() * 6.28, 60 + rr() * 60] });
+    fxCanvas();
+  };
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const anim = (e, frames, ms, ease = 'ease-out') => (e && e.animate ? e.animate(frames, { duration: still ? Math.min(ms, 90) : ms, easing: ease }).finished.catch(() => {}) : Promise.resolve());
   var feed = {   // (var: a global, as game.js asks for it by name)
@@ -222,6 +299,7 @@ else {
       const st = this.st;
       this.active = false; this.busy = false; this.sel = -1; this.els = []; this.box = null;
       for (const f of this.flying) f.e.remove(); this.flying = [];
+      bits.length = 0; if (fxc) { fxc.remove(); fxc = null; }
       track('feed_close', { moves_left: st ? st.moves : 0, duration_ms: Math.round(performance.now() - this.opened), exit_to_main_game: !!toGame });
       if (game.state === 'menu') ui.menu();
     },
@@ -255,6 +333,7 @@ else {
     tile(k, i) {   // a food's element at cell i; a frozen one's under the sheet's own frozen treat, its ice alone (the treat in it left out), see-through
       const e = el('div', 'fm-t'); e.innerHTML = foodSvg(FL.food(k)) + (FL.ice(k) ? '<i class="fm-ice">' + foodSvg('frozen', 'efhi') + '</i>' : '');
       if (FL.ice(k)) e.classList.add('ice');
+      e.dataset.food = FL.food(k);
       this.place(e, i); this.box.append(e); return e;
     },
     shiver(i) {   // a frozen one won't move: it shivers, nothing spent
@@ -263,7 +342,7 @@ else {
     },
     thaw(i) {   // a line gone beside it: its ice cracks off, a puff
       const e = this.els[i], ice = e && e.querySelector('.fm-ice'); if (!ice) return;
-      e.classList.remove('ice'); sound.play('crumble', 0.5, 1.6); haptics.buzz(8);
+      e.classList.remove('ice'); sound.play('crumble', 0.5, 1.6); haptics.buzz(8); jig(e, FEED.jelly.thaw);
       anim(ice, still ? [{ opacity: 0.6 }, { opacity: 0 }] : [{ transform: 'none', opacity: 0.6 }, { transform: 'scale(1.15)', opacity: 0.35, offset: 0.4 }, { transform: 'scale(1.3)', opacity: 0 }], 220).then(() => ice.remove());
     },
     place(e, i) { const c = this.cellPx, n = FEED.n; e.style.left = (i % n) * c + 'px'; e.style.top = ((i / n) | 0) * c + 'px'; },
@@ -298,7 +377,7 @@ else {
         const i = this.cellAt(e); if (i !== d.i) return;
         if (this.sel >= 0 && FL.adj(this.sel, i)) { const s = this.sel; this.sel = -1; this.mark(); this.swap(s, i); }
         else if (FL.ice(this.st.b[i])) this.shiver(i);
-        else { this.sel = this.sel === i ? -1 : i; this.mark(); haptics.buzz(4); }
+        else { this.sel = this.sel === i ? -1 : i; this.mark(); haptics.buzz(4); if (this.sel === i) jig(this.els[i], FEED.jelly.pick); }
       };
       box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
     },
@@ -318,7 +397,7 @@ else {
         else { this.cur = j; this.mark(); }
         return true;
       }
-      if (e.code === 'Space' || e.code === 'Enter') { if (FL.ice(this.st.b[this.cur])) this.shiver(this.cur); else { this.sel = this.sel === this.cur ? -1 : this.cur; this.mark(); } return true; }
+      if (e.code === 'Space' || e.code === 'Enter') { if (FL.ice(this.st.b[this.cur])) this.shiver(this.cur); else { this.sel = this.sel === this.cur ? -1 : this.cur; this.mark(); if (this.sel >= 0) jig(this.els[this.sel], FEED.jelly.pick); } return true; }
       return false;
     },
     async swap(i, j) {   // try a swap: no line, it goes back and costs nothing; a line, a move spent and all it brings resolved
@@ -329,9 +408,10 @@ else {
       const ei = this.els[i], ej = this.els[j], c = this.cellPx, n = FEED.n;
       const dx = ((j % n) - (i % n)) * c, dy = (((j / n) | 0) - ((i / n) | 0)) * c;
       this.place(ei, j); this.place(ej, i);
+      const pull = dx ? -FEED.jelly.swap : FEED.jelly.swap; jig(ei, pull); jig(ej, pull);   // (wider across, taller up and down: stretched the way it goes)
       await Promise.all([anim(ei, [{ transform: `translate(${-dx}px,${-dy}px)` }, { transform: 'none' }], FEED.swap), anim(ej, [{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], FEED.swap)]);
       if (!FL.ok(st.b, i, j)) {   // gently back, no move spent
-        this.place(ei, i); this.place(ej, j); sound.play('deny', 0.35, 1.2);
+        this.place(ei, i); this.place(ej, j); sound.play('deny', 0.35, 1.2); jig(ei, pull); jig(ej, pull);
         await Promise.all([anim(ei, [{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], FEED.back, 'ease-in-out'), anim(ej, [{ transform: `translate(${-dx}px,${-dy}px)` }, { transform: 'none' }], FEED.back, 'ease-in-out')]);
         this.busy = false; return;
       }
@@ -357,13 +437,27 @@ else {
       sound.play('coin', 0.45, 1 + 0.08 * Math.min(ph.cascade - 1, 4)); haptics.buzz(big ? 12 : 5);
       for (const i of ph.thawed) this.thaw(i);
       this.bite(ph);   // (flying while the rest fall: the brief's overlap)
+      setTimeout(() => this.pops(ph, big), FEED.pop * 0.35);   // (as they swell: their bits out)
       this.meter();
-      await Promise.all(ph.gone.map((i) => { const e = this.els[i]; this.els[i] = null; return anim(e, still ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(1.18)', opacity: 1, offset: 0.35 }, { transform: 'scale(0.2)', opacity: 0 }], FEED.pop).then(() => e.remove()); }));
+      await Promise.all(ph.gone.map((i) => { const e = this.els[i]; this.els[i] = null; return anim(e, still ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: 'scale(1)', opacity: 1, filter: 'brightness(1)' }, { transform: 'scale(1.18)', opacity: 1, filter: 'brightness(1.9)', offset: 0.35 }, { transform: 'scale(0.2)', opacity: 0, filter: 'brightness(1.9)' }], FEED.pop).then(() => e.remove()); }));
       const next = this.els.slice(), falls = [];
-      for (const [from, to] of ph.moved) { const e = this.els[from]; next[to] = e; if (next[from] === e) next[from] = null; this.place(e, to); const rows = ((to - from) / FEED.n) | 0; falls.push(anim(e, [{ transform: `translateY(${-rows * c}px)` }, { transform: 'none' }], FEED.fall + FEED.row * rows, 'cubic-bezier(.5,0,.9,.6)')); }
-      for (const [to, from] of ph.come) { const e = this.tile(ph.b[to], to), rows = ((to / FEED.n) | 0) - from; next[to] = e; falls.push(anim(e, [{ transform: `translateY(${-rows * c}px)`, opacity: 0 }, { opacity: 1, offset: 0.3 }, { transform: 'none', opacity: 1 }], FEED.fall + FEED.row * rows, 'cubic-bezier(.5,0,.9,.6)')); }
+      const land = (e, rows) => () => jig(e, -(FEED.jelly.land + FEED.jelly.row * rows));   // (down on the one under it: squashed, the further it fell the more)
+      for (const [from, to] of ph.moved) { const e = this.els[from]; next[to] = e; if (next[from] === e) next[from] = null; this.place(e, to); const rows = ((to - from) / FEED.n) | 0; falls.push(anim(e, [{ transform: `translateY(${-rows * c}px)` }, { transform: 'none' }], FEED.fall + FEED.row * rows, 'cubic-bezier(.5,0,.9,.6)').then(land(e, rows))); }
+      for (const [to, from] of ph.come) { const e = this.tile(ph.b[to], to), rows = ((to / FEED.n) | 0) - from; next[to] = e; falls.push(anim(e, [{ transform: `translateY(${-rows * c}px)`, opacity: 0 }, { opacity: 1, offset: 0.3 }, { transform: 'none', opacity: 1 }], FEED.fall + FEED.row * rows, 'cubic-bezier(.5,0,.9,.6)').then(land(e, rows))); }
       this.els = next;
       await Promise.all(falls);
+    },
+    pops(ph, big) {   // a phase's foods eaten: each one's bits out of where it was, a white ring round them (wider for a line of 4+), its cascade's step over them (×2 to ×4, the
+      // score's: the game's combo in yellow)
+      if (!this.box || !this.active) return;
+      const r = this.box.getBoundingClientRect(), n = FEED.n, cw = r.width / n; let sx = 0, sy = 0;
+      ph.gone.forEach((i, q) => { const x = r.left + (i % n + 0.5) * cw, y = r.top + (((i / n) | 0) + 0.5) * cw; sx += x; sy += y; burst(x, y, ph.foods[q], big); });
+      const x = sx / ph.gone.length, y = sy / ph.gone.length;
+      ring(x, y, 0.25 * cw, (big ? 1.1 : 0.75) * cw);
+      if (ph.cascade > 1) {
+        const e = el('div', 'fm-combo'); e.append(px('×' + Math.min(ph.cascade, FEED.cap))); e.style.left = x - r.left + 'px'; e.style.top = y - r.top + 'px'; this.box.append(e);
+        anim(e, [{ transform: 'translate(-50%,-50%) scale(1.6)' }, { transform: 'translate(-50%,-50%)', offset: 0.2 }, { transform: 'translate(-50%,-90%)', opacity: 1, offset: 0.75 }, { transform: 'translate(-50%,-120%)', opacity: 0 }], 700).then(() => e.remove());
+      }
     },
     async reshuffle() {   // no move left: the foods mixed, as they are, to new places
       await Promise.all(this.els.map((e) => anim(e, [{ opacity: 1 }, { opacity: 0 }], 160)));
@@ -386,13 +480,24 @@ else {
       if (!quiet && this.box) this.result();
     },
     result() {   // over the board: his words, the stars, the score and the best (a new one yellow); his thanks in coins, the day's first time; again, or home
-      const st = this.st, stars = FL.stars(st.full), end = el('div', 'fm-end');
-      const sr = el('div', 'fm-stars'); for (let k = 0; k < 3; k++) sr.append(iconEl(k < stars ? 'star' : 'starOff'));
-      const sc = px(tf('feedScore', { n: st.score })), bs = px(tf('feedBest', { n: this.rec().best || st.score })); bs.classList.add('fm-best'); if (st.best) sc.classList.add('fm-new');
+      // The first time (not a board made again): faded in, the stars popping in one after another and ringing as a level's (ui.starRow), the score counted up,
+      // confetti for a star or more
+      const st = this.st, stars = FL.stars(st.full), end = el('div', 'fm-end'), first = !st.shown; st.shown = true;
+      const sr = el('div', 'fm-stars' + (first ? ' stars' : ''));
+      for (let k = 0; k < 3; k++) {
+        const s = iconEl(k < stars ? 'star' : 'starOff'); sr.append(s); if (!first) continue;
+        if (k < stars) { s.classList.add('won'); setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k); }
+        s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < stars ? ', ' + (1.2 + 0.2 * k) + 's' : '');
+      }
+      const sc = px(tf('feedScore', { n: first && !still ? 0 : st.score })), bs = px(tf('feedBest', { n: this.rec().best || st.score })); bs.classList.add('fm-best'); if (st.best) sc.classList.add('fm-new');
       end.append(cap(el('div', 'head', t('feedDone')), 'feedDone'), sr, sc, bs);
       if (st.pay) { const pay = el('div', 'fm-pay'); pay.append(px(tf('feedTreat', { n: st.pay })), iconEl('coin')); end.append(pay); anim(pay, [{ transform: 'scale(0.6)', opacity: 0 }, { transform: 'scale(1.12)', opacity: 1, offset: 0.6 }, { transform: 'none', opacity: 1 }], 320); }
       const row = el('div', 'pair'); row.append(cap(button(t('feedAgain'), 'big thumb', () => { this.newRun(); ui.menu(); }), 'feedAgain'), cap(button(t('goBack'), 'big thumb alt', () => this.close()), 'goBack'));
       end.append(row); this.box.append(end);
+      if (!first) return;
+      anim(end, [{ opacity: 0 }, { opacity: 1 }], 200);
+      if (!still) { const t0 = performance.now() + 300, up = () => { if (!sc.isConnected) return; const u = Math.min(1, Math.max(0, (performance.now() - t0) / 600)); sc.replaceChildren(...px(tf('feedScore', { n: Math.round(st.score * u) })).childNodes); if (u < 1) setTimeout(up, 50); }; up(); }   // (in steps, as the game's)
+      if (stars) confetti(this.box.getBoundingClientRect(), FEED.confetti.n + FEED.confetti.star * stars);
     },
     frame(now) {   // each frame (game.js runFrame, after menuTouch): his eyes on a bite in the air (or the board), his sag by how full he is, eased back at home
       const b = game.hero; if (!b || !game.lv || game.lv.kind !== 'menu') return;
@@ -456,6 +561,7 @@ else {
       this.hinting = true; this.idle = now;
       const nudge = (e, sx, sy) => (still || !e ? null : e.animate([{ transform: 'none' }, { transform: `translate(${sx}px,${sy}px)` }, { transform: 'none' }, { transform: `translate(${sx}px,${sy}px)` }, { transform: 'none' }], { duration: 900, easing: 'ease-in-out' }));
       this.nudges = [nudge(ei, dx, dy), nudge(ej, -dx, -dy)].filter(Boolean);
+      const lean = dx ? -FEED.jelly.hint : FEED.jelly.hint; jig(ei, lean); jig(ej, lean);
       Promise.all(this.nudges.map((a) => a.finished.catch(() => {}))).then(() => { this.hinting = false; });
     },
     unhint() { for (const a of this.nudges || []) a.cancel(); this.nudges = []; this.hinting = false; },   // (a hint's nudge stopped at a move: not left on the swapped foods)

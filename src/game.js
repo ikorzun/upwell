@@ -2663,37 +2663,37 @@ function px(text, max = Infinity, left = false) {
 // was drawn on, К7), `ink` its world's colours for the frame (К6), `boss` the world whose boss beaten brings it (II and VI come after their own
 // episodes: the crow in 1-3, the treat in Tokyo), `title` under the card. Game.story shows one, the game held under it till Next.
 const STORY = {
-  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [173, 258], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
-  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', cells: [192, 288], ink: 'village', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
-  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [181, 270], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
-  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [168, 254], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
-  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [170, 256], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
-  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [179, 268], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
-  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [171, 256], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
-  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [157, 235], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
-  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [205, 307], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
-  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [192, 288], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
+  moon_fall: { n: 'I', still: 'assets/cards/01_moon_fall.png', cells: [336, 498], was: [173, 258], ink: 'moon', title: { en: 'The Little Accident', es: 'El pequeño accidente', pt: 'O pequeno acidente', ja: 'ちいさな アクシデント' } },
+  village_crow: { n: 'II', still: 'assets/cards/02_village_crow.png', cells: [385, 578], was: [192, 288], ink: 'village', title: { en: 'A Small Kindness', es: 'Una pequeña bondad', pt: 'Uma pequena gentileza', ja: 'ちいさな やさしさ' } },
+  mine_lamp: { n: 'III', still: 'assets/cards/04_mine_lamp.png', cells: [362, 546], was: [181, 270], ink: 'cave', boss: 'cave', title: { en: 'The Lamp in the Dark', es: 'La lámpara en la oscuridad', pt: 'A lâmpada no escuro', ja: 'くらやみの ランプ' } },
+  fuji_bell: { n: 'IV', still: 'assets/cards/05_fuji_bell.png', cells: [330, 492], was: [168, 254], ink: 'ice', boss: 'ice', title: { en: 'The Summit Bell', es: 'La campana de la cima', pt: 'O sino do cume', ja: 'ちょうじょうの かね' } },
+  sea_lighthouse: { n: 'V', still: 'assets/cards/06_sea_lighthouse.png', cells: [340, 514], was: [170, 256], ink: 'sea', boss: 'sea', title: { en: 'A Light for the Sky', es: 'Una luz para el cielo', pt: 'Uma luz para o céu', ja: 'そらへの ひかり' } },
+  city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [359, 538], was: [179, 268], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
+  danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [342, 512], was: [171, 256], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
+  sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [315, 474], was: [157, 235], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
+  forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [408, 618], was: [205, 307], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
+  moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [378, 570], was: [192, 288], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
   // A card for Mochi's coming to each world, before its first level (owner, 2026-10-23: «историю с карточками нужно дополнить, например, сначала показываем
   // падение с луны, потом что герой упал в деревню – т.е. везде добавить +1 карточку перехода»; the scheme of the others, drawn out as the bosses' were:
   // «у карточек тоже используй подход с детализацией»): for everyone since his К17 «А»
-  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [189, 284], ink: 'village', title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
-  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [191, 286], ink: 'cave', title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
-  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [186, 279], ink: 'ice', title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
-  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [128, 192], ink: 'sea', title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
-  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [173, 260], ink: 'tokyo', title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
-  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [204, 305], ink: 'blocks', title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
-  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [146, 219], ink: 'sky', title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
-  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [192, 288], ink: 'skazka', title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
+  arrive_mine: { n: '', still: 'assets/cards/19_arrive_mine.png', cells: [377, 568], was: [189, 284], ink: 'village', title: { en: 'A Soft Landing', es: 'Un aterrizaje suave', pt: 'Um pouso suave', ja: 'ふんわり ちゃくち' } },
+  arrive_cave: { n: '', still: 'assets/cards/20_arrive_cave.png', cells: [360, 564], was: [191, 286], ink: 'cave', title: { en: 'Into the Mine', es: 'Hacia la mina', pt: 'Rumo à mina', ja: 'こうざんへ' } },
+  arrive_ice: { n: '', still: 'assets/cards/21_arrive_ice.png', cells: [345, 540], was: [186, 279], ink: 'ice', title: { en: 'The Foot of Fuji', es: 'Al pie del Fuji', pt: 'Ao pé do Fuji', ja: 'ふじの ふもと' } },
+  arrive_sea: { n: '', still: 'assets/cards/22_arrive_sea.png', cells: [260, 394], was: [128, 192], ink: 'sea', title: { en: 'Out to Sea', es: 'Mar adentro', pt: 'Mar adentro', ja: 'うみへ' } },
+  arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [344, 542], was: [173, 260], ink: 'tokyo', title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
+  arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [368, 564], was: [204, 305], ink: 'blocks', title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
+  arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [278, 442], was: [146, 219], ink: 'sky', title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
+  arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [374, 549], was: [192, 288], ink: 'skazka', title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
   // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
   // boss is, in its world's ink and its own: for all since his К13 «А» (2026-10-23; the tram face-on, as he asked)
-  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [184, 276], ink: 'mine', title: BOSSES.probka.name },
-  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [151, 227], ink: 'cave', title: BOSSES.cart.name },
-  boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [192, 288], ink: 'ice', title: BOSSES.puck.name },
-  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [189, 284], ink: 'sea', title: BOSSES.namazu.name },
-  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [171, 256], ink: 'tokyo', title: BOSSES.tram.name },
-  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [191, 287], ink: 'blocks', title: BOSSES.crane.name },
-  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [158, 237], ink: 'sky', title: BOSSES.pigeon.name },
-  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [198, 297], ink: 'skazka', title: BOSSES.koschei.name },
+  boss_probka: { n: '', still: 'assets/cards/11_boss_probka.png', cells: [352, 520], was: [184, 276], ink: 'mine', title: BOSSES.probka.name },
+  boss_cart: { n: '', still: 'assets/cards/12_boss_cart.png', cells: [301, 454], was: [151, 227], ink: 'cave', title: BOSSES.cart.name },
+  boss_puck: { n: '', still: 'assets/cards/13_boss_puck.png', cells: [384, 573], was: [192, 288], ink: 'ice', title: BOSSES.puck.name },
+  boss_namazu: { n: '', still: 'assets/cards/14_boss_namazu.png', cells: [360, 550], was: [189, 284], ink: 'sea', title: BOSSES.namazu.name },
+  boss_tram: { n: '', still: 'assets/cards/15_boss_tram.png', cells: [338, 515], was: [171, 256], ink: 'tokyo', title: BOSSES.tram.name },
+  boss_crane: { n: '', still: 'assets/cards/16_boss_crane.png', cells: [368, 552], was: [191, 287], ink: 'blocks', title: BOSSES.crane.name },
+  boss_pigeon: { n: '', still: 'assets/cards/17_boss_pigeon.png', cells: [334, 470], was: [158, 237], ink: 'sky', title: BOSSES.pigeon.name },
+  boss_koschei: { n: '', still: 'assets/cards/18_boss_koschei.png', cells: [356, 518], was: [198, 297], ink: 'skazka', title: BOSSES.koschei.name },
 };
 for (const k in STORY) STORY[k].id = k;
 const STORY_LIVE = /[?&]story\b/.test(location.search);   // (the cards are for all since the owner's К10 «А»; ?story shows card I before
@@ -2902,7 +2902,7 @@ function cardShade(d, i, tint, w, o) {   // SHADE_GLSL's shadeOf in 0–255: the
   for (let c = 0; c < 3; c++) { const v = Math.min(255, Math.max(0, l + (s[c] - l) * 1.35)); o[i + c] = Math.round(v + ((d[i + c] * 0.72 + tint[c]) / 2 - v) * f); }
   o[i + 3] = 255;
 }
-function cardNormals(im, w, h) {
+function cardNormals(im, w, h, D = 1) {   // (D: its cells to a cell of the cut it was tuned on, STORY's `was`: its dome and slopes the same size on the card)
   const t = document.createElement('canvas'); t.width = w; t.height = h; const g = t.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, w, h).data;
   const n = w * h, ins = new Uint8Array(n), dist = new Float32Array(n), hgt = new Float32Array(n), out = new Float32Array(n * 3);
   const lum = (q) => { const f = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return Math.cbrt(0.2126 * f(d[q * 4]) + 0.7152 * f(d[q * 4 + 1]) + 0.0722 * f(d[q * 4 + 2])); };   // (about Oklab's L)
@@ -2911,12 +2911,12 @@ function cardNormals(im, w, h) {
     const q = pass ? n - 1 - k : k, x = q % w, y = (q / w) | 0, s = pass ? 1 : -1; if (!ins[q]) continue;
     for (const [dx, dy, c] of [[s, 0, 1], [0, s, 1], [s, s, 1.4], [-s, s, 1.4]]) { const X = x + dx, Y = y + dy, v = X < 0 || Y < 0 || X >= w || Y >= h ? 0 : dist[Y * w + X]; if (v + c < dist[q]) dist[q] = v + c; }
   }
-  for (let q = 0; q < n; q++) if (ins[q]) hgt[q] = CARD_LIT.dome * 4 * Math.log(1 + Math.max(dist[q] - 0.5, 0) / 4) + CARD_LIT.detail * (lum(q) - 0.5);
+  for (let q = 0; q < n; q++) if (ins[q]) hgt[q] = CARD_LIT.dome * 4 * Math.log(1 + Math.max(dist[q] / D - 0.5, 0) / 4) + CARD_LIT.detail * (lum(q) - 0.5);
   const at = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : hgt[y * w + x]);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const q = y * w + x; if (!ins[q]) continue;
     const gx = (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x - 1, y) - at(x - 1, y + 1)) / 8, gy = (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x, y - 1) - at(x + 1, y - 1)) / 8;
-    let nx = -gx * 1.5, ny = -gy * 1.5, nz = 1; const m = Math.hypot(nx, ny, nz); out[q * 3] = nx / m; out[q * 3 + 1] = ny / m; out[q * 3 + 2] = nz / m;
+    let nx = -gx * 1.5 * D, ny = -gy * 1.5 * D, nz = 1; const m = Math.hypot(nx, ny, nz); out[q * 3] = nx / m; out[q * 3 + 1] = ny / m; out[q * 3 + 2] = nz / m;
   }
   return { n: out, ins, px: d };
 }
@@ -2952,6 +2952,8 @@ function wesLive(card) {   // a Wes Anderson still in the album, alive: tipped t
 }
 function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (settled: no coming-in, as a card swiped to in the album)
   const [w, h] = c.cells, dpr = window.devicePixelRatio || 1, still = matchMedia('(prefers-reduced-motion: reduce)').matches, def = CARD_PLANES[c.id];
+  const D = c.was ? w / c.was[0] : 1, Dr = Math.max(1, Math.round(D));   // its cells to one of the cut its motion, threads and lids were made on (STORY's `was`: the
+  // cards at twice their pixels since 2026-10-27)
   const kd = () => (card.getBoundingClientRect().width / w) * dpr;   // device px a cell
   const st = { alive: true, raf: 0, t0: 0, in0: 0, tx: 0, ty: 0, vx: 0, vy: 0, gx: 0, gy: 0, lastIn: -1e9, last: 0, ready: false };
   const planes = [], L0 = { eyes: [], twinkle: [], lights: [], pal: [] };
@@ -2978,7 +2980,7 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
         const t = document.createElement('canvas'); t.width = w; t.height = h; const tg = t.getContext('2d'); tg.drawImage(im, 0, 0); const d = tg.getImageData(0, 0, w, h).data;
         pl.mask = new Uint8Array(w * h); for (let q = 0; q < w * h; q++) pl.mask[q] = d[q * 4 + 3] > 0 ? 1 : 0;
       }
-      if (CARD_VOL && i > 0) { pl.nrm = cardNormals(im, w, h); pl.vol = document.createElement('canvas'); pl.vol.width = w; pl.vol.height = h; pl.volKey = ''; pl.tint = cardTint(c.ink); pl.w = pl.id === 'hero' ? 1 : 0.35; }   // (its volume, CARD_VOL)
+      if (CARD_VOL && i > 0) { pl.nrm = cardNormals(im, w, h, D); pl.vol = document.createElement('canvas'); pl.vol.width = w; pl.vol.height = h; pl.volKey = ''; pl.tint = cardTint(c.ink); pl.w = pl.id === 'hero' ? 1 : 0.35; }   // (its volume, CARD_VOL)
       planes.push(pl);
       if (i === 0 && def && def.threads) { thread = document.createElement('canvas'); thread.className = 'spl'; clip.append(thread); }   // over the plate, under what it holds
     });
@@ -3003,8 +3005,8 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
     const fill = (cells, col) => { g.fillStyle = col; for (const [x, y] of cells) g.fillRect(x, y, 1, 1); };
     p.live.forEach((e, i) => {
       if (e.kind === 'eye' && blink) {   // the eye white, a lid across it, its ends a cell up
-        const [x, y, ew, eh] = e.box, ly = y + Math.floor(eh * 0.6); fill(e.cells, L.pal[4]); g.fillStyle = L.pal[0];
-        for (let q = 0; q < ew; q++) g.fillRect(x + q, ly - (ew >= 4 && (q === 0 || q === ew - 1) ? 1 : 0), 1, 1);
+        const [x, y, ew, eh] = e.box, ly = y + Math.floor(eh * 0.6); fill(e.cells, L.pal[4]); g.fillStyle = L.pal[0];   // (an old cell thick, Dr)
+        for (let q = 0; q < ew; q++) g.fillRect(x + q, ly - (ew >= 4 * Dr && (q < Dr || q >= ew - Dr) ? Dr : 0), 1, Dr);
       }
       if (e.kind === 'twinkle' && (f + i * 5) % 12 < 3) fill(e.cells, L.pal[2]);
       if (e.kind === 'light' && !LIVE.flick[(f + i * 4) % LIVE.flick.length]) fill(e.cells, L.pal[3]);
@@ -3051,11 +3053,11 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
     tilt.style.transform = still ? '' : `translateY(${Math.round(rise * dpr) / dpr}px) perspective(700px) rotateX(${(-st.ty * CARD.tilt).toFixed(2)}deg) rotateY(${(st.tx * CARD.tilt).toFixed(2)}deg)`;
     const mo = !still && CARD_MOTION[c.id] ? CARD_MOTION[c.id](t) : {}, f = Math.floor(t / 0.125), blink = mo.blink != null ? mo.blink : LIVE.blink.includes(f % LIVE.every), off = [];
     planes.forEach((p, i) => {   // its motion (cells) and its depth's parallax, in whole device px; the plate first, each figure 0.09 s after
-      const [mx, my] = mo[p.id] || [0, 0], par = still ? 0 : p.depth * CARD.par, ox = Math.round(mx * K + st.tx * par), oy = Math.round(my * K + st.ty * par);
+      const [mx, my] = mo[p.id] || [0, 0], par = still ? 0 : p.depth * CARD.par, ox = Math.round(mx * K * D + st.tx * par), oy = Math.round(my * K * D + st.ty * par);
       off.push([ox, oy]); p.cv.style.transform = `translate(${ox / dpr}px, ${oy / dpr}px)`;
       drawPlane(p, still ? 16 : Math.round(16 * clamp01((a - CARD.step * i) / CARD.each)), f, blink);
     });
-    if (thread) { drawThread(off, K); thread.style.opacity = still ? 1 : clamp01((a - CARD.step) / CARD.each); }
+    if (thread) { drawThread(off, K * D); thread.style.opacity = still ? 1 : clamp01((a - CARD.step) / CARD.each); }
     if (sheen) drawSheen(st.tx, st.ty);
     show(still || st.forced ? 1 : clamp01((a - CARD.title) / CARD.fade), still || st.forced ? 1 : clamp01((a - CARD.next) / CARD.fade));
   }

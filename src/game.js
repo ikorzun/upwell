@@ -19,7 +19,7 @@ const STR = {
     got_smash: 'Helmet! Jumps smash blocks · {s} s', got_bubble: 'Bubble gum! Float up · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! You break blocks, enemies pop · {s} s',
     reviveQ: 'One more go?', revive: 'Revive', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
-    again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
+    again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', feedMoves: 'moves', feedDone: 'Mochi is full!', feedScore: 'Score {n}', feedAgain: 'Again', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', depth: '2.5D', crt: 'CRT', album: 'Cards', stylePixel: 'Pixel', styleWes: 'Magic', on: 'on', off: 'off',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
@@ -36,7 +36,7 @@ const STR = {
     got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_bubble: '¡Chicle! Flotas hacia arriba · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Rompes bloques, los enemigos revientan · {s} s',
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
-    again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
+    again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', feedMoves: 'movimientos', feedDone: '¡Mochi está lleno!', feedScore: 'Puntos {n}', feedAgain: 'Otra vez', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', depth: '2.5D', crt: 'CRT', album: 'Cartas', stylePixel: 'Píxel', styleWes: 'Magia', on: 'sí', off: 'no',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
@@ -53,7 +53,7 @@ const STR = {
     got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_bubble: 'Chiclete! Flutue para cima · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Você quebra blocos, inimigos estouram · {s} s',
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
-    again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
+    again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', feedMoves: 'jogadas', feedDone: 'Mochi está cheio!', feedScore: 'Pontos {n}', feedAgain: 'De novo', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', depth: '2.5D', crt: 'CRT', album: 'Cartas', stylePixel: 'Pixel', styleWes: 'Magia', on: 'sim', off: 'não',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
@@ -70,7 +70,7 @@ const STR = {
     got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_bubble: 'ガム！ ふわふわ うく · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ ブロックを こわし、てきは はじける · {s} びょう',
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
-    again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
+    again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', feedMoves: 'のこり', feedDone: 'モチ まんぷく！', feedScore: 'スコア {n}', feedAgain: 'もういちど', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', depth: 'りったい', crt: 'ブラウンかん', album: 'カード', stylePixel: 'ドット', styleWes: 'マジック', on: 'オン', off: 'オフ',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
@@ -3155,6 +3155,7 @@ const ui = {
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
     const p = this.panel('menu'); menuTop(true);
     const logo = el('img', 'logo'); logo.src = 'assets/ui/upwell-logo.svg'; logo.alt = 'UPWELL'; logo.lang = 'en'; logo.draggable = false; p.append(logo);
+    if (typeof feed !== 'undefined' && feed.active) { feed.mount(p, logo); return; }   // Feed Moti open (feed.js): its board under him, the rest of home put by
     const set = button('', 'setBtn', () => this.settings()), gear = el('img'); gear.src = 'assets/ui/settings.svg'; gear.alt = ''; gear.draggable = false;
     set.append(gear); set.setAttribute('aria-label', t('settings')); p.append(set);
     const colors = el('div', 'pickers');   // the hero over them (menuTouch: drag it, press it); under it its five colours, what the chosen one starts with, and Play
@@ -3962,6 +3963,7 @@ const menuTouch = {
   look(x, y, now) { const l = game.heroLook; l.x = x; l.y = y; l.t = now; },
   down(e) {
     this.idleAt = performance.now(); this.hopAt = 0;   // (a touch: no hop on its way, the quiet counted from now)
+    if (typeof feed !== 'undefined' && feed.active) return;   // (Feed Moti open: he is being fed, not dragged)
     if (this.ptrs.has(e.pointerId)) this.up(e, true);
     const now = performance.now(), [x, y] = this.local(e), b = game.hero, touch = e.pointerType !== 'mouse', tol = touch ? GRAB.pickTouch : GRAB.pickMouse, lp = this.lastPoke;
     const hit = (x > b.minX - tol && x < b.maxX + tol && y > b.minY - tol && y < b.maxY + tol && (pointInPoly(b.x, b.y, b.n, x, y) || distToPoly(b.x, b.y, b.n, x, y) < tol))
@@ -4018,7 +4020,7 @@ const menuTouch = {
     if (b !== game.hero) return;   // (the hero made again under the finger: nothing of the old one to let go)
     if (!this.on()) cancel = true;   // (the menu shut under it, the settings say: let go where it is, not flung)
     if (p.mode === 'press') {
-      if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) this.poke(b, p);
+      if (!cancel && now - p.downT < SQUEEZE.pokeMaxMs) { this.poke(b, p); if (typeof feed !== 'undefined' && FEED_ON) feed.open(); }   // a tap: Feed Moti (feed.js)
       else {
         b.releaseDent(p.dent, DENT.pressRecover);
         if (!cancel && p.sq > 0.04) { b.kickSquash(b.sqAx, b.sqAy, -SQUEEZE.rebound * p.sq); b.hop(SQUEEZE.hop * p.sq); haptics.buzz(8 + 20 * p.sq, 0); }
@@ -4048,7 +4050,7 @@ const menuTouch = {
     this.lastT = now;
     if (!this.on()) { if (this.ptrs.size) this.cancelAll(); return; }
     b.squeezeIn = 0;
-    if (!this.ptrs.size) this.hop(now, b);   // nobody touching it: now and then a little hop (MENU_HOP)
+    if (!this.ptrs.size && !(typeof feed !== 'undefined' && feed.active)) this.hop(now, b);   // nobody touching it: now and then a little hop (MENU_HOP)
     for (const p of this.ptrs.values()) {
       if (p.body !== b) { p.mode = 'done'; continue; }
       if (p.mode === 'press') {

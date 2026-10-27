@@ -4675,23 +4675,23 @@ const KOMORI_SPR = {
   'komori-A-3': ['...............sssssss............', '.............sskkkkssss...........', '...........sskkkkkksskssss........', '.........sskkssskksskssssss.s...s.', '........sskssssksssksssssss..ssss.', '......sskkssskksssskssssssssskksso', '.....skksssssksssskssssssssssokss.', '...sskssssskkssssskssssssssssssss.', '.sskkssssskksssssksssssssskssss...', 'sskssssssskssssssksssksssss.ss....', '..ssssssskssssss.sssss.sss........', '..ssssssksssssss..................', '..ssssskssssssskss..s.............', '..ssssksssssssskss..s.............', '..ssskssssssssksss.s..............', '..ss.sssssssssksssss..............', '..s..ssssssssssssss...............', '....sssssssssksssss...............', '...sssssssks.sssss................', '...ssssssss..ssks.................', '.....ssssss..sss..................', '.....sssss...ss...................', '.....ssss....s....................', '.....ssss.........................', '.....sss..........................', '.....ss...........................', '.....s............................', '....s.............................'],
 };
 Object.assign(FOE_SPRITES, KOMORI_SPR);
-const BOSS_FIT = { 'probka-F': ['b', 0.5, 0, 1, 1], 'cart-C': ['o', 0.44, 0, 1], 'puck-F': ['s', 0.5, 1, 1, 1], 'tram-E': ['g', 0.55, -1, 1, 1], 'crane-F': ['o', 0.57, 0, 1], 'pigeon-A': ['s', 0.55, -1, 1, 1], 'namazu-D': ['o', 0.5, 1, 1], 'koschei-A': ['s', 0.5, 0, 1] };   // [its ink, its body's place down it, the way its cell has it face (0: at you), its pixel in game pixels (none: fitted over its body)]
-const drawSprite = (d, rows, flip, fit, vol) => {   // a box for each run of one ink; vol: in volume (VOL), a run of one ink and one step a box
-  const H = rows.length, W = rows[0].length, m = flip ? -1 : 1, sh = d.b.s;
+const BOSS_FIT = { 'probka-F': ['b', 0.5, 0, 1, 1], 'cart-C': ['o', 0.44, 0, 1], 'puck-F': ['s', 0.5, 1, 1, 1], 'tram-E': ['g', 0.55, -1, 1, 1], 'crane-F': ['o', 0.57, 0, 1], 'pigeon-A': ['s', 0.55, 1, 1, 1], 'namazu-D': ['o', 0.5, 1, 1], 'koschei-A': ['s', 0.5, 1, 1] };   // [its ink, its body's place down it, the way its cell has it face (0: at you), its pixel in game pixels (none: fitted over its body)]
+// (the Karasu-tengu's beak and Koschei's sweep go right in their frames: they face right, turned to the hero, 2026-10-27; the tengu was drawn looking away from him)
+const drawSprite = (d, rows, flip, fit, vol, at, turn) => {   // a box for each run of one ink; vol: in volume (VOL), a run of one ink and one step a box; at: a boss's pose
+  // (bossPose) where it lies on its frame 1, [dx, dy, W, H]: its top-left in frame 1's pixels and frame 1's size; turn: on a body turned half round (Onamazu on its back),
+  // drawn turned back, so it shows as its frame draws it
+  const H = rows.length, W = rows[0].length, m = flip ? -1 : 1, sh = d.b.s, W0 = at ? at[2] : W, dx = at ? at[0] : 0, n = turn ? -1 : 1;
   if (fit && !sh.ext) sh.ext = [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
-  const k = fit && !fit[3] ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : ((fit ? fit[3] : 1) * PIX.base) / d.b.R, cy = (fit ? fit[1] : 0.62) * H;   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
+  const k = fit && !fit[3] ? 1.08 * Math.max((2 * sh.ext[0]) / W, (2 * sh.ext[1]) / H) : ((fit ? fit[3] : 1) * PIX.base) / d.b.R, cy = (fit ? fit[1] : 0.62) * (at ? at[3] : H) - (at ? at[1] : 0);   // a boss's over its body; else a sheet's pixel a game pixel (1:1), its body under its lower part
   const o = fit ? (0.5 * PIX.size) / d.b.R : 0.004;   // its boxes' overlap: half a pixel on a boss, whose body is not under it to fill the seams when it squashes
-  const hp = d.b.heap || 0, rt = d.b.rattle ? d.b.heapT || 0 : 0, yb = (H - cy) * k, sq = 1 - 0.4 * hp, wx = 1 + 0.3 * hp;   // a heap of bones (Koschei dazed): his rows sunk (his body squashes too) and strewn sideways, rattling before he rises
   const ink = (ch) => (fit && ch === fit[0] ? d.c : d.b.warn && ch === 's' ? PAL.red : ch === 'd' ? PAL.gray : ch === 'W' ? PAL.white : PAL[ICON_INK[ch]]), tn = (ch, v) => (ch === 'd' ? 4 : ch === 'k' ? 0 : volTone(v));   // ('d': a sheet's dark grey, grey a tone down)
-  if (vol && !hp) {   // in volume, its boxes merged down (volRects, mirrored already as seen): lit from the top left in its own ink's shade (owner, 2026-10-25: «Нужен объем»)
-    const R = volRects(rows, flip);
-    for (let q = 0; q < R.length; q += 6) d.shape(10, ((R[q] + R[q + 1]) / 2 - W / 2) * k, ((R[q + 2] + R[q + 3]) / 2 - cy) * k, ((R[q + 1] - R[q]) / 2) * k + o, 0, 0, ((R[q + 3] - R[q + 2]) / 2) * k + o, ink(R[q + 4]), tn(R[q + 4], R[q + 5]));
+  if (vol) {   // in volume, its boxes merged down (volRects, mirrored already as seen): lit from the top left in its own ink's shade (owner, 2026-10-25: «Нужен объем»)
+    const R = volRects(rows, flip), cx = flip ? W + dx - W0 / 2 : W0 / 2 - dx;   // (mirrored in its own box: its place on frame 1 mirrored too)
+    for (let q = 0; q < R.length; q += 6) d.shape(10, n * ((R[q] + R[q + 1]) / 2 - cx) * k, n * ((R[q + 2] + R[q + 3]) / 2 - cy) * k, ((R[q + 1] - R[q]) / 2) * k + o, 0, 0, ((R[q + 3] - R[q + 2]) / 2) * k + o, ink(R[q + 4]), tn(R[q + 4], R[q + 5]));
     return true;
   }
-  const B = vol ? volBands(rows, flip) : null, st = (i, j) => (B ? B[j * W + (flip ? W - 1 - i : i)] : 0);   // (a heap's rows go their own ways: its steps a pixel's)
   rows.forEach((row, j) => {
-    const dy = hp ? yb - (yb - (j + 0.5 - cy) * k) * sq : (j + 0.5 - cy) * k, jx = hp ? (((Math.imul(j + 7, 2654435761) >>> 0) / 4294967296 - 0.5) * 18 * hp + (rt ? Math.sin(rt * 45 + j * 1.7) * 1.2 : 0)) * k : 0;
-    for (let i = 0; i < W;) { const ch = row[i], v = st(i, j); let e = i + 1; while (row[e] === ch && st(e, j) === v) e++; if (ch !== '.') d.shape(10, m * ((i + e) / 2 - W / 2) * k * wx + jx, dy, ((e - i) / 2) * k * wx + o, 0, 0, 0.5 * k * sq + o, ink(ch), B ? tn(ch, v) : ch === 'd' ? 4 : 0); i = e; }
+    for (let i = 0; i < W;) { const ch = row[i]; let e = i + 1; while (row[e] === ch) e++; if (ch !== '.') d.shape(10, n * m * ((i + e) / 2 + dx - W0 / 2) * k, n * (j + 0.5 - cy) * k, ((e - i) / 2) * k + o, 0, 0, 0.5 * k + o, ink(ch), ch === 'd' ? 4 : 0); i = e; }
   });
   return true;
 };
@@ -4796,8 +4796,7 @@ const BOSS_LOOK = new Set(Object.keys(LOOKS).map((k) => k + '-' + LOOKS[k][0])),
 // In volume its eyes stay white (the guide: eyes and key marks kept, not shaded): a boss's white patch no bigger than `BOSS_EYE` pixels (4 ways: an eye's white,
 // a rib, a window's frame) is 'W', a white VOL_KEEP keeps; its big whites (a hood, a belly) are lit and shaded as the rest of it
 const BOSS_EYE = 150;
-for (const id of BOSS_LOOK) {
-  const rows = FOE_SPRITES[id]; if (!rows) continue;
+const bossEyes = (rows) => {   // its rows, its small whites 'W'
   const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H);
   for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
     if (g[j][i] !== 'w' || seen[j * W + i]) continue;
@@ -4805,25 +4804,40 @@ for (const id of BOSS_LOOK) {
     while (st.length) { const [x, y] = st.pop(); cells.push([x, y]); for (const [u, v] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) if (u >= 0 && v >= 0 && u < W && v < H && !seen[v * W + u] && g[v][u] === 'w') { seen[v * W + u] = 1; st.push([u, v]); } }
     if (cells.length <= BOSS_EYE) for (const [x, y] of cells) g[y][x] = 'W';
   }
-  FOE_SPRITES[id] = g.map((r) => r.join(''));
-}
+  return g.map((r) => r.join(''));
+};
+for (const id of BOSS_LOOK) if (FOE_SPRITES[id]) FOE_SPRITES[id] = bossEyes(FOE_SPRITES[id]);
+// Its other poses (BOSS_FRAMES, src/bossframes.js) cleaned as its frame 1 is (pxClean, then its eyes), each the first time it is asked for (its fight's start asks
+// for them all, a frame at a time: LOOK_FACE)
+const BOSS_POSE = new Map(), bossFrame = (id, n) => {   // frame n's rows (frame 1: its drawing in FOE_SPRITES), or null where it has none
+  const F = BOSS_FRAMES[id]; if (n === 1 || !F || !F.rows[n - 2]) return n === 1 ? FOE_SPRITES[id] : null;
+  const key = id + '#' + n; let r = BOSS_POSE.get(key);
+  if (!r) { r = bossEyes(GUIDE ? pxClean(F.rows[n - 2]) : F.rows[n - 2]); BOSS_POSE.set(key, r); }
+  return r;
+};
 // (fit[4]: one drawn 1:1 at an iPhone's size that was fitted over its body before, as Bake-danuki, Tsurara-onna, the Tram, the Karasu-tengu, is made smaller
 // to the size its fitted drawing had wherever a game pixel is bigger against R, as K9's are to theirs: so its fight, which reads its size, is the same on
 // every screen; never bigger than 1:1)
 const bossFit = (id, b) => { const rows = FOE_SPRITES[id], sh = b.s, ex = sh.ext || [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
   return Math.min(1, (1.08 * Math.max((2 * ex[0]) / rows[0].length, (2 * ex[1]) / rows.length) * b.R) / PIX.base); };
-const bossRows = (id, g) => {
-  const rows = FOE_SPRITES[id], W = rows[0].length, w = Math.max(1, Math.min(W, Math.round(W * g)));
+const bossRows = (key, rows, g) => {   // rows made g of their size (frame 1's under its look's id, a pose's under id#n)
+  const W = rows[0].length, w = Math.max(1, Math.min(W, Math.round(W * g)));
   if (w === W) return rows;
-  const key = id + ':' + w; let r = BOSS_SHRINK.get(key); if (r) return r;
+  const ck = key + ':' + w; let r = BOSS_SHRINK.get(ck); if (r) return r;
   const H = Math.max(1, Math.round((rows.length * w) / W));
   r = Array.from({ length: H }, (_, j) => Array.from({ length: w }, (_, i) => rows[Math.floor((j * rows.length) / H)][Math.floor((i * W) / w)]).join(''));
-  if (GUIDE) r = pxClean(r); BOSS_SHRINK.set(key, r); return r;
+  if (GUIDE) r = pxClean(r); BOSS_SHRINK.set(ck, r); return r;
 };
 for (const id in FOE_SPRITES) if (!K9_SPR[id] && !UME_SPR[id]) {
-  const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0);
+  const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0), F = BOSS_FRAMES[id];
+  let warm = 2;   // its next pose to clean and lay in volume, one a frame from its fight's start: none costs a hitch when its move comes
   LOOK_FACE[id] = BOSS_LOOK.has(id) && fit && fit[3]
-    ? (d) => { const g = Math.max(0.05, d.b.growth), q = fit[4] ? bossFit(id, d.b) : 1; return drawSprite(d, bossRows(id, g * q), flip(d), [fit[0], fit[1], fit[2], fit[3] / g], VOL_ON); }   // (in volume: ?novol flat)
+    ? (d) => { const b = d.b, g = Math.max(0.05, b.growth), q = fit[4] ? bossFit(id, b) : 1, s = g * q, one = bossRows(id, FOE_SPRITES[id], s), P = b.pose, up = g > 0.97;   // (in volume: ?novol flat)
+      // up: popped in (its growth springs to 1 and may settle a hair under it)
+      if (F && up && warm <= 8) { const r = bossFrame(id, warm); if (r && VOL_ON) { const w = bossRows(id + '#' + warm, r, q); volRects(w, false); volRects(w, true); } warm++; }
+      const n = P && up ? P.n : 1, R = n > 1 && bossFrame(id, n), A = R && F.at[n - 1], z = one[0].length / FOE_SPRITES[id][0].length;   // (popping in: frame 1)
+      if (P && P.ink) d.c = P.ink;
+      return drawSprite(d, R ? bossRows(id + '#' + n, R, s) : one, flip(d) !== !!(P && P.m), [fit[0], fit[1], fit[2], fit[3] / g], VOL_ON, R ? [Math.round(A[0] * z), Math.round(A[1] * z), one[0].length, one.length] : null, !!(P && P.turn)); }
     : (d) => drawSprite(d, FOE_SPRITES[id], flip(d), fit);
 }   // the forest's face right; a boss as its cell has it
 // A boss's drawing's width and height in world px at its full size, as drawSprite lays it (BOSS_FIT's whole scale, or fitted over its
@@ -4834,6 +4848,77 @@ const bossSize = (bs) => {
   const W = rows[0].length, H = rows.length, sh = b.s, ex = sh.ext || [Math.max(...Array.from(sh.rx, Math.abs)), Math.max(...Array.from(sh.ry, Math.abs))];
   const kf = 1.08 * Math.max((2 * ex[0]) / W, (2 * ex[1]) / H), k = fit[3] ? Math.min(fit[4] ? kf : Infinity, (fit[3] * PIX.base) / b.R) : kf;   // (drawSprite's k: body units a sheet pixel; fit[4]: 1:1 made smaller to its body, bossFit)
   return [W * k * b.R, H * k * b.R];
+};
+// A boss's pose (owner, 2026-10-27: «Да, оживляй боссов в коде их восемью кадрами движения, по правилам анимации»): the frame (BOSS_FRAMES) for what it does, as its
+// sheets lay them out: 1 at rest, 2 its sway, 3 a move's wind-up, 4 the move, 5 its warning, 6 its big move, 7 dazed, 8 hit. The object first, then Disney's and
+// Pixar's rules (feedback-animation-quality): a hanging one leans out at its swing's ends and hangs straight through its middle, as a pendulum does; the Karasu-tengu
+// beats his wings to climb and glides down; Onamazu wriggles and Koschei steps only while they go; a move's warning is its wind-up (anticipation) and its pose is held
+// `after` s past it (follow-through); a stomp's pose `hit` s. A pose is held 0.2 s or more and cut on a beat its body squashes on already (a move's start, a landing).
+// A look only: its fight (its body, its moves, their timing) is the same. Sets its pose (Boss.pose): n its frame, m mirrored (against the way it faces), turn
+// (Onamazu on his back), ink (Koschei's tell)
+const POSE = { hit: 0.3, after: 0.3, beat: [0.24, 0.38], step: 0.3, go: [1.1, 0.6], lunge: 0.2, fan: 0.4, min: 0.2 };   // beat: a wingbeat's down and up; go: R/s to set off and to stop; min: a pose's
+// least hold, and an idle one (its sway, its steps, its wings) is not changed in its move's last `min` s before it
+const bossPose = (bs, R, mid) => {   // mid: the arena's middle
+  const P = bs.pose, b = bs.body, df = bs.def || {}, s = bs.state, st = bs.st, hit = bs.angry > BOSS.angry - POSE.hit, after = (w) => s === 'hover' && bs.was === w && st < POSE.after;
+  const going = () => { const v = Math.abs(b.rigVx) / R, on = P.go ? v > POSE.go[1] : v > POSE.go[0]; if (on && !P.go) P.t0 = bs.t; P.go = on; return on; };   // (a margin both ways: no flicker on the line)
+  const stride = () => (Math.floor((bs.t - P.t0) / POSE.step) % 2 ? 1 : 2);   // its two poses by turns, from its first step as it sets off
+  let n = 1, m = false, turn = false, ink = null, idle = s === 'hover' || s === 'rise';   // idle: at rest, its pose its sway's, its steps', its wings' (not a move's)
+  if (!BOSS_FRAMES[bs.look]) n = 1;
+  else if (df.hang) {   // Bake-danuki, the Tsuchigumo, Nuppeppo (Boss.hang)
+    if (s === 'dazed') n = 7;
+    else if (hit) { n = 8; idle = false; }
+    else if (s === 'spit') n = 3;   // its belly drummed, its cheeks full
+    else if (s === 'windup' || s === 'sweep' || after('sweep')) { n = s === 'windup' ? 5 : s === 'sweep' ? 6 : 2; m = bs.tx < mid; idle = false; }   // its frames swing it from the right: mirrored from the left
+    else if (s === 'warn' || s === 'dive') n = bs.look === 'crane-F' ? 8 : s === 'warn' ? 5 : 6;   // the leaf on its head, its legs drawn in; then down (Nuppeppo screwed up tight)
+    else if (after('spit')) { n = 4; idle = false; }
+    else if (s === 'hover' && bs.t > df.hang.calm) { const u = Math.sin(bs.t * 0.55); if (Math.abs(u) > 0.75) { n = 2; m = u > 0; } }   // its swing's ends (Boss.hang's swing); frame 2 leans as at its left one
+  } else if (df.glide) {   // Tsurara-onna
+    if (s === 'dazed') n = 7;   // frozen to the wall she slid into (that frame mirrored for it: BOSS_FRAMES)
+    else if (hit) { n = 8; idle = false; }
+    else if (s === 'cast' || after('cast')) { n = s === 'cast' && st < df.glide.cast - POSE.after ? 3 : 4; idle = false; }   // her arms up, then her call
+    else if (s === 'warn') n = 5;
+    else if (s === 'dive') n = 6;
+    else if (s === 'hover' && going()) n = 2;   // leaning into her creep
+  } else if (df.quake) {   // Onamazu
+    if (s === 'dazed') { n = 7; turn = true; }   // on his back (his body turned half round: turnOver)
+    else if (hit) { n = 8; idle = false; }
+    else if (s === 'warn') n = bs.drops && st < POSE.after ? 4 : 3;   // reared on his tail; a slam's beat flat before the next
+    else if ((s === 'hover' || s === 'crouch') && bs.was === 'warn' && st < POSE.after) { n = 4; idle = false; }   // his last slam's
+    else if (s === 'crouch') n = 5;
+    else if (s === 'dive') n = 6;
+    else if (s === 'hover' && going()) n = stride();   // his wriggle
+  } else if (df.street) {   // the Tram (its frame 8, drawn three-quarter, off its side view: not used)
+    if (hit) { n = 7; idle = false; }
+    else if (s === 'dazed') n = st < POSE.after ? 6 : 5;   // its pantograph's sparks, then its doors open
+    else if (s === 'warn') n = 2;   // ding-ding
+    else if (s === 'dive') n = st < POSE.lunge ? 3 : 4;   // lurching off, then low and fast
+  } else if (df.sky) {   // the Karasu-tengu
+    if (s === 'dazed') n = 7;   // his beak in the floor
+    else if (hit) { n = 8; idle = false; }
+    else if (s === 'fan') n = 3;
+    else if (s === 'gust') n = Math.floor(st / POSE.fan) % 2 ? 3 : 4;   // his fan swept down, raised, swept again
+    else if (s === 'flick') n = 5;
+    else if (after('flick')) { n = 2; idle = false; }   // the feathers flung
+    else if (s === 'warn') n = 8;   // bristling: his swoop to come
+    else if (s === 'dive') n = 6;
+    else {   // flying: beating his wings to climb (pulled free, still at first, his sway's way up: Boss.sky), gliding down
+      const climb = s === 'rise' || bs.t < df.sky.calm || Math.cos(bs.t * 1.3) < 0;
+      if (climb && !P.fly) P.t0 = bs.t; P.fly = climb;
+      n = climb && (bs.t - P.t0) % (POSE.beat[0] + POSE.beat[1]) >= POSE.beat[0] ? 1 : 2;
+    }
+  } else if (df.bone) {   // Koschei
+    const F = df.bone;
+    if (s === 'rise') { n = st < F.heap - 0.4 ? 8 : 7; idle = false; if (st > F.heap - 0.9 && st < F.heap - 0.4 && Math.floor(st * 5) % 2) ink = bs.ink.base; }   // a heap of bones, rattling (his tell: a flash, 2.5 a second), then up again
+    else if (s === 'dazed') n = 7;   // off balance
+    else if (s === 'throw' || after('throw')) { n = 4; idle = false; }
+    else if (s === 'warn') n = bs.drops || st > F.swarn - 0.25 ? 5 : 3;   // his sword up, then drawn back (a second sweep's straight from back)
+    else if (s === 'sweep') n = 6;
+    else if (s === 'hover' && going()) n = stride();   // his steps
+  }
+  const F = df.hang || df.glide || df.quake || df.sky || df.bone, soon = s === 'hover' && F && F.rest && st > F.rest[df.phase(bs.hp)] - POSE.min;
+  if (idle && (n !== P.n || m !== P.m) && (bs.t - P.since < POSE.min || soon)) { n = P.n; m = P.m; }   // an idle change waits: no pose under `min` s, none just before a move
+  if (n !== P.n || m !== P.m) P.since = bs.t;
+  P.n = n; P.m = m; P.turn = turn; P.ink = ink;
 };
 const gumWriteFace = Renderer.prototype.writeFace;
 // The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units
@@ -7549,7 +7634,9 @@ Renderer.prototype.draw = function (g, alpha) {
   // round it, behind it, only what its setting hangs it on: the tram's wire, the spider's thread, the crane's cable and hook.
   const look = (bs, front) => {   // a boss's look round it: the way it faces, and what its setting hangs it on
     const b = bs.body, k = bs.look.slice(0, -2), df = bs.def || {}, x = b.cx, P = PIX.size, gr = PAL.gray;
-    const d = df.glide || df.quake || df.street || df.bone ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    let d = df.glide || df.quake || df.street || df.bone ? bs.dir || 1 : Math.sign(g.hero.cx - x) || 1;   // the way it faces: the way it rides or slides, else at the hero
+    if (df.sky && (bs.state === 'warn' || bs.state === 'dive')) d = Math.sign(bs.state === 'dive' ? b.rigVx : bs.tx - x) || d;   // the Karasu-tengu along his swoop
+    if (b.lookDir && (bs.state === 'dazed' || (bs.state === 'hover' && Math.abs(g.hero.cx - x) < 0.5 * R))) d = b.lookDir;   // not turned while dazed, nor back and forth by a hero just over it
     if (!front && df.hang && df.hang.shadow && (bs.state === 'warn' || bs.state === 'dive')) {   // where a hanging boss will land (TANUKI): its shadow on the floor, growing
       const [sw] = bossSize(bs), u = bs.state === 'dive' ? 1 : Math.min(1, bs.st / df.hang.warn), sx = bs.state === 'dive' ? x : bs.tx;
       F(sx, lv.floor + 1, (0.2 + 0.3 * u) * sw, 0, 0, (0.06 + 0.06 * u) * sw, INK.dark, 1, 0);
@@ -7558,15 +7645,15 @@ Renderer.prototype.draw = function (g, alpha) {
       const [sw] = bossSize(bs), x0 = x + d * 0.3 * sw, x1 = x + d * (0.5 * sw + df.bone.reach * R), y = lv.floor - 0.5 * R, u = Math.min(1, bs.st / df.bone.sweep);
       line(x0, y - 1.0 * R, x0 + (x1 - x0) * u, y - 0.1 * R, PAL.white, 1, 3); line(x0, y - 0.55 * R, x0 + (x1 - x0) * u, y + 0.25 * R, PAL.white, 0.8, 2); line(x0, y - 0.2 * R, x0 + (x1 - x0) * u * 0.85, y + 0.4 * R, PAL.gray, 1, 1);
     }
-    if (front) {   // the Tsuchigumo tangled in its own thread (SPIDER): loops of it across its drawing while a stomp hurts it
-      if (k === 'cart' && bs.state === 'dazed') { const [w, h] = bossSize(bs), y = b.maxY - 0.55 * h; for (let i = -1; i <= 1; i++) line(x - 0.42 * w, y + i * 0.16 * h - 0.1 * h, x + 0.42 * w, y + i * 0.16 * h + 0.1 * h, PAL.white, 0.85, 1); }
-      return;
-    }
+    if (front) return;   // (the Tsuchigumo tangled in its own thread: its dazed frame draws the thread)
     b.lookDir = d;   // (its drawing on it turns too: LOOK_FACE)
+    bossPose(bs, R, (lv.l + lv.r) / 2);   // and its pose
+    const A = BOSS_FRAMES[bs.look], ps = bs.pose, at = A && ps.n > 1 && A.at[ps.n - 1], W1 = FOE_SPRITES[bs.look][0].length;   // what it hangs by as its pose holds it (frame 1's place: as it was)
+    const hx = at ? ((ps.m ? W1 - at[2] : at[2]) - A.at[0][2]) * PIX.base : 0, hy = at ? (at[3] - A.at[0][3]) * PIX.base : 0;
     if (k === 'tram') { const wy = b.minY - 1.15 * R; box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0); }   // the overhead wire its pantograph (in its drawing) runs on
-    else if (k === 'koschei' && bs.hp === 1) { const ny = b.minY - 1.0 * R + Math.sin(T * 3) * 0.08 * R, nx = Math.round(x / P) * P; F(nx + P / 2, ny, 0.55 * R, 0, 0, 0.8 * R, gr, 0.18, 1); box(nx, ny - 0.6 * R, nx + P, ny + 0.45 * R, gr, 1, 0, 10, 0); box(nx - P, ny - 0.76 * R, nx + 2 * P, ny - 0.5 * R, gr, 1, 0, 10, 0); box(nx, ny - 0.7 * R, nx + P, ny - 0.56 * R, INK.dark, 1, 0, 10, 0); if (Math.floor(T * 2) % 2) box(nx, ny + 0.3 * R, nx + P, ny + 0.38 * R, PAL.white, 1, 0, 10, 0); }   // his last heart: the needle his death is in, over his crown
-    else if (k === 'cart') box(Math.round(x / P) * P, top, Math.round(x / P) * P + P, b.minY + 0.3 * R, PAL.white, 1, 0, 10, 0);   // the spider's thread, from up out of sight into its head
-    else if (k === 'crane') { const hy = b.minY - 0.75 * R, hx = Math.round(x / P) * P; box(hx - P, top, hx + P, hy - 0.3 * R, gr, 1, 0, 10, 0); box(x - 0.22 * R, hy - 0.3 * R, x + 0.22 * R, hy - 0.05 * R, gr, 1, 0, 10, 0); F(x, hy + 0.12 * R, 0.17 * R, 0, 0, 0.17 * R, gr, 1, 4); }   // the crane's cable out of the sky, its block and hook
+    else if (k === 'koschei' && bs.hp === 1) { const ny = b.minY - 1.0 * R + Math.max(0, at ? at[1] : 0) * PIX.base + Math.sin(T * 3) * 0.08 * R, nx = Math.round(x / P) * P; F(nx + P / 2, ny, 0.55 * R, 0, 0, 0.8 * R, gr, 0.18, 1); box(nx, ny - 0.6 * R, nx + P, ny + 0.45 * R, gr, 1, 0, 10, 0); box(nx - P, ny - 0.76 * R, nx + 2 * P, ny - 0.5 * R, gr, 1, 0, 10, 0); box(nx, ny - 0.7 * R, nx + P, ny - 0.56 * R, INK.dark, 1, 0, 10, 0); if (Math.floor(T * 2) % 2) box(nx, ny + 0.3 * R, nx + P, ny + 0.38 * R, PAL.white, 1, 0, 10, 0); }   // his last heart: the needle his death is in, over his crown (down with him as his pose sinks: a heap, a low sweep; not up with his sword)
+    else if (k === 'cart') { const tx = Math.round((x + hx) / P) * P; box(tx, top, tx + P, b.minY + 0.3 * R + hy, PAL.white, 1, 0, 10, 0); }   // the spider's thread, from up out of sight into its head
+    else if (k === 'crane') { const kx = x + hx, ky = b.minY - 0.75 * R + hy, cx = Math.round(kx / P) * P; box(cx - P, top, cx + P, ky - 0.3 * R, gr, 1, 0, 10, 0); box(kx - 0.22 * R, ky - 0.3 * R, kx + 0.22 * R, ky - 0.05 * R, gr, 1, 0, 10, 0); F(kx, ky + 0.12 * R, 0.17 * R, 0, 0, 0.17 * R, gr, 1, 4); }   // the crane's cable out of the sky, its block and hook (in its knot)
   };
   // The Dark Forest's enemies (FOREST_V): a Kikimora on the wall, a Leshy circling, each as its sheet draws it on its soft body (FOE_SPRITES).
   const forestFoe = (e) => {   // a forest enemy: its look (FOE_SPRITES, on it) and the way it faces: off its wall (a Kikimora), at the hero (a Leshy)

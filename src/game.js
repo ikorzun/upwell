@@ -2560,9 +2560,8 @@ class Game {
     const lv = this.lv, b = this.hero;
     const rb = this.power('rainbow') && this.state !== 'dead', tl = this.tail, last = tl[tl.length - 1];   // frame runs on under the revive dialog, gun() does not
     b.color = this.state === 'dead' && this.dieT > 0 ? dieBody(this.deathWhy(), lv.theme) : rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
-    b.helmet = this.rocket && this.rocket.astro ? 'astro' : this.power('smash') && this.state !== 'dead' && !(this.gunT < 1 && Math.floor(this.gunT * 6) % 2 === 0) ? 'moto' : this.state === 'menu' && ui.open === 'settings' && !REPAIR_V ? 'repair' : null;   // the smash's helmet (user: in place of its pips), blinking in its last
-    // second; the settings' repairman (ui.settings): the code's, or a sheet's variant (REPAIR_V) as his look
-    if (this.state === 'menu' && ui.open === 'settings' && REPAIR_V) b.look = 'repair-' + REPAIR_V; else if (b.look && b.look.startsWith('repair-')) b.look = null;
+    b.helmet = this.rocket && this.rocket.astro ? 'astro' : this.power('smash') && this.state !== 'dead' && !(this.gunT < 1 && Math.floor(this.gunT * 6) % 2 === 0) ? 'moto' : this.state === 'menu' && ui.open === 'settings' ? 'repair' : null;   // the smash's helmet (user: in place of its pips), blinking in its last second; the
+    // settings' repairman (ui.settings)
     if (last && Math.hypot(b.cx - last[0], b.cy - last[1]) > 4 * this.R) tl.length = 0;   // a respawn or a door: no streak across the screen
     else if (rb && (!last || Math.hypot(b.cx - last[0], b.cy - last[1]) > RAINBOW.gap * this.R)) tl.push([b.cx, b.cy]);
     while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after

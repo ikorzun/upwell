@@ -294,6 +294,29 @@
   }
   .big:active { filter: brightness(0.88); }   /* pressed: a shade darker */
   .pickers { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 340px; }
+  /* Feed Moti (feed.js): its count, meter and cross over its board, the board's cells --cell wide (36 game pixels), its foods 32 */
+  .fm { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; align-self: center; margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); }
+  .fm-hud { width: var(--side); display: flex; align-items: center; gap: 10px; --p: 3; }
+  .fm-moves { display: flex; flex-direction: column; align-items: center; min-width: var(--btnS); color: var(--white); }
+  .fm-moves .fm-l { --p: 2; color: var(--gray); }
+  .fm-mid { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .fm-meter { position: relative; height: calc(var(--dot) * 6); background: var(--ink); box-shadow: inset 0 0 0 var(--dot) var(--gray); }
+  .fm-meter > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--yellow); transition: width 0.25s; }
+  .fm-ticks b { position: absolute; top: calc(var(--dot) * -2); bottom: calc(var(--dot) * -2); width: var(--dot); margin-left: calc(var(--dot) * -1); background: var(--white); }
+  .fm-mt { --p: 2; color: var(--gray); text-align: center; }
+  .fm-x { position: relative; top: auto; right: auto; }
+  .fm-board { position: relative; width: var(--side); height: var(--side); touch-action: none; background-color: #15151d;
+    background-image: linear-gradient(to right, #23232f var(--dot), transparent var(--dot)), linear-gradient(to bottom, #23232f var(--dot), transparent var(--dot));
+    background-size: var(--cell) var(--cell); box-shadow: 0 0 0 var(--dot) #2c2c3a; }
+  .fm-t { position: absolute; width: var(--cell); height: var(--cell); display: grid; place-items: center; will-change: transform; }
+  .fm-t svg { width: calc(var(--dot) * 32); height: calc(var(--dot) * 32); display: block; }
+  .fm-t.sel { box-shadow: inset 0 0 0 var(--dot) var(--white); }
+  .fm-t.cur { box-shadow: inset 0 0 0 var(--dot) var(--yellow); }
+  .fm-end { position: absolute; inset: 0; background: rgba(20, 20, 20, 0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 0 10px; }
+  .fm-end .pair { width: 100%; }
+  .fm-end .big { min-width: 0; padding: 0 10px; }
+  .fm-stars { display: flex; gap: 6px; }
+  .fm-stars .ico { width: 36px; height: 36px; }
   .chip {
     min-height: var(--btnS); min-width: var(--btnS); padding: 4px 10px; border: 0; box-sizing: border-box;
     background: var(--ink); box-shadow: inset 0 0 0 2px var(--gray); clip-path: var(--notch);
@@ -378,6 +401,7 @@
 <script src="src/world.js"></script>
 <script src="src/cine.js"></script>
 <script src="src/game.js"></script>
+<script src="src/feed.js"></script>   <!-- Feed Moti: a tap on Moti at home, a match-3 to feed him (see feed.js; ?feed while it is built) -->
 <script src="src/fx.js"></script>   <!-- screen filters: the settings' CRT, and the ?fx= tries (see fx.js) -->
 </body>
 </html>

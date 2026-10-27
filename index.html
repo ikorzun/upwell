@@ -25,7 +25,7 @@
   @font-face { font-family: 'DotGothic16'; src: url('assets/fonts/dotgothic16.woff2') format('woff2'); font-display: block; }
   :root {
     --ink: #141414; --red: #f43e34; --blue: #5bb8ff; --yellow: #ffed57; --green: #339c39; --purple: #c996ff; --orange: #faa23e; --gray: #c8c8c8; --white: #f3f3f3;
-    --lime: #b4d64e; --track: #272627;   /* Feed Moti's bar of fullness and its track (the Figma «Feed») */
+    --lime: #b4d64e; --track: #272627; --on: #c0ff47; --off: #fe4648;   /* Feed Moti's bar of fullness and its track (the Figma «Feed») */
     --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
     --btnL: 64px; --btnS: 48px;   /* the two sizes of every button (owner: «все кнопки должны быть только 2 размеров»): a big one, the width of its panel, and a small one (48: a finger's)) */
     --amber: #ffc300;   /* the chosen colour's ring in the menu (the Figma «Main»'s) */
@@ -295,7 +295,27 @@
   #menu .big.thumb > .cap { font-size: 12px; }   /* (the Figma's 10; DotGothic16 no smaller than 12 px: under that its 16-px grid blurs) */
   #topTint { display: none; position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #696d85; pointer-events: none; z-index: 70; }   /* (owner, 2026-10-23: «На сафари и ios градиент должен уходить под остров») iOS 26 Safari tints the bar over the page by a fixed element at its top (theme-color it no longer reads): the menu's backdrop's top ink there, and the bottom left as it is */
   @media (pointer: coarse) { html.menuTop #topTint { display: block; } }
-  #settings { background: var(--dim2); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the menu's settings, as a pause */
+  /* The menu's settings as the Figma «Settings» (owner, 2026-10-27: «передай экран настроек»), a px a CSS px: no backdrop of its own (the canvas draws the dark, Moti in
+     it in his work clothes: ui.settings); from the bottom the yellow pill, 16 over it the bar of rows (8 in from the sides, 64 tall, white lines round and between their
+     cells), 16 over that «Settings»; its words in the game's fonts as tall as the mockup's Inter (19 → VT323 24.8, 33 → 43) */
+  #settings { background: none; justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
+  #settings .head { --p: 3.44; margin: 0 0 16px; padding: 8px; }
+  #settings .head > .cap { font-size: 16px; color: var(--white); opacity: 0.56; }
+  #settings .opts { align-self: stretch; display: flex; flex-direction: column; margin: 0 8px 16px; box-shadow: inset 0 0 0 1px var(--white); }   /* (a column: a button row as wide as it) */
+  #settings .opts > * + * { border-top: 1px solid var(--white); }
+  #settings .opts .langs { display: flex; gap: 0; height: 64px; }
+  #settings .opts .langs .chip { flex: 1 1 0; min-width: 0; height: 100%; --p: 1.98; background: none; box-shadow: none; clip-path: none; color: var(--white); }
+  #settings .opts .langs .chip + .chip { border-left: 1px solid var(--white); }
+  #settings .opts .langs .chip.on { background: var(--white); color: var(--ink); }   /* the language in use */
+  #settings .opts .pair { gap: 0; height: 64px; box-sizing: border-box; }
+  #settings .opts .pair > .big { height: auto; }   /* (64 with its line over it) */
+  #settings .opts .pair > .big + .big { border-left: 1px solid var(--white); }
+  #settings .opts .big { height: 64px; min-width: 0; padding: 0 8px; --p: 2.48; background: none; color: var(--white); box-shadow: none; clip-path: none; box-sizing: border-box; }
+  #settings .opts .big > .cap { color: var(--white); opacity: 0.56; }
+  #settings .v.on { color: var(--on); }   /* a setting's value: on lime, off red */
+  #settings .v.off { color: var(--off); }
+  #settings > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Back: the main screen's pill */
+  #settings > .big.thumb > .cap { font-size: 12px; }
   .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 9px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 9 under the safe area */
   .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 0px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its 40-px ring 4 under the safe area and 12 in from the side, in a 48-px button */
   .setBtn img { width: 40px; height: auto; }

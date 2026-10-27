@@ -10,7 +10,8 @@ variant is picked can be drawn with the renderer's own.
 So that a sheet looks like the game and keeps to its pixels (owner: it smeared), the call sends a real screenshot of the world as
 the style to copy, research/variants/ref-<world>.png, cut from the game at exactly 4 x 4 image pixels a game pixel (1280 x 953 at
 2x on a desktop: a tile is 16 game pixels there); the prompt asks for that grid; and the sheet that comes back is put onto it and
-onto the nine inks (snap), as <id>-<n>-px.png beside the raw one.
+onto the nine inks (snap), as <id>-<n>-px.png beside the raw one. GPT keeps to no such grid (its pixels come out 5 to 10 image pixels wide), so it
+is also found as GPT drew it, variant by variant (snap_cells), as <id>-<n>-cells.png: one cell of GPT's one art pixel, at the same 4 x 4.
 
 A boss (owner 2026-10-20: each a Japanese yokai fitting its world; three of them a sheet, two cells each: A-B, C-D, E-F) keeps its
 fight, its size and its colour (BOSSES: ink), and is one soft body with a face and a few rigid parts round it, as the game draws a
@@ -21,6 +22,7 @@ world's.
     python3 tools/variants.py <id> --prompt     # print the prompt, to paste into ChatGPT by hand (with the reference attached)
     python3 tools/variants.py <id>              # one 3 x 2 sheet of six variants, A to F: research/variants/<id>-<n>.png and -px.png
     python3 tools/variants.py <id> --model sunburst --no-ref   # the finer model; no reference
+    python3 tools/variants.py <id> --resnap [--step 8]         # no new sheet: its sheets snapped again (a variant marked «check»: give its step)
 
 Needs OPENAI_API_KEY: from the shell, or else from "env" in ~/.claude/settings.json, where Claude Code keeps it for its own tools
 only. The gpt-image skill's script makes the call.
@@ -2225,12 +2227,36 @@ def snap_back(src: str, dst: str, k: int = GRID) -> None:
     from PIL import Image
     a = np.asarray(Image.open(src).convert('RGB'), dtype=np.float32)
     h, w = a.shape[0] // k * k, a.shape[1] // k * k
-    a, black = a[:h, :w], np.array(PAL9[-1], dtype=np.float32)
-    pal = np.array(PAL9 + [black + 0.25 * (np.array(c, dtype=np.float32) - black) for c in PAL9[:-1]], dtype=np.float32)
+    a, pal = a[:h, :w], _back_pal()
     near = sum((a[..., c, None] - pal[:, c]) ** 2 for c in range(3)).argmin(-1)
     blocks = near.reshape(h // k, k, w // k, k).transpose(0, 2, 1, 3).reshape(h // k, w // k, k * k)
     ink = np.stack([(blocks == i).sum(-1) for i in range(len(pal))], -1).argmax(-1)
     Image.fromarray(pal[ink].astype(np.uint8).repeat(k, 0).repeat(k, 1)).save(dst)
+
+
+def _inks(a, thr):
+    """snap's mapping, pixel by pixel, as PAL9 indices: a grey pixel to black, grey or white and a coloured one to the ink nearest its hue; a tone well
+    between two of those to the darker or the lighter by `thr` (the 4 x 4 ordered dither's threshold, laid by art pixel; 0.5: no dither)."""
+    import numpy as np
+    pal = np.array(PAL9, dtype=np.float32)
+    lum = lambda c: c @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+    L, sat = lum(a), a.max(-1) - a.min(-1)
+    ramp = lambda t: np.clip((t - 0.25) / 0.5, 0, 1)   # a tone within a quarter of an ink is that ink: only the middle is dithered (no dotted flats)
+    WH, GR, BL = 0, 1, 9   # PAL9's white, grey, black
+    lw, lg, lb = lum(pal[WH]), lum(pal[GR]), lum(pal[BL])
+    grey = np.where(L < lg, np.where(ramp((L - lb) / (lg - lb)) > thr, GR, BL), np.where(ramp((L - lg) / (lw - lg)) > thr, WH, GR))
+    hues = np.arange(2, 9)   # blue, orange, purple, green, red, yellow, aqua
+    ca, ch = a - a.min(-1, keepdims=True), pal[hues] - pal[hues].min(-1, keepdims=True)
+    cos = (ca @ ch.T) / (np.linalg.norm(ca, axis=-1, keepdims=True) * np.linalg.norm(ch, axis=-1) + 1e-6)
+    hue = hues[cos.argmax(-1)]
+    colour = np.where(ramp(L / lum(pal[hue])) > thr, hue, BL)
+    return np.where(sat < 48, grey, colour)
+
+
+def _back_pal():   # snap_back's tones: the black, the eight inks and their dim tones (DEPTH.back: a quarter of the way from the black)
+    import numpy as np
+    black = np.array(PAL9[-1], dtype=np.float32)
+    return np.array(PAL9 + [black + 0.25 * (np.array(c, dtype=np.float32) - black) for c in PAL9[:-1]], dtype=np.float32)
 
 
 def snap(src: str, dst: str, k: int = GRID) -> None:
@@ -2242,24 +2268,121 @@ def snap(src: str, dst: str, k: int = GRID) -> None:
     a = np.asarray(Image.open(src).convert('RGB'), dtype=np.float32)
     h, w = a.shape[0] // k * k, a.shape[1] // k * k
     a, pal = a[:h, :w], np.array(PAL9, dtype=np.float32)
-    lum = lambda c: c @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
     B4 = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]], dtype=np.float32)
     yy, xx = np.mgrid[0:h, 0:w]
     thr = (B4[(yy // k) % 4, (xx // k) % 4] + 0.5) / 16
-    L, sat = lum(a), a.max(-1) - a.min(-1)
-    ramp = lambda t: np.clip((t - 0.25) / 0.5, 0, 1)   # a tone within a quarter of an ink is that ink: only the middle is dithered (no dotted flats)
-    WH, GR, BL = 0, 1, 9   # PAL9's white, grey, black
-    lw, lg, lb = lum(pal[WH]), lum(pal[GR]), lum(pal[BL])
-    grey = np.where(L < lg, np.where(ramp((L - lb) / (lg - lb)) > thr, GR, BL), np.where(ramp((L - lg) / (lw - lg)) > thr, WH, GR))
-    hues = np.arange(2, 9)   # blue, orange, purple, green, red, yellow, aqua
-    ca, ch = a - a.min(-1, keepdims=True), pal[hues] - pal[hues].min(-1, keepdims=True)
-    cos = (ca @ ch.T) / (np.linalg.norm(ca, axis=-1, keepdims=True) * np.linalg.norm(ch, axis=-1) + 1e-6)
-    hue = hues[cos.argmax(-1)]
-    colour = np.where(ramp(L / lum(pal[hue])) > thr, hue, BL)
-    near = np.where(sat < 48, grey, colour)
+    near = _inks(a, thr)
     blocks = near.reshape(h // k, k, w // k, k).transpose(0, 2, 1, 3).reshape(h // k, w // k, k * k)
     ink = np.stack([(blocks == i).sum(-1) for i in range(len(pal))], -1).argmax(-1)
     Image.fromarray(pal[ink].astype(np.uint8).repeat(k, 0).repeat(k, 1)).save(dst)
+
+
+# GPT's own pixels (owner, 2026-10-27: «Да, встраивай», after spritefusion-pixel-snapper, github.com/Hugo-Dz/spritefusion-pixel-snapper, MIT, Hugo Duprez):
+# GPT does not keep to the 4 x 4 grid the prompt asks for; it draws its art pixels 5 to 10 image pixels wide, a size of its own on each sheet and in each
+# variant, so snap's fixed blocks cut its pixels in two and tear its dots. cells() finds the pixels GPT drew in one variant: its colours clustered
+# (k-means), the edges of those summed down each column and along each row, their pitch (the longest period whose comb fits the edges within 95% of
+# the best one: a half of it fits as well, a double does not), then a cut walked along each axis to the strongest edge near each step (the snapper's
+# walk: cells may differ by a pixel or two, as GPT's do), and each cell the ink most of its pixels map to (snap's inks, no dither; the back plane's
+# tones for a back sheet). Not the snapper's own colours: its k-means and nearest-RGB palette turned grey to green and lost small lamps.
+CELL, FRAME, LETTER = 512, 14, (110, 100)   # a sheet's variant (3 x 2 of them on a 1536 x 1024 sheet); its frame and its letter's corner, left out of its pitch
+PITCH = (3.0, 16.0)   # the art pixel sizes looked for, in image pixels
+
+
+def _kmeans(a, k=8, iters=15, seed=42):
+    import numpy as np
+    rng, px = np.random.default_rng(seed), a.reshape(-1, 3)
+    samp = px[rng.choice(len(px), min(len(px), 40000), replace=False)]
+    c = [samp[rng.integers(len(samp))]]
+    for _ in range(1, k):   # k-means++ seeds, on a sample
+        d = np.min(((samp[:, None, :] - np.array(c)[None]) ** 2).sum(-1), 1)
+        c.append(samp[rng.choice(len(samp), p=d / d.sum())] if d.sum() > 0 else samp[rng.integers(len(samp))])
+    c = np.array(c, dtype=np.float32)
+    for it in range(iters):
+        lab = np.argmin(((samp[:, None, :] - c[None]) ** 2).sum(-1), 1)
+        nc = np.array([samp[lab == j].mean(0) if (lab == j).any() else c[j] for j in range(k)], dtype=np.float32)
+        moved, c = ((nc - c) ** 2).sum(-1).max(), nc
+        if it and moved < 0.01:
+            break
+    lab = np.concatenate([np.argmin(((px[s:s + 100000, None, :] - c[None]) ** 2).sum(-1), 1) for s in range(0, len(px), 100000)])
+    return c[lab].reshape(a.shape)
+
+
+def _edges(q):   # the luma's change, summed down each column and along each row
+    import numpy as np
+    g = q @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+    ex, ey = np.zeros(g.shape[1]), np.zeros(g.shape[0])
+    ex[1:-1], ey[1:-1] = np.abs(g[:, 2:] - g[:, :-2]).sum(0), np.abs(g[2:, :] - g[:-2, :]).sum(1)
+    return ex, ey
+
+
+def _pitch(ex, ey):   # the longest period whose comb fits the edges (both ways together) within 95% of the best one (85% let sparse sheets jump to a double)
+    import numpy as np
+    ss = np.arange(PITCH[0], PITCH[1] + 1e-9, 0.05)
+    comb = lambda p: np.array([abs(((p / (p.sum() + 1e-9)) * np.exp(2j * np.pi * np.arange(len(p)) / s)).sum()) for s in ss])
+    mag = comb(ex) + comb(ey)
+    return float(ss[mag >= 0.95 * mag.max()].max())
+
+
+def _walk(p, step):   # the snapper's walk: each cut at the strongest edge within a third of a step of where it falls, if it is strong, else where it falls
+    import numpy as np
+    n, cuts, mean = len(p), [0], p.mean()
+    while cuts[-1] + step < n:
+        t, r = cuts[-1] + step, max(step * 0.35, 2.0)
+        a, b = int(max(cuts[-1] + 1, np.floor(t - r))), int(min(n - 1, np.ceil(t + r)))
+        j = a + int(np.argmax(p[a:b + 1])) if b >= a else int(round(t))
+        cut = j if p[j] > mean * 0.5 else int(round(t))
+        if cut <= cuts[-1] or cut >= n:
+            break
+        cuts.append(cut)
+    return cuts + [n]
+
+
+def _variant_pitch(a):   # a variant's pitch: its edges both ways together, without the sheet's frame and the variant's letter (they drew on their own)
+    import numpy as np
+    c = a[FRAME:-FRAME, FRAME:-FRAME].copy()
+    c[:LETTER[1], :LETTER[0]] = np.array(PAL9[-1], dtype=np.float32)
+    ex, ey = _edges(_kmeans(c))
+    return _pitch(ex, ey)
+
+
+def cells(a, back=False, step=None):
+    """One variant's art pixels as GPT drew them (see above), at `step` image pixels an art pixel (its own pitch if none): its tones' indices (PAL9,
+    or _back_pal for a back sheet), one cell one pixel."""
+    import numpy as np
+    step = step or _variant_pitch(a)
+    ex, ey = _edges(a)   # (the walk on the sheet's own edges, as the snapper's runs on its own)
+    cx, cy = _walk(ex, step), _walk(ey, step)
+    idx = (np.argmin(((a[..., None, :] - _back_pal()) ** 2).sum(-1), -1) if back else _inks(a, 0.5))
+    n = 19 if back else len(PAL9)
+    art = np.zeros((len(cy) - 1, len(cx) - 1), dtype=np.int64)
+    for j in range(len(cy) - 1):
+        for i in range(len(cx) - 1):
+            v = idx[cy[j]:cy[j + 1], cx[i]:cx[i + 1]].ravel()
+            if v.size:
+                art[j, i] = np.bincount(v, minlength=n).argmax()
+    return art
+
+
+def snap_cells(src: str, dst: str, back: bool = False, step=None, k: int = GRID) -> list:
+    """A sheet as GPT's own pixels, variant by variant (cells), each laid at its cell's corner at k x k image pixels an art pixel (as the -px sheet: one
+    of its blocks one game pixel, and nothing to halve), on the black. GPT keeps one pitch to a sheet, near enough: each variant's is found, and one
+    more than 15% off the sheet's (their median) takes the sheet's and is marked to check (its own letters, its drawing: pass a step if wrong).
+    Returns each variant's (letter, pitch, whether it agreed with the sheet's)."""
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(Image.open(src).convert('RGB'), dtype=np.float32)
+    pal = _back_pal() if back else np.array(PAL9, dtype=np.float32)
+    out, report = np.zeros_like(a, dtype=np.uint8) + np.array(PAL9[-1], dtype=np.uint8), []
+    parts = [(j, i, a[j * CELL:(j + 1) * CELL, i * CELL:(i + 1) * CELL]) for j in range(a.shape[0] // CELL) for i in range(a.shape[1] // CELL)]
+    own = [step or _variant_pitch(c) for _, _, c in parts]
+    sheet = float(np.median(own))
+    for n, ((j, i, c), p) in enumerate(zip(parts, own)):
+        ok = step is not None or abs(p - sheet) <= 0.15 * sheet
+        img = pal[cells(c, back, p if ok else sheet)].astype(np.uint8).repeat(k, 0).repeat(k, 1)[:CELL, :CELL]
+        out[j * CELL:j * CELL + img.shape[0], i * CELL:i * CELL + img.shape[1]] = img
+        report.append(('ABCDEF'[n] if n < 6 else '?', round(p if ok else sheet, 2), ok))
+    Image.fromarray(out).save(dst)
+    return report
 
 
 def main() -> None:
@@ -2269,6 +2392,8 @@ def main() -> None:
     ap.add_argument('--ref', help='the style reference (default: research/variants/ref-<world>.png)')
     ap.add_argument('--no-ref', action='store_true', help='send no reference')
     ap.add_argument('--model', default='flare', help='flare (default) or sunburst')
+    ap.add_argument('--resnap', action='store_true', help='no new sheet: snap the element\'s sheets again (-px.png and -cells.png)')
+    ap.add_argument('--step', type=float, help='-cells.png: the art pixel size in image pixels, when the found one is wrong')
     a = ap.parse_args()
     if a.element == 'list':
         for el, e in ELEMENTS.items():
@@ -2283,6 +2408,13 @@ def main() -> None:
         if a.ref:
             sys.exit(f'no reference at {ref}')
         ref = None
+    back = ELEMENTS[el].get('plane') == 'back'
+    if a.resnap:   # (no call, no cost: each sheet of it snapped again, both ways)
+        n = 1
+        while os.path.exists(os.path.join(out, f'{el}-{n}.png')):
+            resnap(os.path.join(out, f'{el}-{n}'), back, a.step)
+            n += 1
+        return
     if a.prompt:
         print(prompt(el, bool(ref)))
         if ref:
@@ -2309,9 +2441,15 @@ def main() -> None:
     rc = subprocess.run(cmd + (['--image', ref] if ref else []), env=env).returncode
     if rc:
         sys.exit(rc)
-    src, dst = os.path.join(out, f'{el}-{n}.png'), os.path.join(out, f'{el}-{n}-px.png')
-    (snap_back if ELEMENTS[el].get('plane') == 'back' else snap)(src, dst)
-    print(dst)
+    resnap(os.path.join(out, f'{el}-{n}'), back, a.step)
+
+
+def resnap(base: str, back: bool, step=None) -> None:   # a sheet <base>.png onto the fixed grid (-px.png) and as GPT's own pixels (-cells.png)
+    (snap_back if back else snap)(base + '.png', base + '-px.png')
+    report = snap_cells(base + '.png', base + '-cells.png', back, step)
+    off = sum(not ok for _, _, ok in report)
+    print(base + '-px.png'); print(base + '-cells.png: ' + ', '.join(f"{v} {s}{'' if ok else ' (check)'}" for v, s, ok in report)
+                                  + ('  — its pitch unsure: look at it and give the right one with --step' if off >= 2 else ''))
 
 
 if __name__ == '__main__':

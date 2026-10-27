@@ -3436,9 +3436,10 @@ const ui = {
     for (let q = 3; title.scrollWidth > p.clientWidth - 24 && q > 1.5;) { q -= 0.25; title.style.setProperty('--p', q); }   // its title on one line (owner, 2026-10-25: «текст под карточкой
     // всегда в 1 строку»): a long one a step smaller till it fits
     // As big as the phone allows (owner, 2026-10-24: «Карточка истории или босса должна занимать на телефоне максимальное количество места»): edge to edge or
-    // as tall as is left over its title and button, in whole pixels: a whole number of the screen's to each of the art's cells, unless that loses over 30% of it
+    // as tall as is left over its title and button, in whole pixels: a whole number of the screen's to each of the art's cells, unless that loses over 15% of it (the cards at twice their
+    // pixels since 2026-10-27: a whole step is a third of a cell's size, and 30% shrank a 320-px 3x phone's card to 224 px)
     const room = title.getBoundingClientRect().top - p.getBoundingClientRect().top - parseFloat(getComputedStyle(p).paddingTop) - parseFloat(getComputedStyle(card).marginBottom) - 12;
-    const [w0, h0] = STORY.moon_fall.cells, box = Math.min(view.w, room * w0 / h0), fit = box / w0, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, W = w0 * (whole >= 0.7 * fit ? whole : fit);
+    const [w0, h0] = STORY.moon_fall.cells, box = Math.min(view.w, room * w0 / h0), fit = box / w0, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, W = w0 * (whole >= 0.85 * fit ? whole : fit);
     card.style.width = W + 'px'; card.style.height = W * h / w + 'px';   // every card as wide as the first, the moon's (owner, 2026-10-25: «все карточки включая боссов должны быть
     // размером как первая карточка с луной»): its size worked out on the moon's cells, the rest scaled to it
     if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);

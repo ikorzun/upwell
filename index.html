@@ -10,6 +10,7 @@
 <!--
   Upwell — a squishy climbs a well (Downwell, upside down). Portrait first.
   src/gum.js   the soft body and the renderer, copied from Gum (see its header)
+  src/bossframes.js the bosses' motion frames, data only (see its header)
   src/world.js tuning, content tables, the level and how it is drawn
   src/cine.js  the 2.5D look over the drawing: light, depth, haze, motes (see its header)
   src/game.js  the run, the rules, the UI, input and the loop
@@ -320,7 +321,7 @@
   .fm-row { display: flex; align-items: center; justify-content: space-between; height: 32px; --p: 1.46; color: var(--white); text-transform: uppercase; }
   .fm-fav, .fm-full { display: flex; align-items: center; gap: 6px; }
   .fm-full { gap: 4px; }
-  .fm-fav svg, .fm-full svg { width: 32px; height: 32px; display: block; }   /* (a sprite's pixel a CSS px: whole screen points) */
+  .fm-fav svg, .fm-full svg { width: var(--icon); height: var(--icon); display: block; }   /* (32 at most, its pixels whole screen points: feed.mount) */
   .fm-of { opacity: 0.4; }   /* the count's whole, dimmer */
   .fm-x { position: absolute; top: env(safe-area-inset-top, 0px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its white disc 40 px, 4 under the safe area and 12 in from the side, in a 48-px button */
   .fm-x::before { content: ''; grid-area: 1 / 1; width: 40px; height: 40px; border-radius: 50%; background: var(--white); }
@@ -328,11 +329,12 @@
   .fm-x:active::before { filter: brightness(0.85); }
   .fm-board { position: relative; width: var(--side); height: var(--side); touch-action: none; }
   .fm-t { position: absolute; width: var(--cell); height: var(--cell); display: grid; place-items: center; will-change: transform; }
-  .fm-t svg { width: calc(var(--dot) * 32); height: calc(var(--dot) * 32); display: block; }
+  .fm-t svg, .fm-ice { position: absolute; left: 50%; top: 50%; width: var(--food); height: var(--food); margin: calc(var(--food) / -2) 0 0 calc(var(--food) / -2); display: block; }   /* centred, its clear
+     edge may stand out of the cell (the widest food fills it) */
   .fm-t.sel { box-shadow: inset 0 0 0 var(--dot) var(--white); }
   .fm-t.cur { box-shadow: inset 0 0 0 var(--dot) var(--yellow); }
-  .fm-ice { position: absolute; inset: 0; margin: auto; width: calc(var(--dot) * 32); height: calc(var(--dot) * 32); opacity: 0.6; pointer-events: none; }   /* a frozen treat's ice over its food (feed.tile) */
-  .fm-end { position: absolute; inset: 0; background: rgba(20, 20, 20, 0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; }
+  .fm-ice { opacity: 0.6; pointer-events: none; }   /* a frozen treat's ice over its food (feed.tile) */
+  .fm-end { position: absolute; inset: 0; z-index: 3; background: rgba(20, 20, 20, 0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; }
   .fm-end .pair { width: 100%; }
   .fm-end .big { min-width: 0; padding: 0 10px; }
   .fm-stars { display: flex; gap: 6px; }
@@ -341,6 +343,8 @@
   .fm-pay { display: flex; align-items: center; gap: 6px; color: var(--yellow); }   /* his coins, the day's first run */
   .fm-pay .ico { --p: 2; }
   .fm-bite { position: fixed; z-index: 40; pointer-events: none; will-change: transform; }   /* a bite on its way to his mouth (feed.bite) */
+  .fm-fx { position: fixed; left: 0; top: 0; z-index: 39; pointer-events: none; image-rendering: pixelated; }   /* a food's bits when eaten, the result's confetti: a food's pixel a pixel of it (feed.js fxStep) */
+  .fm-combo { position: absolute; z-index: 2; --p: 3; color: var(--yellow); filter: drop-shadow(0 3px 0 var(--ink)); pointer-events: none; white-space: nowrap; }   /* a cascade's step over where it was eaten (feed.pops), the game's #combo */
   .fm-bite svg { width: 100%; height: 100%; display: block; }
   .fm-stars .ico { width: 36px; height: 36px; }
   .chip {
@@ -424,6 +428,7 @@
   <div id="album" class="panel"></div>
 </div>
 <script src="src/gum.js"></script>
+<script src="src/bossframes.js"></script>
 <script src="src/world.js"></script>
 <script src="src/cine.js"></script>
 <script src="src/game.js"></script>

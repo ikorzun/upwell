@@ -4176,6 +4176,7 @@ function runFrame(now, fixedDt) {
   if (CINE_ON) cineSync(game.state === 'menu' ? null : game.lv && game.lv.theme);   // (the cinematic fork: on or off for this world, before the layout it may ask for; the menu's backdrop 2D)
   if (layoutQueued) { layoutQueued = false; layout(); }
   menuTouch.update(now);   // (the menu's hero in the hand, before the physics: Gum's order)
+  if (typeof feed !== 'undefined') feed.frame(now);   // (Feed Moti: his eyes on the food, his sag; feed.js)
   let dt = fixedDt != null ? fixedDt : (now - loop.last) / 1000;
   loop.last = now;
   if (fixedDt == null) pixGuard(dt);

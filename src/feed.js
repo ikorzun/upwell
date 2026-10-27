@@ -1,6 +1,8 @@
 // Feed Moti (owner, 2026-10-27: «делаем мини игру при клики на моти на главном экране»; his brief feed_moti_match3_technical_brief v1.0, kept in
 // research/feed-moti): a small match-3 on the home screen, Moti fed what the player matches. Phase A of the brief: the board (5 x 5, four foods, eight
-// moves), its rules, a tap on Moti into it and the way back, the home screen as it was. Only with ?feed while it is built (FEED_ON).
+// moves), its rules, a tap on Moti into it and the way back, the home screen as it was. Phase B: each match's foods one bite flying to his mouth,
+// his eyes on it, his mouth open for it, a munch; the fuller he is the wider and lower he sits (a puddle, never a ball), back as he was at home.
+// Only with ?feed while it is built (FEED_ON).
 // The rules and the board are pure (FL, on a flat array of 25), loaded by node too for tools/feed-test.mjs; the view is the menu panel's (ui.menu,
 // feed.mount), its foods SVG at the game's own pixel (PIX.size a dot), Moti the menu's own hero over it (game.menuFit).
 const FEED_ON = typeof location !== 'undefined' && /[?&]feed\b/.test(location.search);
@@ -10,6 +12,9 @@ const FEED = {
   // moves reach them 97% / 51% / 13% of the time, the biggest line each move 100% / 82% / 38%
   food: 32, cell: 36,   // a food's sprite and its cell, in game pixels (PIX.size CSS px each)
   swap: 110, back: 150, pop: 140, fall: 190, row: 26, hint: 4,   // ms: a swap, an invalid one's way back, a food eaten, a fall (and each row more), s idle before a hint
+  bite: 300, bites: 3, open: 0.55,   // ms a bite's flight to his mouth (the brief's 200-350), at most so many in the air (more: eaten unseen), his mouth open at that part of it
+  wide: 0.06, low: 0.33, from: 0.25,   // full (FEED.stars' last): his size up so much, pressed down so much (SQUEEZE: a third flattens him ~10%, bulges him ~7%);
+  // the sag starts past that part of the meter (the brief: hungry, then blushing and wider, then satisfied and puddled)
 };
 const FEED_SET = ['sakura', 'matcha', 'taiyaki', 'imo'];   // the brief's first four (#01, #02, #05, #19): four shapes and colours apart
 // The foods and blockers (the owner's concept sheet, research/feed-moti/foods-sheet.webp, re-pixelated to 32 x 32 on each one's own grid by
@@ -122,7 +127,7 @@ else {
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const anim = (e, frames, ms, ease = 'ease-out') => (e && e.animate ? e.animate(frames, { duration: still ? Math.min(ms, 90) : ms, easing: ease }).finished.catch(() => {}) : Promise.resolve());
   var feed = {   // (var: a global, as game.js asks for it by name)
-    active: false, st: null, busy: false, sel: -1, cur: -1, els: [], box: null, hud: {}, keys: false, idle: 0, hinting: false,
+    active: false, st: null, busy: false, sel: -1, cur: -1, els: [], box: null, hud: {}, keys: false, idle: 0, hinting: false, flying: [], fat: 0,
     newRun() {
       const seed = (Math.random() * 4294967296) >>> 0;
       this.rng = mulberry32(seed);
@@ -142,6 +147,7 @@ else {
       if (this.busy) { this.closeAfter = { toGame }; return; }
       const st = this.st;
       this.active = false; this.busy = false; this.sel = -1; this.els = []; this.box = null;
+      for (const f of this.flying) f.e.remove(); this.flying = [];
       track('feed_close', { moves_left: st ? st.moves : 0, duration_ms: Math.round(performance.now() - this.opened), exit_to_main_game: !!toGame });
       if (game.state === 'menu') ui.menu();
     },
@@ -256,8 +262,8 @@ else {
       const st = this.st, c = FEED.cell * PIX.size, b = game.hero;
       st.full += ph.gone.length; st.score += FL.score(ph);
       const big = ph.runs.some((r) => r.length >= 4);
-      sound.play('coin', 0.5, 1 + 0.08 * (ph.cascade - 1)); haptics.buzz(big ? 18 : 8);
-      if (b) { b.kickSquash(0, 1, big ? 0.6 : 0.35); b.face.wide = Math.max(b.face.wide, big ? 1 : 0.6); }
+      sound.play('coin', 0.45, 1 + 0.08 * Math.min(ph.cascade - 1, 4)); haptics.buzz(big ? 12 : 5);
+      this.bite(ph);   // (flying while the rest fall: the brief's overlap)
       this.meter();
       await Promise.all(ph.gone.map((i) => { const e = this.els[i]; this.els[i] = null; return anim(e, still ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(1.18)', opacity: 1, offset: 0.35 }, { transform: 'scale(0.2)', opacity: 0 }], FEED.pop).then(() => e.remove()); }));
       const next = this.els.slice(), falls = [];
@@ -275,7 +281,7 @@ else {
       const st = this.st; st.done = true;
       if (st.told) return; st.told = true;
       const stars = FL.stars(st.full), b = game.hero;
-      if (b) { b.kickSquash(0, 1, 0.9); b.face.wide = 1; }
+      if (b) { b.wake(); b.kickSquash(0, 1, -0.7); b.hop(Math.sqrt(2 * WORLD.gravity * (0.25 + 0.15 * stars) * b.R)); b.face.wide = 1; b.face.surprise = 0; }   // full: a happy little hop
       sound.play(stars >= 2 ? 'buy' : 'coin', 0.8, 1); haptics.buzz(25);
       track('feed_finish', { duration_ms: Math.round(performance.now() - st.t0), score: st.score, fullness: st.full, successful_swaps: st.swaps, cascades: st.cascades, stars });
       if (!quiet && this.box) this.result();
@@ -286,6 +292,59 @@ else {
       end.append(cap(el('div', 'head', t('feedDone')), 'feedDone'), sr, px(tf('feedScore', { n: st.score })));
       const row = el('div', 'pair'); row.append(cap(button(t('feedAgain'), 'big thumb', () => { this.newRun(); ui.menu(); }), 'feedAgain'), cap(button(t('goBack'), 'big thumb alt', () => this.close()), 'goBack'));
       end.append(row); this.box.append(end);
+    },
+    frame(now) {   // each frame (game.js runFrame, after menuTouch): his eyes on a bite in the air (or the board), his sag by how full he is, eased back at home
+      const b = game.hero; if (!b || !game.lv || game.lv.kind !== 'menu') return;
+      const dt = Math.min(0.1, Math.max(0, (now - (this.lastF || now)) / 1000)); this.lastF = now;
+      const aim = this.active && this.st ? Math.min(1, this.st.full / FEED.stars[2]) : 0;
+      this.fat = (this.fat || 0) + (aim - (this.fat || 0)) * Math.min(1, dt * (aim > (this.fat || 0) ? 2.5 : 1.2));
+      const k = smooth(FEED.from, 1, this.fat);
+      if (this.fat > 0.003 || this.sagged) {
+        b.growthTarget = 1 + FEED.wide * k;
+        if (k > 0.002) { b.squeezeIn = Math.max(b.squeezeIn, FEED.low * k); b.sqAx = 0; b.sqAy = 1; }
+        this.sagged = this.fat > 0.003; if (!this.sagged) b.growthTarget = 1;
+      }
+      if (!this.active) return;
+      const fly = this.flying[this.flying.length - 1], L = game.heroLook;
+      if (fly) { const p = fly.at(Math.min(1, (now - fly.t0) / fly.ms)); L.x = p.x - view.left; L.y = p.y + game.lv.cam; L.t = now; }
+      else if (this.box && now - (this.lookT || 0) > 400) {   // waiting: on the board (the food in hand, if one is), curious
+        this.lookT = now; const r = this.box.getBoundingClientRect(), n = FEED.n, i = this.sel >= 0 ? this.sel : -1;
+        L.x = (i >= 0 ? r.left + (i % n + 0.5) * r.width / n : r.left + r.width / 2) - view.left; L.y = (i >= 0 ? r.top + (((i / n) | 0) + 0.5) * r.width / n : r.top + r.height / 3) + game.lv.cam; L.t = now;
+      }
+    },
+    mouth() {   // his mouth on the page: the face's own point (its shape's mouth, mapped on the body as it is now)
+      const b = game.hero, f = b.s && b.s.face, mo = f ? f.mouth : [0, 0.2], o = { x: 0, y: 0 };
+      if (typeof mapPoint === 'function') mapPoint(b.s, b.x, b.y, b.cx, b.cy, mo[0], mo[1], o); else { o.x = b.cx; o.y = b.cy + 0.2 * b.R; }
+      return { x: view.left + o.x, y: o.y - game.lv.cam };
+    },
+    bite(ph) {   // a phase's foods as one bite (its most common food; bigger for a line of four or more) from where they were to his mouth, on an arc
+      const b = game.hero; if (!this.box || !b) return;
+      if (this.flying.length >= FEED.bites) { this.munch(ph); return; }   // (a long cascade: not twelve bites in a row)
+      const r = this.box.getBoundingClientRect(), n = FEED.n, c = r.width / n;
+      let sx = 0, sy = 0; for (const i of ph.gone) { sx += (i % n + 0.5) * c; sy += (((i / n) | 0) + 0.5) * c; }
+      const from = { x: r.left + sx / ph.gone.length, y: r.top + sy / ph.gone.length }, to = this.mouth();
+      const cnt = {}; for (const k of ph.foods) cnt[k] = (cnt[k] || 0) + 1;
+      const kind = Object.keys(cnt).sort((u, v) => cnt[v] - cnt[u])[0], big = ph.runs.some((q) => q.length >= 4), size = FEED.food * PIX.size * (big ? 1.25 : 1);
+      const e = document.createElement('div'); e.className = 'fm-bite'; e.innerHTML = foodSvg(kind);
+      Object.assign(e.style, { width: size + 'px', height: size + 'px', left: from.x - size / 2 + 'px', top: from.y - size / 2 + 'px' });
+      document.body.append(e);
+      const at = (u) => ({ x: from.x + (to.x - from.x) * u, y: from.y + (to.y - from.y) * (still ? u : u * (2 - u)) });   // tossed up: slower as it rises, caught by his mouth
+      // at the top of its arc (u: the time's part; across at a steady pace, so a parabola)
+      const ms = still ? 140 : FEED.bite, frames = [];
+      for (let q = 0; q <= 8; q++) { const u = q / 8, p = at(u), sc = 1 - 0.55 * u * u; frames.push({ transform: `translate(${p.x - from.x}px,${p.y - from.y}px) scale(${sc})`, opacity: u < 0.92 ? 1 : 0.6 }); }
+      const fly = { e, t0: performance.now(), ms, at };
+      this.flying.push(fly);
+      setTimeout(() => { if (game.hero && this.flying.includes(fly)) game.hero.face.surprise = 1; }, ms * FEED.open);   // his mouth opens for it
+      e.animate(frames, { duration: ms, easing: 'linear' }).finished.catch(() => {}).then(() => {
+        e.remove(); const k = this.flying.indexOf(fly); if (k < 0) return;   // (closed on its way: no munch after)
+        this.flying.splice(k, 1); this.munch(ph);
+      });
+    },
+    munch(ph) {   // it is in: a bounce of the cheeks and belly, a little chirp, gladder for a big one and for each step of a cascade
+      const b = game.hero; if (!b) return;
+      const big = ph.runs.some((q) => q.length >= 4);
+      b.kickSquash(0, 1, big ? 0.55 : 0.32); b.face.wide = Math.max(b.face.wide, big ? 1 : 0.6); b.face.surprise = Math.min(b.face.surprise, 0.2);
+      sound.play('bubble', big ? 0.7 : 0.5, 1.25 + 0.07 * Math.min(ph.cascade - 1, 4) + (Math.random() - 0.5) * 0.08); haptics.buzz(big ? 14 : 7);
     },
     hint(now) {   // after a while with no move (the first run's sooner): a legal pair nudges toward each other, twice
       if (!this.active || this.busy || this.hinting || !this.st || this.st.done || now - this.idle < 1000 * FEED.hint * (save.seen.feedHint ? 2 : 1)) return;

@@ -1260,6 +1260,8 @@ const FOE_COLOR = {
 // тенью, остальные 20 и 20 красные пятна и краснеют рядом»: those that redden are E's, patched before they do): each enemy draws its paint once, by `mix`; ?paint= sets one for all.
 const FOE_PAINT = { v: ((/[?&]paint=([a-e])\b/i.exec(location.search) || [])[1] || '').toUpperCase() || null, mix: [['A', 0.6], ['C', 0.2], ['E', 0.2]], far: 7, near: 2, spots: 0.6, none: 3.5, all: -5.5 };
 const PAINT_ALL = new Float32Array([-99, 0, 0]);   // (any other body: its colour all over, as before)
+const repairCloth = (b) => (b.color.base === PAL.blue ? PAL.orange : PAL.blue), REPAIR_LEGS = 0.48;   // the settings' repairman's dungarees: blue (orange on a blue hero), their
+// legs under 0.48 of his radius (the body's shader, uPants), their bib over them (writeFace)
 const paintField = (x, y, p) => { const v = y - 0.05; return Math.sin(x * 3.3 + p[1]) + Math.sin(y * 2.9 + p[2]) + Math.sin((x - y) * 2.1 + 1.7 * p[1]) - 2.4 * Math.exp(-5 * (x * x + v * v)); };
 const paintPick = () => { let u = Math.random(); for (const [v, w] of FOE_PAINT.mix) if ((u -= w) < 0) return v; return 'A'; };
 const foePaint = (e, H) => {   // uPaint: the level, the field's two phases
@@ -4599,7 +4601,7 @@ const FEAT_FS_PAL = FEAT_FS.replace('flat in vec4 vP;', 'flat in vec4 vP; flat i
 // highlight where Gum has its soft-box reflection, and the anti-aliasing skirt drawn as a
 // black outline. Its patterns ride with the body (uOrigin is its centre in game pixels).
 const BODY_FS_PIX = GLSL + PIX_GLSL + SHADE_GLSL + `in vec3 vN; in float vAO; in float vA; in vec2 vUV; out vec4 o;
-uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin; uniform vec3 uPaint; uniform float uGlint;
+uniform vec3 uBase, uDeep, uLine; uniform vec2 uOrigin; uniform vec3 uPaint; uniform float uGlint; uniform vec4 uPants;
 float sdRoundBox(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
 void main() {
   if (vA < 0.04) discard;
@@ -4612,12 +4614,14 @@ void main() {
   // its colour shaded deep on its patches, white shaded in its colour elsewhere (FOE_PAINT: paintField over uPaint.x; -99 all of it, as any body but an enemy)
   vec2 u = vUV - vec2(0.0, 0.05);
   bool hot = sin(vUV.x * 3.3 + uPaint.y) + sin(vUV.y * 2.9 + uPaint.z) + sin((vUV.x - vUV.y) * 2.1 + 1.7 * uPaint.y) - 2.4 * exp(-5.0 * dot(u, u)) > uPaint.x;
-  vec3 col = tone(k, g) > 0.5 ? (hot ? uDeep : uBase) : (hot ? uBase : PAL[8]);
+  bool legs = vUV.y > uPants.w;   // (the settings' repairman: under its line his dungarees' cloth, uPants)
+  vec3 base = legs ? uPants.rgb : uBase;
+  vec3 col = legs ? (tone(k, g) > 0.5 ? shadeOf(base, 1.0) : base) : tone(k, g) > 0.5 ? (hot ? uDeep : uBase) : (hot ? uBase : PAL[8]);
   vec3 R = reflect(vec3(0.0, 0.0, -1.0), n);
   if (uGlint > 0.5) {   // the hero in volume (VOL): his dots in his own shade, not black (SHADE_GLSL), more of them on his far side, and a white glint high on his light side
     float dk = dot(n, L);
     bool dark = tone(k, g) > 0.5 || (dk < -0.05 && tone(dk < -0.35 ? 5 : 4, g) > 0.5);
-    col = dark ? shadeOf(uBase, 1.0) : min(uBase.r, min(uBase.g, uBase.b)) > 0.8 ? mix(uBase, uShade, 0.14) : uBase;   // (a white body a breath of the world's ink: white on white would not read)
+    col = dark ? shadeOf(base, 1.0) : min(base.r, min(base.g, base.b)) > 0.8 ? mix(base, uShade, 0.14) : base;   // (a white body a breath of the world's ink: white on white would not read)
     if (length((vUV - vec2(-0.5, -0.42)) / vec2(0.15, 0.1)) < 1.0) col = PAL[8];   // (the glint, in his own shape's frame: it bends with him)
   } else if (sdRoundBox(R.xy - vec2(-0.36, -0.5), vec2(0.17, 0.1), 0.07) < 0.0) col = PAL[8];
   o = vec4(col, 1.0);
@@ -4991,6 +4995,16 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   else if (b.helmet === 'umeLeaf') {   // Ume (UME; owner, 2026-10-24, У6 «Б»): an ume's leaf on a stalk on his crown, tilted
     const tilt = (ux, uy, a, rx, ry, c) => { const ca = Math.cos(a), sa = Math.sin(a); frame(ux, uy, rx * ca, rx * sa, -ry * sa, ry * ca); put(c[0], c[1], c[2], 0); };
     tilt(0.06, -1.02, 0.25, 0.06, 0.17, ink); tilt(0.36, -1.05, -0.35, 0.34, 0.14, ink); tilt(0.36, -1.05, -0.35, 0.28, 0.09, PAL.green);
+  } else if (b.helmet === 'repair') {   // the settings' repairman (owner, 2026-10-27: «сделай для него моти в скине ремонтника»): a hard hat, yellow (orange on a yellow
+    // hero), over his crown with a brim over his brows, a ridge down its middle and a glint, in an ink rim; under his smile a dungarees' bib, blue (orange on a blue
+    // hero), square in an ink rim, a pocket on it, its two buttons at its top (its straps would cross his cheeks), over the legs the body's shader colours (uPants)
+    const box = (ux, uy, ax, ay, c) => { frame(ux, uy, ax, 0, 0, ay); put(c[0], c[1], c[2], 10, Math.hypot(P1.x - P0.x, P1.y - P0.y), Math.hypot(P2.x - P0.x, P2.y - P0.y), 0); };   // a box (FEAT_FS 10, flat)
+    const hat = b.color.base === PAL.yellow ? PAL.orange : PAL.yellow, ridge = hat === PAL.yellow ? PAL.orange : PAL.yellow, cloth = repairCloth(b);
+    box(0, 0.47, 0.38, 0.09, ink); box(0, 0.4875, 0.335, 0.0725, cloth); box(0, 0.64, 0.12, 0.07, ink); box(0, 0.64, 0.09, 0.04, cloth);   // the bib down into the legs
+    // (its rim round its top and sides only), a pocket on them
+    for (let side = -1; side <= 1; side += 2) { dot(0.25 * side, 0.45, 0.075, 0.075, ink); dot(0.25 * side, 0.45, 0.05, 0.05, PAL.yellow); }   // its buttons
+    dot(0, -0.62, 0.86, 0.48, ink); dot(0, -0.3, 1.16, 0.16, ink); dot(0, -0.3, 1.1, 0.11, hat); dot(0, -0.62, 0.8, 0.42, hat);   // the hard hat: its rim, its brim, its dome
+    dot(0, -0.7, 0.14, 0.36, ridge); dot(-0.44, -0.8, 0.13, 0.07, PAL.white);   // its ridge, a glint
   }
 };
 const gumInit = Renderer.prototype.init, gumResize = Renderer.prototype.resize;
@@ -7846,7 +7860,8 @@ Renderer.prototype.draw = function (g, alpha) {
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u); if (pf.u.uShade) gl.uniform3fv(pf.u.uShade, shadeTint(g.lv && g.lv.theme));
   if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
-  if (menu) for (let i = 0; i + 1 < farR.length; i += 2) this.drawFeat(farR[i], farR[i + 1] - farR[i]);   // (the main screen: its far view only)
+  if (menu) { if (!g.menuBare) for (let i = 0; i + 1 < farR.length; i += 2) this.drawFeat(farR[i], farR[i + 1] - farR[i]); }   // (the main screen: its far view only; the
+  // settings none, all dark: Game.menuFit's bare)
   else this.drawFeat(0, back);
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
@@ -7860,6 +7875,7 @@ Renderer.prototype.draw = function (g, alpha) {
     gl.bindVertexArray(this.bodyVao);
     const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
     gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); if (pb.u.uGlint) gl.uniform1f(pb.u.uGlint, r.b === g.hero && VOL_ON ? 1 : 0); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
+    { const c = r.b.helmet === 'repair' ? repairCloth(r.b) : null; if (pb.u.uPants) gl.uniform4f(pb.u.uPants, c ? c[0] : 0, c ? c[1] : 0, c ? c[2] : 0, c ? REPAIR_LEGS : 99); }   // (his dungarees' legs)
     if (!BOSS_FIT[r.b.look]) {   // the target always has a stencil (a boss its sheet's drawing: only that on its body, the body unseen)
       // Fill by winding number (as in Gum), so a crushed outline that turns back on
       // itself neither folds nor loses lobes.

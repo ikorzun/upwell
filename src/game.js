@@ -1033,9 +1033,10 @@ class Game {
   }
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
   // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
-  menuFit(rowY, logoY, splitY = rowY) {   // (splitY: where the dark band under him starts; the colours' row on the main screen, over Feed Moti's bar)
+  menuFit(rowY, logoY, splitY = rowY, bare = false) {   // (splitY: where the dark band under him starts; the colours' row on the main screen, over Feed Moti's bar;
+    // bare: no far view behind him, the settings')
     const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, MENU_HERO.k * Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
-    this.menuFloor = floorY; this.menuSplit = splitY; this.lv.menuAt(floorY);
+    this.menuFloor = floorY; this.menuSplit = splitY; this.menuBare = bare; this.lv.menuAt(floorY);
     if (Math.abs(R - this.R) > 0.5) { this.menuR = this.R = R; this.lv.R = R; this.makeHero(); }
   }
   startRun(daily, endless) {   // daily: the day's well; endless: on past the summit, round and round
@@ -2558,7 +2559,8 @@ class Game {
     const lv = this.lv, b = this.hero;
     const rb = this.power('rainbow') && this.state !== 'dead', tl = this.tail, last = tl[tl.length - 1];   // frame runs on under the revive dialog, gun() does not
     b.color = this.state === 'dead' && this.dieT > 0 ? dieBody(this.deathWhy(), lv.theme) : rb ? RAINBOW_BODY[Math.floor(lv.t / (this.gunT < 1 ? RAINBOW.slow : RAINBOW.cycle)) % 6] : colorById(save.color);   // the rainbow cycles the inks, slower in its last second
-    b.helmet = this.rocket && this.rocket.astro ? 'astro' : this.power('smash') && this.state !== 'dead' && !(this.gunT < 1 && Math.floor(this.gunT * 6) % 2 === 0) ? 'moto' : null;   // the smash's helmet (user: in place of its pips), blinking in its last second
+    b.helmet = this.rocket && this.rocket.astro ? 'astro' : this.power('smash') && this.state !== 'dead' && !(this.gunT < 1 && Math.floor(this.gunT * 6) % 2 === 0) ? 'moto' : this.state === 'menu' && ui.open === 'settings' ? 'repair' : null;   // the smash's helmet (user: in place of its pips), blinking in its last second; the
+    // settings' repairman (ui.settings)
     if (last && Math.hypot(b.cx - last[0], b.cy - last[1]) > 4 * this.R) tl.length = 0;   // a respawn or a door: no streak across the screen
     else if (rb && (!last || Math.hypot(b.cx - last[0], b.cy - last[1]) > RAINBOW.gap * this.R)) tl.push([b.cx, b.cy]);
     while (tl.length > (rb ? Math.ceil(RAINBOW.n * Math.min(1, this.gunT / RAINBOW.fade)) : 0)) tl.shift();   // shorter at the end, gone after
@@ -3133,8 +3135,8 @@ function button(text, cls, fn) {
 // over a world's background (Game.menuBackdrop) its back's top ink, not the old gradient's grey-blue (a grey line over the screen's dark top otherwise)
 const themeMeta = document.querySelector('meta[name="theme-color"]'), themeInk = themeMeta ? themeMeta.content : '';
 let menuInk = '';   // (Game.toMenu)
-function menuTop(on) {
-  const ink = menuInk || MENU_BG.inks[0];
+function menuTop(on, over) {   // (over: an ink of its own, the settings' dark)
+  const ink = over || menuInk || MENU_BG.inks[0];
   document.documentElement.classList.toggle('menuTop', on); $('topTint').style.background = ink; if (themeMeta && coarse) themeMeta.content = on ? ink : themeInk;   // (a phone's: a desktop's tab bar left as it is)
 }
 function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
@@ -3206,19 +3208,29 @@ const ui = {
     const y0 = p.getBoundingClientRect().top;
     if (game.state === 'menu') game.menuFit(colors.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0);   // the hero over the colours (they climb as rows come, once won)
   },
-  // The settings (owner, 2026-10-23: the menu's icon on the right): the language, sound, 2.5D and CRT, as at a pause; Back to the menu.
+  // The settings (owner, 2026-10-23: the menu's icon on the right): the language, sound, 2.5D and CRT, as at a pause; Back to the menu. Since 2026-10-27 the Figma
+  // «Settings» (1258:519; owner: «передай экран настроек… сделай для него моти в скине ремонтника»): all dark, Moti in it in a repairman's hard hat and dungarees
+  // (the menu's own hero, his helmet 'repair' while it is open: Game.frame), his feet a little over «Settings», the rows in one bar of white lines, Back the yellow pill
   settings() {
-    const p = this.panel('settings');
-    p.append(cap(el('div', 'head', t('settings')), 'settings'), ...this.prefs(() => this.settings()), cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
+    const first = this.open !== 'settings', p = this.panel('settings'); menuTop(true, MENU_BG.inks[3]);
+    const head = cap(el('div', 'head', t('settings')), 'settings'), opts = el('div', 'opts');
+    opts.append(...this.prefs(() => this.settings()));
+    p.append(head, opts, cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
+    if (game.state !== 'menu') return;
+    const y0 = p.getBoundingClientRect().top, feet = head.getBoundingClientRect().top - y0 - 11;   // (the Figma's 10.6 px between his feet and the words' frame)
+    game.menuFit(feet + MENU_HERO.gap, 0, 1, true);   // (the dark from the top, no far view: all of it under him)
+    if (first && game.hero) game.hero.kickSquash(0, 1, 0.6);   // into his work clothes: a little bounce
   },
   // The rows the settings and a pause share, each redrawing its panel (`again`) once changed.
   prefs(again) {
-    const snd = cap(button(t('sound') + ': ' + t(save.sound === false ? 'off' : 'on'), 'big thumb alt', () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); again(); }), 'sound');
-    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(button('2.5D: ' + t(cinePref ? 'on' : 'off'), 'big thumb alt', () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); again(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
+    const val = (name, on, fn) => { const b = button('', 'big thumb alt', fn), w = px(name + ': '), v = el('span', 'v ' + (on ? 'on' : 'off')); v.textContent = t(on ? 'on' : 'off'); w.append(v); b.append(w); return b; };   // its
+    // name and its value (the settings colour the value: on lime, off red)
+    const snd = cap(val(t('sound'), save.sound !== false, () => { sound.toggle(); track('settings_changed', { setting: 'sound', value: save.sound !== false }); again(); }), 'sound');
+    const d25 = CINE_ON && CINE_DONE(game.lv && game.lv.theme) ? cap(val('2.5D', cinePref, () => { save.flat = cinePref; persist(); track('settings_changed', { setting: 'depth', value: !save.flat }); cineUse(!save.flat); again(); }), 'depth') : null;   // (the cinematic fork: 2.5D or 2D; not in a world whose 2.5D is not done yet, where it would change nothing)
     const langs = el('div', 'langs');   // the language, each by its own name (the user: chosen here)
     langs.setAttribute('role', 'group'); langs.setAttribute('aria-label', t('lang'));
     for (const [k, name] of LANGS) { const b = button(name, 'chip' + (k === lang ? ' on' : ''), () => { save.lang = k; persist(); setLang(k); track('settings_changed', { setting: 'language', value: k }); again(); }); b.lang = k; langs.append(b); }
-    const crt = cap(button('CRT: ' + t(save.crt === false ? 'off' : 'on'), 'big thumb alt', () => { save.crt = save.crt === false; persist(); track('settings_changed', { setting: 'crt', value: save.crt }); if (window.fxRetro) fxRetro(); again(); }), 'crt');   // the
+    const crt = cap(val('CRT', save.crt !== false, () => { save.crt = save.crt === false; persist(); track('settings_changed', { setting: 'crt', value: save.crt }); if (window.fxRetro) fxRetro(); again(); }), 'crt');   // the
     // screen's scanlines and its split when hurt (fx.js)
     const row = el('div', 'pair'); row.append(...(d25 ? [d25, crt] : [snd, crt]));   // with 2.5D on one row (owner, 2026-10-25: «рядом с 2.5d в одну строку»); the sound
     return d25 ? [langs, snd, row] : [langs, row];   // with it where there is no 2.5D (Shake gone: owner, «Убери настройку shake»)

@@ -66,7 +66,7 @@ void main() {
   const go = (name) => {   // a moment begins (the newest over one under way); its flash only if the last was long enough ago
     const p = KICK[name], now = performance.now() / 1000, flash = !!p.flash && now - last.flash >= FLASH_GAP;
     if (flash) last.flash = now;
-    Object.assign(kick, { p, t0: now, seed: Math.random() * 100, flash });
+    Object.assign(kick, { p, t0: now, seed: fxRand(0, 100), flash });   // (fxRand: a look draws none of the game's chances, which the bot seeds)
   };
   window.fxKick = go;   // (for checks)
   if (typeof Game !== 'undefined' && !still) for (const name of Object.keys(KICK)) {   // the moments that set it off

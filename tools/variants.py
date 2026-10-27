@@ -1011,6 +1011,16 @@ ELEMENTS = {
                          where='standing on a ledge against the shaft wall', material='cracked whitewashed brick, a crooked chimney, the round-topped mouth, clay pots and a '
                          'poker beside it', size='about 3 tiles wide and 3.5 tiles tall', inks='a grey stove (no white), black soot and cracks, its mouth glowing purple '
                          'inside (purple is the stash\'s mark) with a few orange embers', scene=SKAZKA_AT),
+    # The Dark Forest's stash room (owner 2026-10-25, Д280 «1»: inside Baba Yaga's hut on chicken legs), six takes in code while the owner picks (SKR_V)
+    'skazka-caveroom': dict(world='skazka', kind='prop', plane='back', what="the inside of the secret stash in the Dark Forest, seen as one whole game screen: inside Baba "
+                            "Yaga's hut on chicken legs, its walls of crooked logs and its sagging ceiling beams, a great clay Russian stove (pech) with its round-topped mouth "
+                            "and a bent chimney, her wooden mortar and pestle and a broom of twigs leaning by it, a crooked shelf of skulls whose eye sockets glow, bunches of "
+                            "dried herbs hanging from the beams, coins to collect hanging in the room; drawn crooked and hand-cut like Ivan Bilibin's ink line",
+                            where='the whole room behind the play: its log walls, the stove and her things; the ledges in it are crooked shelves and beams',
+                            material='crooked logs, clay, old wood, twigs, bone, dried herbs', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                            inks='big flat shapes of one dim grey tone each on the black, cut through with black lines like a woodcut (no dither, no fine speckle, no white): '
+                            'dim grey logs, stove, mortar, broom, herbs and skulls; the only colour the skulls\' eye sockets, small orange glows with a yellow core, a few '
+                            'orange embers in the stove\'s mouth, and gold coins', scene=SKAZKA_AT + ' as a shelf in the room'),
     'skazka-far': dict(world='skazka', kind='prop', what='the dark forest far away: the jagged crooked tops of black spruces and dead trees with clawing branches against a '
                        'huge moon, an owl, Baba Yaga flying across the moon in her mortar, mist over a swamp', plane='back', where='far behind everything, low and faint, so '
                        'the play reads over it', material='spruces, dead trees, the moon, mist', size='about 14 tiles wide and 6 tiles tall', inks='a faint grey dither on '

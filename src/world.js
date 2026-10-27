@@ -5980,6 +5980,74 @@ Renderer.prototype.draw = function (g, alpha) {
   const exitT = lv.kind === 'treasure' && lv.exit ? ((t) => [(lv.exit.x0 - lv.l) / t - 0.3, (lv.floor - lv.exit.y1) / t - 0.3, (lv.exit.x1 - lv.l) / t + 0.3, (lv.floor - lv.exit.y0) / t + 0.4])(lv.tile) : null;
   const overExit = (u0, v0, u1, v1) => !!exitT && u0 < exitT[2] && u1 > exitT[0] && v0 < exitT[3] && v1 > exitT[1];
   const postFoot = (u0, u1, v1) => (overExit(u0, 0, u1, v1) ? exitT[3] : 0);
+  if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.skazka) {   // the Dark Forest's stash room: inside Baba Yaga's hut on chicken legs (Д280
+    // «1»; research/variants/skazka-caveroom-1.png), as the cellar is drawn: big flat shapes at a quarter on a quiet black, black and white only, crooked and cut
+    // through with black like Bilibin's ink line: walls of crooked log courses (a step darker), the ceiling's beam, the great clay stove, her mortar and pestle,
+    // a broom, a shelf of skulls whose sockets glow, bunches of herbs; the only colour small lights (the sockets, the stove's embers, a candle, a cat's eyes);
+    // Take A (the owner's pick, Д284 «A»). Nothing over the way out (overExit)
+    const t = lv.tile, P = PIX.size, sn = (v) => Math.round(v / P) * P, X = (u) => sn(lv.l + u * t), Y = (v) => sn(lv.floor - v * t), WD = 1.24, LG = 1.08, G = PAL.gray, K = PAL.black, O = PAL.orange;
+    const ex = (u0, v0, u1, v1) => overExit(Math.min(u0, u1), Math.min(v0, v1), Math.max(u0, u1), Math.max(v0, v1));
+    const bx = (u0, v0, u1, v1, c = G, a = WD) => { if (!ex(u0, v0, u1, v1)) box(X(u0), Y(v1), X(u1), Y(v0), c, a, 0, 10, 0); };
+    const el = (u, v, ru, rv, c = G, a = WD) => { if (!ex(u - ru, v - rv, u + ru, v + rv)) F(X(u), Y(v), ru * t, 0, 0, rv * t, c, a, 0); };
+    const ln = (u0, v0, u1, v1, w = 0.1, c = G, a = WD) => { if (!ex(u0, v0, u1, v1)) line(X(u0), Y(v0), X(u1), Y(v1), c, a, Math.max(1, Math.round((w * t) / P))); };   // (w in tiles)
+    const pq = (u, v, au, av, bu, bv, c = G, a = WD) => { const ru = Math.abs(au) + Math.abs(bu), rv = Math.abs(av) + Math.abs(bv);   // a crooked box: its middle, its half sides
+      if (!ex(u - ru, v - rv, u + ru, v + rv)) F(X(u), Y(v), au * t, -av * t, bu * t, -bv * t, c, a, 10, Math.hypot(au, av) * t, Math.hypot(bu, bv) * t, 0); };
+    const tri = (u, v, hw, hh, lean = 0, c = G, a = WD) => { if (!ex(u - hw - Math.abs(lean), v - hh, u + hw + Math.abs(lean), v + hh)) F(X(u), Y(v), hw * t, 0, -lean * t, hh * t, c, a, 6, hw * t, hh * t, 2 * hw * t); };   // its point up, leaning
+    const logs = (v1, h = 1.68) => {   // the walls' crooked log courses, a step darker, a black seam between; by the way out each starts past it
+      for (let v = 0, k = 0; v < v1 - 0.3; v += h, k++) { const tl = 0.14 * Math.sin(k * 2.3 + 1), m = v + h / 2, hh = Math.min(h, v1 - v) / 2 - 0.1; let a = -0.3; const b = 16.3;
+        if (ex(a, m - hh - Math.abs(tl), b, m + hh + Math.abs(tl))) a = exitT[2] + 0.01;
+        pq((a + b) / 2, v + hh + 0.1, (b - a) / 2, tl, 0, hh, G, LG); }
+    };
+    const beam = (v, tl = -0.2) => pq(8, v, 8.5, tl, 0, 0.42);   // the ceiling's beam (matitsa), crooked
+    const eyes = (u, v, dx, r = 0.09) => { for (const e of [-1, 1]) { const x = X(u + e * dx), y = Y(v); disc(x, y, r * t + P / 2, O, 1); box(x - P / 2, y - P / 2, x + P / 2, y + P / 2, PAL.yellow, 1, 0, 10, 0); } };   // sockets lit
+    const skull = (u, v, s = 1, ring = false) => { if (ring) el(u, v + 0.42 * s, 0.56 * s, 0.52 * s, K, 1); el(u, v + 0.48 * s, 0.42 * s, 0.36 * s); bx(u - 0.24 * s, v, u + 0.24 * s, v + 0.24 * s); eyes(u, v + 0.5 * s, 0.17 * s, 0.09 * s); };   // a
+    // skull (a black line round it where it stands on grey), its sockets lit and steady (no lids to blink)
+    const shelf = (u0, u1, v, n, tl = 0.12, s1 = u1 - 0.8) => {   // a crooked plank on two pegs, n skulls on it (to s1)
+      pq((u0 + u1) / 2, v - 0.13, (u1 - u0) / 2, tl, 0, 0.13); for (const u of [u0 + 0.5, u1 - 0.7]) ln(u, v - 0.26, u + 0.3, v - 0.95, 0.16);
+      for (let k = 0; k < n; k++) { const u = u0 + 0.8 + (k * (s1 - u0 - 0.8)) / Math.max(1, n - 1), f = (u - (u0 + u1) / 2) / ((u1 - u0) / 2); skull(u, v + tl * f); }
+    };
+    const herb = (u, v, len, s = 1, k = 0) => {   // a bunch of dried herbs hung from the beam at v: its string, four leafy sprigs fanning down crooked from its tie
+      ln(u, v, u + 0.04, v - 0.65, 0.07);
+      for (const [a, f] of [[-0.5 + 0.08 * k, 0.74], [-0.16 + 0.07 * k, 1], [0.2 + 0.07 * k, 0.88], [0.52 + 0.08 * k, 0.66]]) { const l = (len * f) / 2, dx = Math.sin(a) * l, dy = Math.cos(a) * l;
+        F(X(u + dx), Y(v - 0.75 - dy), dx * t, dy * t, 0.17 * s * Math.cos(a) * t, -0.17 * s * Math.sin(a) * t, G, WD, 0); }
+      bx(u - 0.16, v - 0.88, u + 0.16, v - 0.6, G, 1.36);
+    };
+    const chimney = (pts, w = 1.25) => { for (const [c, ww] of [[K, w + 0.26], [G, w]]) for (let k = 0; k + 1 < pts.length; k++) ln(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1], ww, c, c === K ? 1 : WD); };   // a bent
+    // chimney through its points, a black line round it
+    const stove = (u0, w, h, lean, o = {}) => {   // the great clay stove (pech), from u0, w wide, h tall, its top leaning by lean, a black line round it: its rounded
+      // top, the hearth's ledge, its round-topped mouth black with embers in it (small lights), the hole under it, cracks cut in black
+      const um = u0 + w / 2, mu = u0 + 0.36 * w, q = 0.13;
+      pq(um + lean / 2, h / 2, w / 2 + q, 0, lean / 2, h / 2 + q, K, 1); el(um + lean, h, 0.5 * w + q, 0.7 + q, K, 1);
+      pq(um + lean / 2, h / 2, w / 2, 0, lean / 2, h / 2); el(um + lean, h, 0.5 * w, 0.7);
+      bx(mu - 1.2, 2.75, mu + 1.2, 3.05, G, 1.36);
+      bx(mu - 0.95, 3.05, mu + 0.95, 4.4, K, 1); el(mu, 4.4, 0.95, 0.68, K, 1); bx(mu - 0.7, 0.45, mu + 0.7, 1.6, K, 1); el(mu, 1.6, 0.7, 0.36, K, 1);
+      for (const [du, dv] of [[-0.45, 3.2], [0.02, 3.28], [0.42, 3.16]]) bx(mu + du - 0.12, dv - 0.08, mu + du + 0.12, dv + 0.06, O, 1);
+      ln(u0 + w - 0.55 + lean * 0.8, h - 0.9, u0 + w - 0.85 + lean * 0.6, h - 2.5, 0.12, K, 1); ln(u0 + 0.55, 2.2, u0 + 0.85, 0.7, 0.12, K, 1);
+      if (o.vent) bx(o.vent[0] - 0.35, o.vent[1] - 0.3, o.vent[0] + 0.35, o.vent[1] + 0.3, K, 1);   // its vent (dushnik)
+    };
+    const mortar = (u, s = 1) => {   // her mortar (stupa), a tub hollowed from a stump on a foot, leaning a little, a black line round it and bands cut round it, its pestle up
+      // out of it
+      pq(u + 0.04 * s, 1.55 * s, 0.86 * s, 0.03 * s, 0.05 * s, 0.9 * s, K, 1); pq(u + 0.16 * s, 3.05 * s, 1.14 * s, 0.05 * s, 0.06 * s, 0.95 * s, K, 1); ln(u + 0.2 * s, 3.4 * s, u + 0.95 * s, 5.4 * s, 0.3 * s + 0.26, K, 1);
+      bx(u - 0.6 * s, 0, u + 0.6 * s, 0.32 * s); bx(u - 0.32 * s, 0.32 * s, u + 0.32 * s, 0.8 * s);
+      pq(u + 0.04 * s, 1.55 * s, 0.72 * s, 0.03 * s, 0.05 * s, 0.75 * s); pq(u + 0.14 * s, 2.95 * s, 0.9 * s, 0.05 * s, 0.06 * s, 0.68 * s); bx(u - 0.85 * s, 3.55 * s, u + 1.15 * s, 3.85 * s);
+      ln(u - 0.62 * s, 1.5 * s, u + 0.72 * s, 1.58 * s, 0.1, K, 1); ln(u - 0.7 * s, 2.75 * s, u + 0.95 * s, 2.8 * s, 0.1, K, 1);
+      ln(u + 0.2 * s, 3.4 * s, u + 0.95 * s, 5.4 * s, 0.3 * s); el(u + 0.98 * s, 5.45 * s, 0.22 * s, 0.2 * s);
+    };
+    const broom = (u, lean, s = 1) => {   // a broom of twigs leaning, its foot at u: its handle, its binding, the twigs a crooked point cut through in black
+      ln(u + lean * 0.42, 2.6 * s, u + lean, 6.2 * s, 0.46, K, 1); tri(u, 1.4 * s, 1.15 * s, 1.55 * s, lean * 0.36, K, 1);   // (a black line round it)
+      ln(u + lean * 0.42, 2.6 * s, u + lean, 6.2 * s, 0.22); tri(u, 1.35 * s, 1.0 * s, 1.4 * s, lean * 0.36); bx(u + lean * 0.4 - 0.24, 2.45 * s, u + lean * 0.4 + 0.24, 2.85 * s, G, 1.36);
+      ln(u + 0.1, 0.05, u + lean * 0.32, 2.2 * s, 0.1, K, 1);
+    };
+    const web = (u, v, d, r) => {   // a cobweb in the corner (u, v), out toward d (±1): its threads out of the corner, two rows across
+      for (const [a, b] of [[r, -0.15], [0.72 * r, -0.72 * r], [0.12, -r]]) ln(u, v, u + d * a, v + b, 0.06);
+      for (const f of [0.5, 0.9]) { ln(u + d * f * r, v - 0.15 * f, u + d * 0.72 * f * r, v - 0.72 * f * r, 0.06); ln(u + d * 0.72 * f * r, v - 0.72 * f * r, u + d * 0.12 * f, v - f * r, 0.06); }
+    };
+    const candle = (u, v) => { const fh = 0.3 + 0.05 * Math.sin(T * 2.4 + u); bx(u - 0.12, v, u + 0.12, v + 0.6); bx(u - 0.28, v, u + 0.28, v + 0.1);   // a candle, lit, its flame
+      bx(u - 0.07, v + 0.66, u + 0.07, v + 0.66 + fh, O, 1); bx(u - 0.03, v + 0.7, u + 0.03, v + 0.8, PAL.yellow, 1); };   // wavering (under half a beat a second)
+    // the stove on the right, its chimney bent up to the beam; her mortar and the broom by it; the shelf of skulls; herbs off the beam
+    logs(20.2); beam(20.6); stove(9.6, 5.9, 7.2, -0.3); chimney([[12.6, 7.2], [13.3, 11.5], [12.4, 15.8], [12.9, 20.3]]);
+    mortar(5.7); broom(8.0, 0.8); shelf(1.0, 6.6, 13.0, 3); for (const [u, len, k] of [[3.0, 2.4, 1], [5.3, 2.0, -1], [15.0, 2.2, 1]]) herb(u, 20.2, len, 1, k);
+  }
   if (lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.village) {   // the Village's stash room: the cellar under a farmhouse (Д97 «А», Д110
     // «C»'s layout), as a few big flat shapes at a quarter on a quiet black (owner: «Фоны в подарочных комнатах выглядят грязно: предметы не читаются, пиксели
     // лезут в глаза, выглядит как грязь»; its sheet was dark dithered mush): two posts and the beam over them, braces; three shelves on the back wall, jars on the

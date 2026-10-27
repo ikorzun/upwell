@@ -4858,10 +4858,10 @@ for (const id in FOE_SPRITES) if (!K9_SPR[id] && !UME_SPR[id]) {
   LOOK_FACE[id] = BOSS_LOOK.has(id) && fit && fit[3]
     ? (d) => { const b = d.b, g = Math.max(0.05, b.growth), q = fit[4] ? bossFit(id, b) : 1, s = g * q, one = bossRows(id, FOE_SPRITES[id], s), P = b.pose, up = g > 0.97;   // (in volume: ?novol flat)
       // up: popped in (its growth springs to 1 and may settle a hair under it)
-      if (F && up && warm <= 8) { const r = bossFrame(id, warm); if (r && VOL_ON) { const w = bossRows(id + '#' + warm, r, q); volRects(w, false); volRects(w, true); } warm++; }
-      const n = P && up ? P.n : 1, R = n > 1 && bossFrame(id, n), A = R && F.at[n - 1], z = one[0].length / FOE_SPRITES[id][0].length;   // (popping in: frame 1)
+      if (F && up && warm <= F.rows.length + 1) { const r = bossFrame(id, warm); if (r && VOL_ON) { const w = bossRows(id + '#' + warm, r, q); volRects(w, false); volRects(w, true); } warm++; }
+      const n = P && up ? P.f : 1, R = n > 1 && bossFrame(id, n), A = R && F.at[n - 1], z = one[0].length / FOE_SPRITES[id][0].length;   // (popping in: frame 1)
       if (P && P.ink) d.c = P.ink;
-      return drawSprite(d, R ? bossRows(id + '#' + n, R, s) : one, flip(d) !== !!(P && P.m), [fit[0], fit[1], fit[2], fit[3] / g], VOL_ON, R ? [Math.round(A[0] * z), Math.round(A[1] * z), one[0].length, one.length] : null, !!(P && P.turn)); }
+      return drawSprite(d, R ? bossRows(id + '#' + n, R, s) : one, flip(d) !== !!(P && P.fm), [fit[0], fit[1], fit[2], fit[3] / g], VOL_ON, R ? [Math.round(A[0] * z), Math.round(A[1] * z), one[0].length, one.length] : null, !!(P && P.turn)); }
     : (d) => drawSprite(d, FOE_SPRITES[id], flip(d), fit);
 }   // the forest's face right; a boss as its cell has it
 // A boss's drawing's width and height in world px at its full size, as drawSprite lays it (BOSS_FIT's whole scale, or fitted over its
@@ -4880,18 +4880,25 @@ const bossSize = (bs) => {
 // `after` s past it (follow-through); a stomp's pose `hit` s. A pose is held 0.2 s or more and cut on a beat its body squashes on already (a move's start, a landing).
 // A look only: its fight (its body, its moves, their timing) is the same. Sets its pose (Boss.pose): n its frame, m mirrored (against the way it faces), turn
 // (Onamazu on his back), ink (Koschei's tell)
-const POSE = { hit: 0.3, after: 0.3, beat: [0.24, 0.38], step: 0.3, go: [1.1, 0.6], lunge: 0.2, fan: 0.4, min: 0.2 };   // beat: a wingbeat's down and up; go: R/s to set off and to stop; min: a pose's
+const POSE = { hit: 0.3, after: 0.3, beat: [0.24, 0.38], step: 0.3, go: [1.1, 0.6], lunge: 0.2, fan: 0.4, min: 0.2, lead: 0.12, sub: 0.1 };   // lead: a look with
+// in-betweens (BOSS_FRAMES seq) takes a move's pose so much before it, for its wind-back; sub: an in-between drawn at least so long before an idle change   // beat: a wingbeat's down and up; go: R/s to set off and to stop; min: a pose's
 // least hold, and an idle one (its sway, its steps, its wings) is not changed in its move's last `min` s before it
+const seqFrame = (S, t) => {   // a pose's frame `t` s into it (BOSS_FRAMES seq): its frames in turn, then round again from `loop` (none: its last held)
+  const q = S.s; let i = 0;
+  while (t >= q[i][1]) { t -= q[i][1]; if (++i === q.length) { if (S.loop === undefined) return q[i - 1][0]; i = S.loop; } }
+  return q[i][0];
+};
 const bossPose = (bs, R, mid) => {   // mid: the arena's middle
   const P = bs.pose, b = bs.body, df = bs.def || {}, s = bs.state, st = bs.st, hit = bs.angry > BOSS.angry - POSE.hit, after = (w) => s === 'hover' && bs.was === w && st < POSE.after;
   const going = () => { const v = Math.abs(b.rigVx) / R, on = P.go ? v > POSE.go[1] : v > POSE.go[0]; if (on && !P.go) P.t0 = bs.t; P.go = on; return on; };   // (a margin both ways: no flicker on the line)
   const stride = () => (Math.floor((bs.t - P.t0) / POSE.step) % 2 ? 1 : 2);   // its two poses by turns, from its first step as it sets off
   let n = 1, m = false, turn = false, ink = null, idle = s === 'hover' || s === 'rise';   // idle: at rest, its pose its sway's, its steps', its wings' (not a move's)
+  const Q = BOSS_FRAMES[bs.look] && BOSS_FRAMES[bs.look].seq;   // its in-betweens: each pose's frames in turn (24 frames, Bake-danuki's for now)
   if (!BOSS_FRAMES[bs.look]) n = 1;
   else if (df.hang) {   // Bake-danuki, the Tsuchigumo, Nuppeppo (Boss.hang)
     if (s === 'dazed') n = 7;
     else if (hit) { n = 8; idle = false; }
-    else if (s === 'spit') n = 3;   // its belly drummed, its cheeks full
+    else if (s === 'spit') n = Q && st > df.hang.spit - POSE.lead ? 4 : 3;   // its belly drummed, its cheeks full (with in-betweens, its arm back just before the throw)
     else if (s === 'windup' || s === 'sweep' || after('sweep')) { n = s === 'windup' ? 5 : s === 'sweep' ? 6 : 2; m = bs.tx < mid; idle = false; }   // its frames swing it from the right: mirrored from the left
     else if (s === 'warn' || s === 'dive') n = bs.look === 'crane-F' ? 8 : s === 'warn' ? 5 : 6;   // the leaf on its head, its legs drawn in; then down (Nuppeppo screwed up tight)
     else if (after('spit')) { n = 4; idle = false; }
@@ -4940,9 +4947,15 @@ const bossPose = (bs, R, mid) => {   // mid: the arena's middle
     else if (s === 'hover' && going()) n = stride();   // his steps
   }
   const F = df.hang || df.glide || df.quake || df.sky || df.bone, soon = s === 'hover' && F && F.rest && st > F.rest[df.phase(bs.hp)] - POSE.min;
-  if (idle && (n !== P.n || m !== P.m) && (bs.t - P.since < POSE.min || soon)) { n = P.n; m = P.m; }   // an idle change waits: no pose under `min` s, none just before a move
-  if (n !== P.n || m !== P.m) P.since = bs.t;
+  if (idle && (n !== P.n || m !== P.m) && (bs.t - P.since < POSE.min || soon || bs.t - P.ft < POSE.sub)) { n = P.n; m = P.m; }   // an idle change waits: no pose under `min` s, none just before a move
+  if (n !== P.n || m !== P.m) {
+    const o = Q && Q[P.n] && Q[P.n].out;   // a pose left through a frame of its own (its lean back through half, its dive flattened as it lands)
+    if (o) { P.out = o[0]; P.outM = P.m; P.outT = bs.t + o[1]; }
+    P.since = bs.t;
+  }
   P.n = n; P.m = m; P.turn = turn; P.ink = ink;
+  if (P.out && bs.t < P.outT) { P.f = P.out; P.fm = P.outM; }   // the frame drawn: f, mirrored fm
+  else { P.out = 0; const f = Q && Q[n] ? seqFrame(Q[n], bs.t - P.since) : n; if (f !== P.f || m !== P.fm) P.ft = bs.t; P.f = f; P.fm = m; }
 };
 const gumWriteFace = Renderer.prototype.writeFace;
 // The Kolobok's face (the owner's pick, research/variants/skazka-kolobok-game.png E, 2026-10-20): rosy cheeks over Gum's face, in the hero's units
@@ -7581,8 +7594,8 @@ Renderer.prototype.draw = function (g, alpha) {
     if (front) return;   // (the Tsuchigumo tangled in its own thread: its dazed frame draws the thread)
     b.lookDir = d;   // (its drawing on it turns too: LOOK_FACE)
     bossPose(bs, R, (lv.l + lv.r) / 2);   // and its pose
-    const A = BOSS_FRAMES[bs.look], ps = bs.pose, at = A && ps.n > 1 && A.at[ps.n - 1], W1 = FOE_SPRITES[bs.look][0].length;   // what it hangs by as its pose holds it (frame 1's place: as it was)
-    const hx = at ? ((ps.m ? W1 - at[2] : at[2]) - A.at[0][2]) * PIX.base : 0, hy = at ? (at[3] - A.at[0][3]) * PIX.base : 0;
+    const A = BOSS_FRAMES[bs.look], ps = bs.pose, at = A && ps.f > 1 && A.at[ps.f - 1], W1 = FOE_SPRITES[bs.look][0].length;   // what it hangs by as its pose holds it (frame 1's place: as it was)
+    const hx = at ? ((ps.fm ? W1 - at[2] : at[2]) - A.at[0][2]) * PIX.base : 0, hy = at ? (at[3] - A.at[0][3]) * PIX.base : 0;
     if (k === 'tram') { const wy = b.minY - 1.15 * R; box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0); }   // the overhead wire its pantograph (in its drawing) runs on
     else if (k === 'koschei' && bs.hp === 1) { const ny = b.minY - 1.0 * R + Math.max(0, at ? at[1] : 0) * PIX.base + Math.sin(T * 3) * 0.08 * R, nx = Math.round(x / P) * P; F(nx + P / 2, ny, 0.55 * R, 0, 0, 0.8 * R, gr, 0.18, 1); box(nx, ny - 0.6 * R, nx + P, ny + 0.45 * R, gr, 1, 0, 10, 0); box(nx - P, ny - 0.76 * R, nx + 2 * P, ny - 0.5 * R, gr, 1, 0, 10, 0); box(nx, ny - 0.7 * R, nx + P, ny - 0.56 * R, INK.dark, 1, 0, 10, 0); if (Math.floor(T * 2) % 2) box(nx, ny + 0.3 * R, nx + P, ny + 0.38 * R, PAL.white, 1, 0, 10, 0); }   // his last heart: the needle his death is in, over his crown (down with him as his pose sinks: a heap, a low sweep; not up with his sword)
     else if (k === 'cart') { const tx = Math.round((x + hx) / P) * P; box(tx, top, tx + P, b.minY + 0.3 * R + hy, PAL.white, 1, 0, 10, 0); }   // the spider's thread, from up out of sight into its head

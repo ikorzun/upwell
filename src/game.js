@@ -602,7 +602,7 @@ class Boss {
     this.state = 'hover'; this.was = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // was: its state before (its pose's follow-through, bossPose); rattled: Koschei's bones have shaken to say he rises
     this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
     this.halfW = bossSize(this)[0] / 2;   // its drawing's half width
-    this.pose = this.body.pose = loosen({ n: 1, m: false, turn: false, ink: null, go: false, fly: false, t0: 0, since: 0 }, 't0', 'since');   // its pose (its frame, bossPose): drawn only
+    this.pose = this.body.pose = loosen({ n: 1, m: false, f: 1, fm: false, ft: 0, out: 0, outM: false, outT: 0, turn: false, ink: null, go: false, fly: false, t0: 0, since: 0 }, 'ft', 'outT', 't0', 'since');   // its pose (its frame, bossPose): drawn only
     loosen(this, 't', 'drop', 'call', 'angry', 'state', 'was', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
   }
   open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)

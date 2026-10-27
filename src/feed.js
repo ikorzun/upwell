@@ -5,13 +5,16 @@
 // Phase C: the day's favourite food (FL.fav, the four in turn by the UTC day; its points doubled), his coins for the day's first run fed to the end
 // (FEED.pay, once a UTC day, kept in save.feed), the best score, one frozen treat on each board. Only with ?feed while it is built (FEED_ON).
 // The rules and the board are pure (FL, on a flat array of 25), loaded by node too for tools/feed-test.mjs; the view is the menu panel's (ui.menu,
-// feed.mount), its foods SVG at the game's own pixel (PIX.size a dot), Moti the menu's own hero over it (game.menuFit).
+// feed.mount; the Figma «Feed», 1254:1525: no logo, the close a white disc, a thin bar of fullness, the favourite and the count under it, a board of
+// 70-px cells), its foods SVG at a whole number of the screen's points a pixel, Moti the menu's own hero over it (game.menuFit).
 const FEED_ON = typeof location !== 'undefined' && /[?&]feed\b/.test(location.search);
 const FEED = {
   n: 5, moves: 8, pts: 10, cap: 4,   // the board's side; the moves a run; points a food cleared, times its cascade's depth (x1, x2, x3, at most x4)
   stars: [30, 50, 70],   // fullness for one, two, three stars (the brief's 6/12/18 can't miss: eight moves clear 24 at least). tools/feed-test.mjs: random
   // moves reach them 97% / 51% / 13% of the time, the biggest line each move 100% / 82% / 38%
-  food: 32, cell: 36,   // a food's sprite and its cell, in game pixels (PIX.size CSS px each)
+  food: 32, cellMax: 70, side: 22, band: 21,   // a food's sprite (its pixels); the board's cell at most (CSS px), its margin at the screen's sides, the dark
+  // band's top over the bar (the Figma «Feed»)
+  fullIcon: 'sakura',   // the food by the fullness count (the mockup's: one of the four)
   swap: 110, back: 150, pop: 140, fall: 190, row: 26, hint: 4,   // ms: a swap, an invalid one's way back, a food eaten, a fall (and each row more), s idle before a hint
   bite: 300, bites: 3, open: 0.55,   // ms a bite's flight to his mouth (the brief's 200-350), at most so many in the air (more: eaten unseen), his mouth open at that part of it
   wide: 0.06, low: 0.33, from: 0.25,   // full (FEED.stars' last): his size up so much, pressed down so much (SQUEEZE: a third flattens him ~10%, bulges him ~7%);
@@ -168,27 +171,31 @@ else {
       track('feed_close', { moves_left: st ? st.moves : 0, duration_ms: Math.round(performance.now() - this.opened), exit_to_main_game: !!toGame });
       if (game.state === 'menu') ui.menu();
     },
-    mount(p, logo) {   // its view in the menu panel (ui.menu asks, while it is open): the count, the meter and the cross over the board, Moti over them
+    mount(p, logo) {   // its view in the menu panel (ui.menu asks, while it is open), the Figma «Feed» (owner, 2026-10-27: «переделать экран метча по макету»): no
+      // logo; the close a white disc at the top right; Moti; the bar of fullness, under it the day's favourite (×2 score) and the count; the board
       if (this.busy) this.dirty = true;   // (made again in the middle of a move: once more when it is over, from the board as it ends)
-      const st = this.st, dot = PIX.size, cell = FEED.cell * dot, side = FEED.n * cell;
-      const wrap = el('div', 'fm'); wrap.style.setProperty('--cell', cell + 'px'); wrap.style.setProperty('--side', side + 'px'); wrap.style.setProperty('--dot', dot + 'px');
-      const hud = el('div', 'fm-hud'), mv = el('div', 'fm-moves'), meter = el('div', 'fm-meter'), bar = el('i'), ticks = el('div', 'fm-ticks');
-      mv.append(px(String(st.moves)), el('small', 'fm-l', t('feedMoves')));
-      for (const s of FEED.stars) { const k = el('b'); k.style.left = (100 * s / FEED.stars[2]) + '%'; ticks.append(k); }
-      meter.append(bar, ticks); const meterTxt = el('div', 'fm-mt'); meterTxt.append(px(st.full + '/' + FEED.stars[2]));
-      const x = button('', 'setBtn fm-x', () => this.close()), xi = el('img'); xi.src = 'assets/ui/close.svg'; xi.alt = ''; xi.draggable = false; x.append(xi); x.setAttribute('aria-label', t('goBack'));
-      const mid = el('div', 'fm-mid'); mid.append(meter, meterTxt);
-      const fav = el('div', 'fm-fav'); fav.innerHTML = foodSvg(st.fav); fav.append(el('small', 'fm-l', '×' + FEED.favX)); fav.setAttribute('role', 'img'); fav.setAttribute('aria-label', t('feedFav'));   // the day's favourite
-      hud.append(mv, fav, mid, x);
+      logo.remove();
+      const W = document.documentElement.clientWidth, st = this.st, n = FEED.n, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / n)), dpr = devicePixelRatio || 1;   // (the page's
+      // width: the game's view is cut to its pixel grid)
+      const k = Math.max(1, Math.floor(((cell - 2) * dpr) / FEED.food)), food = (FEED.food * k) / dpr;   // a food as big as its cell lets it, each pixel whole screen points
+      this.cellPx = cell; this.foodPx = food;
+      const wrap = el('div', 'fm'); wrap.style.setProperty('--cell', cell + 'px'); wrap.style.setProperty('--side', n * cell + 'px'); wrap.style.setProperty('--dot', food / FEED.food + 'px');
+      wrap.style.setProperty('--hud', W - 2 * FEED.side + 'px');
+      const hud = el('div', 'fm-hud'), bar = el('div', 'fm-bar'), fill = el('i'), row = el('div', 'fm-row'), fav = el('div', 'fm-fav'), full = el('div', 'fm-full'), count = el('span', 'fm-n');
+      bar.append(fill);
+      fav.innerHTML = foodSvg(st.fav); fav.append(px(t('feedX2'))); fav.setAttribute('role', 'img'); fav.setAttribute('aria-label', t('feedFav'));   // the day's favourite
+      full.innerHTML = foodSvg(FEED.fullIcon); full.append(count);
+      row.append(fav, full); hud.append(bar, row);
+      const x = button('', 'fm-x', () => this.close()), xi = el('img'); xi.src = 'assets/ui/close-24.svg'; xi.alt = ''; xi.draggable = false; x.append(xi); x.setAttribute('aria-label', t('goBack'));
       const box = el('div', 'fm-board'); box.setAttribute('role', 'grid'); box.setAttribute('aria-label', t('feedMoves'));
-      wrap.append(hud, box); p.append(wrap);
-      this.box = box; this.hud = { mv, bar, meterTxt, fav }; this.els = [];
-      st.b.forEach((k, i) => this.els.push(this.tile(k, i)));
+      wrap.append(hud, box); p.append(x, wrap);
+      this.box = box; this.hud = { bar: fill, count, fav }; this.els = [];
+      st.b.forEach((q, i) => this.els.push(this.tile(q, i)));
       this.meter();
       this.wire(box);
       if (st.done && st.told) this.result();
-      const y0 = p.getBoundingClientRect().top;
-      game.menuFit(hud.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0);   // Moti over the board, smaller if he must be
+      const y0 = p.getBoundingClientRect().top, top = bar.getBoundingClientRect().top - y0;
+      game.menuFit(top, x.getBoundingClientRect().top - y0, top - FEED.band);   // Moti over the bar, the dark band from a little over it (the Figma's)
     },
     tile(k, i) {   // a food's element at cell i; a frozen one's under the sheet's own frozen treat, its ice alone (the treat in it left out), see-through
       const e = el('div', 'fm-t'); e.innerHTML = foodSvg(FL.food(k)) + (FL.ice(k) ? '<i class="fm-ice">' + foodSvg('frozen', 'e') + '</i>' : '');
@@ -196,7 +203,7 @@ else {
       this.place(e, i); this.box.append(e); return e;
     },
     shiver(i) {   // a frozen one won't move: it shivers, nothing spent
-      const d = 2 * PIX.size; sound.play('deny', 0.35, 1.4); haptics.buzz(6); this.sel = -1; this.mark();
+      const d = this.foodPx / 16; sound.play('deny', 0.35, 1.4); haptics.buzz(6); this.sel = -1; this.mark();
       anim(this.els[i], [{ transform: 'none' }, { transform: `translateX(${d}px)` }, { transform: `translateX(${-d}px)` }, { transform: 'none' }], 200);
     },
     thaw(i) {   // a line gone beside it: its ice cracks off, a puff
@@ -204,12 +211,11 @@ else {
       e.classList.remove('ice'); sound.play('crumble', 0.5, 1.6); haptics.buzz(8);
       anim(ice, still ? [{ opacity: 0.6 }, { opacity: 0 }] : [{ transform: 'none', opacity: 0.6 }, { transform: 'scale(1.15)', opacity: 0.35, offset: 0.4 }, { transform: 'scale(1.3)', opacity: 0 }], 220).then(() => ice.remove());
     },
-    place(e, i) { const c = FEED.cell * PIX.size, n = FEED.n; e.style.left = (i % n) * c + 'px'; e.style.top = ((i / n) | 0) * c + 'px'; },
-    meter() {
+    place(e, i) { const c = this.cellPx, n = FEED.n; e.style.left = (i % n) * c + 'px'; e.style.top = ((i / n) | 0) * c + 'px'; },
+    meter() {   // the bar of fullness and its count (its whole, 70, dimmer)
       const st = this.st, h = this.hud; if (!h.bar) return;
       h.bar.style.width = Math.min(100, (100 * st.full) / FEED.stars[2]) + '%';
-      h.meterTxt.replaceChildren(px(st.full + '/' + FEED.stars[2]));
-      h.mv.firstChild.replaceWith(px(String(st.moves)));
+      const of = px('/' + FEED.stars[2]); of.classList.add('fm-of'); h.count.replaceChildren(px(String(st.full)), of);
     },
     cellAt(e) { const r = this.box.getBoundingClientRect(), c = r.width / FEED.n, x = Math.floor((e.clientX - r.left) / c), y = Math.floor((e.clientY - r.top) / c); return x >= 0 && y >= 0 && x < FEED.n && y < FEED.n ? y * FEED.n + x : -1; },
     wire(box) {   // a drag from one food toward its neighbour swaps them; so does a tap on one and then on its neighbour
@@ -265,7 +271,7 @@ else {
       if (this.busy || st.done || !FL.adj(i, j)) return;
       if (FL.ice(st.b[i]) || FL.ice(st.b[j])) { this.shiver(FL.ice(st.b[i]) ? i : j); return; }
       this.busy = true; this.idle = performance.now(); this.unhint();
-      const ei = this.els[i], ej = this.els[j], c = FEED.cell * PIX.size, n = FEED.n;
+      const ei = this.els[i], ej = this.els[j], c = this.cellPx, n = FEED.n;
       const dx = ((j % n) - (i % n)) * c, dy = (((j / n) | 0) - ((i / n) | 0)) * c;
       this.place(ei, j); this.place(ej, i);
       await Promise.all([anim(ei, [{ transform: `translate(${-dx}px,${-dy}px)` }, { transform: 'none' }], FEED.swap), anim(ej, [{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], FEED.swap)]);
@@ -290,7 +296,7 @@ else {
       if (st.moves <= 0) this.finish();
     },
     async eat(ph) {   // one phase: its foods eaten (Moti's bite), then the rest down and new ones in
-      const st = this.st, c = FEED.cell * PIX.size, b = game.hero;
+      const st = this.st, c = this.cellPx, b = game.hero;
       st.full += ph.gone.length; st.score += FL.score(ph, st.fav);
       const big = ph.runs.some((r) => r.length >= 4);
       sound.play('coin', 0.45, 1 + 0.08 * Math.min(ph.cascade - 1, 4)); haptics.buzz(big ? 12 : 5);
@@ -364,7 +370,7 @@ else {
       let sx = 0, sy = 0; for (const i of ph.gone) { sx += (i % n + 0.5) * c; sy += (((i / n) | 0) + 0.5) * c; }
       const from = { x: r.left + sx / ph.gone.length, y: r.top + sy / ph.gone.length }, to = this.mouth();
       const cnt = {}; for (const k of ph.foods) cnt[k] = (cnt[k] || 0) + 1;
-      const kind = Object.keys(cnt).sort((u, v) => cnt[v] - cnt[u])[0], big = ph.runs.some((q) => q.length >= 4), size = FEED.food * PIX.size * (big ? 1.25 : 1);
+      const kind = Object.keys(cnt).sort((u, v) => cnt[v] - cnt[u])[0], big = ph.runs.some((q) => q.length >= 4), size = this.foodPx * (big ? 1.25 : 1);
       const e = document.createElement('div'); e.className = 'fm-bite'; e.innerHTML = foodSvg(kind);
       Object.assign(e.style, { width: size + 'px', height: size + 'px', left: from.x - size / 2 + 'px', top: from.y - size / 2 + 'px' });
       document.body.append(e);
@@ -390,7 +396,7 @@ else {
     hint(now) {   // after a while with no move (the first run's sooner): a legal pair nudges toward each other, twice
       if (!this.active || this.busy || this.hinting || !this.st || this.st.done || now - this.idle < 1000 * FEED.hint * (save.seen.feedHint ? 2 : 1)) return;
       const ls = FL.legal(this.st.b); if (!ls.length) return;
-      const [i, j] = ls[(Math.random() * ls.length) | 0], ei = this.els[i], ej = this.els[j], c = 0.16 * FEED.cell * PIX.size, n = FEED.n;
+      const [i, j] = ls[(Math.random() * ls.length) | 0], ei = this.els[i], ej = this.els[j], c = 0.16 * this.cellPx, n = FEED.n;
       const dx = ((j % n) - (i % n)) * c, dy = (((j / n) | 0) - ((i / n) | 0)) * c;
       this.hinting = true; this.idle = now;
       const nudge = (e, sx, sy) => (still || !e ? null : e.animate([{ transform: 'none' }, { transform: `translate(${sx}px,${sy}px)` }, { transform: 'none' }, { transform: `translate(${sx}px,${sy}px)` }, { transform: 'none' }], { duration: 900, easing: 'ease-in-out' }));

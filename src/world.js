@@ -23,7 +23,8 @@ function loosen(o, ...keys) {
 // ── Tuning ───────────────────────────────────────────────────
 // Lengths in CSS pixels or in hero radii (R) where noted, time in seconds. The well is
 // as wide as the view; the hero and everything in the well are sized from it.
-const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40 };   // a tile: the well is 16 tiles wide (COLS)
+const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40, body: 1.1 };   // a tile: the well is 16 tiles wide (COLS); in a level drawn `body` times his size
+// (owner, 2026-10-27: «увеличь размер моти на 10% во всех мирах»; his body as it was: drawBig)
 const MENU_HERO = { w: 0.25, k: 0.85, h: 1.89, gap: 36, room: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest, then `k` of that (owner: «уменьши героя на 15%»); its floor `gap` px over the colours' row (their circles 40 px under it: the Figma's 4 more inside their buttons), `room` px at least under the logo
 const BIG_BLOCK = { w: 3.5, h: 2.6, size: 0.5, tone: 1.45 };   // a block this wide and tall (tiles) gets a kanji half its smaller side across, in its ink 0.45 of the way from the black (KANJI)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
@@ -4966,6 +4967,20 @@ const kolobokFace = (dot, f) => {
 };
 // A boss drawn less rubbery than its body is (BOSS.squish): its outline's give against its rest shape at its size (turned to fit it best) drawn `q` of
 // it, its bottom where its body's is (and its side on a wall it is pressed to), so it stands where it stands. Its body, and so its fight, untouched.
+// The hero drawn HERO.body times as big as his body in a level, the body itself as it was: the levels' gaps and hits are measured for it (his body 10% bigger,
+// the 80-level sweep lost 1-3 to its fire, the bot no longer slipping through its gaps in time, and two bosses to their shots). Grown from the side he
+// touches (the floor if none: he stands where he stood, a wall's side flush with it), not across two he is pressed between. His points scaled for the
+// drawing only, then put back.
+const BIG_X = new Float64Array(64), BIG_Y = new Float64Array(64), BIG_SX = new Float64Array(64), BIG_SY = new Float64Array(64);
+const drawBig = (r, b, k, alpha) => {
+  const n = b.n, m = b.wallMask || 0, kx = (m & 3) === 3 ? 1 : k, ky = (m & 12) === 12 ? 1 : k;
+  const ax = m & 1 ? b.minX : m & 2 ? b.maxX : b.cx, ay = m & 4 && !(m & 8) ? b.minY : b.maxY;
+  for (let i = 0; i < n; i++) {
+    BIG_X[i] = b.x[i]; BIG_Y[i] = b.y[i]; BIG_SX[i] = b.sx[i]; BIG_SY[i] = b.sy[i];
+    b.x[i] = ax + (b.x[i] - ax) * kx; b.sx[i] = ax + (b.sx[i] - ax) * kx; b.y[i] = ay + (b.y[i] - ay) * ky; b.sy[i] = ay + (b.sy[i] - ay) * ky;
+  }
+  try { r.buildBody(b, alpha); } finally { for (let i = 0; i < n; i++) { b.x[i] = BIG_X[i]; b.y[i] = BIG_Y[i]; b.sx[i] = BIG_SX[i]; b.sy[i] = BIG_SY[i]; } }
+};
 const CALM_X = new Float64Array(64), CALM_Y = new Float64Array(64);
 let calmDx = 0, calmDy = 0;
 const calmOutline = (b, X, Y, cx, cy, q) => {
@@ -7666,7 +7681,8 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const b of list) if (b !== hero || !heroOff) sig += b.id + ',';
   this.idxDirty = sig !== this.idxSig;
   this.kolobok = !!th.skazka;   // the Dark Forest's hero a Kolobok (see writeFace)
-  for (const b of list) if (b !== hero || !heroOff) this.buildBody(b, alpha);
+  for (const b of list) if (b !== hero || !heroOff) { if (b === hero && !menu && HERO.body !== 1) drawBig(this, b, HERO.body, alpha); else this.buildBody(b, alpha); }   // (the hero
+  // drawn bigger than his body: drawBig)
   const front = this.nf;
   fx.write(this);
   for (const p of pops) {   // an enemy beaten (popFx): its flash, ring, rays, blobs and puffs, each going out through the dither as it ends

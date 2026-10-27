@@ -4995,11 +4995,10 @@ Renderer.prototype.writeFace = function (b, X, Y, cx, cy) {
   else if (b.helmet === 'umeLeaf') {   // Ume (UME; owner, 2026-10-24, У6 «Б»): an ume's leaf on a stalk on his crown, tilted
     const tilt = (ux, uy, a, rx, ry, c) => { const ca = Math.cos(a), sa = Math.sin(a); frame(ux, uy, rx * ca, rx * sa, -ry * sa, ry * ca); put(c[0], c[1], c[2], 0); };
     tilt(0.06, -1.02, 0.25, 0.06, 0.17, ink); tilt(0.36, -1.05, -0.35, 0.34, 0.14, ink); tilt(0.36, -1.05, -0.35, 0.28, 0.09, PAL.green);
-  } else if (b.helmet === 'repair') {   // the settings' repairman (owner, 2026-10-27: «сделай для него моти в скине ремонтника»): a hard hat, yellow (orange on a yellow
-    // hero), over his crown with a brim over his brows, a ridge down its middle and a glint, in an ink rim; under his smile a dungarees' bib, blue (orange on a blue
+  } else if (b.helmet === 'repair') {   // the settings' repairman (owner, 2026-10-27: «сделай для него моти в скине ремонтника»): a yellow hard hat over his crown with a brim over his brows, a ridge down its middle and a glint, in an ink rim; under his smile a dungarees' bib, blue (orange on a blue
     // hero), square in an ink rim, a pocket on it, its two buttons at its top (its straps would cross his cheeks), over the legs the body's shader colours (uPants)
     const box = (ux, uy, ax, ay, c) => { frame(ux, uy, ax, 0, 0, ay); put(c[0], c[1], c[2], 10, Math.hypot(P1.x - P0.x, P1.y - P0.y), Math.hypot(P2.x - P0.x, P2.y - P0.y), 0); };   // a box (FEAT_FS 10, flat)
-    const hat = b.color.base === PAL.yellow ? PAL.orange : PAL.yellow, ridge = hat === PAL.yellow ? PAL.orange : PAL.yellow, cloth = repairCloth(b);
+    const hat = PAL.yellow, ridge = PAL.orange, cloth = repairCloth(b);   // (no hero is yellow: PALETTE)
     box(0, 0.47, 0.38, 0.09, ink); box(0, 0.4875, 0.335, 0.0725, cloth); box(0, 0.64, 0.12, 0.07, ink); box(0, 0.64, 0.09, 0.04, cloth);   // the bib down into the legs
     // (its rim round its top and sides only), a pocket on them
     for (let side = -1; side <= 1; side += 2) { dot(0.25 * side, 0.45, 0.075, 0.075, ink); dot(0.25 * side, 0.45, 0.05, 0.05, PAL.yellow); }   // its buttons

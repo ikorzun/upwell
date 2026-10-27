@@ -307,6 +307,7 @@
   #settings .opts .langs .chip { flex: 1 1 0; min-width: 0; height: 100%; --p: 1.98; background: none; box-shadow: none; clip-path: none; color: var(--white); }
   #settings .opts .langs .chip + .chip { border-left: 1px solid var(--white); }
   #settings .opts .langs .chip.on { background: var(--white); color: var(--ink); }   /* the language in use */
+  #settings .opts .langs .chip .tx:lang(ja) { font-size: 16px; }   /* 日本語 on DotGothic16's own 16-px grid (its --p would make it 15.8) */
   #settings .opts .pair { gap: 0; height: 64px; box-sizing: border-box; }
   #settings .opts .pair > .big { height: auto; }   /* (64 with its line over it) */
   #settings .opts .pair > .big + .big { border-left: 1px solid var(--white); }

@@ -600,10 +600,11 @@ class Boss {
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
     this.state = 'hover'; this.was = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // was: its state before (its pose's follow-through, bossPose); rattled: Koschei's bones have shaken to say he rises
-    this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
+    this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;
+    this.form = 0; this.cards = 0; this.card = null; this.card2 = null; this.land = 'plain'; this.last = {}; this.bags = null;   // the Lid's (LIDF): its form, its turn's cards, its bags   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
     this.halfW = bossSize(this)[0] / 2;   // its drawing's half width
     this.pose = this.body.pose = loosen({ n: 1, m: false, f: 1, fm: false, ft: 0, out: 0, outM: false, outT: 0, outTurn: false, turn: false, ink: null, go: false, fly: false, t0: 0, since: 0 }, 'ft', 'outT', 't0', 'since');   // its pose (its frame, bossPose): drawn only
-    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'was', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx');   // (see loosen)
+    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'was', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx', 'card', 'card2', 'land', 'cards', 'look', 'halfW');   // (see loosen)
   }
   open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)
   to(s) { this.was = this.state; this.state = s; this.st = 0; }
@@ -855,7 +856,7 @@ class Boss {
   hang(dt, g) {
     const F = this.def.hang;
     const b = this.body, lv = g.lv, R = lv.R, W = lv.r - lv.l, cx = (lv.l + lv.r) / 2, H = g.hero, ph = this.def.phase(this.hp);
-    const hang = lv.floor - R * F.high, x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;
+    const hang = lv.floor - R * (F.high[ph] || F.high), x0 = lv.l + this.halfW + 0.3 * R, x1 = lv.r - this.halfW - 0.3 * R;   // (the Lid's lower phase by phase)
     const seat = (tx, ty, k) => { const q = Math.min(1, k * dt); addVel(b, ((tx - b.cx) * 3 - b.rigVx) * q, ((ty - b.cy) * 3 - b.rigVy) * q); };   // pulled to (tx, ty) on its thread
     const mid = cx + (F.follow || 0) * (clamp(H.cx, x0, x1) - cx);   // its sway's middle: the arena's, or drawn `follow` of the way over the hero
     const swing = () => seat(mid + Math.sin(this.t * 0.55) * W * F.swing, hang + Math.sin(this.t * 1.1) * 0.3 * R, 2.4);
@@ -866,7 +867,11 @@ class Boss {
       this.phSeen = ph; shake.add(5); sound.play(...F.snd.phase);
       for (let k = 0; k < (F.lings[ph] || 0); k++) lv.enemies.push(new Foe({ type: F.ling, x: lv.l + (k % 2 ? 0.78 : 0.22) * W, y: lv.capY + 2 * R }, lv));
     }
-    if (this.state === 'hover') {   // swinging, its next move after its rest
+    if (F.forms && this.state === 'rise' && F.form(ph) !== this.form) this.lidForm(F.form(ph));   // the Lid: into its next form as it gets up after the hit
+    if (this.state === 'hover' && F.bag) {   // the Lid: its next card from its bag after its rest (a short one between the cards of one turn)
+      swing();
+      if (this.st > (this.cards > 0 && this.cards < F.cards[ph] ? F.chain : F.rest[ph])) this.lidPick(g, ph, x0, x1);
+    } else if (this.state === 'hover') {   // swinging, its next move after its rest
       swing();
       if (this.st > F.rest[ph]) {   // its next move: a swing (if it has one), a spit (if this phase has any), a drop
         if (F.sweep && (this.next === 'sweep' || (this.next === 'spit' && !F.webs[ph]))) { this.to('windup'); this.tx = H.cx < cx ? x1 : x0; sound.play(...F.snd.sweep); }
@@ -878,16 +883,29 @@ class Boss {
       if (this.st > F.spit) {
         const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = F.webs[ph];
         for (let i = 0; i < n; i++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (i ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R });
-        b.kickSquash(0, 1, -1.6); sound.play('spit', 0.7, 1); this.next = 'drop'; this.to('hover');
+        b.kickSquash(0, 1, -1.6); sound.play('spit', 0.7, 1); this.next = 'drop'; this.to('hover'); this.lidAlso(g, ph);
       }
     } else if (this.state === 'windup') {   // wound back away from the hero, red, creaking: its swing to come
       seat(this.tx, hang, 5);
       b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
-      if (this.st > F.sweep.warn) { this.to('sweep'); b.color = this.ink; sound.play('airjump', 0.8, 0.4); }   // (tx: where its swing sets off)
+      if (this.st > F.sweep.warn) { this.to('sweep'); b.color = this.ink; sound.play('airjump', 0.8, 0.4); this.lidAlso(g, ph); }   // (tx: where its swing sets off)
     } else if (this.state === 'sweep') {   // across like a wrecking ball, its middle low: under it on the floor is the way through
       const u = Math.min(1, this.st / F.sweep.dur), xe = this.tx < cx ? x1 : x0;
       seat(this.tx + (xe - this.tx) * u, hang + (lv.floor - F.sweep.low * R - hang) * Math.sin(Math.PI * u), 12);
       if (u >= 1) { this.next = F.webs[ph] ? 'spit' : 'drop'; this.to('hover'); }
+    } else if (this.state === 'cast') {   // the Lid: red, its card's sound; then the card (icicles, bones, crawlers; a gust blows on after)
+      swing(); b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
+      if (Math.floor(this.st * 10) % 2) b.kickSquash(0, 1, 0.08);
+      if (this.st > F.cast) { b.color = this.ink; const c = this.card; this.to(c === 'gust' ? 'gust' : 'hover'); this.lidFire(c, g, ph); this.lidAlso(g, ph); }
+    } else if (this.state === 'gust') {   // the Lid's gust (the Karasu-tengu's): the hero blown toward a wall, streaks across the shaft
+      swing(); addVel(H, this.wind * F.push * R * dt * (g.onFloor() ? 0.5 : 1), 0);
+      if ((this.dustT -= dt) <= 0 && bits.length < 300) { this.dustT = 0.035; const x = fxRand(lv.l, lv.r), y = lv.capY + fxRand(0.05, 0.98) * (lv.floor - lv.capY), v = this.wind * fxRand(600, 800); for (let k = 0; k < 6; k++) bits.push({ x: x - this.wind * k * 3, y, vx: v, vy: 0, s: 1.2, c: k ? PAL.gray : PAL.white, t: 0, life: 0.35, g: 0, drag: 0 }); }
+      if (this.st > F.gust) this.to('hover');
+    } else if (this.state === 'rush') {   // the Lid's rush (the Tram's): along the floor to the wall it set off toward, then lies there
+      addVel(b, (this.dir * F.rush * R - b.rigVx) * Math.min(1, 10 * dt), 0);
+      if (!(b.wallMask & (this.dir > 0 ? 2 : 1)) && this.st < 2) return;
+      shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(this.dir > 0 ? lv.r : lv.l, lv.floor, IMPACT.puffSpeed + 900);
+      this.to('dazed'); setVel(b, 0, 0); b.kickSquash(1, 0, 1.6);
     } else if (this.state === 'warn') {   // over the hero, its eyes red, dust off the ceiling where it will fall; held still its last `lock` s
       const end = this.drops ? F.again : F.warn;
       if (this.st < end - F.lock) this.tx += clamp(clamp(H.cx, x0, x1) - this.tx, -F.track * R * dt, F.track * R * dt);   // after the hero no faster than `track` R/s: a hero who runs gets clear
@@ -902,6 +920,10 @@ class Boss {
         shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx - this.halfW, lv.floor, IMPACT.puffSpeed + 700); fx.dust(b.cx + this.halfW, lv.floor, IMPACT.puffSpeed + 700);
         if (ph >= F.twice && !this.drops) { this.drops = 1; this.to('warn'); this.tx = b.cx; setVel(b, 0, -6 * R); return; }   // its last heart: straight back up a way, and a second drop
         this.drops = 0; this.next = F.sweep ? 'sweep' : 'spit'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2);
+        if (F.bag && this.land === 'quake') {   // the Lid landing as Onamazu slams: its waves both ways along the floor, rocks over the hero (their shadows show where)
+          for (const d of [-1, 1]) lv.shots.push({ x: b.cx + d * this.halfW, y: lv.floor - 0.45 * R, vx: d * F.wave * R, vy: 0, r: 0.75 * R, wave: true });
+          for (let k = 0; k < F.rocks[ph]; k++) lv.shots.push({ x: clamp(H.cx + (k - (F.rocks[ph] - 1) / 2) * 3.2 * R, lv.l + R, lv.r - R), y: lv.capY + R, vx: 0, vy: 0, r: CART.rock * R, rock: true });
+        } else if (F.bag && this.land === 'rush') { this.dir = H.cx < b.cx ? -1 : 1; this.to('rush'); sound.play('airjump', 0.9, 0.5); }   // off along the floor through where the hero is
         for (let k = 0; k < ((F.splat && F.splat[ph]) || 0) && lv.enemies.length < 4; k++) lv.enemies.push(new Foe({ type: F.ling, x: b.cx + (k % 2 ? 1 : -1) * (this.halfW + 0.6 * R), y: lv.floor - 1.2 * R }, lv));   // blobs out of its splat
         if (!this.dazes++) ui.toast(this.def.hint ? L2(this.def.hint) : t('bossHint'), 2400);   // the first time: what to do now
       }
@@ -913,6 +935,41 @@ class Boss {
       seat(b.cx, hang, 3);
       if (this.st > F.reel) this.to('hover');
     }
+  }
+  // The Lid's bag (LIDF): its next card, never the one just played, the bag refilled shuffled when empty (the game's chance for the level, lv.rng);
+  // once its turn's `cards` are played, its drop and how it lands.
+  lidDraw(lv, key, all) {
+    const bag = (this.bags || (this.bags = {}))[key] || (this.bags[key] = []);
+    if (!bag.length) { bag.push(...all); for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(lv.rng() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; } }
+    let i = bag.length - 1; if (all.length > 1 && bag[i] === this.last[key]) i = 0;   // (never twice running, the bags' seam too)
+    const c = bag.splice(i, 1)[0]; this.last[key] = c; return c;
+  }
+  lidPick(g, ph, x0, x1) {
+    const F = this.def.hang, lv = g.lv, H = g.hero, b = this.body, cx = (lv.l + lv.r) / 2, f = F.form(ph);
+    if (this.cards >= F.cards[ph]) {   // its turn played: the drop (and how it lands)
+      this.cards = 0; this.land = this.lidDraw(lv, 'drop' + Math.min(ph, F.drops.length - 1), F.drops[Math.min(ph, F.drops.length - 1)]);
+      this.to('warn'); this.tx = b.cx; sound.play(...F.snd.warn); return;
+    }
+    const c = this.lidDraw(lv, 'form' + f, F.bag[f]); this.cards++; this.card = c;
+    if (F.both[ph]) { const two = F.bag[f].filter((k) => k !== c && k !== 'sweep' && k !== 'gust'); this.card2 = two.length ? two[Math.floor(lv.rng() * two.length)] : null; }   // two at once: one thrown with it
+    if (c === 'sweep') { this.to('windup'); this.tx = H.cx < cx ? x1 : x0; sound.play(...F.snd.sweep); }
+    else if (c === 'goo') { this.to('spit'); this.tx = b.cx; sound.play(...F.snd.spit); }
+    else { this.to('cast'); this.wind = H.cx < b.cx ? -1 : 1; sound.play(...F.snd[c]); }
+  }
+  lidAlso(g, ph) { if (this.card2) { const c = this.card2; this.card2 = null; this.lidFire(c, g, ph); } }   // its second card, thrown with the first
+  lidFire(c, g, ph) {   // a card played: the campaign boss's own move it is
+    const F = this.def.hang, lv = g.lv, R = lv.R, H = g.hero, b = this.body;
+    if (c === 'icicles') { const n = F.icicles[ph]; for (let k = 0; k < n; k++) lv.icicles.push({ x: clamp(H.cx + (k - (n - 1) / 2) * F.gap * R, lv.l + R, lv.r - R), y: Math.max(lv.capY, lv.cam + CAM.top), state: 'shake', t: F.shake }); sound.play('crumble', 0.7, 1.4); }
+    else if (c === 'bones') { const x = b.cx, y = b.maxY, n = F.bones[ph]; for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.2 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 450, 0.55, 1.0); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: 0.32 * R, bone: true }); } sound.play('spit', 0.7, 0.8); }
+    else if (c === 'web') { for (let k = 0; k < F.crawl[ph] && lv.enemies.length < 4; k++) lv.enemies.push(new Foe({ type: F.ling, x: lv.l + (k % 2 ? 0.78 : 0.22) * (lv.r - lv.l), y: lv.capY + 2 * R }, lv)); }
+    else if (c === 'goo') { const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R }); sound.play('spit', 0.7, 1); }
+    else if (c === 'gust') sound.play('airjump', 0.9, 0.3);
+  }
+  lidForm(f) {   // into form f (LIDF.forms): its look, its ink, its drawing's width; a burst of its goo over the change
+    const [look, ink] = this.def.hang.forms[f], b = this.body;
+    this.form = f; this.look = b.look = look; this.ink = { id: 'boss', base: PAL[ink], deep: PAL.black }; if (this.angry <= 0) b.color = this.ink;
+    this.halfW = bossSize(this)[0] / 2; Object.assign(this.pose, { n: 1, m: false, f: 1, fm: false, out: 0, since: this.t, ft: this.t });
+    splatFx(b.cx, b.cy, b.R * 1.2, PAL[ink], 18); shake.add(7); sound.play(...this.def.hang.snd.form); b.kickSquash(0, 1, 1.8);
   }
 }
 
@@ -1788,7 +1845,7 @@ class Game {
     if (boss && !(above && can) && (e.state === 'dazed' || e.state === 'rise')) return;   // flat on the floor, or getting up after the hero, it only pushes
     if (above && can) this.stomp(e); else if ((this.power('rainbow') || this.power('grow') || this.power('swarm')) && e !== this.lv.boss) this.zap(e, this.power('grow') ? [b.color.base, INK.white] : RAINBOW_INK);
     else if (this.ram && b.cy < H.cy && e !== this.lv.boss) this.kill(e, true);   // rammed from below: it goes like the block over it
-    else if (boss && e.state === 'dive' && e.def && (e.def.glide || e.def.street)) this.hurt(-e.dir * 0.4, -1, 'boss');   // a slide or a rush: thrown up and back over it
+    else if (boss && ((e.state === 'dive' && e.def && (e.def.glide || e.def.street)) || e.state === 'rush')) this.hurt(-e.dir * 0.4, -1, 'boss');   // a slide or a rush (the Lid's too): thrown up and back over it
     else if (boss && e.state === 'dive') this.hurt(Math.sign(H.cx - b.cx) || 1, 0, 'boss');   // landed on: thrown out to the side, not up into it
     else this.hurt(H.cx - b.cx, H.cy - b.cy, boss ? 'boss' : e.type);
   }

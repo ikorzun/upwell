@@ -999,12 +999,18 @@ const kitAvoid = (lv, r, rows = 1) => {   // what r's thing may not be: the kind
   for (const [dy, kind] of below) { if (dy > top + 1.5 * t) { if (++row > rows) break; top = dy; } out.add(kind); }
   return out;
 };
+const KIT_REF = 4 / 3 / 23;   // a dot over a tile on the 393 phone the kits' rooms in tiles were fitted on (a dot 1.33 CSS px, a tile 23)
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
   const th = lv.theme, t = lv.tile, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, w = r.x1 - r.x0, X = (u) => wx + d * u * t;
   const clear = (x0, y0, x1, y1) => !lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1) && !lv.rects.some((q) => !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
+  // A picture's room in tiles as fitted on the 393 phone, times how much bigger its dot (whole pixels, whatever the tile) is against this screen's tile, never
+  // less (owner, 2026-10-28: «Нужно придумать систему, как ведут себе объекты и блоки на уровне при изменении размера экрана», «делай»): on a narrow column or a
+  // computer a thing with no room for its real size is left out (the next slot's thing that fits, or none); the rooms taken off the sprites (iw, tw, en, gai) and
+  // the things drawn in tiles as they were
+  const f = Math.max(1, PIX.base / t / KIT_REF), sroom = (u0, u1, h) => room(u0 * f, u1 * f, h * f), ssteady = (min) => steady(min * f);
   const steady = (min) => !(r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.crack || r.cage || r.slick || r.magnet) && (wl || wr) && !(wl && wr) && w >= min * t   // (a row across the shaft is a way through: the tutorial's helmet breaks one)
     && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'))
     && !lv.icicles.some((c) => c.x > r.x0 && c.x < r.x1 && c.y > r.y0 - t && c.y < r.y1 + 2 * t);   // (nor over the icicles that fall, a hazard's ledge busy enough: UPwell,
@@ -1017,9 +1023,9 @@ const kitThing = (lv, r) => {
   if (th.village) {
     if (r.kitWant === 'lantern' && steady(4) && room(0, 4, 4.4)) return (r.kit = { kind: 'lantern', x: X(0.63), y: b - 1.3 * t });   // asked for by its chunk (CHUNKS kit)
     const H = lv.floor - lv.endY;   // the Peeing Boy of the Iya gorge: once, on 1-2 (the cliff road, Д86/Д93), on a wall ledge's free end halfway up
-    if (lv.stage === 1 && !lv.statueAt && H > 0 && H < 1e9 && b < lv.floor - 0.35 * H && b > lv.floor - 0.7 * H && steady(2.6) && room(w / t - 1.6, w / t, 2.8)) { lv.statueAt = r; return (r.kit = { kind: 'statue' }); }
-    k = hk(0); opts = [[0, 'sakura', () => steady(2.6) && room(0, 4.6, 4.9)], [1, 'scarecrow', () => steady(3) && room(0, 3.5, 3.8)],
-      [3, 'beast', () => steady(2.6) && room(0, 2.6, 2.6)], [5, 'kaya', () => steady(2.6) && room(0, 2.8, 3.0)],   // (Iya's: Д90 «В», Д87 «В»)
+    if (lv.stage === 1 && !lv.statueAt && H > 0 && H < 1e9 && b < lv.floor - 0.35 * H && b > lv.floor - 0.7 * H && ssteady(2.6) && room(w / t - 1.6 * f, w / t, 2.8 * f)) { lv.statueAt = r; return (r.kit = { kind: 'statue' }); }
+    k = hk(0); opts = [[0, 'sakura', () => ssteady(2.6) && sroom(0, 4.6, 4.9)], [1, 'scarecrow', () => ssteady(3) && sroom(0, 3.5, 3.8)],
+      [3, 'beast', () => ssteady(2.6) && sroom(0, 2.6, 2.6)], [5, 'kaya', () => ssteady(2.6) && sroom(0, 2.8, 3.0)],   // (Iya's: Д90 «В», Д87 «В»)
       [2, 'lantern', () => steady(4) && room(0, 4, 4.4), () => ({ x: X(0.63), y: b - 1.3 * t })], [4, 'koinobori', () => steady(2.2) && clear(lv.l, b - 5.6 * t, lv.r, b - 3.6 * t)]];
   } else if (th.mines) {   // the Mine's: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore in the wall behind it, a cart on
     // its rails, the miners' tools, a winch; the props but the lamps on half their ledges: about four in six with a thing on them, as the Village (the rule book's
@@ -1082,10 +1088,10 @@ const kitThing = (lv, r) => {
       { k = 0; opts = [[0, 'bell', () => true, () => ({ x: wl ? r.x1 - 0.3 * t : r.x0 + 0.3 * t, y: r.y0 - 1.4 * t })]]; }
   } else if (th.fuji) {   // Fuji's things on its ledges' wall ends (the owner's letters d51-d61, FUJI_SPR): a tent (its snow rabbit by it), a snowman, a serow or a fox, the
     // pilgrims' stones, persimmons drying, a bare larch
-    const fox = ((Math.imul(Math.round(b / t) + 11, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, beast = () => w >= 2.9 * t && room(0, 2.9, 2.6);
-    k = hk(0); opts = [[0, 'tent', () => w >= 4.7 * t && room(0, 4.7, 2.8)], [1, 'snowman', () => room(0, 2.2, 3.3)], [2, fox ? 'fox' : 'serow', beast], [2, fox ? 'serow' : 'fox', beast],
-      [3, 'stelae', () => w >= 4.0 * t && room(0, 4.0, 3.6)], [4, 'persimmons', () => w >= 3.4 * t && room(0.3, 3.5, 4.3)], [5, 'larch', () => w >= 3.6 * t && room(0, 4.8, 4.9)]];
-    if (!steady(2.4)) opts = null;
+    const fox = ((Math.imul(Math.round(b / t) + 11, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, beast = () => w >= 2.9 * f * t && sroom(0, 2.9, 2.6);
+    k = hk(0); opts = [[0, 'tent', () => w >= 4.7 * f * t && sroom(0, 4.7, 2.8)], [1, 'snowman', () => sroom(0, 2.2, 3.3)], [2, fox ? 'fox' : 'serow', beast], [2, fox ? 'serow' : 'fox', beast],
+      [3, 'stelae', () => w >= 4.0 * f * t && sroom(0, 4.0, 3.6)], [4, 'persimmons', () => w >= 3.4 * f * t && sroom(0.3, 3.5, 4.3)], [5, 'larch', () => w >= 3.6 * f * t && sroom(0, 4.8, 4.9)]];
+    if (!ssteady(2.4)) opts = null;
   }
   const want = r.kitWant && opts && opts.find((q) => q[1] === r.kitWant && q[2]());   // one its level must have (kitAtLeast): there, its slot's hash aside
   if (want) return (r.kit = Object.assign({ kind: want[1] }, want[3] ? want[3]() : {}));

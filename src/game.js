@@ -2803,16 +2803,12 @@ for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8
   STORY_INK[k] = { I, W: '#f3f3f3', L: ink, R: '#f43e34', G: '#ffed57', bg: '#141414' };
 }
 STORY_INK.village = STORY_INK.mine;   // (the Village's world id is 'mine')
-// The cards' one frame, drawn here on the card's own grid (the pack: «draw the thin frame procedurally… more reliable and always aligned»;
-// the owner's К7: one pixel size in a card, the frame's too): its band round a 2:3 window, a white keyline, stepped corners in the ink, a
-// crescent moon at its top with a red knot either side, a yellow speck at each tip. Sizes in the pack's frame of 128 across (`u` cells to one).
-function storyFrame(f, w, h) {   // the card's medallion (owner, К16 «Б»: «окружность сверху карточки обрезается… убери все рамки внутри карточки»): a
-  // crescent in a ring, whole a little under the card's top, a red stud each side of it; no band, no lines, no corners (the corners round, CSS)
-  const u = w / 128, q = (v) => Math.max(1, Math.round(v * u)), r = (x, y, ww, hh, c) => `<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${c}"/>`;
-  const cx = Math.round(w / 2), cy = q(10);
-  let s = `<circle cx="${cx}" cy="${cy}" r="${q(7)}" fill="${f.I}"/><circle cx="${cx}" cy="${cy}" r="${q(6)}" fill="none" stroke="${f.L}" stroke-width="${q(1)}"/><circle cx="${cx - q(1)}" cy="${cy}" r="${3.5 * u}" fill="${f.W}"/><circle cx="${cx + q(1)}" cy="${cy - q(1)}" r="${3 * u}" fill="${f.I}"/>`;
-  s += r(cx - q(11), cy - q(1.5), q(3), q(3), f.R) + r(cx + q(8), cy - q(1.5), q(3), q(3), f.R);
-  return `<svg class="sframe" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${s}</svg>`;
+// A card's back in the album (its flip as the strip stops on it, ui.album): its world's ink, a line of its light ink round it, the logo in the middle.
+function cardBack(f) {
+  const b = document.createElement('div'), im = document.createElement('img');
+  b.className = 'aback'; b.style.background = f.I; b.style.boxShadow = 'inset 0 0 0 3px ' + f.L;
+  im.src = 'assets/ui/upwell-logo.svg'; im.alt = ''; im.draggable = false; b.append(im);
+  return b;
 }
 // A card comes alive by the game itself (owner, К4 «А»; К14 «В»: «наклон, перелив как в пикселях»; К15 «А»: «Движения дожны быть плавными, по
 // всем правилам анимации дисней и пиксара»; К16 «Б»: «остальные карточки делай»). Its planes (CARD_PLANES: the plate, the card with what was behind
@@ -3414,7 +3410,7 @@ const ui = {
         const f = STORY_INK[c.ink], [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
         fig = el('div', 'scard acard');
         for (const [v, x2] of Object.entries(f)) fig.style.setProperty('--s' + v, x2);
-        im.className = 'astill'; clip.append(im); tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt);
+        im.className = 'astill'; clip.append(im); tilt.append(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt, cardBack(f));   // (no moon on top: owner, 2026-10-28)
         cells.push({ cell, c, fig, tilt, clip });
       } else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
         fig = el('div', 'acard shut');
@@ -3432,9 +3428,22 @@ const ui = {
       if (this.live) this.live.stop();
       this.albumLive = k; this.live = cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
     };
-    let tm = 0; strip.addEventListener('scroll', () => { clearTimeout(tm); tm = setTimeout(wake, 140); }, { passive: true });
+    // (owner, 2026-10-28: «карточки при скроле нужно анимировать и переворачивать, сейчас скучно совсем»): as they go by, each turned toward the middle and a little
+    // smaller the further it is from it (a fan of cards, no blur on the one in the middle: it stands flat); the one the strip stops on flips over, its back
+    // (its world's ink, the logo) round to its face, then comes alive. Under «reduce motion» none of it
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let fanQ = 0; const fan = () => { fanQ = 0; const mid = strip.scrollLeft + strip.clientWidth / 2, x0 = strip.offsetLeft;   // (by the layout, not the turned boxes)
+      for (const cell of strip.children) { const w = cell.offsetWidth, d = Math.max(-2, Math.min(2, (cell.offsetLeft - x0 + w / 2 - mid) / (w + 16))), a = Math.abs(d);
+        cell.style.transform = a < 0.06 ? '' : `perspective(900px) rotateY(${(-34 * d).toFixed(2)}deg) scale(${(1 - 0.1 * Math.min(a, 1.5)).toFixed(3)})`; cell.style.opacity = a < 0.06 ? '' : (1 - 0.3 * Math.min(a, 1.5)).toFixed(3); } };   // (the one stopped on flat: its pixels whole)
+    const flip = () => {   // the one in the middle over from its back: a full turn, quick out of the stop, slow into its face
+      const k = this.albumLive; if (calm || !k || k.flipped) return; k.flipped = true;
+      k.fig.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-200deg)', offset: 0.55 }, { transform: 'rotateY(-372deg)', offset: 0.85 }, { transform: 'rotateY(-360deg)' }], { duration: 760, easing: 'ease-in-out' });
+      sound.play('click', 0.5, 1.3);
+    };
+    let tm = 0; strip.addEventListener('scroll', () => { if (!calm && !fanQ) fanQ = requestAnimationFrame(fan); clearTimeout(tm); tm = setTimeout(() => { const was = this.albumLive; wake(); if (this.albumLive !== was && this.albumLive) { this.albumLive.flipped = false; flip(); } }, 140); }, { passive: true });
+    if (!calm) requestAnimationFrame(fan);
     this.albumLive = null;
-    requestAnimationFrame(() => { if (go) strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }); setTimeout(wake, 60); });
+    requestAnimationFrame(() => { if (go) strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }); setTimeout(() => { wake(); flip(); }, 60); });   // (the one it opens on flips in too)
   },
   book() {
     this.mapAt = 'book';
@@ -3507,7 +3516,7 @@ const ui = {
     const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); this.storyArgs = null; done(); }), 'next');
     next.style.background = f.L; next.style.color = inkOn(f.L);   // the button in the card's own colour, its words in the one of black and white that stands out on it (owner, 2026-10-24)
     clip.setAttribute('role', 'img'); clip.setAttribute('aria-label', L2(c.title));
-    tilt.innerHTML = storyFrame(f, w, h); tilt.prepend(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); card.append(tilt);
+    tilt.append(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); card.append(tilt);   // (no moon on top: owner, 2026-10-28: «на всех карточках сверху убери месяц»)
     p.append(card, title, next);   // (laid first with no height: what is left over its title is the card's)
     for (let q = 3; title.scrollWidth > p.clientWidth - 24 && q > 1.5;) { q -= 0.25; title.style.setProperty('--p', q); }   // its title on one line (owner, 2026-10-25: «текст под карточкой
     // всегда в 1 строку»): a long one a step smaller till it fits

@@ -2314,7 +2314,7 @@ class Game {
   enterRoom(bub) {
     if (!bub.room) {
       const room = new Level();
-      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor(), cave: bub.kind === 'treasure' ? this.caveNext(this.lv.world) : undefined });
+      room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: this.lv.world.theme, hard: this.hard, keep: this.roomFloor(), cave: bub.kind === 'treasure' ? this.caveNext(this.lv.world) : undefined });   // in its world's colours, a shop's and a stash's alike (owner: «пещеры и магазины внутри … такого же цвета как и мир»)
       if (bub.kind === 'shop' && this.heartsFull()) for (const q of room.pickups) if (q.item.id === 'maxhp') q.item = SHOP_ITEMS.find((i) => !room.pickups.some((o) => o.item === i));   // (the
       // world's max hearts all bought, SHOP_GROW: the thing its three left out in its place)
       bub.room = room;

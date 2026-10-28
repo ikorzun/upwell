@@ -25,7 +25,7 @@
   @font-face { font-family: 'DotGothic16'; src: url('assets/fonts/dotgothic16.woff2') format('woff2'); font-display: block; }
   :root {
     --ink: #141414; --red: #f43e34; --blue: #5bb8ff; --yellow: #ffed57; --green: #339c39; --purple: #c996ff; --orange: #faa23e; --gray: #c8c8c8; --white: #f3f3f3;
-    --lime: #b4d64e; --track: #272627; --on: #c0ff47; --off: #fe4648; --veil: rgba(20, 20, 20, 0.96);   /* Feed Moti's bar of fullness and its track (the Figma «Feed») */
+    --lime: #b4d64e; --track: #272627; --on: #c0ff47; --off: #fe4648; --veil: rgba(14, 13, 19, 0.96); --night: #0e0d13; --starOff: #5b5b5b;   /* Feed Moti's bar of fullness and its track (the Figma «Feed») */
     --notch: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);
     --btnL: 64px; --btnS: 48px;   /* the two sizes of every button (owner: «все кнопки должны быть только 2 размеров»): a big one, the width of its panel, and a small one (48: a finger's)) */
     --amber: #ffc300;   /* the chosen colour's ring in the menu (the Figma «Main»'s) */
@@ -93,22 +93,38 @@
   .acard.shut .ico { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); --p: 6; }
   .atitle { --p: 2.5; color: var(--white); white-space: nowrap; max-width: var(--aw, 240px); overflow: hidden; text-overflow: ellipsis; line-height: 1.3; padding-bottom: 3px; }   /* (room for a g's tail) */
   #map { background: var(--ink); justify-content: flex-end; padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
-  #map.wmap { background: var(--ink) no-repeat center bottom; image-rendering: pixelated; justify-content: flex-start; gap: 10px; padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }   /* a world's map (ui.map): its world's scene, opaque (owner: no see-through), whole pixels (mapBack) */
-  .mapg { position: relative; flex: 1; min-height: 0; align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 12px; }   /* its ten levels at one look: three a row, the boss on top */
-  .mapg > svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-  .mapg > svg path { fill: none; stroke-linecap: square; stroke-linejoin: miter; }
-  .mapg > svg path.u { stroke: var(--ink); stroke-width: 10; }   /* under each step of the path: the ink, so it reads on any scene */
-  .mapg > svg path.l { stroke: var(--gray); stroke-width: 4; stroke-dasharray: 8 8; }
-  .mapg > svg path.l.on { stroke: var(--yellow); stroke-dasharray: none; }   /* lit from a level cleared */
-  .mapg .chip.lvl { position: relative; min-width: 0; min-height: 0; padding: 6px; gap: 6px; --p: 4; }
-  .mapg .chip.lvl.locked { background: #262626; color: #8a8a8a; }   /* shut: opaque too */
-  .mapg .chip.lvl > .ico { --p: 4; }   /* a bonus's coin */
-  .mapg .chip.lvl .mini { --p: 2; gap: 2px; }
+  /* A world's map as the Figma «Words» (1268:2581; owner, 2026-10-28: «внимательно посмотри на детали»), a px a CSS px: the dark, 17.5 px in from the
+     sides; the round tabs 12 from the top (40-px circles in their 48-px buttons, 8 apart), 16 over its name (Inter 24 → VT323 31, its caption 20), 23
+     over one table in yellow lines (its rows 100 tall, shorter on a short screen), the pill at the bottom */
+  #map.wmap { background: var(--night); justify-content: flex-start; gap: 0; padding: calc(env(safe-area-inset-top, 0px) + 8px) 17.5px calc(env(safe-area-inset-bottom, 0px) + 16px); }
+  .mtabs { display: flex; justify-content: center; margin-bottom: 12px; }
+  .mtabs > .chip { position: relative; flex: none; width: var(--btnS); height: var(--btnS); padding: 0; background: none; box-shadow: none; clip-path: none; color: var(--white); --p: 1.76; }
+  .mtabs > .chip::before { content: ''; position: absolute; inset: 4px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--yellow); }
+  .mtabs > .chip > .tx { position: relative; }
+  .mtabs > .chip.on { color: var(--ink); box-shadow: none; }
+  .mtabs > .chip.on::before { background: var(--yellow); }   /* this world */
+  .mtabs > .chip.locked { color: rgba(255, 255, 255, 0.4); }
+  .mtabs > .chip.locked::before { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4); }   /* shut */
+  #map.wmap > .head { --p: 2.5; margin: 0 0 28px; padding-top: 4px; color: var(--white); filter: none; }   /* (its words where the mockup's Inter has them: its
+     two lines' 57-px box 23 over the table, VT323's and DotGothic16's boxes tighter) */
+  #map.wmap > .head > .cap { margin-top: 10px; font-size: 20px; }
+  .mapg { flex: 0 1 397px; min-height: 0; box-sizing: border-box; align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 1px; padding: 1px; background: var(--yellow); }   /* the yellow lines: 1 px between its cells and round them */
+  .mapg .chip.lvl { min-width: 0; min-height: 0; padding: 4px; gap: 6px; background: var(--night); box-shadow: none; clip-path: none; color: var(--white); }
+  .mapg .chip.lvl .num { display: flex; align-items: center; gap: 6px; --p: 2.5; }   /* Inter 24 → VT323 31; a bonus level's coin after it */
+  .mapg .chip.lvl .num .ico { --p: 1.6; }
+  .mapg .chip.lvl.boss { flex-direction: row; justify-content: flex-start; gap: 12px; padding-left: 24px; }   /* its figure 76 across, its name and stars by it */
+  .mapg .bfig { flex: none; width: 76px; height: 76px; display: flex; align-items: center; justify-content: center; }
   .mapg .chip.lvl .fig { display: block; image-rendering: pixelated; }   /* its world's boss off its card (bossFig) */
+  .mapg .bname { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; --p: 1.88; }   /* Inter 18 → VT323 23.5 */
+  .mapg .chip.lvl .mini { --p: 2; gap: 4px; }   /* its stars 24 tall (the 12-px star at whole pixels: the mockup's 26), 4 apart */
+  .mapg .chip.lvl.locked { background: var(--night); color: rgba(255, 255, 255, 0.4); }   /* shut: dim, no stars */
   .mapg .chip.lvl.on { box-shadow: inset 0 0 0 3px var(--yellow); animation: here 1.4s ease-in-out infinite alternate; }   /* where the player stopped (owner: lit at a look) */
   @keyframes here { to { box-shadow: inset 0 0 0 6px var(--yellow); } }
   @media (prefers-reduced-motion: reduce) { .mapg .chip.lvl.on { animation: none; } }
-  .mini { display: flex; gap: 1px; --p: 1; }   /* a level's stars */
+  #map.wmap > .big.thumb { --p: 2.6; margin-top: auto; border-radius: 32px; clip-path: none; }   /* Menu: the main screen's pill */
+  #map.wmap > .big.thumb > .cap { font-size: 12px; }
+  .mini { display: flex; gap: 1px; --p: 1; }
+  .ico[data-i=starOff] { --gray: var(--starOff); }   /* a star not won: the mockups' dark grey (owner, 2026-10-28), so the won ones stand out */   /* a level's stars */
   .build { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 340px; --p: 2; }   /* the upgrades taken, in the pause */
   .cloth { display: flex; gap: 18px; padding: 16px 22px; background: var(--ink); box-shadow: inset 0 0 0 2px var(--yellow); clip-path: var(--notch); margin: auto 0 12px; }   /* a world's tapestry */
   .rune { font-family: 'Yarndings 12'; font-size: 72px; line-height: 1; }   /* knitted on a 12-px grid: crisp at 6 px a stitch */
@@ -320,9 +336,9 @@
   #settings .v.off { color: var(--off); }
   #settings > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Back: the main screen's pill */
   #settings > .big.thumb > .cap { font-size: 12px; }
-  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 9px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 9 under the safe area */
-  .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 0px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its 40-px ring 4 under the safe area and 12 in from the side, in a 48-px button */
-  .setBtn img { width: 40px; height: auto; }
+  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 17px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 17 under the safe area (2026-10-28) */
+  .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its 32-px gear 16 under the safe area and 16 in from the side, in a 48-px button */
+  .setBtn img { width: 32px; height: auto; }   /* the Figma «Main»'s gear (2026-10-28): 32 px, 16 from the top and the right */
   .setBtn:active img { filter: brightness(0.8); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }
@@ -338,7 +354,7 @@
   /* Feed Moti (feed.js) as the Figma «Feed» (owner, 2026-10-27: «переделать экран метча по макету»), a px a CSS px: the bar of fullness 8 tall (a pill),
      13 under it the favourite (×2 score) and the count at its two ends, 16 under them the board of --cell cells (70 at most), no lines on it; the words in
      the game's fonts as tall as the mockup's Inter 14 (VT323 18 px) */
-  .fm { pointer-events: auto; display: flex; flex-direction: column; align-items: center; align-self: center; margin-bottom: 14px; }   /* (30 over the bottom, with the panel's 16) */
+  .fm { pointer-events: auto; display: flex; flex-direction: column; align-items: center; align-self: center; }   /* (16 over the bottom: the panel's, as the other screens'; the mockup's 5) */
   .fm-hud { width: var(--hud); display: flex; flex-direction: column; gap: 13px; margin-bottom: 16px; }
   .fm-bar { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; }
   .fm-bar > i { display: block; width: 0; height: 100%; border-radius: 4px; background: var(--lime); transition: width 0.25s; }
@@ -347,7 +363,7 @@
   .fm-full { gap: 4px; }
   .fm-fav svg, .fm-full svg { width: var(--icon); height: var(--icon); display: block; }   /* (32 at most, its pixels whole screen points: feed.mount) */
   .fm-of { opacity: 0.4; }   /* the count's whole, dimmer */
-  .fm-x { position: absolute; top: env(safe-area-inset-top, 0px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its white disc 40 px, 4 under the safe area and 12 in from the side, in a 48-px button */
+  .fm-x { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its white disc 40 px, 12 under the safe area and 12 in from the side, in a 48-px button (the Figma «Feed») */
   .fm-x::before { content: ''; grid-area: 1 / 1; width: 40px; height: 40px; border-radius: 50%; background: var(--white); }
   .fm-x img { grid-area: 1 / 1; width: 24px; height: 24px; filter: brightness(0); }   /* the library's close-24 (white) made black, as the Figma's */
   .fm-x:active::before { filter: brightness(0.85); }
@@ -393,15 +409,18 @@
   .mast.new .ico { animation: starIn 0.4s steps(5) 1.5s both, starTwinkle 1.4s steps(2) 2s infinite; }   /* one won now: in after the stars */
   .stars .pay { animation: payIn 0.3s steps(3) 1.1s both; }   /* what they paid, once they are all in */
   /* A level cleared as the Figma «Win» (owner, 2026-10-27), a px a CSS px: all dark (--veil, the mockup's 0.96); its stars 60 px (the 12-px star five
-     times), 7 apart; 22 under them «Level cleared!» in yellow (Inter 33 → VT323 43, its caption 24); 22 under it a line each of what it asked for (Inter
-     24.75 → VT323 32, the game's 24-px pictures for the mockup's emoji); the yellow pill 60 under them at the bottom (its main screen's) */
+     times), 7 apart; 12 under them «Level cleared!» in yellow (Inter 33 → VT323 43, its caption 24 in purple); 22 under it a line each of what it asked
+     for (Inter 24.75 → VT323 32, the game's 24-px pictures for the mockup's emoji); the yellow pill 70 under them at the bottom (its main screen's) */
   #cards.win { background: var(--veil); justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
-  .wbox { display: flex; flex-direction: column; align-items: center; gap: 22px; margin: auto 0 60px; }
+  .wbox { display: flex; flex-direction: column; align-items: center; gap: 22px; margin: auto 0 70px; }
   .wstars { gap: 7px; --p: 5; }
-  .wbox > .head { --p: 3.44; margin: 0; padding: 8px; color: var(--yellow); }
-  .wbox > .head > .cap { font-size: 24px; color: var(--white); opacity: 0.56; }
+  #cards.win .wstars { margin-bottom: -10px; }   /* 12 over «Level cleared!» (the box's 22 less 10) */
+  .wbox > .head { --p: 3.44; margin: 0; padding: 16px 8px 10px; color: var(--yellow); }   /* (its words where the mockup's Inter has them in its 85-px block:
+     VT323's and DotGothic16's line boxes are tighter) */
+  .wbox > .head > .cap { margin-top: 11px; font-size: 24px; color: var(--purple); }   /* the mockup's purple (2026-10-28) */
   .wlines { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px; --p: 2.58; color: var(--white); }
   .wl, .wl > span { display: flex; align-items: center; gap: 8px; }
+  .wl { min-height: 30px; }   /* (the mockup's Inter line, 30 tall) */
   .wl .ico { --p: 2; }
   .wl.not, .wl .not { color: var(--gray); }   /* not done: grey */
   .wl.pay { color: var(--yellow); }
@@ -409,6 +428,47 @@
   .wdot { color: var(--gray); opacity: 0.5; }   /* between two tasks */
   #cards.win > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Next: the main screen's pill */
   #cards.win > .big.thumb > .cap { font-size: 12px; }
+  /* The dialogs of the Figma round of 2026-10-28 (owner: «обнови экраны… внимательно посмотри на детали»), a px a CSS px, the game's fonts at the mockups'
+     cap heights: «One more go?» («Death» 1268:2433), a loss («too sour» 1268:2463), «Pick an upgrade» (1268:2520). All dark (--veil; with Moti in it the
+     stage's own dark under him, .staged: Game.stageIn), the title in yellow (Inter 33 → VT323 43, its caption 24 in purple), the yellow pill at the bottom
+     16 in from the edges, Menu in a 2-px line of white at 30% 16 over it */
+  #result.dlg, #cards.dlg { background: var(--veil); justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
+  #result.dlg.staged, #cards.dlg.staged { background: none; }   /* Moti over the dark, not under the veil */
+  .dlg .head { --p: 3.44; margin: 0; padding: 16px 8px 10px; color: var(--yellow); filter: none; }   /* (as the Win's: the mockup's words' places) */
+  .dlg .head > .cap { margin-top: 11px; font-size: 24px; color: var(--purple); white-space: nowrap; letter-spacing: 0.1em; }   /* (one line: «パワーアップを えらぼう» in 340) */
+  .dlg > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }
+  .dlg > .big.thumb > .cap { font-size: 12px; }
+  .dlg > .big.thumb.off { opacity: 0.45; }   /* Revive without coins enough */
+  .dlg > .big.alt { --p: 2.6; align-self: stretch; margin-bottom: 16px; border-radius: 0; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3); clip-path: none; }   /* (square: the pill is the main one's) */
+  .dlg > .big.alt > .cap, .drow > .big > .cap { font-size: 12px; color: var(--white); opacity: 0.5; }
+  /* «One more go?»: Moti's slot 255 × 180, 22 over the title and the coins in hand (Inter 24.75 → VT323 32, the 24-px coin), 43 over the row of No-finish
+     and the ad's go: two 64-px cells in 1.5-px yellow lines, 8 in from the sides, 16 over the pill */
+  .dbox { display: flex; flex-direction: column; align-items: center; gap: 22px; margin: auto 0 43px; }
+  .dslot { flex: none; width: 255px; height: 180px; }
+  .dline { display: flex; align-items: center; gap: 8px; min-height: 30px; margin-top: -22px; padding: 8px; --p: 2.58; color: var(--white); }
+  .dline .ico { --p: 2; }
+  .drow { display: flex; align-self: stretch; margin: 0 8px 16px; }
+  .drow > .big { flex: 1; min-width: 0; --p: 2.6; background: none; color: var(--white); box-shadow: inset 0 0 0 1.5px var(--yellow); clip-path: none; }
+  .drow > .big + .big { margin-left: -1.5px; }   /* (one line between them) */
+  .drow > .big:active { background: rgba(255, 237, 87, 0.12); }
+  /* A loss: its stars 48 tall (the 12-px star at whole pixels: the mockup's 52), 22 over the title, 22 over the go in two columns 300 across (Inter 20 →
+     VT323 26), 8 apart, 42 over Menu */
+  #result.dlg .summary { flex: none; margin: auto 0 42px; gap: 22px; }
+  .dstars { gap: 8px; --p: 4; }
+  #result.dlg .rows { max-width: 300px; gap: 8px; margin: 0; padding: 8px 0; --p: 2.08; }
+  #result.dlg .row { min-height: 24px; }   /* (the mockup's Inter 20 line) */
+  #result.dlg .row span { color: var(--white); }
+  /* «Pick an upgrade»: in the middle, Moti's slot 126 × 89, 22 over the title, 22 over the three: one box of 1-px yellow lines 340 across, each 16 in and
+     12 high, its 60-px picture 16 from its name in yellow over what it does in white (Inter 18 → VT323 23.5) */
+  #cards.dlg { justify-content: center; }
+  .pbox { display: flex; flex-direction: column; align-items: center; gap: 22px; width: min(340px, 100%); }
+  .pslot { flex: none; width: 126px; height: 89px; }
+  .popts { align-self: stretch; display: flex; flex-direction: column; }
+  .popts > .card { max-width: none; padding: 12px 16px; gap: 0 16px; background: none; box-shadow: inset 0 0 0 1px var(--yellow); clip-path: none; --p: 1.88; }
+  .popts > .card + .card { margin-top: -1px; }   /* (one line between them) */
+  .popts > .card .ico { --p: 5; }
+  .popts > .card > span { color: var(--white); }
+  .popts > .card:active { background: rgba(255, 237, 87, 0.12); box-shadow: inset 0 0 0 1px var(--yellow); }
   .fm-fin { gap: 12px; margin: auto 0 53px; }   /* Feed Moti's result, the Figma «Feed-full» (1263:1599): a Win's box, its foods 12 over its words, 53 over Close */
   .fm-stars { display: flex; align-items: center; }   /* the foods for its stars in a row (.wstars: their gap) */
   .fm-star, .fm-star svg { width: var(--food); height: var(--food); display: block; }   /* a food for a star: as big as on the board (feed.result) */

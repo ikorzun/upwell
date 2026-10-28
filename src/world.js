@@ -4821,10 +4821,13 @@ vec3 shadeOf(vec3 c, float w) {   // (w: how far a hueless ink goes toward the w
 `;
 // Pictures tiled over a box by the shader (FEAT_FS type 11: one shape for a whole band of a ledge, however long; a box of runs would be a shape a run): each
 // registered once (tileId), packed down one texture, a texel an ink's index in PAL (G: its darker half; A: clear or not); uTile its place and size
-const TILE_MAX = 64, TILES = { list: [], byKey: new Map(), tex: null, n: 0, u: new Int32Array(4 * TILE_MAX) };
+const TILE_MAX = 128, TILES = { list: [], byKey: new Map(), tex: null, n: 0, u: new Int32Array(4 * TILE_MAX) };   // (128: the eight worlds' ledges and rooms
+// need about 90 together, the five open ones 66, past the 64 there were: a sixth world's in one sitting drew the first picture, the Village's; 128 ivec4s keep the
+// shader well inside WebGL2's 224 uniform vectors)
 const tileId = (rows) => {
   const key = rows.join('/'); let id = TILES.byKey.get(key); if (id !== undefined) return id;
-  id = TILES.list.length; if (id >= TILE_MAX) return 0; TILES.list.push(rows); TILES.byKey.set(key, id); return id;
+  if (TILES.list.length >= TILE_MAX) { TILES.list.length = 0; TILES.byKey.clear(); TILES.n = -1; }   // (full all the same: begun again, its pictures registered anew as drawn, never another's)
+  id = TILES.list.length; TILES.list.push(rows); TILES.byKey.set(key, id); return id;
 };
 const tileUpload = (gl) => {   // (again whenever a picture was added since)
   if (TILES.n === TILES.list.length && TILES.tex) return TILES.tex;
@@ -4873,8 +4876,8 @@ void main() {
   else if (t == 8) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 2.0)); if (fract(p.y / vP.w) < 0.5) col = PAL[0]; }   // box ribbed across in black
   else if (t == 10) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 0.0)); int tn = int(vP.w + 0.5); if (tn >= 20) { if (tone(tn - 20, g) > 0.5) col = shadeOf(col, 0.35); } else if (tn >= 10) { if (tone(tn - 10, g) > 0.5) col = mix(PAL[0], col, 0.5); } else if (tone(tn, g) > 0.5) col = PAL[0]; }   // square box in a tone of black (0: flat; 10 + k: tone k its darker half, a sheet's two-tone dither; 20 + k: tone k its shade, VOL)
   else if (t == 11) {                                                         // a picture of the atlas (TILES) repeated over the box from its top left, a
-    vec2 hs = vP.yz, p = vL * hs; float w = abs(vP.w); int id = int(mod(w, 64.0)), oy = int(w / 64.0); ivec4 d = uTile[id];   // game pixel a texel; p3 its id
-    a = aa(sdRB(p, hs, 0.0)); ivec2 lp = ivec2(floor((p + hs) / uPix)); if (vP.w < 0.0) lp.x = int(2.0 * hs.x / uPix + 0.5) - 1 - lp.x; lp.y += oy;   // (+ 64 a row it
+    vec2 hs = vP.yz, p = vL * hs; float w = abs(vP.w); int id = int(mod(w, ${TILE_MAX}.0)), oy = int(w / ${TILE_MAX}.0); ivec4 d = uTile[id];   // game pixel a texel; p3 its id
+    a = aa(sdRB(p, hs, 0.0)); ivec2 lp = ivec2(floor((p + hs) / uPix)); if (vP.w < 0.0) lp.x = int(2.0 * hs.x / uPix + 0.5) - 1 - lp.x; lp.y += oy;   // (+ TILE_MAX a row it
     lp.x += 23 * (lp.y >= 0 ? lp.y / d.w : -1 - (-1 - lp.y) / d.w);   // starts down; less than 0 mirrored; each repeat down shifted along, so a tall block shows no grid)
     vec4 tx = texelFetch(uAtlas, d.xy + ivec2(((lp.x % d.z) + d.z) % d.z, ((lp.y % d.w) + d.w) % d.w), 0);
     if (tx.a < 0.5) discard;
@@ -6982,7 +6985,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // up to a pulley on the cable across the shaft (the cable behind, see YAEN). A crumbling block is a rope bridge (the owner's C): slats the block's own height (so
   // nothing solid is out of sight) wide apart on two ropes, each shaking its own way as it gives, at a wall a peg and the rope down off it, at a free end
   // (one in three) a rope hanging with a weight on it. False for what keeps the common look (ice, springs, magnets, bouncy planks, stairs).
-  const tbox = (x0, y0, x1, y1, rows, flip, oy, a) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, PAL.white, a, 11, hw, hh, (flip ? -1 : 1) * (tileId(rows) + 64 * oy + 0.5)); };
+  const tbox = (x0, y0, x1, y1, rows, flip, oy, a) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, PAL.white, a, 11, hw, hh, (flip ? -1 : 1) * (tileId(rows) + TILE_MAX * oy + 0.5)); };
   const platTiles = (r, S, ox = 0, a = 1) => {   // a ledge in its tile set (PLAT): its top band from its edge down, its middle repeated, its bottom; at each free end its L
     const q = PIX.size, x0 = snap(r.x0) + ox, x1 = snap(r.x1) + ox, y0 = snap(r.y0), y1 = snap(r.y1), H = Math.max(1, Math.round((y1 - y0) / q)), E = S.top.L[0].length * q;
     const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, ht = Math.min(S.top.M.length, H), hb = Math.min(S.bot.M.length, H - ht), hm = H - ht - hb, l = wl ? x0 : x0 + E, rr = wr ? x1 : x1 - E;

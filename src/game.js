@@ -3235,6 +3235,14 @@ function pixelDisc(r, fill) {
 }
 const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon, taskLantern, taskBell, taskLamp, taskLighthouse
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
+// The Win screen's stars' timing (ui.win, ui.starHit): one in every `gap` s (0.35: its flashes under the owner's 3 Hz), each landing `peak` s into its 0.4-s
+// way in (starIn's biggest), the won ones twinkling from `twinkle` s on, once all are in
+const STAR_IN = { gap: 0.35, peak: 0.24, twinkle: 1.45 };
+// A ring of pixels on an n-px grid at radius r (a star's going out, ui.starHit): an SVG of its cells, drawn crisp at any size
+function pixRing(n, r) {
+  let d = ''; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const q = Math.hypot(x + 0.5 - n / 2, y + 0.5 - n / 2); if (Math.abs(q - r) < 0.62) d += 'M' + x + ' ' + y + 'h1v1h-1z'; }
+  return '<svg viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" aria-hidden="true"><path fill="var(--yellow)" d="' + d + '"/></svg>';
+}
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.append(px(text)); return e; }
 const goOwed = (f) => { if (!game.owed(f)) f(); };   // into a campaign level: a card owed first (Game.owed)
 const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : 'hintKeys');   // the first floor's words: how to run and jump
@@ -3385,10 +3393,13 @@ const ui = {
     // level over the stars, as its lines are (owner, 2026-10-28: «добавь сверху звезд название мира и уровня, текстом такого же стиля, как рядом с монетами»)
     if (st) {
       const row = el('div', 'stars wstars');
-      for (let k = 0; k < 3; k++) {
-        const s = iconEl(k < st.n ? 'star' : 'starOff');
-        if (k < st.n) { s.classList.add('won'); setTimeout(() => sound.play('chime', 0.8, 1 + 0.18 * k), 300 + 300 * k); }
-        s.style.animationDelay = 0.15 + 0.3 * k + 's' + (k < st.n ? ', ' + (1.2 + 0.2 * k) + 's' : ''); row.append(s);
+      for (let k = 0; k < 3; k++) {   // the detailed stars (ICON48.starBig), in one after another STAR_IN.gap apart, each landing with its moment (starHit)
+        const won = k < st.n, s = bigIcon(won ? 'starBig' : 'starBigOff'), at = 0.15 + STAR_IN.gap * k, w = el('span', 'wstar'); w.append(s); row.append(w);
+        if (won) {   // its moment at its way in's biggest, timed off its own animation's start (a timer off this call ran ahead of a late first frame)
+          s.classList.add('won'); const hit = () => this.starHit(w, s, box, k, k === st.n - 1);
+          if (shakeOn()) s.addEventListener('animationstart', (e) => { if (e.animationName === 'starIn') setTimeout(hit, STAR_IN.peak * 1000); }, { once: true }); else setTimeout(hit, (at + STAR_IN.peak) * 1000);
+        }
+        s.style.animationDelay = at + 's' + (won ? ', ' + (STAR_IN.twinkle + 0.2 * k) + 's' : '');
       }
       box.append(row);
     }
@@ -3404,6 +3415,25 @@ const ui = {
     if (lines.children.length) box.append(lines);
     this.stationLine(box);
     p.append(box, cap(button(t('next'), 'big thumb', next), 'next'));
+  },
+  starHit(w, s, box, k, last) {   // a star landing on the Win screen (owner, 2026-10-28: «добавь при появлении звезды больше эффектов, можно использовать такой же crt
+    // эффект как при уроне»): the CRT's moment over the game (fx.js KICK.star: a gold flash, the split, a tear), the star itself split red and blue and bright as a
+    // hurt splits the screen, the stars' box jolted down and back, gold pixels flung off it and a ring of them going out; the last star more of each; its chime.
+    // A flash 0.35 s apart at the least (the owner's 3 Hz); none of it with reduced motion
+    sound.play('chime', 0.8, 1 + 0.18 * k); haptics.buzz(last ? 22 : 12);
+    if (!shakeOn() || !s.animate) return;
+    if (window.fxKick) fxKick(last ? 'starLast' : 'star');
+    const q = last ? 1.6 : 1, sh = Math.round(4 * q), n = last ? 14 : 9;
+    s.animate([{ filter: `drop-shadow(-${sh}px 0 0 rgba(244, 62, 52, 0.9)) drop-shadow(${sh}px 0 0 rgba(72, 160, 255, 0.9)) brightness(1.9)` },
+      { filter: 'drop-shadow(0 0 0 rgba(244, 62, 52, 0)) drop-shadow(0 0 0 rgba(72, 160, 255, 0)) brightness(1)' }], { duration: 460, easing: 'steps(6)' });
+    box.animate([{ transform: `translateY(${Math.round(5 * q)}px)` }, { transform: 'translateY(0)' }], { duration: 280, easing: 'steps(4)' });
+    for (let i = 0; i < n; i++) {   // the sparks: pixels of 2 a CSS px a star pixel's size, out on whole pairs of px
+      const ang = (i / n) * TAU + k, r = (30 + (i % 3) * 10) * q, sp = el('i', 'spark' + (i % 3 ? '' : ' w')); w.append(sp);
+      sp.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${Math.round((Math.cos(ang) * r) / 2) * 2}px, ${Math.round((Math.sin(ang) * r) / 2) * 2}px)`, opacity: 0 }],
+        { duration: 560, easing: 'steps(7)', fill: 'forwards' }).onfinish = () => sp.remove();
+    }
+    const ring = el('i', 'sring'); ring.innerHTML = this.ringSvg || (this.ringSvg = pixRing(30, 13.4)); w.append(ring);
+    ring.animate([{ transform: 'scale(0.5)', opacity: 1 }, { transform: `scale(${last ? 2.4 : 1.8})`, opacity: 0 }], { duration: 480, easing: 'steps(6)', fill: 'forwards' }).onfinish = () => ring.remove();
   },
   stationLine(p) {   // Fuji's levels its trail's stations, 1 to 9 (owner, К12 «А»: its far view a compass of the climb, and the station said at each end)
     const g = game, n = Math.floor((g.ci % 30) / 3) + 1;

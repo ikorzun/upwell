@@ -444,6 +444,12 @@
   #cards.win { background: var(--veil); justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
   .wbox { display: flex; flex-direction: column; align-items: center; gap: 22px; margin: auto 0 70px; }
   .wstars { gap: 7px; --p: 5; }
+  .wstars .wstar { position: relative; display: block; }   /* a star, its sparks and its ring about it (ui.starHit) */
+  .wstars .ico.big48 { width: 60px; height: 60px; }   /* the detailed star (ICON48.starBig, research/stars): its 30 pixels 2 CSS px each, as big as the old one */
+  .wstar .spark { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; background: var(--yellow); pointer-events: none; }
+  .wstar .spark.w { background: var(--white); }
+  .wstar .sring { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+  .wstar .sring svg { display: block; width: 100%; height: 100%; }
   #cards.win .wstars { margin-bottom: -10px; }   /* 12 over «Level cleared!» (the box's 22 less 10) */
   .wbox > .head { --p: 3.44; margin: 0; padding: 16px 8px 10px; color: var(--yellow); }   /* (its words where the mockup's Inter has them in its 85-px block:
      VT323's and DotGothic16's line boxes are tighter) */

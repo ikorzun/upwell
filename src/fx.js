@@ -13,6 +13,8 @@
     hurt: { chroma: 4.68, tear: 10.8, jolt: 5.4, flash: [0.96, 0.24, 0.2, 0.36], lines: 0.5, dur: 2.45 },   // (its split, tear and jolt half as much again and 2 s longer: owner, 2026-10-28,
     // «сильнее искажение экрана и дольше на 2 секунды, когда игрок получает урон»; before it, a fifth more: «усиль на 20% эффект искажения экрана при уроне»)
     kill: { chroma: 2, sweep: 1, flash: [1, 1, 1, 0.18], lines: 0.25, dur: 0.34 },
+    star: { chroma: 2.2, tear: 3, jolt: 2, flash: [1, 0.86, 0.3, 0.22], lines: 0.25, dur: 0.6 }, starLast: { chroma: 3.4, tear: 5, jolt: 3.4, flash: [1, 0.86, 0.3, 0.3], lines: 0.35, dur: 0.9 },   // (a Win
+    // screen's star landing, ui.starHit: a hurt's moment in gold, the last star's bigger; set off by hand, fxKick)
     hitBoss: { chroma: 2.2, tear: 3, sweep: 1, flash: [1, 1, 1, 0.22], lines: 0.3, dur: 0.42 },
     free: { chroma: 0.5, dur: 0.22 }, task: { chroma: 0.5, dur: 0.22 }, take: { chroma: 0.6, dur: 0.25 }, buy: { chroma: 0.4, dur: 0.18 },
   };

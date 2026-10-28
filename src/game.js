@@ -1095,9 +1095,11 @@ class Game {
   }
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
   // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
-  menuFit(rowY, logoY, splitY = rowY, bare = false, keep = false) {   // (splitY: where the dark band under him starts; the colours' row on the main screen, over Feed Moti's
-    // bar; bare: no far view behind him, the settings'; keep: his size as it is, Feed Moti's result, where he swells to his own: feed.frame)
-    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, MENU_HERO.k * Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
+  menuFit(rowY, logoY, splitY = rowY, bare = false, keep = false, tall = 0) {   // (splitY: where the dark band under him starts; the colours' row on the main screen, over Feed Moti's
+    // bar; bare: no far view behind him, the settings'; keep: his size as it is, Feed Moti's result, where he swells to his own: feed.frame; tall: the least of the
+    // screen's height he takes where the room over the row allows it, the main screen's MENU_HERO.tall: a short screen makes him smaller, never its buttons)
+    const floorY = rowY - MENU_HERO.gap, room = (floorY - logoY - MENU_HERO.room) / MENU_HERO.h, figma = MENU_HERO.k * Math.min(MENU_HERO.w * view.w, room);
+    const R = Math.max(HERO.sizeMin, tall ? Math.min(Math.max(figma, (tall * view.h) / MENU_HERO.h), MENU_HERO.k * room, view.w / 2 - MENU_HERO.side) : figma);   // (k of the room: his hop's)
     this.menuFloor = floorY; this.menuSplit = splitY; this.menuBare = bare; this.lv.menuAt(floorY);
     if (!keep && Math.abs(R - this.R) > 0.5) { this.menuR = this.R = R; this.lv.R = R; this.makeHero(); }
   }
@@ -2823,13 +2825,6 @@ for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8
   STORY_INK[k] = { I, W: '#f3f3f3', L: ink, R: '#f43e34', G: '#ffed57', bg: '#141414' };
 }
 STORY_INK.village = STORY_INK.mine;   // (the Village's world id is 'mine')
-// A card's back in the album (its flip as the strip stops on it, ui.album): its world's ink, a line of its light ink round it, the logo in the middle.
-function cardBack(f) {
-  const b = document.createElement('div'), im = document.createElement('img');
-  b.className = 'aback'; b.style.background = f.I; b.style.boxShadow = 'inset 0 0 0 3px ' + f.L;
-  im.src = 'assets/ui/upwell-logo.svg'; im.alt = ''; im.draggable = false; b.append(im);
-  return b;
-}
 // A card comes alive by the game itself (owner, К4 «А»; К14 «В»: «наклон, перелив как в пикселях»; К15 «А»: «Движения дожны быть плавными, по
 // всем правилам анимации дисней и пиксара»; К16 «Б»: «остальные карточки делай»). Its planes (CARD_PLANES: the plate, the card with what was behind
 // its figures repainted, and each figure on its own; a card without them one plane, its art), each a canvas on the card's cells moved by whole
@@ -3301,7 +3296,7 @@ const ui = {
     else p.append(cap(button(t('continue') + ' • ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => game.playLevel(ni))), 'continue'));   // the width of the screen, 12 px in from its edges
     if (line) fitLine(line, p.clientWidth - 24);
     const y0 = p.getBoundingClientRect().top;
-    if (game.state === 'menu') game.menuFit(purse.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0);   // the hero over the purse and the colours (they climb as rows come, once won)
+    if (game.state === 'menu') game.menuFit(purse.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0, undefined, false, false, MENU_HERO.tall);   // the hero over the purse and the colours (they climb as rows come, once won)
   },
   // The settings (owner, 2026-10-23: the menu's icon on the right): the language, sound, 2.5D and CRT, as at a pause; Back to the menu. Since 2026-10-27 the Figma
   // «Settings» (1258:519; owner: «передай экран настроек… сделай для него моти в скине ремонтника»): all dark, Moti in it in a repairman's hard hat and dungarees
@@ -3438,7 +3433,7 @@ const ui = {
         const f = STORY_INK[c.ink], [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
         fig = el('div', 'scard acard');
         for (const [v, x2] of Object.entries(f)) fig.style.setProperty('--s' + v, x2);
-        im.className = 'astill'; clip.append(im); tilt.append(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt, cardBack(f));   // (no moon on top: owner, 2026-10-28)
+        im.className = 'astill'; clip.append(im); tilt.append(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt);   // (no moon on top: owner, 2026-10-28)
         cells.push({ cell, c, fig, tilt, clip });
       } else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
         fig = el('div', 'acard shut');
@@ -3457,21 +3452,16 @@ const ui = {
       this.albumLive = k; this.live = cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
     };
     // (owner, 2026-10-28: «карточки при скроле нужно анимировать и переворачивать, сейчас скучно совсем»): as they go by, each turned toward the middle and a little
-    // smaller the further it is from it (a fan of cards, no blur on the one in the middle: it stands flat); the one the strip stops on flips over, its back
-    // (its world's ink, the logo) round to its face, then comes alive. Under «reduce motion» none of it
+    // smaller the further it is from it (a fan of cards, no blur on the one in the middle: it stands flat); the one the strip stops on comes alive. Under «reduce
+    // motion» none of it. (Its flip over from a back: gone, owner: «анимацию переворота карт убери»)
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let fanQ = 0; const fan = () => { fanQ = 0; const mid = strip.scrollLeft + strip.clientWidth / 2, x0 = strip.offsetLeft;   // (by the layout, not the turned boxes)
       for (const cell of strip.children) { const w = cell.offsetWidth, d = Math.max(-2, Math.min(2, (cell.offsetLeft - x0 + w / 2 - mid) / (w + 16))), a = Math.abs(d);
         cell.style.transform = a < 0.06 ? '' : `perspective(900px) rotateY(${(-34 * d).toFixed(2)}deg) scale(${(1 - 0.1 * Math.min(a, 1.5)).toFixed(3)})`; cell.style.opacity = a < 0.06 ? '' : (1 - 0.3 * Math.min(a, 1.5)).toFixed(3); } };   // (the one stopped on flat: its pixels whole)
-    const flip = () => {   // the one in the middle over from its back: a full turn, quick out of the stop, slow into its face
-      const k = this.albumLive; if (calm || !k || k.flipped) return; k.flipped = true;
-      k.fig.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-200deg)', offset: 0.55 }, { transform: 'rotateY(-372deg)', offset: 0.85 }, { transform: 'rotateY(-360deg)' }], { duration: 760, easing: 'ease-in-out' });
-      sound.play('click', 0.5, 1.3);
-    };
-    let tm = 0; strip.addEventListener('scroll', () => { if (!calm && !fanQ) fanQ = requestAnimationFrame(fan); clearTimeout(tm); tm = setTimeout(() => { const was = this.albumLive; wake(); if (this.albumLive !== was && this.albumLive) { this.albumLive.flipped = false; flip(); } }, 140); }, { passive: true });
+    let tm = 0; strip.addEventListener('scroll', () => { if (!calm && !fanQ) fanQ = requestAnimationFrame(fan); clearTimeout(tm); tm = setTimeout(wake, 140); }, { passive: true });
     if (!calm) requestAnimationFrame(fan);
     this.albumLive = null;
-    requestAnimationFrame(() => { if (go) strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }); setTimeout(() => { wake(); flip(); }, 60); });   // (the one it opens on flips in too)
+    requestAnimationFrame(() => { if (go) strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }); setTimeout(wake, 60); });
   },
   book() {
     this.mapAt = 'book';

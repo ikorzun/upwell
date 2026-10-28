@@ -3697,8 +3697,12 @@ const ui = {
       for (let i = 0; i < g.maxHp; i++) { const k = i < g.hp ? 'full' : 'empty', s = el('i', k); s.innerHTML = pxSvg(7, 6, `<path fill="currentColor" d="${inkPath(HEART[k], 0, 0)}"/>`); h.append(s); }
     }
     if (g.coins !== this.coins) { this.coins = g.coins; $('coins').replaceChildren(px(g.coins)); }
-    $('hud').classList.toggle('tight', g.coins >= 1000 && view.w < 375);   // (four figures on a narrow screen: the purse and the height a size
-    // smaller, clear of each other; review: 27 px over at 320. Each frame: a narrower window with the same purse too)
+    const hk = $('height').textContent + '|' + g.coins + '|' + view.w;   // the purse and the height a size smaller when at their size the height would run
+    if (hk !== this.hudKey) {   // into the purse (owner, 2026-10-28, a 320-px column: «52 M» over «119»; it was four figures under 375 only): measured as they change,
+      // their widths at full size (the small ones half as wide again), the height round the middle, the purse up to the pause
+      this.hudKey = hk; const hud = $('hud'), q = hud.classList.contains('tight') ? 1.5 : 1, m = $('height').getBoundingClientRect(), pu = $('purse').getBoundingClientRect();
+      hud.classList.toggle('tight', m.left + m.width / 2 + (q * m.width) / 2 + 6 * view.k > pu.right - q * pu.width);
+    }
     const bh = $('bossHp'), bs = g.lv.boss, bon = !!bs && !bs.dead && playing;   // a boss's hearts, under the HUD (Lucky Tower's players asked for them)
     bh.classList.toggle('on', bon);
     if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax || bs !== this.bboss)) { this.bhp = bs.hp; this.bmax = bs.max; this.bboss = bs; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); bh.style.setProperty('--pip', `var(--${(bs.def && bs.def.ink) || 'blue'})`); }   // in its colour

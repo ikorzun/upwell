@@ -25,6 +25,9 @@ function loosen(o, ...keys) {
 // as wide as the view; the hero and everything in the well are sized from it.
 const HERO = { sizeFrac: 1 / 16, sizeMin: 16, sizeMax: 40, body: 1.1 };   // a tile: the well is 16 tiles wide (COLS); in a level drawn `body` times his size
 // (owner, 2026-10-27: «увеличь размер моти на 10% во всех мирах»; his body as it was: drawBig)
+const HURT_SQUEEZE = { k: 0.8, dur: 1, in: 0.1, out: 0.5 };   // a heart lost: the hero drawn `k` of his size for `dur` s, in fast over `in`, back over the last `out`
+// (owner, 2026-10-28: «сам моти в этот момент сжимается на 20% на секунду»; drawn only, as drawBig, his body as it was)
+const hurtSqueezeK = (left) => { const q = HURT_SQUEEZE, t = q.dur - left, u = left / q.out, a = t < q.in ? 1 - (1 - t / q.in) ** 2 : u < 1 ? u * u * (3 - 2 * u) : 1; return 1 - (1 - q.k) * a; };
 const MENU_HERO = { w: 0.25, k: 0.85, h: 1.89, gap: 24, room: 24, tall: 0.3, side: 24 };   // the menu's hero (owner, 2026-10-23, the Figma «Main»): R a quarter of the screen across (its width at rest about 2 R), 1.89 R tall at rest, then `k` of that (owner: «уменьши героя на 15%»); its floor `gap` px over the purse (owner, 2026-10-28: 24; it was 36 over the colours' row), `room` px at least under the logo; on the main screen at least `tall` of the screen's height where the room allows it, `side` px at least from its edges (owner, 2026-10-28: «моти на главном экране должен занимать не менее 30% по вертикали, если позволяет пространство. На маленьких экранах уменьшать именно его, а не кнопки»)
 const BIG_BLOCK = { w: 3.5, h: 2.6, size: 0.5, tone: 1.45 };   // a block this wide and tall (tiles) gets a kanji half its smaller side across, in its ink 0.45 of the way from the black (KANJI)
 // Buttons, as in Downwell. Left and right run at `speed` R/s, reached at `accel`/s on a
@@ -7804,7 +7807,7 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const b of list) if (b !== hero || !heroOff) sig += b.id + ',';
   this.idxDirty = sig !== this.idxSig;
   this.kolobok = !!th.skazka;   // the Dark Forest's hero a Kolobok (see writeFace)
-  for (const b of list) if (b !== hero || !heroOff) { if (b === hero && !menu && HERO.body !== 1) drawBig(this, b, HERO.body, alpha); else this.buildBody(b, alpha); }   // (the hero
+  for (const b of list) if (b !== hero || !heroOff) { if (b === hero && !menu && HERO.body !== 1) drawBig(this, b, HERO.body * (g.hurtSq > 0 ? hurtSqueezeK(g.hurtSq) : 1), alpha); else this.buildBody(b, alpha); }   // (the hero
   // drawn bigger than his body: drawBig)
   const front = this.nf;
   fx.write(this);

@@ -1139,7 +1139,7 @@ class Game {
   // What a level starts clear of, the menu's scene too (its hero not left in a candy's colours or a helmet, a combo's count gone, no swarm or
   // followers): the timers, the powers, the landing count, the effects
   levelReset() {
-    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
+    this.sinceContact = 1; this.queueT = 0; this.air = 0; this.invuln = 0; this.hurtSq = 0; this.hitstop = 0; this.levelM = 0; this.idleT = 0; this.gunT = 0; this.gunMax = 1; this.fallV = 0; this.landV = 0; this.landT = Infinity; this.landUsed = true; this.missed = 0; this.rebounded = false; this.dizzyT = 0; this.joyT = 0; this.flatT = 0; this.harmed = false; this.combo = 0; this.pow = null; this.ram = false; this.rocket = null; if (this.hero) { this.hero.thread = false; this.hero.squeezeIn = 0; }
     this.touch = 0; this.rising = false; this.crouch = false; this.plasters = this.mods.plaster;   // a plaster for each taken, a level
     this.winT = 0; this.rushed = false;   // a beaten boss's win still to come is the old level's (rushed: the fire's speed-up heard, К2)
     this.followers = []; this.trail = []; this.swarm = []; this.fireFree = this.mods.fireFree;
@@ -1507,6 +1507,7 @@ class Game {
       this.invuln -= dt;
       if (this.invuln <= 0 && playing && (this.blinkHold || 0) < HEALTH.hold && this.insideFoe()) { this.blinkHold = (this.blinkHold || 0) + dt; this.invuln = 0.5 * dt; }
     } else this.blinkHold = 0;
+    if (this.hurtSq > 0) this.hurtSq -= dt;   // (the hero drawn smaller a second after a heart lost: HURT_SQUEEZE)
     if (playing) for (const r of lv.near(hero.cy - MAGNET.range * this.R, hero.cy + MAGNET.range * this.R)) if (r.magnet && hero.cx > r.x0 - this.R && hero.cx < r.x1 + this.R) {   // a magnet ledge pulls the hero in, more the nearer
       const d = hero.cy < r.y0 ? r.y0 - hero.maxY : hero.minY - r.y1, k = 1 - clamp(d / (MAGNET.range * this.R), 0, 1);
       if (d > 1) addVel(hero, 0, (hero.cy < r.y0 ? 1 : -1) * MAGNET.pull * this.R * k * dt);
@@ -2027,7 +2028,7 @@ class Game {
     this.invuln = HEALTH.invuln + this.mods.invuln;
     setVel(H, dx * HEALTH.knock, Math.min(dy * HEALTH.knock, 0) - HEALTH.knock * 0.45);
     unstick(H, 0.3); H.face.surprise = 1; H.kickSquash(dx, dy, 2); this.rising = false;
-    this.hitstop = HEALTH.hitstop; shake.add(7); haptics.buzz(40); if (lost) ui.hurt();
+    this.hitstop = HEALTH.hitstop; shake.add(7); haptics.buzz(40); if (lost) { ui.hurt(); this.hurtSq = HURT_SQUEEZE.dur; }   // (with the screen's kick: fx.js)
     if (this.hp > 0) sound.play('hurt');
     if (this.hp <= 0) this.die();
     return true;

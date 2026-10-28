@@ -10,7 +10,7 @@
   const retro = () => typeof save !== 'undefined' && save.crt !== false, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const KICK = {   // a moment: its split (a game pixel at the screen's sides at 1, a third of it in the middle), its tear (the most a band is pushed aside, game px),
     // its jolt (px down), its flash (ink and strength), its sweep (a bright band down the screen), how much darker the lines; how long it fades over (s)
-    hurt: { chroma: 2.6, tear: 6, jolt: 3, flash: [0.96, 0.24, 0.2, 0.36], lines: 0.4, dur: 0.45 },
+    hurt: { chroma: 3.12, tear: 7.2, jolt: 3.6, flash: [0.96, 0.24, 0.2, 0.36], lines: 0.4, dur: 0.45 },   // (its split, tear and jolt a fifth more: owner, 2026-10-28, «усиль на 20% эффект искажения экрана при уроне»)
     kill: { chroma: 2, sweep: 1, flash: [1, 1, 1, 0.18], lines: 0.25, dur: 0.34 },
     hitBoss: { chroma: 2.2, tear: 3, sweep: 1, flash: [1, 1, 1, 0.22], lines: 0.3, dur: 0.42 },
     free: { chroma: 0.5, dur: 0.22 }, task: { chroma: 0.5, dur: 0.22 }, take: { chroma: 0.6, dur: 0.25 }, buy: { chroma: 0.4, dur: 0.18 },

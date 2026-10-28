@@ -1066,7 +1066,8 @@ const kitThing = (lv, r) => {
     const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, lamp = [() => steady(1.8) && room(0, 1.6, 2.6), () => ({ x: X(0.5), y: b - 2.0 * t })];
     // Iwami Ginzan's own (Д119 «А»: the ore carriers' baskets or a box of silver, the mountain god's shrine or a stone rakan, a windlass over a drainage shaft; the
     // cart only on 2-6, the drift laid with rails): each its sprite's room (IW, one sheet pixel a game pixel), in tiles
-    const alt = hk(11) < 3, iw = (el) => { const S = IW[el]; return () => half && steady(((S.dx + S.rows[0].length) * PIX.base) / t + 0.3) && room(0, ((S.dx + S.rows[0].length) * PIX.base) / t + 0.2, (S.base * PIX.base) / t + 0.3); };
+    const alt = ((Math.imul(Math.round(b / t) + 11, 0xc2b2ae35) >>> 0) / 4294967296) < 0.5, iw = (el) => { const S = IW[el]; return () => half && steady(((S.dx + S.rows[0].length) * PIX.base) / t + 0.3) && room(0, ((S.dx + S.rows[0].length) * PIX.base) / t + 0.2, (S.base * PIX.base) / t + 0.3); };   // (alt
+    // its own hash: hk(11) beside the slot's hk(3) is that one shifted, and silver came 7 times to the baskets' 1, the shrine 6 to the rakan's 2; Worlds, handover 63)
     const one = lv.stage === 5 ? ['cart', () => half && steady(2.6) && room(0, 2.6, 2.0)] : [alt ? 'silver' : 'baskets', iw(alt ? 'silver' : 'baskets')];
     k = hk(3); opts = [[0, 'lamp', ...lamp], [3, 'lamp', ...lamp], [1, ...one], [2, 'ore', () => half && steady(2.4) && room(0, 2.2, 2.0)],
       [4, alt ? 'rakan' : 'shrine', iw(alt ? 'rakan' : 'shrine')], [5, 'windlass', iw('windlass')]];

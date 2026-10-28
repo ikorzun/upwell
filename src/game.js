@@ -78,7 +78,9 @@ const STR = {
   },
 };
 let lang = 'en';
-const t = (k) => (STR[lang] && STR[lang][k]) || STR.en[k];
+function t(k) { return (STR[lang] && STR[lang][k]) || STR.en[k]; }   // (a function, not a const: Playgama's game host runs its bootstrap.js first, whose
+// top-level «var o, t, r» and «function a» are globals, and «const t» beside them was a SyntaxError that stopped the whole game there: «Identifier 't'
+// has already been declared», the Bridge never up, its archive check failed. A function declaration may share the name; ours is the one left)
 const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (_, n) => o[n]);
 const L2 = (o) => o[lang] || o.en;
 const LANGS = [['en', 'EN'], ['es', 'ES'], ['pt', 'PT'], ['ja', '日本語']];   // short, in one row (owner); Japanese as it is written

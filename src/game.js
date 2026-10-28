@@ -3197,6 +3197,19 @@ function iconEl(id) {
   e.dataset.i = id; e.className = 'px ico' + (rows[0].length / (rows.x2 || 1) > 12 ? ' wide' : ''); e.innerHTML = pxSvg(rows[0].length, rows.length, paths, rows.x2);   // (wide: a portrait's 16)
   return e;
 }
+// The Book's and the upgrade cards' pictures in detail (owner, 2026-10-28: «на этом экране и все в разделе Book перерисуй с детализацией, как сейчас
+// нарисована еда в мэтч – именно детализация и ракурс»): GPT's sheets in the food sheet's style cut as the foods were (ICON48, research/icons48), drawn
+// a sprite pixel a CSS px (48: pixel for pixel on any screen); one not redrawn, its plain picture
+const icon48Svgs = {};
+function bigIcon(id) {
+  const f = ICON48[id]; if (!f) return iconEl(id);
+  if (!icon48Svgs[id]) {
+    const [ps, rs] = f, rows = rs.split('/'), pal = {}, runs = {}; for (const q of ps.split(',')) pal[q[0]] = '#' + q.slice(1);
+    rows.forEach((r, y) => { for (let x = 0; x < r.length;) { const c = r[x]; if (c === '.') { x++; continue; } let e = x + 1; while (e < r.length && r[e] === c) e++; runs[c] = (runs[c] || '') + 'M' + x + ' ' + y + 'h' + (e - x) + 'v1h-' + (e - x) + 'z'; x = e; } });
+    icon48Svgs[id] = '<svg viewBox="0 0 ' + rows[0].length + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + Object.keys(runs).map((c) => '<path fill="' + pal[c] + '" d="' + runs[c] + '"/>').join('') + '</svg>';
+  }
+  const e = document.createElement('i'); e.className = 'ico big48'; e.dataset.i = id; e.innerHTML = icon48Svgs[id]; return e;
+}
 const HEART = { full: '.##.##./#######/#######/.#####./..###../...#...'.split('/'), empty: '.##.##./#..#..#/#.....#/.#...#./..#.#../...#...'.split('/') };
 // A disc of radius `r` px in 2-px pixels: a gray rim a pixel wide round an inside of ink (or, for the knob, white) at `fill`.
 function pixelDisc(r, fill) {
@@ -3340,7 +3353,7 @@ const ui = {
     for (const u of list) {
       const [name, desc] = L2(u.name), c = button('', 'card', () => game.pick(u)), d = el('span');
       d.append(px(desc, 123, true));   // (its words' room: 340 less its sides, the picture and the gap)
-      c.append(iconEl(u.id), el('b', null, name), d);
+      c.append(bigIcon(u.id), el('b', null, name), d);
       opts.append(c);
     }
     box.append(slot, cap(el('div', 'head', t('pick')), 'pick'), opts); p.append(box);
@@ -3481,7 +3494,7 @@ const ui = {
       feed.append(el('div', 'sect', t(head) + ' · ' + items.filter(([id]) => has(k, id)).length + '/' + items.length));   // how many found
       for (const [id, icon, name, desc] of items) {
         const known = has(k, id), card = el('div', 'card2' + (known ? '' : ' locked')), pic = el('div', 'pic'), txt = el('div', 'txt');
-        pic.append(known ? iconEl(icon) : px('?'));
+        pic.append(known ? bigIcon(icon) : px('?'));
         txt.append(el('b', null, known ? name : '???'), el('span', null, known ? desc : t('unknown')));
         card.append(pic, txt); feed.append(card);
       }

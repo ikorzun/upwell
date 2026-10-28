@@ -2605,8 +2605,8 @@ class Game {
       this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: wd, theme: wd.theme, floorY: 0.5 * view.h }); this.menuBack = this.menuBackdrop();
       menuTouch.idleAt = performance.now(); menuTouch.hopAt = 0; menuTouch.hops = 0;
     }
-    const r = slot.getBoundingClientRect(), y0 = uiEl.getBoundingClientRect().top, R = Math.max(HERO.sizeMin, (MENU_HERO.k * r.width) / 2.05);
-    this.menuFloor = r.bottom - y0; this.menuSplit = 1; this.menuBare = true; this.lv.menuAt(this.menuFloor);
+    const r = slot.getBoundingClientRect(), y0 = uiEl.getBoundingClientRect().top, R = Math.max(HERO.sizeMin, (MENU_HERO.k * r.width) / view.k / 2.05);
+    this.menuFloor = (r.bottom - y0) / view.k; this.menuSplit = 1; this.menuBare = true; this.lv.menuAt(this.menuFloor);
     if (this.hero === this.held.hero || Math.abs(R - this.R) > 0.5) { this.R = this.lv.R = R; this.makeHero(); }   // (no levelReset: the run's level state is the kept level's)
   }
   stageOut() {
@@ -3169,7 +3169,7 @@ function cap(e, k, o) {   // (`o`: the values for its {n}s, as tf takes them)
 const BOSS_FIG = {};
 function bossFig(id, cv, cell, box) {   // (`box`: the CSS px it fits in, else its cell less a margin and a row of stars)
   const put = (f) => {
-    const d = devicePixelRatio || 1, r = cell.getBoundingClientRect(), room = box || [Math.max(1, r.width - 12), Math.max(1, r.height - 34)], k = Math.min((room[0] * d) / f.w, (room[1] * d) / f.h), K = k >= 1 ? Math.floor(k) : k;
+    const d = (devicePixelRatio || 1) * view.k, r = cell.getBoundingClientRect(), room = box || [Math.max(1, r.width / view.k - 12), Math.max(1, r.height / view.k - 34)], k = Math.min((room[0] * d) / f.w, (room[1] * d) / f.h), K = k >= 1 ? Math.floor(k) : k;
     cv.width = f.w; cv.height = f.h; cv.getContext('2d').drawImage(f.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
     cv.style.width = (f.w * K) / d + 'px'; cv.style.height = (f.h * K) / d + 'px';
   };
@@ -3239,7 +3239,7 @@ function menuTop(on, over) {   // (over: an ink of its own, the settings' dark)
   document.documentElement.classList.toggle('menuTop', on); $('topTint').style.background = ink; if (themeMeta && coarse) themeMeta.content = on ? ink : themeInk;   // (a phone's: a desktop's tab bar left as it is)
 }
 function fitLine(e, w, min = 1.2) {   // a line of words a little smaller each time till it fits `w` px (the menu's perk, on one line: owner)
-  for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
+  for (let p = parseFloat(getComputedStyle(e).getPropertyValue('--p')) || 2; e.getBoundingClientRect().width / view.k > w && p > min;) { p -= 0.1; e.style.setProperty('--p', p.toFixed(2)); }
 }
 // A big button's words stay on one line: a size smaller at a time (down to --p 2) while they are wider than the button
 // ("×2 con un anuncio", a world's name after Continue on a small phone).
@@ -3314,7 +3314,7 @@ const ui = {
     else p.append(cap(button(t('continue') + ' • ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => game.playLevel(ni))), 'continue'));   // the width of the screen, 12 px in from its edges
     if (line) fitLine(line, p.clientWidth - 24);
     const y0 = p.getBoundingClientRect().top;
-    if (game.state === 'menu') game.menuFit(purse.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0, undefined, false, false, MENU_HERO.tall);   // the hero over the purse and the colours (they climb as rows come, once won)
+    if (game.state === 'menu') game.menuFit((purse.getBoundingClientRect().top - y0) / view.k, (logo.getBoundingClientRect().bottom - y0) / view.k, undefined, false, false, MENU_HERO.tall);   // the hero over the purse and the colours (they climb as rows come, once won)
   },
   // The settings (owner, 2026-10-23: the menu's icon on the right): the language, sound, 2.5D and CRT, as at a pause; Back to the menu. Since 2026-10-27 the Figma
   // «Settings» (1258:519; owner: «передай экран настроек… сделай для него моти в скине ремонтника»): all dark, Moti in it in a repairman's hard hat and dungarees
@@ -3325,7 +3325,7 @@ const ui = {
     opts.append(...this.prefs(() => this.settings()));
     p.append(head, opts, cap(button(t('goBack'), 'big thumb', () => this.menu()), 'goBack'));
     if (game.state !== 'menu') return;
-    const y0 = p.getBoundingClientRect().top, feet = head.getBoundingClientRect().top - y0 - 11;   // (the Figma's 10.6 px between his feet and the words' frame)
+    const y0 = p.getBoundingClientRect().top, feet = (head.getBoundingClientRect().top - y0) / view.k - 11;   // (the Figma's 10.6 px between his feet and the words' frame)
     game.menuFit(feet + MENU_HERO.gap, 0, 1, true);   // (the dark from the top, no far view: all of it under him)
     if (first && game.hero) game.hero.kickSquash(0, 1, 0.6);   // into his work clothes: a little bounce
   },
@@ -3439,7 +3439,7 @@ const ui = {
     x.src = 'assets/ui/close.svg'; x.alt = ''; x.draggable = false; shut.append(x); shut.setAttribute('aria-label', t('goBack'));
     head.append(shut, cap(el('div', 'head', t('album')), 'album'), el('div', 'acount', n + '/' + ids.length));
     p.append(head, strip);   // (every card in pixels: the style's switch gone, owner 2026-10-27: «У карточек внизу убери переключатель стиля, все карточки только пиксельные»)
-    const [w0, h0] = STORY.moon_fall.cells, room = Math.max(160, strip.getBoundingClientRect().height - 40), W = Math.round(Math.min(view.w - 64, (room * w0) / h0)), H = Math.round((W * h0) / w0);
+    const [w0, h0] = STORY.moon_fall.cells, room = Math.max(160, strip.getBoundingClientRect().height / view.k - 40), W = Math.round(Math.min(view.w - 64, (room * w0) / h0)), H = Math.round((W * h0) / w0);
     strip.style.setProperty('--aw', W + 'px'); strip.style.setProperty('--ah', H + 'px');
     const cells = [];
     let go = null;
@@ -3464,7 +3464,7 @@ const ui = {
       if (open) go = cell;   // (at the furthest one seen)
     }
     const wake = () => {   // the card in the middle alive, the one before it still (one at a time: a phone's breath)
-      const mid = strip.getBoundingClientRect().left + strip.clientWidth / 2, k = cells.find((q) => { const r = q.cell.getBoundingClientRect(); return r.left < mid && r.right > mid; });
+      const mid = strip.getBoundingClientRect().left + (strip.clientWidth * view.k) / 2, k = cells.find((q) => { const r = q.cell.getBoundingClientRect(); return r.left < mid && r.right > mid; });
       if (!k || k === this.albumLive) return;
       if (this.live) this.live.stop();
       this.albumLive = k; this.live = cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
@@ -3559,8 +3559,8 @@ const ui = {
     // As big as the phone allows (owner, 2026-10-24: «Карточка истории или босса должна занимать на телефоне максимальное количество места»): edge to edge or
     // as tall as is left over its title and button, in whole pixels: a whole number of the screen's to each of the art's cells, unless that loses over 15% of it (the cards at twice their
     // pixels since 2026-10-27: a whole step is a third of a cell's size, and 30% shrank a 320-px 3x phone's card to 224 px)
-    const room = title.getBoundingClientRect().top - p.getBoundingClientRect().top - parseFloat(getComputedStyle(p).paddingTop) - parseFloat(getComputedStyle(card).marginBottom) - 12;
-    const [w0, h0] = STORY.moon_fall.cells, box = Math.min(view.w, room * w0 / h0), fit = box / w0, d = window.devicePixelRatio || 1, whole = Math.floor(fit * d) / d, W = w0 * (whole >= 0.85 * fit ? whole : fit);
+    const room = (title.getBoundingClientRect().top - p.getBoundingClientRect().top) / view.k - parseFloat(getComputedStyle(p).paddingTop) - parseFloat(getComputedStyle(card).marginBottom) - 12;
+    const [w0, h0] = STORY.moon_fall.cells, box = Math.min(view.w, room * w0 / h0), fit = box / w0, d = (window.devicePixelRatio || 1) * view.k, whole = Math.floor(fit * d) / d, W = w0 * (whole >= 0.85 * fit ? whole : fit);
     card.style.width = W + 'px'; card.style.height = W * h / w + 'px';   // every card as wide as the first, the moon's (owner, 2026-10-25: «все карточки включая боссов должны быть
     // размером как первая карточка с луной»): its size worked out on the moon's cells, the rest scaled to it
     if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);
@@ -3588,7 +3588,7 @@ const ui = {
   result(r) {
     const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons, as the Figma «too sour» (1268:2463)
     p.classList.add('dlg');
-    const cuts = [], fit = () => { cuts.sort((a, b) => a[0] - b[0]); while (cuts.length && box.firstElementChild.getBoundingClientRect().top < p.getBoundingClientRect().top + 8) cuts.shift()[1].remove(); };   // a short screen: the least of it goes, till the top shows (touch scrolls nothing here)
+    const cuts = [], fit = () => { cuts.sort((a, b) => a[0] - b[0]); while (cuts.length && box.firstElementChild.getBoundingClientRect().top < p.getBoundingClientRect().top + 8 * view.k) cuts.shift()[1].remove(); };   // a short screen: the least of it goes, till the top shows (touch scrolls nothing here)
     const def = !r.won && game.lv.boss && game.lv.boss.def;   // a loss: a word on what did it (a boss has its own, as in ui.campDead),
     box.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[game.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', r.won ? t('won') : t(deadKey(r.why, game.lv.theme))), r.won ? 'won' : deadKey(r.why, game.lv.theme)));
     const tb = this.runRows([[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]]);
@@ -3660,7 +3660,7 @@ const ui = {
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot' && !(g.lv && g.lv.kind === 'menu');   // (the owed cards over the menu: no level's HUD)
     $('hud').classList.toggle('on', playing);
-    if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children, $('tasks')].map((e) => e.getBoundingClientRect().bottom));   // the threat signs go under it, the level's name too (see Game.threats)
+    if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children, $('tasks')].map((e) => e.getBoundingClientRect().bottom)) / view.k;   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner
     $('pad').classList.toggle('idle', performance.now() - padUsed > 2500);   // unused, the keys go faint
@@ -4037,7 +4037,7 @@ const ads = {
 // ── Setup ────────────────────────────────────────────────────
 const canvas = $('gl');
 const uiEl = $('ui');
-const view = { w: 1, h: 1, left: 0, keep: 0 };   // keep: px at the bottom under the touch keys
+const view = { w: 1, h: 1, left: 0, keep: 0, k: 1 };   // keep: px at the bottom under the touch keys; k: the column's px on the screen (layout: under 1 in a short window)
 const perf = { ctxLoss: 0, lost0: 0, t0: 0, last: 0, active: 0, ft: [] };   // the renderer counts lost contexts here (Gum sends them as telemetry); the rest: see perfFrame
 const fx = new FX();
 const game = new Game();
@@ -4048,6 +4048,7 @@ let paused = document.hidden, started = false, firstFrame = false, layoutQueued 
 // The view is a portrait column: the whole screen on a phone held upright, a 9:16
 // column in the middle of a wider window.
 const PIXELATED = !!(window.CSS && CSS.supports && CSS.supports('image-rendering', 'pixelated'));   // (Safari and iOS 10 on, Chrome, Firefox: caniuse 97%)
+const COL_MIN = 320;   // the narrowest column laid out as it is: the smallest phone the game is checked at (320×568); a computer's narrower one, shrunk to it
 function layout() {
   const vw = window.innerWidth, vh = window.innerHeight;
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
@@ -4056,20 +4057,27 @@ function layout() {
   const d = window.devicePixelRatio || 1, W0 = vw < vh ? vw : Math.min(vw, Math.round(vh * 0.5625)), W = Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = Math.floor(vh / PIX.size + 1e-6) * PIX.size;   // a phone
   // held upright: all of its width; a whole number of game pixels across and down, on the screen's own pixels (left), so each is as many of them as the next
   // (owner: «пиксель в пиксель на всех устройствах»; a phone's was its full width and height, a game pixel 4.5 of an iPhone's, lines 4 and 5 by turns)
-  const left = Math.round(((vw - W) / 2) * d) / d;
-  view.w = W; view.h = H; view.left = left; view.hudB = 0;   // (the HUD measured again: see ui.frame)
+  const left = Math.round(((vw - W) / 2) * d) / d, P = PIX.size;
+  // A computer's short window (Poki's 640×360 and 836×470: a 203- or 264-px column, the well wider than it, the HUD in two rows): the column laid out as
+  // the narrowest phone's (COL_MIN across, its height to the same scale) and shown k times smaller, its game pixel still P of the screen (pixel for pixel)
+  const k = coarse ? 1 : Math.min(1, W / COL_MIN);
+  PIX.size = P / k;   // (the drawing's grid in the laid-out column's px)
+  view.w = W / k; view.h = H / k; view.left = left; view.k = k; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
-  const sides = $('sides'), Ws = coarse ? 0 : Math.floor(Math.min(vw, 2 * H) / PIX.size + 1e-6) * PIX.size, on = Ws > W + 4 * PIX.size;   // a computer's: its far view beside the
+  Object.assign(uiEl.style, k < 1 ? { width: view.w + 'px', height: view.h + 'px', transform: 'scale(' + k + ')', transformOrigin: '0 0' } : { transform: '' });   // (the
+  // page's words and buttons laid out in the column's px, shown at its size)
+  document.documentElement.style.setProperty('--k', k);   // (what sits on the page outside the column, over it: Feed Moti's words and bites)
+  const sides = $('sides'), Ws = coarse ? 0 : Math.floor(Math.min(vw, 2 * H) / P + 1e-6) * P, on = Ws > W + 4 * P;   // a computer's: its far view beside the
   // column, the window's width and 2:1 at most (owner, П3 «А»; Playgama's 27th), in the column's game pixels (Renderer.sideShot)
   sides.classList.toggle('on', on); renderer.sides = on ? sides : null;
-  if (on) { sides.width = Math.round(Ws / PIX.size); sides.height = Math.round(H / PIX.size); Object.assign(sides.style, { width: Ws + 'px', height: H + 'px', left: Math.round(((vw - Ws) / 2) * d) / d + 'px' }); renderer.sideLv = null; }
-  renderer.resize(W, H, PIXELATED ? (CINE ? CINE.k : 1) / PIX.size : window.devicePixelRatio || 1);   // (the cinematic fork: k times the game's pixels, its light that smooth)   // the canvas as many pixels as the game draws, the page scales it up
+  if (on) { sides.width = Math.round(Ws / P); sides.height = Math.round(H / P); Object.assign(sides.style, { width: Ws + 'px', height: H + 'px', left: Math.round(((vw - Ws) / 2) * d) / d + 'px' }); renderer.sideLv = null; }
+  renderer.resize(view.w, view.h, PIXELATED ? (CINE ? CINE.k : 1) / PIX.size : (window.devicePixelRatio || 1) * k);   // (the cinematic fork: k times the game's pixels, its light that smooth)   // the canvas as many pixels as the game draws, the page scales it up
   // pixelated (index.html): a phone gets no full-resolution copy of each frame to keep and compose (on a 3x iPhone 20 times the pixels for nothing);
   // a browser that cannot scale it pixelated gets the copy, a device pixel per pixel, as before
   game.applyMods();
-  if (started && Math.abs(W - game.builtW) > 2) game.resized();
+  if (started && Math.abs(view.w - game.builtW) > 2) game.resized();
   else if (started && ui.open === 'menu') ui.menu();   // only taller or shorter: the menu's rows, and the hero over them, placed again
 }
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
@@ -4109,7 +4117,7 @@ const MENU_HOP = { first: 1.2, every: 3.6, ready: 0.12, squash: 0.5, stretch: 0.
 const menuTouch = {
   ptrs: new Map(), lastT: 0, lastPoke: null, idleAt: 0, hopAt: 0, hops: 0,
   on() { return game.state === 'menu' && ui.open === 'menu' && game.lv && game.lv.kind === 'menu' && !!game.hero; },
-  local(e) { return [e.clientX - view.left, e.clientY + game.lv.cam]; },   // in the world
+  local(e) { return [(e.clientX - view.left) / view.k, e.clientY / view.k + game.lv.cam]; },   // in the world
   look(x, y, now) { const l = game.heroLook; l.x = x; l.y = y; l.t = now; },
   down(e) {
     this.idleAt = performance.now(); this.hopAt = 0;   // (a touch: no hop on its way, the quiet counted from now)

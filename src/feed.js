@@ -242,7 +242,7 @@ else {
   const bits = []; let fxc = null, fxRaf = 0, fxLast = 0;
   window.feedSvg = { foodSvg, volOf, bits };   // (for checks)
   const fxCanvas = () => {   // the bits' canvas over the screen, a food's pixel its pixel (whole screen points): made at the first bit, gone with the board (feed.close)
-    const dpr = devicePixelRatio || 1, k = Math.max(1, Math.round(((feed.foodPx || 64) * dpr) / FEED.food)),   // (home, no board yet: a food's 64)
+    const dpr = devicePixelRatio || 1, k = Math.max(1, Math.round(((feed.foodPx || 64) * view.k * dpr) / FEED.food)),   // (home, no board yet: a food's 64)
       W = Math.ceil((innerWidth * dpr) / k), H = Math.ceil((innerHeight * dpr) / k);
     if (!fxc) { fxc = document.createElement('canvas'); fxc.className = 'fm-fx'; document.body.append(fxc); }
     if (fxc.width !== W || fxc.height !== H || fxc.k !== k) { fxc.width = W; fxc.height = H; fxc.k = k; fxc.style.width = (W * k) / dpr + 'px'; fxc.style.height = (H * k) / dpr + 'px'; }
@@ -293,15 +293,15 @@ else {
   };
   const hearts = (n) => {   // a few hearts out of his crown, up and swaying (his joy: a cascade, a star, full)
     const b = game.hero; if (!b || still) return;
-    for (let i = 0; i < n; i++) bits.push({ heart: true, x: view.left + b.cx + fxRand(-0.6, 0.6) * b.R, y: b.minY - game.lv.cam + fxRand(0, 0.3) * b.R, vx: fxRand(-30, 30), vy: -fxRand(70, 130), g: 0, drag: 0.6,
+    for (let i = 0; i < n; i++) bits.push({ heart: true, x: view.left + (b.cx + fxRand(-0.6, 0.6) * b.R) * view.k, y: (b.minY - game.lv.cam + fxRand(0, 0.3) * b.R) * view.k, vx: fxRand(-30, 30), vy: -fxRand(70, 130), g: 0, drag: 0.6,
       t: -i * 0.09, life: fxRand(0.9, 1.3), ph: fxRand(0, 6.28), c: fxRand(0, 1) < 0.5 ? '#f43e34' : '#ff7db0' });
     fxCanvas();
   };
   let sayEl = null, sayEnd = 0;
   const sayPlace = () => {   // the bubble over his crown, kept on the screen (8 px in from its sides)
     const b = game.hero; if (!sayEl || !b) return;
-    const w = sayEl.offsetWidth, x = Math.min(innerWidth - 8 - w / 2, Math.max(8 + w / 2, view.left + b.cx));
-    sayEl.style.left = x + 'px'; sayEl.style.top = Math.max(sayEl.offsetHeight + 8, b.minY - game.lv.cam - 10) + 'px';
+    const w = sayEl.offsetWidth, x = Math.min(innerWidth - 8 - w / 2, Math.max(8 + w / 2, view.left + b.cx * view.k));
+    sayEl.style.left = x + 'px'; sayEl.style.top = Math.max(sayEl.offsetHeight + 8, (b.minY - game.lv.cam - 10) * view.k) + 'px';
   };
   const say = (text, ms = FEED.say.hold) => {   // his word in a bubble over him: in with a pop, he says it (a little squash, his mouth round), out after ms
     if (sayEl) sayEl.remove(); for (const e of document.querySelectorAll('.say.out')) e.remove();   // (one going out: gone at once, not under the new one)
@@ -359,8 +359,8 @@ else {
       if (this.busy) this.dirty = true;   // (made again in the middle of a move: once more when it is over, from the board as it ends)
       logo.remove(); this.fin = 0;
       if (this.st.done && this.st.told) { this.result(p); return; }   // (the run over: its result in the board's place)
-      const W = document.documentElement.clientWidth, st = this.st, n = FEED.n, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / n)), dpr = devicePixelRatio || 1;   // (the page's
-      // width: the game's view is cut to its pixel grid)
+      const W = coarse ? document.documentElement.clientWidth : view.w, st = this.st, n = FEED.n, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / n)), dpr = (devicePixelRatio || 1) * view.k;   // (a phone's page's
+      // width: the game's view is cut to its pixel grid; a computer's column; a screen pixel as the column shows it)
       const k = Math.max(1, Math.floor((cell * dpr) / FEED.widest)), food = (FEED.food * k) / dpr, kh = Math.max(1, Math.floor((32 * dpr) / FEED.food));   // a food as big as
       // its cell lets the widest one be, each of its pixels whole screen points (its sprite's clear edge may stand out of the cell); the bar's two 32 at most
       this.cellPx = cell; this.foodPx = food;
@@ -381,8 +381,8 @@ else {
       st.b.forEach((q, i) => this.els.push(this.tile(q, i)));
       this.meter();
       this.wire(box);
-      const y0 = p.getBoundingClientRect().top, top = bar.getBoundingClientRect().top - y0;
-      game.menuFit(top, x.getBoundingClientRect().top - y0, top - FEED.band);   // Moti over the bar, the dark band from a little over it (the Figma's)
+      const y0 = p.getBoundingClientRect().top, top = (bar.getBoundingClientRect().top - y0) / view.k;
+      game.menuFit(top, (x.getBoundingClientRect().top - y0) / view.k, top - FEED.band);   // Moti over the bar, the dark band from a little over it (the Figma's)
     },
     tile(k, i) {   // a food's element at cell i; a frozen one's under the sheet's own frozen treat, its ice alone (the treat in it left out), see-through
       const e = el('div', 'fm-t'); e.innerHTML = foodSvg(FL.food(k)) + (FL.ice(k) ? '<i class="fm-ice">' + foodSvg('frozen', 'efhi') + '</i>' : '');
@@ -542,7 +542,7 @@ else {
       // foods, the dark from a little over his feet down; the first time each in after the other, confetti for a star or more; his gift the day's first time (З20 «Б»). No
       // score, best or Again, as in it
       const st = this.st, stars = FL.stars(st.full), first = !st.shown; st.shown = true;
-      const W = document.documentElement.clientWidth, dpr = devicePixelRatio || 1, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / FEED.n));
+      const W = coarse ? document.documentElement.clientWidth : view.w, dpr = (devicePixelRatio || 1) * view.k, cell = Math.min(FEED.cellMax, Math.floor((W - 2 * FEED.side + 1) / FEED.n));
       this.foodPx = (FEED.food * Math.max(1, Math.floor((cell * dpr) / FEED.widest))) / dpr;   // (a food as big as on the board: its pixels whole screen points)
       const box = el('div', 'wbox fm-fin'), row = el('div', 'wstars fm-stars' + (first ? ' stars' : '')), words = el('div', 'fm-words');
       box.style.setProperty('--food', this.foodPx + 'px');
@@ -560,7 +560,7 @@ else {
       // coins, the day's first run (З20 «Б»)
       const close = cap(button(t('feedClose'), 'big thumb', () => this.close()), 'feedClose');
       box.append(row, words); p.append(box, close); this.finLook = row;
-      const y0 = p.getBoundingClientRect().top, feet = row.getBoundingClientRect().top - y0 - FEED.fin.feet;
+      const y0 = p.getBoundingClientRect().top, feet = (row.getBoundingClientRect().top - y0) / view.k - FEED.fin.feet;
       game.menuFit(feet + MENU_HERO.gap, 0, feet - FEED.fin.band, false, true);   // (his size kept: the bigger one he swells to)
       this.fin = Math.min(FEED.fin.big, Math.max(1, (feet - MENU_HERO.room) / (MENU_HERO.h * game.R)));   // (no higher than the menu's room over him)
       if (!first) return;
@@ -595,18 +595,18 @@ else {
       }
       if (!this.active) return;
       const fly = this.flying[this.flying.length - 1], L = game.heroLook;
-      if (fly) { const p = fly.at(Math.min(1, (now - fly.t0) / fly.ms)); L.x = p.x - view.left; L.y = p.y + game.lv.cam; L.t = now; }
+      if (fly) { const p = fly.at(Math.min(1, (now - fly.t0) / fly.ms)); L.x = (p.x - view.left) / view.k; L.y = p.y / view.k + game.lv.cam; L.t = now; }
       else if (!this.box && this.fin && this.finLook && now - (this.lookT || 0) > 400) {   // the result: on its foods, then on his gift
-        this.lookT = now; const r = this.finLook.getBoundingClientRect(); L.x = r.left + r.width / 2 - view.left; L.y = r.top + r.height / 2 + game.lv.cam; L.t = now;
+        this.lookT = now; const r = this.finLook.getBoundingClientRect(); L.x = (r.left + r.width / 2 - view.left) / view.k; L.y = (r.top + r.height / 2) / view.k + game.lv.cam; L.t = now;
       } else if (this.box && now - (this.lookT || 0) > 400) {   // waiting: on the board (the food in hand, if one is), curious
         this.lookT = now; const r = this.box.getBoundingClientRect(), n = FEED.n, i = this.sel >= 0 ? this.sel : -1;
-        L.x = (i >= 0 ? r.left + (i % n + 0.5) * r.width / n : r.left + r.width / 2) - view.left; L.y = (i >= 0 ? r.top + (((i / n) | 0) + 0.5) * r.width / n : r.top + r.height / 3) + game.lv.cam; L.t = now;
+        L.x = ((i >= 0 ? r.left + (i % n + 0.5) * r.width / n : r.left + r.width / 2) - view.left) / view.k; L.y = (i >= 0 ? r.top + (((i / n) | 0) + 0.5) * r.width / n : r.top + r.height / 3) / view.k + game.lv.cam; L.t = now;
       }
     },
     mouth() {   // his mouth on the page: the face's own point (its shape's mouth, mapped on the body as it is now)
       const b = game.hero, f = b.s && b.s.face, mo = f ? f.mouth : [0, 0.2], o = { x: 0, y: 0 };
       if (typeof mapPoint === 'function') mapPoint(b.s, b.x, b.y, b.cx, b.cy, mo[0], mo[1], o); else { o.x = b.cx; o.y = b.cy + 0.2 * b.R; }
-      return { x: view.left + o.x, y: o.y - game.lv.cam };
+      return { x: view.left + o.x * view.k, y: (o.y - game.lv.cam) * view.k };
     },
     bite(ph) {   // a phase's foods as one bite (its most common food; bigger for a line of four or more) from where they were to his mouth, on an arc
       const b = game.hero; if (!this.box || !b) return;
@@ -615,7 +615,7 @@ else {
       let sx = 0, sy = 0; for (const i of ph.gone) { sx += (i % n + 0.5) * c; sy += (((i / n) | 0) + 0.5) * c; }
       const from = { x: r.left + sx / ph.gone.length, y: r.top + sy / ph.gone.length }, to = this.mouth();
       const cnt = {}; for (const k of ph.foods) cnt[k] = (cnt[k] || 0) + 1;
-      const kind = Object.keys(cnt).sort((u, v) => cnt[v] - cnt[u])[0], big = ph.runs.some((q) => q.length >= 4), size = this.foodPx * (big ? 1.25 : 1);
+      const kind = Object.keys(cnt).sort((u, v) => cnt[v] - cnt[u])[0], big = ph.runs.some((q) => q.length >= 4), size = this.foodPx * (big ? 1.25 : 1) * view.k;
       const e = document.createElement('div'); e.className = 'fm-bite'; e.innerHTML = foodSvg(kind);
       Object.assign(e.style, { width: size + 'px', height: size + 'px', left: from.x - size / 2 + 'px', top: from.y - size / 2 + 'px' });
       document.body.append(e);

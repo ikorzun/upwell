@@ -274,6 +274,8 @@
   @media (max-height: 620px) { .panel { gap: 8px; } }   /* a short screen: the 64-px buttons whole (QA: 61 px at 320×568 under a two-row build) */
   #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
+  #result .big { border-radius: 32px; clip-path: none; }   /* a loss's and a bonus's buttons round at their ends, as the main screen's (owner, 2026-10-28: «Сделать
+     круглыми и кнопки на экранах проигрыша и бонуса?» «да»), the grey-lined ones too */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
   #pause { justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }   /* as the settings (ui.pause; owner,
      2026-10-28: «меню паузы нужно переработать по типу меню настроек»), over the game's own dark (--dim2) */

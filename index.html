@@ -31,6 +31,7 @@
     --amber: #ffc300;   /* the chosen colour's ring in the menu (the Figma «Main»'s) */
     --dim: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' d='M0 0h2v2H0zM2 2h2v2H2z'/%3E%3C/svg%3E") 0 0 / 4px 4px;
     --dim2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' fill-rule='evenodd' d='M0 0h4v4H0zM1 1h1v1H1zM3 3h1v1H3z'/%3E%3C/svg%3E") 0 0 / 4px 4px;   /* seven eighths ink: the game shows through a pixel in eight */
+    --dim3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23141414' fill-rule='evenodd' d='M0 0h4v4H0zM1 1h1v1H1z'/%3E%3C/svg%3E") 0 0 / 4px 4px;   /* fifteen sixteenths ink: a pixel in sixteen, half --dim2's (one of its two) */
     --p: 2;
   }
   html, body {
@@ -275,7 +276,8 @@
   }
   .panel.on { display: flex; }
   @media (max-height: 620px) { .panel { gap: 8px; } }   /* a short screen: the 64-px buttons whole (QA: 61 px at 320×568 under a two-row build) */
-  #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
+  #result, #cards { background: var(--dim2); }   /* over the game after a level, at the end */
+  #pause { background: var(--dim3); }   /* at a pause twice as dark (owner, 2026-10-28: «во время паузы затемнение фона нужно сделать в 2 раза темнее») */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
   #result .big { border-radius: 32px; clip-path: none; }   /* a loss's and a bonus's buttons round at their ends, as the main screen's (owner, 2026-10-28: «Сделать
      круглыми и кнопки на экранах проигрыша и бонуса?» «да»), the grey-lined ones too */

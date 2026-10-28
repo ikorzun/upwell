@@ -172,6 +172,9 @@
     padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 0;
   }
   #hud.on { display: flex; }
+  #hud { z-index: 0; }   /* (its band behind its words, over the level) */
+  #hud::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 34px); background: linear-gradient(rgba(20, 20, 20, 0.86) 70%, rgba(20, 20, 20, 0)); z-index: -1; pointer-events: none; }   /* a
+     dark band under the HUD, down past its tasks, the level under it dimmed (owner, 2026-10-28, Ш2 «Б»: the top ledges and the tasks ran into each other) */
   #hearts { display: flex; flex-wrap: wrap; gap: 2px 3px; flex: 1; min-width: 0; max-width: calc(50% - 52px); --p: 3; }   /* many hearts (a world's shop buys them for good): rows of them, in their corner, clear of the middle */
   #hearts.many { --p: 2; }
   #rotate { display: none; position: fixed; inset: 0; z-index: 50; background: var(--ink); align-items: center; justify-content: center; --p: 3; color: var(--white); }
@@ -274,6 +277,8 @@
   @media (max-height: 620px) { .panel { gap: 8px; } }   /* a short screen: the 64-px buttons whole (QA: 61 px at 320×568 under a two-row build) */
   #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
+  #result .big { border-radius: 32px; clip-path: none; }   /* a loss's and a bonus's buttons round at their ends, as the main screen's (owner, 2026-10-28: «Сделать
+     круглыми и кнопки на экранах проигрыша и бонуса?» «да»), the grey-lined ones too */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
   #pause { justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }   /* as the settings (ui.pause; owner,
      2026-10-28: «меню паузы нужно переработать по типу меню настроек»), over the game's own dark (--dim2) */

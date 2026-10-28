@@ -4091,6 +4091,8 @@ function layout() {
   // the narrowest phone's (COL_MIN across, its height to the same scale) and shown k times smaller, its game pixel still P of the screen (pixel for pixel)
   const k = coarse ? 1 : Math.min(1, W / COL_MIN);
   PIX.size = P / k;   // (the drawing's grid in the laid-out column's px)
+  PIX.base = Math.max(1, Math.round(PIX.base / PIX.size - 1e-6)) * PIX.size;   // a picture's dot whole game pixels at this scale too (owner, 2026-10-28:
+  // «важно, чтобы при уменьшении экрана пиксели не мылились»: at 0.96 its dot was 1.92 of them, one and two by turns)
   view.w = W / k; view.h = H / k; view.left = left; view.k = k; view.hudB = 0;   // (the HUD measured again: see ui.frame)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key

@@ -760,6 +760,16 @@ const VDROP_SPR = {   // village-drop E (owner, Д79 «E»: a pine cone), path A
 // lower and wider; their foot on what it landed on, `brkX` the impact's column (the sheet's red there left out: landed, it no longer hurts)
 VDROP_SPR.brk = [["............o..................................", "...........oo..................................", "..........oooo.................................", "...........ooo.................................", "...........oo...............ooo................", "...........................oooo................", "..........................ooooo................", ".................o.o.......oo..................", "................oo.oo..........................", "..............oo..o..oo........................", ".................ooo...........................", "...............oooooo.o............ooo.........", ".....oooo......ooooooo............ooooo........", ".....oooo......ooooooo............ooooo........", ".....oooooo.....ooooooo.........oooooo.........", "......ooooo.......ooo...........ooooo..........", "......ooooo......................oooo..........", ".......ooo...........o...........ooo..........."], ["...............................................", "...............................................", "...............................................", "...............................................", "...............................................", "...............................................", "...............................................", "...............................................", "...............................................", "........ooo....................................", ".......ooooo...................................", "........ooo.....................oo.............", ".........o.....................ooo.............", "..............................oooo.............", "..............................oooo.............", "...............oo..............................", ".oo.o.........ooo...........o..................", ".ooooo.......ooooo.........ooo...........ooo...", "ooooooo......oooo.........ooooo.........ooooo..", "ooooooo.......oo...........ooo.........oooooo..", "..o.o.......................o...........ooo...."]]; VDROP_SPR.brkX = 22;
 const VSLICK_SPR = ['wkrkrkrrrrrrrrrrrrrwrrr', 'wrrrrrrrkrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'wrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'kkrkrkrrrrrrrrrrrrrwrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrkrkrrrrrrrrrrrrrwrrr', 'krrrkrrrkrrrrrrrrrrwrrr', 'rkrkrkrkrrrkrkrkrrrrrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'rkrkrkrkrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'krrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'krrkrkrrrkrrrrrrrrrrrrk', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrrrkrrrrrrrrrrrrrwrrr', 'krkkkrkkkrkkkrrkrkkskkk', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkkkkkkkkkkkkkkkkkkskkk', 'kkrkrkkrkkrkrrrrkrrwrrr', 'kkkkkkkkkkkkkkkkkkkkkkk', 'kkrkkkkkkkrkkkrkrkkkkkk', 'krrrrrrrrrrrrrrrrrrwrrr', 'kkrkrrrkrrrkrrrkrkkokrr', 'krrrrrrrrrrrrrrrrrrwrrr', 'rrrrrrrrrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrkrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrrrrrrrrrrrrrrrrrrrr', 'rrrrkrrrrrrrrrrrrrrrrrr'];   // village-slick D (owner, Д80 «D»: a lacquered red pillar), path A off research/variants/village-slick-1-px.png: a strip of its
+// The worlds' ledges as GPT redrew them on the game's grid (owner, 2026-10-28: «перерисуй платформы в мирах тем же способом, решение по выбору прими сам. Все
+// миры, все платформы»): each kind drawn now, cut to rows, given to GPT at 6x, redrawn richer at its pixel, cut 1:1 (scratchpad snap/plat), then a tile set:
+// bands down it (top from its white edge, a middle that repeats down a tall block, its underside's row, and what hangs under it, outside the rect: crumbs,
+// a fringe), each an L (a free end; the right one L mirrored) and
+// an M that repeats along it, cut where it joins itself best; drawn by the shader a band at a time (platTiles, TILES). My picks, by the owner's word: the
+// Village's earth A (the least repeat you see along a ledge; its grass under the edge, crumbs off its underside), its plank C (its boards' joints and nails)
+const PLAT = {};
+PLAT.vblock = {"top": {"L": [".wwwww", "wwwwww", "wggggg", "wggggg", "woGGkg", ".OGGkk"], "M": ["wwwwwwggwwwwwwwwwwwwwwwwwwwwwwggwwwwwwww", "wwwwwwwwwwwwwwwwwwwwwwgwwwwwwwwwwwwwwwgw", "gggggggggggggggggggggggggggggggggggggggg", "gggggggggggggggggggggggggggggggggggggggg", "kkgkkggggggggkgggggggkkgggkkggkkggkkgggk", "kkgooggggkkkkkkkgggggOOggkkkkkkoookkkkgk"]}, "mid": {"L": [".ooooo", "..oooo", ".ooooO", ".ooooO", ".oooOO", ".ooOOO", ".oooOO", ".ooooo", ".ooooo", ".ooooo", ".ooooo", ".ooooo"], "M": ["ooooooooooooooooooooooooooooooOOOOOooooo", "oooooooooooooooooooooooooooooOOOOOOooooo", "oooooooooooooooooooooooooooooooOOOoooooo", "ooooooOOooooooooooooooooooOooooOoooooooo", "oooooOOOOooooooooooooooooOOOOooooooooooo", "oooooOOOoooooooooooooooooOOOOooooooooooo", "ooooooOoooooooooooooooooooOOoooooooooooo", "ooooooooooooooooooooooooooOooooooooooooo", "odooooooooooOooooooooooooooooooooooooooo", "dddooooooooOOOoooooooooooooooooooooooooo", "dddoooooooooOOoooooooooooooooooooooooooo", "oooooooooooooooooooooooooooooooooooooooo"]}, "bot": {"L": ["......"], "M": ["ookoo.o.....oooo...ooooooooooo.o...ooooo"]}, "hang": {"L": ["..oo..", "..o...", "......"], "M": ["ooOO...o....k.O..o....o..ooOO........OO.", ".oo......................ooO....o...OO..", ".............o.......O....oo.......o...."]}};
+PLAT.vplank = {"top": {"L": ["wwww", "wwww", "oooo", "oooo", "oooo"], "M": ["wwwwwwwwwwwwwwwwwwwwwwwwww", "wwwwwwwwwwwwwwwwwwwwwwwwww", "oooooooooooOooooooooOooooo", "oooooooooooOOoooooooOOoooo", "oooooooooooOooooooooOooooo"]}, "mid": {"L": ["oooo"], "M": ["oooooooooooooooooooooooooo"]}, "bot": {"L": [".koo"], "M": ["ookokokokokokokokooookokoo"]}, "hang": {"L": ["o.o."], "M": [".o.o.o.o.o.o.o.o.o..o.o.o."]}};
+PLAT.vblockSparse = Object.assign({}, PLAT.vblock, { top: { L: PLAT.vblock.top.L, M: PLAT.vblock.top.M.map((r, j) => (j > 1 && j < 5 ? r.replace(/[gGk]/g, 'o') : r)) } });   // (a `sparse` level's: its grass only by a free end, as before)
 // surface, laid over a slick rect at a sheet pixel a game pixel, tiled down and across
 // How each world's hazard from below moves (the object first: owner, 2026-10-24): kind (flame: tongues rising and sinking each at its own beat; wave: waves
 // travelling along; roll: billows rolling forward), amp (its front's stand in sheet pixels), rush (more as it speeds up, К2), len (its wavelength, sheet
@@ -4554,8 +4564,27 @@ vec3 shadeOf(vec3 c, float w) {   // (w: how far a hueless ink goes toward the w
   return mix(s, mix(c * 0.72, uShade, 0.5), (1.0 - sat) * w);   // (a hueless one half its own a step down, half the world's: a white's shade light and clean)
 }
 `;
+// Pictures tiled over a box by the shader (FEAT_FS type 11: one shape for a whole band of a ledge, however long; a box of runs would be a shape a run): each
+// registered once (tileId), packed down one texture, a texel an ink's index in PAL (G: its darker half; A: clear or not); uTile its place and size
+const TILE_MAX = 64, TILES = { list: [], byKey: new Map(), tex: null, n: 0, u: new Int32Array(4 * TILE_MAX) };
+const tileId = (rows) => {
+  const key = rows.join('/'); let id = TILES.byKey.get(key); if (id !== undefined) return id;
+  id = TILES.list.length; if (id >= TILE_MAX) return 0; TILES.list.push(rows); TILES.byKey.set(key, id); return id;
+};
+const tileUpload = (gl) => {   // (again whenever a picture was added since)
+  if (TILES.n === TILES.list.length && TILES.tex) return TILES.tex;
+  const keys = Object.keys(PAL), W = Math.max(1, ...TILES.list.map((r) => r[0].length)), H = Math.max(1, TILES.list.reduce((h, r) => h + r.length, 0)), px = new Uint8Array(W * H * 4); let y = 0;
+  TILES.list.forEach((rows, id) => {
+    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '.') return; const lc = ch === 'd' ? 's' : ch.toLowerCase(), o = ((y + j) * W + i) * 4; px[o] = keys.indexOf(ICON_INK[lc]); px[o + 1] = lc !== ch ? 255 : 0; px[o + 3] = 255; }));
+    TILES.u.set([0, y, rows[0].length, rows.length], 4 * id); y += rows.length;
+  });
+  if (!TILES.tex) TILES.tex = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, TILES.tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, W, H, 0, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); gl.activeTexture(gl.TEXTURE0);
+  TILES.n = TILES.list.length; return TILES.tex;
+};
 const FEAT_FS = GLSL + PIX_GLSL + SHADE_GLSL + `in vec2 vL; in vec4 vCol; flat in vec4 vP; out vec4 o;
-uniform float uPix;
+uniform float uPix; uniform sampler2D uAtlas; uniform ivec4 uTile[${TILE_MAX}];
 float aa(float d) { float w = fwidth(d); return clamp(0.5 - d / max(w, 1e-4), 0.0, 1.0); }
 float sdArc(vec2 p, vec2 sc, float ra, float rb) {
   p.x = abs(p.x);
@@ -4588,6 +4617,14 @@ void main() {
   else if (t == 7) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 2.0)); if (fract((p.x + p.y) / vP.w) < 0.35) col = PAL[8]; }   // striped box
   else if (t == 8) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 2.0)); if (fract(p.y / vP.w) < 0.5) col = PAL[0]; }   // box ribbed across in black
   else if (t == 10) { vec2 p = vL * vP.yz; a = aa(sdRB(p, vP.yz, 0.0)); int tn = int(vP.w + 0.5); if (tn >= 20) { if (tone(tn - 20, g) > 0.5) col = shadeOf(col, 0.35); } else if (tn >= 10) { if (tone(tn - 10, g) > 0.5) col = mix(PAL[0], col, 0.5); } else if (tone(tn, g) > 0.5) col = PAL[0]; }   // square box in a tone of black (0: flat; 10 + k: tone k its darker half, a sheet's two-tone dither; 20 + k: tone k its shade, VOL)
+  else if (t == 11) {                                                         // a picture of the atlas (TILES) repeated over the box from its top left, a
+    vec2 hs = vP.yz, p = vL * hs; float w = abs(vP.w); int id = int(mod(w, 64.0)), oy = int(w / 64.0); ivec4 d = uTile[id];   // game pixel a texel; p3 its id
+    a = aa(sdRB(p, hs, 0.0)); ivec2 lp = ivec2(floor((p + hs) / uPix)); if (vP.w < 0.0) lp.x = int(2.0 * hs.x / uPix + 0.5) - 1 - lp.x; lp.y += oy;   // (+ 64 a row it
+    lp.x += 23 * (lp.y >= 0 ? lp.y / d.w : -1 - (-1 - lp.y) / d.w);   // starts down; less than 0 mirrored; each repeat down shifted along, so a tall block shows no grid)
+    vec4 tx = texelFetch(uAtlas, d.xy + ivec2(((lp.x % d.z) + d.z) % d.z, ((lp.y % d.w) + d.w) % d.w), 0);
+    if (tx.a < 0.5) discard;
+    col = PAL[int(tx.r * 255.0 + 0.5)]; if (tx.g > 0.5) col = mix(PAL[0], col, 0.5);   // (an uppercase ink: its darker half, as vsp draws it)
+  }
   else if (t == 9) {                                                          // ellipse lit from the top left: ink p1 in tones down to the right
     a = aa(length(vL) - 1.0);
     float v = dot(vL, vec2(0.6, 0.8));
@@ -6635,6 +6672,13 @@ Renderer.prototype.draw = function (g, alpha) {
   // up to a pulley on the cable across the shaft (the cable behind, see YAEN). A crumbling block is a rope bridge (the owner's C): slats the block's own height (so
   // nothing solid is out of sight) wide apart on two ropes, each shaking its own way as it gives, at a wall a peg and the rope down off it, at a free end
   // (one in three) a rope hanging with a weight on it. False for what keeps the common look (ice, springs, magnets, bouncy planks, stairs).
+  const tbox = (x0, y0, x1, y1, rows, flip, oy, a) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, PAL.white, a, 11, hw, hh, (flip ? -1 : 1) * (tileId(rows) + 64 * oy + 0.5)); };
+  const platTiles = (r, S, ox = 0, a = 1) => {   // a ledge in its tile set (PLAT): its top band from its edge down, its middle repeated, its bottom; at each free end its L
+    const q = PIX.size, x0 = snap(r.x0) + ox, x1 = snap(r.x1) + ox, y0 = snap(r.y0), y1 = snap(r.y1), H = Math.max(1, Math.round((y1 - y0) / q)), E = S.top.L[0].length * q;
+    const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, ht = Math.min(S.top.M.length, H), hb = Math.min(S.bot.M.length, H - ht), hm = H - ht - hb, l = wl ? x0 : x0 + E, rr = wr ? x1 : x1 - E;
+    const band = (B, ya, yb, oy) => { if (yb <= ya) return; if (!wl) tbox(x0, ya, x0 + E, yb, B.L, false, oy, a); if (!wr) tbox(x1 - E, ya, x1, yb, B.L, true, oy, a); if (rr > l) tbox(l, ya, rr, yb, B.M, false, oy, a); };
+    band(S.top, y0, y0 + ht * q, 0); band(S.mid, y0 + ht * q, y0 + (ht + hm) * q, 0); band(S.bot, y1 - hb * q, y1, S.bot.M.length - hb); if (S.hang) band(S.hang, y1, y1 + S.hang.M.length * q, 0); if (S.hang) band(S.hang, y1, y1 + S.hang.M.length * q, 0);
+  };
   const villageRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
     const thin = (f) => { const rt = this.route; if (CINE) this.route = 0; f(); this.route = rt; };   // (2.5D: a rail, a rope, a post or a charm flat, no depth of its own: owner, 2026-10-23: «дублирование перил и мелких деталей ради объема не нужно, сильно утяжеляет»)
@@ -6718,7 +6762,7 @@ Renderer.prototype.draw = function (g, alpha) {
         box(snap(Math.min(wx, wx + d * 0.45 * t)), r.y0, snap(Math.max(wx, wx + d * 0.45 * t)), snap(r.y1 + 0.7 * t), th.plank, 1, 0, 10, 4);
         box(snap(wx + d * 0.22 * t), snap(r.y1 + 0.25 * t), snap(wx + d * 0.22 * t) + P, snap(r.y1 + 0.25 * t) + P, PAL.gray, 1, 0, 10, 0);
       }
-      box(r.x0, r.y0, r.x1, r.y1, th.plank, 1, 0, 10, 0); box(r.x0, snap(r.y0 + 0.17 * t), r.x1, snap(r.y0 + 0.17 * t) + P, th.plank, 1, 0, 10, 4); box(r.x0, r.y1 - P, r.x1, r.y1, th.plank, 1, 0, 10, 4);   // its boards, a row of nails, a rough underside
+      platTiles(r, PLAT.vplank);   // its boards, GPT's (PLAT): their joints and nails, a rough underside
       const pw = snap(0.2 * t), ph = snap(1.15 * t), ry = snap(r.y0 - 0.7 * t), ps = [snap(wl ? r.x0 + 0.5 * t : r.x0 + 0.05 * t), snap(wr ? r.x1 - 0.5 * t : r.x1 - 0.05 * t) - pw];
       if (ps[1] - ps[0] > 1.2 * t) thin(() => {   // its rail of dried bamboo on two posts lashed at their tops, their nodes black
         for (const x of ps) {
@@ -6736,11 +6780,7 @@ Renderer.prototype.draw = function (g, alpha) {
       box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25); return true;
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair) return false;
-    const g0 = snap(r.y0 + 2.5), g1 = g0 + 2 * P;
-    box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0, 10, 1);   // the earth, sparse dots in it, a fringe of grass under its edge (ragged), its underside ragged
-    const fringe = !(lv.rc && lv.rc.sparse) ? [[r.x0, r.x1]] : [...(wl ? [] : [[r.x0, Math.min(r.x1, r.x0 + 1.5 * t)]]), ...(wr ? [] : [[Math.max(r.x0, r.x1 - 1.5 * t), r.x1]])];   // (a `sparse` level's: by a free end only)
-    for (const [x0, x1] of fringe) { box(x0, g0, x1, g1, PAL.green, 1, 0, 10, 0); box(x0, g1, x1, g1 + P, PAL.green, 1, 0, 10, 4); }
-    box(r.x0, r.y1 - P, r.x1, r.y1, th.block, 1, 0, 10, 4);
+    platTiles(r, lv.rc && lv.rc.sparse ? PLAT.vblockSparse : PLAT.vblock);   // its earth, GPT's (PLAT): clods, stones and roots, grass under its edge, crumbs off its underside
     box(r.x0, r.y0, r.x1, r.y0 + 2.5, th.lip, 1, 1.25);
     if (r.x1 - r.x0 >= 2 * t) for (const [on, ex, d] of [[wl, r.x0, 1], [wr, r.x1, -1]]) if (!on) thin(() => {   // a free end: its edge curled over it, blades of grass,
       // a flower (flat in 2.5D, as the rails)
@@ -7911,6 +7951,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u); if (pf.u.uShade) gl.uniform3fv(pf.u.uShade, shadeTint(g.lv && g.lv.theme));
+  if (pf.u.uAtlas && TILES.list.length) { tileUpload(gl); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, TILES.tex); gl.activeTexture(gl.TEXTURE0); gl.uniform1i(pf.u.uAtlas, 5); gl.uniform4iv(pf.u['uTile[0]'], TILES.u); }   // (the ledges' pictures: TILES)
   if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
   if (menu) { if (!g.menuBare) for (let i = 0; i + 1 < farR.length; i += 2) this.drawFeat(farR[i], farR[i + 1] - farR[i]); }   // (the main screen: its far view only; the
   // settings none, all dark: Game.menuFit's bare)
@@ -8063,6 +8104,7 @@ Renderer.prototype.drawMenu = function (g, alpha) {
   const pf = this.pFeat, ps = this.pShadow, pb = this.pBody;
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u); if (pf.u.uShade) gl.uniform3fv(pf.u.uShade, shadeTint(g.lv && g.lv.theme));
+  if (pf.u.uAtlas && TILES.list.length) { tileUpload(gl); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, TILES.tex); gl.activeTexture(gl.TEXTURE0); gl.uniform1i(pf.u.uAtlas, 5); gl.uniform4iv(pf.u['uTile[0]'], TILES.u); }   // (the ledges' pictures: TILES)
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
   gl.uniform2f(ps.u.uOffset, 0, RENDER.shadowOffset); gl.uniform1f(ps.u.uShadowA, RENDER.shadowA);

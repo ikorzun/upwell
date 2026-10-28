@@ -6843,7 +6843,10 @@ Renderer.prototype.draw = function (g, alpha) {
       box(r.x0, snap(ty1 - ch), r.x1, snap(ty1), C, 1, 0, 10, 0);   // its bottom chord (a tier's)
       const np = Math.max(1, Math.round(e1 / ph)), pw = e1 / np, U = (k) => k * pw;
       for (let k = 0; k <= np; k++) bxp(U(k) - (k === np ? 2 * P : 0), y0, U(k) + (k === np ? 0 : 2 * P), y1);   // its verticals
-      for (let k = 0; k < np; k++) { const a = U(k), b = U(k + 1); ln(a + P, y0, b - P, y1); ln(b - P, y0, a + P, y1); bxp((a + b) / 2 - 2 * P, (y0 + y1) / 2 - 2 * P, (a + b) / 2 + 2 * P, (y0 + y1) / 2 + 2 * P); riv((a + b) / 2 - P / 2, (y0 + y1) / 2 - P / 2); }   // X bracing, its plate
+      for (let k = 0; k < np; k++) { const a = U(k), b = U(k + 1); if (!scv || k % 2) ln(a + P, y0, b - P, y1); if (!scv || !(k % 2)) ln(b - P, y0, a + P, y1);   // (a TV Tower cave's: one
+        // brace a panel by turns, a Warren truss: thin over its busy backdrop)
+        if (!scv) { bxp((a + b) / 2 - 2 * P, (y0 + y1) / 2 - 2 * P, (a + b) / 2 + 2 * P, (y0 + y1) / 2 + 2 * P); riv((a + b) / 2 - P / 2, (y0 + y1) / 2 - P / 2); } }   // X bracing, its
+      // plate (none where no two cross)
       bxp(e1, ty0, w, ty1); riv(e1 + P, ty0 + ch + P); riv(e1 + P, ty1 - ch - 2 * P);   // its end plate
     }
     if (on && below) { const g0 = 0.7 * t; for (let k = 0; k < 3; k++) bxp(0, r.y1 + (k * g0) / 3, g0 * (1 - k / 3), r.y1 + ((k + 1) * g0) / 3); riv(2 * P, r.y1 + 2 * P); riv(2 * P, r.y1 + g0 * 0.5); }   // its gusset, tapering
@@ -7492,14 +7495,29 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const tcv = lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.town;   // (a Tokyo cave's: its awnings Tokyo's own (townRect, as in its shafts),
   // its pachinko board's pins by take (tcPin); its other ledges the stash's purple, as the other worlds' caves keep them)
-  const scv = lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.glass;   // (a TV Tower cave's: its clouds the Tower's own (skyRect, as in its
-  // shafts), so a cloud reads as one that gives way; its catwalks, box and door the stash's for now, their look Worlds')
+  const scv = lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.glass;   // (a TV Tower cave's, the owner's З21 «А»: all its ledges the Tower's
+  // own (skyRect, as in its shafts): its clouds that give way, its catwalks the outside stair's landings, its box, roof and floors the lattice's trusses; its door a
+  // lift's, its button a call panel's: see the shutter's and the switches')
   for (const r of lv.rects) {
     if (r.shutter) {   // a Tokyo cave's roll-down shutter (SHUTTER), the arena holder's (HOLD_SPR.tokyo, Д84 «B»): its box over the gateway, a guide rail down each
       // side, between them its curtain of grey slats and its bottom rail (grey: not an edge to stand on). It rolls slat by slat: the curtain's foot steps up a
       // whole slat at a time into the box (its seams keep their places, as a real curtain's do), easing out of it and back in as a motor drives it; down it
       // falls faster as it goes. Rolled up, its bottom rail stays under the box. Drawn only: the gate's rect is the race's (SHUTTER)
       if (!seen(r.y0, r.y1)) continue;
+      if (scv) {   // the TV Tower's: a lift's door, its two leaves sliding apart from its middle seam and back (f: how far shut) as a motor drives them, in a steel
+        // frame, over it a floor lamp lit orange while it stands open; grey steel, no white (not an edge to stand on)
+        const q = PIX.size, u = clamp((lv.t - r.tg) / SHUTTER.roll, 0, 1), f = r.gone ? 1 - u * u * (3 - 2 * u) : 1 - (1 - u) * (1 - u), G = PAL.gray, K = PAL.black;
+        const x0 = snap(r.x0), x1 = snap(r.x1), yt = snap(r.y0), y1 = snap(r.y1), y0 = yt + snap(0.3 * lv.tile), mid = snap((x0 + x1) / 2), lw = Math.round((f * (mid - x0 - q)) / q) * q;
+        box(x0, y0, x1, y1, K, 1, 0, 10, 0);   // the shaft behind it, dark
+        if (lw > 0) for (const [a, b] of [[x0 + q, x0 + q + lw], [x1 - q - lw, x1 - q]]) {   // its leaves, a window slit high in each, their edges a tone darker
+          box(a, y0, b, y1, G, 1, 0, 10, 0); box(a, y0, a + q, y1, G, 1.5, 0, 10, 0);
+          if (b - a > 4 * q) box(a + 2 * q, y0 + 3 * q, b - 2 * q, y0 + 6 * q, K, 1, 0, 10, 0);
+        }
+        for (const x of [x0, x1 - q]) box(x, y0, x + q, y1, G, 1.5, 0, 10, 0);   // its jambs
+        box(x0 - q, yt, x1 + q, y0, G, 1, 0, 10, 0); box(x0 - q, y0 - q, x1 + q, y0, K, 1, 0, 10, 0);   // its header
+        box(mid - q, yt + q, mid + q, yt + 3 * q, r.gone && u >= 1 ? PAL.orange : K, 1, 0, 10, 0);   // its floor lamp
+        continue;
+      }
       const q = PIX.size, u = clamp((lv.t - r.tg) / SHUTTER.roll, 0, 1), f = r.gone ? 1 - u * u * (3 - 2 * u) : u * u, G = PAL.gray, K = PAL.black;   // (f: how far down)
       const x0 = snap(r.x0), x1 = snap(r.x1), yt = snap(r.y0), y1 = snap(r.y1), y0 = yt + snap(0.3 * lv.tile), S = 4 * q, RB = 3 * q;   // (S a slat, RB its bottom rail)
       const yb = Math.max(y0 + RB, y1 - Math.round(((1 - f) * (y1 - y0)) / S) * S);   // (the curtain's foot, a whole number of slats up from the shut)
@@ -7572,7 +7590,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 31) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = (!r.slick || th.fuji || th.village || th.sea) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (tcv && r.plank && !r.move && (r.bouncy ? townRect(r) : lv.cave === 'cavePins' && tcPin(r))) || (scv && r.cloud && skyRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    const own = (!r.slick || th.fuji || th.village || th.sea) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (tcv && r.plank && !r.move && (r.bouncy ? townRect(r) : lv.cave === 'cavePins' && tcPin(r))) || (scv && !r.shutter && skyRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.gate && lv.world && lv.world.theme && lv.world.theme.fuji) fcGate(r);   // (Fuji's cave's gate of ice, by take)
       else if (r.gate && lv.world && lv.world.theme && lv.world.theme.sea) enoGate(r);   // (the Sea cave's gate, the shrine's door)
@@ -7738,6 +7756,13 @@ Renderer.prototype.draw = function (g, alpha) {
     const left = on ? s.t + SHUTTER.open - lv.t : 0, lamp = s.done ? K : !on ? PAL.aqua : Math.floor((lv.t - s.t) * (left < 1.5 ? 5 : 3)) % 2 ? K : PAL.orange;
     const X = (u) => sn2(x + u * w), Y = (v) => sn2(top + v * h), bx = (u0, v0, u1, v1, c) => box(X(u0), Y(v0), X(u1), Y(v1), c, 1, 0, 10, 0);
     const lit = (u, v) => box(X(u), Y(v), X(u) + 2 * q, Y(v) + 2 * q, lamp, 1, 0, 10, 0), post = (u, v) => box(X(u) - q, Y(v), X(u) + q, foot, G, 1, 0, 10, 0);
+    if (scv) {   // the TV Tower's: a lift's call panel on a post, an up arrow over its round button, the button lit as the lever box's lamp (ready aqua, pressed
+      // blinking orange, done dark); pressed, the button in a pixel
+      post(0, 0.5); bx(-0.45, 0.0, 0.45, 0.52, G); bx(-0.35, 0.06, 0.35, 0.46, K);
+      const ax = X(0), ay = Y(0.1); box(ax - q / 2, ay, ax + q / 2, ay + 3 * q, G, 1, 0, 10, 0); box(ax - 1.5 * q, ay + q, ax + 1.5 * q, ay + 2 * q, G, 1, 0, 10, 0);   // its arrow
+      disc(X(0), Y(0.33) + (on ? q : 0), 2 * q, lamp === K ? G : lamp, 1);   // its button
+      continue;
+    }
     post(-0.35, 0.55); bx(-0.9, 0.05, 0.25, 0.56, G); lit(-0.55, 0.15); const px = X(0.25), py = Y(0.32), ex = X(0.75), ey = Y(on ? 0.62 : 0.02);
     line(px, py, ex, ey, G, 1, 1); disc(ex, ey, 1.5 * q, Bl, 1);
   }

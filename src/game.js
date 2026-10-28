@@ -2474,7 +2474,14 @@ class Game {
     input.clear(); haptics.buzz(30);
     if (this.lv.boss) save.camp.fails[this.failKey()] = (save.camp.fails[this.failKey()] || 0) + 1;   // a loss at a boss, counted (help after three)
     if (this.mode === 'camp') { delete save.cur; this.campKeep(); persist(); return; }   // (lost: no going on from the last ledge by a reload) the purse keeps what was picked up; then Again, or on for coins (ui.campDead)
+    if (this.atLid()) return;   // the Lid: neither a revive nor the run's end, its fight again (frame: lidAgain)
     if (this.coins < this.revivePrice()) this.finish(false);
+  }
+  atLid() { return this.mode !== 'camp' && this.daily == null && !this.bonus && this.world >= WORLDS.length && this.lv.kind === 'boss'; }   // the random run's summit
+  lidAgain() {   // dead at the Lid (owner, Л3 «А»: «Бой с Крышкой заново, забег сохраняется»): its fight again at once, all hearts, the run's coins and upgrades, no
+    // fee; the losses still counted (die: save.camp.fails.lid), so its help comes after three as before
+    pmsg('level_failed', this.lvl()); this.state = 'wait'; ui.hideAll();
+    ads.between(() => { this.hp = this.maxHp; this.state = 'play'; this.stateT = 0; nextSeed = this.seed; this.buildLevel(false); this.saveRun(); ui.hideAll(); ui.banner(); });
   }
   pop() {   // the burst, each death its own: where it can be seen (a fall ends below the screen), in the colour it was held in
     const H = this.hero, lv = this.lv, R = this.R, x = H.cx, y = clamp(H.cy, lv.cam + R, lv.cam + view.h - R), why = this.deathWhy();
@@ -2568,7 +2575,7 @@ class Game {
     this.stateT += dt;
     if (this.dieT > 0 && (this.dieT -= dt) <= 0 && this.state === 'dead') this.pop();
     if (this.state === 'clear' && this.stateT > 0.8 && !ui.open) { if (this.bonus) this.endBonus(); else if (this.mode === 'camp' && !this.first) ui.cleared(); else if (this.daily != null && this.stage >= 2) { this.finish(true); ui.result(this.result); } else { const list = this.offer(); if (this.mode === 'camp') { save.camp.owe = { w: this.world, ids: list.map((u) => u.id) }; persist(); } ui.cards(list); } }   // (the daily's third: its top)   // an upgrade the first time a campaign level is cleared
-    if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
+    if (this.state === 'dead' && this.stateT > 1 && !ui.open) { if (this.mode === 'camp') ui.campDead(); else if (this.atLid()) this.lidAgain(); else if (this.result) ui.result(this.result); else ui.revive(this.revivePrice(), this.coins); }
     if (this.state === 'won' && this.stateT > 0.4 && !ui.open) { if (this.mode === 'camp') ui.runes(); else ui.result(this.result); }
     if (this.winT > 0 && this.state === 'play' && (this.winT -= dt) <= 0) this.win();
     if (lv.under && this.state === 'play') {   // the flip side is fallen: the hero high in the view, to see what is under it

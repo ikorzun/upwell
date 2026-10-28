@@ -5259,6 +5259,9 @@ Renderer.prototype.draw = function (g, alpha) {
   // over its world's back with no walls, the menu's ink under the colours' row as before (owner, 2026-10-24: «Слишком шумно. Верни как было, оставь
   // анимацию, а вместо градиента за моти используй фон локации»)
   const menu = g.state === 'menu', farR = [];
+  const farQ = (n) => { const q = 2 * PIX.base; return menu && n * q < view.w ? Math.ceil(view.w / (n * PIX.size)) * PIX.size : q; };   // a far picture's pixel: two game pixels, on the main screen as many whole ones
+  // as fill it edge to edge (no walls there: a phone's game pixel is small, its 111-116 across were narrower than it; owner, 2026-10-28: «задник в мобильном на главном экране
+  // сейчас срезается по бокам, п должен быть от края до края»)
   const vsp = (rows, x, y, flip = false, a = 1, s = PIX.base, vol = false, sh = null) => {   // (sh(u): a row u of its pixels up shifted so far, as fspr's: a sway)   // a sheet's rows of ink letters as boxes, s a sheet pixel ('d': the sheet's dark grey, a dim grey; an
     // uppercase ink: its darker half): its runs, a run the same as the one over it merged down into one box, worked out once a picture (VSP_RECTS)
     if (vol && VOL_ON) {   // a thing or an animal in volume (VOL; its callers say so): its boxes of one ink and one step (volRects), as seen
@@ -5708,7 +5711,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // Mine's MFAR)
     const FV = TFAR.cell[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5];   // (no recipe: 5-6's, the bonus level's, the fair)
     if (!FV) return;
-    const q = 2 * PIX.base, n = FV[0].length, foot = snap(farY(cam, H)), x0 = snap((lv.l + lv.r) / 2 - (n * q) / 2), y0 = snap(foot - FV.length * q);
+    const n = FV[0].length, q = farQ(n), foot = snap(farY(cam, H)), x0 = snap((lv.l + lv.r) / 2 - (n * q) / 2), y0 = snap(foot - FV.length * q);
     vsp(FV, x0, y0, false, DIM, q);
     if (!FV.lit) { FV.lit = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (!'oO'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);   // its lights (its
       // orange clusters, once a cell) light the dark round them, as the Mine's
@@ -5932,7 +5935,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // most: the tower's steel is no lamp) light the dark round them
     const key = TWFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5], FV = TWFAR.cell[key];   // (no recipe: the bonus level, 7-6's painters)
     if (!FV) return;
-    const q = 2 * PIX.base, n = FV[0].length, cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q);
+    const n = FV[0].length, q = farQ(n), cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q);
     vsp(FV, x0, y0, false, DIM, q);
     const L = TWFAR.lit || (TWFAR.lit = {});
     if (!L[key]) { L[key] = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== 'o' || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
@@ -5965,7 +5968,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const glow = (u, v) => { fb(u - 0.08, v - 0.1, u + 0.08, v + 0.1, PAL.orange, LIT); vlamps.push([U(u), Vv(v), 0.4, 1.4]); };
     const key = MFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5], FV = window.__far === 99 ? null : MFAR.cell[key];   // (window.__far 99: the old view, to count against)
     if (FV) {   // Iwami Ginzan by level (MFAR); its lights (its orange and yellow clusters) light the dark round them
-      const q = 2 * PIX.base, n = FV[0].length, x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q);
+      const n = FV[0].length, q = farQ(n), x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q);
       vsp(FV, x0, y0, false, DIM, q);
       const L = MFAR.lit || (MFAR.lit = {});
       if (!L[key]) { L[key] = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (!'oOyY'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
@@ -6021,7 +6024,7 @@ Renderer.prototype.draw = function (g, alpha) {
       // bigger, its foot on Mochi's floor: its summit over his head, Д113 «А»)   // (d41 «Б»: by turns of level, Fuji seen over Lake Kawaguchi; low down only)
       const shore = snap(farY(cam, H)), cx = (lv.l + lv.r) / 2, ht = 5.5 * t * k, hw = 6.6 * t * k, foot = lake || menu ? shore : shore + (k - 1) * 4 * t;   // (nearer: bigger, its foot down past the keys; over the lake it stands on the far shore)   // (over the lake: the mountain on its far
       // shore, its reflection under it down to the keys)
-      const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return Math.min((lv.r - lv.l) / 2, w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side))); };   // its flanks, uneven (between the walls)
+      const half = (y, side) => { const u = y / ht, w = 0.5 * t + (hw - 0.5 * t) * Math.pow(u, 1.25); return Math.min((menu ? view.w : lv.r - lv.l) / 2, w * (1 + 0.05 * Math.sin(y / P * (side < 0 ? 0.37 : 0.29) + side) + 0.03 * Math.sin(y / P * 1.13 + 2 * side))); };   // its flanks, uneven (between the walls; on the main screen edge to edge)
       for (let y = 0; y < ht; y += 2 * P) {
         const u = y / ht, yy = foot - ht + y, wl = half(y, -1), wr = half(y, 1), sn = 0.3 + 0.06 * Math.sin(y / P * 0.9) + 0.05 * Math.sin(y / P * 2.3);
         box(snap(cx - wl), yy, snap(cx + wr), yy + 2 * P, PAL.blue, DIM, 0, 10, 0);
@@ -6171,7 +6174,7 @@ Renderer.prototype.draw = function (g, alpha) {
       const stilts = (u0, n, v, lit) => { for (let i = 0; i < n; i++) { const u = u0 + i * 1.5; for (const e of [0.1, 0.6, 1.1]) fb(u + e, v, u + e + px, v + 0.5, PAL.blue); fb(u, v + 0.5, u + 1.2, v + 1.1, PAL.blue); tri(u + 0.6, v + 1.1, 0.75, 0.5, PAL.gray);
         if (lit) for (const e of [0.3, 0.75]) fb(u + e, v + 0.7, u + e + 2 * px, v + 0.7 + 2 * px, PAL.orange, LIT); } };
       const FV = window.__far === 99 ? null : EFAR.cell[EFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 2]];   // (window.__far 99: the old view, to count against)
-      if (FV) { const q = 2 * PIX.base, n = FV[0].length; vsp(FV, snap(cx - (n * q) / 2), snap(foot - FV.length * q), false, DIM, q); }   // Enoshima by level (EFAR)
+      if (FV) { const n = FV[0].length, q = farQ(n); vsp(FV, snap(cx - (n * q) / 2), snap(foot - FV.length * q), false, DIM, q); }   // Enoshima by level (EFAR)
       else { water();   // (the water first: the islands, the boats and the rest stand in it)
       if (lv.stage % 2 === 0) { stilts(-7.2, 3, 0.6, true); for (const [u, s] of [[-6.3, 1.1], [-3.4, 1.0]]) pine(u, 2.1, s); boat(3.6, 0.7, 1.4, [[0.6, 0.9]]); }   // stilt houses lit, pines behind them, a boat (B)
       else { isle(-7.8, -3.4, 0.7, 0.6, [[-6.8, 1.0], [-5.0, 0.9]]); isle(3.8, 7.8, 0.7, 0.6, [[5.2, 0.9], [6.8, 1.0]]); torii(0.4, 0.7, 1.4); boat(-2.4, 0.4, 0.6, [[0.3, 0.5]]); boat(3.0, 0.35, 0.8, [[0.4, 0.7]]); } }   // a torii in the water between two islands, boats (F)
@@ -6360,7 +6363,7 @@ Renderer.prototype.draw = function (g, alpha) {
       const fb = (u0, v0, u1, v1, c, tn = 0) => box(U(u0), V(v1), U(u1), V(v0), c, DIM, 0, 10, tn);
       const FV = window.__far === 99 ? null : VFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 2];   // (Д86 «А», Д111 «А»: by level; a level of no
       // campaign: the farmhouses; window.__far 99: the old view, to count against)
-      if (FV) { const q = 2 * PIX.base, n = FV[0].length; vsp(FV, snap(cx - (n * q) / 2), snap(foot - FV.length * q), false, DIM, q); }
+      if (FV) { const n = FV[0].length, q = farQ(n); vsp(FV, snap(cx - (n * q) / 2), snap(foot - FV.length * q), false, DIM, q); }
       if (FV && lv.rc && (lv.stage || 0) <= 2) {   // the gorge's morning mist over it on 1-1…1-3 (Д112 «А»): its sheet's band laid across the shaft, every other copy
         // mirrored, drifting slowly downstream, cut at the walls
         const q = 2 * PIX.base, n = VMIST[0].length, bw = n * q, off = (((T * 0.05 * t) % (2 * bw)) + 2 * bw) % (2 * bw), y = snap(foot - VMIST.length * q);

@@ -1,6 +1,6 @@
 {
- "commit": "cf7ab44",
- "made": "2026-10-25",
+ "commit": "8d4d535",
+ "made": "2026-10-28",
  "levels": {
   "c1-1": {
    "result": "clear",
@@ -11,34 +11,35 @@
   },
   "c1-2": {
    "result": "clear",
-   "time": 22,
+   "time": 24.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-3": {
    "result": "clear",
-   "time": 23,
+   "time": 16,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-4": {
    "result": "clear",
-   "time": 21,
+   "time": 29,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c1-5": {
    "result": "clear",
-   "time": 48.5,
-   "heartsLost": 0,
+   "time": 41.5,
+   "heartsLost": 1,
    "stuck": [
-    "mosswall@72",
-    "iciclerun@135"
+    "iciclerun@140"
    ],
-   "hits": []
+   "hits": [
+    "crawler@icebridge"
+   ]
   },
   "c1-6": {
    "result": "clear",
@@ -49,25 +50,25 @@
   },
   "c1-7": {
    "result": "clear",
-   "time": 39.5,
+   "time": 21.5,
    "heartsLost": 0,
-   "stuck": [
-    "fork@35"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c1-8": {
    "result": "clear",
-   "time": 19.5,
+   "time": 42,
    "heartsLost": 1,
-   "stuck": [],
+   "stuck": [
+    "iceride@119"
+   ],
    "hits": [
-    "crawler@gate3w"
+    "spikes@gate3w"
    ]
   },
   "c1-9": {
    "result": "clear",
-   "time": 20.5,
+   "time": 17,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -93,30 +94,32 @@
   },
   "c2-2": {
    "result": "clear",
-   "time": 36.5,
-   "heartsLost": 0,
+   "time": 34.5,
+   "heartsLost": 1,
    "stuck": [
-    "overhang@149"
+    "shelves@104"
    ],
-   "hits": []
+   "hits": [
+    "fire@gate"
+   ]
   },
   "c2-3": {
    "result": "clear",
-   "time": 21,
+   "time": 12,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-4": {
    "result": "clear",
-   "time": 28.5,
+   "time": 29,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c2-5": {
    "result": "clear",
-   "time": 21,
+   "time": 19,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -132,22 +135,23 @@
   },
   "c2-7": {
    "result": "clear",
-   "time": 49,
+   "time": 17.5,
    "heartsLost": 0,
-   "stuck": [
-    "rubberwall@111",
-    "comb@163"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c2-8": {
    "result": "clear",
-   "time": 39.5,
-   "heartsLost": 0,
+   "time": 53,
+   "heartsLost": 2,
    "stuck": [
-    "mosswall@163"
+    "rubberwall@13",
+    "rubberwall@17"
    ],
-   "hits": []
+   "hits": [
+    "crawler@stairs",
+    "spikes@gate3w"
+   ]
   },
   "c2-9": {
    "result": "clear",
@@ -176,27 +180,25 @@
   },
   "c3-2": {
    "result": "clear",
-   "time": 30.5,
+   "time": 32.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c3-3": {
    "result": "clear",
-   "time": 38.5,
+   "time": 43.5,
    "heartsLost": 0,
    "stuck": [
-    "comb@172"
+    "overhang@138"
    ],
    "hits": []
   },
   "c3-4": {
    "result": "clear",
-   "time": 48.5,
+   "time": 44,
    "heartsLost": 0,
-   "stuck": [
-    "icewall@173"
-   ],
+   "stuck": [],
    "hits": []
   },
   "c3-5": {
@@ -204,7 +206,7 @@
    "time": 34,
    "heartsLost": 0,
    "stuck": [
-    "rubberwall@66"
+    "comb@167"
    ],
    "hits": []
   },
@@ -217,23 +219,27 @@
   },
   "c3-7": {
    "result": "clear",
-   "time": 30,
+   "time": 26,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c3-8": {
    "result": "clear",
-   "time": 47.5,
-   "heartsLost": 0,
+   "time": 55,
+   "heartsLost": 2,
    "stuck": [
-    "rubberwall@146"
+    "rubberwall@56",
+    "icicles@101"
    ],
-   "hits": []
+   "hits": [
+    "crawler@planks",
+    "crawler@gate3w"
+   ]
   },
   "c3-9": {
    "result": "clear",
-   "time": 16,
+   "time": 15.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -258,58 +264,63 @@
   },
   "c4-2": {
    "result": "clear",
-   "time": 32,
+   "time": 30.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-3": {
    "result": "clear",
-   "time": 31,
+   "time": 28,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-4": {
    "result": "clear",
-   "time": 31.5,
+   "time": 32,
    "heartsLost": 1,
-   "stuck": [],
+   "stuck": [
+    "stairs@131"
+   ],
    "hits": [
-    "circler@comb"
+    "fire@shelves"
    ]
   },
   "c4-5": {
    "result": "clear",
-   "time": 24.5,
+   "time": 31,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-6": {
    "result": "clear",
-   "time": 10,
+   "time": 9,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-7": {
    "result": "clear",
-   "time": 18.5,
+   "time": 56.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "comb@134",
+    "rest@213"
+   ],
    "hits": []
   },
   "c4-8": {
    "result": "clear",
-   "time": 36,
+   "time": 29.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c4-9": {
    "result": "clear",
-   "time": 9,
+   "time": 15.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -336,38 +347,36 @@
   },
   "c5-2": {
    "result": "clear",
-   "time": 21,
+   "time": 40.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "comb@124"
+   ],
    "hits": []
   },
   "c5-3": {
    "result": "clear",
-   "time": 42,
+   "time": 28.5,
    "heartsLost": 0,
-   "stuck": [
-    "comb@189"
-   ],
-   "hits": [
-    "crawler@pillars"
-   ]
+   "stuck": [],
+   "hits": []
   },
   "c5-4": {
    "result": "clear",
-   "time": 42,
+   "time": 42.5,
    "heartsLost": 0,
    "stuck": [
-    "spring@114"
+    "stairs@211"
    ],
    "hits": []
   },
   "c5-5": {
    "result": "clear",
-   "time": 32,
+   "time": 33.5,
    "heartsLost": 1,
    "stuck": [],
    "hits": [
-    "crawler@comb"
+    "crawler@stairs"
    ]
   },
   "c5-6": {
@@ -379,23 +388,27 @@
   },
   "c5-7": {
    "result": "clear",
-   "time": 23.5,
+   "time": 27,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c5-8": {
    "result": "clear",
-   "time": 27.5,
-   "heartsLost": 0,
+   "time": 32.5,
+   "heartsLost": 1,
    "stuck": [],
-   "hits": []
+   "hits": [
+    "spikes@gate3"
+   ]
   },
   "c5-9": {
    "result": "clear",
-   "time": 17,
+   "time": 28.5,
    "heartsLost": 0,
-   "stuck": [],
+   "stuck": [
+    "shelves@19"
+   ],
    "hits": []
   },
   "c5-10": {
@@ -416,37 +429,40 @@
   },
   "c6-2": {
    "result": "clear",
-   "time": 25,
+   "time": 35.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c6-3": {
    "result": "clear",
-   "time": 22,
+   "time": 20,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c6-4": {
    "result": "clear",
-   "time": 39.5,
+   "time": 32.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c6-5": {
    "result": "clear",
-   "time": 39.5,
+   "time": 56,
    "heartsLost": 1,
-   "stuck": [],
+   "stuck": [
+    "arena@131",
+    "chimney@144"
+   ],
    "hits": [
-    "shot@comb"
+    "crawler@pocket"
    ]
   },
   "c6-6": {
    "result": "clear",
-   "time": 27.5,
+   "time": 25.5,
    "heartsLost": 0,
    "stuck": [
     "planks@9"
@@ -455,34 +471,34 @@
   },
   "c6-7": {
    "result": "clear",
-   "time": 53.5,
-   "heartsLost": 0,
+   "time": 83,
+   "heartsLost": 1,
    "stuck": [
-    "icicles@125"
+    "flight@107",
+    "flight@110"
    ],
-   "hits": []
+   "hits": [
+    "fire@pocket"
+   ]
   },
   "c6-8": {
    "result": "clear",
-   "time": 36,
-   "heartsLost": 1,
+   "time": 45,
+   "heartsLost": 2,
    "stuck": [
-    "flight@87"
+    "flight@100"
    ],
    "hits": [
-    "spikes@shelves"
+    "@flight",
+    "fire@icicles"
    ]
   },
   "c6-9": {
    "result": "clear",
-   "time": 25.5,
-   "heartsLost": 1,
-   "stuck": [
-    "flight@72"
-   ],
-   "hits": [
-    "fire@stairs"
-   ]
+   "time": 12.5,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c6-10": {
    "result": "won",
@@ -497,7 +513,7 @@
   },
   "c7-1": {
    "result": "clear",
-   "time": 21,
+   "time": 22,
    "heartsLost": 1,
    "stuck": [
     "planks@19"
@@ -508,30 +524,30 @@
   },
   "c7-2": {
    "result": "clear",
-   "time": 36.5,
+   "time": 32,
    "heartsLost": 0,
    "stuck": [
-    "chimney@165"
+    "spring@173"
    ],
    "hits": []
   },
   "c7-3": {
    "result": "clear",
-   "time": 22.5,
+   "time": 17,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c7-4": {
    "result": "clear",
-   "time": 34,
+   "time": 36,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c7-5": {
    "result": "clear",
-   "time": 36.5,
+   "time": 30,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -545,27 +561,24 @@
   },
   "c7-7": {
    "result": "clear",
-   "time": 20,
-   "heartsLost": 1,
+   "time": 19.5,
+   "heartsLost": 2,
    "stuck": [],
    "hits": [
-    "crawler@pillars"
+    "crawler@pillars",
+    "climber@planks"
    ]
   },
   "c7-8": {
    "result": "clear",
-   "time": 50,
-   "heartsLost": 1,
-   "stuck": [
-    "icicles@172"
-   ],
-   "hits": [
-    "shot@pillars"
-   ]
+   "time": 34,
+   "heartsLost": 0,
+   "stuck": [],
+   "hits": []
   },
   "c7-9": {
    "result": "clear",
-   "time": 19.5,
+   "time": 13.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -591,32 +604,31 @@
   },
   "c8-2": {
    "result": "clear",
-   "time": 45,
-   "heartsLost": 1,
-   "stuck": [
-    "comb@136"
-   ],
-   "hits": [
-    "skull@stairs"
-   ]
-  },
-  "c8-3": {
-   "result": "clear",
-   "time": 23.5,
+   "time": 24.5,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
+  "c8-3": {
+   "result": "clear",
+   "time": 53,
+   "heartsLost": 0,
+   "stuck": [
+    "pocket@129",
+    "comb@159"
+   ],
+   "hits": []
+  },
   "c8-4": {
    "result": "clear",
-   "time": 19.5,
+   "time": 19,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
   },
   "c8-5": {
    "result": "clear",
-   "time": 24.5,
+   "time": 27,
    "heartsLost": 0,
    "stuck": [],
    "hits": []
@@ -630,25 +642,21 @@
   },
   "c8-7": {
    "result": "clear",
-   "time": 29.5,
-   "heartsLost": 1,
+   "time": 31,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "skull@pocket"
-   ]
+   "hits": []
   },
   "c8-8": {
    "result": "clear",
-   "time": 32.5,
-   "heartsLost": 1,
+   "time": 26,
+   "heartsLost": 0,
    "stuck": [],
-   "hits": [
-    "spikes@gate3"
-   ]
+   "hits": []
   },
   "c8-9": {
    "result": "clear",
-   "time": 9.5,
+   "time": 14,
    "heartsLost": 0,
    "stuck": [],
    "hits": []

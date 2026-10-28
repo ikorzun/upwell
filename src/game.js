@@ -2110,6 +2110,16 @@ class Game {
   at() { return { level_id: this.levelId(), height: Math.round(this.levelM) }; }   // the analytics' where
   lvl() { return { world: this.wd.name.en.toLowerCase().replace(/ /g, '_'), level: this.mode === 'camp' ? String(this.stage + 1) : this.daily != null ? 'D' + (this.stage + 1) : this.bonus ? 'bonus' : this.world >= WORLDS.length ? 'boss' : String(this.stage + 1) }; }   // the same, as the platform's messages take it (the world by its
   // English name: the code's ids would say 'mine' for the Village and 'cave' for the Mine)
+  // A level's start, clear, and loss or quitting as Playgama's telemetry guide has them (owner, 2026-10-28: «добавь в сборку всю телеметрию, которая позволяет
+  // добавить плейгама»): one stable name each, the level in the data (its place on the campaign's line, 1 to 100, or in the daily's three), with the platform's
+  // own message as before (`msg` false: a quit, which it never had)
+  prog(kind, data, msg = true) {
+    if (msg) pmsg('level_' + kind, this.lvl());
+    const mode = this.bonus ? 'bonus' : this.daily != null ? 'daily' : this.mode === 'camp' ? 'campaign' : this.endless ? 'endless' : 'run';
+    track('progression_' + kind, { level_id: this.levelId(), ...(mode === 'campaign' ? { step_index: this.world * 10 + this.stage + 1 } : mode === 'daily' ? { step_index: this.stage + 1 } : {}), mode, world: this.lvl().world, ...data });
+  }
+  lost(reason) { return { reason, ...(reason === 'died' ? { cause: this.lastBy || 'other' } : {}), seconds: Math.round(this.lv.t), height: Math.round(this.levelM) }; }   // a loss's
+  // data: died (by its last hit) or quit
   learning() { return this.world === 0 && this.stage === 0 && !this.bonus && this.daily == null && this.lv.t < 60; }   // the first minute of 1-1: a fall costs no heart (the digest §6; the fire does, owner)
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
@@ -2402,7 +2412,6 @@ class Game {
     joyEnd();   // a stick held into the hole lets go
     this.markDay();
     if (this.cardDue) { const id = this.cardDue.id; this.cardDue = null; this.story(id); }   // a card due (the crow's, RIBBON) as the level ends: now, before what follows (QA: it was lost)
-    if (!this.bonus) { pmsg('level_completed', this.lvl()); track('level_stats', { level_id: this.levelId(), seconds: Math.round(this.lv.t), coins_taken: this.lv.coinsTaken, coins_total: this.lv.coinTotal, hp: this.hp }); }   // (a bonus level is done in endBonus, by its hole or not)
     this.state = 'clear'; this.stateT = 0;
     const H = this.hero;
     H.gScale = 0; H.sticky = false; unstick(H, 9); H.face.surprise = 1;   // and into the hole (see suck)
@@ -2418,6 +2427,8 @@ class Game {
       const c = save.camp, par = this.parOf(), got = (lv.t <= par ? 1 : 0) | (this.harmed ? 0 : 2), had = c.medals[this.ci] | 0;
       c.medals[this.ci] = had | got; this.medals = { par, t: lv.t, got, had }; persist();
     }
+    if (!this.bonus) this.prog('completed', { seconds: Math.round(lv.t), coins_taken: lv.coinsTaken, coins_total: lv.coinTotal, hp: this.hp, stars: this.stars.n });   // (a bonus level is done
+    // in endBonus, by its hole or not)
     this.climbed += this.daily != null ? this.rc.len : this.levelM; this.levelM = 0;   // (the daily's: its whole length, where its medal stands)
     if (this.mode === 'camp' && !this.bonus) this.campDone(this.stars.n);
     haptics.buzz(20); sound.play('portal');   // no toast: it would hide the hole
@@ -2478,7 +2489,7 @@ class Game {
     if (!this.bonus || this.state === 'reward') return;
     if (this.combo > 0) this.payCombo();   // a combo running (a rainbow holds one) is paid
     this.bankDrops(); input.clear();
-    pmsg('level_completed', this.lvl());
+    this.prog('completed', { seconds: Math.round(this.lv.t), coins_taken: this.lv.coinsTaken || 0 });
     if (this.mode === 'camp') { const lv = this.lv, f = lv.coinsTaken / Math.max(1, lv.coinTotal); this.campDone(1 + (f >= 0.4) + (f >= 0.8)); }   // its stars: by the share of its coins
     this.state = 'reward'; this.stateT = 0; this.bonusWhy = why || 'bonusDone'; this.bonusGot = this.coins - this.bonusCoins; this.adBusy = false;
     ui.bonusEnd(this.bonusWhy, this.bonusGot, false);
@@ -2506,7 +2517,7 @@ class Game {
     if (this.mode === 'run') save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
       bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice(), syns: this.syns.slice(), daily: this.daily, tier: this.tier, endless: this.endless, loop: this.loop, buys: Object.assign({}, this.buys) };
     persist();
-    pmsg('level_started', this.lvl());
+    this.prog('started');
   }
   continueRun() {   // back where the kept run's level began: the same level (its seed), hearts, coins and upgrades
     const r = save.run;
@@ -2542,13 +2553,15 @@ class Game {
   campKeep() { const d = this.coins - this.kept; if (d > 0) save.bank += d; this.kept = this.coins; save.camp.wallet = this.coins; }
   // A level cleared: its best stars, the next one open, the purse; kept at once (a reload loses none of it).
   campDone(n) {
-    const c = save.camp, i = this.ci;
+    const c = save.camp, i = this.ci, was = campWorlds();
     delete save.cur;
     c.stars[i] = Math.max(c.stars[i] || 0, n);
+    for (const w of campWorlds()) if (!was.includes(w)) track('world_unlocked', { world: CAMPAIGN[w].world.name.en.toLowerCase().replace(/ /g, '_'), world_index: w + 1 });   // a milestone
+    // (Playgama's telemetry guide): a world opened by this clear, its boss's or its stars
     this.campKeep(); persist();
   }
   campNext() { if (this.state !== 'clear') return; this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(campAfter(this.ci))); }   // on from a level played again: into the next one
-  campAgain() { if (this.state !== 'dead') return; pmsg('level_failed', this.lvl()); this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci)); }
+  campAgain() { if (this.state !== 'dead') return; this.prog('failed', this.lost('died')); this.state = 'wait'; ui.hideAll(); ads.between(() => this.playLevel(this.ci)); }
   die() {   // the run ends here, unless there are coins enough to go on (see revive)
     if (this.state !== 'play') return;
     this.bankDrops();
@@ -2563,7 +2576,7 @@ class Game {
   atLid() { return this.mode !== 'camp' && this.daily == null && !this.bonus && this.world >= WORLDS.length && this.lv.kind === 'boss'; }   // the random run's summit
   lidAgain() {   // dead at the Lid (owner, Л3 «А»: «Бой с Крышкой заново, забег сохраняется»): its fight again at once, all hearts, the run's coins and upgrades, no
     // fee; the losses still counted (die: save.camp.fails.lid), so its help comes after three as before
-    pmsg('level_failed', this.lvl()); this.state = 'wait'; ui.hideAll();
+    this.prog('failed', this.lost('died')); this.state = 'wait'; ui.hideAll();
     ads.between(() => { this.hp = this.maxHp; this.state = 'play'; this.stateT = 0; nextSeed = this.seed; this.buildLevel(false); this.saveRun(); ui.hideAll(); ui.banner(); });
   }
   pop() {   // the burst, each death its own: where it can be seen (a fall ends below the screen), in the colour it was held in
@@ -2615,8 +2628,8 @@ class Game {
     Object.assign(this, { lv: h.lv, hero: h.hero, R: h.R, startY: h.startY, state: h.state, builtW: h.builtW, menuWd: h.menuWd, menuBack: h.menuBack, menuR: h.menuR, menuFloor: h.menuFloor, menuSplit: h.menuSplit, menuBare: h.menuBare });
   }
   win() {
-    if (this.mode === 'run' && this.endless) { pmsg('level_completed', this.lvl()); this.loopOn(); return; }   // the endless climb goes round again
-    pmsg('level_completed', this.lvl()); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8);
+    if (this.mode === 'run' && this.endless) { this.prog('completed', { seconds: Math.round(this.lv.t), height: Math.round(this.levelM) }); this.loopOn(); return; }   // the endless climb goes round again
+    this.prog('completed', { seconds: Math.round(this.lv.t), height: Math.round(this.levelM) }); this.state = 'won'; this.stateT = 0; input.clear(); sound.play('combo', 1, 0.8);
     if (this.mode === 'camp') { this.campWin(); this.result = null; return; }
     this.finish(true);
   }
@@ -2632,7 +2645,7 @@ class Game {
     if (run && this.tier >= (save.tierMax || 0) && (save.tierMax || 0) < 5) { save.tierMax = this.tier + 1; tierUp = save.tierMax; }   // a win at the top tier opens the next (up to 5)
     if (this.endless) save.endlessBest = Math.max(save.endlessBest || 0, total);
     delete save.run;   // over: nothing to continue
-    if (!won) pmsg('level_failed', this.lvl());   // only now: a death with a revive after it is the same go at the level
+    if (!won) this.prog('failed', this.lost('died'));   // only now: a death with a revive after it is the same go at the level
     track('run_over', { won, level_id: this.levelId(), height: total, coins: this.coins, kills: this.kills, revives: this.revives });
     let daily = null;
     if (this.daily != null) {   // the day's best kept, its score to the leaderboard where there is one
@@ -3405,7 +3418,7 @@ const ui = {
     box.append(st, def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t(deadKey(why, g.lv.theme))), deadKey(why, g.lv.theme)));   // a boss has a word of its own
     box.append(this.runRows([[t('height'), Math.floor(g.levelM) + ' ' + t('m')], [t('reached'), g.where()], [t('coins'), g.lv.coinsTaken || 0], [t('kills'), g.kills], [t('combo'), g.bestCombo]]));
     if (!boss && g.coins >= price) p.append(box, cap(button(tf('reviveHere', { n: price }), 'big alt', () => g.revive()), 'reviveHere', { n: price })); else p.append(box);
-    p.append(cap(button(t('menu'), 'big alt', () => { pmsg('level_failed', g.lvl()); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
+    p.append(cap(button(t('menu'), 'big alt', () => { g.prog('failed', g.lost('died')); g.toMenu(); }), 'menu'), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
   },
   runRows(rows) {   // a go's numbers in two columns, the words on the left, the numbers on the right (the Figma «too sour»)
     const tb = el('div', 'rows');
@@ -3548,7 +3561,8 @@ const ui = {
     const build = el('div', 'build');   // the upgrades taken (the world's build, in the campaign), as their pictures
     for (const id of game.taken) build.append(iconEl(id));
     for (const id of game.syns) { const i = iconEl(SYNERGIES.find((q) => q.id === id).of[0]); i.classList.add('syn'); build.append(i); }   // a synergy: its first card, ringed
-    opts.append(...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'));
+    opts.append(...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => { game.prog('failed', game.lost('quit'), false); game.toMenu(); }), 'menu'));   // (quitting: a loss for the
+    // telemetry, not for the platform's messages)
     p.append(...(game.taken.length ? [build] : []), cap(el('div', 'head', t('paused')), 'paused'), opts, cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
@@ -4043,7 +4057,12 @@ const ads = {
 const canvas = $('gl');
 const uiEl = $('ui');
 const view = { w: 1, h: 1, left: 0, keep: 0, k: 1 };   // keep: px at the bottom under the touch keys; k: the column's px on the screen (layout: under 1 in a short window)
-const perf = { ctxLoss: 0, lost0: 0, t0: 0, last: 0, active: 0, ft: [] };   // the renderer counts lost contexts here (Gum sends them as telemetry); the rest: see perfFrame
+const perf = { ctxLoss: 0, lost0: 0, t0: 0, last: 0, active: 0, ft: [], err: 0, err0: 0, rej: 0, rej0: 0, lt: null };   // the renderer counts lost contexts here (Gum sends them as
+// telemetry); the page's errors and refused promises counted here, and its long tasks where the browser reports them (Chromium); the rest: see perfFrame
+addEventListener('error', () => perf.err++); addEventListener('unhandledrejection', () => perf.rej++);
+if (window.PerformanceObserver && (PerformanceObserver.supportedEntryTypes || []).includes('longtask')) {
+  perf.lt = { n: 0, ms: 0, max: 0 }; new PerformanceObserver((l) => { for (const e of l.getEntries()) { perf.lt.n++; perf.lt.ms += e.duration; perf.lt.max = Math.max(perf.lt.max, e.duration); } }).observe({ type: 'longtask' });
+}
 const fx = new FX();
 const game = new Game();
 const renderer = new Renderer(canvas);
@@ -4320,8 +4339,11 @@ function perfSend(now) {
   const ft = perf.ft.sort((a, b) => a - b), n = ft.length, q = (p) => ft[Math.min(n - 1, Math.floor(p * n))], over = (ms) => ft.filter((d) => d > ms).length, r1 = (v) => Math.round(v * 10) / 10;
   if (n) track('performance_sample', { target_fps: 60, window_ms: Math.round(now - perf.t0), active_ms: Math.round(perf.active), frame_count: n,
     fps_avg: r1((n * 1000) / perf.active), fps_p10: r1(1000 / q(0.9)), frame_time_p50_ms: r1(q(0.5)), frame_time_p95_ms: r1(q(0.95)), frame_time_p99_ms: r1(q(0.99)), frame_time_max_ms: r1(ft[n - 1]),
-    frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION });
-  perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss;
+    frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION,
+    js_error_count: perf.err - perf.err0, unhandled_rejection_count: perf.rej - perf.rej0, ...(perf.lt ? { long_task_count: perf.lt.n, long_task_total_ms: Math.round(perf.lt.ms), long_task_max_ms: Math.round(perf.lt.max) } : {}),
+    ...(performance.memory ? { memory_used_mb: Math.round(performance.memory.usedJSHeapSize / 1048576), memory_measurement_supported: true, memory_measurement_type: 'js_heap' } : { memory_measurement_supported: false }) });   // (each count this
+  // window's; the memory where the browser tells it: Chromium's heap)
+  perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss; perf.err0 = perf.err; perf.rej0 = perf.rej; if (perf.lt) perf.lt = { n: 0, ms: 0, max: 0 };
 }
 // A computer too slow for the finer grid (PIX.fit): its first 3 s of play measured, and if half its frames took over 25 ms, the old grid for good. A
 // frame is slow against the screen's own pace too, the menu's (a cheap scene): a screen or a battery saver at 30 Hz is not a slow computer.

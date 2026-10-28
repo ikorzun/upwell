@@ -3542,12 +3542,14 @@ const ui = {
     }
     p.append(grid, cap(button(t('menu'), 'big thumb', () => game.toMenu()), 'menu'));
   },
-  pause() {
-    const p = this.panel('pause');
+  pause() {   // as the settings (owner, 2026-10-28: «меню паузы нужно переработать по типу меню настроек»): its rows in their box of white lines, Menu the box's last
+    // row, Resume the yellow pill at the bottom, under the thumb; the upgrades taken over the title
+    const p = this.panel('pause'), opts = el('div', 'opts');
     const build = el('div', 'build');   // the upgrades taken (the world's build, in the campaign), as their pictures
     for (const id of game.taken) build.append(iconEl(id));
     for (const id of game.syns) { const i = iconEl(SYNERGIES.find((q) => q.id === id).of[0]); i.classList.add('syn'); build.append(i); }   // a synergy: its first card, ringed
-    p.append(cap(el('div', 'head', t('paused')), 'paused'), ...(game.taken.length ? [build] : []), ...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));   // Resume at the bottom, under the thumb
+    opts.append(...this.prefs(() => this.pause()), cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'));
+    p.append(...(game.taken.length ? [build] : []), cap(el('div', 'head', t('paused')), 'paused'), opts, cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
     const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink]; this.storyArgs = [c, done];   // (laid again on a resize: Game.resized)

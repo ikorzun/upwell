@@ -274,7 +274,9 @@
   #pause, #result, #cards { background: var(--dim2); }   /* over the game after a level, at a pause, at the end */
   #result { justify-content: flex-end; }   /* all of it low, in the thumb's reach */
   #menu, #result, #pause { padding-left: 12px; padding-right: 12px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* the main button 12 px from the edges */
-  #pause { justify-content: flex-end; }
+  #pause { justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }   /* as the settings (ui.pause; owner,
+     2026-10-28: «меню паузы нужно переработать по типу меню настроек»), over the game's own dark (--dim2) */
+  #pause > .build { margin-bottom: 16px; }   /* the upgrades taken, over its title (where the settings' mockup has its cog) */
   #story { background: rgba(11, 7, 22, 0.92); justify-content: flex-end; padding: calc(env(safe-area-inset-top, 0px) + 8px) 0 calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* a story card over the game held under it (STORY), edge to edge (owner, 2026-10-24); its button 12 px in from the sides */
   #story > .big { align-self: stretch; margin: 0 12px; }
   #story > .big.thumb { border-radius: 32px; clip-path: none; }   /* Next: the main screen's pill (owner, 2026-10-28: «кнопки в карточках сделай такие же круглые по краям, как в главном меню») */
@@ -324,24 +326,24 @@
      it in his work clothes: ui.settings); from the bottom the yellow pill, 16 over it the bar of rows (8 in from the sides, 64 tall, white lines round and between their
      cells), 16 over that «Settings»; its words in the game's fonts as tall as the mockup's Inter (19 → VT323 24.8, 33 → 43) */
   #settings { background: none; justify-content: flex-end; gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
-  #settings .head { --p: 3.44; margin: 0 0 16px; padding: 8px; }
-  #settings .head > .cap { font-size: 16px; color: var(--white); opacity: 0.56; }
-  #settings .opts { align-self: stretch; display: flex; flex-direction: column; margin: 0 8px 16px; box-shadow: inset 0 0 0 1px var(--white); }   /* (a column: a button row as wide as it) */
-  #settings .opts > * + * { border-top: 1px solid var(--white); }
-  #settings .opts .langs { display: flex; gap: 0; height: 64px; }
-  #settings .opts .langs .chip { flex: 1 1 0; min-width: 0; height: 100%; --p: 1.98; background: none; box-shadow: none; clip-path: none; color: var(--white); }
-  #settings .opts .langs .chip + .chip { border-left: 1px solid var(--white); }
-  #settings .opts .langs .chip.on { background: var(--white); color: var(--ink); }   /* the language in use */
-  #settings .opts .langs .chip .tx:lang(ja) { font-size: 16px; }   /* 日本語 on DotGothic16's own 16-px grid (its --p would make it 15.8) */
-  #settings .opts .pair { gap: 0; height: 64px; box-sizing: border-box; }
-  #settings .opts .pair > .big { height: auto; }   /* (64 with its line over it) */
-  #settings .opts .pair > .big + .big { border-left: 1px solid var(--white); }
-  #settings .opts .big { height: 64px; min-width: 0; padding: 0 8px; --p: 2.48; background: none; color: var(--white); box-shadow: none; clip-path: none; box-sizing: border-box; }
-  #settings .opts .big > .cap { color: var(--white); opacity: 0.56; }
-  #settings .v.on { color: var(--on); }   /* a setting's value: on lime, off red */
-  #settings .v.off { color: var(--off); }
-  #settings > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Back: the main screen's pill */
-  #settings > .big.thumb > .cap { font-size: 12px; }
+  #settings .head, #pause .head { --p: 3.44; margin: 0 0 16px; padding: 8px; }
+  #settings .head > .cap, #pause .head > .cap { font-size: 16px; color: var(--white); opacity: 0.56; }
+  #settings .opts, #pause .opts { align-self: stretch; display: flex; flex-direction: column; margin: 0 8px 16px; box-shadow: inset 0 0 0 1px var(--white); }   /* (a column: a button row as wide as it) */
+  #settings .opts > * + *, #pause .opts > * + * { border-top: 1px solid var(--white); }
+  #settings .opts .langs, #pause .opts .langs { display: flex; gap: 0; height: 64px; }
+  #settings .opts .langs .chip, #pause .opts .langs .chip { flex: 1 1 0; min-width: 0; height: 100%; --p: 1.98; background: none; box-shadow: none; clip-path: none; color: var(--white); }
+  #settings .opts .langs .chip + .chip, #pause .opts .langs .chip + .chip { border-left: 1px solid var(--white); }
+  #settings .opts .langs .chip.on, #pause .opts .langs .chip.on { background: var(--white); color: var(--ink); }   /* the language in use */
+  #settings .opts .langs .chip .tx:lang(ja), #pause .opts .langs .chip .tx:lang(ja) { font-size: 16px; }   /* 日本語 on DotGothic16's own 16-px grid (its --p would make it 15.8) */
+  #settings .opts .pair, #pause .opts .pair { gap: 0; height: 64px; box-sizing: border-box; }
+  #settings .opts .pair > .big, #pause .opts .pair > .big { height: auto; }   /* (64 with its line over it) */
+  #settings .opts .pair > .big + .big, #pause .opts .pair > .big + .big { border-left: 1px solid var(--white); }
+  #settings .opts .big, #pause .opts .big { height: 64px; min-width: 0; padding: 0 8px; --p: 2.48; background: none; color: var(--white); box-shadow: none; clip-path: none; box-sizing: border-box; }
+  #settings .opts .big > .cap, #pause .opts .big > .cap { color: var(--white); opacity: 0.56; }
+  #settings .v.on, #pause .v.on { color: var(--on); }   /* a setting's value: on lime, off red */
+  #settings .v.off, #pause .v.off { color: var(--off); }
+  #settings > .big.thumb, #pause > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Back: the main screen's pill */
+  #settings > .big.thumb > .cap, #pause > .big.thumb > .cap { font-size: 12px; }
   .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 17 under the safe area (2026-10-28) */
   .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its 32-px gear 16 under the safe area and 16 in from the side, in a 48-px button */
   .setBtn img { width: 32px; height: auto; }   /* the Figma «Main»'s gear (2026-10-28): 32 px, 16 from the top and the right */

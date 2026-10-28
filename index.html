@@ -363,6 +363,15 @@
   .fm-full { gap: 4px; }
   .fm-fav svg, .fm-full svg { width: var(--icon); height: var(--icon); display: block; }   /* (32 at most, its pixels whole screen points: feed.mount) */
   .fm-of { opacity: 0.4; }   /* the count's whole, dimmer */
+  /* His words (feed.js say; owner, 2026-10-28): a white bubble over his crown, its tail down to him, the game's font in ink; in with a pop from its foot, out
+     rising */
+  .say { position: fixed; z-index: 45; transform: translate(-50%, -100%); transform-origin: 50% 100%; max-width: 230px; padding: 7px 10px 9px; background: var(--white); color: var(--ink); --p: 1.6; pointer-events: none; animation: sayIn 0.24s cubic-bezier(0.3, 1.6, 0.6, 1) both; }
+  .say::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 8px; margin-left: -6px; background: var(--white); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  .say .tx { line-height: 1; }
+  .say.out { animation: sayOut 0.25s ease-in both; }
+  @keyframes sayIn { 0% { transform: translate(-50%, -100%) scale(0.4); opacity: 0; } 60% { transform: translate(-50%, -100%) scale(1.08); opacity: 1; } 100% { transform: translate(-50%, -100%) scale(1); opacity: 1; } }
+  @keyframes sayOut { to { transform: translate(-50%, calc(-100% - 12px)); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .say, .say.out { animation: none; } }
   .fm-x { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its white disc 40 px, 12 under the safe area and 12 in from the side, in a 48-px button (the Figma «Feed») */
   .fm-x::before { content: ''; grid-area: 1 / 1; width: 40px; height: 40px; border-radius: 50%; background: var(--white); }
   .fm-x img { grid-area: 1 / 1; width: 24px; height: 24px; filter: brightness(0); }   /* the library's close-24 (white) made black, as the Figma's */

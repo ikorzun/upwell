@@ -30,6 +30,11 @@ const FEED = {
   // совмещения и финала»): its bits (a line of 4+ more), as the game's sparkFx in its own colours: CSS px/s, s, px/s² down, their speed's part lost a second, the
   // part in white; a white ring round the line for ring s (a line of 4+ a wider one)
   confetti: { n: 24, star: 24, life: [1.4, 2.2], g: 260 },   // the result's: bits, and more a star, in the four foods' colours, falling slow and fluttering
+  say: { every: [7, 11], first: 2.5, hold: 2600, yum: 5000 },   // his words in a bubble (owner, 2026-10-28: «если игрок не кормил моти, то он попрыгивает и
+  // периодически издает короткие реплики… если покормил… моти издает реплику что сыт»): hungry at home every so many s (the first so long after home shows),
+  // held so many ms; while fed a «Yum!» at most every so many ms
+  joy: { hops: 3, gap: 450, from: 600, every: 2400, hearts: 4 },   // full, his joy (owner: «финальный экран… больше анимации и радости»): so many hops in a
+  // row from from ms, gap ms apart, then one every every ms, a few hearts out of him at each
   fin: { big: 1.5, feet: 61, band: 75, breath: 0.02, period: 2.4, pay: 1450, tick: 110 },   // the result (the Figma «Feed-full»): Moti half as big again as over the
   // board (its 300 to «Feed»'s 200), his feet so far over the foods, the dark from so far over his feet; full, he breathes (his size a breath's part up and down
   // in period s); the day's gift its coin in at pay ms, counted up a coin each tick ms (owner, З20 «Б»: «добавить максимум приятной анимации на последнем экране»)
@@ -237,7 +242,8 @@ else {
   const bits = []; let fxc = null, fxRaf = 0, fxLast = 0;
   window.feedSvg = { foodSvg, volOf, bits };   // (for checks)
   const fxCanvas = () => {   // the bits' canvas over the screen, a food's pixel its pixel (whole screen points): made at the first bit, gone with the board (feed.close)
-    const dpr = devicePixelRatio || 1, k = Math.max(1, Math.round((feed.foodPx * dpr) / FEED.food)), W = Math.ceil((innerWidth * dpr) / k), H = Math.ceil((innerHeight * dpr) / k);
+    const dpr = devicePixelRatio || 1, k = Math.max(1, Math.round(((feed.foodPx || 64) * dpr) / FEED.food)),   // (home, no board yet: a food's 64)
+      W = Math.ceil((innerWidth * dpr) / k), H = Math.ceil((innerHeight * dpr) / k);
     if (!fxc) { fxc = document.createElement('canvas'); fxc.className = 'fm-fx'; document.body.append(fxc); }
     if (fxc.width !== W || fxc.height !== H || fxc.k !== k) { fxc.width = W; fxc.height = H; fxc.k = k; fxc.style.width = (W * k) / dpr + 'px'; fxc.style.height = (H * k) / dpr + 'px'; }
     if (!fxRaf) fxRaf = requestAnimationFrame(fxStep);
@@ -254,6 +260,12 @@ else {
       if (b.t < 0) continue;   // (one still to come)
       x.fillStyle = b.c;
       if (b.ring) { ringPx(x, b.x * s, b.y * s, (b.r0 + (b.r1 - b.r0) * Math.sqrt(b.t / b.life)) * s); continue; }
+      if (b.heart) {   // a heart (the game's own, HEART) rising out of him, swaying, gone the last third of its life a pixel at a time from its top
+        const d = Math.exp(-b.drag * dt); b.vx *= d; b.vy = b.vy * d + b.g * dt; b.x += (b.vx + 22 * Math.sin(b.t * 5 + b.ph)) * dt; b.y += b.vy * dt;
+        const rows = HEART.full, cut = b.t > 0.66 * b.life ? Math.ceil(((b.t - 0.66 * b.life) / (0.34 * b.life)) * rows.length) : 0, ox = Math.round(b.x * s - 3), oy = Math.round(b.y * s - 3);
+        for (let j = cut; j < rows.length; j++) for (let q = 0; q < rows[j].length; q++) if (rows[j][q] === '#') { x.fillStyle = j === 1 && q === 1 ? WHITE : b.c; x.fillRect(ox + q, oy + j, 1, 1); }
+        continue;
+      }
       const d = Math.exp(-b.drag * dt); b.vx *= d; b.vy = b.vy * d + b.g * dt; b.x += (b.vx + (b.fl ? b.fl[2] * Math.sin(b.t * b.fl[0] + b.fl[1]) : 0)) * dt; b.y += b.vy * dt;
       const z = b.t > 0.66 * b.life ? Math.max(1, b.s - 1) : b.s, flat = b.fl && Math.cos(b.t * b.fl[0] + b.fl[1]) > 0, zw = b.fl && !flat ? Math.max(1, z - 1) : z, zh = flat ? Math.max(1, z - 1) : z;   // (a confetti's
       // bit turning over: long across, then up and down)
@@ -279,6 +291,28 @@ else {
       t: -rr() * 0.6, life: C.life[0] + rr() * (C.life[1] - C.life[0]), s: rr() < 0.5 ? 3 : 2, c: inks[(rr() * inks.length) | 0], fl: [4 + rr() * 4, rr() * 6.28, 60 + rr() * 60] });
     fxCanvas();
   };
+  const hearts = (n) => {   // a few hearts out of his crown, up and swaying (his joy: a cascade, a star, full)
+    const b = game.hero; if (!b || still) return;
+    for (let i = 0; i < n; i++) bits.push({ heart: true, x: view.left + b.cx + fxRand(-0.6, 0.6) * b.R, y: b.minY - game.lv.cam + fxRand(0, 0.3) * b.R, vx: fxRand(-30, 30), vy: -fxRand(70, 130), g: 0, drag: 0.6,
+      t: -i * 0.09, life: fxRand(0.9, 1.3), ph: fxRand(0, 6.28), c: fxRand(0, 1) < 0.5 ? '#f43e34' : '#ff7db0' });
+    fxCanvas();
+  };
+  let sayEl = null, sayEnd = 0;
+  const sayPlace = () => {   // the bubble over his crown, kept on the screen (8 px in from its sides)
+    const b = game.hero; if (!sayEl || !b) return;
+    const w = sayEl.offsetWidth, x = Math.min(innerWidth - 8 - w / 2, Math.max(8 + w / 2, view.left + b.cx));
+    sayEl.style.left = x + 'px'; sayEl.style.top = Math.max(sayEl.offsetHeight + 8, b.minY - game.lv.cam - 10) + 'px';
+  };
+  const say = (text, ms = FEED.say.hold) => {   // his word in a bubble over him: in with a pop, he says it (a little squash, his mouth round), out after ms
+    if (sayEl) sayEl.remove(); for (const e of document.querySelectorAll('.say.out')) e.remove();   // (one going out: gone at once, not under the new one)
+    sayEl = document.createElement('div'); sayEl.className = 'say'; sayEl.append(px(text)); document.body.append(sayEl); sayEnd = performance.now() + ms; sayPlace();
+    const b = game.hero; if (b) { b.wake(); b.kickSquash(0, 1, 0.25); b.face.surprise = Math.max(b.face.surprise, 0.6); }
+  };
+  const unsay = () => { const e = sayEl; sayEl = null; if (!e) return; if (still) { e.remove(); return; } e.classList.add('out'); setTimeout(() => e.remove(), 260); };
+  const joyHop = (h) => {   // a hop of joy: down a moment, then up, his eyes wide, hearts out
+    const b = game.hero; if (!b || still) return;
+    b.wake(); b.kickSquash(0, 1, -0.7); b.hop(Math.sqrt(2 * WORLD.gravity * h * b.R)); b.face.wide = 1; hearts(FEED.joy.hearts);
+  };
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const anim = (e, frames, ms, ease = 'ease-out') => (e && e.animate ? e.animate(frames, { duration: still ? Math.min(ms, 90) : ms, easing: ease }).finished.catch(() => {}) : Promise.resolve());
   var feed = {   // (var: a global, as game.js asks for it by name)
@@ -290,8 +324,19 @@ else {
       // how many of each food he has eaten, for the result)
     },
     rec() { const f = save.feed; return f && typeof f === 'object' ? f : (save.feed = { day: -1, best: 0 }); },   // kept in the save: the UTC day his coins were last given, the best score
+    fedToday() { return this.rec().day === today; },   // his day's run fed to its end (its gift given): full till tomorrow
+    line(key) {   // one of his words for it, never the same twice in a row
+      const all = t(key).split('|'), was = (this.lastLine = this.lastLine || {})[key]; let i = (Math.random() * all.length) | 0;
+      if (all.length > 1 && i === was) i = (i + 1) % all.length; this.lastLine[key] = i; return all[i];
+    },
+    full() {   // tapped while full (owner, 2026-10-28: «повторное нажатие не открывает метч, а моти издает реплику что сыт»): a sated wobble and his word
+      const b = game.hero; if (b) { b.wake(); b.kickSquash(0, 1, 0.5); }
+      sound.play('bubble', 0.5, 0.75); haptics.buzz(8); say(this.line('motiFull')); track('feed_full_tap', { date: dayKey() });
+    },
     open() {   // a tap on Moti: the board under him, a run under way taken up again
       if (this.active || game.state !== 'menu') return;
+      if (this.fedToday() && !(this.st && !this.st.done)) { this.full(); return; }   // fed today: no board till tomorrow
+      unsay();
       if (!this.st || this.st.done) this.newRun();
       this.active = true; this.sel = -1; this.opened = performance.now(); this.idle = performance.now();
       const b = game.hero; if (b) { b.kickSquash(0, 1, 0.7); b.face.wide = 1; }
@@ -438,7 +483,9 @@ else {
     },
     async eat(ph) {   // one phase: its foods eaten (Moti's bite), then the rest down and new ones in
       const st = this.st, c = this.cellPx, b = game.hero;
+      const was = FL.stars(st.full);
       st.full += ph.gone.length; st.score += FL.score(ph, st.fav); for (const f of ph.foods) st.ate[FL.food(f)] = (st.ate[FL.food(f)] || 0) + 1;
+      if (FL.stars(st.full) > was && st.moves > 0) setTimeout(() => { if (this.active) { joyHop(0.35); say(this.line('motiYum'), 1200); this.yumAt = performance.now(); } }, FEED.bite);   // a star more: a cheer
       const big = ph.runs.some((r) => r.length >= 4);
       sound.play('coin', 0.45, 1 + 0.08 * Math.min(ph.cascade - 1, 4)); haptics.buzz(big ? 12 : 5);
       for (const i of ph.thawed) this.thaw(i);
@@ -521,9 +568,18 @@ else {
         for (let i = 1; i <= st.pay; i++) setTimeout(() => { if (!pay.isConnected) return; pay.firstChild.replaceWith(px(tf('feedTreat', { n: i }))); sound.play('coin', 0.7, 1 + 0.12 * i); haptics.buzz(6); }, i * FEED.fin.tick);
       }, FEED.fin.pay);
       if (stars) confetti(p.getBoundingClientRect(), FEED.confetti.n + FEED.confetti.star * stars);
+      const J = FEED.joy; for (let k = 0; k < J.hops; k++) setTimeout(() => { if (this.active && this.fin) joyHop(k === J.hops - 1 ? 0.6 : 0.4); }, J.from + J.gap * k);   // hops of joy
+      this.joyAt = performance.now() + J.from + J.gap * J.hops + J.every; setTimeout(() => { if (this.active && this.fin) say(this.line('motiThanks'), 2400); }, J.from + J.gap * J.hops);   // then his thanks
     },
     frame(now) {   // each frame (game.js runFrame, after menuTouch): his eyes on a bite in the air (or the board), his sag by how full he is, eased back at home
-      const b = game.hero; if (!b || !game.lv || game.lv.kind !== 'menu') return;
+      const b = game.hero; if (!b || !game.lv || game.lv.kind !== 'menu') { if (sayEl) unsay(); return; }
+      const home = game.state === 'menu' && ui.open === 'menu' && !this.active && !game.held;   // (home: his words; hungry, now and then)
+      if (sayEl) { if (now > sayEnd || !(home || this.active)) unsay(); else sayPlace(); }
+      if (home && !this.fedToday() && !menuTouch.ptrs.size) {
+        if (!this.chatAt) this.chatAt = now + 1000 * FEED.say.first;
+        else if (now > this.chatAt) { this.chatAt = now + 1000 * (FEED.say.every[0] + Math.random() * (FEED.say.every[1] - FEED.say.every[0])); say(this.line('motiHungry')); }
+      } else if (!home) this.chatAt = 0;
+      if (this.active && this.fin && !this.box && this.joyAt && now > this.joyAt) { this.joyAt = now + FEED.joy.every; joyHop(0.35); }   // full: a hop now and then
       const dt = Math.min(0.1, Math.max(0, (now - (this.lastF || now)) / 1000)); this.lastF = now;
       const aim = this.active && this.st ? Math.min(1, this.st.full / FEED.stars[2]) : 0;
       this.fat = (this.fat || 0) + (aim - (this.fat || 0)) * Math.min(1, dt * (aim > (this.fat || 0) ? 2.5 : 1.2));
@@ -576,7 +632,10 @@ else {
       const b = game.hero; if (!b) return;
       const fav = !!this.st && ph.foods.includes(this.st.fav), big = fav || ph.runs.some((q) => q.length >= 4);
       if (fav) { sound.play('chime', 0.45, 1.5); anim(this.hud.fav, [{ transform: 'none' }, { transform: 'scale(1.2)', offset: 0.4 }, { transform: 'none' }], 240); }
-      b.kickSquash(0, 1, big ? 0.55 : 0.32); b.face.wide = Math.max(b.face.wide, big ? 1 : 0.6); b.face.surprise = Math.min(b.face.surprise, 0.2);
+      b.kickSquash(0, 1, big ? 0.75 : 0.45); b.face.wide = Math.max(b.face.wide, big ? 1 : 0.6); b.face.surprise = Math.min(b.face.surprise, 0.2);   // (owner, 2026-10-28:
+      // «моти сильнее анимировать и добавить радости и эмоций»: a bigger chomp; a cascade's or a big line's hop of joy and hearts; a «Yum!» now and then)
+      if (!still && (big || ph.cascade >= 2)) { b.wake(); b.hop(Math.sqrt(2 * WORLD.gravity * (0.12 + 0.05 * Math.min(ph.cascade, 4)) * b.R)); hearts(big ? 3 : 2); }
+      const now = performance.now(); if ((big || ph.cascade >= 2) && now - (this.yumAt || 0) > FEED.say.yum && Math.random() < 0.6) { this.yumAt = now; say(this.line('motiYum'), 1200); }
       sound.play('bubble', big ? 0.7 : 0.5, 1.25 + 0.07 * Math.min(ph.cascade - 1, 4) + (Math.random() - 0.5) * 0.08); haptics.buzz(big ? 14 : 7);
     },
     hint(now) {   // after a while with no move (the first run's sooner): a legal pair nudges toward each other, twice

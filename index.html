@@ -189,6 +189,7 @@
   #mid { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; }
   #height { --p: 3; filter: drop-shadow(0 3px 0 var(--ink)); }
   #stage { color: var(--gray); filter: drop-shadow(0 2px 0 var(--ink)); }
+  #stage:empty { display: none; }   /* the story's worlds: their level in the height's place (ui.frame) */
   .tasks { display: flex; justify-content: center; gap: 10px; --p: 2; color: var(--gray); }   /* a level's tasks: a picture and a count each (Game.setTasks) */
   .tasks > span { display: flex; align-items: center; gap: 4px; }
   .tasks > .done { color: var(--yellow); }

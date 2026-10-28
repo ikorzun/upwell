@@ -6660,14 +6660,15 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   if (th.glass && lv.kind === 'well') {   // the Tower's kit (the Skyscraper's glass facades gone: a lattice tower has none, research/tower; their thin lines broke into specks
     // through the trusses and between the things, the guide's measure): a white aviation lamp blinking every 20 tiles
-    const t = kitT;
+    const t = kitT, rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the 2.5D, the rule book: its lamps flat, a light; far off behind; its things small)
+    L(0);
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d);
       for (let k = Math.floor(top / (20 * t)) - 1; k * 20 * t < bot; k++) if (Math.floor(T * 1.5 + (side < 0 ? 0 : 0.5)) % 2) disc(at(0.3 * t), k * 20 * t + (side < 0 ? 6 : 16) * t, 0.12 * t, PAL.white, LIT);   // the lamp, a light
     }
     // The TV Tower from Tokyo Tower (its picks, Д230–Д249): its far view by level behind (first: nothing of it over a thing), then on its
     // ledges' wall ends the floodlights of the Landmark Light (lit for good once the hero comes: lv.tended) and its things (kitThing, TW), one sheet pixel a game pixel
-    farMark(); twFar(); farMark();
+    L(3); farMark(); twFar(); farMark(); L(4);
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5 * kitT, r.y0 + kitT) && kitThing(lv, r);
       if (!p) continue;
@@ -6681,6 +6682,7 @@ Renderer.prototype.draw = function (g, alpha) {
       }
       else if (TW[p.kind]) { const S = TW[p.kind]; iwAt(S, wl ? lv.l : lv.r, r.y0, d, 1, twDx(S)); }
     }
+    this.route = rt0;
   }
   // The Tower's ledges (Tokyo Tower, Д162 «Б»; the picks Д234–Д236 A, after research/variants/tt-truss/landing/stair-1-px.png; man-made, so in the game's boxes and
   // lines, at any length): a block a truss of the lattice, a plank off a wall a landing of the outside stair and its rail, a stair's step a step of its flights. The
@@ -6696,6 +6698,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const nt = Math.max(1, Math.round(hgt / t)), e1 = w - 4 * P;
     box(r.x0, r.y0, r.x1, r.y1, K, 1, 0, 10, 0);   // the black between its members (it is solid: nothing behind shows through it in specks)
     box(r.x0, r.y0, r.x1, snap(r.y0 + ch), C, 1, 0, 10, 0);   // its top chord
+    if (CINE) this.route = 0;   // (2.5D: its members flat on its face, the rule book's thin parts; its body deep)
     for (let i = 0; i < nt; i++) {
       const ty0 = r.y0 + (i * hgt) / nt, ty1 = r.y0 + ((i + 1) * hgt) / nt, y0 = ty0 + ch, y1 = ty1 - ch, ph = ty1 - ty0;
       box(r.x0, snap(ty1 - ch), r.x1, snap(ty1), C, 1, 0, 10, 0);   // its bottom chord (a tier's)
@@ -6705,6 +6708,7 @@ Renderer.prototype.draw = function (g, alpha) {
       bxp(e1, ty0, w, ty1); riv(e1 + P, ty0 + ch + P); riv(e1 + P, ty1 - ch - 2 * P);   // its end plate
     }
     if (on && below) { const g0 = 0.7 * t; for (let k = 0; k < 3; k++) bxp(0, r.y1 + (k * g0) / 3, g0 * (1 - k / 3), r.y1 + ((k + 1) * g0) / 3); riv(2 * P, r.y1 + 2 * P); riv(2 * P, r.y1 + g0 * 0.5); }   // its gusset, tapering
+    if (CINE) this.route = 2;
   };
   const twLanding = (r) => {   // a bar grating, one rail on posts (behind the hero, a tone darker, never white), a knee brace under it at the wall
     const t = kitT, P = kitP, C = th.plank, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl !== wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0;
@@ -6712,9 +6716,11 @@ Renderer.prototype.draw = function (g, alpha) {
     const bxp = (u0, y0, u1, y1, c = C, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), snap(Math.min(y0, y1)), Math.max(X(u0), X(u1)), snap(Math.max(y0, y1)), c, a, 0, 10, tn);
     box(r.x0, r.y0, r.x1, r.y1, C, 1, 0, 10, 3); box(r.x0, snap(r.y1 - P), r.x1, r.y1, C, 1.5, 0, 10, 0);   // its floor, its edge under
     const ry = r.y0 - 0.8 * t, np = Math.max(1, Math.round(w / (1.4 * t)));
+    if (CINE) this.route = 0;   // (2.5D: its rail, posts and brace flat)
     bxp(on ? 0 : P, ry, w - P, ry + P, C, RL);   // its rail
     for (let k = 0; k <= np; k++) { const u = Math.min(w - 2 * P, (k * (w - 2 * P)) / np); bxp(u, ry, u + P, r.y0, C, RL); }   // its posts
     if (on) brace(d > 0 ? r.x0 : r.x1, d, snap(r.y1), snap(0.75 * t), snap(0.2 * t), C);
+    if (CINE) this.route = 2;
   };
   const twStep = (r) => {   // a grating box; a handrail up the flight: a post a tile, the rail from post to post and on to the next step's
     const t = kitT, P = kitP, C = th.block, G = PAL.gray;
@@ -6723,19 +6729,22 @@ Renderer.prototype.draw = function (g, alpha) {
       r.twFl = { up, dir: up ? (up.x0 >= r.x1 - 1 ? 1 : -1) : 1 };
     }
     const fl = r.twFl;
-    box(r.x0, r.y0, r.x1, r.y1, C, 1, 0, 10, 0); box(r.x0 + 2 * P, r.y0 + 3 * P, r.x1 - 2 * P, r.y1 - 2 * P, C, 1, 0, 10, 4);
+    box(r.x0, r.y0, r.x1, r.y1, C, 1, 0, 10, 0); if (CINE) this.route = 0; box(r.x0 + 2 * P, r.y0 + 3 * P, r.x1 - 2 * P, r.y1 - 2 * P, C, 1, 0, 10, 4);   // (2.5D: its grating
+    // and handrail flat)
     const pts = []; for (let x = r.x0 + 0.5 * t; x < r.x1; x += t) pts.push([snap(x), snap(r.y0 - 0.9 * t)]);   // its posts' tops
     if (fl.up) pts.push([snap(fl.dir > 0 ? fl.up.x0 + 0.5 * t : fl.up.x1 - 0.5 * t), snap(fl.up.y0 - 0.9 * t)]);
     for (const [x, y] of pts.slice(0, fl.up ? -1 : undefined)) box(x, y, x + P, r.y0, G, 1, 0, 10, 0);
     pts.sort((a, b) => a[0] - b[0]); for (let k = 0; k + 1 < pts.length; k++) line(pts[k][0], pts[k][1], pts[k + 1][0] + P, pts[k + 1][1], G, 1, 1);   // its rail
+    if (CINE) this.route = 2;
   };
   const skyRect = (r) => {
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
     if (r.cloud) {
       const a = r.crumbling ? 1 - 0.7 * (r.t / CRUMBLE.time) : 1, n = Math.max(2, Math.round((r.x1 - r.x0) / (0.7 * t)));
+      if (CINE) this.route = 0;   // (2.5D: a cloud flat, the rule book)
       for (let i = 0; i < n; i++) { const x = r.x0 + (i + 0.5) * (r.x1 - r.x0) / n; disc(x, r.y0 + 0.1 * t, (i % 2 ? 0.42 : 0.5) * t, PAL.white, a); }
       box(r.x0 + 0.2 * t, r.y0 + 0.1 * t, r.x1 - 0.2 * t, r.y1 + 0.15 * t, PAL.gray, a, 0, 10, 0);
-      return true;
+      if (CINE) this.route = 2; return true;
     }
     if (r.plank && r.move) return false;
     if (r.stair) twStep(r);   // (the Tower's, Д162 «Б»)

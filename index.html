@@ -290,11 +290,13 @@
   #menu { background: none; pointer-events: none; justify-content: flex-end; }   /* (owner, 2026-10-23, the Figma «Main») its backdrop and the hero drawn under it (Renderer.drawMenu), a finger through it to the hero (menuTouch); its buttons take theirs */
   /* The main screen as the Figma «Main» (owner, 2026-10-27: «переделай главный экран, размеры кнопок, расстояния и т.д. бери с макета, тип шрифта
      текущий из кода, размеры с макета»): its frame 393 wide, a px a CSS px. From the bottom: the main button 16 px from the edges, 16 over it the bar of
-     Map, Cards, Book and Daily (56 tall, 8 more in from the sides), 20 over that the perk, 12 over that the colours' circles. The words in the game's own
+     Map, Cards, Book and Daily (56 tall, 8 more in from the sides), 16 over that the perk, 6 over that the colours' buttons, 6 over those the purse (40 tall),
+     24 over that Moti, the logo 16 under the top and the room between it and Moti free (owner, 2026-10-28, on the spec: «изменение отступов сверху вниз: 16,
+     плавающий, 24, 6 (при этом размер блока с монетой по высоте 40), 6, 16, 16, 16»). The words in the game's own
      fonts at the mockup's sizes as tall as its Inter's capitals (VT323's are 0.56 of its size, Inter's 0.73: 17 → 22 px, 20 → 26) */
   #menu { gap: 0; padding-left: 16px; padding-right: 16px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
-  #menu .pickers { margin-bottom: 8px; }   /* (its circles 40 in their 48-px buttons: 12 px over the perk) */
-  #menu .perk { margin-bottom: 20px; }
+  #menu .pickers { margin-bottom: 6px; }   /* (its circles 40 in their 48-px buttons: 10 px over the perk) */
+  #menu .perk { margin-bottom: 16px; }
   #menu .row3 { gap: 0; margin: 0 8px 16px; height: 56px; border: 1px solid var(--yellow); box-sizing: border-box; }   /* one bar of four cells, a yellow line round and between them */
   #menu .row3 > .chip { --p: 1.76; height: 100%; min-height: 0; padding: 4px 2px; background: none; box-shadow: none; clip-path: none; }
   #menu .row3 > .chip + .chip { border-left: 1px solid var(--yellow); }
@@ -338,7 +340,7 @@
   #settings .v.off { color: var(--off); }
   #settings > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Back: the main screen's pill */
   #settings > .big.thumb > .cap { font-size: 12px; }
-  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 17px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 17 under the safe area (2026-10-28) */
+  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 17 under the safe area (2026-10-28) */
   .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its 32-px gear 16 under the safe area and 16 in from the side, in a 48-px button */
   .setBtn img { width: 32px; height: auto; }   /* the Figma «Main»'s gear (2026-10-28): 32 px, 16 from the top and the right */
   .setBtn:active img { filter: brightness(0.8); }
@@ -402,7 +404,7 @@
   .swatch.on::before { box-shadow: 0 0 0 2px var(--amber); }
   .swatch.locked::before { opacity: 0.35; }
   .swatch small { grid-area: 1 / 1; color: var(--white); }
-  .purse { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 30px; margin: 0 0 6px; padding: 8px; --p: 2.58; color: var(--white); }   /* the purse over the colours (Э3 «А»): the Death dialog's coin line (.dline) */
+  .purse { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; box-sizing: border-box; margin: 0 0 6px; padding: 0 8px; --p: 2.58; color: var(--white); }   /* the purse over the colours (Э3 «А»): the Death dialog's coin line (.dline), 40 tall (owner, 2026-10-28) */
   .purse .ico { --p: 2; }
   .perk { display: flex; align-items: center; gap: 8px; text-align: left; }
   .perk .ico { --p: 2; }

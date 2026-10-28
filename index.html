@@ -344,9 +344,11 @@
   #settings .v.off, #pause .v.off { color: var(--off); }
   #settings > .big.thumb, #pause > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Back: the main screen's pill */
   #settings > .big.thumb > .cap, #pause > .big.thumb > .cap { font-size: 12px; }
-  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 50%; transform: translateX(-50%); width: min(197px, calc(100% - 134px)); height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 17 under the safe area (2026-10-28) */
+  .logo { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 50%; transform: translateX(-50%); width: 196px; height: auto; }   /* the Figma «Main»'s sizes, a px a CSS px (its frame 393 wide): 197 wide, 17 under the safe area (2026-10-28); in pixels (owner,
+     2026-10-28: «аккуратно пикселизируй логотип игры»): its 196 a pixel a CSS px, as the Book's pictures (on
+     a 320 screen too: its right edge at 258, the gear's button at 264) */
   .setBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 8px); right: 8px; width: var(--btnS); height: var(--btnS); border: 0; padding: 0; background: none; display: grid; place-items: center; }   /* its 32-px gear 16 under the safe area and 16 in from the side, in a 48-px button */
-  .setBtn img { width: 32px; height: auto; }   /* the Figma «Main»'s gear (2026-10-28): 32 px, 16 from the top and the right */
+  .setBtn img { width: 32px; height: auto; }   /* the Figma «Main»'s gear (2026-10-28): 32 px, 16 from the top and the right; its 32 pixels a CSS px each (owner: «Тоже самое с иконкой настроек») */
   .setBtn:active img { filter: brightness(0.8); }
   .head { --p: 3; margin-bottom: 6px; filter: drop-shadow(0 3px 0 var(--ink)); }
   .label { color: var(--gray); margin-top: 6px; }

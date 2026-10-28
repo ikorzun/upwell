@@ -5197,7 +5197,8 @@ Renderer.prototype.draw = function (g, alpha) {
   // Where each world's far view starts and ends among the features (pairs of this.nf): on the main screen, of all that is behind, only that is drawn,
   // over its world's back with no walls, the menu's ink under the colours' row as before (owner, 2026-10-24: «Слишком шумно. Верни как было, оставь
   // анимацию, а вместо градиента за моти используй фон локации»)
-  const menu = g.state === 'menu', farR = [];
+  const menu = g.state === 'menu', farR = [], farF = [], farMark = () => { farR.push(this.nf); farF.push(this.nFar || 0); };   // (a far view's start and end: in the
+  // features, and in the 2.5D's far ones)
   const farQ = (n, fill) => { const q = 2 * PIX.base, w = menu ? view.w : lv.r - lv.l; return (menu || fill) && n * q < w ? Math.ceil(w / (n * PIX.size)) * PIX.size : q; };
   const farCut = new WeakMap(), farPic = (FV, cx, foot, a = DIM) => {   // a far picture for the low band (Д331 «Г»): centred, its foot at `foot`, the shaft filled, cut at the walls in
     // play (owner, Д332: «фон не должен заходить за боковые линии»; the main screen has none: edge to edge)
@@ -5669,7 +5670,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
     // a wall; vending machines stand in a niche at a ledge's wall end. All on a fixed beat by height, not at random, so nothing is kept.
     const t = kitT, P = kitP, arm = WIRE.arm * t, mod = (k, n) => ((k % n) + n) % n;
-    { const rt = this.route; if (CINE) this.route = 3; farR.push(this.nf); gaiFar(); farR.push(this.nf); this.route = rt; }   // Golden Gai far off, behind all (TFAR)
+    { const rt = this.route; if (CINE) this.route = 3; farMark(); gaiFar(); farMark(); this.route = rt; }   // Golden Gai far off, behind all (TFAR)
     for (let k = Math.floor(top / arm) - 1; k * arm < bot + arm; k++) {   // the wire, from crossarm to crossarm, sagging (WIRE)
       const y0 = (k * WIRE.arm + WIRE.drop) * t, x0 = lv.l + WIRE.inset * t, x1 = lv.r - WIRE.inset * t, sag = WIRE.sag * t, st = 3 * P;
       if (y0 + sag < top || y0 > bot) continue;
@@ -5941,7 +5942,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (CINE) this.route = 0;
     for (const r of lv.rects) if (!r.gone && seen(r.y1 - kitT, r.y1 + 2 * kitT) && mnBatsAt(r)) mnBats(r);   // bats asleep under some ledges
     if (CINE) this.route = 3;
-    farR.push(this.nf); mnFar(); farR.push(this.nf);
+    farMark(); mnFar(); farMark();
     this.route = rt0;
   }
   if (th.fuji && lv.kind === 'well') {   // Mount Fuji's kit (THEMES.ice; the owner's picks, research/variants/fuji-*-1-px.png): each its size on the sheets (owner:
@@ -5958,9 +5959,9 @@ Renderer.prototype.draw = function (g, alpha) {
     const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
-    farR.push(this.nf);
+    farMark();
     farPic(FFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 0], (lv.l + lv.r) / 2, snap(farY(cam, H)));   // Fuji by level (FFAR)
-    farR.push(this.nf);
+    farMark();
     for (const r of lv.rects) {
       if (!seen(r.y0 - 6 * t, r.y0) || !steady(r, 2.4)) continue;
       const kk = kitThing(lv, r); if (!kk) continue;   // (which thing: kitThing's, never the one next under it, the owner's rule)
@@ -6048,7 +6049,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = kitT, P = kitP, px = P / t, PROPS = ['lighthouse', 'net', 'kite', 'sazae', 'cats', 'rods', 'flags'], rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic
     // fork, the rule book: the sea far off behind; the props small, their thin parts flat)
     L(3);
-    farR.push(this.nf);
+    farMark();
     {   // the sea far off (the owner's picks, the wave sheet's B and the far sheet's F, a level each in turn): screen-fixed, low on the screen and sinking a
       // little as the climb goes on, as Fuji's; at a quarter (DIM), its lanterns lit (LIT)
       const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);
@@ -6070,7 +6071,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (lv.stage % 2 === 0) { stilts(-7.2, 3, 0.6, true); for (const [u, s] of [[-6.3, 1.1], [-3.4, 1.0]]) pine(u, 2.1, s); boat(3.6, 0.7, 1.4, [[0.6, 0.9]]); }   // stilt houses lit, pines behind them, a boat (B)
       else { isle(-7.8, -3.4, 0.7, 0.6, [[-6.8, 1.0], [-5.0, 0.9]]); isle(3.8, 7.8, 0.7, 0.6, [[5.2, 0.9], [6.8, 1.0]]); torii(0.4, 0.7, 1.4); boat(-2.4, 0.4, 0.6, [[0.3, 0.5]]); boat(3.0, 0.35, 0.8, [[0.4, 0.7]]); } }   // a torii in the water between two islands, boats (F)
     }
-    farR.push(this.nf);
+    farMark();
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
       if (!p || !PROPS.includes(p.kind)) continue;
@@ -6158,7 +6159,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const rt0 = this.route;   // (the cinematic fork, the rule book: the forest far off behind, all of it, the moon, its eyes, Koschei's oak and chest; the fence small, its
     // skulls' eyes flat)
     if (CINE) this.route = 3;
-    farR.push(this.nf);
+    farMark();
     {   // the forest far off (F): spruces, a dead tree with eyes in it, the moon, mist; screen-fixed, low on the screen and sinking a little as the climb goes on;
       // at a quarter (DIM), the moon brighter (a light: it shows through the dark, the crooked treetops black against it), the eyes LIT
       const ar = lv.kind === 'boss', cx = (lv.l + lv.r) / 2, foot = snap(ar ? lv.floor : farY(cam, H)), U = (u) => snap(cx + u * t), Vv = (v) => snap(foot - v * t);   // (Koschei's arena: on its floor)
@@ -6180,7 +6181,7 @@ Renderer.prototype.draw = function (g, alpha) {
       row(-1.6, 4.2, 1.15, 0.3, [2.8, 3.6, 3.0, 3.8]);
       for (let i = 0; i < 6; i++) { const v = 0.1 + 0.22 * i, u0 = -7.5 + ((i * 29) % 7) * 0.6; fb(u0, v, u0 + 2.4 + (i % 3) * 0.8, v + px, G); fb(u0 + 4.2, v, u0 + 6.0, v + px, G); }   // mist over the swamp
     }
-    farR.push(this.nf);
+    farMark();
     for (const r of lv.kind === 'well' ? lv.rects : []) {   // Baba Yaga's fence on a ledge (E): broken stakes, a fallen one across them, a long pole leaning out over the shaft with a skull on its end whose
       // sockets glow the nearer the hero comes, their cores looking at him
       const p = !r.gone && seen(r.y0 - 4 * t, r.y0) && kitThing(lv, r);
@@ -6248,7 +6249,7 @@ Renderer.prototype.draw = function (g, alpha) {
     // a stone lantern and a branch of sakura out of the wall (D), koinobori flying off a pole (D). Nothing covers a door.
     const t = kitT, P = kitP, px = P / t, mod = (k, n) => ((k % n) + n) % n;
     const sp = lv.rc && lv.rc.sparse, few = (list, keep) => (sp ? list.filter((q, i) => keep.includes(i)) : list);   // a `sparse` level's: less of it (owner: «E»)
-    farR.push(this.nf);
+    farMark();
     {   // the countryside far off (F), low on the screen and sinking a little as the climb goes on
       const cx = (lv.l + lv.r) / 2, foot = snap(farY(cam, H)), U = (u) => snap(cx + u * t), V = (v) => snap(foot - v * t);
       const fb = (u0, v0, u1, v1, c, tn = 0) => box(U(u0), V(v1), U(u1), V(v0), c, DIM, 0, 10, tn);
@@ -6276,7 +6277,7 @@ Renderer.prototype.draw = function (g, alpha) {
       fb(3.35, 2.7, 4.95, 2.9, PAL.orange); fb(3.55, 2.35, 4.75, 2.45, PAL.orange); fb(3.25, 2.85, 3.4, 3.0, PAL.orange); fb(4.9, 2.85, 5.05, 3.0, PAL.orange);
       }
     }
-    farR.push(this.nf);
+    farMark();
     for (const side of [-1, 1]) {   // a bamboo grove up each wall (E): two stalks in segments, a node between, sprays of three leaves off the inner one
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), seg = 2.2 * t;
       for (const [d, w, ph] of few([[0.3, 3, 0], [1.15, 2, 0.8]], [0])) {
@@ -6493,7 +6494,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     // The TV Tower from Tokyo Tower (its picks, Д230–Д249): its far view by level behind (first: nothing of it over a thing), then on its
     // ledges' wall ends the floodlights of the Landmark Light (lit for good once the hero comes: lv.tended) and its things (kitThing, TW), one sheet pixel a game pixel
-    farR.push(this.nf); twFar(); farR.push(this.nf);
+    farMark(); twFar(); farMark();
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5 * kitT, r.y0 + kitT) && kitThing(lv, r);
       if (!p) continue;
@@ -7907,10 +7908,16 @@ Renderer.prototype.draw = function (g, alpha) {
   gl.useProgram(pf.p);
   gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, sx, sy); gl.uniform1f(pf.u.uPix, P); grid(pf.u); if (pf.u.uShade) gl.uniform3fv(pf.u.uShade, shadeTint(g.lv && g.lv.theme));
   if (pf.u.uAtlas && TILES.list.length) { tileUpload(gl); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, TILES.tex); gl.activeTexture(gl.TEXTURE0); gl.uniform1i(pf.u.uAtlas, 5); gl.uniform4iv(pf.u['uTile[0]'], TILES.u); }   // (the ledges' pictures: TILES)
-  if (CINE) { this.drawFeat(this.farStart, this.nFar); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
+  if (CINE) { { let a = 0; for (let i = 0; i + 1 < farF.length; i += 2) if (farF[i + 1] > farF[i]) this.drawFeat(this.farStart + farF[i], farF[i + 1] - farF[i]);   // (the far views first
+      for (let i = 0; i + 1 < farF.length; i += 2) { if (farF[i] > a) this.drawFeat(this.farStart + a, farF[i] - a); a = Math.max(a, farF[i + 1]); } if (this.nFar > a) this.drawFeat(this.farStart + a, this.nFar - a); } gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.st.fb); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.stStart, this.nSt); gl.bindFramebuffer(gl.FRAMEBUFFER, this.cine.sm.fb); gl.clear(gl.COLOR_BUFFER_BIT); this.drawFeat(this.smStart, this.nSm); gl.bindFramebuffer(gl.FRAMEBUFFER, this.target.fb); gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT); }   // (what is behind, the structures on nothing, then the play on nothing)
   if (menu) { if (!g.menuBare) for (let i = 0; i + 1 < farR.length; i += 2) this.drawFeat(farR[i], farR[i + 1] - farR[i]); }   // (the main screen: its far view only; the
   // settings none, all dark: Game.menuFit's bare)
-  else this.drawFeat(0, back);
+  else {   // what is behind, its far views first, under all of it (owner, 2026-10-28: «фон – это всегда самый отдаленный слой во всех мирах»)
+    let a = 0;
+    for (let i = 0; i + 1 < farR.length; i += 2) if (farR[i + 1] > farR[i]) this.drawFeat(farR[i], Math.min(farR[i + 1], back) - farR[i]);
+    for (let i = 0; i + 1 < farR.length; i += 2) { if (farR[i] > a) this.drawFeat(a, Math.min(farR[i], back) - a); a = Math.max(a, farR[i + 1]); }
+    if (back > a) this.drawFeat(a, back - a);
+  }
   gl.useProgram(ps.p);
   gl.uniform2f(ps.u.uView, W, H); gl.uniform2f(ps.u.uShake, sx, sy); grid(ps.u);
   gl.uniform2f(ps.u.uOffset, 0, RENDER.shadowOffset); gl.uniform1f(ps.u.uShadowA, RENDER.shadowA);

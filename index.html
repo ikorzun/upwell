@@ -172,6 +172,9 @@
     padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 0;
   }
   #hud.on { display: flex; }
+  #hud { z-index: 0; }   /* (its band behind its words, over the level) */
+  #hud::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 34px); background: linear-gradient(rgba(20, 20, 20, 0.86) 70%, rgba(20, 20, 20, 0)); z-index: -1; pointer-events: none; }   /* a
+     dark band under the HUD, down past its tasks, the level under it dimmed (owner, 2026-10-28, Ш2 «Б»: the top ledges and the tasks ran into each other) */
   #hearts { display: flex; flex-wrap: wrap; gap: 2px 3px; flex: 1; min-width: 0; max-width: calc(50% - 52px); --p: 3; }   /* many hearts (a world's shop buys them for good): rows of them, in their corner, clear of the middle */
   #hearts.many { --p: 2; }
   #rotate { display: none; position: fixed; inset: 0; z-index: 50; background: var(--ink); align-items: center; justify-content: center; --p: 3; color: var(--white); }

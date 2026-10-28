@@ -3224,6 +3224,11 @@ function bigIcon(id) {
   }
   const e = document.createElement('i'); e.className = 'ico big48'; e.dataset.i = id; e.innerHTML = icon48Svgs[id]; return e;
 }
+// A star in detail at `px` CSS px (ICON48.star<N>, research/stars): the grid of N pixels that makes each one whole there, 2 CSS px a pixel from 36 px up, 1 below
+// (owner, 2026-10-28: «везде улучши качество звезд»): the Win's 60, a loss's 48, a toast's 36, the map's 24, the menu's 20
+function starEl(won, px) {
+  const n = px >= 36 ? px / 2 : px, e = bigIcon((won ? 'star' : 'starOff') + n); e.className = 'ico starx'; e.dataset.i = won ? 'star' : 'starOff'; e.style.width = e.style.height = px + 'px'; return e;
+}
 const HEART = { full: '.##.##./#######/#######/.#####./..###../...#...'.split('/'), empty: '.##.##./#..#..#/#.....#/.#...#./..#.#../...#...'.split('/') };
 // A disc of radius `r` px in 2-px pixels: a gray rim a pixel wide round an inside of ink (or, for the knob, white) at `fill`.
 function pixelDisc(r, fill) {
@@ -3314,7 +3319,7 @@ const ui = {
     if (begun && bw >= 0 && bw < CAMP_OPEN) {
       const need = CAMP_STARS[CAMPAIGN[bw].world.id], shut = !campOpen(bw * 30 + 1), name = L2(CAMPAIGN[bw].world.name);
       const b = button('', 'chip' + (shut ? ' locked' : ''), () => (shut ? ui.toast(tf('starsFor', { n: need - lineStars(), w: name }), 2200, 'starOff') : this.map(bw))), w = px(L2(CAMPAIGN[bw].world.name));
-      if (shut) { const k = el('span', 'need'); k.append(iconEl('starOff'), px(lineStars() + '/' + need)); w.append(k); }   // after its name, dimmer: a star and the count (the Figma «Main-random»)
+      if (shut) { const k = el('span', 'need'); k.append(starEl(false, 20), px(lineStars() + '/' + need)); w.append(k); }   // after its name, dimmer: a star and the count (the Figma «Main-random»)
       const c = document.createElement('small'); c.className = 'cap'; c.lang = lang !== 'ja' ? 'ja' : 'en'; c.textContent = CAMPAIGN[bw].world.name[c.lang];   // its name in the other script, as cap()
       b.append(w, c); b.classList.add('capped'); grid.append(b);
     }
@@ -3393,8 +3398,8 @@ const ui = {
     // level over the stars, as its lines are (owner, 2026-10-28: «добавь сверху звезд название мира и уровня, текстом такого же стиля, как рядом с монетами»)
     if (st) {
       const row = el('div', 'stars wstars');
-      for (let k = 0; k < 3; k++) {   // the detailed stars (ICON48.starBig), in one after another STAR_IN.gap apart, each landing with its moment (starHit)
-        const won = k < st.n, s = bigIcon(won ? 'starBig' : 'starBigOff'), at = 0.15 + STAR_IN.gap * k, w = el('span', 'wstar'); w.append(s); row.append(w);
+      for (let k = 0; k < 3; k++) {   // the detailed stars (starEl), in one after another STAR_IN.gap apart, each landing with its moment (starHit)
+        const won = k < st.n, s = starEl(won, 60), at = 0.15 + STAR_IN.gap * k, w = el('span', 'wstar'); w.append(s); row.append(w);
         if (won) {   // its moment at its way in's biggest, timed off its own animation's start (a timer off this call ran ahead of a late first frame)
           s.classList.add('won'); const hit = () => this.starHit(w, s, box, k, k === st.n - 1);
           if (shakeOn()) s.addEventListener('animationstart', (e) => { if (e.animationName === 'starIn') setTimeout(hit, STAR_IN.peak * 1000); }, { once: true }); else setTimeout(hit, (at + STAR_IN.peak) * 1000);
@@ -3445,7 +3450,7 @@ const ui = {
     // Revive dim without coins enough, a tap tells its price), Again the yellow pill. No Menu here, as the mockup: the pause has it
     const p = this.panel('result'), g = game, price = g.revivePrice(), boss = !!(g.rc && g.rc.boss), why = g.deathWhy(), def = g.lv.boss && g.lv.boss.def, box = el('div', 'summary');
     p.classList.add('dlg');
-    const st = el('div', 'stars dstars'), won = save.camp.stars[g.ci] || 0; for (let k = 0; k < 3; k++) st.append(iconEl(k < won ? 'star' : 'starOff'));
+    const st = el('div', 'stars dstars'), won = save.camp.stars[g.ci] || 0; for (let k = 0; k < 3; k++) st.append(starEl(k < won, 48));
     box.append(st, def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t(deadKey(why, g.lv.theme))), deadKey(why, g.lv.theme)));   // a boss has a word of its own
     box.append(this.runRows([[t('height'), Math.floor(g.levelM) + ' ' + t('m')], [t('reached'), g.where()], [t('coins'), g.lv.coinsTaken || 0], [t('kills'), g.kills], [t('combo'), g.bestCombo]]));
     const row = el('div', 'drow'), can = g.coins >= price;
@@ -3574,7 +3579,7 @@ const ui = {
     for (let s = 0; s < 10; s++) {
       const i = w * 30 + s * 3 + 1, { rc } = campAt(i), open = campOpen(i), n = c.stars[i] || 0;
       const b = button('', 'chip lvl' + (rc.boss ? ' boss' : '') + (i === ni ? ' on' : '') + (open ? '' : ' locked'), () => { if (open) goOwed(() => (save.cur && save.cur.ci === i ? game.resume() : game.playLevel(i))); });   // (a level under way goes on where it was)
-      const stars = () => { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(iconEl(open && k < n ? 'star' : 'starOff')); return st; };
+      const stars = () => { const st = el('div', 'mini'); for (let k = 0; k < 3; k++) st.append(starEl(open && k < n, 24)); return st; };
       if (rc.boss) {   // its world's boss off its card, its name and its stars
         const fig = el('div', 'bfig'), cv = document.createElement('canvas'), txt = el('div', 'bname');
         cv.className = 'fig'; fig.append(cv); txt.append(px(L2(BOSSES[rc.boss].name)), stars()); b.append(fig, txt); bossFig(rc.boss, cv, fig, [76, 76]);
@@ -3676,7 +3681,7 @@ const ui = {
   toast(text, ms = 1500, icon) {   // `icon`: an ICONS picture before the words
     const e = $('toast'), lv = game.lv, low = !!lv && lv.kind === 'boss' && game.state === 'play';   // at a boss: on the floor's band, under the fight (owner)
     e.classList.toggle('low', low); e.style.top = low ? Math.round(lv.floor - lv.cam + (view.h - view.keep - (lv.floor - lv.cam)) / 2) + 'px' : '';
-    e.replaceChildren(...(icon ? [iconEl(icon)] : []), px(text, Math.floor((view.w - (icon ? 110 : 64)) / 2))); e.classList.add('show');
+    e.replaceChildren(...(icon ? [icon === 'star' || icon === 'starOff' ? starEl(icon === 'star', 36) : iconEl(icon)] : []), px(text, Math.floor((view.w - (icon ? 110 : 64)) / 2))); e.classList.add('show');   // (a star: in detail)
     clearTimeout(this.toastTimer);
     if (ms) this.toastTimer = setTimeout(() => e.classList.remove('show'), ms);   // 0 keeps it up
   },

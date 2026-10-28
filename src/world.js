@@ -5,7 +5,7 @@
    and how it is drawn. Loaded after src/gum.js, before src/game.js.
    ───────────────────────────────────────────────────────────── */
 
-const VERSION = '0.3.3';
+const VERSION = '0.3.4';
 const BASE_STICK = Object.assign({}, STICK);   // upgrades scale STICK per run; this is where it starts
 // V8 (the browser's engine) gives a field the kind of the first value put in it, for all the objects made the same way: a timer begun at 0 (a small
 // integer) that later holds a fraction, or a flag first set and later changed, has it remake that family of objects and throw away the optimised

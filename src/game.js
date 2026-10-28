@@ -2656,7 +2656,10 @@ class Game {
   togglePause(on) {
     if (this.storyOn) return;   // (a story card is up: its Next goes on)
     if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); pmsg('level_paused', this.lvl()); }   // (the platform told: no play while paused, nor in the menu after)
-    else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); pmsg('level_resumed', this.lvl()); }
+    else if (!on && this.state === 'pause' && !this.resuming) {
+      const go = () => { this.resuming = false; if (this.state !== 'pause') return; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); pmsg('level_resumed', this.lvl()); };
+      if (POKI) { this.resuming = true; ui.hideAll(); ads.between(go); } else go();   // (Poki: an ad's chance on the way back into play)
+    }
   }
 
   // ── Once per drawn frame ──
@@ -3551,7 +3554,8 @@ const ui = {
     const p = this.panel('result');
     p.append(cap(el('div', 'head', t(why)), why), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
     this.markLine(p);
-    if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'big thumb alt', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
+    if (!doubled && n > 0 && ads.canReward && POKI) p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'), adMark(cap(button(t('double'), 'big thumb alt', () => game.doubleBonus()), 'double')));   // (Poki: the plain one the main one, over the ad's)
+    else if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'big thumb alt', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
     else p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'));
   },
   revive(price, coins) {   // before the result, as the Figma «Death» (1268:2433; owner, 2026-10-28): Moti big over «One more go?» (the dialog's stage on its slot:
@@ -3562,7 +3566,7 @@ const ui = {
     have.append(iconEl('coin'), px(t('coins') + ' ' + coins));
     box.append(slot, cap(el('div', 'head', t('reviveQ')), 'reviveQ'), have);
     row.append(cap(button(t('giveUp'), 'big', () => game.giveUp()), 'giveUp'));
-    if (game.canAdRevive()) row.append(cap(button(t('watchAd'), 'big', () => game.reviveAd()), 'watchAd'));
+    if (game.canAdRevive()) row.append(adMark(cap(button(t('watchAd'), 'big', () => game.reviveAd()), 'watchAd')));
     p.append(box, row, cap(button(tf('reviveFor', { n: price }), 'big thumb' + (can ? '' : ' off'), () => (can ? game.revive() : ui.toast(tf('reviveCost', { n: price, c: coins }), 1800))), 'reviveFor', { n: price }));
     game.stageIn(slot);
   },
@@ -3597,8 +3601,8 @@ const ui = {
       if (r.tierUp > 1) u.append(el('div', null, tf('tierOpen', { n: r.tierUp }))); else if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       box.append(u);
     }
-    const then = (f) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); ads.between(f); };   // the run over: an ad may come first
-    p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu())), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun(!!r.daily, game.endless))), 'again'));   // Again (the same kind of run) at the bottom, Menu as big over it
+    const then = (f, ad = true) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); if (ad) ads.between(f); else f(); };   // the run over: an ad may come first
+    p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu(), !POKI)), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun(!!r.daily, game.endless))), 'again'));   // Again (the same kind of run) at the bottom, Menu as big over it (Poki: no ad on the way to the menu)
     fit();
   },
   toastTimer: 0,
@@ -3956,6 +3960,12 @@ for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.add
 // tried. No Bridge at all: no rewarded button, no interstitials.
 // Analytics (the digest §9: telemetry says what, playtests why): the level's start, end and failure go as the platform's own
 // messages (Bridge records them); what only the game knows goes through analytics.send. Without the Bridge, nothing.
+// Poki (its build, tools/poki/build.mjs, marks the page <html data-host="poki">; its SDK answers through tools/poki/poki.js): no timers of the
+// game's own between ads (Poki paces them), none on the way to the menu, one asked on the way back from a pause, and a rewarded go marked 🎬 under
+// the plain one (Poki's requirements). Elsewhere the game as it was.
+const POKI = document.documentElement.dataset.host === 'poki';
+if (POKI) ICONS.ad = '............/.kwkwkwkwkw./.wkwkwkwkwk./............/.wwwwwwwwww./.wwwkwwwwww./.wwwkkwwwww./.wwwkkkwwww./.wwwkkwwwww./.wwwkwwwwww./.wwwwwwwwww./............'.split('/');   // a clapperboard
+const adMark = (b) => { if (POKI) { const i = iconEl('ad'); i.style.setProperty('--p', 2); b.querySelector('.tx').prepend(i, ' '); } return b; };   // a rewarded ad's button: 🎬 before its words (24 px: the words' height)
 const pmsg = (m, data) => { if (ads.ok) try { bridge.platform.sendMessage(m, data); } catch (e) { /* not on this platform */ } };
 const track = (name, data) => { if (ads.ok && bridge.analytics) try { bridge.analytics.send(name, data); } catch (e) { /* not on this platform */ } };
 const BRIDGE_WAIT = 4000, AD_GAP = 180000, AD_AFTER = 3;   // an interstitial three minutes apart at most, from the third pause on (CrazyGames; the digest §6)
@@ -3982,7 +3992,7 @@ const ads = {
   },
   between(done) {   // an interstitial, if one is due and to be had; `done` once it is closed, or at once if none comes
     const now = performance.now();
-    if (!this.ok || !bridge.advertisement.isInterstitialSupported || ++this.pauses < AD_AFTER || now - this.lastAd < AD_GAP) { done(); return; }
+    if (!this.ok || !bridge.advertisement.isInterstitialSupported || (!POKI && (++this.pauses < AD_AFTER || now - this.lastAd < AD_GAP))) { done(); return; }
     const EV = bridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
     let over = false, timer = 0;
     const end = () => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(); };

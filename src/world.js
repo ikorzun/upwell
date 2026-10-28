@@ -1275,10 +1275,19 @@ PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized 
 // number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen
 // may change), ?pix= another to try; the old 2 for good on a computer too slow for it (PIX.slow, see game.js pixGuard). At a screen's 125–175 % or a
 // browser's zoom a sprite's dot is 1.5 or 2.5 of its pixels: the pictures put each dot's edges on the drawing grid (onGrid), so no holes (owner: «делай по совету»)
+// Since 2026-10-28 (owner: «важно, чтобы при уменьшении экрана пиксели не мылились, как и при увеличении») a dot is a whole number of game pixels too: PIX.base
+// the whole-pixel dot nearest a computer's 2 CSS px (base0), exactly 2 where the screen allows (at 150 % a game pixel one screen pixel, the dot three), so
+// a browser's zoom draws no dot of 1 and 2 pixels by turns; the slow computer's old grid on whole pixels as well
+PIX.base0 = PIX.base;
 PIX.fit = function () {
-  if (this.base !== 2 || this.slow) return this.base;
+  if (this.base0 !== 2) return this.base;   // a phone's: phonePx, a dot a game pixel
   const q = +new URLSearchParams(location.search).get('pix'), d = window.devicePixelRatio || 1;
-  return q > 0 ? q : Math.max(1, Math.round(d)) / d;
+  if (q > 0) { this.base = this.base0; return q; }
+  if (this.slow) return (this.base = Math.max(1, Math.round(this.base0 * d)) / d);
+  const n0 = Math.max(1, Math.round(d)), x = this.base0 * d, X = Math.round(x);
+  let n = n0, m = Math.max(1, Math.round(x / n0 - 1e-6));   // a game pixel n of the screen's, a dot m game pixels
+  if (Math.abs(x - X) < 1e-6) for (let j = n0; j >= Math.ceil(n0 / 2); j--) if (X % j === 0) { n = j; m = X / j; break; }   // (the dot exact, on a grid at most twice as fine)
+  this.base = (m * n) / d; return n / d;
 };
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at first (user)

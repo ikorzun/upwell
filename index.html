@@ -277,6 +277,7 @@
   #pause { justify-content: flex-end; }
   #story { background: rgba(11, 7, 22, 0.92); justify-content: flex-end; padding: calc(env(safe-area-inset-top, 0px) + 8px) 0 calc(env(safe-area-inset-bottom, 0px) + 12px); }   /* a story card over the game held under it (STORY), edge to edge (owner, 2026-10-24); its button 12 px in from the sides */
   #story > .big { align-self: stretch; margin: 0 12px; }
+  #story > .big.thumb { border-radius: 32px; clip-path: none; }   /* Next: the main screen's pill (owner, 2026-10-28: «кнопки в карточках сделай такие же круглые по краям, как в главном меню») */
   .scard { position: relative; flex: none; margin-bottom: 14px; touch-action: none; }   /* its size by ui.story: whole pixels, from the view */
   .scard .stilt { position: absolute; inset: 0; }   /* what tilts and rises (cardLive) */
   .scard .sclip { position: absolute; inset: 0; overflow: hidden; border-radius: 20px; clip-path: inset(0 round 20px); background: var(--sbg); }   /* its planes, its corners round (owner, К16 «Б»: «углы скругли на 20 px») */

@@ -4827,23 +4827,32 @@ const GUIDE = !/[?&]guide=0\b/.test(location.search);
 const PX_MIN = (() => { const q = new URLSearchParams(location.search).get('pxmin'); return q != null && q !== '' ? +q : 3; })();   // (the guide's spec:
 // minUnprotectedClusterArea 3: a cluster of 1 or 2 pixels is noise; ?pxmin=N another, to compare)
 const pxClean = (rows) => {   // each cluster of one ink (either tone, 8-connected) under PX_MIN pixels takes what is most round it: the shape's ink inside a
-  // shape, the clear off its edge; kept: eyes and marks ('o', 'k', 'y', 'r') and a cluster at a picture's left or right side
-  const H = rows.length, W = rows[0].length, g = rows.map((r) => [...r]), seen = new Uint8Array(W * H), fill = [], ink = (c) => (c === 'd' ? 's' : c.toLowerCase());
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = g[y][x]; if (ch === '.' || seen[y * W + x]) continue;
-    const cells = [[x, y]], st = [[x, y]]; seen[y * W + x] = 1; let side = false;
-    while (st.length) { const [a, b] = st.pop(); if (a === 0 || a === W - 1) side = true;
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
-        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[v * W + u] && ink(g[v][u]) === ink(ch)) { seen[v * W + u] = 1; st.push([u, v]); cells.push([u, v]); } } }
-    if (cells.length >= PX_MIN || side || 'okyr'.includes(ink(ch))) continue;
-    const own = new Set(cells.map(([a, b]) => b * W + a)), n = {};
-    for (const [a, b] of cells) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy;
-      if (!(dx || dy) || own.has(v * W + u)) continue; const c = u >= 0 && u < W && v >= 0 && v < H ? rows[v][u] : '.'; n[c] = (n[c] || 0) + 1; }
-    let best = '.', most = -1; for (const k in n) if (n[k] > most || (n[k] === most && k !== '.')) { most = n[k]; best = k; }
-    fill.push(cells, best);
+  // shape, the clear off its edge; kept: eyes and marks ('o', 'k', 'y', 'r') and a cluster at a picture's left or right side. On char codes in typed
+  // arrays (the boot cleans every sheet's picture: its strings and pairs took a quarter second of a phone's start), the same rows out as before
+  const H = rows.length, W = rows[0].length, N = W * H, src = new Uint16Array(N), ink = new Uint16Array(N);
+  for (let y = 0, i = 0; y < H; y++) { const r = rows[y]; for (let x = 0; x < W; x++, i++) { const c = r.charCodeAt(x); src[i] = c; ink[i] = c === 100 ? 115 : c >= 65 && c <= 90 ? c + 32 : c; } }   // ('d' is 's', a capital its small letter)
+  const seen = new Uint8Array(N), own = new Uint8Array(N), st = new Int32Array(N), cells = new Int32Array(N), fill = [];
+  for (let i0 = 0; i0 < N; i0++) {
+    if (src[i0] === 46 || seen[i0]) continue;
+    const k = ink[i0]; let n = 0, sp = 0, side = false; seen[i0] = 1; st[sp++] = i0; cells[n++] = i0;
+    while (sp) { const i = st[--sp], a = i % W, b = (i - a) / W; if (a === 0 || a === W - 1) side = true;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy, j = v * W + u;
+        if ((dx || dy) && u >= 0 && u < W && v >= 0 && v < H && !seen[j] && ink[j] === k) { seen[j] = 1; st[sp++] = j; cells[n++] = j; } } }
+    if (n >= PX_MIN || side || k === 111 || k === 107 || k === 121 || k === 114) continue;   // ('o', 'k', 'y', 'r')
+    for (let c = 0; c < n; c++) own[cells[c]] = 1;
+    const round = new Map();   // each ink round it, as often as it touches it
+    for (let c = 0; c < n; c++) { const i = cells[c], a = i % W, b = (i - a) / W;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy, j = v * W + u;
+        if (!(dx || dy) || (j >= 0 && j < N && own[j])) continue; const ch = u >= 0 && u < W && v >= 0 && v < H ? src[j] : 46; round.set(ch, (round.get(ch) || 0) + 1); } }
+    for (let c = 0; c < n; c++) own[cells[c]] = 0;
+    const met = [...round.keys()], dig = (ch) => ch >= 48 && ch <= 57;   // (looked at in an object's keys' order, as it was: digits first, then as met; a tie to the last)
+    let best = 46, most = -1; for (const ch of met.filter(dig).sort((p, q) => p - q).concat(met.filter((ch) => !dig(ch)))) { const m = round.get(ch); if (m > most || (m === most && ch !== 46)) { most = m; best = ch; } }
+    fill.push(cells.slice(0, n), best);
   }
-  for (let k = 0; k < fill.length; k += 2) for (const [a, b] of fill[k]) g[b][a] = fill[k + 1];
-  return fill.length ? g.map((r) => r.join('')) : rows;
+  if (!fill.length) return rows;
+  for (let f = 0; f < fill.length; f += 2) for (const i of fill[f]) src[i] = fill[f + 1];
+  const out = []; for (let y = 0; y < H; y++) out.push(String.fromCharCode.apply(null, src.subarray(y * W, (y + 1) * W)));
+  return out;
 };
 const pxWalk = (o) => {   // every array of ink rows (strings of one length) in a table, cleaned in place
   if (!o || typeof o !== 'object') return o;

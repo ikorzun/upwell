@@ -1074,7 +1074,9 @@ const kitThing = (lv, r) => {
     // of the dark) on two slots in six, as the Mine's lamps; the things on half their ledges, one a ledge, never two alike running (kitAvoid): the Main Deck's binocular
     // or a step-number sign, the night painters' cans or the electrician's box of lamps, Tower Daijingu, antenna panels or a crow; each its sprite's room (TW)
     const half = ((Math.imul(Math.round(b / t) + 7, 0x85ebca6b) >>> 0) / 4294967296) < 0.5, flood = [() => steady(1.8) && room(0, 1.8, 3.2), () => ({ x: X(0.5), y: b - 2.0 * t })];
-    const alt = hk(11) < 3, tw = (el) => { const S = TW[el], u = ((twDx(S) + S.rows[0].length) * PIX.base) / t; return () => half && steady(u + 0.3) && room(0, u + 0.2, (S.base * PIX.base) / t + 0.3); };
+    const alt = ((Math.imul(Math.round(b / t) + 11, 0xc2b2ae35) >>> 0) / 4294967296) < 0.5, tw = (el) => { const S = TW[el],   // (alt its own hash: hk(11) beside the
+    // slot's hk(5) is that one shifted, so a slot leaned to one of its pair: the lamp box once in the world, the paint cans eight times)
+    u = ((twDx(S) + S.rows[0].length) * PIX.base) / t; return () => half && steady(u + 0.3) && room(0, u + 0.2, (S.base * PIX.base) / t + 0.3); };
     k = hk(5); opts = [[0, 'flood', ...flood], [3, 'flood', ...flood], [1, alt ? 'bino' : 'sign', tw(alt ? 'bino' : 'sign')], [2, alt ? 'paint' : 'lampbox', tw(alt ? 'paint' : 'lampbox')],
       [4, 'shrine', tw('shrine')], [5, alt ? 'antenna' : 'crow', tw(alt ? 'antenna' : 'crow')]];
   } else if (th.sea) {   // Enoshima's (Д146 «А»: a black kite on its post at a ledge's free end for the gull, a grill of sazae on its coals, the island's cats
@@ -1100,7 +1102,9 @@ const kitThing = (lv, r) => {
     const fence = () => steady(3.2) && room(0, 3.2, 3.5);   // (and its own things, Д338–Д343, on a quarter of their ledges (the detail count), never two alike running: each its sprite's room, SKT)
     const half = ((Math.imul(Math.round(b / t) + 9, 0x85ebca6b) >>> 0) / 4294967296) < 0.25, alt = ((Math.imul(Math.round(b / t) + 19, 0xc2b2ae35) >>> 0) / 4294967296) < 0.5;   // (alt
     // its own hash: hk's with another salt is the slot's shifted, so a slot always got the same one of its pair)
-    const sk = (el) => { const S = SKT[el], u = ((S.dx + S.rows[0].length) * PIX.base) / t; return () => half && steady(u + 0.3) && room(0, u + 0.2, (S.base * PIX.base) / t + 0.3); };
+    const lone = () => !lv.rects.some((q) => q !== r && q.y0 > b && q.y0 - b < 24 * t && (() => { const k = kitThing(lv, q); return k && SKT[k.kind]; })());   // (none of
+    // its things on the 24 tiles under another, most of a screen: two on one ran it over the detail count, 8-5's 2915; only those under, so it is the same however it is seen)
+    const sk = (el) => { const S = SKT[el], u = ((S.dx + S.rows[0].length) * PIX.base) / t; return () => half && steady(u + 0.3) && room(0, u + 0.2, (S.base * PIX.base) / t + 0.3) && lone(); };
     k = hk(13); opts = [[0, 'fence', fence], [3, 'fence', fence], [1, alt ? 'stupa' : 'cauldron', sk(alt ? 'stupa' : 'cauldron')], [2, alt ? 'skullpost' : 'raven', sk(alt ? 'skullpost' : 'raven')],
       [4, 'stump', sk('stump')], [5, 'bayun', sk('bayun')]];
   } else if (th.town) {   // Tokyo's: a vending machine in a niche at a ledge's wall end, a bonsai in its pot, and Golden Gai's (Д156 «Б», GAI): plastic crates stacked or

@@ -3710,10 +3710,11 @@ const ui = {
     const gun = $('gun'), left = g.gunT > 0 && g.state === 'play' ? Math.ceil((g.gunT / g.gunMax) * 10) : 0;   // the fizz left, in tenths, blinking near the end
     gun.classList.toggle('on', left > 0);
     if (left) { gun.dataset.k = g.pow; gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
-    const m = Math.floor(g.climbed + g.levelM);
-    if (m !== this.m) { this.m = m; $('height').replaceChildren(px(m + ' ' + t('m'))); }
     const st = g.bonus ? t('bonus') + ' ' + Math.max(0, Math.ceil(g.bonusT)) : g.lv.trial ? (g.lv.trial.state === 'on' ? `${g.lv.trial.got}/${g.lv.trial.n} · ${Math.max(0, Math.ceil(g.lv.trial.time - g.lv.trial.t))}` : t('trial')) : g.lv.kind === 'shop' || g.lv.kind === 'treasure' ? t(g.lv.kind) : g.mode !== 'camp' && g.world >= WORLDS.length ? L2(SUMMIT.name) : g.num;   // a bonus level counts its seconds down
-    if (st !== this.stage) { this.stage = st; $('stage').replaceChildren(px(st)); }
+    const camp = g.mode === 'camp', top = camp ? st : Math.floor(g.climbed + g.levelM) + ' ' + t('m'), low = camp ? '' : st;   // the story's worlds: the world and
+    // level in the height's place, no metres (owner, 2026-10-28: «убери в мирах по сюжету подъем в метрах, на это место поставь номер мира и уровень»)
+    if (top !== this.m) { this.m = top; $('height').replaceChildren(px(top)); }
+    if (low !== this.stage) { if (!low !== !this.stage) view.hudB = 0; this.stage = low; $('stage').replaceChildren(...(low ? [px(low)] : [])); }   // (one line less: the HUD measured again)
     const tk = (playing && !g.well && g.lv.tasks) || [], tkey = tk.map((q) => q.id + q.n + '/' + q.of).join();   // the level's tasks, how far each
     if (tkey !== this.tkey) { this.tkey = tkey; $('tasks').replaceChildren(...tk.map(taskEl)); view.hudB = 0; }   // (the HUD measured again)
     const c = $('combo');

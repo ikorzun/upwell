@@ -366,6 +366,7 @@
   .fm-fav, .fm-full { display: flex; align-items: center; gap: 6px; }
   .fm-full { gap: 4px; }
   .fm-fav svg, .fm-full svg { width: var(--icon); height: var(--icon); display: block; }   /* (32 at most, its pixels whole screen points: feed.mount) */
+  .fm-fav > .tx { transform: translateY(1.5px); } .fm-full .fm-n { transform: translateY(-0.5px); }   /* the words' letters on the pictures' middle (their drawings centred in feed.mount; owner: «шрифт должен быть посередине картинки, а сейчас задран вверх»): VT323's capitals sit high in their line, the two lines laid differently */
   .fm-of { opacity: 0.4; }   /* the count's whole, dimmer */
   /* His words (feed.js say; owner, 2026-10-28): a white bubble over his crown, its tail down to him, the game's font in ink; in with a pop from its foot, out
      rising */

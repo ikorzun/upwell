@@ -370,6 +370,9 @@ else {
       bar.append(fill);
       fav.innerHTML = foodSvg(st.fav); fav.append(px(t('feedX2'))); fav.setAttribute('role', 'img'); fav.setAttribute('aria-label', t('feedFav'));   // the day's favourite
       full.innerHTML = foodSvg(FEED.fullIcon); full.append(count);
+      const mid = (id) => { const rows = FOODS[id][1].split('/'), on = rows.map((r) => /[^.]/.test(r)); return Math.round(rows.length / 2 - (on.indexOf(true) + on.lastIndexOf(true) + 1) / 2); };   // its
+      // drawing's middle on its box's, in whole pixels of it (a food sits low in its 48: on its cell), so the words are by its middle (owner: «шрифт должен быть посередине картинки»)
+      fav.firstElementChild.style.transform = 'translateY(' + (mid(st.fav) * kh) / dpr + 'px)'; full.firstElementChild.style.transform = 'translateY(' + (mid(FEED.fullIcon) * kh) / dpr + 'px)';
       row.append(fav, full); hud.append(bar, row);
       const x = button('', 'fm-x', () => this.close()), xi = el('img'); xi.src = 'assets/ui/close-24.svg'; xi.alt = ''; xi.draggable = false; x.append(xi); x.setAttribute('aria-label', t('goBack'));
       const box = el('div', 'fm-board'); box.setAttribute('role', 'grid'); box.setAttribute('aria-label', t('feedMoves'));

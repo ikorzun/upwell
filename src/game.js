@@ -3368,6 +3368,8 @@ const ui = {
   win(next) {
     const p = this.panel('cards'), box = el('div', 'wbox'), lines = el('div', 'wlines'), st = game.stars, md = game.medals; p.classList.add('win');
     const line = (cls, ...kids) => { const e = el('div', 'wl' + (cls ? ' ' + cls : '')); e.append(...kids); lines.append(e); return e; };
+    const where = el('div', 'wlines'), wl = el('div', 'wl'); wl.append(px(L2(game.wd.name) + ' · ' + game.num)); where.append(wl); box.append(where);   // the world and the
+    // level over the stars, as its lines are (owner, 2026-10-28: «добавь сверху звезд название мира и уровня, текстом такого же стиля, как рядом с монетами»)
     if (st) {
       const row = el('div', 'stars wstars');
       for (let k = 0; k < 3; k++) {

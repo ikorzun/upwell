@@ -4127,8 +4127,10 @@ function layout() {
   // (owner: «пиксель в пиксель на всех устройствах»; a phone's was its full width and height, a game pixel 4.5 of an iPhone's, lines 4 and 5 by turns)
   const left = Math.round(((vw - W) / 2) * d) / d, P = PIX.size;
   // A computer's short window (Poki's 640×360 and 836×470: a 203- or 264-px column, the well wider than it, the HUD in two rows): the column laid out as
-  // the narrowest phone's (COL_MIN across, its height to the same scale) and shown k times smaller, its game pixel still P of the screen (pixel for pixel)
-  const k = coarse ? 1 : Math.min(1, W / COL_MIN);
+  // the narrowest phone's (COL_MIN across, its height to the same scale) or wider, and shown k times smaller, its game pixel still P of the screen (pixel for
+  // pixel). k a whole step where there is one, a CSS px of the HUD a whole number of the screen's (on a Retina ½: owner, 2026-10-28, Ш3 «Б»: «Целый шаг ½: всё
+  // чёткое, но шапка и кнопки вдвое мельче»); with none (a screen's pixel a CSS px), the shrink as it was, a little soft
+  const fit = W / COL_MIN, k = coarse || fit >= 1 ? 1 : d * fit >= 1 ? Math.floor(d * fit + 1e-6) / d : fit;
   PIX.size = P / k;   // (the drawing's grid in the laid-out column's px)
   PIX.base = Math.max(1, Math.round(PIX.base / PIX.size - 1e-6)) * PIX.size;   // a picture's dot whole game pixels at this scale too (owner, 2026-10-28:
   // «важно, чтобы при уменьшении экрана пиксели не мылились»: at 0.96 its dot was 1.92 of them, one and two by turns)

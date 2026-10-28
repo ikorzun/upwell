@@ -49,6 +49,8 @@
   body { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
   #gl { position: absolute; top: 0; left: 0; display: block; touch-action: none; image-rendering: pixelated; }
   #gl.wait { visibility: hidden; }
+  #sides { position: absolute; top: 0; display: none; image-rendering: pixelated; pointer-events: none; }   /* a computer's sides (game.js layout, sidesPaint) */
+  #sides.on { display: block; }
   #fps { position: fixed; left: 4px; bottom: 4px; z-index: 60; padding: 2px 4px; background: var(--ink); color: var(--white); font: 12px monospace; pointer-events: none; }   /* ?fps */
   /* everything over the canvas column; layout() gives it the canvas's box */
   #ui { position: absolute; top: 0; left: 0; pointer-events: none; overflow: hidden; }
@@ -527,6 +529,7 @@
 </style>
 </head>
 <body>
+<canvas id="sides" aria-hidden="true"></canvas>
 <canvas id="gl" class="wait" aria-label="Climbing squishy"></canvas>
 <div id="rotate" role="alert"></div>   <!-- a phone held sideways: the game is for upright (see layout) -->
 <div id="stick" aria-hidden="true"><i></i></div>   <!-- over the canvas, under the UI; out of #ui so it shows by the column too (landscape) -->

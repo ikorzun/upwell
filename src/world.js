@@ -5139,7 +5139,7 @@ Renderer.prototype.init = function () {
   try { this.pBody = program(this.gl, BODY_VS, BODY_FS_PIX); this.pShadow = program(this.gl, BODY_VS, SHADOW_FS_PIX); this.pDark = program(this.gl, BG_VS, DARK_FS); this.pRamp = program(this.gl, BG_VS, RAMP_FS); this.pLight = program(this.gl, BG_VS, LIGHT_FS); this.pMenu = program(this.gl, BG_VS, MENU_FS); } catch (err) { console.error(err); return false; }
   try { this.pFeat = program(this.gl, FEAT_VS_PAL, FEAT_FS_PAL); } catch (err) { console.error(err); }   // (the sprites' palette snap a corner, not a fragment: FEAT_VS_PAL)
   this.darkBuf = new Float32Array(128);   // 32 lights (the Dark Forest's eyes and fences as well as the coins)
-  this.target = null;
+  this.target = null; this.sideT = null; this.sideLv = null;   // (a context lost and back: the sides' target made again, and shot again)
   if (this.low) this.makeTarget();
   return true;
 };
@@ -5171,6 +5171,52 @@ Renderer.prototype.makeTarget = function () {
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 };
+// A computer's sides (owner, 2026-10-28, П3 «А»: the world's far view beside the game up to 2:1, Playgama's 27th, the game the same width): a level's far
+// view drawn once on nothing (no walls, no shake) into a target of its own, read back and laid k times bigger (the sides' width over the column's, 2 at least) behind the column on the #sides
+// canvas (game.js layout), over its world's top ink; its middle stays behind the game. A room keeps its level's.
+Renderer.prototype.sideShot = function (lv, cam, W, H, ranges, th, menu, foot) {   // (foot: the far view's foot on the screen, farY: it sinks a little as the climb goes on)
+  if (!menu && (lv.kind === 'shop' || lv.kind === 'treasure' || lv.kind === 'trial')) return;
+  const P = PIX.size, S = this.sideImg;
+  if (S && this.sideLv === lv && this.sideLow === this.low && this.sideCv === this.sides) {   // the same: only moved down with the column's, laid again
+    const dy = Math.round((foot - S.foot) / P); if (dy !== S.dy) { S.dy = dy; sidesPaint(this.sides, S); }
+    return;
+  }
+  this.sideLv = lv; this.sideLow = this.low; this.sideCv = this.sides;
+  const gl = this.gl, [lw, lh] = this.low, sy = Math.round(-cam / P) * P;
+  let t = this.sideT;
+  if (!t || t.w !== lw || t.h !== lh) {
+    if (!t) t = this.sideT = { fb: gl.createFramebuffer(), color: gl.createRenderbuffer() };
+    t.w = lw; t.h = lh; t.px = new Uint8Array(lw * lh * 4);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, t.color); gl.renderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, lw, lh); gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb); gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, t.color);
+  }
+  gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb); gl.viewport(0, 0, lw, lh); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.enable(gl.BLEND);
+  const pf = this.pFeat; gl.useProgram(pf.p);
+  gl.uniform2f(pf.u.uView, W, H); gl.uniform2f(pf.u.uShake, 0, sy); gl.uniform1f(pf.u.uPix, P); gl.uniform2f(pf.u.uGrid, 0, lh - sy / P);
+  for (let i = 0; i + 1 < ranges.length; i += 2) this.drawFeat(ranges[i], ranges[i + 1] - ranges[i]);
+  gl.readPixels(0, 0, lw, lh, gl.RGBA, gl.UNSIGNED_BYTE, t.px);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  this.sideImg = sidesShot(t.px, lw, lh, th, foot); sidesPaint(this.sides, this.sideImg);
+};
+function sidesShot(px, w, h, th, foot) {   // the far view read back (its bottom row first, its colours by their alpha) as a picture, and its rows from t0 to b0
+  const img = new ImageData(w, h), d = img.data, q = new Uint32Array(d.buffer);
+  for (let y = 0; y < h; y++) d.set(px.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4);
+  let t0 = h, b0 = -1;
+  for (let y = 0; y < h; y++) for (let i = y * w, e = i + w; i < e; i++) {
+    const a = q[i] >>> 24; if (!a) continue;
+    if (y < t0) t0 = y; b0 = y;
+    if (a < 255) { const u = 255 / a, o = i * 4; d[o] *= u; d[o + 1] *= u; d[o + 2] *= u; }
+  }
+  const off = document.createElement('canvas'); off.width = w; off.height = h; off.getContext('2d').putImageData(img, 0, 0);
+  return { off, w, t0, b0, top: th.top, foot, dy: 0 };
+}
+function sidesPaint(cv, S) {   // over the world's top ink, k times bigger, on its foot in the column (a tall one's top off the screen), moved down with it by dy
+  const c = cv.getContext('2d'), Wt = cv.width, Ht = cv.height, ink = (v) => Math.round(v * 255);
+  c.imageSmoothingEnabled = false; c.fillStyle = `rgb(${ink(S.top[0])},${ink(S.top[1])},${ink(S.top[2])})`; c.fillRect(0, 0, Wt, Ht);
+  if (S.b0 < 0) return;   // no far view: its ink only
+  const hb = S.b0 - S.t0 + 1, k = Math.max(2, Math.round(Wt / S.w));
+  c.drawImage(S.off, 0, S.t0, S.w, hb, Math.round((Wt - k * S.w) / 2), S.b0 + 1 + S.dy - k * hb, k * S.w, k * hb);   // (whole game pixels: k of them a pixel of it)
+}
 
 // One frame of the scene: behind the bodies (wall coats, doors, portal, floor, ledges,
 // spikes, coins, items, drops), the bodies (shadow, cushion, face), in front (puffs,
@@ -8061,6 +8107,7 @@ Renderer.prototype.draw = function (g, alpha) {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND);
   }
+  if (this.sides) this.sideShot(lv, cam, W, H, farR, th, menu, farY(cam, H) - cam);   // a computer's sides (game.js layout): its far view, once a level
   gl.bindVertexArray(null);
   if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.target.fb);   // up onto the canvas, pixel for pixel

@@ -477,10 +477,12 @@
   .dslot { flex: none; width: 255px; height: 180px; }
   .dline { display: flex; align-items: center; gap: 8px; min-height: 30px; margin-top: -22px; padding: 8px; --p: 2.58; color: var(--white); }
   .dline .ico { --p: 2; }
-  .drow { display: flex; align-self: stretch; margin: 0 8px 16px; }
+  .drow { display: flex; align-self: stretch; margin: 0 8px 12px; }   /* (12 over the pill, as the Figma «Death» and «too sour») */
   .drow > .big { flex: 1; min-width: 0; --p: 2.6; background: none; color: var(--white); box-shadow: inset 0 0 0 1.5px var(--yellow); clip-path: none; }
   .drow > .big + .big { margin-left: -1.5px; }   /* (one line between them) */
   .drow > .big:active { background: rgba(255, 237, 87, 0.12); }
+  #result .drow > .big { border-radius: 0; }   /* (a row's cells square in their yellow lines, as the Figma «Death» and «too sour»: the pill is the main one's alone) */
+  .drow > .big.off { opacity: 0.45; }   /* (Revive without coins enough) */
   /* A loss: its stars 48 tall (the 12-px star at whole pixels: the mockup's 52), 22 over the title, 22 over the go in two columns 300 across (Inter 20 →
      VT323 26), 8 apart, 42 over Menu */
   #result.dlg .summary { flex: none; margin: auto 0 42px; gap: 22px; }

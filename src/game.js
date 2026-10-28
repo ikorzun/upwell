@@ -4353,6 +4353,8 @@ function setLang(l) {
 }
 function start() {
   if (started) return;
+  if (window.innerWidth < 120 || window.innerHeight < 120) { window.addEventListener('resize', start, { once: true }); return; }   // a frame with no size yet (a portal's
+  // iframe 0 high at load, grown after): the menu waits for one; laid out 1 px across it drew 134 million things a frame and threw (Poki chat's repro; game_ready still goes)
   setLang(STR[save.lang] ? save.lang : detectLang());
   if (!renderer.ok) { ui.toast(t('nogl'), 0); return; }
   $('pad').classList.toggle('stick', !!save.stick);   // (the round jump key: what layout measures the keys by)

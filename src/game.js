@@ -23,7 +23,7 @@ const STR = {
     noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', depth: '2.5D', crt: 'CRT', album: 'Cards', on: 'on', off: 'off',
     hintStick: 'Lean to run · tap to jump', lang: 'Language',
-    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', station: 'Station {n}', worldDone: 'World cleared!', soon: 'World {n} is on its way', bossFirst: 'Beat World {n}\'s boss first', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_water: 'Soaked!', dead_snow: 'Snowed under!', dead_storm: 'Thunderstruck!', dead_bog: 'Swamped!', dead_steam: 'Scalded!', dead_thorns: 'Pricked!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
+    random: 'Random run', reviveHere: 'Go on from here · {n}', cleared: 'Level cleared!', station: 'Station {n}', worldDone: 'World cleared!', soon: 'World {n} is on its way', bossFirst: 'Beat World {n}\'s boss first', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_water: 'Soaked!', dead_snow: 'Snowed under!', dead_storm: 'Thunderstruck!', dead_bog: 'Swamped!', dead_steam: 'Scalded!', dead_thorns: 'Pricked!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Your crowd smashes everything · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', heartCap: 'Up to 3 a world', purseIn: '+{n} coins to your purse', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
   },
   es: {
     hintKeys: '← → correr · Espacio saltar', hintTouch: 'Arrastra para correr · toca para saltar', play: 'Jugar',
@@ -40,7 +40,7 @@ const STR = {
     noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', depth: '2.5D', crt: 'CRT', album: 'Cartas', on: 'sí', off: 'no',
     hintStick: 'Inclina para correr · toca para saltar', lang: 'Idioma',
-    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', station: 'Estación {n}', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', bossFirst: 'Antes vence al jefe del mundo {n}', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_water: '¡Empapado!', dead_snow: '¡Bajo la nieve!', dead_storm: '¡Fulminado!', dead_bog: '¡Empantanado!', dead_steam: '¡Escaldado!', dead_thorns: '¡Pinchado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Diario', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
+    random: 'Partida al azar', reviveHere: 'Seguir desde aquí · {n}', cleared: '¡Nivel superado!', station: 'Estación {n}', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', bossFirst: 'Antes vence al jefe del mundo {n}', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_water: '¡Empapado!', dead_snow: '¡Bajo la nieve!', dead_storm: '¡Fulminado!', dead_bog: '¡Empantanado!', dead_steam: '¡Escaldado!', dead_thorns: '¡Pinchado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Diario', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', heartCap: 'Hasta 3 por mundo', purseIn: '+{n} monedas a tu monedero', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
   },
   pt: {
     hintKeys: '← → correr · Espaço pular', hintTouch: 'Arraste para correr · toque para pular', play: 'Jogar',
@@ -57,7 +57,7 @@ const STR = {
     noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', depth: '2.5D', crt: 'CRT', album: 'Cartas', on: 'sim', off: 'não',
     hintStick: 'Incline para correr · toque para pular', lang: 'Idioma',
-    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', station: 'Estação {n}', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', bossFirst: 'Antes vença o chefe do mundo {n}', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_water: 'Encharcado!', dead_snow: 'Soterrado na neve!', dead_storm: 'Fulminado!', dead_bog: 'Atolado!', dead_steam: 'Escaldado!', dead_thorns: 'Espetado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Diário', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
+    random: 'Partida aleatória', reviveHere: 'Continuar daqui · {n}', cleared: 'Fase concluída!', station: 'Estação {n}', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', bossFirst: 'Antes vença o chefe do mundo {n}', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_water: 'Encharcado!', dead_snow: 'Soterrado na neve!', dead_storm: 'Fulminado!', dead_bog: 'Atolado!', dead_steam: 'Escaldado!', dead_thorns: 'Espetado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Diário', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', heartCap: 'Até 3 por mundo', purseIn: '+{n} moedas na sua bolsa', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
   },
   ja: {
     hintKeys: '← → はしる · スペース ジャンプ', hintTouch: 'ドラッグで はしる · タップで ジャンプ', play: 'プレイ',
@@ -74,11 +74,13 @@ const STR = {
     noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', depth: 'りったい', crt: 'ブラウンかん', album: 'カード', on: 'オン', off: 'オフ',
     hintStick: 'かたむけて はしる · タップで ジャンプ', lang: 'ことば',
-    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', station: '{n} ごうめ', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', bossFirst: 'さきに ワールド {n}の ボスを たおそう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_water: 'びしょぬれ！', dead_snow: 'ゆきに うもれた！', dead_storm: 'かみなりに うたれた！', dead_bog: 'ぬまに しずんだ！', dead_steam: 'じょうきで やけど！', dead_thorns: 'トゲに ささった！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'デイリー', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
+    random: 'ランダム プレイ', reviveHere: 'ここから つづける · {n}', cleared: 'ステージ クリア！', station: '{n} ごうめ', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', bossFirst: 'さきに ワールド {n}の ボスを たおそう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_water: 'びしょぬれ！', dead_snow: 'ゆきに うもれた！', dead_storm: 'かみなりに うたれた！', dead_bog: 'ぬまに しずんだ！', dead_steam: 'じょうきで やけど！', dead_thorns: 'トゲに ささった！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'デイリー', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', heartCap: 'ワールドに 3つまで', purseIn: 'さいふに +{n} コイン', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
   },
 };
 let lang = 'en';
-const t = (k) => (STR[lang] && STR[lang][k]) || STR.en[k];
+function t(k) { return (STR[lang] && STR[lang][k]) || STR.en[k]; }   // (a function, not a const: Playgama's game host runs its bootstrap.js first, whose
+// top-level «var o, t, r» and «function a» are globals, and «const t» beside them was a SyntaxError that stopped the whole game there: «Identifier 't'
+// has already been declared», the Bridge never up, its archive check failed. A function declaration may share the name; ours is the one left)
 const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (_, n) => o[n]);
 const L2 = (o) => o[lang] || o.en;
 const LANGS = [['en', 'EN'], ['es', 'ES'], ['pt', 'PT'], ['ja', '日本語']];   // short, in one row (owner); Japanese as it is written
@@ -1019,7 +1021,7 @@ class Game {
     this.lv = new Level(); this.well = null; this.door = null; this.hero = null; this.state = 'boot'; this.paused = 'play';
     this.R = 30; this.vjump = 1; this.builtW = 0; this.list = []; this.look = { x: 0, y: 0, t: 0 }; this.heroLook = { x: 0, y: 0, t: -1e9 };
     this.sinceContact = 1; this.queueT = 0; this.air = 0; this.hitstop = 0; this.invuln = 0; this.touch = 0; this.rising = false;
-    this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = [];
+    this.stateT = 0; this.pruneT = 0; this.winT = 0; this.startY = 0; this.result = null; this.safes = []; this.buys = {};
     this.pow = null; this.ram = false; this.tail = []; this.rocket = null;   // the candy at work, a ram on its way up, a rainbow's tail, a boost ring's flight
     this.warns = [];   // where threats come down into view (see threats)
     this.followers = []; this.trail = [];   // the freed, following the hero along its way (see followStep)
@@ -1036,6 +1038,7 @@ class Game {
     this.maxHp = HEALTH.start; this.hp = this.maxHp; this.coins = 0; this.kills = 0; this.combo = 0; this.bestCombo = 0; this.syns = [];
     this.climbed = 0; this.levelM = 0; this.revives = 0; this.adRevived = false; this.bonus = null; this.bonusT = 0; this.bonusCoins = 0; this.freed = 0; this.cardDue = null;
     this.mode = 'run'; this.rc = null; this.ci = -1; this.lastBy = null; this.daily = null;   // the random run; playLevel makes it a campaign level
+    this.buys = {};   // a run's max hearts and upgrades bought, by world (Game.bought)
     const perk = UPGRADES.find((u) => u.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     if (perk) this.takeUpgrade(perk);   // each colour starts with its own upgrade
   }
@@ -1094,9 +1097,11 @@ class Game {
   }
   // The menu's hero over the colours' row (`rowY`, CSS px down the screen), under the logo (`logoY`, its foot): as wide as the design's (a quarter
   // of the screen across: 2 R, about), smaller on a short screen to keep room over it; standing a third of a row over the colours (MENU_HERO).
-  menuFit(rowY, logoY, splitY = rowY, bare = false, keep = false) {   // (splitY: where the dark band under him starts; the colours' row on the main screen, over Feed Moti's
-    // bar; bare: no far view behind him, the settings'; keep: his size as it is, Feed Moti's result, where he swells to his own: feed.frame)
-    const floorY = rowY - MENU_HERO.gap, R = Math.max(HERO.sizeMin, MENU_HERO.k * Math.min(MENU_HERO.w * view.w, (floorY - logoY - MENU_HERO.room) / MENU_HERO.h));
+  menuFit(rowY, logoY, splitY = rowY, bare = false, keep = false, tall = 0) {   // (splitY: where the dark band under him starts; the colours' row on the main screen, over Feed Moti's
+    // bar; bare: no far view behind him, the settings'; keep: his size as it is, Feed Moti's result, where he swells to his own: feed.frame; tall: the least of the
+    // screen's height he takes where the room over the row allows it, the main screen's MENU_HERO.tall: a short screen makes him smaller, never its buttons)
+    const floorY = rowY - MENU_HERO.gap, room = (floorY - logoY - MENU_HERO.room) / MENU_HERO.h, figma = MENU_HERO.k * Math.min(MENU_HERO.w * view.w, room);
+    const R = Math.max(HERO.sizeMin, tall ? Math.min(Math.max(figma, (tall * view.h) / MENU_HERO.h), MENU_HERO.k * room, view.w / 2 - MENU_HERO.side) : figma);   // (k of the room: his hop's)
     this.menuFloor = floorY; this.menuSplit = splitY; this.menuBare = bare; this.lv.menuAt(floorY);
     if (!keep && Math.abs(R - this.R) > 0.5) { this.menuR = this.R = R; this.lv.R = R; this.makeHero(); }
   }
@@ -1236,7 +1241,14 @@ class Game {
     this.applyMods();
   }
   randomUpgrade() { const u = this.offer(1)[0]; if (u) { this.takeUpgrade(u); ui.toast(L2(u.name)[0]); } }
-  priceOf(p) { return p.item.free ? 0 : Math.round(p.item.price * (1 + 0.5 * Math.min(this.world, 4)) * this.mods.discount * (this.hard ? 1.5 : 1)); }
+  priceOf(p) { return p.item.free ? 0 : Math.round(p.item.price * (1 + 0.5 * Math.min(this.world, 4)) * this.mods.discount * (this.hard ? 1.5 : 1) * (SHOP_GROW.of.includes(p.item.id) ? SHOP_GROW.k ** this.bought(p.item.id) : 1)); }   // (SHOP_GROW: the next one dearer)
+  bought(id) {   // the max hearts or upgrades bought in this world so far (SHOP_GROW): the campaign's in its world's build (a bought upgrade marked '$',
+    // a card's not), a run's in its own count
+    if (this.mode !== 'camp') return this.buys[this.world + id] || 0;
+    const b = save.camp.builds[this.world] || [];
+    return b.filter((x) => (id === 'maxhp' ? x === 'maxhp' : x[0] === '$')).length;
+  }
+  heartsFull() { return this.bought('maxhp') >= SHOP_GROW.hearts; }   // a world's max hearts all bought: its shops offer none (Game.enterRoom, folkUp)
 
   // ── Jumping ──
   contact() { const b = this.hero; return (b.wallMask & 15) !== 0 || b.stuck > 0; }
@@ -1560,7 +1572,11 @@ class Game {
     }
     const b = (f.body = new Body(designById(cage ? 'round' : 'mochi'), cage ? cols[(fxRand(0, 1) * cols.length) | 0] : colorById('purple'), f.x, f.y - 1.05 * r, r, 0.9));
     b.gScale = 1; b.sticky = false; b.ghost = true; b.face.frown = cage;   // locked in: glum
-    if (!cage) { f.p = { x: f.x, y: f.y - 3 * R, r: 0.6 * R, item: SHOP_ITEMS[(Math.random() * SHOP_ITEMS.length) | 0], sold: false, near: false, trader: f }; lv.pickups.push(f.p); }
+    if (!cage) {
+      let item = SHOP_ITEMS[(Math.random() * SHOP_ITEMS.length) | 0];
+      if (item.id === 'maxhp' && this.heartsFull()) item = SHOP_ITEMS.find((i) => i.id === 'upgrade');   // (the world's max hearts all bought: SHOP_GROW)
+      f.p = { x: f.x, y: f.y - 3 * R, r: 0.6 * R, item, sold: false, near: false, trader: f }; lv.pickups.push(f.p);
+    }
   }
   // Folk (see FOLK): a cage opens at a touch and its blob hops for joy, paying coins or a heart by turns; the trader's thing
   // keeps over its head; critters keep clear of the hero.
@@ -2288,6 +2304,8 @@ class Game {
     if (!bub.room) {
       const room = new Level();
       room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: bub.kind === 'treasure' || bub.kind === 'trial' ? THEMES.stash : THEMES.room, hard: this.hard, keep: this.roomFloor(), cave: bub.kind === 'treasure' ? this.caveNext(this.lv.world) : undefined });
+      if (bub.kind === 'shop' && this.heartsFull()) for (const q of room.pickups) if (q.item.id === 'maxhp') q.item = SHOP_ITEMS.find((i) => !room.pickups.some((o) => o.item === i));   // (the
+      // world's max hearts all bought, SHOP_GROW: the thing its three left out in its place)
       bub.room = room;
     }
     if (this.combo > 0) this.payCombo();
@@ -2362,15 +2380,16 @@ class Game {
   buy(p) {
     const price = this.priceOf(p);
     if (p.item.can && !p.item.can(this)) { ui.toast(t('noNeed'), 1200); sound.play('deny', 0.7); return; }
+    if (p.item.id === 'maxhp' && this.heartsFull()) { ui.toast(t('heartCap'), 1400); haptics.buzz(8); sound.play('deny', 0.7); return; }   // (one laid before the last was bought)
     if (this.coins < price) { ui.toast(tf('poor', { n: price - this.coins }), 1200); haptics.buzz(8); sound.play('deny', 0.7); return; }
     const had = this.taken.length;
     this.coins -= price; p.sold = true; p.item.apply(this); sound.play('buy');
     if (this.mode === 'camp' && (p.item.id === 'maxhp' || this.taken.length > had)) {   // a shop's max heart and upgrade kept for the whole world, as its cards are (owner: «на весь мир»)
       const b = save.camp.builds, mine = (b[this.world] = b[this.world] || []);
       if (p.item.id === 'maxhp') mine.push('maxhp');
-      for (const id of this.taken.slice(had)) mine.push(id);
+      for (const id of this.taken.slice(had)) mine.push('$' + id);   // (bought: its world's next dearer, Game.bought)
       persist();
-    }
+    } else if (this.mode !== 'camp' && SHOP_GROW.of.includes(p.item.id)) { const k = this.world + p.item.id; this.buys[k] = (this.buys[k] || 0) + 1; }
     track('item_bought', { id: p.item.id, price, from: p.trader ? 'trader' : this.lv.kind, level_id: this.levelId() });
     if (p.trader && p.trader.body) { const b = p.trader.body; b.face.surprise = 1; setVel(b, 0, -0.5 * this.vjump); }   // the trader hops: a sale
     splatFx(p.x, p.y, p.r * 2, p.item.color, 8); haptics.buzz(16);
@@ -2484,7 +2503,7 @@ class Game {
   // players of the climbing games hate most), dropped once the run ends. Quitting to the menu keeps it, for Continue.
   saveRun() {
     if (this.mode === 'run') save.run = { world: this.world, stage: this.stage, bonus: this.bonus ? BONUS.indexOf(this.bonus) : -1, seed: this.seed, hp: this.hp, maxHp: this.maxHp, coins: this.coins, kills: this.kills,
-      bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice(), syns: this.syns.slice(), daily: this.daily, tier: this.tier, endless: this.endless, loop: this.loop };
+      bestCombo: this.bestCombo, climbed: this.climbed, revives: this.revives, freed: this.freed, hard: this.hard, mods: Object.assign({}, this.mods), taken: this.taken.slice(), syns: this.syns.slice(), daily: this.daily, tier: this.tier, endless: this.endless, loop: this.loop, buys: Object.assign({}, this.buys) };
     persist();
     pmsg('level_started', this.lvl());
   }
@@ -2494,7 +2513,7 @@ class Game {
     this.newRun(); padUsed = performance.now(); track('run_continued', { level_id: r.bonus >= 0 ? 'B' + (r.world + 1) : r.world >= WORLDS.length ? 'boss' : (r.world + 1) + '-' + (r.stage + 1) });
     for (const k of ['world', 'stage', 'hp', 'maxHp', 'coins', 'kills', 'bestCombo', 'climbed', 'revives', 'freed', 'hard']) this[k] = r[k];
     this.daily = r.daily != null ? r.daily : null; this.tier = r.tier || 0; this.endless = !!r.endless; this.loop = r.loop || 0;
-    this.mods = Object.assign(MODS(), r.mods); this.taken = r.taken.slice();
+    this.mods = Object.assign(MODS(), r.mods); this.taken = r.taken.slice(); this.buys = Object.assign({}, r.buys);
     this.syns = r.syns ? r.syns.slice() : SYNERGIES.filter((sy) => sy.of.every((id) => this.taken.includes(id))).map((sy) => sy.id);   // its pairs in its mods already: not paid again
     this.state = 'play'; this.stateT = 0; nextSeed = r.seed;
     if (r.bonus >= 0) { this.startBonus(BONUS[r.bonus]); return; }
@@ -2508,7 +2527,7 @@ class Game {
     const { w, s } = campAt(i), merged = campMerge(w, s, campAt(i).rc, order), rc = (w > 0 || s >= 2) && !merged.boss && merged.bonus == null ? Object.assign({}, merged, { astro: true }) : merged;   // (an astro may come from the third level: ASTRO)
     delete save.cur;   // a level begun (Game.resume puts back the one it goes on with)
     this.newRun(); this.mode = 'camp'; this.ci = i; save.camp.last = i; this.world = w; this.stage = s; this.rc = rc; this.hard = false;   // (the random run's hard mode is its own)
-    for (const id of save.camp.builds[w] || []) { if (id === 'maxhp') { this.maxHp++; continue; } const u = UPGRADES.find((x) => x.id === id); if (u) this.takeUpgrade(u); }   // (maxhp: a heart bought in its shops)
+    for (const id of save.camp.builds[w] || []) { if (id === 'maxhp') { this.maxHp++; continue; } const u = UPGRADES.find((x) => x.id === (id[0] === '$' ? id.slice(1) : id)); if (u) this.takeUpgrade(u); }   // (maxhp: a heart bought in its shops; '$': an upgrade bought)
     this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = !(save.camp.stars[w * 30 + s * 3 + 1] > 0);   // its tier's first clear (an upgrade then: one a tier)
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
@@ -2617,7 +2636,10 @@ class Game {
     let daily = null;
     if (this.daily != null) {   // the day's best kept, its score to the leaderboard where there is one
       const d = save.days = save.days || {};
-      d[this.daily] = Math.max(d[this.daily] || 0, total); daily = { best: d[this.daily], day: this.daily };
+      d[this.daily] = Math.max(d[this.daily] || 0, total); daily = { best: d[this.daily], day: this.daily, paid: 0 };
+      if (save.dayPaid !== this.daily) {   // the day's first run over: its coins left into the purse, once a day as Moti's gift (owner, Э4 «А»; every run would be a farm)
+        save.dayPaid = this.daily; daily.paid = this.coins; save.camp.wallet += this.coins; if (save.cur) save.cur.coins += this.coins;   // (a level under way: its own count too, see campKeep)
+      }
       const lt = ads.ok && bridge.leaderboards ? bridge.leaderboards.type : 'not_available';   // (a board the platform draws itself, native: the metres alone, not the day's number with them)
       if (lt !== 'not_available') bridge.leaderboards.setScore('daily_height', (lt === 'in_game' ? this.daily * BOARD : 0) + d[this.daily]).catch(() => {});   // the day's best, whether the board keeps the best or the last
     }
@@ -2636,7 +2658,10 @@ class Game {
   togglePause(on) {
     if (this.storyOn) return;   // (a story card is up: its Next goes on)
     if (on && this.state === 'play') { this.paused = this.state; this.state = 'pause'; input.clear(); ui.pause(); this.saveCur(true); pmsg('level_paused', this.lvl()); }   // (the platform told: no play while paused, nor in the menu after)
-    else if (!on && this.state === 'pause') { this.state = this.paused; loop.last = performance.now(); ui.hideAll(); pmsg('level_resumed', this.lvl()); }
+    else if (!on && this.state === 'pause' && !this.resuming) {
+      const go = () => { this.resuming = false; if (this.state !== 'pause') return; this.state = this.paused; loop.last = performance.now(); ui.hideAll(); pmsg('level_resumed', this.lvl()); };
+      if (POKI) { this.resuming = true; ui.hideAll(); ads.between(go); } else go();   // (Poki: an ad's chance on the way back into play)
+    }
   }
 
   // ── Once per drawn frame ──
@@ -2805,13 +2830,6 @@ for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8
   STORY_INK[k] = { I, W: '#f3f3f3', L: ink, R: '#f43e34', G: '#ffed57', bg: '#141414' };
 }
 STORY_INK.village = STORY_INK.mine;   // (the Village's world id is 'mine')
-// A card's back in the album (its flip as the strip stops on it, ui.album): its world's ink, a line of its light ink round it, the logo in the middle.
-function cardBack(f) {
-  const b = document.createElement('div'), im = document.createElement('img');
-  b.className = 'aback'; b.style.background = f.I; b.style.boxShadow = 'inset 0 0 0 3px ' + f.L;
-  im.src = 'assets/ui/upwell-logo.svg'; im.alt = ''; im.draggable = false; b.append(im);
-  return b;
-}
 // A card comes alive by the game itself (owner, К4 «А»; К14 «В»: «наклон, перелив как в пикселях»; К15 «А»: «Движения дожны быть плавными, по
 // всем правилам анимации дисней и пиксара»; К16 «Б»: «остальные карточки делай»). Its planes (CARD_PLANES: the plate, the card with what was behind
 // its figures repainted, and each figure on its own; a card without them one plane, its art), each a canvas on the card's cells moved by whole
@@ -3239,10 +3257,13 @@ const ui = {
         save.color = u.id; persist(); game.hero.kickSquash(0, 1, 0.9); this.menu();   // the hero in its new colour at once (Game.frame paints it), with a little squash
       });
       b.style.setProperty('--c', rgb(colorById(u.id).base)); b.setAttribute('aria-label', u.id);
-      if (!open) b.append(el('small', null, u.price));   // its price, in the purse's coins
+      if (!open) b.append(el('small', null, u.price < 1000 ? u.price : String(u.price / 1000)));   // its price, in the purse's coins (in thousands from a thousand, to
+      // fit its circle: 1500 as 1.5; owner, Э2 «Б»: «1500 сократи до 1.5»)
       colors.append(b);
     }
-    p.append(colors);
+    const purse = el('div', 'purse');   // over them the purse, what a tap can spend (owner, Э3 «А»: a coin and its number, research/econ/menu-pair.png; the hero on it)
+    purse.append(iconEl('coin'), px(String(Math.min(save.camp.wallet, save.cur ? save.cur.coins : Infinity))));
+    p.append(purse, colors);
     const perk = UPGRADES.find((x) => x.id === (UNLOCKS.find((u) => u.id === save.color) || {}).perk);
     let line = null;
     if (perk) { line = el('div', 'perk'); line.append(iconEl(perk.id), px(L2(perk.name)[1])); p.append(line); }   // on one line (owner): smaller, if it must, to fit
@@ -3280,7 +3301,7 @@ const ui = {
     else p.append(cap(button(t('continue') + ' • ' + wNo(next.w) + '-' + (next.s + 1), 'big thumb', () => goOwed(() => game.playLevel(ni))), 'continue'));   // the width of the screen, 12 px in from its edges
     if (line) fitLine(line, p.clientWidth - 24);
     const y0 = p.getBoundingClientRect().top;
-    if (game.state === 'menu') game.menuFit(colors.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0);   // the hero over the colours (they climb as rows come, once won)
+    if (game.state === 'menu') game.menuFit(purse.getBoundingClientRect().top - y0, logo.getBoundingClientRect().bottom - y0, undefined, false, false, MENU_HERO.tall);   // the hero over the purse and the colours (they climb as rows come, once won)
   },
   // The settings (owner, 2026-10-23: the menu's icon on the right): the language, sound, 2.5D and CRT, as at a pause; Back to the menu. Since 2026-10-27 the Figma
   // «Settings» (1258:519; owner: «передай экран настроек… сделай для него моти в скине ремонтника»): all dark, Moti in it in a repairman's hard hat and dungarees
@@ -3417,7 +3438,7 @@ const ui = {
         const f = STORY_INK[c.ink], [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
         fig = el('div', 'scard acard');
         for (const [v, x2] of Object.entries(f)) fig.style.setProperty('--s' + v, x2);
-        im.className = 'astill'; clip.append(im); tilt.append(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt, cardBack(f));   // (no moon on top: owner, 2026-10-28)
+        im.className = 'astill'; clip.append(im); tilt.append(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt);   // (no moon on top: owner, 2026-10-28)
         cells.push({ cell, c, fig, tilt, clip });
       } else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
         fig = el('div', 'acard shut');
@@ -3436,21 +3457,16 @@ const ui = {
       this.albumLive = k; this.live = cardLive(k.c, k.fig, k.tilt, k.clip, el('div'), el('div'), true);
     };
     // (owner, 2026-10-28: «карточки при скроле нужно анимировать и переворачивать, сейчас скучно совсем»): as they go by, each turned toward the middle and a little
-    // smaller the further it is from it (a fan of cards, no blur on the one in the middle: it stands flat); the one the strip stops on flips over, its back
-    // (its world's ink, the logo) round to its face, then comes alive. Under «reduce motion» none of it
+    // smaller the further it is from it (a fan of cards, no blur on the one in the middle: it stands flat); the one the strip stops on comes alive. Under «reduce
+    // motion» none of it. (Its flip over from a back: gone, owner: «анимацию переворота карт убери»)
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let fanQ = 0; const fan = () => { fanQ = 0; const mid = strip.scrollLeft + strip.clientWidth / 2, x0 = strip.offsetLeft;   // (by the layout, not the turned boxes)
       for (const cell of strip.children) { const w = cell.offsetWidth, d = Math.max(-2, Math.min(2, (cell.offsetLeft - x0 + w / 2 - mid) / (w + 16))), a = Math.abs(d);
         cell.style.transform = a < 0.06 ? '' : `perspective(900px) rotateY(${(-34 * d).toFixed(2)}deg) scale(${(1 - 0.1 * Math.min(a, 1.5)).toFixed(3)})`; cell.style.opacity = a < 0.06 ? '' : (1 - 0.3 * Math.min(a, 1.5)).toFixed(3); } };   // (the one stopped on flat: its pixels whole)
-    const flip = () => {   // the one in the middle over from its back: a full turn, quick out of the stop, slow into its face
-      const k = this.albumLive; if (calm || !k || k.flipped) return; k.flipped = true;
-      k.fig.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-200deg)', offset: 0.55 }, { transform: 'rotateY(-372deg)', offset: 0.85 }, { transform: 'rotateY(-360deg)' }], { duration: 760, easing: 'ease-in-out' });
-      sound.play('click', 0.5, 1.3);
-    };
-    let tm = 0; strip.addEventListener('scroll', () => { if (!calm && !fanQ) fanQ = requestAnimationFrame(fan); clearTimeout(tm); tm = setTimeout(() => { const was = this.albumLive; wake(); if (this.albumLive !== was && this.albumLive) { this.albumLive.flipped = false; flip(); } }, 140); }, { passive: true });
+    let tm = 0; strip.addEventListener('scroll', () => { if (!calm && !fanQ) fanQ = requestAnimationFrame(fan); clearTimeout(tm); tm = setTimeout(wake, 140); }, { passive: true });
     if (!calm) requestAnimationFrame(fan);
     this.albumLive = null;
-    requestAnimationFrame(() => { if (go) strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }); setTimeout(() => { wake(); flip(); }, 60); });   // (the one it opens on flips in too)
+    requestAnimationFrame(() => { if (go) strip.scrollTo({ left: go.offsetLeft - (strip.clientWidth - go.clientWidth) / 2 }); setTimeout(wake, 60); });
   },
   book() {
     this.mapAt = 'book';
@@ -3540,7 +3556,8 @@ const ui = {
     const p = this.panel('result');
     p.append(cap(el('div', 'head', t(why)), why), el('div', 'label', tf('bonusGot', { n: doubled ? 2 * n : n }) + (doubled ? '  ×2' : '')));
     this.markLine(p);
-    if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'big thumb alt', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
+    if (!doubled && n > 0 && ads.canReward && POKI) p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'), adMark(cap(button(t('double'), 'big thumb alt', () => game.doubleBonus()), 'double')));   // (Poki: the plain one the main one, over the ad's)
+    else if (!doubled && n > 0 && ads.canReward) p.append(cap(button(t('next'), 'big thumb alt', () => game.nextWorld()), 'next'), cap(button(t('double'), 'big thumb', () => game.doubleBonus()), 'double'));   // the ad's button under the thumb
     else p.append(cap(button(t('next'), 'big thumb', () => game.nextWorld()), 'next'));
   },
   revive(price, coins) {   // before the result, as the Figma «Death» (1268:2433; owner, 2026-10-28): Moti big over «One more go?» (the dialog's stage on its slot:
@@ -3551,7 +3568,7 @@ const ui = {
     have.append(iconEl('coin'), px(t('coins') + ' ' + coins));
     box.append(slot, cap(el('div', 'head', t('reviveQ')), 'reviveQ'), have);
     row.append(cap(button(t('giveUp'), 'big', () => game.giveUp()), 'giveUp'));
-    if (game.canAdRevive()) row.append(cap(button(t('watchAd'), 'big', () => game.reviveAd()), 'watchAd'));
+    if (game.canAdRevive()) row.append(adMark(cap(button(t('watchAd'), 'big', () => game.reviveAd()), 'watchAd')));
     p.append(box, row, cap(button(tf('reviveFor', { n: price }), 'big thumb' + (can ? '' : ' off'), () => (can ? game.revive() : ui.toast(tf('reviveCost', { n: price, c: coins }), 1800))), 'reviveFor', { n: price }));
     game.stageIn(slot);
   },
@@ -3568,6 +3585,7 @@ const ui = {
       const row = el('div', 'medals');
       dayMedals(r.daily.day).forEach((m, k) => { const c = el('div', 'medal'); c.append(iconEl(r.daily.best >= m ? ['medalB', 'medalS', 'medalG'][k] : 'medalOff'), px(m + ' ' + t('m'))); row.append(c); });
       box.prepend(row); box.append(el('div', 'label', tf('dailyBest', { n: r.daily.best })));
+      if (r.daily.paid > 0) box.append(el('div', 'label mark pay', tf('purseIn', { n: r.daily.paid })));   // the day's first run's coins in the purse (Game.finish), as the week's pay is said
       if (ads.ok && bridge.leaderboards && bridge.leaderboards.type === 'in_game') bridge.leaderboards.getEntries('daily_height').then((all) => {
         const day = (e) => Math.floor(Number(e.score) / BOARD), es = all.filter((e) => day(e) === r.daily.day), ahead = all.filter((e) => day(e) > r.daily.day).length;   // today's only (see BOARD), ranked among themselves (a clock set ahead sends days to come)
         const me = es.findIndex((e) => bridge.player && e.id === bridge.player.id), from = me < 0 ? 0 : Math.max(0, me - 2), b = el('div', 'rows');   // the neighbours, not the top hundred (the digest §6)
@@ -3585,8 +3603,8 @@ const ui = {
       if (r.tierUp > 1) u.append(el('div', null, tf('tierOpen', { n: r.tierUp }))); else if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       box.append(u);
     }
-    const then = (f) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); ads.between(f); };   // the run over: an ad may come first
-    p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu())), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun(!!r.daily, game.endless))), 'again'));   // Again (the same kind of run) at the bottom, Menu as big over it
+    const then = (f, ad = true) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); if (ad) ads.between(f); else f(); };   // the run over: an ad may come first
+    p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu(), !POKI)), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun(!!r.daily, game.endless))), 'again'));   // Again (the same kind of run) at the bottom, Menu as big over it (Poki: no ad on the way to the menu)
     fit();
   },
   toastTimer: 0,
@@ -3619,11 +3637,11 @@ const ui = {
     if (!lv || !lv.pickups.length) { if (this.labelEls.length) { box.replaceChildren(); this.labelEls = []; } return; }
     if (this.labelEls.length !== lv.pickups.length) { box.replaceChildren(); this.labelEls = lv.pickups.map(() => box.appendChild(el('div', 'tag'))); }
     lv.pickups.forEach((p, i) => {
-      const e = this.labelEls[i], price = game.priceOf(p), text = L2(p.item.name) + '\n' + (p.sold ? t('sold') : price ? price : t('free'));
+      const e = this.labelEls[i], price = game.priceOf(p), full = !p.sold && p.item.id === 'maxhp' && game.heartsFull(), text = L2(p.item.name) + '\n' + (p.sold ? t('sold') : full ? t('heartCap') : price ? price : t('free'));
       if (e.dataset.text !== text) { e.dataset.text = text; e.replaceChildren(px(text, 34)); e.h = 0; }
       if (!e.h) e.h = e.offsetHeight;
       e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round((p.top != null ? p.top - 6 : p.y - p.r - 8) - e.h - lv.cam) + 'px) translateX(-50%)';   // over its drawn picture (p.top, the renderer's), clear of it
-      e.classList.toggle('dim', p.sold || price > game.coins);
+      e.classList.toggle('dim', p.sold || full || price > game.coins);
     });
   },
   frame(g) {
@@ -3944,6 +3962,12 @@ for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.add
 // tried. No Bridge at all: no rewarded button, no interstitials.
 // Analytics (the digest §9: telemetry says what, playtests why): the level's start, end and failure go as the platform's own
 // messages (Bridge records them); what only the game knows goes through analytics.send. Without the Bridge, nothing.
+// Poki (its build, tools/poki/build.mjs, marks the page <html data-host="poki">; its SDK answers through tools/poki/poki.js): no timers of the
+// game's own between ads (Poki paces them), none on the way to the menu, one asked on the way back from a pause, and a rewarded go marked 🎬 under
+// the plain one (Poki's requirements). Elsewhere the game as it was.
+const POKI = document.documentElement.dataset.host === 'poki';
+if (POKI) ICONS.ad = '............/.kwkwkwkwkw./.wkwkwkwkwk./............/.wwwwwwwwww./.wwwkwwwwww./.wwwkkwwwww./.wwwkkkwwww./.wwwkkwwwww./.wwwkwwwwww./.wwwwwwwwww./............'.split('/');   // a clapperboard
+const adMark = (b) => { if (POKI) { const i = iconEl('ad'); i.style.setProperty('--p', 2); b.querySelector('.tx').prepend(i, ' '); } return b; };   // a rewarded ad's button: 🎬 before its words (24 px: the words' height)
 const pmsg = (m, data) => { if (ads.ok) try { bridge.platform.sendMessage(m, data); } catch (e) { /* not on this platform */ } };
 const track = (name, data) => { if (ads.ok && bridge.analytics) try { bridge.analytics.send(name, data); } catch (e) { /* not on this platform */ } };
 const BRIDGE_WAIT = 4000, AD_GAP = 180000, AD_AFTER = 3;   // an interstitial three minutes apart at most, from the third pause on (CrazyGames; the digest §6)
@@ -3970,7 +3994,7 @@ const ads = {
   },
   between(done) {   // an interstitial, if one is due and to be had; `done` once it is closed, or at once if none comes
     const now = performance.now();
-    if (!this.ok || !bridge.advertisement.isInterstitialSupported || ++this.pauses < AD_AFTER || now - this.lastAd < AD_GAP) { done(); return; }
+    if (!this.ok || !bridge.advertisement.isInterstitialSupported || (!POKI && (++this.pauses < AD_AFTER || now - this.lastAd < AD_GAP))) { done(); return; }
     const EV = bridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
     let over = false, timer = 0;
     const end = () => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(); };
@@ -4024,6 +4048,10 @@ function layout() {
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
+  const sides = $('sides'), Ws = coarse ? 0 : Math.floor(Math.min(vw, 2 * H) / PIX.size + 1e-6) * PIX.size, on = Ws > W + 4 * PIX.size;   // a computer's: its far view beside the
+  // column, the window's width and 2:1 at most (owner, П3 «А»; Playgama's 27th), in the column's game pixels (Renderer.sideShot)
+  sides.classList.toggle('on', on); renderer.sides = on ? sides : null;
+  if (on) { sides.width = Math.round(Ws / PIX.size); sides.height = Math.round(H / PIX.size); Object.assign(sides.style, { width: Ws + 'px', height: H + 'px', left: Math.round(((vw - Ws) / 2) * d) / d + 'px' }); renderer.sideLv = null; }
   renderer.resize(W, H, PIXELATED ? (CINE ? CINE.k : 1) / PIX.size : window.devicePixelRatio || 1);   // (the cinematic fork: k times the game's pixels, its light that smooth)   // the canvas as many pixels as the game draws, the page scales it up
   // pixelated (index.html): a phone gets no full-resolution copy of each frame to keep and compose (on a 3x iPhone 20 times the pixels for nothing);
   // a browser that cannot scale it pixelated gets the copy, a device pixel per pixel, as before
@@ -4337,6 +4365,8 @@ function setLang(l) {
 }
 function start() {
   if (started) return;
+  if (window.innerWidth < 120 || window.innerHeight < 120) { window.addEventListener('resize', start, { once: true }); return; }   // a frame with no size yet (a portal's
+  // iframe 0 high at load, grown after): the menu waits for one; laid out 1 px across it drew 134 million things a frame and threw (Poki chat's repro; game_ready still goes)
   setLang(STR[save.lang] ? save.lang : detectLang());
   if (!renderer.ok) { ui.toast(t('nogl'), 0); return; }
   $('pad').classList.toggle('stick', !!save.stick);   // (the round jump key: what layout measures the keys by)

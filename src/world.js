@@ -2986,6 +2986,98 @@ const CHUNKS = {
     '............',
     '............',
     '............'] },
+  // The TV Tower's bonus caves (after the Danchi's, one world at a time; owner, Д336 «A»: the Tower first of the locked worlds), in its stash room's
+  // lattice (TOWER_ROOM): its rule as in its shafts (Level.flavour), a free plank a cloud that gives way 0.55 s after a touch and is back 3 s later, one off
+  // a wall a catwalk that holds. Two gifts and two puzzles of it, the clouds a world's own thing as Fuji's bells and the Sea's shells; route-tested on
+  // 393×852 and 375×667 (research/caves-tower), the way out the hole in the left wall (nothing to fall down within 3 tiles of it)
+  caveClouds: { d: 1, kind: 'cave', rows: [   // a gift: up a zigzag of three clouds, 4 tiles apart (a jump's 7.2 never tops the one after next: one grazed on the
+    '............',   // way is gone when you get to it), a coin on each and on each hop; the big coins on the catwalk at the top, run out to over the middle
+    '............',
+    '............',
+    '..........OO',
+    '.......oooOO',
+    '.......=====',
+    '............',
+    '............',
+    '....o.......',
+    '....=.......',
+    '.....o......',
+    '............',
+    '.......o....',
+    '.......=....',
+    '......o.....',
+    '............',
+    '....o.......',
+    '....=.......',
+    '............',
+    '............',
+    '............'] },
+  caveCascade: { d: 1, kind: 'cave', rows: [   // a gift: a spring (on its block) throws you up past a column of coins to the big ones over it; across at the top onto
+    '............',   // a stack of four clouds 4 wide, 1.5 tiles clear of the throw, and down them one by one as each gives way under you, a coin on each
+    '............',
+    '............',
+    '............',
+    '............',
+    '.....OO.....',
+    '....OO......',
+    '.......o....',
+    '......===...',
+    '............',
+    '.......o....',
+    '......===...',
+    '....o.......',
+    '.......o....',
+    '....o.===...',
+    '............',
+    '....o..o....',
+    '......===...',
+    '............',
+    '....S.......',
+    '....#.......'] },
+  caveElevator: { d: 1, kind: 'cave', rows: [   // a puzzle: the lift's door (a shutter, G) high on the left, the big coins behind it; its call button (N) on the floor
+    '............',   // by the right wall: press it, up the two clouds over it, then up and left onto the sill and in before the door shuts (3.5-3.7 s of its 5
+    '............',   // at a run). The top cloud 5 over the first and 3 under the sill, so the jump onto it comes down steeply and well in: a body landing over
+    '............',   // a block's end drapes on its corner and can hardly walk back onto it. Its floor two thick, its roof to the wall: no coin in the magnet's
+    '............',   // reach from outside (walked round on both phones)
+    '............',
+    '#####.......',
+    '....G.......',
+    'OOO.G.......',
+    'OOO.G..o....',
+    '########....',
+    '########....',
+    '..........o.',
+    '.........==.',
+    '............',
+    '............',
+    '............',
+    '..........o.',
+    '.........==.',
+    '............',
+    '............',
+    '..........N.'] },
+  caveLid: { d: 1, kind: 'cave', rows: [   // a puzzle: the big coins in a box of girders high on the left, shut all round, its lid a cloud: up the right side by
+    '............',   // two catwalks and a cloud, onto the lid, and it gives way under you: in. The lid out over the box's right wall, which stops a tile under it
+    '............',   // (a block's end up there was a corner to hang on, not to walk back from; off the lid's end you slide down instead). Its floor two thick at
+    '............',   // 8-10 tiles up, the coins 3.5 tiles and more from any spot outside (the magnet)
+    '............',
+    '............',
+    '............',
+    '............',
+    '#=====......',
+    '#....#......',
+    '#OOOO#.=....',
+    '#OOOO#......',
+    '######......',
+    '######....==',
+    '............',
+    '............',
+    '............',
+    '..........==',
+    '............',
+    '............',
+    '............',
+    '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -3493,8 +3585,9 @@ const AMBUSH = { waves: [2], coins: 2 };
 // heaps of coins (Level.build).
 const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] },
   ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] }, sea: { gift: ['caveSpouts', 'caveRafts'], puzzle: ['caveShell', 'caveKeel'] },
-  tokyo: { gift: ['caveAwnings', 'cavePins'], puzzle: ['caveShutter', 'caveRush'] }, blocks: { gift: ['caveRungs'], puzzle: ['caveRungs'] } };   // (the
-// Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice'; the Sea's, 'sea'; Tokyo's, 'tokyo'; the Danchi's, 'blocks': its one room in both places, З15 «В»)
+  tokyo: { gift: ['caveAwnings', 'cavePins'], puzzle: ['caveShutter', 'caveRush'] }, blocks: { gift: ['caveRungs'], puzzle: ['caveRungs'] },
+  sky: { gift: ['caveClouds', 'caveCascade'], puzzle: ['caveElevator', 'caveLid'] } };   // (the Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice'; the Sea's,
+// 'sea'; Tokyo's, 'tokyo'; the Danchi's, 'blocks': its one room in both places, З15 «В»; the TV Tower's, 'sky': its clouds, Д336 «A»)
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {
@@ -3726,7 +3819,8 @@ class Level {
       for (const f of [0.34, 0.76]) this.coin(cx, at(f), 1);
     } else if (this.cave) {   // a world's own bonus cave (CAVES): laid whole, its floor the room's; a gift room may hold a heart, as the old ones (a puzzle's prize is its coins)
       const n0 = this.rects.length; this.place(CHUNKS[this.cave], this.floor, false);
-      if (o.world.awnings) this.flavour(n0);   // (Tokyo's: a plank off a wall is an awning, and it bounces, as in its shafts)
+      if (o.world.awnings || o.world.clouds) this.flavour(n0);   // (Tokyo's: a plank off a wall is an awning, and it bounces, as in its shafts; the TV Tower's: a free plank a cloud
+      // that gives way, one off a wall a catwalk that holds)
       if (this.switches.length) for (const r of this.rects) if (r.gate) { r.shutter = true; r.tg = -9; }   // (a switch's gate is a shutter: SHUTTER)
       if (CAVES[o.world.id] && CAVES[o.world.id].gift.includes(this.cave) && rnd() < 0.45) this.pickups.push({ x: this.r - 1.5 * this.tile, y: this.floor - 14.5 * this.tile, r: 0.6 * R, item: GIFT, sold: false, near: false });   // (by the
       // right wall 14.5 tiles up: clear of the bridges, their coins and the wheel, and its words under the HUD on every phone; at(0.8) put it on the high
@@ -7353,6 +7447,8 @@ Renderer.prototype.draw = function (g, alpha) {
   };
   const tcv = lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.town;   // (a Tokyo cave's: its awnings Tokyo's own (townRect, as in its shafts),
   // its pachinko board's pins by take (tcPin); its other ledges the stash's purple, as the other worlds' caves keep them)
+  const scv = lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.glass;   // (a TV Tower cave's: its clouds the Tower's own (skyRect, as in its
+  // shafts), so a cloud reads as one that gives way; its catwalks, box and door the stash's for now, their look Worlds')
   for (const r of lv.rects) {
     if (r.shutter) {   // a Tokyo cave's roll-down shutter (SHUTTER), the arena holder's (HOLD_SPR.tokyo, Д84 «B»): its box over the gateway, a guide rail down each
       // side, between them its curtain of grey slats and its bottom rail (grey: not an edge to stand on). It rolls slat by slat: the curtain's foot steps up a
@@ -7431,7 +7527,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const c = r.flash > 0 ? INK.white : r.bouncy ? th.spring : r.magnet ? PAL.blue : r.plank ? (r.move ? th.mover : th.plank) : r.slick ? th.slick : r.crumble ? th.crumble : th.block, rad = Math.min((r.y1 - r.y0) / 2, 6);   // (a bouncy plank the spring's ink, a magnet blue)
     let ox = 0, a = 1;
     if (r.crumbling) { const u = r.t / CRUMBLE.time; ox = Math.sin(T * 31) * 1.8 * u; a = 1 - 0.5 * u * u; }
-    const own = (!r.slick || th.fuji || th.village || th.sea) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (tcv && r.plank && !r.move && (r.bouncy ? townRect(r) : lv.cave === 'cavePins' && tcPin(r))) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
+    const own = (!r.slick || th.fuji || th.village || th.sea) && (!r.crumble || r.cloud || th.village || th.sea || th.skazka || th.mines || th.fuji || th.danchi) && !r.crack && !(r.flash > 0), kit = own && ((th.town && townRect(r)) || (tcv && r.plank && !r.move && (r.bouncy ? townRect(r) : lv.cave === 'cavePins' && tcPin(r))) || (scv && r.cloud && skyRect(r)) || (th.mines && mineRect(r)) || (th.danchi && danchiRect(r)) || (th.fuji && fujiRect(r)) || (th.village && villageRect(r)) || (th.sea && seaRect(r)) || (th.skazka && skazkaRect(r)) || (th.panels && panelsRect(r)) || (th.glass && skyRect(r)) || (th.junk && junkRect(r)));   // a world's own look (townRect, villageRect); the overlays below stay
     if (!kit) {
       if (r.gate && lv.world && lv.world.theme && lv.world.theme.fuji) fcGate(r);   // (Fuji's cave's gate of ice, by take)
       else if (r.gate && lv.world && lv.world.theme && lv.world.theme.sea) enoGate(r);   // (the Sea cave's gate, the shrine's door)

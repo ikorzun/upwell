@@ -54,11 +54,17 @@ void main() {
     gl.bindVertexArray(r.emptyVao); gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindVertexArray(null); gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND);
   };
-  {   // the scanlines: a still overlay over the canvas, one dark line under each row of game pixels, the picture under it a little brighter for them
-    const ov = document.createElement('div'); ov.style.cssText = 'position:fixed;pointer-events:none;mix-blend-mode:multiply';   // (after the canvas, before the HUD: under its words)
-    const fit = () => { const r = typeof renderer !== 'undefined' ? renderer : null, c = r && r.canvas; if (!c || !r.low) return; const b = c.getBoundingClientRect(), row = b.height / r.low[1];
-      const onn = retro(); Object.assign(ov.style, { display: onn ? '' : 'none', left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px',
-        backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0) 0 70%, rgba(0,0,0,0.5) 70% 100%)', backgroundSize: `100% ${row}px` }); c.style.filter = onn ? 'brightness(1.12)' : ''; };
+  {   // the scanlines: a still overlay over the canvas, one dark line under each row of game pixels, the picture under it a little brighter for them. Drawn on
+    // the screen's own pixels: a CSS tile a game pixel tall went wrong where a CSS px is not whole screen pixels (a browser's zoom: Safari at 85 % drew no
+    // lines and the column's bottom third half dark, owner: «а затемнение это что внизу экрана?»)
+    const ov = document.createElement('canvas'); ov.style.cssText = 'position:fixed;pointer-events:none;mix-blend-mode:multiply;image-rendering:pixelated';   // (after the canvas, before the HUD: under its words)
+    let drawn = '';
+    const fit = () => { const r = typeof renderer !== 'undefined' ? renderer : null, c = r && r.canvas; if (!c || !r.low) return; const b = c.getBoundingClientRect(), onn = retro();
+      Object.assign(ov.style, { display: onn ? '' : 'none', left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px' }); c.style.filter = onn ? 'brightness(1.12)' : '';
+      const rows = r.low[1], h = Math.round(b.height * (window.devicePixelRatio || 1)), key = rows + ' ' + h; if (!onn || key === drawn) return; drawn = key;
+      ov.width = 1; ov.height = h; const x = ov.getContext('2d'), g = h / rows, line = Math.max(1, Math.round(0.3 * g));   // a row's screen pixels; its line, the bottom 30 % of them (one at least)
+      x.fillStyle = `rgba(0,0,0,${(0.125 * g) / line})`;   // as dark on the whole as a 3x phone's lines were: a pixel of a row's four, half black
+      for (let i = 1; i <= rows; i++) x.fillRect(0, Math.round(i * g) - line, 1, line); };
     window.fxRetro = fit;   // (the settings' CRT, at once)
     const start = () => { if (typeof renderer === 'undefined') return setTimeout(start, 200); renderer.canvas.after(ov); fit(); addEventListener('resize', () => setTimeout(fit, 50)); setInterval(fit, 1000); };
     start();

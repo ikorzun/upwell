@@ -187,7 +187,7 @@ const campMerge = (w, s, rc, order) => {   // a tier's level: its calm, plain an
     candy, shop: rc.shop || 0.55, cage: true, trader: s % 2 === 0 });
 };
 const campWorlds = () => { const out = []; for (let w = 0; w < CAMP_OPEN; w++) if (gated(w) || campOpen(w * 30 + 1)) out.push(w); return out; };   // the worlds open (a bonus world always: its tab shows its stars)
-const opened = (u) => save.bank >= u.at;
+const opened = (u) => !u.price || save.owned.includes(u.id);   // a colour bought (UNLOCKS), or the free one
 // The screen shake (Gum's) unless the system asks for reduced motion (the digest §8); no setting of its own any more (owner, 2026-10-25: «Убери настройку shake,
 // все равно она не работает»: on an iPhone the buzz can't be had)
 const shakeOn = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -242,7 +242,9 @@ function loadSave(s) {
   c.order = ids;   // the worlds' order this save is in (the next change follows it)
   delete c.open;   // what is open comes of the stars (campOpen)
   save.v = 7; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
-  if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not open yet
+  if (!Array.isArray(save.owned)) save.owned = [save.color];   // the colours bought (owner, 2026-10-28: sold now, not opened by coins): a save from before keeps the one it has on
+  // (so `save` has no `owned` of its own: given one, a save from before would come in with it empty and its colour back to the first)
+  if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not bought
 }
 let saveIn = false, cloud = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
 // cloud: this visit writes the Bridge's storage too, decided once at boot: a Bridge up late, or a storage that did not answer,
@@ -2514,7 +2516,7 @@ class Game {
     // save under way: before its next); a world's own coming-in card on its first level (arrive_); and a boss's card before its first fight (owner,
     // К11 «А»), then the level's banner (STORY)
   }
-  // The coins held into the purse; those come in since the last time count toward the colours too (save.bank).
+  // The coins held into the purse; those come in since the last time counted into all the coins ever taken too (save.bank).
   campWin() { const lost = this.maxHp - this.hp, rn = save.camp.runes; delete save.camp.fails[this.ci]; if (!rn.includes(this.world)) rn.push(this.world); this.campDone(lost <= 0 ? 3 : lost <= 2 ? 2 : 1); }   // a boss's stars, by the hearts it cost; kept at its last blow too (a game left in the moment after keeps them)
   campKeep() { const d = this.coins - this.kept; if (d > 0) save.bank += d; this.kept = this.coins; save.camp.wallet = this.coins; }
   // A level cleared: its best stars, the next one open, the purse; kept at once (a reload loses none of it).
@@ -2602,7 +2604,7 @@ class Game {
     ads.between(() => { this.state = 'play'; this.stateT = 0; this.buildLevel(false); this.saveRun(); ui.hideAll(); ui.toast(tf('loop', { n: this.loop + 1 }), 2200); });
   }
   finish(won) {
-    const run = won && this.daily == null, bank0 = save.bank, total = Math.floor(this.climbed + this.levelM), firstWin = run && save.wins === 0;   // (the daily's top is no run won: nothing opens for it)
+    const run = won && this.daily == null, total = Math.floor(this.climbed + this.levelM), firstWin = run && save.wins === 0;   // (the daily's top is no run won: nothing opens for it)
     save.bank += this.coins; save.best = Math.max(save.best, total);
     if (run) save.wins++;
     let tierUp = 0;
@@ -2619,8 +2621,7 @@ class Game {
       if (lt !== 'not_available') bridge.leaderboards.setScore('daily_height', (lt === 'in_game' ? this.daily * BOARD : 0) + d[this.daily]).catch(() => {});   // the day's best, whether the board keeps the best or the last
     }
     persist();   // (after the day's best: a game shut on its result keeps it)
-    const fresh = UNLOCKS.filter((u) => u.at > bank0 && u.at <= save.bank);
-    this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), fresh, firstWin, daily, tierUp, why: this.deathWhy() };
+    this.result = { won, total, coins: this.coins, kills: this.kills, combo: this.bestCombo, where: this.where(), firstWin, daily, tierUp, why: this.deathWhy() };
   }
   where() { return this.mode !== 'camp' && this.world >= WORLDS.length ? L2(SUMMIT.name) : L2(this.wd.name) + ' ' + this.num; }
   get num() { return this.daily != null ? (this.stage + 1) + '/3' : (this.mode === 'camp' ? wNo(this.world) : this.world + 1) + '-' + (this.stage + 1); }   // a level's number (the daily well's: of its three)
@@ -3228,11 +3229,16 @@ const ui = {
     const colors = el('div', 'pickers');   // the hero over them (menuTouch: drag it, press it); under it its five colours, what the chosen one starts with, and Play
     for (const u of UNLOCKS) {
       const open = opened(u), b = button('', 'swatch' + (save.color === u.id ? ' on' : '') + (open ? '' : ' locked'), () => {
-        if (!open) return;
+        if (!open) {   // a tap on one not bought buys it from the purse (owner: «клик в окружность равно покупка»); short of coins, how many more
+          const cur = save.cur, have = Math.min(save.camp.wallet, cur ? cur.coins : Infinity);   // (a level under way goes on with its own count: not a coin it has not got)
+          if (have < u.price) { ui.toast(tf('poor', { n: u.price - have }), 1400); haptics.buzz(8); sound.play('deny', 0.7); return; }
+          save.camp.wallet -= u.price; if (cur) cur.coins -= u.price; save.owned.push(u.id); sound.play('buy'); haptics.buzz(16);
+          track('item_bought', { id: 'color_' + u.id, price: u.price, from: 'menu' });
+        }
         save.color = u.id; persist(); game.hero.kickSquash(0, 1, 0.9); this.menu();   // the hero in its new colour at once (Game.frame paints it), with a little squash
       });
       b.style.setProperty('--c', rgb(colorById(u.id).base)); b.setAttribute('aria-label', u.id);
-      if (!open) b.append(el('small', null, u.at));   // what it costs, in coins of all runs
+      if (!open) b.append(el('small', null, u.price));   // its price, in the purse's coins
       colors.append(b);
     }
     p.append(colors);
@@ -3572,10 +3578,9 @@ const ui = {
         if (es.length) { box.append(el('div', 'label', t('board')), b); fit(); }
       }).catch(() => {});
     }
-    if (r.fresh.length || r.firstWin || r.tierUp > 1) {
+    if (r.firstWin || r.tierUp > 1) {
       const u = el('div', 'fresh');
       u.append(el('div', 'label', t('unlocked')));
-      for (const f of r.fresh) { const c = el('span', 'swatch on'); c.style.setProperty('--c', rgb(colorById(f.id).base)); u.append(c); }
       if (r.tierUp > 1) u.append(el('div', null, tf('tierOpen', { n: r.tierUp }))); else if (r.firstWin) u.append(el('div', null, t('hardOpen')));
       box.append(u);
     }

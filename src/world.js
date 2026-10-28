@@ -2099,12 +2099,13 @@ ICONS.boss_koschei = ['.....r.r.r......', '.....sssss......', '....swwwwws.....'
 ICONS.foe_skull = ['................', '.....wwwwww.....', '...wwwwwwwwww...', '..wwwwwwwswwww..', '..wwswwwwwwwww..', '.wwkkkkwwkkkkww.', '.wkkkkkwwkkkkkw.', '.wkkrkkwwkkrkkw.',
   '.wwkkkwwwwkkkww.', '..wwwwwkkwwwww..', '...wwwwwwwwww...', '...wkwkwkwkwk...', '..ssssssssssss..', '.ssssssssssssss.', '.ss.sss..sss.ss.', '..s..s....s..s..'];   // a skull over its goo (the user's picture)
 ICONS.foe_komori = ['................', '................', '.....s....s.....', '.....ss..ss.....', 's....ssssss....s', 'ss...ssssss...ss', 'sss.sossssos.sss', 'ssssssssssssssss', 'skskssssssssksks', 'skskssssssssksks', 's..s.ssssss.s..s', '.....ssssss.....', '......ssss......', '......k..k......', '................', '................'];   // the Mine's komori face on, its wings spread, its eyes orange (the book's; its sprite: KOMORI_SPR)
-// The hero's looks: one shape (the ball) in five colours, each opening with the coins of all runs
-// together (not spent), like Downwell's palettes, and each starting a run with an upgrade (`perk`).
+// The hero's looks: one shape (the ball) in five colours, each sold for the purse's coins at the menu (owner, 2026-10-28: «цветные моти не
+// открываются, а продаются за монеты – клик в окружность равно покупка»; they opened with the coins of all runs before), the first free, and each
+// starting a run with an upgrade (`perk`).
 const UNLOCKS = [
-  { kind: 'color', id: 'white', at: 0, perk: 'bouncy' }, { kind: 'color', id: 'orange', at: 80, perk: 'legs' },
-  { kind: 'color', id: 'blue', at: 200, perk: 'sticky' }, { kind: 'color', id: 'green', at: 400, perk: 'heart' },
-  { kind: 'color', id: 'purple', at: 700, perk: 'blast' },
+  { kind: 'color', id: 'white', price: 0, perk: 'bouncy' }, { kind: 'color', id: 'orange', price: 80, perk: 'legs' },
+  { kind: 'color', id: 'blue', price: 200, perk: 'sticky' }, { kind: 'color', id: 'green', price: 400, perk: 'heart' },
+  { kind: 'color', id: 'purple', price: 700, perk: 'blast' },
 ];
 
 // ── Chunks ───────────────────────────────────────────────────

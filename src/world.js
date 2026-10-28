@@ -1917,7 +1917,10 @@ const SHOP_ITEMS = [
   { id: 'maxhp', price: 80, color: PAL.red, name: { en: '+1 max heart', es: '+1 corazón máx.', pt: '+1 coração máx.', ja: 'さいだい ハート +1' }, apply: (g) => { g.maxHp++; g.hp++; } },
   { id: 'upgrade', price: 110, color: PAL.purple, name: { en: 'Upgrade', es: 'Mejora', pt: 'Melhoria', ja: 'パワーアップ' }, apply: (g) => g.randomUpgrade() },
 ];
-const GIFT = { id: 'gift', price: 0, free: true, color: PAL.red, name: { en: '+1 heart', es: '+1 corazón', pt: '+1 coração', ja: 'ハート +1' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(1) };
+// Each next max heart and upgrade bought in a world k times the one before (the Village's max heart 80, 128, 205), and at most `hearts` max hearts
+// a world (owner, 2026-10-28, Э1 «Б»: the max heart was cheap and endless, a strong player took the Village with 11 hearts; research/econ/sim.py 'B')
+const SHOP_GROW = { k: 1.6, of: ['maxhp', 'upgrade'], hearts: 3 };
+const GIFT ={ id: 'gift', price: 0, free: true, color: PAL.red, name: { en: '+1 heart', es: '+1 corazón', pt: '+1 coração', ja: 'ハート +1' }, can: (g) => g.hp < g.maxHp, apply: (g) => g.heal(1) };
 // A 12×12 pixel picture for every upgrade and shop item, rows top to bottom in the letters
 // of ICON_INK ('.' is nothing); drawn on its card and as the item in a shop.
 const ICONS = {
@@ -2114,10 +2117,10 @@ ICONS.foe_komori = ['................', '................', '.....s....s.....', 
 // открываются, а продаются за монеты – клик в окружность равно покупка»; they opened with the coins of all runs before), the first free, and each
 // starting a run with an upgrade (`perk`).
 const UNLOCKS = [
-  { kind: 'color', id: 'white', price: 0, perk: 'bouncy' }, { kind: 'color', id: 'orange', price: 80, perk: 'legs' },
-  { kind: 'color', id: 'blue', price: 200, perk: 'sticky' }, { kind: 'color', id: 'green', price: 400, perk: 'heart' },
-  { kind: 'color', id: 'purple', price: 700, perk: 'blast' },
-];
+  { kind: 'color', id: 'white', price: 0, perk: 'bouncy' }, { kind: 'color', id: 'orange', price: 150, perk: 'legs' },
+  { kind: 'color', id: 'blue', price: 400, perk: 'sticky' }, { kind: 'color', id: 'green', price: 800, perk: 'heart' },
+  { kind: 'color', id: 'purple', price: 1500, perk: 'blast' },
+];   // (owner, Э2 «Б»: dearer, a goal past the five worlds; they were 80, 200, 400, 700)
 
 // ── Chunks ───────────────────────────────────────────────────
 // A shaft is stacked from these, like Downwell's and Spelunky's hand-made rooms: drawn 12

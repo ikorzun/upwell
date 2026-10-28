@@ -1014,6 +1014,25 @@ ELEMENTS = {
                          where='standing on a ledge against the shaft wall', material='cracked whitewashed brick, a crooked chimney, the round-topped mouth, clay pots and a '
                          'poker beside it', size='about 3 tiles wide and 3.5 tiles tall', inks='a grey stove (no white), black soot and cracks, its mouth glowing purple '
                          'inside (purple is the stash\'s mark) with a few orange embers', scene=SKAZKA_AT),
+    # The Dark Forest's new things on its ledges (owner 2026-10-28, Д337 «A»: all six candidates on sheets, he picks; 4-5 stay)
+    'skazka-stupa': dict(world='skazka', kind='prop', what="Baba Yaga's mortar (stupa) standing on the ground with her pestle and broom leaning in it",
+                         where='on the top of a ledge at its wall end', material='a crooked, cracked wooden mortar bound with iron hoops, a gnarled pestle, a twig broom',
+                         size='about 1.5 tiles wide and 2.5 tiles tall with the broom', inks='grey and black wood, black iron hoops, the broom\'s twigs grey', scene=SKAZKA_AT),
+    'skazka-stump': dict(world='skazka', kind='prop', what='an old rotten stump with poisonous toadstools (fly agarics) growing round it, its roots clawing the ledge',
+                         where='on the top of a ledge at its wall end', material='a rotten split stump, toadstools with spotted caps', size='about 2 tiles wide and 1.5 tiles tall',
+                         inks='a grey and black stump, the toadstools\' caps pale grey with black spots on grey stems (no red: red is danger here, no white)', scene=SKAZKA_AT),
+    'skazka-cauldron': dict(world='skazka', kind='prop', what="a witch's iron cauldron on three crooked legs over a small fire, steam curling up from it",
+                            where='on the top of a ledge at its wall end', material='black iron, a few logs and stones, the fire', size='about 1.5 tiles wide and 1.5 tiles tall, its steam a tile more',
+                            inks='a black and grey cauldron, the fire under it orange with a yellow core (a light in the dark), the steam grey and thin', scene=SKAZKA_AT),
+    'skazka-skullpost': dict(world='skazka', kind='prop', what='a skull lantern on a tall crooked pole, as on Baba Yaga\'s fence: its eye sockets glowing',
+                             where='on the top of a ledge at its wall end', material='a gnarled pole, a bone skull on top tied on with rope', size='about 0.8 tiles wide and 2.5 tiles tall',
+                             inks='a grey pole and a grey bone skull (no white), its eye sockets glowing orange with a yellow core: a light in the dark', scene=SKAZKA_AT),
+    'skazka-raven': dict(world='skazka', kind='prop', what='a big black raven sitting on a crooked dead snag, looking down (it flies off when the hero comes)',
+                         where='on the top of a ledge at its wall end', material='a black raven with ragged feathers, a bare twisted snag', size='about 1.5 tiles wide and 2 tiles tall with the snag',
+                         inks='a black raven with grey edges to its feathers and a grey beak, one small orange eye, a grey snag', scene=SKAZKA_AT),
+    'skazka-bayun': dict(world='skazka', kind='prop', what='Kot Bayun, the giant black cat of the Russian tales who lulls travellers to sleep, lying on a crooked branch, its tail hanging down',
+                         where='on the top of a ledge at its wall end, on a branch growing out of the wall over it', material='a big shaggy black cat, a gnarled branch',
+                         size='about 2.5 tiles wide and 1.5 tiles tall', inks='a black cat with grey fur edges, its eyes glowing orange (a light in the dark), a grey branch', scene=SKAZKA_AT),
     # The Dark Forest's stash room (owner 2026-10-25, Д280 «1»: inside Baba Yaga's hut on chicken legs), six takes in code while the owner picks (SKR_V)
     'skazka-caveroom': dict(world='skazka', kind='prop', plane='back', what="the inside of the secret stash in the Dark Forest, seen as one whole game screen: inside Baba "
                             "Yaga's hut on chicken legs, its walls of crooked logs and its sagging ceiling beams, a great clay Russian stove (pech) with its round-topped mouth "

@@ -4948,10 +4948,14 @@ const tileId = (rows) => {
 };
 const tileUpload = (gl) => {   // (again whenever a picture was added since)
   if (TILES.n === TILES.list.length && TILES.tex) return TILES.tex;
-  const keys = Object.keys(PAL), W = Math.max(1, ...TILES.list.map((r) => r[0].length)), H = Math.max(1, TILES.list.reduce((h, r) => h + r.length, 0)), px = new Uint8Array(W * H * 4); let y = 0;
+  const keys = Object.keys(PAL), HM = Math.max(2048, ...TILES.list.map((r) => r.length)), at = [];   // (packed down columns HM tall: a hazard's turned strips are tall, one column of them past what a phone's texture takes)
+  let x = 0, y = 0, cw = 0, W = 1, H = 1;
+  for (const rows of TILES.list) { if (y + rows.length > HM) { x += cw; y = 0; cw = 0; } at.push([x, y]); cw = Math.max(cw, rows[0].length); y += rows.length; W = Math.max(W, x + cw); H = Math.max(H, y); }
+  const px = new Uint8Array(W * H * 4);
   TILES.list.forEach((rows, id) => {
-    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '.') return; const lc = ch === 'd' || ch === 'D' ? 's' : ch.toLowerCase(), o = ((y + j) * W + i) * 4; px[o] = keys.indexOf(ICON_INK[lc]); px[o + 1] = lc !== ch ? 255 : 0; px[o + 3] = 255; }));
-    TILES.u.set([0, y, rows[0].length, rows.length], 4 * id); y += rows.length;
+    const [x0, y0] = at[id];
+    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '.') return; const lc = ch === 'd' || ch === 'D' ? 's' : ch.toLowerCase(), o = ((y0 + j) * W + x0 + i) * 4; px[o] = keys.indexOf(ICON_INK[lc]); px[o + 1] = lc !== ch ? 255 : 0; px[o + 3] = 255; }));
+    TILES.u.set([x0, y0, rows[0].length, rows.length], 4 * id);
   });
   if (!TILES.tex) TILES.tex = gl.createTexture();
   gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, TILES.tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, W, H, 0, gl.RGBA, gl.UNSIGNED_BYTE, px);
@@ -8322,18 +8326,31 @@ Renderer.prototype.draw = function (g, alpha) {
       for (let g = 0; g < cols;) { const l = L[g]; let e = g + 1; while (e < cols && L[e] === l) e++;   // under a lifted front, its body's ink
         if (l > 0) { const a = Math.max(start + g * s, lv.l), b = Math.min(start + e * s, lv.r); if (b > a) box(a, yf - l * s, b, yf + KT * s, PAL[ICON_INK[S.body]], 1, 0, 10, 0); }
         g = e; }
-      for (let k = 0, x = start; x < lv.r; k++, x += st * s) {
-        if (x + n * s <= lv.l) continue;
-        band.forEach((r, j) => { const y = y0 + j * s; if (y - Amp * 2 * s < bot && y + s > top) row(r, k, y, j, j < S.front ? 1 : j < S.front + KT ? 1 - (j - S.front + 1) / (KT + 1) : 0, j < S.front); });
-        for (let y = y0 + band.length * s, j = 0; y < bot && j < 2 * band.length; y += s, j++) {   // its ground on down, its embers thinning out into the black
-          if (y + s <= top) continue;
-          const G = (S.ground || (S.ground = []))[k % 2] || (S.ground[k % 2] = []);   // (its rows the same every frame: made once)
-          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), (k % 2) + 50) * q.length), keep = 1 - j / (2 * band.length);
+      // Its band as pictures of the atlas (TILES): its copies laid along the shaft, their checkered overlaps and its ground on down baked into one strip, stored
+      // turned (a column of it a row of the picture, so a run of columns is a box of it from that row: a run its own shape, not its runs of boxes): the rows
+      // under its front one shape, its front a shape a run of one lift, each of the KT rows under it a shape a run of its own share of the lift
+      const f = Math.max(1, Math.round(s / PIX.size)), HP = S.pics || (S.pics = {});
+      if (!HP[f]) {
+        const NC = (Math.ceil((cols + st) / st) + 2) * st + D, G2 = (S.ground || (S.ground = [[], []]));
+        const gRow = (kp, j) => { const G = G2[kp] || (G2[kp] = []); if (!G[j]) {
+          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), kp + 50) * q.length), keep = 1 - j / (2 * band.length);
             G[j] = [...q.slice(o) + q.slice(0, o)].map((ch, i) => (ch === S.body && steady(Math.floor((i + 3 * (Math.floor(j / 2) % 2)) / 4), Math.floor(j / 2) + 60) < keep ? ch : 'k')).join(''); }   // (its body's
-            // ink only: no crystal or sign repeated; thinned in clusters of 4 by 2, never single pixels: the guide's cluster rule)
-          row(G[j], k, y, band.length + j, false, false);
-        }
+          } return G[j]; };
+        const at = (rowOf, j, keepK) => { const out = []; for (let g = 0; g < NC; g++) { const k = Math.floor(g / st), q = g - k * st; let ch;
+          if (q >= D || (g + j) % 2 === 1) ch = rowOf(k)[q]; else ch = k > 0 ? rowOf(k - 1)[q + st] : '.';
+          out.push(ch === '.' || (!keepK && ch === 'k') ? '.' : ch); } return out; };
+        const turn = (cols2) => { const pic = []; for (let g = 0; g < NC; g++) { const r = cols2.map((c) => c[g].repeat(f)).join(''); for (let e = 0; e < f; e++) pic.push(r); } return pic; };   // (the strip turned: its column g picture rows g·f…)
+        const fr = [], kt = [], st2 = [];
+        band.forEach((r, j) => { const c = at(() => r, j, j < S.front); (j < S.front ? fr : j < S.front + KT ? kt : st2).push(c); });
+        for (let j = 0; j < 2 * band.length; j++) st2.push(at((k) => gRow(k % 2, j), band.length + j, false));
+        HP[f] = { NC, front: turn(fr), kt: kt.map((c) => turn([c])), rest: turn(st2), nRest: st2.length };
       }
+      const HPf = HP[f], gl0 = Math.max(0, Math.floor((lv.l - start) / s)), gr0 = Math.min(HPf.NC, Math.ceil((lv.r - start) / s));
+      const TB = (pic, g0, g1, yT, nr) => { if (g1 <= g0) return; const hw = ((g1 - g0) * s) / 2, hh = (nr * s) / 2; F(start + g0 * s + hw, yT + hh, 0, hh, hw, 0, PAL.white, 1, 11, hh, hw, tileId(pic) + TILE_MAX * g0 * f + 0.5); };   // (turned: its A axis down the screen, its B along it)
+      TB(HPf.rest, gl0, gr0, y0 + (S.front + KT) * s, HPf.nRest);
+      for (let g = gl0; g < gr0;) { const l = L[g]; let e = g + 1; while (e < gr0 && L[e] === l) e++; TB(HPf.front, g, e, y0 - l * s, S.front); g = e; }
+      HPf.kt.forEach((pic, i) => { const sh = 1 - (i + 1) / (KT + 1), y = y0 + (S.front + i) * s;
+        for (let g = gl0; g < gr0;) { const l = Math.round(L[g] * sh); let e = g + 1; while (e < gr0 && Math.round(L[e] * sh) === l) e++; TB(pic, g, e, y - l * s, 1); g = e; } });
       const TG = S.tongue;
       if (TG) {   // its tongues over the front (frames, path A): each one's life in its own share of the front, somewhere else each time, at its own beat,
         // resting between lives (so no two pulse together); its root on the front where it stands, lifted as the front is

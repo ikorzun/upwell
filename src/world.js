@@ -5723,31 +5723,6 @@ function sidesArt(cv, art) {
 // The helpers in draw are made again for each frame; V8 keeps their optimised code only while one of them lives, so a major GC between two frames
 // dropped it and they were all compiled again (perf, 2026-10-24: 10-20 compiles a GC). The last frame's are held till the next frame's are made.
 let drawKept = null;
-// 1-1's lessons on signs in the level (?tut=v, the lessons' look on trial: owner, 2026-10-29): a board on a post on the floor by the start (the run, then the
-// jump) and one on the ledge under the double jump's mark (lv.signs 1), each on a post over Mochi's head (he walks past under it), the step burned in: a hand and what it does on a phone, the keys on a computer; white
-// while its lesson waits (TUT's 3 s), black else. Boards in the wood's mid tone, outlined and posted in its dark one ('m', 'd' of spr's ink)
-function tutSigns(g, lv, dot) {   // (dot: spr's dot, the board's post as tall as to carry it over Mochi's head)
-  const T = g.tut, t = lv.tile, touch = coarse, out = [], glyph = (c) => (Array.isArray(FONT[c]) ? FONT[c] : FONT[c].split('/'));
-  const cat = (a, b, gap = 2) => { const h = Math.max(a.length, b.length), pad = (r) => Array.from({ length: h }, (_, i) => r[i - ((h - r.length) >> 1)] || '.'.repeat(r[0].length));
-    const A = pad(a), B = pad(b); return A.map((r, i) => r + '.'.repeat(gap) + B[i]); };
-  const cap = (G) => { const w = G[0].length + 4, rows = ['.' + '#'.repeat(w - 2) + '.', '#' + '.'.repeat(w - 2) + '#']; for (const r of G) rows.push('#.' + r + '.#'); rows.push('#' + '.'.repeat(w - 2) + '#', '.' + '#'.repeat(w - 2) + '.'); return rows; };
-  const key = () => { const n = 9, r = 3.6, T2 = glyph('▲'), rows = []; for (let y = 0; y < n; y++) { let row = ''; for (let x = 0; x < n; x++) row += Math.abs(Math.hypot(x + 0.5 - n / 2, y + 0.5 - n / 2) - r) < 0.62 ? '#' : '.'; rows.push(row); }
-    const ox = (n - T2[0].length) >> 1, oy = (n - T2.length) >> 1; return rows.map((row, y) => [...row].map((c, x) => (T2[y - oy] && T2[y - oy][x - ox] === '#' ? '#' : c)).join('')); };
-  const pic = (step) => touch ? cat(TUT_HAND, step === 'run' ? cat(glyph('◀'), glyph('▶'), 1) : step === 'jump' ? key() : cat(key(), key(), 1))
-    : step === 'run' ? cat(cap(glyph('←')), cap(glyph('→')), 1) : step === 'jump' ? cap(['.'.repeat(13)]) : cat(cap(['.'.repeat(9)]), cap(['.'.repeat(9)]), 1);
-  const board = (step) => {   // its rows: the board round the picture, its post under it
-    const P = pic(step), w = P[0].length + 6, ink = T.show === step ? 'w' : 'k', rows = ['.' + 'd'.repeat(w - 2) + '.', 'd' + 'm'.repeat(w - 2) + 'd'];
-    rows.push('d' + 'm'.repeat(w - 2) + 'd'); for (const r of P) rows.push('dmm' + [...r].map((c) => (c === '#' ? ink : 'm')).join('') + 'mmd');
-    rows.push('d' + 'm'.repeat(w - 2) + 'd', 'd' + 'm'.repeat(w - 2) + 'd', '.' + 'd'.repeat(w - 2) + '.');
-    const px0 = (w >> 1) - 1, n = Math.max(7, Math.ceil((2.4 * g.R) / dot)); for (let k = 0; k < n; k++) rows.push('.'.repeat(px0) + 'ddd' + '.'.repeat(w - px0 - 3));
-    return rows;
-  };
-  const first = ['run', 'jump'].find((k) => !T.done[k]) || 'jump', x0 = T.x0 + (T.x0 + 3 * t < lv.r ? 2.6 : -2.6) * t;
-  out.push({ x: x0, y: lv.floor, rows: board(first) });
-  const m = (lv.signs || []).find((q) => q.id === 1);
-  if (m) { const r = lv.rects.filter((q) => !q.cap && q.y0 > m.y && q.x0 < m.x && q.x1 > m.x).sort((a, b) => a.y0 - b.y0)[0]; if (r) out.push({ x: Math.min(Math.max(m.x + 1.6 * t, r.x0 + t), r.x1 - t), y: r.y0, rows: board('double') }); }
-  return out;
-}
 Renderer.prototype.draw = function (g, alpha) {
   const gl = this.gl;
   if (!gl || this.lost || !this.ok) return;
@@ -7914,7 +7889,6 @@ Renderer.prototype.draw = function (g, alpha) {
     // mid tones; a box a run of one ink, as cineSpr: a crow with its ring 492 boxes, 255 now: perf)
   };
   const ck = Math.max(1, Math.round((0.11 * R) / PIX.size));
-  if (typeof TUT_LOOK !== 'undefined' && TUT_LOOK === 'v' && g.tut && lv.kind === 'well') for (const q of tutSigns(g, lv, PIX.size * ck)) if (seen(q.y - 6 * R, q.y)) spr(q.rows, q.x, q.y, PAL.orange, ck, false);   // (?tut=v: 1-1's lessons on signs)
   for (const f of lv.folk) if (seen(f.y - R, f.y + R)) {
     if (f.kind === 'bat') spr(f.fly ? (Math.floor(f.t * 10) % 2 ? CRITTER.batUp : CRITTER.batDown) : CRITTER.bat, f.x, f.y, th.wall, ck, !f.fly);
     else if (f.kind === 'bug') spr(Math.floor(f.t * (f.run ? 14 : 4)) % 2 ? CRITTER.bug : CRITTER.bug2, f.x, f.y, th.wall, ck, false);

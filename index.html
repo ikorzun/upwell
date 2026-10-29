@@ -235,21 +235,17 @@
   #labels .tag.dim { color: var(--gray); }
   #floorHint { position: absolute; left: 0; top: 0; display: none; --p: 3; color: var(--ink); padding: 8px 12px; background: var(--gray); clip-path: var(--notch); }   /* written on the first floor, on a plain plate over its stripes */
   #floorHint.on { display: block; }
-  #tutHint { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; --p: 3; color: var(--ink); padding: 8px 12px; background: var(--gray); clip-path: var(--notch); opacity: 0; transition: opacity 0.25s; pointer-events: none; }   /* the first level's lesson by the hero (TUT in game.js): its picture over its words, in after a stall, out once it is done */
-  #tutHint.on { opacity: 1; }
   .tutpic { display: flex; gap: 6px; }
   .tutpic svg { display: block; width: calc(var(--w) * var(--p) * 1px); height: calc(var(--h) * var(--p) * 1px); }
-  .tutpic.touch.run svg { animation: tutDrag 1.6s steps(7, jump-none) infinite alternate; }   /* the finger slides a cell at a time, there and back */
-  .tutpic.touch.jump svg, .tutpic.keys.jump .cap { animation: tutTap 1.2s step-end infinite; }   /* a tap: down a cell, and up */
-  .tutpic.touch.double svg, .tutpic.keys.double .cap { animation: tutTap2 1.4s step-end infinite; }   /* two taps, quick */
+  .tutpic.keys.jump .cap { animation: tutTap 1.2s step-end infinite; }   /* a tap: down a cell, and up */
+  .tutpic.keys.double .cap { animation: tutTap2 1.4s step-end infinite; }   /* two taps, quick */
   .tutpic.keys.run .cap:first-child { animation: tutKeyL 1.2s step-end infinite; } .tutpic.keys.run .cap:last-child { animation: tutKeyR 1.2s step-end infinite; }   /* ← and → by turns */
-  @keyframes tutDrag { from { transform: translateX(calc(var(--p) * -3px)); } to { transform: translateX(calc(var(--p) * 3px)); } }
   @keyframes tutTap { 0%, 100% { transform: none; } 60% { transform: translateY(calc(var(--p) * 1px)); } 80% { transform: none; } }
   @keyframes tutTap2 { 0%, 100% { transform: none; } 40% { transform: translateY(calc(var(--p) * 1px)); } 52% { transform: none; } 64% { transform: translateY(calc(var(--p) * 1px)); } 76% { transform: none; } }
   @keyframes tutKeyL { 0% { transform: translateY(calc(var(--p) * 1px)); } 50% { transform: none; } }
   @keyframes tutKeyR { 0% { transform: none; } 50% { transform: translateY(calc(var(--p) * 1px)); } }
   #pad.teach #jumpBtn { animation: tutKey 1s ease-in-out infinite; }   /* the first level: the jump key glowing, a ring round it, till the first jump (TUT) */
-  #pad.teach.ghost #jumpBtn { animation: none; }   /* (?tut=a: the hand's rings instead) */
+  #pad.teach.ghost #jumpBtn { animation: none; }   /* (the glove's rings instead) */
   .glove svg { display: block; width: calc(17px * var(--p)); height: calc(20px * var(--p)); } .gX { fill: var(--ink); } .gW { fill: var(--white); } .gS { fill: #c9c3d8; }   /* the lessons' glove: its shade a cold white's */
   #tutGhost { position: absolute; left: 0; top: 0; width: 0; height: 0; --p: 3; color: var(--white); pointer-events: none; opacity: 0; transition: opacity 0.25s; }   /* ?tut=a (ui.ghost): placed at its point */
   #tutGhost.on { opacity: 1; }
@@ -274,14 +270,7 @@
   #tutGhost.keys.run .cap:first-child { animation: tutKeyL 1.2s step-end infinite; } #tutGhost.keys.run .cap:last-child { animation: tutKeyR 1.2s step-end infinite; }
   #tutGhost.keys.jump .cap { animation: tutTap 1.2s step-end infinite; } #tutGhost.keys.double .cap { animation: tutTap2 1.4s step-end infinite; }
   #tutGhost.keys > .tx { left: calc(12px * var(--p)); top: calc(-12px * var(--p)); }
-  #tutHint.bubble { background: none; clip-path: none; padding: 0; color: #f6efdc; filter: drop-shadow(calc(1px * var(--p)) 0 0 var(--ink)) drop-shadow(calc(-1px * var(--p)) 0 0 var(--ink)) drop-shadow(0 calc(1px * var(--p)) 0 var(--ink)) drop-shadow(0 calc(-1px * var(--p)) 0 var(--ink)); }   /* ?tut=b: Mochi's bubble, its outline a game pixel */
-  #tutHint.bubble .bubw { display: flex; flex-direction: column; align-items: center; } #tutHint.bubble.under .bubw { flex-direction: column-reverse; } #tutHint.bubble.under .tail svg { transform: scaleY(-1); }
-  #tutHint.bubble .bub { display: flex; align-items: center; gap: calc(3px * var(--p)); padding: calc(3px * var(--p)) calc(4px * var(--p)); background: #f6efdc; color: var(--ink); clip-path: polygon(calc(2px * var(--p)) 0, calc(100% - 2px * var(--p)) 0, calc(100% - 2px * var(--p)) var(--pp), calc(100% - 1px * var(--p)) var(--pp), calc(100% - 1px * var(--p)) calc(2px * var(--p)), 100% calc(2px * var(--p)), 100% calc(100% - 2px * var(--p)), calc(100% - 1px * var(--p)) calc(100% - 2px * var(--p)), calc(100% - 1px * var(--p)) calc(100% - 1px * var(--p)), calc(100% - 2px * var(--p)) calc(100% - 1px * var(--p)), calc(100% - 2px * var(--p)) 100%, calc(2px * var(--p)) 100%, calc(2px * var(--p)) calc(100% - 1px * var(--p)), calc(1px * var(--p)) calc(100% - 1px * var(--p)), calc(1px * var(--p)) calc(100% - 2px * var(--p)), 0 calc(100% - 2px * var(--p)), 0 calc(2px * var(--p)), calc(1px * var(--p)) calc(2px * var(--p)), calc(1px * var(--p)) var(--pp), calc(2px * var(--p)) var(--pp)); --pp: calc(1px * var(--p)); }   /* round pixel corners */
-  #tutHint.bubble .tail svg { display: block; width: calc(5px * var(--p)); height: calc(3px * var(--p)); margin-top: -1px; } #tutHint.bubble.under .tail svg { margin: 0 0 -1px; }
-  #tutHint.bubble .glove svg { width: calc(17px * var(--q)); height: calc(20px * var(--q)); } #tutHint.bubble { --q: 2; }   /* the glove a size down in the bubble */
-  #tutHint.bubble .kmini { color: var(--ink); } #tutHint.bubble .kmini svg { display: block; width: calc(13px * var(--p)); height: calc(13px * var(--p)); } #tutHint.bubble .kmini path { fill: var(--ink); }
-  #tutHint.bubble .cap, #tutHint.bubble .arr { color: var(--ink); } #tutHint.bubble .arr svg { display: block; width: calc(var(--w) * var(--p) * 1px); height: calc(var(--h) * var(--p) * 1px); }
-  @media (prefers-reduced-motion: reduce) { #tutGhost *, #tutHint.bubble * { animation: none !important; } }
+  @media (prefers-reduced-motion: reduce) { #tutGhost * { animation: none !important; } }
   @keyframes tutKey { 0%, 100% { box-shadow: 0 0 0 0 rgba(243, 243, 243, 0); } 50% { box-shadow: 0 0 0 6px rgba(243, 243, 243, 0.45); } }
   @media (prefers-reduced-motion: reduce) { .tutpic svg, .tutpic .cap, #pad.teach #jumpBtn { animation: none !important; } }
   #boot { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #0e0d13; transition: opacity 0.25s, visibility 0s; }   /* while the game's files come (owner, З27 «А»): its logo and a bar, gone once it starts (game.js start) */
@@ -628,8 +617,7 @@
   <div id="combo" aria-hidden="true"></div>
   <div id="labels"></div>
   <div id="floorHint" aria-hidden="true"></div>
-  <div id="tutHint" aria-hidden="true"></div>   <!-- the first level's lessons (TUT in game.js) -->
-  <div id="tutGhost" aria-hidden="true"></div>   <!-- the lessons' hand where it is done (?tut=a, ui.ghost) -->
+  <div id="tutGhost" aria-hidden="true"></div>   <!-- the first level's lessons: the glove where it is done (TUT, ui.ghost in game.js) -->
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="fade"></div>
   <div id="pad">

@@ -1366,6 +1366,26 @@ const PAL = { black: hex('#141414'),   // a tone lighter and brighter than at fi
   red: hex('#f43e34'), blue: hex('#5bb8ff'), yellow: hex('#ffed57'), green: hex('#339c39'),
   purple: hex('#c996ff'), orange: hex('#faa23e'), gray: hex('#c8c8c8'), white: hex('#f3f3f3'),
   aqua: hex('#6fe0ee') };   // the tenth ink, last (white stays PAL[8]): the Sea's turquoise sky blue (owner, 2026-10-20: research/variants/sea-ink-swatches.png D)
+// ?pal=…: a console's palette over the screen's colours, only to look at (owner, 2026-10-29: «у них есть панель цветов для разных приставок… как у нас устроены
+// цвета и легко ли будет их обновить без перерисовки всех миров?»): the last pass already gives each pixel the black or one of its ink's three steps (rampOf),
+// but only in a dark level: elsewhere the screen is the ten inks and their tones. So each ink goes to its nearest of the console's colours (OKLab), and in a
+// dark level each of its steps too; the art and its letters stay as they are
+const PAL_TRY = { pico8: ['#000000', '#1d2b53', '#7e2553', '#008751', '#ab5236', '#5f574f', '#c2c3c7', '#fff1e8', '#ff004d', '#ffa300', '#ffec27', '#00e436', '#29adff', '#83769c', '#ff77a8', '#ffccaa'],
+  c64: ['#000000', '#ffffff', '#880000', '#aaffee', '#cc44cc', '#00cc55', '#0000aa', '#eeee77', '#dd8855', '#664400', '#ff7777', '#333333', '#777777', '#aaff66', '#0088ff', '#bbbbbb'],
+  zx: ['#000000', '#0000d7', '#d70000', '#d700d7', '#00d700', '#00d7d7', '#d7d700', '#d7d7d7', '#0000ff', '#ff0000', '#ff00ff', '#00ff00', '#00ffff', '#ffff00', '#ffffff'],
+  gb: ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'] }[(/[?&]pal=(\w+)/.exec(location.search) || [])[1]];
+const okLab = (c) => { const l = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4), [r, g, b] = c.map(l);
+  const L = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b), M = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b), S = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [0.2104542553 * L + 0.793617785 * M - 0.0040720468 * S, 1.9779984951 * L - 2.428592205 * M + 0.4505937099 * S, 0.0259040371 * L + 0.7827717662 * M - 0.808675766 * S]; };
+const nearPal = (c) => { const q = okLab(c); let best = null, bd = Infinity; for (const h of PAL_TRY) { const v = hex(h), p = okLab(v), d = (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2 + (p[2] - q[2]) ** 2; if (d < bd) { bd = d; best = v; } } return best; };
+if (PAL_TRY) {   // the ten inks each to its own nearest of the console's colours (two inks on one only when it has fewer than ten), in place: INK, the themes and the
+  // shader's PAL are made of them; then every tone of an ink is a tone of that colour
+  const keys = Object.keys(PAL), cand = PAL_TRY.map(hex), L = (c) => okLab(c), pairs = [], took = new Set(), to = {};
+  for (const k of keys) cand.forEach((v, i) => { const p = L(PAL[k]), q = L(v); pairs.push([(p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2 + (p[2] - q[2]) ** 2, k, i]); });
+  pairs.sort((x, y) => x[0] - y[0]);
+  for (const [, k, i] of pairs) if (!to[k] && (cand.length < keys.length || !took.has(i))) { to[k] = cand[i]; took.add(i); }
+  for (const k of keys) PAL[k].splice(0, 3, ...to[k]);
+}
 // 80/20: the world in its one ink, and the bright inks mean something: yellow is what can be
 // taken (coins, items), red is danger (enemies, spikes, fire), white the hero and the edges; a
 // surface that behaves differently (ice, moss, rubber, crumbling, moving, springs) has a colour of its own.
@@ -4955,7 +4975,7 @@ const rampOf = (th) => {
     const keep = id === 'white' || id === 'yellow';   // (Worlds: white is the hero's and an edge's mark, yellow a coin's: at the light's full step they stay
     // themselves, not tinted cream; cold and mid as every ink's)
     const steps = own ? own.map(hex) : [((m) => [m[0] * 0.8, m[1] * 0.9, Math.min(1, m[2] * 1.18 + 0.03)])(mixK(c, 0.36)), mixK(c, 0.68), keep ? c.slice() : c.map((v, i) => Math.min(1, v * 0.84 + [1, 0.8, 0.52][i] * 0.2))];
-    steps.forEach((s3, j) => out.set(s3, (k * 3 + j) * 3));
+    steps.forEach((s3, j) => out.set(PAL_TRY ? nearPal(s3) : s3, (k * 3 + j) * 3));   // (?pal: the console's nearest)
   });
   return out;
 };

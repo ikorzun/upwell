@@ -574,7 +574,7 @@
 <body>
 <div id="boot" aria-hidden="true"><img src="assets/ui/upwell-logo.svg" alt=""><div class="bar"><i></i></div></div>
 <script>   // the boot bar: each of the game's files as it comes, by its weight (KB gzipped, 2026-10-29), crawling a whole pixel at a time towards the one coming
-  var bootGot = 0, bootShow = 0, bootK = 0, bootW = [23, 532, 16, 149, 39, 4], bootAll = 763;
+  var bootGot = 0, bootShow = 0, bootK = 0, bootW = [22, 484, 15, 148, 38, 4], bootAll = 711;
   function bootBar(w) { if (w > bootShow) { bootShow = w; var b = document.querySelector('#boot .bar i'); if (b) b.style.width = w + 'px'; } }
   var bootT = setInterval(function () { if (bootShow < Math.round(192 * Math.min(1, (bootGot + 0.9 * (bootW[bootK] || 0)) / bootAll))) bootBar(bootShow + 1); }, 60);
   function bootStep() { bootGot += bootW[bootK++] || 0; bootBar(Math.round(192 * Math.min(1, bootGot / bootAll))); if (bootK >= bootW.length) clearInterval(bootT); }
@@ -612,7 +612,7 @@
   <div id="story" class="panel"></div>
   <div id="album" class="panel"></div>
 </div>
-<script src="src/gum.js" onload="bootStep()"></script>   <!-- (src/bossframes.js: fetched by game.js after the menu, owner, З27 «А») -->
+<script src="src/gum.js" onload="bootStep()"></script>   <!-- (src/bossframes.js and src/sides.js: fetched by game.js after the menu, the sides' on a wide screen only; owner, З27 «А») -->
 <script src="src/world.js" onload="bootStep()"></script>
 <script src="src/cine.js" onload="bootStep()"></script>
 <script src="src/game.js" onload="bootStep()"></script>

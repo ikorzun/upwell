@@ -4163,7 +4163,7 @@ if (window.PerformanceObserver && (PerformanceObserver.supportedEntryTypes || []
 const fx = new FX();
 const game = new Game();
 const renderer = new Renderer(canvas);
-let paused = document.hidden, started = false, firstFrame = false, layoutQueued = false, inputTold = false, menuTold = false;   // (told: the first input, the menu, once a page)
+let paused = document.hidden, started = false, firstFrame = false, layoutQueued = false, inputTold = false, menuTold = false, sidesAsked = false;   // (told: the first input, the menu, once a page; asked: src/sides.js fetched)
 { const s = new URLSearchParams(location.search).get('seed'); if (s != null && s !== '' && Number.isFinite(+s)) nextSeed = +s; }
 
 // The view is a portrait column: the whole screen on a phone held upright, a 9:16
@@ -4197,6 +4197,8 @@ function layout() {
   const sides = $('sides'), Ws = coarse ? 0 : Math.floor(Math.min(vw, 2 * H) / P + 1e-6) * P, on = Ws > W + 4 * P;   // a computer's: its far view beside the
   // column, the window's width and 2:1 at most (owner, П3 «А»; Playgama's 27th), in the column's game pixels (Renderer.sideShot)
   sides.classList.toggle('on', on); renderer.sides = on ? sides : null;
+  if (on && !sidesAsked && typeof SIDE_ART === 'undefined') { sidesAsked = true; const b = document.createElement('script'); b.src = 'src/sides.js'; document.head.append(b); }   // the sides'
+  // backdrops (SIDE_ART) fetched the first time a wide screen shows them, never on a phone (owner, З27 «А»: 102 KB); their far view's shot till they come (sideShot)
   if (on) { sides.width = Math.round(Ws / P); sides.height = Math.round(H / P); Object.assign(sides.style, { width: Ws + 'px', height: H + 'px', left: Math.round(((vw - Ws) / 2) * d) / d + 'px' }); renderer.sideLv = null; }
   renderer.resize(view.w, view.h, PIXELATED ? (CINE ? CINE.k : 1) / PIX.size : (window.devicePixelRatio || 1) * k);   // (the cinematic fork: k times the game's pixels, its light that smooth)   // the canvas as many pixels as the game draws, the page scales it up
   // pixelated (index.html): a phone gets no full-resolution copy of each frame to keep and compose (on a 3x iPhone 20 times the pixels for nothing);

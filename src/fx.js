@@ -33,6 +33,21 @@
   const okl = (c) => { const l = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4), [r, g, b] = c.map(l);
     const L = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b), M = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b), S = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
     return [0.2104542553 * L + 0.793617785 * M - 0.0040720468 * S, 1.9779984951 * L - 2.428592205 * M + 0.4505937099 * S, 0.0259040371 * L + 0.7827717662 * M - 0.808675766 * S]; };
+  // The same for what is drawn beside the canvas, not through the pass (a computer's sides, world.js sideShot; owner, 2026-10-29: «в новую палитру должны
+  // перекрашиваться и задники для десктопа»): fxPal() a colour (0–255 each) through the palette as the pass's repal takes it, each colour worked out once;
+  // null with none on. One function a palette (the sides laid again when it changes)
+  const maps = new Map();
+  window.fxPal = () => { const P = palOn(); if (!P) return null; let m = maps.get(P); if (m) return m;
+    const ink0 = Object.values(PAL), inkN = P.inks.map(hex), all = P.all.map(hex), allL = all.map(okl), W = Object.keys(PAL).indexOf('white'), done = new Map();
+    m = (r, g, b) => { const key = (r << 16) | (g << 8) | b; let v = done.get(key); if (v) return v;
+      const c = [r / 255, g / 255, b / 255]; let best = 1e9, n = c;
+      const line = (a, z, na, nz) => { const d = z.map((x, j) => x - a[j]), t = Math.min(1, Math.max(0, d.reduce((s, x, j) => s + (c[j] - a[j]) * x, 0) / d.reduce((s, x) => s + x * x, 0)));
+        const e = d.reduce((s, x, j) => s + (c[j] - a[j] - t * x) ** 2, 0); if (e < best) { best = e; n = na.map((x, j) => x + t * (nz[j] - x)); } };
+      for (let i = 1; i < ink0.length; i++) line(ink0[0], ink0[i], inkN[0], inkN[i]);   // (the shader's two loops, in its order)
+      for (let i = 1; i < ink0.length; i++) if (i !== W) line(ink0[i], ink0[W], inkN[i], inkN[W]);
+      const q = okl(n); let k = 0, bd = 1e9; allL.forEach((L, i) => { const e = L.reduce((s, x, j) => s + (x - q[j]) ** 2, 0); if (e < bd) { bd = e; k = i; } });
+      v = all[k].map((x) => Math.round(x * 255)); done.set(key, v); return v; };
+    maps.set(P, m); return m; };
   const f3 = (list) => new Float32Array(list.flat()), palBufs = new Map();   // (each palette's uniforms, made once)
   const bufsOf = (P) => { let b = palBufs.get(P); if (!b) { const inks = P.inks.map(hex), all = P.all.map(hex); b = { ink0: f3(Object.values(PAL)), inkN: f3(inks), all: f3(all), allL: f3(all.map(okl)), n: all.length }; palBufs.set(P, b); } return b; };
   const kicks = [{ p: null }, { p: null }, { p: null }], last = { flash: -9 };   // a hurt's moment, the others', and a jump's bend, all under way at once (a kill in a hurt's 1.95 s cuts it off no more)

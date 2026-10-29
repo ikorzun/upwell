@@ -5666,14 +5666,15 @@ Renderer.prototype.makeTarget = function () {
 Renderer.prototype.sideShot = function (lv, cam, W, H, ranges, th, menu, foot) {   // (foot: the far view's foot on the screen, farY: it sinks a little as the climb goes on)
   if (!menu && (lv.kind === 'shop' || lv.kind === 'treasure' || lv.kind === 'trial')) return;
   const art = lv.world && typeof SIDE_ART !== 'undefined' && SIDE_ART[lv.world.id];   // a world with its own backdrop (SIDE_ART): that, laid once, no shot
-  if (art) { if (this.sideArt !== art || this.sideLow !== this.low || this.sideCv !== this.sides) { this.sideArt = art; this.sideLv = lv; this.sideLow = this.low; this.sideCv = this.sides; sidesArt(this.sides, art); } return; }
+  const m = typeof fxPal === 'function' ? fxPal() : null;   // (the settings' palette, fx.js: the sides in it too, laid again when it changes)
+  if (art) { if (this.sideArt !== art || this.sideLow !== this.low || this.sideCv !== this.sides || this.sidePal !== m) { this.sideArt = art; this.sideLv = lv; this.sideLow = this.low; this.sideCv = this.sides; this.sidePal = m; sidesArt(this.sides, art, m); } return; }
   this.sideArt = null;
   const P = PIX.size, S = this.sideImg;
-  if (S && this.sideLv === lv && this.sideLow === this.low && this.sideCv === this.sides) {   // the same: only moved down with the column's, laid again
+  if (S && this.sideLv === lv && this.sideLow === this.low && this.sideCv === this.sides && this.sidePal === m) {   // the same: only moved down with the column's, laid again
     const dy = Math.round((foot - S.foot) / P); if (dy !== S.dy) { S.dy = dy; sidesPaint(this.sides, S); }
     return;
   }
-  this.sideLv = lv; this.sideLow = this.low; this.sideCv = this.sides;
+  this.sideLv = lv; this.sideLow = this.low; this.sideCv = this.sides; this.sidePal = m;
   const gl = this.gl, [lw, lh] = this.low, sy = Math.round(-cam / P) * P;
   let t = this.sideT;
   if (!t || t.w !== lw || t.h !== lh) {
@@ -5688,34 +5689,36 @@ Renderer.prototype.sideShot = function (lv, cam, W, H, ranges, th, menu, foot) {
   for (let i = 0; i + 1 < ranges.length; i += 2) this.drawFeat(ranges[i], ranges[i + 1] - ranges[i]);
   gl.readPixels(0, 0, lw, lh, gl.RGBA, gl.UNSIGNED_BYTE, t.px);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  this.sideImg = sidesShot(t.px, lw, lh, th, foot); sidesPaint(this.sides, this.sideImg);
+  this.sideImg = sidesShot(t.px, lw, lh, th, foot, m); sidesPaint(this.sides, this.sideImg);
 };
-function sidesShot(px, w, h, th, foot) {   // the far view read back (its bottom row first, its colours by their alpha) as a picture, and its rows from t0 to b0
-  const img = new ImageData(w, h), d = img.data, q = new Uint32Array(d.buffer);
+function sidesShot(px, w, h, th, foot, m) {   // the far view read back (its bottom row first, its colours by their alpha) as a picture, and its rows from t0 to b0; in a
+  // palette (m), each pixel laid on the top ink first, then through it, as the pass takes the screen
+  const img = new ImageData(w, h), d = img.data, q = new Uint32Array(d.buffer), top = th.top.map((v) => Math.round(v * 255));
   for (let y = 0; y < h; y++) d.set(px.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4);
   let t0 = h, b0 = -1;
   for (let y = 0; y < h; y++) for (let i = y * w, e = i + w; i < e; i++) {
     const a = q[i] >>> 24; if (!a) continue;
     if (y < t0) t0 = y; b0 = y;
     if (a < 255) { const u = 255 / a, o = i * 4; d[o] *= u; d[o + 1] *= u; d[o + 2] *= u; }
+    if (m) { const o = i * 4, k = a / 255; d.set(m(...top.map((v, j) => Math.round(d[o + j] * k + v * (1 - k)))), o); d[o + 3] = 255; }
   }
   const off = document.createElement('canvas'); off.width = w; off.height = h; off.getContext('2d').putImageData(img, 0, 0);
-  return { off, w, t0, b0, top: th.top, foot, dy: 0 };
+  return { off, w, t0, b0, top: `rgb(${m ? m(...top) : top})`, foot, dy: 0 };
 }
 function sidesPaint(cv, S) {   // over the world's top ink, k times bigger, on its foot in the column (a tall one's top off the screen), moved down with it by dy
-  const c = cv.getContext('2d'), Wt = cv.width, Ht = cv.height, ink = (v) => Math.round(v * 255);
-  c.imageSmoothingEnabled = false; c.fillStyle = `rgb(${ink(S.top[0])},${ink(S.top[1])},${ink(S.top[2])})`; c.fillRect(0, 0, Wt, Ht);
+  const c = cv.getContext('2d'), Wt = cv.width, Ht = cv.height;
+  c.imageSmoothingEnabled = false; c.fillStyle = S.top; c.fillRect(0, 0, Wt, Ht);
   if (S.b0 < 0) return;   // no far view: its ink only
   const hb = S.b0 - S.t0 + 1, k = Math.max(2, Math.round(Wt / S.w));
   c.drawImage(S.off, 0, S.t0, S.w, hb, Math.round((Wt - k * S.w) / 2), S.b0 + 1 + S.dy - k * hb, k * S.w, k * hb);   // (whole game pixels: k of them a pixel of it)
 }
 
 // (SIDE_ART, each world's backdrop for a computer's sides: src/sides.js, loaded on a wide screen only; none yet: the far view's shot)
-function sidesArt(cv, art) {
-  if (!art.off) {   // (once: its rows into a picture of its own size)
-    const img = new ImageData(art.w, art.h), d = img.data, pal = art.pal.map((h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)));
+function sidesArt(cv, art, m) {   // (m: the settings' palette, fx.js fxPal: each of its colours through it)
+  if (!art.off || art.m !== m) {   // (once, and again in another palette: its rows into a picture of its own size)
+    const img = new ImageData(art.w, art.h), d = img.data, pal = art.pal.map((h) => { const c = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); return m ? m(...c) : c; });
     art.rows.forEach((r, y) => { let x = 0; for (const [, ch, n] of r.matchAll(/([a-z])(\d*)/g)) { const c = pal[ch.charCodeAt(0) - 97]; for (let k = +(n || 1); k > 0; k--, x++) { const o = (y * art.w + x) * 4; d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255; } } });
-    art.off = document.createElement('canvas'); art.off.width = art.w; art.off.height = art.h; art.off.getContext('2d').putImageData(img, 0, 0); art.sky = art.pal[art.rows[0].charCodeAt(0) - 97];
+    art.off = document.createElement('canvas'); art.off.width = art.w; art.off.height = art.h; art.off.getContext('2d').putImageData(img, 0, 0); art.m = m; art.sky = `rgb(${pal[art.rows[0].charCodeAt(0) - 97]})`;
   }
   const c = cv.getContext('2d'), Wt = cv.width, Ht = cv.height, k = Math.max(1, Math.ceil(Wt / art.w));
   c.imageSmoothingEnabled = false; c.fillStyle = art.sky; c.fillRect(0, 0, Wt, Ht);

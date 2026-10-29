@@ -4714,17 +4714,21 @@ function collidePair(A, B) {
 const bits = [];
 // A coin taken, Sprite Fusion's pickup (MIT, Hugo Duprez; its recipe through their MCP, owner, Эф1 «В», Эф2 «В»): the coin squashed a moment in its colours, then
 // stretched white over a shrinking white disc (coinPops, 0.1 s); its sparks a plus of 1 or 2 px trailing dithered dots, out at even angles, then (0.12 s on) homing on
-// the hero's chest or the purse, taken in with two motes rising and every third a little ring. PICK_FX the look tried (?pick=a|b|c, for the owner's pick): 'a' on
-// the chest, 'b' a burst fading where it was, 'c' on the purse; none: as before. Its art pixel ours by the coin (its 9 across ours 2 × COIN.r hero radii: two game
-// pixels on a phone, PICK_A, whole game pixels), its world units half of one (PICK_U)
-const PICK_FX = (location.search.match(/[?&]pick=([abc])/) || [])[1] || null, coinPops = [];
+// the purse, taken in with two motes rising and every third a little ring, the purse bumping as a coin's first gets there (the owner's pick of three, Эф3 «В»). At most
+// SPARKS_MAX of them at once (a run of coins: 30 in a quarter second drew 2400 more on a phone, the old look 316): a coin past it gets what is left, or none and
+// the bump at once. Its art pixel ours by the coin (its 9 across ours 2 × COIN.r hero radii: two game pixels on a phone, PICK_A, whole game pixels), its world
+// units half of one (PICK_U)
+const coinPops = [], SPARKS_MAX = 36;   // (36: two small coins and a big one's, 8 + 8 + 14, all at once as the owner saw them)
 const PICK_A = () => Math.max(1, Math.round((2 * COIN.r * ((typeof game !== 'undefined' && game.R) || 24)) / 9 / PIX.size)) * PIX.size, PICK_U = () => PICK_A() / 2;
 const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], bayer4 = (x, y) => (BAYER4[((y & 3) << 2) | (x & 3)] + 0.5) / 16;   // (a dither's threshold)
-let pickTo = null, pickIn = 0;   // (the homing target this frame, PICK_FX 'a' the chest, 'c' the purse; how many taken in, for the rings)
+let pickTo = null, pickIn = 0;   // (the purse's middle this frame, the sparks' homing target; how many taken in, for the rings)
+const purseAt = () => { const e = document.getElementById('purse'); if (!e || !game.lv) return null; const q = e.getBoundingClientRect(); if (!q.width) return null;
+  return [(q.left + q.width / 2) / view.k, (q.top + q.height / 2) / view.k + game.lv.cam]; };   // (in the level's px: #ui is logical px, view.k; null with no purse shown)
 function coinSparks(x, y, big) {   // the recipe's sparks (14 a big coin's, 8 a small one's: ours come in rows), 150–300 units/s at even angles ±0.2 rad and 40 up
-  const U = PICK_U(), n = big ? 14 : 8, inks = [INK.white, INK.coin, lighten(INK.coin, 0.35)];
+  let live = 0; for (const b of bits) if (b.star != null) live++;
+  const U = PICK_U(), n = Math.min(big ? 14 : 8, SPARKS_MAX - live), inks = [INK.white, INK.coin, lighten(INK.coin, 0.35)];
   for (let i = 0; i < n; i++) { const a = (i / n) * TAU + fxRand(-0.2, 0.2), v = fxRand(150, 300) * U;
-    bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40 * U, s: 1, c: inks[(fxRand(0, 3) | 0) % 3], t: 0, life: fxRand(0.75, 1.05), g: 0, drag: 3, star: fxRand(0, 1) < 0.4 ? 2 : 1, tr: [], home: PICK_FX !== 'b' }); }
+    bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40 * U, s: 1, c: inks[(fxRand(0, 3) | 0) % 3], t: 0, life: fxRand(0.75, 1.05), g: 0, drag: 3, star: fxRand(0, 1) < 0.4 ? 2 : 1, tr: [] }); }
 }
 function burstFx(x, y, R, c) {
   for (let i = 0; i < 80; i++) {
@@ -4744,22 +4748,21 @@ function sparkFx(x, y, n, a, spread, sp, size, life, inks, g) {
   }
 }
 function updateBits(dt) {
-  const U = PICK_U(), H = typeof game !== 'undefined' && game.hero;
-  pickTo = !PICK_FX || PICK_FX === 'b' || !H ? null : PICK_FX === 'a' ? [H.cx, H.cy] : (() => { const e = document.getElementById('purse'); if (!e || !game.lv) return null; const q = e.getBoundingClientRect();
-    return [(q.left + q.width / 2) / view.k, (q.top + q.height / 2) / view.k + game.lv.cam]; })();   // (the purse's middle in the level's px: #ui is logical px, view.k)
+  const U = PICK_U();
+  pickTo = bits.length && typeof game !== 'undefined' ? purseAt() : null;
   for (let i = bits.length - 1; i >= 0; i--) {
     const b = bits[i], d = Math.exp(-b.drag * dt);
     if ((b.t += dt) < 0) continue;   // (a bit still to come: popFx's specks)
-    if (b.star != null) {   // a coin's spark (PICK_FX): out with drag and a little gravity its first 0.12 s, then homing faster and faster
+    if (b.star != null) {   // a coin's spark: out with drag and a little gravity its first 0.12 s, then homing faster and faster
       b.tr.unshift(b.x, b.y); if (b.tr.length > 10) b.tr.length = 10;
-      if (b.home && pickTo && b.t > 0.12) {
+      if (pickTo && b.t > 0.12) {
         const dx = pickTo[0] - b.x, dy = pickTo[1] - b.y, dd = Math.hypot(dx, dy) || 1, want = (380 + 900 * b.t) * U, k = Math.min(1, dt * (3 + 22 * b.t));
         b.vx += ((dx / dd) * want - b.vx) * k; b.vy += ((dy / dd) * want - b.vy) * k;
-        if (dd < 9 * U) {   // taken in: two motes rising, every third a little ring; the purse bumps at the first of a coin's (PICK_FX 'c')
+        if (dd < 9 * U) {   // taken in: two motes rising, every third a little ring; the purse bumps at the first of a coin's
           bits.splice(i, 1);
           if (pickIn++ % 3 === 0) fx.ring(pickTo[0], pickTo[1], 7 * PICK_A(), INK.coin);   // (opening to the recipe's 14 art px)
           for (let j = 0; j < 2; j++) bits.push({ x: pickTo[0] + fxRand(-10, 10) * U, y: pickTo[1] + fxRand(-14, 10) * U, vx: fxRand(-12, 12) * U, vy: -fxRand(30, 80) * U, s: 1, c: j ? INK.coin : lighten(INK.coin, 0.35), t: 0, life: fxRand(0.4, 0.8), g: 0, drag: 1.5, mote: true });
-          if (PICK_FX === 'c' && b.bump && !b.bump.done) { b.bump.done = true; ui.coinBump(); }
+          if (b.bump && !b.bump.done) { b.bump.done = true; ui.coinBump(); }
           continue;
         }
       } else { b.vx -= b.vx * 3 * dt; b.vy -= b.vy * 3 * dt; b.vy += 60 * U * dt; }
@@ -8269,7 +8272,7 @@ Renderer.prototype.draw = function (g, alpha) {
       for (const [ox, oy, rr] of pf.lobes) { const r = pf.r * rr * (0.7 + 0.8 * out(u)); F(cx + ox * pf.r, cy + oy * pf.r, r, 0, 0, r, p.accent, 1 - u, 4); }
     }
   }
-  for (const p of coinPops) {   // a coin taken (PICK_FX), over the bodies as the recipe's front layer: squashed to 1.5 × 0.6 in its colours its first 0.05 s, then stretched to 0.7 × 1.45 all white, over a white disc
+  for (const p of coinPops) {   // a coin taken, over the bodies as the recipe's front layer: squashed to 1.5 × 0.6 in its colours its first 0.05 s, then stretched to 0.7 × 1.45 all white, over a white disc
     // shrinking from 1.8 coin radii to a fifth of one in 0.08 s (the recipe's 8 art px to 1, its coin 9 across)
     const sq = p.t < 0.05, rx = p.r * (sq ? 1.5 : 0.7), ry = p.r * (sq ? 0.6 : 1.45);
     if (p.t < 0.08) { const dr = p.r * (0.2 + 1.6 * (1 - p.t / 0.08)); F(p.x, p.y, dr, 0, 0, dr, INK.white, 1, 9, 0); }
@@ -8277,7 +8280,7 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   for (const b of bits) {   // a burst hero's bits, on the game-pixel grid, shrinking over their last 40%
     if (b.t < 0) continue;
-    if (b.star != null || b.mote) {   // a coin's spark or mote (PICK_FX): a plus, its arms shrinking its last third, its trail's dots dithered out (0.8 to 0.2)
+    if (b.star != null || b.mote) {   // a coin's spark or mote: a plus, its arms shrinking its last third, its trail's dots dithered out (0.8 to 0.2)
       const P = PICK_A(), gx = Math.round(b.x / P), gy = Math.round(b.y / P), k = (b.life - b.t) / b.life;   // (on the recipe's art-pixel grid in ours)
       if (b.mote && k * (0.6 + 0.4 * Math.sin(b.t * 18)) <= 0.25) continue;
       if (b.tr) for (let j = 2; j < b.tr.length; j += 2) { const tx = Math.round(b.tr[j] / P), ty = Math.round(b.tr[j + 1] / P); if (1 - j / 10 > bayer4(tx, ty)) box(tx * P, ty * P, tx * P + P, ty * P + P, j < 4 ? lighten(INK.coin, 0.35) : INK.coin, 1, 0, 10, 0); }

@@ -235,6 +235,27 @@
   #labels .tag.dim { color: var(--gray); }
   #floorHint { position: absolute; left: 0; top: 0; display: none; --p: 3; color: var(--ink); padding: 8px 12px; background: var(--gray); clip-path: var(--notch); }   /* written on the first floor, on a plain plate over its stripes */
   #floorHint.on { display: block; }
+  #tutHint { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; --p: 3; color: var(--ink); padding: 8px 12px; background: var(--gray); clip-path: var(--notch); opacity: 0; transition: opacity 0.25s; pointer-events: none; }   /* the first level's lesson by the hero (TUT in game.js): its picture over its words, in after a stall, out once it is done */
+  #tutHint.on { opacity: 1; }
+  .tutpic { display: flex; gap: 6px; }
+  .tutpic svg { display: block; width: calc(var(--w) * var(--p) * 1px); height: calc(var(--h) * var(--p) * 1px); }
+  .tutpic.touch.run svg { animation: tutDrag 1.6s steps(7, jump-none) infinite alternate; }   /* the finger slides a cell at a time, there and back */
+  .tutpic.touch.jump svg, .tutpic.keys.jump .cap { animation: tutTap 1.2s step-end infinite; }   /* a tap: down a cell, and up */
+  .tutpic.touch.double svg, .tutpic.keys.double .cap { animation: tutTap2 1.4s step-end infinite; }   /* two taps, quick */
+  .tutpic.keys.run .cap:first-child { animation: tutKeyL 1.2s step-end infinite; } .tutpic.keys.run .cap:last-child { animation: tutKeyR 1.2s step-end infinite; }   /* ← and → by turns */
+  @keyframes tutDrag { from { transform: translateX(calc(var(--p) * -3px)); } to { transform: translateX(calc(var(--p) * 3px)); } }
+  @keyframes tutTap { 0%, 100% { transform: none; } 60% { transform: translateY(calc(var(--p) * 1px)); } 80% { transform: none; } }
+  @keyframes tutTap2 { 0%, 100% { transform: none; } 40% { transform: translateY(calc(var(--p) * 1px)); } 52% { transform: none; } 64% { transform: translateY(calc(var(--p) * 1px)); } 76% { transform: none; } }
+  @keyframes tutKeyL { 0% { transform: translateY(calc(var(--p) * 1px)); } 50% { transform: none; } }
+  @keyframes tutKeyR { 0% { transform: none; } 50% { transform: translateY(calc(var(--p) * 1px)); } }
+  #pad.teach #jumpBtn { animation: tutKey 1s ease-in-out infinite; }   /* the first level: the jump key glowing, a ring round it, till the first jump (TUT) */
+  @keyframes tutKey { 0%, 100% { box-shadow: 0 0 0 0 rgba(243, 243, 243, 0); } 50% { box-shadow: 0 0 0 6px rgba(243, 243, 243, 0.45); } }
+  @media (prefers-reduced-motion: reduce) { .tutpic svg, .tutpic .cap, #pad.teach #jumpBtn { animation: none !important; } }
+  #boot { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #0e0d13; transition: opacity 0.25s, visibility 0s; }   /* while the game's files come (owner, З27 «А»): its logo and a bar, gone once it starts (game.js start) */
+  #boot.gone { opacity: 0; visibility: hidden; transition: opacity 0.25s, visibility 0s 0.25s; }
+  #boot img { display: block; width: 196px; height: 31px; }   /* the menu's logo, a CSS px a cell */
+  #boot .bar { width: 196px; height: 6px; box-sizing: border-box; border: 1px solid var(--gray); padding: 1px; }
+  #boot .bar i { display: block; width: 0; height: 100%; background: var(--gray); }
   #fade { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
   #fade.go { animation: fade 0.35s steps(4); }
 
@@ -551,6 +572,13 @@
 </style>
 </head>
 <body>
+<div id="boot" aria-hidden="true"><img src="assets/ui/upwell-logo.svg" alt=""><div class="bar"><i></i></div></div>
+<script>   // the boot bar: each of the game's files as it comes, by its weight (KB gzipped, 2026-10-29), crawling a whole pixel at a time towards the one coming
+  var bootGot = 0, bootShow = 0, bootK = 0, bootW = [23, 532, 16, 149, 39, 4], bootAll = 763;
+  function bootBar(w) { if (w > bootShow) { bootShow = w; var b = document.querySelector('#boot .bar i'); if (b) b.style.width = w + 'px'; } }
+  var bootT = setInterval(function () { if (bootShow < Math.round(192 * Math.min(1, (bootGot + 0.9 * (bootW[bootK] || 0)) / bootAll))) bootBar(bootShow + 1); }, 60);
+  function bootStep() { bootGot += bootW[bootK++] || 0; bootBar(Math.round(192 * Math.min(1, bootGot / bootAll))); if (bootK >= bootW.length) clearInterval(bootT); }
+</script>
 <canvas id="sides" aria-hidden="true"></canvas>
 <canvas id="gl" class="wait" aria-label="Climbing squishy"></canvas>
 <div id="rotate" role="alert"></div>   <!-- a phone held sideways: the game is for upright (see layout) -->
@@ -567,6 +595,7 @@
   <div id="combo" aria-hidden="true"></div>
   <div id="labels"></div>
   <div id="floorHint" aria-hidden="true"></div>
+  <div id="tutHint" aria-hidden="true"></div>   <!-- the first level's lessons (TUT in game.js) -->
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="fade"></div>
   <div id="pad">
@@ -583,12 +612,11 @@
   <div id="story" class="panel"></div>
   <div id="album" class="panel"></div>
 </div>
-<script src="src/gum.js"></script>
-<script src="src/bossframes.js"></script>
-<script src="src/world.js"></script>
-<script src="src/cine.js"></script>
-<script src="src/game.js"></script>
-<script src="src/feed.js"></script>   <!-- Feed Moti: a tap on Moti at home, a match-3 to feed him (see feed.js; ?feed while it is built) -->
-<script src="src/fx.js"></script>   <!-- screen filters: the settings' CRT, and the ?fx= tries (see fx.js) -->
+<script src="src/gum.js" onload="bootStep()"></script>   <!-- (src/bossframes.js: fetched by game.js after the menu, owner, З27 «А») -->
+<script src="src/world.js" onload="bootStep()"></script>
+<script src="src/cine.js" onload="bootStep()"></script>
+<script src="src/game.js" onload="bootStep()"></script>
+<script src="src/feed.js" onload="bootStep()"></script>   <!-- Feed Moti: a tap on Moti at home, a match-3 to feed him (see feed.js; ?feed while it is built) -->
+<script src="src/fx.js" onload="bootStep()"></script>   <!-- screen filters: the settings' CRT, and the ?fx= tries (see fx.js) -->
 </body>
 </html>

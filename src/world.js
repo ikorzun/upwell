@@ -1878,15 +1878,16 @@ const CAMPAIGN = [
 // Mine's went to the Mine): the Heat, a drop like the hero, the Light (since fedc427 Mochi's story: it fell from the Moon's light, kindness its first
 // step back). The worm stays in the random run (user).
 { world: WORLDS[2], runes: 'VhS', lore: { en: 'Mochi fell from the Moon\'s light.\nKindness was the first step back.', es: 'Mochi cayó de la luz de la Luna.\nLa bondad fue el primer paso de vuelta.', pt: 'Mochi caiu da luz da Lua.\nA bondade foi o primeiro passo de volta.', ja: 'モチは つきの ひかりから おちた。\nやさしさが かえりみちの いっぽめ。' }, levels: [
-  { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutShop', 'tutEnemy', 'tutHelmet', 'tutMix', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
-    intro: [], enemies: ['crawler'], foes: 0, candy: [], cage: true, safe: true, seed: 4102,   // the tutorial (owner): CHUNKS.tut*, in their order
+  { role: 'teach', len: 30, fire: 0.25, calm: 40, maxD: 1, script: ['tutJump', 'tutDouble', 'tutHop', 'tutHop2', 'planks', 'rest'], chunks: { stairs: 2, planks: 2, shelves: 2, pillars: 2 },
+    intro: [], enemies: ['crawler'], foes: 0, candy: [], cage: false, safe: true, seed: 4102,   // the tutorial (owner): CHUNKS.tut*, in their order; since 2026-10-29 a run,
+    // jumps and coins only, as long (owner, З26 «А»: one new idea at a time), the shop's, the enemy's and the helmet's lessons on in 1-2 and 1-3
     news: { en: 'how to climb', es: 'cómo trepar', pt: 'como escalar', ja: 'のぼりかた' } },
   { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: { mosswall: 3, chimney: 2, planks: 1, shelves: 1, stairs: 1, crumble: 1, bridge: 1, lift: 1 },   // (1-1's surfaces first, it being the tutorial now)
-    motif: ['rope', 'rope2', 'ropewall'], steps: true, sparse: true, intro: ['crumble'], enemies: ['crawler', 'shell'], foes: 0.7, pair: 0.3, candy: ['bubble', 'bubble'], cage: true, seed: 4105,   // the Village's second by the practice of 1-7 (owner, 2026-10-22,
+    motif: ['rope', 'rope2', 'ropewall'], steps: true, sparse: true, intro: ['crumble', 'tutEnemy'], enemies: ['crawler', 'shell'], foes: 0.7, pair: 0.3, candy: ['bubble', 'bubble'], cage: true, seed: 4105,   // the Village's second by the practice of 1-7 (owner, 2026-10-22,
     // round 2: «Начинай все по списку»): its one idea bridges of boards falling behind the hero, met (a crumbling block), applied (a bridge across), varied (bridges by
     // turns up the shaft), with the walls (the towers' channel); enemies more and in pairs, decor less; the walls in the pool (moss, chimneys)
     news: { en: 'falling bridges', es: 'puentes que caen', pt: 'pontes que caem', ja: 'おちる はし' } },   // (short: one line at 320 px; «keep moving» is the crumble hint's)
-  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: { mosswall: 2, chimney: 1, stairs: 2, shelves: 1, planks: 1, rubberwall: 1, crumble: 1 }, intro: [],   // by the
+  { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: { mosswall: 2, chimney: 1, stairs: 2, shelves: 1, planks: 1, rubberwall: 1, crumble: 1 }, intro: ['tutHelmet'],   // by the
     motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler'], foes: 0.4, pair: 0.15, candy: ['bubble'], seed: 4106,   // practice
     // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow with
     // the red ring midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers (the tumblers gone to Tokyo: Р1 «А»)
@@ -3662,6 +3663,35 @@ const CHUNKS = {
     '....====....',
     '............',
     '............'] },
+  tutHop: { d: 1, kind: 'tut', rows: [   // the jumps practised: planks by turns a single jump apart, coins on the way between (owner, З26 «А»)
+    '............',
+    '........o...',
+    '.......====.',
+    '....o.......',
+    '............',
+    '..====......',
+    '......o.....',
+    '.......o....',
+    '.......====.',
+    '...o........',
+    '............',
+    '..====......',
+    '............'] },
+  tutHop2: { d: 1, kind: 'tut', rows: [   // the air jump again, with no words: a wide plank, a line of coins up, two big ones on the next
+    '............',
+    '....O..O....',
+    '...======...',
+    '............',
+    '......o.....',
+    '............',
+    '......o.....',
+    '............',
+    '......o.....',
+    '............',
+    '............',
+    '..========..',
+    '............',
+    '............'] },
   tutShop: { d: 1, kind: 'tut', rows: [   // the shop's door on the way up, coins enough for its cheapest thing
     '............',
     '............',
@@ -4085,10 +4115,11 @@ class Level {
     if (c.kind === 'gate') for (const r of this.rects.slice(lens[0])) if (r.crack) r.key = true;   // a gate's keystone
     if (c.kit) for (const r of this.rects.slice(lens[0])) r.kitWant = c.kit;   // the thing it asks for on its wall's ledge (kitThing)
     if (this.fizzAt.length && this.top - (lift + c.rows.length) * this.tile < this.fizzAt[0] && c !== CHUNKS.pocket) {   // a candy due: over a steady ledge of this chunk
-      const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile);
-      if (ok.length) { const r = ok[((this.fizzKind[this.fizz.length] === 'astro' ? this.astroRng : this.rng)() * ok.length) | 0], x = (r.x0 + r.x1) / 2, hw = 0.75 * this.R + BONUS_GAP.gap * PIX.base;
+      const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile), n = this.fizz.filter((f) => !f.again).length;   // (n: the planned ones
+      // laid so far, a helmet's not among them: 1-3's helmet lesson, owner, З26 «А», read one past the planned kinds)
+      if (ok.length) { const r = ok[((this.fizzKind[n] === 'astro' ? this.astroRng : this.rng)() * ok.length) | 0], x = (r.x0 + r.x1) / 2, hw = 0.75 * this.R + BONUS_GAP.gap * PIX.base;
         let top = r.y0; for (const q of this.rects.slice(lens[0])) if (q !== r && !q.gone && q.x0 < x + hw && q.x1 > x - hw && q.y0 < top && q.y1 >= r.y0 - 0.5 * this.tile) top = q.y0;   // a spring or a block on the ledge under it: over that (BONUS_GAP; QA: 4-2's rainbow sat on a spring)
-        this.fizz.push({ x, y: top - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[this.fizz.length] }); this.fizzAt.shift(); }
+        this.fizz.push({ x, y: top - 1.3 * this.R, r: 0.5 * this.R, taken: false, kind: this.fizzKind[n] }); this.fizzAt.shift(); }
     }
     const h = (lift + c.rows.length) * this.tile;
     if (c !== CHUNKS.pocket) this.addFolk(lens[0], this.top - h);
@@ -5257,10 +5288,11 @@ const bossEyes = (rows) => {   // its rows, its small whites 'W'
   return g.map((r) => r.join(''));
 };
 for (const id of BOSS_LOOK) if (FOE_SPRITES[id]) FOE_SPRITES[id] = bossEyes(FOE_SPRITES[id]);
+const bossFrames = (id) => (typeof BOSS_FRAMES !== 'undefined' ? BOSS_FRAMES[id] : undefined);   // (src/bossframes.js is fetched after the menu: owner, З27 «А»)
 // Its other poses (BOSS_FRAMES, src/bossframes.js) cleaned as its frame 1 is (pxClean, then its eyes), each the first time it is asked for (its fight's start asks
 // for them all, a frame at a time: LOOK_FACE)
 const BOSS_POSE = new Map(), bossFrame = (id, n) => {   // frame n's rows (frame 1: its drawing in FOE_SPRITES), or null where it has none
-  const F = BOSS_FRAMES[id]; if (n === 1 || !F || !F.rows[n - 2]) return n === 1 ? FOE_SPRITES[id] : null;
+  const F = bossFrames(id); if (n === 1 || !F || !F.rows[n - 2]) return n === 1 ? FOE_SPRITES[id] : null;
   const key = id + '#' + n; let r = BOSS_POSE.get(key);
   if (!r) { r = bossEyes(GUIDE ? pxClean(F.rows[n - 2]) : F.rows[n - 2]); BOSS_POSE.set(key, r); }
   return r;
@@ -5279,7 +5311,7 @@ const bossRows = (key, rows, g) => {   // rows made g of their size (frame 1's u
   if (GUIDE) r = pxClean(r); BOSS_SHRINK.set(ck, r); return r;
 };
 for (const id in FOE_SPRITES) if (!K9_SPR[id] && !UME_SPR[id]) {
-  const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0), F = BOSS_FRAMES[id];
+  const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0), F = bossFrames(id);
   let warm = 2;   // its next pose to clean and lay in volume, one a frame from its fight's start: none costs a hitch when its move comes
   LOOK_FACE[id] = BOSS_LOOK.has(id) && fit && fit[3]
     ? (d) => { const b = d.b, g = Math.max(0.05, b.growth), q = fit[4] ? bossFit(id, b) : 1, s = g * q, one = bossRows(id, FOE_SPRITES[id], s), P = b.pose, up = g > 0.97;   // (in volume: ?novol flat)
@@ -5319,8 +5351,8 @@ const bossPose = (bs, R, mid) => {   // mid: the arena's middle
   const going = () => { const v = Math.abs(b.rigVx) / R, on = P.go ? v > POSE.go[1] : v > POSE.go[0]; if (on && !P.go) P.t0 = bs.t; P.go = on; return on; };   // (a margin both ways: no flicker on the line)
   const stride = () => (Math.floor((bs.t - P.t0) / POSE.step) % 2 ? 1 : 2);   // its two poses by turns, from its first step as it sets off
   let n = 1, m = false, turn = false, ink = null, idle = s === 'hover' || s === 'rise';   // idle: at rest, its pose its sway's, its steps', its wings' (not a move's)
-  const Q = BOSS_FRAMES[bs.look] && BOSS_FRAMES[bs.look].seq;   // its in-betweens: each pose's frames in turn (24 frames, Bake-danuki's for now)
-  if (!BOSS_FRAMES[bs.look]) n = 1;
+  const Q = bossFrames(bs.look) && bossFrames(bs.look).seq;   // its in-betweens: each pose's frames in turn (24 frames, Bake-danuki's for now)
+  if (!bossFrames(bs.look)) n = 1;
   else if (df.hang) {   // Bake-danuki, the Tsuchigumo, Nuppeppo (Boss.hang)
     if (s === 'dazed') n = 7;
     else if (hit) { n = 8; idle = false; }
@@ -8120,7 +8152,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (front) return;   // (the Tsuchigumo tangled in its own thread: its dazed frame draws the thread)
     b.lookDir = d;   // (its drawing on it turns too: LOOK_FACE)
     bossPose(bs, R, (lv.l + lv.r) / 2);   // and its pose
-    const A = BOSS_FRAMES[bs.look], ps = bs.pose, at = A && ps.f > 1 && A.at[ps.f - 1], W1 = FOE_SPRITES[bs.look][0].length;   // what it hangs by as its pose holds it (frame 1's place: as it was)
+    const A = bossFrames(bs.look), ps = bs.pose, at = A && ps.f > 1 && A.at[ps.f - 1], W1 = FOE_SPRITES[bs.look][0].length;   // what it hangs by as its pose holds it (frame 1's place: as it was)
     const hx = at ? ((ps.fm ? W1 - at[2] : at[2]) - A.at[0][2]) * PIX.base : 0, hy = at ? (at[3] - A.at[0][3]) * PIX.base : 0;
     if (k === 'tram') { const wy = b.minY - 1.15 * R; box(lv.l, wy, lv.r, wy + P, gr, 1, 0, 10, 0); }   // the overhead wire its pantograph (in its drawing) runs on
     else if (k === 'koschei' && bs.hp === 1) { const ny = b.minY - 1.0 * R + Math.max(0, at ? at[1] : 0) * PIX.base + Math.sin(T * 3) * 0.08 * R, nx = Math.round(x / P) * P; F(nx + P / 2, ny, 0.55 * R, 0, 0, 0.8 * R, gr, 0.18, 1); box(nx, ny - 0.6 * R, nx + P, ny + 0.45 * R, gr, 1, 0, 10, 0); box(nx - P, ny - 0.76 * R, nx + 2 * P, ny - 0.5 * R, gr, 1, 0, 10, 0); box(nx, ny - 0.7 * R, nx + P, ny - 0.56 * R, INK.dark, 1, 0, 10, 0); if (Math.floor(T * 2) % 2) box(nx, ny + 0.3 * R, nx + P, ny + 0.38 * R, PAL.white, 1, 0, 10, 0); }   // his last heart: the needle his death is in, over his crown (down with him as his pose sinks: a heap, a low sweep; not up with his sword)

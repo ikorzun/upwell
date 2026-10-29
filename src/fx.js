@@ -10,8 +10,9 @@
   const retro = () => typeof save !== 'undefined' && save.crt !== false, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const KICK = {   // a moment: its split (a game pixel at the screen's sides at 1, a third of it in the middle), its tear (the most a band is pushed aside, game px),
     // its jolt (px down), its flash (ink and strength), its sweep (a bright band down the screen), how much darker the lines; how long it fades over (s)
-    hurt: { chroma: 4.68, tear: 10.8, jolt: 5.4, flash: [0.96, 0.24, 0.2, 0.36], lines: 0.5, dur: 2.45 },   // (its split, tear and jolt half as much again and 2 s longer: owner, 2026-10-28,
-    // «сильнее искажение экрана и дольше на 2 секунды, когда игрок получает урон»; before it, a fifth more: «усиль на 20% эффект искажения экрана при уроне»)
+    hurt: { chroma: 4.68, tear: 10.8, jolt: 5.4, flash: [0.96, 0.24, 0.2, 0.36], lines: 0.5, dur: 1.95 },   // (its split, tear and jolt half as much again and 2 s longer: owner, 2026-10-28,
+    // «сильнее искажение экрана и дольше на 2 секунды, когда игрок получает урон»; before it, a fifth more: «усиль на 20% эффект искажения экрана при уроне»;
+    // then half a second shorter, 2026-10-29: «уменьши длительность от эффекта повреждения моти на 0.5 секунды»)
     kill: { chroma: 2, sweep: 1, flash: [1, 1, 1, 0.18], lines: 0.25, dur: 0.34 },
     star: { chroma: 2.2, tear: 3, jolt: 2, flash: [1, 0.86, 0.3, 0.22], lines: 0.25, dur: 0.6 }, starLast: { chroma: 3.4, tear: 5, jolt: 3.4, flash: [1, 0.86, 0.3, 0.3], lines: 0.35, dur: 0.9 },   // (a Win
     // screen's star landing, ui.starHit: a hurt's moment in gold, the last star's bigger; set off by hand, fxKick)
@@ -19,7 +20,7 @@
     free: { chroma: 0.5, dur: 0.22 }, task: { chroma: 0.5, dur: 0.22 }, take: { chroma: 0.6, dur: 0.25 }, buy: { chroma: 0.4, dur: 0.18 },
   };
   const FLASH_GAP = 0.34;   // s: a flash at most three times a second (the owner's rule)
-  const kicks = [{ p: null }, { p: null }], last = { flash: -9 };   // a hurt's moment and the others', both under way at once (a kill in a hurt's 2.45 s cuts it off no more)
+  const kicks = [{ p: null }, { p: null }], last = { flash: -9 };   // a hurt's moment and the others', both under way at once (a kill in a hurt's 1.95 s cuts it off no more)
   const FS = GLSL + `in vec2 vUv; out vec4 o;
 uniform sampler2D uScene; uniform vec2 uLow; uniform float uScale, uChroma, uTear, uSeed, uJolt, uSweep, uSweepK, uLines; uniform vec4 uFlash;
 vec3 at(ivec2 p) { return texelFetch(uScene, clamp(p, ivec2(0), ivec2(uLow) - 1), 0).rgb; }

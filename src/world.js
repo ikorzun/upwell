@@ -93,7 +93,8 @@ const EXIT_TRAIL = { n: 4, from: 1.7, step: 1.25 };   // worlds 1-3's coins up i
 // costs a heart and puts it back on the last ledge it stood on.
 const CAM = { anchor: 0.62, follow: 7, floorShow: 90, top: 70, deathPad: 40, keep: 3 };
 const R_PER_M = 2.2;   // a metre of climb is 2.2 hero radii (64 px when the well was 12 tiles), so a level is as many jumps on any screen
-const HEALTH = { start: 4, invuln: 1.0, knock: 520, hitstop: 0.08, blink: 0.09, hold: 1.5 };   // (hold: the most a blink is drawn out while the hero is still inside an enemy, Game.step)
+const HEALTH = { start: 4, invuln: 1.0, knock: 416, hitstop: 0.08, blink: 0.09, hold: 1.5 };   // (hold: the most a blink is drawn out while the hero is still inside an enemy, Game.step;
+// knock a fifth less than 520: owner, 2026-10-29, «уменьши отскок моти при повреждении на 20%»)
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
 const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the hearts back (user)

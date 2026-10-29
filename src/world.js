@@ -7273,6 +7273,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // colour only for lights (eyes, see skEyes; a candle). Roots half dark (behind the ledge's face), a cobweb that is only decor dim (the white one you hold is
   // this world's moss). False for what keeps the common look.
   const skazkaRect = (r) => {
+    if (lv.kind === 'treasure') return false;   // (a Forest cave's ledges plain, in the Forest's grey: its shafts' roots, hollows and mortars over its backdrop and props went past the owner's ~2500; its own look after З22)
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);

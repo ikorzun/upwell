@@ -30,7 +30,7 @@ const FEED = {
   // совмещения и финала»): its bits (a line of 4+ more), as the game's sparkFx in its own colours: CSS px/s, s, px/s² down, their speed's part lost a second, the
   // part in white; a white ring round the line for ring s (a line of 4+ a wider one)
   confetti: { n: 24, star: 24, life: [1.4, 2.2], g: 260 },   // the result's: bits, and more a star, in the four foods' colours, falling slow and fluttering
-  say: { every: [7, 11], first: 2.5, hold: 2600, yum: 5000 },   // his words in a bubble (owner, 2026-10-28: «если игрок не кормил моти, то он попрыгивает и
+  say: { hold: 2600, yum: 5000 },   // his words in a bubble (owner, 2026-10-28: «если игрок не кормил моти, то он попрыгивает и
   // периодически издает короткие реплики… если покормил… моти издает реплику что сыт»): hungry at home every so many s (the first so long after home shows),
   // held so many ms; while fed a «Yum!» at most every so many ms
   joy: { hops: 3, gap: 450, from: 600, every: 2400, hearts: 4 },   // full, his joy (owner: «финальный экран… больше анимации и радости»): so many hops in a
@@ -329,20 +329,16 @@ else {
       const all = t(key).split('|'), was = (this.lastLine = this.lastLine || {})[key]; let i = (Math.random() * all.length) | 0;
       if (all.length > 1 && i === was) i = (i + 1) % all.length; this.lastLine[key] = i; return all[i];
     },
-    full() {   // tapped while full (owner, 2026-10-28: «повторное нажатие не открывает метч, а моти издает реплику что сыт»): a sated wobble and his word
-      const b = game.hero; if (b) { b.wake(); b.kickSquash(0, 1, 0.5); }
-      sound.play('bubble', 0.5, 0.75); haptics.buzz(8); say(this.line('motiFull')); track('feed_full_tap', { date: dayKey() });
-    },
-    open() {   // a tap on Moti: the board under him, a run under way taken up again
+    open(source = 'world') {   // the board under him, a run under way taken up again: from a world's end, its «Feed Mochi» (ui.worldDone; owner, 2026-10-29: not from home,
+      // between worlds and only if the player likes; so no day's limit any more, a world's end each time)
       if (this.active || game.state !== 'menu') return;
-      if (this.fedToday() && !(this.st && !this.st.done)) { this.full(); return; }   // fed today: no board till tomorrow
       unsay();
       if (!this.st || this.st.done) this.newRun();
       this.active = true; this.sel = -1; this.opened = performance.now(); this.idle = performance.now();
       const b = game.hero; if (b) { b.kickSquash(0, 1, 0.7); b.face.wide = 1; }
       sound.play('bubble', 0.7, 1.2); haptics.buzz(10);
       ui.menu();
-      track('feed_open', { source: 'home', date: dayKey() });
+      track('feed_open', { source, date: dayKey() });
     },
     close(toGame) {   // back home as it was; a run under way kept for the next tap (this visit only); in the middle of a move, once it is resolved
       if (!this.active) return;
@@ -524,7 +520,7 @@ else {
       const st = this.st; st.done = true;
       if (st.told) return; st.told = true;
       const stars = FL.stars(st.full), b = game.hero, rec = this.rec();
-      st.pay = rec.day !== today ? FEED.pay : 0; st.best = st.score > (rec.best || 0);   // the day's first run fed to the end, whatever its stars: his coins (once a UTC day)
+      st.pay = FEED.pay;   // (each world's end's run fed to its end: his coins; was the day's first) st.best = st.score > (rec.best || 0);   // the day's first run fed to the end, whatever its stars: his coins (once a UTC day)
       if (st.pay) { rec.day = today; save.bank += st.pay; save.camp.wallet = (save.camp.wallet || 0) + st.pay; if (save.cur) save.cur.coins = (save.cur.coins || 0) + st.pay; }   // (a level under way
       // takes them up too: Game.resume starts it from its own count)
       if (st.best) rec.best = st.score;
@@ -578,10 +574,7 @@ else {
       const b = game.hero; if (!b || !game.lv || game.lv.kind !== 'menu') { if (sayEl) unsay(); return; }
       const home = game.state === 'menu' && ui.open === 'menu' && !this.active && !game.held;   // (home: his words; hungry, now and then)
       if (sayEl) { if (now > sayEnd || !(home || this.active)) unsay(); else sayPlace(); }
-      if (home && !this.fedToday() && !menuTouch.ptrs.size) {
-        if (!this.chatAt) this.chatAt = now + 1000 * FEED.say.first;
-        else if (now > this.chatAt) { this.chatAt = now + 1000 * (FEED.say.every[0] + Math.random() * (FEED.say.every[1] - FEED.say.every[0])); say(this.line('motiHungry')); }
-      } else if (!home) this.chatAt = 0;
+      // (no hungry words at home any more: he is fed between worlds, owner, 2026-10-29)
       if (this.active && this.fin && !this.box && this.joyAt && now > this.joyAt) { this.joyAt = now + FEED.joy.every; joyHop(0.35); }   // full: a hop now and then
       const dt = Math.min(0.1, Math.max(0, (now - (this.lastF || now)) / 1000)); this.lastF = now;
       const aim = this.active && this.st ? Math.min(1, this.st.full / FEED.stars[2]) : 0;

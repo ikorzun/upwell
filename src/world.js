@@ -8267,7 +8267,7 @@ Renderer.prototype.draw = function (g, alpha) {
       // (owner: «внимательно повторить листы жпт»): its sheet's own pixels (HAZ_SPR), a sheet pixel two game pixels (the sheet drew the hero half size), its
       // band laid wall to wall, every other copy mirrored so no seam shows, drifting with the wind, the flames over its front flickering a pixel; its ground on
       // down to the keys; its burst rising out of the front and falling back as the fire throws a jet
-      const S = HAZ_SPR[th.hazard], P = PIX.size, s = 2 * PIX.base, sn = (x) => Math.round(x / P) * P;
+      const S = HAZ_SPR[th.hazard], P = PIX.size, u2 = 2 / (S.k || 2), s = (S.k || 2) * PIX.base, sn = (x) => Math.round(x / P) * P;   // (S.k: game pixels a sheet pixel, 2 as cut at first, 1 at the game's own (Д346); u2: a sheet pixel's old count in this one's)
       if (!S.body) { const n = {}; for (const r of S.band.slice(-8)) for (const ch of r) if (ch !== '.' && ch !== 'k') n[ch] = (n[ch] || 0) + 1; S.body = Object.keys(n).sort((a, b) => n[b] - n[a])[0] || 'k'; }   // its ground's own ink
       // How it moves is how its thing moves (owner, 2026-10-24: «вся анимация подчиняется объекту, а базово правилам дисней и пиксар»; «опасность некрасиво сверху
       // обрезается, анимация рваная»). Its sheet's band is laid along the shaft without mirroring (that made a Rorschach of it), each copy over the next by
@@ -8275,8 +8275,8 @@ Renderer.prototype.draw = function (g, alpha) {
       // pixels, its gap filled with its body's ink): fire in tongues that rise and sink each at its own beat, water in waves travelling along, snow billowing
       // forward; higher as it speeds up (К2: lv.fire.rush). So its top is never a straight line. Its bursts: the front swells where one is coming
       // (anticipation), it is thrown up out of it in an arc (slow at the top: gravity), falls back in, and the front dips where it lands
-      const band = S.band, n = band[0].length, D = 6, st = n - D, y0 = sn(fy + 0.3 * R - S.front * s), yf = y0 + S.front * s, rush = lv.fire.rush || 0;
-      const mv = HAZ_MOVE[th.hazard] || HAZ_MOVE.noyaki, Amp = mv.amp + mv.rush * rush, TAUv = 2 * Math.PI, T = Math.floor(lv.t * mv.fps) / mv.fps;   // (its front in
+      const band = S.band, n = band[0].length, D = Math.round(6 * u2), st = n - D, y0 = sn(fy + 0.3 * R - S.front * s), yf = y0 + S.front * s, rush = lv.fire.rush || 0;
+      const mv = HAZ_MOVE[th.hazard] || HAZ_MOVE.noyaki, Amp = (mv.amp + mv.rush * rush) * u2, TAUv = 2 * Math.PI, T = Math.floor(lv.t * mv.fps) / mv.fps;   // (its front in
       // discrete states, the guide's time rule: water 6 a second, snow 8, fire 12; its drift and its bursts at the frame's)
       const drift = lv.t * 0.25 * R, start = sn(lv.l - D * s - (((drift % (st * s)) + st * s) % (st * s))), cols = Math.ceil((lv.r - start) / s) + 1;
       const jets = [];   // (its bursts now: where, and how far into their throw)
@@ -8295,13 +8295,13 @@ Renderer.prototype.draw = function (g, alpha) {
         else h = (0.5 + 0.5 * Math.sin(T * mv.speed + u * 0.37 + 2 * Math.sin(u * 0.071))) * (0.55 + 0.45 * Math.sin(u / mv.len + T * 0.8));   // (a tongue's own beat)
         let lf = Amp * h;
         for (const j of jets) {   // the swell before a burst, the dip where it lands
-          const dx = (X - j.xc) / (6 * s), gs = Math.exp(-dx * dx);
+          const dx = (X - j.xc) / (6 * u2 * s), gs = Math.exp(-dx * dx);
           if (j.tt < 0.25) lf += 0.6 * Amp * gs * (j.tt / 0.25) * (2 - j.tt / 0.25);   // (slow out)
           else if (j.tt > 1.1) lf -= Amp * gs * Math.sin(((j.tt - 1.1) / 0.2) * Math.PI);
         }
         L[g] = Math.max(0, Math.round(lf));
       }
-      const KT = 12;   // (the body's first KT rows lifted less and less under it: no straight line where the front meets the body)
+      const KT = Math.round(12 * u2);   // (the body's first KT rows lifted less and less under it: no straight line where the front meets the body)
       const put = (ch, g0, g1, y, lift) => {   // a run of one ink over global sheet columns g0…g1 at row y (lift: 1 its front's, each column lifted its own; less, a share)
         if (!lift) { const a = Math.max(start + g0 * s, lv.l), b = Math.min(start + g1 * s, lv.r); if (b > a) box(a, y, b, y + s, PAL[ICON_INK[ch]], 1, 0, 10, 0); return; }
         for (let g = g0; g < g1;) { const l = Math.round(L[g] * lift); let e = g + 1; while (e < g1 && Math.round(L[e] * lift) === l) e++;
@@ -8319,7 +8319,7 @@ Renderer.prototype.draw = function (g, alpha) {
           i = e; }
       };
       for (const j of jets) if (j.tt >= 0.25 && j.tt <= 1.15) {   // a burst thrown up in an arc out of the front (behind it: the front and its black come over it)
-        const b = S.burst, p = (j.tt - 0.25) / 0.9, hgt = (b.length + 6) * s * 4 * p * (1 - p), x = sn(j.xc - (b[0].length * s) / 2), yb = y0 + S.foot * s + b.length * s;
+        const b = S.burst, p = (j.tt - 0.25) / 0.9, hgt = (b.length + 6 * u2) * s * 4 * p * (1 - p), x = sn(j.xc - (b[0].length * s) / 2), yb = y0 + S.foot * s + b.length * s;
         sprAt(b, x, sn(yb - hgt) - b.length * s, false, 1, s);
       }
       box(lv.l, yf, lv.r, fy + H + 200, PAL.black, 1, 0, 10, 0);   // black under its front
@@ -8331,9 +8331,9 @@ Renderer.prototype.draw = function (g, alpha) {
       // under its front one shape, its front a shape a run of one lift, each of the KT rows under it a shape a run of its own share of the lift
       const f = Math.max(1, Math.round(s / PIX.size)), HP = S.pics || (S.pics = {});
       if (!HP[f]) {
-        const NC = (Math.ceil((cols + st) / st) + 2) * st + D, G2 = (S.ground || (S.ground = [[], []]));
+        const NG = Math.round(2 * band.length * u2), NC = (Math.ceil((cols + st) / st) + 2) * st + D, G2 = (S.ground || (S.ground = [[], []]));
         const gRow = (kp, j) => { const G = G2[kp] || (G2[kp] = []); if (!G[j]) {
-          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), kp + 50) * q.length), keep = 1 - j / (2 * band.length);
+          if (!G[j]) { const q = band[band.length - 8 + ((j * 5) % 8)], o = Math.floor(steady(Math.floor(j / 8), kp + 50) * q.length), keep = 1 - j / NG;
             G[j] = [...q.slice(o) + q.slice(0, o)].map((ch, i) => (ch === S.body && steady(Math.floor((i + 3 * (Math.floor(j / 2) % 2)) / 4), Math.floor(j / 2) + 60) < keep ? ch : 'k')).join(''); }   // (its body's
           } return G[j]; };
         const at = (rowOf, j, keepK) => { const out = []; for (let g = 0; g < NC; g++) { const k = Math.floor(g / st), q = g - k * st; let ch;
@@ -8342,7 +8342,7 @@ Renderer.prototype.draw = function (g, alpha) {
         const turn = (cols2) => { const pic = []; for (let g = 0; g < NC; g++) { const r = cols2.map((c) => c[g].repeat(f)).join(''); for (let e = 0; e < f; e++) pic.push(r); } return pic; };   // (the strip turned: its column g picture rows g·f…)
         const fr = [], kt = [], st2 = [];
         band.forEach((r, j) => { const c = at(() => r, j, j < S.front); (j < S.front ? fr : j < S.front + KT ? kt : st2).push(c); });
-        for (let j = 0; j < 2 * band.length; j++) st2.push(at((k) => gRow(k % 2, j), band.length + j, false));
+        for (let j = 0; j < NG; j++) st2.push(at((k) => gRow(k % 2, j), band.length + j, false));
         HP[f] = { NC, front: turn(fr), kt: kt.map((c) => turn([c])), rest: turn(st2), nRest: st2.length };
       }
       const HPf = HP[f], gl0 = Math.max(0, Math.floor((lv.l - start) / s)), gr0 = Math.min(HPf.NC, Math.ceil((lv.r - start) / s));
@@ -8360,11 +8360,11 @@ Renderer.prototype.draw = function (g, alpha) {
           if (f >= TG.frames.length) continue;   // (resting)
           // (`pad` [left, right]: how far its root keeps off each wall, sheet columns, its width by default; `gap`: a lick as wide as a wave's crest kept in its own
           // share, never over its neighbour's)
-          const pl = (TG.pad ? TG.pad[0] : tw) * s, gp = (TG.gap || 0) * s, sw = (W - pl - (TG.pad ? TG.pad[1] : tw) * s - (TG.n - 1) * gp) / TG.n, rr = steady(c, 73 + i);
+          const ts = (TG.k || 2) * PIX.base, pl = (TG.pad ? TG.pad[0] : tw) * ts, gp = (TG.gap || 0) * ts, sw = (W - pl - (TG.pad ? TG.pad[1] : tw) * ts - (TG.n - 1) * gp) / TG.n, rr = steady(c, 73 + i);
           const xc = lv.l + pl + i * (sw + gp) + rr * Math.max(0, sw), g = Math.max(0, Math.min(cols - 1, Math.round((xc - start) / s)));   // (its root: the next one's
           // at least `gap` on, the last one's `pad` off the right wall)
-          const x = start + (g - TG.base) * s, yb = y0 + (S.front - 1) * s - L[g] * s;
-          if (yb - th * s < bot && yb > top) sprAt(TG.frames[f], x, yb - (th - 1) * s, false, 1, s);
+          const x = sn(start + g * s - TG.base * ts), yb = y0 + (S.front - 1) * s - L[g] * s;   // (its tongues their own pixel, TG.k as S.k)
+          if (yb - th * ts < bot && yb > top) sprAt(TG.frames[f], x, yb - (th - 1) * ts, false, 1, ts);
         }
       }
     } else {

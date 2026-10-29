@@ -3690,8 +3690,10 @@ const ui = {
     // As big as the phone allows (owner, 2026-10-24: «Карточка истории или босса должна занимать на телефоне максимальное количество места»): edge to edge or
     // as tall as is left over its title and button, in whole pixels: a whole number of the screen's to each of the art's cells, unless that loses over 15% of it (the cards at twice their
     // pixels since 2026-10-27: a whole step is a third of a cell's size, and 30% shrank a 320-px 3x phone's card to 224 px)
-    const room = (title.getBoundingClientRect().top - p.getBoundingClientRect().top) / view.k - parseFloat(getComputedStyle(p).paddingTop) - parseFloat(getComputedStyle(card).marginBottom) - 12;
-    const [w0, h0] = STORY.moon_fall.cells, box = Math.min(view.w, room * w0 / h0), fit = box / w0, d = (window.devicePixelRatio || 1) * view.k, whole = Math.floor(fit * d) / d, W = w0 * (whole >= 0.85 * fit ? whole : fit);
+    // Its room from Next up (the card and its title in the middle since 2026-10-29), the tallest card's to fit it (a taller one than the moon's was 3 px off the top)
+    const [tb, nb, pb] = [title, next, p].map((e) => e.getBoundingClientRect()), gap = parseFloat(getComputedStyle(p).rowGap) || 12;
+    const room = (nb.top - pb.top - tb.height) / view.k - parseFloat(getComputedStyle(p).paddingTop) - parseFloat(getComputedStyle(card).marginBottom) - 2 * gap;
+    const [w0] = STORY.moon_fall.cells, tall = Math.max(...Object.values(STORY).filter((s) => s.cells).map((s) => s.cells[1] / s.cells[0])), box = Math.min(view.w, room / tall), fit = box / w0, d = (window.devicePixelRatio || 1) * view.k, whole = Math.floor(fit * d) / d, W = w0 * (whole >= 0.85 * fit ? whole : fit);
     card.style.width = W + 'px'; card.style.height = W * h / w + 'px';   // every card as wide as the first, the moon's (owner, 2026-10-25: «все карточки включая боссов должны быть
     // размером как первая карточка с луной»): its size worked out on the moon's cells, the rest scaled to it
     if (this.live) this.live.stop(); this.live = cardLive(c, card, tilt, clip, title, next);

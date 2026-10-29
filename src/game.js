@@ -2568,7 +2568,7 @@ class Game {
     this.hp = this.maxHp; this.coins = this.kept = save.camp.wallet; this.first = !(save.camp.stars[w * 30 + s * 3 + 1] > 0);   // its tier's first clear (an upgrade then: one a tier)
     padUsed = performance.now(); this.state = 'play'; this.stateT = 0; nextSeed = seed != null ? seed : rc.seed != null ? rc.seed : null;
     if (rc.bonus != null) { this.startBonus(BONUS[rc.bonus]); return; }
-    this.buildLevel(true); this.saveRun(false); this.tut = rc.script && w === 0 && s === 0 ? { done: {}, t: 0, x0: this.hero.cx, show: null } : null;   // (the tutorial's: TUT)
+    this.buildLevel(true); this.saveRun(false); this.tut = TUT_ON && rc.script && w === 0 && s === 0 ? { done: {}, t: 0, x0: this.hero.cx, show: null } : null;   // (the tutorial's: TUT)
     ui.hideAll(); this.story('moon_fall', () => this.story(s === (w === 0 ? 1 : 0) && 'arrive_' + CAMPAIGN[w].world.id, () => this.story(rc.boss && 'boss_' + rc.boss, () => { this.prog('started'); ui.banner(); })), storyLook); storyLook = false;   // the story's first card, once, before the first level played (a
     // save under way: before its next); a world's own coming-in card on its first level (arrive_; the Village's on its second, owner, З23 «Б»: one tap less before
     // the first one's lessons); and a boss's card before its first fight (owner, К11 «А»), then the level's start told (after its cards: the telemetry's
@@ -3282,6 +3282,9 @@ const howTo = () => (coarse ? (save.stick ? 'hintStick' : 'hintTouch') : 'hintKe
 // are done; a step's picture and words (at most eight) by the hero after `idle` s without it (the digest §3: help after a stall, not before), gone once it is
 // done; nothing dimmed, no input held, the jump key bright till the first jump. `run`: tiles across that make a run; `wake`: the fire's calm, at least, meanwhile
 const TUT = { idle: 3, run: 1.5, wake: 3 }, TUT_STEPS = ['run', 'jump', 'double'];
+// The lessons off for now, only with ?tut (owner, 2026-10-29: «не нравится внешний вид обучения… пока сделай выкладку версии без обучения»): 1-1 tells how
+// to run and jump on its floor again (floorHint) and its sign's words as before, the fire as the level's own; their new look is being reworked
+const TUT_ON = /[?&]tut\b/.test(location.search);
 const tutWords = (k) => (k === 'double' ? (coarse ? 'seen_tut1S' : 'seen_tut1K') : 'tut' + (k === 'run' ? 'Run' : 'Jump') + (coarse ? 'S' : 'K'));
 const TUT_HAND = ['...##....', '...##....', '...##....', '...####..', '...######', '.########', '#########', '#########', '#########', '.#######.', '..#####..', '..#####..'];   // a finger up
 const tutCap = (g) => {   // a key's cap round a glyph (FONT; none: the space bar), its lower lip under it

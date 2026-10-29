@@ -3772,9 +3772,9 @@ const ui = {
       if (!fh.firstChild) fh.append(px(t(howTo()).replace(' · ', '\n'), Math.floor((view.w - 48) / 3)));   // how to run and jump, once, on the floor (owner: not in a toast as well), a line each
       fh.style.transform = 'translate(' + Math.round(view.w / 2) + 'px,' + Math.round(fy + (view.h - view.keep - fy) / 2) + 'px) translate(-50%, -50%)';
     }
-    const tb = $('tutHint'), tq = g.state === 'play' && g.tut && lv.kind === 'well' ? g.tut.show : null;   // the first level's lesson by the hero (TUT): over him, under him
+    const tb = $('tutHint'), tq = tb && g.state === 'play' && g.tut && lv.kind === 'well' ? g.tut.show : null;   // (tb: none in a cached old index.html)   // the first level's lesson by the hero (TUT): over him, under him
     // when the HUD is in the way; it fades where it was once the step is done
-    if (tq !== this.tutQ) { this.tutQ = tq; if (tq) { tb.replaceChildren(tutPic(tq), px(t(tutWords(tq)).replace(': ', ':\n'), Math.floor((view.w - 48) / 3))); this.tutW = 0; } tb.classList.toggle('on', !!tq); }
+    if (tb && tq !== this.tutQ) { this.tutQ = tq; if (tq) { tb.replaceChildren(tutPic(tq), px(t(tutWords(tq)).replace(': ', ':\n'), Math.floor((view.w - 48) / 3))); this.tutW = 0; } tb.classList.toggle('on', !!tq); }
     if (tq) {
       if (!this.tutW) { this.tutW = tb.offsetWidth; this.tutH = tb.offsetHeight; }
       const H = g.hero, x = clamp(Math.round(H.cx), Math.ceil(lv.l + this.tutW / 2) + 4, Math.floor(lv.r - this.tutW / 2) - 4);   // (inside the shaft's walls)
@@ -4516,15 +4516,15 @@ function start() {
   if (started) return;
   if (window.innerWidth < 120 || window.innerHeight < 120) { window.addEventListener('resize', start, { once: true }); return; }   // a frame with no size yet (a portal's
   // iframe 0 high at load, grown after): the menu waits for one; laid out 1 px across it drew 134 million things a frame and threw (Poki chat's repro; game_ready still goes)
-  $('boot').classList.add('gone');   // (the logo and bar while the files came: index.html)
+  { const b = $('boot'); if (b) b.classList.add('gone'); }   // (the logo and bar while the files came: index.html; none in a cached old one)
   setLang(STR[save.lang] ? save.lang : detectLang());
   if (!renderer.ok) { ui.toast(t('nogl'), 0); return; }
   $('pad').classList.toggle('stick', !!save.stick);   // (the round jump key: what layout measures the keys by)
   layout();
   started = true;
   game.toMenu();
-  { const b = document.createElement('script'); b.src = 'src/bossframes.js'; document.head.append(b); }   // the bosses' motion frames after the menu (owner, З27 «А»: a quarter of
-  // the load, and the first boss is ten levels up; their frame 1 meanwhile, bossFrames)
+  if (typeof BOSS_FRAMES === 'undefined') { const b = document.createElement('script'); b.src = 'src/bossframes.js'; document.head.append(b); }   // the bosses' motion frames after the menu (owner,
+  // З27 «А»: a quarter of the load, and the first boss is ten levels up; their frame 1 meanwhile, bossFrames; a cached old index.html has them already)
   { const lm = location.search.match(/[?&]level=(\d+)-(\d+)/); if (lm) game.playLevel((+lm[1] - 1) * 30 + (+lm[2] - 1) * 3 + 1); }   // straight into a campaign level, to try it (e.g. ?level=3-4), as the menu's Continue (its cards on first)
   if (/[?&]cards\b/.test(location.search)) { const ids = Object.keys(STORY), show = (k) => { if (k < ids.length) game.story(ids[k], () => show(k + 1), true); }; show(0); }   // every story card in turn, seen or not
   if (/[?&]play=crypt\b/.test(location.search)) window.__up.go(CRYPT.at[0], CRYPT.at[1]);   // the Crypt by itself, to look at

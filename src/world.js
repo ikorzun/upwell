@@ -3172,9 +3172,9 @@ const CHUNKS = {
     '............'] },
   caveSkulls: { d: 1, kind: 'cave', rows: [   // a puzzle: Baba Yaga's three skull lamps (BELLS, big to small) to light in their order, a wrong one and all go
     '............',   // dark; lit, her gate (G) opens. The big one under a beam by the vault's way in (a jump and an air jump from the floor), the middle one
-    '............',   // under the low ledge (walked into), the small one under the vault's floor (a jump): bottom up they come middle, small, big. The vault on
-    '............',   // the right wall, its floor and roof two thick, its gate 4 tall (in as at Fuji's: a jump and an air jump from beside it), its coins 3.5
-    '............',   // tiles and more from any spot outside (the magnet)
+    '............',   // under the low ledge (over a walking hero, so the way in rings nothing: a jump), the small one under the vault's floor (a jump): bottom
+    '............',   // up they come middle, small, big. The vault on the right wall, its floor and roof two thick, its gate 4 tall (in as at Fuji's: a jump
+    '............',   // and an air jump from beside it), its coins 3.5 tiles and more from any spot outside (the magnet)
     '............',
     '.....##.....',
     '......4.####',
@@ -3187,9 +3187,9 @@ const CHUNKS = {
     '........####',
     '.........6..',
     '............',
-    '............',
-    '..###.......',
+    '...##.......',
     '...5........',
+    '............',
     '............',
     '............'] },
   caveSquash: { d: 1, kind: 'cave', rows: [   // a puzzle: Baba Yaga's pestle (K, its post P) over her mortar (U): stand in it and it comes down, and flattened

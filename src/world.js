@@ -4999,7 +4999,7 @@ const LIGHT_LOOK = (th) => th.village ? { lo: [1, 1], hi: [1, 0.34] }   // morni
   : th.glass ? { lo: [0.67, 1.3], hi: [0.34, 1] }   // dusk, lit from below (the floodlights)
   : null;
 const LIGHT_FS = GLSL + PIX_GLSL + `in vec2 vUv; out vec4 o;
-uniform sampler2D uScene; uniform vec4 uLights[32]; uniform int uN; uniform vec2 uFire; uniform vec4 uBand, uRects[24], uHot[8]; uniform int uNR, uNH;
+uniform sampler2D uScene; uniform vec4 uLights[32]; uniform int uN; uniform vec2 uFire; uniform vec4 uBand, uRects[24], uHot[8]; uniform int uNR, uNH; uniform vec3 uHero; uniform int uHeroK;
 void main() {
   ivec2 g = cell();
   vec2 p = vec2(g) + 0.5;
@@ -5009,7 +5009,9 @@ void main() {
     vec3 d = PAL[i] - PAL[0]; float t = clamp(dot(c - PAL[0], d) / dot(d, d), 0.0, 1.0); vec3 e = c - (PAL[0] + t * d); float err = dot(e, e);
     if (err < best) { best = err; k = i; tk = t; }
   }
-  if (tk < 0.4 || (tk > 0.8 && (k == 1 || k == 3 || k == 8))) { o = vec4(c, 1.0); return; }   // the black and what is behind; red, yellow, white
+  if (tk < 0.4 || (tk > 0.8 && (k == 1 || k == 3 || k == 8)) || (k == uHeroK && length(p - uHero.xy) < uHero.z)) { o = vec4(c, 1.0); return; }   // the black and what
+  // is behind; red, yellow, white; the hero in his own ink, whatever it is (a white hero's was whole from the first; owner, 2026-10-29: «синий, зеленый и
+  // фиолетовый моти в игре чуть светлее»: a step down took them to SNES's dull ones)
   for (int i = 0; i < 8; i++) {   // what burns or sparks (a wall on fire): it is its own light, as drawn
     if (i >= uNH) break;
     vec4 r = uHot[i];
@@ -8643,6 +8645,8 @@ Renderer.prototype.draw = function (g, alpha) {
     gl.uniform4fv(pl.u['uLights[0]'], L); gl.uniform1i(pl.u.uN, n); gl.uniform2f(pl.u.uFire, lv.fire ? lv.fire.y / P : 1e9, (3 * R) / P);
     gl.uniform4f(pl.u.uBand, lk.lo[0] + (lk.hi[0] - lk.lo[0]) * lt, lk.lo[1] + (lk.hi[1] - lk.lo[1]) * lt, lv.endY / P, lv.floor / P);
     gl.uniform4fv(pl.u['uRects[0]'], RB); gl.uniform1i(pl.u.uNR, nr); gl.uniform4fv(pl.u['uHot[0]'], HB); gl.uniform1i(pl.u.uNH, nh);
+    const Hh = g.hero, hk = Hh && Hh.color ? Object.values(PAL).indexOf(Hh.color.base) : -1;   // (the hero: his ink, round him a little over his size)
+    gl.uniform3f(pl.u.uHero, Hh ? Hh.cx / P : -1e6, Hh ? Hh.cy / P : -1e6, Hh ? (0.65 * Math.max(Hh.maxX - Hh.minX, Hh.maxY - Hh.minY)) / P : 0); gl.uniform1i(pl.u.uHeroK, hk);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.target.scene); gl.uniform1i(pl.u.uScene, 0);
     gl.bindVertexArray(this.emptyVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

@@ -25,10 +25,13 @@
   // The screen in a console's colours, the settings' «SNES» (save.pal; owner, 2026-10-29: «вместо него добавь переключение цвета на SNES», after the palettes
   // compared): the last pass finds each pixel's ink and how far along from the black (or on to the white) it is, as the dark levels' ramp does, takes that
   // ink's own colour of the console there, and then the console's nearest (Jehkoba32, Sprite Fusion's SNES; OKLab). Nothing redrawn, no reload; the page's
-  // colours (the HUD's) its inks too. `inks` in PAL's order, each the nearest of its own (purple by hand: its nearest, a salmon, took Tokyo's purple off)
-  const PALS = { snes: { inks: ['#00021c', '#f25565', '#0bafe6', '#f7c93e', '#119955', '#d94c87', '#f09c60', '#a3ccd9', '#f0edd8', '#96e3c9'],
-    all: ['#000000', '#00021c', '#1c284d', '#343473', '#2d5280', '#4d7a99', '#7497a6', '#a3ccd9', '#f0edd8', '#732866', '#a6216e', '#d94c87', '#d9214f', '#f25565', '#f27961', '#993649',
-      '#b36159', '#f09c60', '#b38f24', '#b3b324', '#f7c93e', '#17735f', '#119955', '#67b31b', '#1ba683', '#47cca9', '#96e3c9', '#2469b3', '#0b8be6', '#0bafe6', '#f28d85', '#f0bb90'] } };
+  // colours (the HUD's) its inks too. `inks` in PAL's order, each the nearest of its own. Since Пл1 «В» (owner, 2026-10-29: «чуть в палитре SNES нужно
+  // поправить оранжевый … и фиолетовый … предложи близкий к палитре, но более мягкий и контрастный»; the sheets UPWELL/snes-*.png) Jehkoba32 softened, 9 of
+  // its 32: purple a lavender (#b29ee9, #7c6cc4, and #4f428f for its shadows in the never-used #000000's slot), orange an amber (#c8823a, #74452a: the hero's
+  // orange and the Village's boards were a salmon, a danger's), blue, yellow and green less loud, white lighter; no harmless thing red or pink any more
+  const PALS = { snes: { inks: ['#00021c', '#f25565', '#3fb0df', '#f2cb58', '#119955', '#b29ee9', '#f09c60', '#a3ccd9', '#f5f3e4', '#96e3c9'],
+    all: ['#4f428f', '#00021c', '#1c284d', '#343473', '#2d5280', '#4d7a99', '#7497a6', '#a3ccd9', '#f5f3e4', '#732866', '#7c6cc4', '#b29ee9', '#d9214f', '#f25565', '#74452a', '#993649',
+      '#c8823a', '#f09c60', '#b38f24', '#b3b324', '#f2cb58', '#17735f', '#2a9a5e', '#67b31b', '#1ba683', '#47cca9', '#96e3c9', '#2469b3', '#0b8be6', '#3fb0df', '#f28d85', '#f0bb90'] } };
   const palOn = () => (typeof save !== 'undefined' && PALS[save.pal]) || null;
   const okl = (c) => { const l = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4), [r, g, b] = c.map(l);
     const L = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b), M = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b), S = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
@@ -125,10 +128,11 @@ void main() {
     window.fxRetro = fit;   // (the settings' CRT, at once)
     const TOKENS = { ink: 'black', red: 'red', blue: 'blue', yellow: 'yellow', green: 'green', purple: 'purple', orange: 'orange', gray: 'gray', white: 'white' };   // index.html's :root
     let palKey = null;
-    const palCss = () => { const P = palOn(), key = P ? save.pal : ''; if (key === palKey) return; palKey = key; const keys = Object.keys(PAL);
-      for (const [tk, ink] of Object.entries(TOKENS)) document.documentElement.style.setProperty('--' + tk, P ? P.inks[keys.indexOf(ink)] : ''); };
+    const palCss = () => { const P = palOn(), key = P ? save.pal : ''; if (key === palKey) return; palKey = key; const m = P && window.fxPal();   // (each ink as the
+      // screen shows it, fxPal: the HUD's green the game's)
+      for (const [tk, ink] of Object.entries(TOKENS)) document.documentElement.style.setProperty('--' + tk, m ? '#' + m(...PAL[ink].map((v) => Math.round(v * 255))).map((v) => v.toString(16).padStart(2, '0')).join('') : ''); };
     window.fxPalette = palCss;   // (the settings' SNES, at once)
-    setInterval(palCss, 1000);
+    palCss(); setInterval(palCss, 1000);   // (now too: a save read before this file came in had none to tell, the HUD its own colours for a second)
     const start = () => { if (typeof renderer === 'undefined') return setTimeout(start, 200); renderer.canvas.after(ov); fit(); addEventListener('resize', () => setTimeout(fit, 50)); setInterval(fit, 1000); };
     start();
   }

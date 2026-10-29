@@ -3046,6 +3046,18 @@ Object.assign(CARD_MOTION, {
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
 const cardImg = (src, ms = 6000) => new Promise((ok) => { const i = new Image(), t = setTimeout(() => ok(null), ms); i.onload = () => { clearTimeout(t); ok(i); }; i.onerror = () => { clearTimeout(t); ok(null); }; i.src = src; });   // (given up after `ms`: a stalled request held the card for good; review)
+// The settings' palette (fx.js fxPal) on the cards too (owner, 2026-10-29, Пл2 «А»: the story cards in SNES as the game): a canvas's pixels through it in
+// place, a picture as a canvas in it, a '#rrggbb' through it, a card's inks (STORY_INK); with none on, each as it is
+const palNow = () => (typeof fxPal === 'function' ? fxPal() : null);
+const palHex = (h, m = palNow()) => (m ? '#' + m(...[1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))).map((v) => v.toString(16).padStart(2, '0')).join('') : h);
+const palInks = (f, m = palNow()) => (m ? Object.fromEntries(Object.entries(f).map(([k, v]) => [k, palHex(v, m)])) : f);
+function palCanvas(cv, m = palNow()) {
+  const g = m && cv.width && cv.getContext('2d'); if (!g) return cv;
+  const d = g.getImageData(0, 0, cv.width, cv.height), a = d.data;
+  for (let i = 0; i < a.length; i += 4) if (a[i + 3]) { const v = m(a[i], a[i + 1], a[i + 2]); a[i] = v[0]; a[i + 1] = v[1]; a[i + 2] = v[2]; }
+  g.putImageData(d, 0, 0); return cv;
+}
+const palPic = (im, m = palNow()) => { if (!m || !im) return im; const cv = document.createElement('canvas'); cv.width = im.naturalWidth || im.width; cv.height = im.naturalHeight || im.height; const g = cv.getContext('2d'); if (!g) return im; g.drawImage(im, 0, 0); return palCanvas(cv, m); };
 // Volume on the story cards (owner, 2026-10-24: «На карточки тоже примерь», then «Выбираю блик, обновляй движок и все остальное»; as the sprites', VOL, the method Sprite Normals', MIT © 2026 Hugo Duprez): each
 // figure's normals (Mochi's, a boss's plane; the plate none: it went to grain) once from its shape (a low dome over the distance to its edge) and a little of its
 // lightness; a light from the top left that the tilt moves; its far side in its shade, its turn its shade in a checker, a white glint. Its shade as the game's
@@ -3087,6 +3099,7 @@ function cardLight(p, tx, ty) {   // a plane's light for this tilt (in steps of 
     const i = q * 4;   // (its far side its shade, its turn its shade in a checker, its glint white: the game's own steps, VOL)
     if (L < CARD_LIT.deep || (L < CARD_LIT.lo && (x + y) & 1)) cardShade(p.nrm.px, i, p.tint, p.w, o); else if (L > CARD_LIT.glint) { o[i] = o[i + 1] = o[i + 2] = 243; o[i + 3] = 255; }
   }
+  const pm = palNow(); if (pm) for (let i = 0; i < o.length; i += 4) if (o[i + 3]) { const v = pm(o[i], o[i + 1], o[i + 2]); o[i] = v[0]; o[i + 1] = v[1]; o[i + 2] = v[2]; }   // (its shade and glint in the settings' palette too)
   g.putImageData(img, 0, 0); return key;
 }
 function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (settled: no coming-in, as a card swiped to in the album)
@@ -3114,9 +3127,10 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
     Promise.race([liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({}))), new Promise((ok) => setTimeout(() => ok({}), 6000))])]).then((got) => {   // (the wait
     // a card's: a slow first answer kept as none left every later card without its motion)
     if (!st.alive) return;
-    const ims = got.slice(0, -1), j = got[got.length - 1];
+    const m = palNow(), ims = got.slice(0, -1).map((im) => palPic(im, m)), j = got[got.length - 1];   // (its pictures in the settings' palette)
     if (!ims[0]) { show(1, 1); track('card_fail', { id: c.id, why: 'noimg' }); return; }   // (no art: the card's ground only, and its Next: a card that did not load held the game for good; review)
     pics = ims; L = (j && j[c.id]) || L0;
+    if (m && L.pal) L = Object.assign({}, L, { pal: L.pal.map((h) => palHex(h, m)) });   // (its live cells' colours too)
     const specs = [['plate', 0.25], ...(def ? def.planes : [])];
     ims.forEach((im, i) => {
       if (!im) return;
@@ -3179,7 +3193,7 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
     const g = thread.getContext('2d'), pa = off[0], pb = off[1] || off[0], at = ([x, y, f]) => [x * K + pa[0] + (pb[0] - pa[0]) * f, y * K + pa[1] + (pb[1] - pa[1]) * f];
     g.clearRect(0, 0, W, H);
     for (const th of def.threads) {
-      g.fillStyle = th.ink;
+      g.fillStyle = palHex(th.ink);
       for (let s = 1; s < th.pts.length; s++) {
         const [x0, y0] = at(th.pts[s - 1]), [x1, y1] = at(th.pts[s]), n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / K));
         for (let i = 0; i <= n; i++) { const u = i / n; g.fillRect(Math.round(x0 + (x1 - x0) * u), Math.round(y0 + (y1 - y0) * u), Math.round(K), Math.round(K)); }
@@ -3228,7 +3242,7 @@ const BOSS_FIG = {};
 function bossFig(id, cv, cell, box) {   // (`box`: the CSS px it fits in, else its cell less a margin and a row of stars)
   const put = (f) => {
     const d = (devicePixelRatio || 1) * view.k, r = cell.getBoundingClientRect(), room = box || [Math.max(1, r.width / view.k - 12), Math.max(1, r.height / view.k - 34)], k = Math.min((room[0] * d) / f.w, (room[1] * d) / f.h), K = k >= 1 ? Math.floor(k) : k;
-    cv.width = f.w; cv.height = f.h; cv.getContext('2d').drawImage(f.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+    cv.width = f.w; cv.height = f.h; cv.getContext('2d').drawImage(f.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h); palCanvas(cv);
     cv.style.width = (f.w * K) / d + 'px'; cv.style.height = (f.h * K) / d + 'px';
   };
   if (BOSS_FIG[id]) { requestAnimationFrame(() => put(BOSS_FIG[id])); return; }
@@ -3576,15 +3590,16 @@ const ui = {
       im.src = src;
       let fig;
       if (open) {   // as the story shows it: its frame, its number, and alive (its planes' parallax, its motion) when it is the one in the middle
-        const f = STORY_INK[c.ink], [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
+        const f = palInks(STORY_INK[c.ink]), [w, h] = c.cells, tilt = el('div', 'stilt'), clip = el('div', 'sclip');
         fig = el('div', 'scard acard');
         for (const [v, x2] of Object.entries(f)) fig.style.setProperty('--s' + v, x2);
         im.className = 'astill'; clip.append(im); tilt.append(clip); if (c.n) tilt.append(el('div', 'snum', c.n)); fig.append(tilt);   // (no moon on top: owner, 2026-10-28)
+        im.onload = () => { const pc = palPic(im); if (pc !== im) { pc.className = 'astill'; im.replaceWith(pc); } };   // (in the settings' palette)
         cells.push({ cell, c, fig, tilt, clip });
       } else {   // its picture in a few big blocks (an average of each), dimmed, and the lock
         fig = el('div', 'acard shut');
         const cv = document.createElement('canvas'); cv.width = 9; cv.height = Math.round((9 * h0) / w0); cv.className = 'astill';
-        im.onload = () => { const g = cv.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, cv.width, cv.height); };
+        im.onload = () => { const g = cv.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, cv.width, cv.height); palCanvas(cv); };
         fig.append(cv, iconEl('lock'));
       }
       cell.append(fig, el('div', 'atitle', open ? L2(c.title) : '???'));
@@ -3678,7 +3693,7 @@ const ui = {
     p.append(...(game.taken.length ? [build] : []), cap(el('div', 'head', t('paused')), 'paused'), opts, cap(button(t('resume'), 'big thumb', () => game.togglePause(false)), 'resume'));
   },
   story(c, done) {   // a story card (STORY): its art in the one frame, its numeral on the frame, its title under it, then Next
-    const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = STORY_INK[c.ink]; this.storyArgs = [c, done];   // (laid again on a resize: Game.resized)
+    const p = this.panel('story'), card = el('div', 'scard'), [w, h] = c.cells, f = palInks(STORY_INK[c.ink]); this.storyArgs = [c, done];   // (laid again on a resize: Game.resized; its inks in the settings' palette)
     for (const [v, x] of Object.entries(f)) card.style.setProperty('--s' + v, x);
     const tilt = el('div', 'stilt'), clip = el('div', 'sclip'), title = el('div', 'stitle', L2(c.title)), next = cap(button(t('next'), 'big thumb', () => { this.live.stop(); this.storyArgs = null; done(); }), 'next');
     next.style.background = f.L; next.style.color = inkOn(f.L);   // the button in the card's own colour, its words in the one of black and white that stands out on it (owner, 2026-10-24)

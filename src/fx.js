@@ -18,17 +18,46 @@
     // screen's star landing, ui.starHit: a hurt's moment in gold, the last star's bigger; set off by hand, fxKick)
     hitBoss: { chroma: 2.2, tear: 3, sweep: 1, flash: [1, 1, 1, 0.22], lines: 0.3, dur: 0.42 },
     free: { chroma: 0.5, dur: 0.22 }, task: { chroma: 0.5, dur: 0.22 }, take: { chroma: 0.6, dur: 0.25 }, buy: { chroma: 0.4, dur: 0.18 },
+    warp: { warp: 5, dur: 0.5 },   // a jump in the air (Game.requestJump): space bent round Mochi, a ring going out of him pushing what it passes outward, `warp`
+    // game px at most, half a second (owner, 2026-10-29: «При повторном прыжке сделай на 0,5 секунды фильтр искривления пространства»), whole game pixels
   };
   const FLASH_GAP = 0.34;   // s: a flash at most three times a second (the owner's rule)
-  const kicks = [{ p: null }, { p: null }], last = { flash: -9 };   // a hurt's moment and the others', both under way at once (a kill in a hurt's 1.95 s cuts it off no more)
+  // The screen in a console's colours, the settings' «SNES» (save.pal; owner, 2026-10-29: «вместо него добавь переключение цвета на SNES», after the palettes
+  // compared): the last pass finds each pixel's ink and how far along from the black (or on to the white) it is, as the dark levels' ramp does, takes that
+  // ink's own colour of the console there, and then the console's nearest (Jehkoba32, Sprite Fusion's SNES; OKLab). Nothing redrawn, no reload; the page's
+  // colours (the HUD's) its inks too. `inks` in PAL's order, each the nearest of its own (purple by hand: its nearest, a salmon, took Tokyo's purple off)
+  const PALS = { snes: { inks: ['#00021c', '#f25565', '#0bafe6', '#f7c93e', '#119955', '#d94c87', '#f09c60', '#a3ccd9', '#f0edd8', '#96e3c9'],
+    all: ['#000000', '#00021c', '#1c284d', '#343473', '#2d5280', '#4d7a99', '#7497a6', '#a3ccd9', '#f0edd8', '#732866', '#a6216e', '#d94c87', '#d9214f', '#f25565', '#f27961', '#993649',
+      '#b36159', '#f09c60', '#b38f24', '#b3b324', '#f7c93e', '#17735f', '#119955', '#67b31b', '#1ba683', '#47cca9', '#96e3c9', '#2469b3', '#0b8be6', '#0bafe6', '#f28d85', '#f0bb90'] } };
+  const palOn = () => (typeof save !== 'undefined' && PALS[save.pal]) || null;
+  const okl = (c) => { const l = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4), [r, g, b] = c.map(l);
+    const L = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b), M = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b), S = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * L + 0.793617785 * M - 0.0040720468 * S, 1.9779984951 * L - 2.428592205 * M + 0.4505937099 * S, 0.0259040371 * L + 0.7827717662 * M - 0.808675766 * S]; };
+  const f3 = (list) => new Float32Array(list.flat()), palBufs = new Map();   // (each palette's uniforms, made once)
+  const bufsOf = (P) => { let b = palBufs.get(P); if (!b) { const inks = P.inks.map(hex), all = P.all.map(hex); b = { ink0: f3(Object.values(PAL)), inkN: f3(inks), all: f3(all), allL: f3(all.map(okl)), n: all.length }; palBufs.set(P, b); } return b; };
+  const kicks = [{ p: null }, { p: null }, { p: null }], last = { flash: -9 };   // a hurt's moment, the others', and a jump's bend, all under way at once (a kill in a hurt's 1.95 s cuts it off no more)
   const FS = GLSL + `in vec2 vUv; out vec4 o;
-uniform sampler2D uScene; uniform vec2 uLow; uniform float uScale, uChroma, uTear, uSeed, uJolt, uSweep, uSweepK, uLines; uniform vec4 uFlash;
+uniform sampler2D uScene; uniform vec2 uLow; uniform float uScale, uChroma, uTear, uSeed, uJolt, uSweep, uSweepK, uLines, uWarp, uWarpR, uPalOn; uniform vec2 uWarpC; uniform vec4 uFlash;
+uniform vec3 uInk0[${Object.keys(PAL).length}], uInkN[${Object.keys(PAL).length}], uPalC[32], uPalL[32]; uniform int uPalN;
 vec3 at(ivec2 p) { return texelFetch(uScene, clamp(p, ivec2(0), ivec2(uLow) - 1), 0).rgb; }
+vec3 okl(vec3 c) { c = mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
+  vec3 m = pow(max(vec3(dot(c, vec3(0.4122214708, 0.5363325363, 0.0514459929)), dot(c, vec3(0.2119034982, 0.6806995451, 0.1073969566)), dot(c, vec3(0.0883024619, 0.2817188376, 0.6299787005))), 0.0), vec3(1.0 / 3.0));
+  return vec3(dot(m, vec3(0.2104542553, 0.793617785, -0.0040720468)), dot(m, vec3(1.9779984951, -2.428592205, 0.4505937099)), dot(m, vec3(0.0259040371, 0.7827717662, -0.808675766))); }
+vec3 repal(vec3 c) {   // the pixel's ink and its place from the black to it (or from it on to the white), that ink's console colour there, then the console's nearest
+  const int N = ${Object.keys(PAL).length}, W = ${Object.keys(PAL).indexOf('white')}; float best = 1e9; vec3 n = c;
+  for (int i = 1; i < N; i++) { vec3 d = uInk0[i] - uInk0[0]; float t = clamp(dot(c - uInk0[0], d) / dot(d, d), 0.0, 1.0); vec3 e = c - (uInk0[0] + t * d); float r = dot(e, e); if (r < best) { best = r; n = mix(uInkN[0], uInkN[i], t); } }
+  for (int i = 1; i < N; i++) { if (i == W) continue; vec3 d = uInk0[W] - uInk0[i]; float s = clamp(dot(c - uInk0[i], d) / dot(d, d), 0.0, 1.0); vec3 e = c - (uInk0[i] + s * d); float r = dot(e, e); if (r < best) { best = r; n = mix(uInkN[i], uInkN[W], s); } }
+  vec3 q = okl(n); int k = 0; float bd = 1e9;
+  for (int i = 0; i < 32; i++) { if (i >= uPalN) break; vec3 e = uPalL[i] - q; float r = dot(e, e); if (r < bd) { bd = r; k = i; } }
+  return uPalC[k];
+}
 float h1(float x) { return fract(sin(x * 127.1 + uSeed * 311.7) * 43758.5453); }
 void main() {
   ivec2 gp = ivec2(floor(gl_FragCoord.xy / uScale));   // the game pixel under this screen pixel
   vec2 uv = (vec2(gp) + 0.5) / uLow;
   gp.y += int(round(uJolt));   // (read from above: the picture down)
+  if (uWarp > 0.0) { vec2 d = vec2(gp) + 0.5 - uWarpC; float r = length(d), w = (r - uWarpR) / 9.0; if (r > 0.5) gp -= ivec2(round(d / r * uWarp * exp(-w * w))); }   // the bend: a ring
+  // out of Mochi, what it passes read from nearer him (pushed out), whole game pixels
   if (uTear > 0.0) { float b = floor(float(gp.y) / 5.0); if (h1(b) > 0.72) gp.x += int(round(uTear * (h1(b + 17.0) * 2.0 - 1.0))); }   // a band of rows pushed aside
   vec3 c = at(gp);
   float base = uChroma * 0.35;   // (a third of it everywhere, more out to the sides)
@@ -37,16 +66,17 @@ void main() {
   if (uSweepK > 0.0) { float y = 1.0 - uv.y, d = abs(y - uSweep) * uLow.y; c += uSweepK * 0.32 * smoothstep(4.0, 0.0, d); }   // the bright band, on its way down
   if (uLines > 0.0 && fract(gl_FragCoord.y / uScale) < 0.3) c *= 1.0 - uLines;   // the lines darker (each game row's bottom)
   c = mix(c, uFlash.rgb, uFlash.a);
+  if (uPalOn > 0.5) c = repal(c);   // (the settings' SNES)
   o = vec4(c, 1.0);
 }`;
   const pass = (r) => {
     const gl = r.gl, t = r.target; if (!t || !t.scene || CINE) return;
     if (r.pFx === undefined) { try { r.pFx = program(gl, BG_VS, FS); } catch (err) { console.error(err); r.pFx = null; } }   // (built at the first frame, not at the first hit)
-    const pf = r.pFx; if (!pf || !retro()) return;
+    const pal = palOn(), pf = r.pFx; if (!pf || (!retro() && !pal)) return;
     const now = performance.now() / 1000, on = [];
-    for (const m of kicks) if (m.p) { const u = (now - m.t0) / m.p.dur; if (u >= 1) m.p = null; else on.push({ m, p: m.p, u, k: (1 - u) * (1 - u) }); }   // (each fades fast, then slowly)
-    if (!on.length) return;   // (nothing to do: no pass at all)
-    const [lw, lh] = r.low, most = (f) => Math.max(...on.map(f)), tr = on.find((o) => o.p.tear), sw = on.find((o) => o.p.sweep);   // (two at once: each part the stronger's, the bands a hurt's)
+    if (retro()) for (const m of kicks) if (m.p) { const u = (now - m.t0) / m.p.dur; if (u >= 1) m.p = null; else on.push({ m, p: m.p, u, k: (1 - u) * (1 - u) }); }   // (each fades fast, then slowly)
+    if (!on.length && !pal) return;   // (nothing to do: no pass at all)
+    const [lw, lh] = r.low, most = (f) => (on.length ? Math.max(...on.map(f)) : 0), tr = on.find((o) => o.p.tear), sw = on.find((o) => o.p.sweep);   // (two at once: each part the stronger's, the bands a hurt's)
     let fl = null, fa = 0; for (const o of on) if (o.m.flash && o.p.flash && o.p.flash[3] * o.k > fa) { fl = o.p.flash; fa = fl[3] * o.k; }   // (the brighter flash now)
     gl.bindFramebuffer(gl.READ_FRAMEBUFFER, t.fb); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, t.sceneFb);
     gl.blitFramebuffer(0, 0, lw, lh, 0, 0, lw, lh, gl.COLOR_BUFFER_BIT, gl.NEAREST);
@@ -56,7 +86,12 @@ void main() {
     gl.uniform1f(pf.u.uChroma, most((o) => (o.p.chroma || 0) * o.k)); gl.uniform1f(pf.u.uTear, most((o) => (o.p.tear || 0) * o.k)); gl.uniform1f(pf.u.uSeed, tr ? tr.m.seed : 0);
     gl.uniform1f(pf.u.uJolt, most((o) => (o.p.jolt || 0) * Math.min(1, 4 * (1 - o.u)) * (1 - o.u))); gl.uniform1f(pf.u.uLines, most((o) => (o.p.lines || 0) * o.k));   // (the jolt: at once, back over its time)
     gl.uniform1f(pf.u.uSweep, sw ? sw.u : 0); gl.uniform1f(pf.u.uSweepK, sw ? 1 - sw.u : 0);
+    const wa = on.find((o) => o.p.warp), H = typeof game !== 'undefined' && game.hero, L = wa && H && game.lv;   // (the bend round Mochi where he is now, in the low target's px, y up)
+    gl.uniform1f(pf.u.uWarp, L ? wa.p.warp * (1 - wa.u) : 0); gl.uniform1f(pf.u.uWarpR, L ? 6 + wa.u * 0.45 * lh : 0);
+    gl.uniform2f(pf.u.uWarpC, L ? (H.cx / view.w) * lw : 0, L ? lh - ((H.cy - L.cam) / view.h) * lh : 0);
     gl.uniform4f(pf.u.uFlash, fl ? fl[0] : 0, fl ? fl[1] : 0, fl ? fl[2] : 0, fa);
+    gl.uniform1f(pf.u.uPalOn, pal ? 1 : 0);
+    if (pal) { const b = bufsOf(pal); gl.uniform3fv(pf.u['uInk0[0]'], b.ink0); gl.uniform3fv(pf.u['uInkN[0]'], b.inkN); gl.uniform3fv(pf.u['uPalC[0]'], b.all); gl.uniform3fv(pf.u['uPalL[0]'], b.allL); gl.uniform1i(pf.u.uPalN, b.n); }
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, t.scene); gl.uniform1i(pf.u.uScene, 0);
     gl.bindVertexArray(r.emptyVao); gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindVertexArray(null); gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND);
@@ -73,13 +108,20 @@ void main() {
       x.fillStyle = `rgba(0,0,0,${(0.125 * g) / line})`;   // as dark on the whole as a 3x phone's lines were: a pixel of a row's four, half black
       for (let i = 1; i <= rows; i++) x.fillRect(0, Math.round(i * g) - line, 1, line); };
     window.fxRetro = fit;   // (the settings' CRT, at once)
+    const TOKENS = { ink: 'black', red: 'red', blue: 'blue', yellow: 'yellow', green: 'green', purple: 'purple', orange: 'orange', gray: 'gray', white: 'white' };   // index.html's :root
+    let palKey = null;
+    const palCss = () => { const P = palOn(), key = P ? save.pal : ''; if (key === palKey) return; palKey = key; const keys = Object.keys(PAL);
+      for (const [tk, ink] of Object.entries(TOKENS)) document.documentElement.style.setProperty('--' + tk, P ? P.inks[keys.indexOf(ink)] : ''); };
+    window.fxPalette = palCss;   // (the settings' SNES, at once)
+    setInterval(palCss, 1000);
     const start = () => { if (typeof renderer === 'undefined') return setTimeout(start, 200); renderer.canvas.after(ov); fit(); addEventListener('resize', () => setTimeout(fit, 50)); setInterval(fit, 1000); };
     start();
   }
   const go = (name) => {   // a moment begins (the newest over one of its kind under way: a hurt's, the others'); its flash only if the last was long enough ago
     const p = KICK[name], now = performance.now() / 1000, flash = !!p.flash && now - last.flash >= FLASH_GAP;
     if (flash) last.flash = now;
-    Object.assign(kicks[name === 'hurt' ? 0 : 1], { p, t0: now, seed: fxRand(0, 100), flash });   // (fxRand: a look draws none of the game's chances, which the bot seeds)
+    if (name === 'warp' && still) return;   // (set off by hand, Game.requestJump: none with reduced motion, as the hooked ones)
+    Object.assign(kicks[name === 'hurt' ? 0 : name === 'warp' ? 2 : 1], { p, t0: now, seed: fxRand(0, 100), flash });   // (fxRand: a look draws none of the game's chances, which the bot seeds)
   };
   window.fxKick = go;   // (for checks)
   if (typeof Game !== 'undefined' && !still) for (const name of Object.keys(KICK)) {   // the moments that set it off

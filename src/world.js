@@ -4948,8 +4948,7 @@ vec3 shadeOf(vec3 c, float w) {   // (w: how far a hueless ink goes toward the w
 const TILE_MAX = 128, TILES = { list: [], byKey: new Map(), tex: null, n: 0, u: new Int32Array(4 * TILE_MAX) };   // (128: the eight worlds' ledges and rooms
 // need about 90 together, the five open ones 66, past the 64 there were: a sixth world's in one sitting drew the first picture, the Village's; 128 ivec4s keep the
 // shader well inside WebGL2's 224 uniform vectors)
-let TILES_VKEY = 0;
-const TWV = { b: (/[?&]twv=([A-D])/.exec(location.search) || [])[1] || 'A', m: (/[?&]twm=([AB])/.exec(location.search) || [])[1] || 'A' };   // (the Tower's variants on the questions page, 2026-10-29: its tall blocks, its grip; A as now)   // (vtsp's pictures' own keys)
+let TILES_VKEY = 0;   // (vtsp's pictures' own keys)
 const TILE_LIM = 2048;   // (the atlas's side: WebGL2 promises textures of 2048 at least; past a phone's limit texImage2D fails without a word, the pictures wrong)
 const tileId = (rows) => {
   const key = rows.key || rows.join('/'); let id = TILES.byKey.get(key); if (id !== undefined) return id;
@@ -6946,7 +6945,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const ln = (u0, y0, u1, y1, wd = 2, c = C) => line(X(u0), snap(y0), X(u1), snap(y1), c, 1, wd);
     const riv = (u, y) => bxp(u, y, u + P, y + P, K);
     const below = r.twBelow !== undefined ? r.twBelow : (r.twBelow = !lv.rects.some((q) => q !== r && !q.cap && q.x1 > Math.min(X(0), X(0.9 * t)) && q.x0 < Math.max(X(0), X(0.9 * t)) && q.y0 < r.y1 + 1.0 * t && q.y1 > r.y1));   // (room under its wall end)
-    const tl = hgt > 2.5 * t ? { A: 1, B: 2, C: 2, D: 3 }[TWV.b] || 1 : 1, nt = Math.max(1, Math.round(hgt / (tl * t))), e1 = w - 4 * P, warren = tl > 1 && TWV.b === 'C';   // (variants of a tall block, ?twv=: B panels twice as big, C so as a Warren truss, D thrice)
+    const nt = Math.max(1, Math.round(hgt / ((hgt > 2.5 * t ? 2 : 1) * t))), e1 = w - 4 * P;   // (a tall block's panels twice as big, as a leg of the tower: the owner's Д361 «B»)
     box(r.x0, r.y0, r.x1, r.y1, K, 1, 0, 10, 0);   // the black between its members (it is solid: nothing behind shows through it in specks)
     box(r.x0, r.y0, r.x1, snap(r.y0 + ch), C, 1, 0, 10, 0);   // its top chord
     if (CINE) this.route = 0;   // (2.5D: its members flat on its face, the rule book's thin parts; its body deep)
@@ -6955,9 +6954,9 @@ Renderer.prototype.draw = function (g, alpha) {
       box(r.x0, snap(ty1 - ch), r.x1, snap(ty1), C, 1, 0, 10, 0);   // its bottom chord (a tier's)
       const np = Math.max(1, Math.round(e1 / ph)), pw = e1 / np, U = (k) => k * pw;
       for (let k = 0; k <= np; k++) bxp(U(k) - (k === np ? 2 * P : 0), y0, U(k) + (k === np ? 0 : 2 * P), y1);   // its verticals
-      for (let k = 0; k < np; k++) { const a = U(k), b = U(k + 1); if (!(scv || warren) || k % 2) ln(a + P, y0, b - P, y1); if (!(scv || warren) || !(k % 2)) ln(b - P, y0, a + P, y1);   // (a TV Tower cave's: one
+      for (let k = 0; k < np; k++) { const a = U(k), b = U(k + 1); if (!scv || k % 2) ln(a + P, y0, b - P, y1); if (!scv || !(k % 2)) ln(b - P, y0, a + P, y1);   // (a TV Tower cave's: one
         // brace a panel by turns, a Warren truss: thin over its busy backdrop)
-        if (!(scv || warren)) { bxp((a + b) / 2 - 2 * P, (y0 + y1) / 2 - 2 * P, (a + b) / 2 + 2 * P, (y0 + y1) / 2 + 2 * P); riv((a + b) / 2 - P / 2, (y0 + y1) / 2 - P / 2); } }   // X bracing, its
+        if (!scv) { bxp((a + b) / 2 - 2 * P, (y0 + y1) / 2 - 2 * P, (a + b) / 2 + 2 * P, (y0 + y1) / 2 + 2 * P); riv((a + b) / 2 - P / 2, (y0 + y1) / 2 - P / 2); } }   // X bracing, its
       // plate (none where no two cross)
       bxp(e1, ty0, w, ty1); riv(e1 + P, ty0 + ch + P); riv(e1 + P, ty1 - ch - 2 * P);   // its end plate
     }
@@ -7734,14 +7733,12 @@ Renderer.prototype.draw = function (g, alpha) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka || th.danchi || th.town || th.glass)) {   // (Tokyo's and the Tower's too, 2026-10-29: the owner's rule for every world)
-      if (th.glass && TWV.m === 'B') { const P = kitP; box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * P, PAL.gray, a, 0, 10, 0); for (let x = r.x0 + 0.18 * R; x < r.x1 - 0.1 * R; x += 0.36 * R) box(snap(x + ox), r.y1 - 0.12 * R, snap(x + ox) + P, r.y1 + 2 * P, PAL.black, a, 0, 10, 0); } else {   // (a variant, ?twm=B: the Tower's grip a cable tray)   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka || th.danchi || th.town || th.glass)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect; Tokyo's and the Tower's too, 2026-10-29: the owner's rule for every world)
       if (CINE && th.danchi) this.route = 0;   // (the Danchi's flat in 2.5D, the rule book: in depth its green and its slab's vault's dither made lone dots)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
       if (CINE && th.danchi) this.route = 2;
       if (th.skazka && lv.kind === 'treasure') skWeb(r);   // (a Forest cave's: Baba Yaga's cobweb canopy, what you hang from)
       if (th.rime) for (let x = r.x0 + 0.2 * R, k = 0; x < r.x1 - 0.1 * R; x += 0.36 * R, k++) if (k % 2) box(x + ox, r.y1 - 0.06 * R, x + ox + kitP, r.y1 - 0.06 * R + kitP, PAL.white, a, 0, 10, 0);   // rime: a glint here and there (no strands hanging: owner)
-      }
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
       for (let x = r.x0 + 0.25 * R, k = 0; x < r.x1 - 0.15 * R; x += 0.42 * R, k++) disc(x + ox, r.y1 + 0.1 * R, (k & 1 ? 0.17 : 0.27) * R, th.moss, a);

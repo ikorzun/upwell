@@ -7043,7 +7043,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const ln = (u0, y0, u1, y1, wd = 2, c = C) => line(X(u0), snap(y0), X(u1), snap(y1), c, 1, wd);
     const riv = (u, y) => bxp(u, y, u + P, y + P, K);
     const below = r.twBelow !== undefined ? r.twBelow : (r.twBelow = !lv.rects.some((q) => q !== r && !q.cap && q.x1 > Math.min(X(0), X(0.9 * t)) && q.x0 < Math.max(X(0), X(0.9 * t)) && q.y0 < r.y1 + 1.0 * t && q.y1 > r.y1));   // (room under its wall end)
-    const nt = Math.max(1, Math.round(hgt / t)), e1 = w - 4 * P;
+    const nt = Math.max(1, Math.round(hgt / ((hgt > 2.5 * t ? 2 : 1) * t))), e1 = w - 4 * P;   // (a tall block's panels twice as big, as a leg of the tower: the owner's Д361 «B»)
     box(r.x0, r.y0, r.x1, r.y1, K, 1, 0, 10, 0);   // the black between its members (it is solid: nothing behind shows through it in specks)
     box(r.x0, r.y0, r.x1, snap(r.y0 + ch), C, 1, 0, 10, 0);   // its top chord
     if (CINE) this.route = 0;   // (2.5D: its members flat on its face, the rule book's thin parts; its body deep)
@@ -7487,8 +7487,9 @@ Renderer.prototype.draw = function (g, alpha) {
       platTiles(r, PLAT.kblock);   // GPT's (PLAT): old stone, cracks, lichen, its underside jagged and dark
       if (CINE) this.route = 0;   // (the cinematic fork: its roots, its hollows and what is in them flat)
       [0.4, 1.9, 3.4].filter((u) => u < wt - 0.25).forEach((u, i) => root(W(u), 1.7 * (0.65 + 0.5 * hsh(i + 70)), 100 + i * 17, 3));
-      if (hsh(2030) < 1 / 3) { hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); }   // a skull in a hollow under one ledge in three (the rule book: under each, too many)
-      if (wt > 3) { let eyes = hsh(2020) < 0.34; if (eyes && CINE) { const hx = W(2.5), hy = Y(ht + 0.45), E2 = r.eyesP || (r.eyesP = {}); cinePoke(g, lv, E2, 'hollow', hx - 1.2 * t, hy - 1.2 * t, hx + 1.2 * t, hy + 1.2 * t); eyes = cinePerched(E2, lv.t); }   // (2.5D:
+      const pick = ((Math.imul(Math.round(r.x0 / t) + 7, 0x9E3779B1) ^ Math.imul(Math.round(r.y0 / t) + 13, 0x85EBCA77)) >>> 0) % 3;   // (one draw for both: a skull, eyes or neither, so never the two under one ledge; hsh(2030) and hsh(2020) were the same hash shifted, the two together under nine ledges in ten that had one)
+      if (pick === 0) { hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); }   // a skull in a hollow under one ledge in three (the rule book: under each, too many)
+      if (wt > 3) { let eyes = pick === 1; if (eyes && CINE) { const hx = W(2.5), hy = Y(ht + 0.45), E2 = r.eyesP || (r.eyesP = {}); cinePoke(g, lv, E2, 'hollow', hx - 1.2 * t, hy - 1.2 * t, hx + 1.2 * t, hy + 1.2 * t); eyes = cinePerched(E2, lv.t); }   // (2.5D:
         hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, eyes); }   // eyes in one in three (the owner's rule on detail: a screen of eyes is noise); shut, their light out, while the hero is by
       if (CINE) this.route = 2; lip(); return true;
     }
@@ -7831,7 +7832,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (r.key && (T * 1.6) % 1 < 0.5) for (const [x0, y0, x1, y1] of [[r.x0, r.y0, r.x1, r.y0 + P], [r.x0, r.y1 - P, r.x1, r.y1], [r.x0, r.y0, r.x0 + P, r.y1], [r.x1 - P, r.y0, r.x1, r.y1]]) box(x0, y0, x1, y1, INK.coin, 1, 0, 10, 0);   // a gate's keystone: its rim blinks gold (hit here)
     }
     if (r.move && !kit) { disc(r.x0 + 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); disc(r.x1 - 5, (r.y0 + r.y1) / 2, 2.2, th.lip, 1); }
-    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka || th.danchi)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect)
+    if (r.moss && (th.village || th.sea || th.mines || th.fuji || th.skazka || th.danchi || th.town || th.glass)) {   // the Village's moss under it (F's): a strip, no strands off it (owner: «убери эти зеленые висюльки»; the green you hold; see villageRect; Tokyo's and the Tower's too, 2026-10-29: the owner's rule for every world)
       if (CINE && th.danchi) this.route = 0;   // (the Danchi's flat in 2.5D, the rule book: in depth its green and its slab's vault's dither made lone dots)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
       if (CINE && th.danchi) this.route = 2;

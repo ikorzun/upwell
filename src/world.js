@@ -80,7 +80,7 @@ const KIT9 = {
   fence: { dx: 1, base: 62, lit: [[21.0, 13.5], [24.7, 13.3], [46.0, 21.5], [50.0, 21.0]], rows: [".........................kk.....................................", ".......................kksk.....................................", ".......................kssk.....................................", "......................ksssk.....................................", ".....................kssssk.....................................", ".....................ksssk......................................", ".....................ksssk......................................", "....................kssssk......................................", "....................kdddkk......................................", "...................kssssssk..................k..................", "..................ksssssssskk...............ksk.................", ".................ksssssssssskk..............ksk.................", ".................ksskkkskkkskk..............ksskk...............", ".................kssoyosyyoskk..............ksskk...............", ".................kssoyosoyoskk..............kssskk..............", "..................kssosksssskk..............kssskk..............", "..................ksssskssdkk................kdddkk.............", "...................kkssssskk................kksssssk............", "..........kk........ksksksk................kkssssssk............", ".........kskk.......dkkkkkk................ssssssssskk..........", ".........ksdk......kdddk..................ksskkksskkkk..........", "........kkssk......ksdkk..................kssoyossyokk..........", ".......kkssssk.....ksskdk.................kssoyossoskk..........", ".......kkssssdk....dsskdk..................ksssskksk............", ".......kkssdssk....ssdddk...................kksssssk............", ".......kksskksk....ssddk.....................ksksksk............", ".........kkdkddk.kkssddk.........kk..........kkkkkk.............", ".........kddksdk.kkssddk........kskk.........kdkkkk........k....", ".........kssdsdk.kksdsdk......kksskk.........kskkdk.......ksk...", ".........ksssddd..ksdsdk.......ssskk........kskdddk.......dsk...", "..........kssdsd..ksdsdk.....kdssskk........ksddssd......kssk...", "..........kssdsdk.ksdsk......ksssskk.........kssdsdk....ksssk...", "....kk....kssssdkksssdk....kksssks.......k...kdsdsdk....kssssk..", "...kssk....sssddkksssdk....kksskkdk.....ksk..kdsdsdk...ksssssk..", "...kssk....kssddkksssdk....kdkskdd......ksk...dssssk...kssdssk..", "..kssssk...kssddkksssdk....kddkddk.....kssk...dssdsk...kskkksk..", "..kssssk...kksddkksssdk...ksssdsdk.....ksssk..dssdsk...kddddkk..", "..kssssd...kksdsdksdddk...ksssdsdk....kssssk..kssdsk....ddddk...", ".kssssssk...ksssdksddk....ksssdsdk....kssssk..kssdsk....ssddk...", ".kssskksk...kdsddksddk....kssdssd.....kssksk..kssssk...kssddk...", ".ksskkddk...kdsddksddk....kssdsdd.....kddkdk..kssssd...kssddk...", ".kskddddk...kdsddkkkdk....kdsdddk.....kddddk...dsssd...kssddk...", "..kdddsdk...kkkkdkskkk...kskkkkksk....kssddk..kkkkkkkkkksssdk...", "..kssdsdk...kdskksdkssssskkdskksdkk.kkkkkkk..kkddddddkkksdsdk...", "..kssddkk.kkkkdsddkssssssskddksddksssssssssssskkddkdkkkkkdsdk...", "..kkkkksssssdkdddkkdsdddddkkksddkdssssssssssssskkdddkkdsskkk....", "kksssssssddddkkddkkdddddddkkdddkkddddddssdddddddkkdkkkdssssskkk.", "kssssddddddddkskddsdddddddkddkdddddddddddssssddksdddkkddsssssskk", "kdddddddddddkkddkddkdddddksdkkkddkddddddddddddkkddkddkkdsssdddkk", "kdddddddddddkddkkkdkkkkkkkdkkkkkdkkkkkkkkkkdddkddkkkdkkddddsddkk", "kdddddkkkk..kdkkkdkk.....kkkdkdkkk...kkddkkk..kdkkddkkkkkkddddkk", "kkkkkkkdkk..kkkdkdd.......ddddddk.....kdddk....kkddddkkkkkkkkkkk", "...kssddkk...kssdsdk.....ksssdddk.....ksssk.....ksssdkkkdddd....", "...kssdsdd...kssssdk.....kssddddk.....ksssk.....ksssddkksdddk...", "...kssssddk...dssdsd.....kssdsdk......ksssk......kssddkksdddk...", "...kssssddk...kssdsd....kdsddsdk......ksssk......ksdddkksssdk...", "...kssssddk...kssdsd....kdsddsdk......ksssd......ksdsddksdsdk...", "....kssdsdk...ksssddk...kssssddk.....kssdsdk.....ksssddksdsdk...", "....kssdsddk..ksssddk...ksssddkk.....kssdsdk......ksdsdkkdsdk...", "....kssdsddk.ksdssddk..kssdsddkk.....kssdsddk.....ksdsddkdsdk...", "....kssdsddk.ksdssddk..kssdsddk......kssdsssk.....ksdsddkdsdk...", "....kkkkkkkk.kkkkkkk...kkkkkkkk......kkkkkkkk.....kkkkkkkkkkk..."] },   // Baba Yaga's paling, two skulls on its stakes (Д359 A)
 };
 const DOOR_ROWS = new WeakMap();
-const TSP = new WeakMap();   // (tsp's pictures, by a sprite's own rows)   // a door's sheet rows with its marks in a world's ink, by the ink's letter (see dRows)
+const TSP = new WeakMap(), VTSP = new WeakMap();   // (tsp's pictures, by a sprite's own rows; vtsp's, by its rows, side, pixel and inks)   // a door's sheet rows with its marks in a world's ink, by the ink's letter (see dRows)
 // The way out pulls at `pull` R/s into the hole, `spin` R/s round it at first, and shrinks the
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
 // ledges (at a crawler on them, say) passes under it, a full one up from the top ledge gets in.
@@ -5017,9 +5017,10 @@ vec3 shadeOf(vec3 c, float w) {   // (w: how far a hueless ink goes toward the w
 const TILE_MAX = 128, TILES = { list: [], byKey: new Map(), tex: null, n: 0, u: new Int32Array(4 * TILE_MAX) };   // (128: the eight worlds' ledges and rooms
 // need about 90 together, the five open ones 66, past the 64 there were: a sixth world's in one sitting drew the first picture, the Village's; 128 ivec4s keep the
 // shader well inside WebGL2's 224 uniform vectors)
+let TILES_VKEY = 0;   // (vtsp's pictures' own keys)
 const TILE_LIM = 2048;   // (the atlas's side: WebGL2 promises textures of 2048 at least; past a phone's limit texImage2D fails without a word, the pictures wrong)
 const tileId = (rows) => {
-  const key = rows.join('/'); let id = TILES.byKey.get(key); if (id !== undefined) return id;
+  const key = rows.key || rows.join('/'); let id = TILES.byKey.get(key); if (id !== undefined) return id;
   const w = rows[0].length, h = rows.length, K = TILES.pk || (TILES.pk = { x: 0, y: 0, cw: 0 });   // (packed down columns TILE_LIM tall, the columns side by side)
   if (K.y + h > TILE_LIM) { K.x += K.cw; K.y = 0; K.cw = 0; }
   if (TILES.list.length >= TILE_MAX || K.x + w > TILE_LIM) { TILES.list.length = 0; TILES.byKey.clear(); TILES.at = []; TILES.n = -1; K.x = K.y = K.cw = 0; TILES.resets = (TILES.resets || 0) + 1; }   // (full all the same: begun
@@ -5032,8 +5033,9 @@ const tileUpload = (gl) => {   // (again whenever a picture was added since)
   TILES.list.forEach((rows, id) => { const [x0, y0] = TILES.at[id]; W = Math.max(W, x0 + rows[0].length); H = Math.max(H, y0 + rows.length); });
   const px = new Uint8Array(W * H * 4);
   TILES.list.forEach((rows, id) => {
-    const [x0, y0] = TILES.at[id];
-    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '.') return; const lc = ch === 'd' || ch === 'D' ? 's' : ch.toLowerCase(), o = ((y0 + j) * W + x0 + i) * 4; px[o] = keys.indexOf(ICON_INK[lc]); px[o + 1] = lc !== ch ? 255 : 0; px[o + 3] = 255; }));
+    const [x0, y0] = TILES.at[id], w = rows[0].length;
+    if (rows.px) for (let j = 0; j < rows.length; j++) px.set(rows.px.subarray(j * w * 4, (j + 1) * w * 4), ((y0 + j) * W + x0) * 4);   // (vtsp's: its texels made already)
+    else rows.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '.') return; const lc = ch === 'd' || ch === 'D' ? 's' : ch.toLowerCase(), o = ((y0 + j) * W + x0 + i) * 4; px[o] = keys.indexOf(ICON_INK[lc]); px[o + 1] = lc !== ch ? 255 : 0; px[o + 3] = 255; }));
     TILES.u.set([x0, y0, rows[0].length, rows.length], 4 * id);
   });
   if (!TILES.tex) TILES.tex = gl.createTexture();
@@ -5081,7 +5083,8 @@ void main() {
     lp.x += 23 * (lp.y >= 0 ? lp.y / d.w : -1 - (-1 - lp.y) / d.w);   // starts down; less than 0 mirrored; each repeat down shifted along, so a tall block shows no grid)
     vec4 tx = texelFetch(uAtlas, d.xy + ivec2(((lp.x % d.z) + d.z) % d.z, ((lp.y % d.w) + d.w) % d.w), 0);
     if (tx.a < 0.5) discard;
-    col = PAL[int(tx.r * 255.0 + 0.5)]; if (tx.g > 0.5) col = mix(PAL[0], col, 0.5);   // (an uppercase ink: its darker half, as vsp draws it)
+    col = PAL[int(tx.r * 255.0 + 0.5)]; int gq = int(tx.g * 255.0 + 0.5), st = int(tx.b * 255.0 + 0.5); if (gq == 255) col = mix(PAL[0], col, 0.5);   // (an uppercase ink: its darker half, as vsp draws it)
+    if ((st == 1 && tone(4, g) > 0.5) || (st == 2 && tone(6, g) > 0.5)) col = shadeOf(col, 0.35); if (gq > 0 && gq < 255) k = 1.0 + float(gq) / 200.0;   // (vtsp's: its step's shade, VOL, and its own tone from the black, DEPTH, as its boxes had)
   }
   else if (t == 9) {                                                          // ellipse lit from the top left: ink p1 in tones down to the right
     a = aa(length(vL) - 1.0);
@@ -5721,7 +5724,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const n = FV[0].length, q = farQ(n, true), x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q);
     const i0 = menu ? 0 : Math.max(0, Math.ceil((lv.l - x0) / q - 1e-6)), i1 = menu ? n : Math.min(n, Math.floor((lv.r - x0) / q + 1e-6));
     let c = farCut.get(FV); if (!c || c.i0 !== i0 || c.i1 !== i1) farCut.set(FV, (c = { i0, i1, rows: i0 === 0 && i1 === n ? FV : FV.map((r) => r.slice(i0, i1)) }));   // (its own arrays: vsp keeps its boxes by them)
-    vsp(c.rows, x0 + i0 * q, y0, false, a, q);
+    if (window.__noAtlas) vsp(c.rows, x0 + i0 * q, y0, false, a, q); else tsp(a > 1 && a <= DIM && VSP_SPECK ? vspClean(c.rows) : c.rows, x0 + i0 * q, y0, q, a);   // (one picture of the atlas, as vsp's boxes drew it, specks cleaned: its boxes were 450–1150 of a screen)
     return [x0, y0, q];   // (where the whole picture lies: its lights by it)
   };   // a far picture's pixel: two game pixels, on the main screen as many whole ones
   // as fill it edge to edge (no walls there: a phone's game pixel is small, its 111-116 across were narrower than it; owner, 2026-10-28: «задник в мобильном на главном экране
@@ -5767,6 +5770,25 @@ Renderer.prototype.draw = function (g, alpha) {
   const tsp = (rows, x, y, q = PIX.base, a = 1, flip = false) => {   // a sprite as one picture of the atlas (TILES, a game pixel a texel: its pixel q / PIX.size of them), not its runs of boxes
     const f = Math.max(1, Math.round(q / PIX.size)); let T = TSP.get(rows); if (!T || T.f !== f) { const pic = []; for (const r of rows) { const u = [...r].map((c) => c.repeat(f)).join(''); for (let k = 0; k < f; k++) pic.push(u); } TSP.set(rows, (T = { f, pic })); }
     const hw = (rows[0].length * q) / 2, hh = (rows.length * q) / 2; F(x + hw, y + hh, hw, 0, 0, hh, PAL.white, a, 11, hw, hh, (flip ? -1 : 1) * (tileId(T.pic) + 0.5));   // (flip: mirrored, off a right wall)
+  };
+  const vtsp = (rows, x, y, flip, q, inks = null, tag = '') => {   // a sprite in volume as one picture of the atlas, not its boxes: each texel its ink, its tone from the black and its
+    // step's shade baked in (vsp's `vol`, or fspr's with `inks`, its letters' [ink, alpha]); mirrored as built (its light from the same side either way)
+    const f = Math.max(1, Math.round(q / PIX.size)), kk = (flip ? 'l' : 'r') + f + tag; let C = VTSP.get(rows); if (!C) VTSP.set(rows, (C = {}));
+    let pic = C[kk];
+    if (!pic) {
+      const W = rows[0].length, H = rows.length, B = volBands(rows, flip), keys = Object.keys(PAL), px = new Uint8Array(W * f * H * f * 4);
+      for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const ch = flip ? rows[j][W - 1 - i] : rows[j][i]; if (ch === '.') continue;
+        let ink, al; if (inks) [ink, al] = inks[ch] || SPR_INK[ch] || SPR_INK.k; else { const lc = ch === 'd' ? 's' : ch.toLowerCase(); ink = PAL[ICON_INK[lc]]; al = lc !== ch ? 1.5 : 1; }
+        const v = B[j * W + i], stp = (!inks && ch === 'k') || !v ? 0 : v === -1 ? 1 : 2, pi = keys.findIndex((k) => PAL[k] === ink), gq = al > 1 ? Math.round((al - 1) * 200) : 0;
+        for (let b = 0; b < f; b++) for (let a = 0; a < f; a++) { const o = (((j * f + b) * W * f) + i * f + a) * 4; px[o] = pi; px[o + 1] = gq; px[o + 2] = stp; px[o + 3] = 255; } }
+      pic = C[kk] = new Array(H * f).fill('.'.repeat(W * f)); pic.px = px; pic.key = 'v' + TILES_VKEY++;
+    }
+    x = onGrid(x); y = onGrid(y);   // (on the game's pixel: a ledge's foot half a pixel off had its boxes' edge rows drawn twice, its picture a row off them)
+    const hw = (rows[0].length * q) / 2, hh = (rows.length * q) / 2; F(x + hw, y + hh, hw, 0, 0, hh, PAL.white, 1, 11, hw, hh, tileId(pic) + 0.5);
+  };
+  const ksp = (rows, x, y, flip, a, q, vol, sh) => {   // a kit's sprite as one picture of the atlas where it can be (not swaying, not faded): in volume vtsp's, else
+    // tsp's with vsp's specks cleaned; else vsp's boxes
+    if (sh || a < 1 || window.__noAtlas) vsp(rows, x, y, flip, a, q, vol, sh); else if (vol && VOL_ON) vtsp(rows, x, y, flip, q); else tsp(a > 1 && a <= DIM && VSP_SPECK ? vspClean(rows) : rows, x, y, q, a, flip);   // (window.__noAtlas: the boxes, to compare)
   };
   const kit9At = (id, wx, b, d, a = 1, lit = true) => {   // a thing off its sheet (KIT9) at a ledge's wall end, one picture of the atlas; its lights' cores lights of the dark
     const S = KIT9[id], q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + S.dx * q : snap(wx) - (S.dx + n) * q, y0 = snap(b) - S.base * q;
@@ -5883,7 +5905,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const dx = X(Math.min(1.6, 0.1 + (dc * Pk) / t)), flip = wl ? mir : !mir, x0 = sn(flip ? dx + dcN * Pk : dx - dcN * Pk), y1 = d.y1, top = y1 - (hh - (shop ? r1 + 1 : r0)) * Pk, wy = y1 - hh * Pk;
     const dw = shop ? Math.max(0.35 * t, ((c1 - c0 + 1) / 2) * Pk) : 0.3 * t, x = dx, y = (top + y1) / 2;
     F(dx, (top + y1) / 2, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
-    fspr(id, x0, y1, flip, null, DOOR_INKW);
+    if (VOL_ON && !window.__noAtlas) { const rw = sprRows(id), Pk = PIX.base; vtsp(rw, onGrid(flip ? x0 - rw[0].length * Pk : x0), onGrid(y1 - rw.length * Pk), flip, Pk, DOOR_INKW, 'D' + DL); } else fspr(id, x0, y1, flip, null, DOOR_INKW);   // (one picture of the atlas: its boxes were 2300 of a screen)
     if (!shop) {   // the stash's door ajar: a dark gap, purple light down both its edges and over it
       box(sn(dx - dw), sn(top), sn(dx + dw), y1, INK.dark, 1, 0, 10, 0);
       for (const e of [-1, 1]) box(Math.min(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), sn(top), Math.max(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), y1, c, 1, 0, 10, 0);
@@ -5967,7 +5989,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const cm = flip ? n - cm0 : cm0, x0 = sn(dx - cm * q), y0 = y1 - S.base * q;
     const my = y0 + ((r0 + r1 + 1) / 2) * q, dw = sn(0.7 * t);
     F(dx, my, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
-    vsp(dRows(S.rows), x0, y0, flip, 1, q, !S.flat);
+    if (VOL_ON && !S.flat && !window.__noAtlas) vtsp(dRows(S.rows), x0, y0, flip, q); else vsp(dRows(S.rows), x0, y0, flip, 1, q, !S.flat);   // (one picture of the atlas: its boxes were 800–1800 of a screen)
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
     if (shop) { const ry = sn(my); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
     else { const ry = sn(y1 - 0.5 * t); for (let k = 0; k < 3; k++) disc(dx + (k - 1) * rr * 0.5, ry - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
@@ -6183,7 +6205,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const vlamps = [];   // the lights the kits put on this screen, for the dark: the Mine's lanterns, the Village's stone lanterns, the forest's eyes, candles and moon, Golden Gai's far
   const gaiAt = (S, wx, b, d, a = 1, sh = null) => {   // a Golden Gai thing (GAI) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + S.dx * q : snap(wx) - (S.dx + n) * q;
-    vsp(S.rows, x0, snap(b) - S.base * q, d < 0, a, q, a === 1 && !S.flat, sh);
+    ksp(S.rows, x0, snap(b) - S.base * q, d < 0, a, q, a === 1 && !S.flat, sh);   // (its boxes were 1500 of a screen)
   };
   const gaiFar = () => {   // Golden Gai far off, by level (TFAR): screen-fixed, low, at a quarter (DIM), two game pixels a sheet pixel, centred, its foot at farY (as the
     // Mine's MFAR)
@@ -6362,7 +6384,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const iwAt = (S, wx, b, d, a = 1, ox = S.dx, base = S.base, sh = null) => {   // an Iwami thing (IW) at a ledge's wall end, one sheet pixel a game pixel, mirrored off the right wall; its orange and yellow (a
     // flame, a lit window) lights of the dark
     const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + ox * q : snap(wx) - (ox + n) * q, y0 = snap(b) - base * q;
-    vsp(S.rows, x0, y0, d < 0, a, q, a === 1 && !S.flat, sh);
+    ksp(S.rows, x0, y0, d < 0, a, q, a === 1 && !S.flat, sh);
     iwLit(S);
     for (const [u, v] of S.lit) vlamps.push([d > 0 ? x0 + (u + 0.5) * q : x0 + (n - u - 0.5) * q, y0 + (v + 0.5) * q, 0.4, 1.4]);
     return [x0, y0];
@@ -8604,6 +8626,8 @@ Renderer.prototype.draw = function (g, alpha) {
 };
 // The menu's frame (owner, 2026-10-23, the Figma «Main»): its backdrop (MENU_FS) and the hero alone over it, big, to drag and press (menuTouch in
 // game.js): its shadow, body, face and the puffs a poke sends off, on the game-pixel grid like the levels; no 2.5D, nothing of a level.
+{ const once = Renderer.prototype.draw;   // a frame whose pictures filled the atlas (TILES) drawn again: its pictures before the reset had their places in the old one
+  Renderer.prototype.draw = function (g, alpha) { const r0 = TILES.resets || 0; once.call(this, g, alpha); if ((TILES.resets || 0) !== r0) once.call(this, g, alpha); }; }
 Renderer.prototype.drawMenu = function (g, alpha) {
   if (g.menuBack) {   // over its world's own background (owner, 2026-10-24; Game.menuBackdrop): that level's back and far view (draw's `menu`), at the menu's camera and time, the hero on its floor
     const real = g.lv, bk = g.menuBack; bk.cam = real.cam; bk.t = real.t; g.lv = bk;

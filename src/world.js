@@ -104,9 +104,12 @@ const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the 
 // than `rel` px/s, or falling onto it while over its middle at all; else a touch hurts. On level ground the feet are at the floor, under any enemy's middle,
 // so a touch from the side always hurts (742dd52 weighed the two middles: a squat one's side, a crawler's as it pulsed, came and went as a stomp). An enemy
 // that can be stomped looks scared with the hero over it within `look` R (Game.frame), and cross otherwise.
-const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350, look: 3 };
-const overFoe = (H, b) => H.maxY < b.cy;
-const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * S); };
+// `zone`: the stomp's reach a twentieth bigger (owner, 2026-10-29: «увеличь зону поражения врагов на 5%», its Б, from over it): the top half reaching a
+// twentieth of the enemy's radius under its middle (on level ground its middle is still far over the hero's feet: a side touch still hurts), the fall onto it
+// within 0.95 × 1.05 of the two radii across, not 0.95
+const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350, look: 3, zone: 1.05 };
+const overFoe = (H, b) => H.maxY < b.cy + (STOMP.zone - 1) * b.R;
+const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * STOMP.zone * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
 const FLEE_GO = { reach: 2.2, bird: [0.12, 0.1, 10], small: [0.2, 0.12, 11], fly: [2.5, 7, 1.5, 6], run: 7, fall: 30, life: 3.5, back: 0.6 };   // an animal that
 // flees the hero (fleeDraw): within `reach` tiles it goes; a bird crouches bird[0] s, springs bird[1] s, then flaps at bird[2] a second while it flies up and

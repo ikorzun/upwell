@@ -3120,6 +3120,100 @@ const CHUNKS = {
     '............',
     '............',
     '............'] },
+  // The Dark Forest's bonus caves (after the TV Tower's, one world at a time), in its stash room, Baba Yaga's hut (SK_ROOM), of her own things: the cobwebs
+  // you hang from ('~' under a block: taken 0.16 s into a rise and on, held 1.8 s, a creep of 5 tiles a second along it, off at its end), her mortars
+  // (movers to and fro), her skull lamps (BELLS) and her pestle (MOCHI). A web carries no puzzle: a creep goes 5 tiles at most, as far as a jump's drift
+  // or a dash, so its two rooms are gifts; the puzzles are the skulls (Fuji's bells' order) and the pestle (the Village's). Route-tested on 393×852 and
+  // 375×667, every ceiling holding too (an upgrade's), the way out the hole in the left wall, nothing to fall down within 3 tiles of it
+  // (research/caves-forest)
+  caveWebs: { d: 1, kind: 'cave', rows: [   // a gift: two cobwebbed canopies, a row of coins hanging under each web: jump up into the low one from the floor,
+    '............',   // hang and creep along it through them; up onto it (a jump and an air jump) and into the high one the same way; then up onto the high
+    '............',   // one, the big coins on it. Each web 5 tiles and more over where its jump starts (a web is taken 0.16 s into a rise), the low one 4 tiles
+    '............',   // from the left wall, the high one's end by the gift heart (a hang there may take it)
+    '............',
+    '.......OO...',
+    '......OOO...',
+    '.....#####..',
+    '.....~~~~~..',
+    '.....ooooo..',
+    '............',
+    '............',
+    '............',
+    '............',
+    '...####.....',
+    '...~~~~.....',
+    '...oooo.....',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveMortars: { d: 1, kind: 'cave', rows: [   // a gift: Baba Yaga's mortars (W, to and fro) one over another 4 tiles apart, a coin or two over each; hop from
+    '............',   // one to the next as they come by, the big coins on the shelf off the right wall at the top, past the top mortar's way (a jump from it
+    '............',   // goes up by the shelf's end, not under it), its underside 1.5 over the gift heart. Each mortar's way 4 tiles and more from the left wall
+    '..........OO',
+    '.........OOO',
+    '.........###',
+    '............',
+    '......o.....',
+    '.....o......',
+    '.....WW.....',
+    '............',
+    '........o...',
+    '.......o....',
+    '.......WW...',
+    '............',
+    '......o.....',
+    '.....o......',
+    '.....WW.....',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveSkulls: { d: 1, kind: 'cave', rows: [   // a puzzle: Baba Yaga's three skull lamps (BELLS, big to small) to light in their order, a wrong one and all go
+    '............',   // dark; lit, her gate (G) opens. The big one under a beam by the vault's way in (a jump and an air jump from the floor), the middle one
+    '............',   // under the low ledge (walked into), the small one under the vault's floor (a jump): bottom up they come middle, small, big. The vault on
+    '............',   // the right wall, its floor and roof two thick, its gate 4 tall (in as at Fuji's: a jump and an air jump from beside it), its coins 3.5
+    '............',   // tiles and more from any spot outside (the magnet)
+    '............',
+    '.....##.....',
+    '......4.####',
+    '........####',
+    '........GGO.',
+    '........GGOO',
+    '........GGOO',
+    '........GGOO',
+    '........####',
+    '........####',
+    '.........6..',
+    '............',
+    '............',
+    '..###.......',
+    '...5........',
+    '............',
+    '............'] },
+  caveSquash: { d: 1, kind: 'cave', rows: [   // a puzzle: Baba Yaga's pestle (K, its post P) over her mortar (U): stand in it and it comes down, and flattened
+    '............',   // you fit under the low beam (L) into the vault on the right wall; out up through its plank roof. The Village's cavePestle mirrored and
+    '............',   // two rows higher, its walkway one plank 4 tiles from the left wall
+    '............',
+    '............',
+    '............',
+    '.......=====',
+    '.......#...#',
+    '.......#OOO#',
+    '....KKK#OOO#',
+    '.......LOOO#',
+    '...P.......#',
+    '...=UUU#####',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............',
+    '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -3628,8 +3722,9 @@ const AMBUSH = { waves: [2], coins: 2 };
 const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] },
   ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] }, sea: { gift: ['caveSpouts', 'caveRafts'], puzzle: ['caveShell', 'caveKeel'] },
   tokyo: { gift: ['caveAwnings', 'cavePins'], puzzle: ['caveShutter', 'caveRush'] }, blocks: { gift: ['caveRungs'], puzzle: ['caveRungs'] },
-  sky: { gift: ['caveClouds', 'caveCascade'], puzzle: ['caveElevator', 'caveLid'] } };   // (the Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice'; the Sea's,
-// 'sea'; Tokyo's, 'tokyo'; the Danchi's, 'blocks': its one room in both places, З15 «В»; the TV Tower's, 'sky': its clouds, Д336 «A»)
+  sky: { gift: ['caveClouds', 'caveCascade'], puzzle: ['caveElevator', 'caveLid'] }, skazka: { gift: ['caveWebs', 'caveMortars'], puzzle: ['caveSkulls', 'caveSquash'] } };
+// (the Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice'; the Sea's, 'sea'; Tokyo's, 'tokyo'; the Danchi's, 'blocks': its one room in both places, З15 «В»;
+// the TV Tower's, 'sky': its clouds, Д336 «A», kept З21 «А»; the Dark Forest's, 'skazka': its webs, mortars, skulls and pestle)
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {

@@ -8272,7 +8272,7 @@ Renderer.prototype.draw = function (g, alpha) {
         const r0 = S.k ? Math.max(0, S.front - Math.ceil((mv.amp + mv.rush) * u2 * 1.6) - 1) : S.front + KT;   // (at the game's pixel its rows still behind from just over its front's lowest reach: what shows where a row is lifted is its own texture, not one ink)
         band.forEach((r, j) => { const c = at(() => r, j, j < S.front); if (j < S.front) fr.push(c); else if (j < S.front + KT) kt.push(c); if (j >= r0) st2.push(S.k && j < S.front ? at(() => r, j, true) : c); });
         for (let j = 0; j < NG; j++) st2.push(at((k) => gRow(k % 2, j), band.length + j, false));
-        const ug = Math.max(1, Math.round(u2)), ktg = []; for (let i = 0; i < kt.length; i += ug) ktg.push(turn(kt.slice(i, i + ug)));   // (its KT rows by twos at the game's pixel: a pair one lift, half the shapes)
+        const ug = Math.max(1, Math.round(3 * u2)), ktg = []; for (let i = 0; i < kt.length; i += ug) ktg.push(turn(kt.slice(i, i + ug)));   // (its KT rows by sixes at the game's pixel: six one lift, four steps down to the still body; to the eye as the twelve were, a third of the shapes: UPwell's nfwalk, 2026-10-29)
         HP[f] = { NC, front: turn(fr), kt: ktg, ug, rest: turn(st2), nRest: st2.length, r0 };
       }
       const HPf = HP[f], gl0 = Math.max(0, Math.floor((lv.l - start) / s)), gr0 = Math.min(HPf.NC, Math.ceil((lv.r - start) / s));

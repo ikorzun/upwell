@@ -5393,10 +5393,10 @@ const bossRows = (key, rows, g) => {   // rows made g of their size (frame 1's u
   if (GUIDE) r = pxClean(r); BOSS_SHRINK.set(ck, r); return r;
 };
 for (const id in FOE_SPRITES) if (!K9_SPR[id] && !UME_SPR[id]) {
-  const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0), F = bossFrames(id);
+  const fit = BOSS_FIT[id], flip = (d) => (fit ? fit[2] !== 0 && d.fd !== fit[2] : d.fd < 0);
   let warm = 2;   // its next pose to clean and lay in volume, one a frame from its fight's start: none costs a hitch when its move comes
   LOOK_FACE[id] = BOSS_LOOK.has(id) && fit && fit[3]
-    ? (d) => { const b = d.b, g = Math.max(0.05, b.growth), q = fit[4] ? bossFit(id, b) : 1, s = g * q, one = bossRows(id, FOE_SPRITES[id], s), P = b.pose, up = g > 0.97;   // (in volume: ?novol flat)
+    ? (d) => { const b = d.b, F = bossFrames(id), g = Math.max(0.05, b.growth), q = fit[4] ? bossFit(id, b) : 1, s = g * q, one = bossRows(id, FOE_SPRITES[id], s), P = b.pose, up = g > 0.97;   // (in volume: ?novol flat)
       // up: popped in (its growth springs to 1 and may settle a hair under it)
       if (F && up && warm <= F.rows.length + 1) { const r = bossFrame(id, warm); if (r && VOL_ON) { const w = bossRows(id + '#' + warm, r, q); volRects(w, false); volRects(w, true); } warm++; }
       const n = P && up ? P.f : 1, R = n > 1 && bossFrame(id, n), A = R && F.at[n - 1], z = one[0].length / FOE_SPRITES[id][0].length;   // (popping in: frame 1)

@@ -66,6 +66,7 @@ const FACE = { near: 4, scare: 2, joy: 1.2, dizzy: 1.2 };
 // `toPlank` of the plain one-tile ledges are laid as planks, to jump up through.
 const LEVEL = { wall: 12, thick: 0.75, plank: 0.32, spike: 0.42, ahead: 1.5, behind: 1.2, pocketEnd: 24, room: 4.5, toPlank: 0.35 };
 const DOOR = { w: 2.4, h: 2.8 };   // in R: a way into a shop or a stash, and the way back out
+const DOOR_ROWS = new WeakMap();   // a door's sheet rows with its marks in a world's ink, by the ink's letter (see dRows)
 // The way out pulls at `pull` R/s into the hole, `spin` R/s round it at first, and shrinks the
 // hero away in `shrink` s. It hangs `rise` R over the top of the shaft: a jump across the last
 // ledges (at a crawler on them, say) passes under it, a full one up from the top ledge gets in.
@@ -5662,6 +5663,9 @@ Renderer.prototype.draw = function (g, alpha) {
     }
   };
   const seen = (y0, y1) => y1 > top && y0 < bot;
+  const DI = th.wall, DL = Object.keys(ICON_INK).find((k) => PAL[ICON_INK[k]] === DI) || 's';   // a door's marks (a shop's red, a stash's and a trial's purple or yellow) in its world's
+  // ink, as the rooms behind them are (owner: «двери тоже сделай в цвет мира»); what bobs inside tells a shop from a stash
+  const dRows = (rows) => { let m = DOOR_ROWS.get(rows); if (!m) DOOR_ROWS.set(rows, (m = {})); return m[DL] || (m[DL] = rows.map((r) => r.replace(/[rp]/g, DL).replace(/[RP]/g, DL.toUpperCase()))); };   // (a sheet door's)
   // A door: a dark opening square on the ledge (and in the wall), framed but on the wall's side, with what is
   // inside. A shop's (gold) and a stash's (violet) are magic: a breathing glow round them, white studs and a gem
   // on the frame, lights turning in the dark of the opening, sparks rising up past it.
@@ -5680,7 +5684,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (th.danchi && kind !== 'exit') { (kind === 'shop' ? dcShop : dcStash)(d); return; }   // the Danchi's (see dcShop, dcStash)
     if (th.glass && kind !== 'exit' && kind !== 'trial') { iyaDoor(d, kind, TW[kind === 'shop' ? 'shop' : 'stash']); return; }   // the Tower's: the Main Deck's souvenir counter
     // under its red noren, a steel service hatch glowing purple (Д247 A, Д248 A, TW; see iyaDoor)
-    const magic = kind !== 'exit', c = !magic ? th.lip : kind === 'shop' ? INK.coin : PAL.purple, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
+    const magic = kind !== 'exit', c = !magic ? th.lip : DI, P = PIX.size, f = (magic ? 3 : 2) * P, glow = magic ? c : th.wall;
     const x = (d.x0 + d.x1) / 2, y = (d.y0 + d.y1) / 2, r = (d.x1 - d.x0) / 2, hh = (d.y1 - d.y0) / 2;
     F(x, y, r * 2.1, 0, 0, hh * 1.8, glow, 0.5 + 0.14 * Math.sin(T * 2.6 + x), 1); F(x, d.y0 + r, r * 1.6, 0, 0, r * 1.6, glow, 0.45 + 0.2 * Math.sin(T * 3.1 + x), 1);   // a glow breathing round it, brightest round the arch
     if (magic) F(x, y, r * 1.4, 0, 0, hh * 1.25, INK.white, 0.22, 1);
@@ -5723,6 +5727,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // Fuji's sprites cut off its GPT sheets (FUJI_SPR: its props and doors)
   const SPR_INK = { k: [PAL.black, 1], w: [PAL.gray, 1], g: [PAL.gray, 1.62], b: [PAL.blue, 1], o: [PAL.orange, 1], p: [PAL.purple, 1], a: [PAL.aqua, 1], G: [PAL.gray, 1], r: [PAL.orange, 1], y: [PAL.orange, 1] };
   const DOOR_INK = { r: [PAL.red, LIT], y: [PAL.yellow, 1] };   // (a door's: its red the shop's mark, muted as a thing's (К6: bright red is danger's), its yellow a window's light)
+  const DOOR_INKW = Object.assign({}, DOOR_INK, { r: [DI, 1], p: [DI, 1] });   // (its marks in the world's ink: DI)
   const postId = (n) => {   // the station post with its numeral: n's rows made once (a level of no station keeps the sheet's 八)
     const id = 'post' + n; if (FUJI_SPR[id] || !POST_NUM[n]) return FUJI_SPR[id] ? id : 'post';
     const rows = sprRows('post').map((row) => [...row]), gl = POST_NUM[n].split('/');   // (its rows as sprRows keeps them: a level without a numeral drawn first had made the string an object)
@@ -5760,18 +5765,18 @@ Renderer.prototype.draw = function (g, alpha) {
   // doorway, 3.4 tiles out from the wall, its roof deep in snow. The stash's (E): its door framed purple and lit warm inside, a little stone lantern by it; the
   // shop's (F): a red noren hanging in its doorway, a face on it, and a lit window beside it. What is inside bobs in the doorway; sparks rise past it.
   const hut = (d, kind) => {   // (a real Fuji hut, stones on its roof, cut off its sheet: the shop's open, d58 A; the stash's shut for the winter, d59 D)
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : PAL.purple;
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = DI;
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), id = shop ? 'shop' : 'stash', rows = sprRows(id), [c0, c1, r0, r1] = FUJI_DOOR[id], Pk = PIX.base, hh = rows.length;
     const W = rows[0].length, dcN = (c0 + c1 + 1) / 2, mir = dcN > W - dcN, dc = mir ? W - dcN : dcN;   // (its door kept near the wall, in the door's place: a hut
     // whose door is past its middle drawn mirrored; one whose door is far out set into the wall, as Fuji's huts are built into the slope)
     const dx = X(Math.min(1.6, 0.1 + (dc * Pk) / t)), flip = wl ? mir : !mir, x0 = sn(flip ? dx + dcN * Pk : dx - dcN * Pk), y1 = d.y1, top = y1 - (hh - (shop ? r1 + 1 : r0)) * Pk, wy = y1 - hh * Pk;
     const dw = shop ? Math.max(0.35 * t, ((c1 - c0 + 1) / 2) * Pk) : 0.3 * t, x = dx, y = (top + y1) / 2;
     F(dx, (top + y1) / 2, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
-    fspr(id, x0, y1, flip, null, DOOR_INK);
+    fspr(id, x0, y1, flip, null, DOOR_INKW);
     if (!shop) {   // the stash's door ajar: a dark gap, purple light down both its edges and over it
       box(sn(dx - dw), sn(top), sn(dx + dw), y1, INK.dark, 1, 0, 10, 0);
-      for (const e of [-1, 1]) box(Math.min(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), sn(top), Math.max(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), y1, PAL.purple, 1, 0, 10, 0);
-      box(sn(dx - dw) - 2 * P, sn(top) - 2 * P, sn(dx + dw) + 2 * P, sn(top), PAL.purple, 1, 0, 10, 0);
+      for (const e of [-1, 1]) box(Math.min(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), sn(top), Math.max(sn(dx + e * dw), sn(dx + e * dw) + e * 2 * P), y1, c, 1, 0, 10, 0);
+      box(sn(dx - dw) - 2 * P, sn(top) - 2 * P, sn(dx + dw) + 2 * P, sn(top), c, 1, 0, 10, 0);
     }
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, ry = shop ? sn((top + y1) / 2) : y, rr = shop ? Math.max(dw, 0.6 * t) : 0.42 * t;
     if (shop) { disc(x, ry + bob, rr * 0.42, INK.coinD, 1); disc(x, ry + bob, rr * 0.32, INK.coin, 1); disc(x - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
@@ -5788,7 +5793,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // a thatch in two tiers under a dark ridge, grey posts on a stone footing, a lit window, a purple noren, a lantern off a bracket. What is inside bobs in the
   // doorway; sparks rise past it.
   const farmhouse = (d, kind) => {
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : kind === 'trial' ? INK.coin : PAL.purple, y1 = d.y1, px = P / t;   // (a trial's yellow: coins to win)
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = DI, y1 = d.y1, px = P / t;
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
     const on = (u) => lv.rects.some((q) => !q.gone && Math.abs(q.y0 - y1) < 2 && Math.min(X(u - 0.3), X(u + 0.3)) >= q.x0 && Math.max(X(u - 0.3), X(u + 0.3)) <= q.x1);   // its ledge goes on out under u
@@ -5829,7 +5834,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
     F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-    bx(0.55, dh - noren, 1.95, dh, c, 0, shop ? LIT : 1);   // the noren in three panels, a white crest on its middle one (the shop's red muted: К6, bright red is danger's)
+    bx(0.55, dh - noren, 1.95, dh, c);   // the noren in three panels, a white crest on its middle one (the shop's red muted: К6, bright red is danger's)
     for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.2, PAL.black);
     for (const [u, v] of [[1.25, dh - 0.22], [1.15, dh - 0.38], [1.35, dh - 0.38]]) bx(u - px, v - px, u + px, v + px, INK.white);
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
@@ -5844,14 +5849,14 @@ Renderer.prototype.draw = function (g, alpha) {
   // The Village's door from the Iya valley (Д91 «А», VDOOR): the shop a soba shop, the stash the cellar under a farmhouse, off their sheets; its doorway's mark
   // where the old farmhouse had its door (1.25 tiles out from the wall); a glow breathing round it, what is inside bobbing in it, sparks rising past it
   const iyaDoor = (d, kind, S0 = null) => {   // (S0: another world's house off its sheet, the Mine's, the Sea's)
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, c = shop ? PAL.red : PAL.purple, y1 = d.y1, q = PIX.base;
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, c = DI, y1 = d.y1, q = PIX.base;
     const S = S0 || VDOOR[shop ? 'shop' : 'stash'], n = S.rows[0].length, [c0, c1, r0, r1] = S.mark || [n >> 2, n >> 2, 0, 0];
     const dx = sn((wl ? lv.l : lv.r) + (wl ? 1 : -1) * 1.25 * t), cm0 = (c0 + c1 + 1) / 2, mir = cm0 > n / 2, flip = wl ? mir : !mir;   // (a house whose door is past its
     // middle drawn mirrored, so that its door is the nearer the wall and less of it in the wall, as Fuji's huts)
     const cm = flip ? n - cm0 : cm0, x0 = sn(dx - cm * q), y0 = y1 - S.base * q;
     const my = y0 + ((r0 + r1 + 1) / 2) * q, dw = sn(0.7 * t);
     F(dx, my, 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
-    vsp(S.rows, x0, y0, flip, 1, q, !S.flat);
+    vsp(dRows(S.rows), x0, y0, flip, 1, q, !S.flat);
     const bob = Math.round(Math.sin(T * 3 + dx) * 1.5) * P, rr = dw;
     if (shop) { const ry = sn(my); disc(dx, ry + bob, rr * 0.42, INK.coinD, 1); disc(dx, ry + bob, rr * 0.32, INK.coin, 1); disc(dx - rr * 0.1, ry + bob - rr * 0.1, rr * 0.08, INK.white, 1); }
     else { const ry = sn(y1 - 0.5 * t); for (let k = 0; k < 3; k++) disc(dx + (k - 1) * rr * 0.5, ry - (k === 1 ? rr * 0.4 : 0) + bob, rr * 0.26, INK.coin, 1); }
@@ -5865,7 +5870,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // water as in Ine, built round the doorway on the ledge, its boat bay under the ledge behind (DIM); the noren red for the shop, purple for the stash (the
   // owner's), a lit window, a lattice panel by the door, a lantern off its eave. What is inside bobs in the doorway; sparks rise past it.
   const funaya = (d, kind) => {
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = shop ? PAL.red : kind === 'trial' ? INK.coin : PAL.purple, y1 = d.y1, px = P / t;   // (a trial's yellow: coins to win)
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = DI, y1 = d.y1, px = P / t;
     const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
     const W = 3.2, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);
@@ -5881,7 +5886,7 @@ Renderer.prototype.draw = function (g, alpha) {
     bx((W - 0.3) / 2, eave + 1.15, (W - 0.3) / 2 + 2 * px, eave + 1.45, PAL.gray);   // its ridge's end
     bx(0.55, 0, 1.95, dh, INK.dark);   // the doorway, warm inside
     F(dx, Y(0.6), 0.6 * t, 0, 0, 0.7 * t, PAL.orange, 0.5, 1);
-    bx(0.55, dh - noren, 1.95, dh, c, 0, shop ? LIT : 1);   // the noren, its slits, its crest (the shop's red muted: К6)
+    bx(0.55, dh - noren, 1.95, dh, c);   // the noren, its slits, its crest (the shop's red muted: К6)
     for (const u of [1.02, 1.48]) bx(u, dh - noren, u + px, dh - 0.22, PAL.black);
     for (const [u, v] of [[1.25, dh - 0.24], [1.15, dh - 0.4], [1.35, dh - 0.4]]) bx(u - px, v - px, u + px, v + px, INK.white);
     const lan = (u, v) => { bx(u, v + 0.3, u + px, eave - 0.15, PAL.gray); bx(u - 0.15, v - 0.2, u + 0.17, v + 0.3, PAL.orange); bx(u - 0.15, v + 0.04, u + 0.17, v + 0.04 + px, PAL.black); F(X(u), Y(v + 0.05), 0.45 * t, 0, 0, 0.45 * t, PAL.orange, 0.4, 1); };   // a lantern off the eave, lit
@@ -5927,7 +5932,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
   };
   const izba = (d) => {   // Baba Yaga's hut on chicken legs (the shop, E), leaning out, its roof sagging, a smoking chimney, a skull over its door
-    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.red, G = PAL.gray, K = PAL.black, HALF = 1.5;
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = DI, G = PAL.gray, K = PAL.black, HALF = 1.5;
     const Wd = 3.3, eave = 2.5, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t), lean = 0.5;   // tiles its top leans out
     const sk = (v) => (lean * v) / eave;   // how far a height leans
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
@@ -5957,7 +5962,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // stone, a keystone with its mark over it, a lock, its cracks glowing purple (the stash's mark), a lamp. What is inside bobs in the doorway (skInside), a glow
   // breathes round it.
   const mnStash = (d) => {
-    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = DI, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) it
     for (let i = 0; i < 9; i++) { const q = i / 8, u = q < 0.3 ? 0.32 : q > 0.7 ? 2.18 : 0.32 + ((q - 0.3) / 0.4) * 1.86, v = q < 0.3 ? (q / 0.3) * dh : q > 0.7 ? ((1 - q) / 0.3) * dh : dh; bx(u - 0.22, v - 0.15, u + 0.22, v + 0.27, G, 1, 1.5); }   // its frame of stones (half dark)
     bx(0.5, 0, 2.0, dh, G, 3, 1.5); for (const v of [0.45, 1.2, 1.75]) bx(0.5, v, 2.0, v + 0.08, K);   // its door, timber (half dark: it was pure white), iron bands
@@ -5973,7 +5978,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // lantern lit; the stash a grille deep in the open end of a giant hollow beam, its purple glow (its mark) through it, no sparks rising past it (owner: «delete
   // arrows»). What is inside bobs in the doorway (skInside), a glow breathes round it. The beams' tops dotted, never a ledge's white edge.
   const dcShop = (d) => {
-    const { t, sn, X, Y, bx, px } = skDoorAt(d), c = PAL.red, G = PAL.gray, K = PAL.black, O = PAL.orange, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    const { t, sn, X, Y, bx, px } = skDoorAt(d), c = DI, G = PAL.gray, K = PAL.black, O = PAL.orange, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its door
     bx(0.15, 0, 2.75, dh + 0.35, G, 0, 1.5); for (let v = 0.25; v < dh + 0.35; v += 0.25) bx(0.15, v, 2.75, v + px, K, 0, 0.6);   // its board-formed front (half dark)
     bx(-0.05, dh + 0.45, 3.4, dh + 1.25, G, 2, 1.5); bx(0.1, dh + 0.35, 3.2, dh + 0.45, G, 4, 1.5); bx(2.7, dh + 0.5, 3.4, dh + 1.2, G); bx(2.7 + 2 * px, dh + 0.5 + 2 * px, 3.4 - 2 * px, dh + 1.2 - 2 * px, K);   // the beam, its soffit, its open end
@@ -5985,14 +5990,14 @@ Renderer.prototype.draw = function (g, alpha) {
     skInside(d, 'shop', c, dx, dw, dh + 1.1);
   };
   const dcStash = (d) => {
-    const { t, sn, X, Y, bx, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    const { t, sn, X, Y, bx, px } = skDoorAt(d), c = DI, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round it
     bx(0.15, 0, 2.75, dh + 0.6, G, 2, 1.5); bx(0.15, dh + 0.6, 2.75, dh + 0.7, G, 2); bx(0.32, 0, 2.58, dh + 0.45, K); bx(0.32, dh + 0.3, 2.58, dh + 0.45, G, 4, 1.5);   // the beam's end: its thick walls, the dark in it, its soffit
     bx(0.5, 0, 2.0, dh, c, 0, 1.6); for (let u = 0.62; u < 2.0; u += 0.2) bx(u, 0, u + px, dh, K); for (let v = 0.2; v < dh; v += 0.2) bx(0.5, v, 2.0, v + px, K);   // a grille, the glow through
     skInside(d, 'stash', c, dx, dw, dh, false);
   };
   const pech = (d) => {   // a crooked Russian stove (the stash, E), tall and lumpy and cracked, its mouth the door, its chimney bent, a bench step off it with a shelf over it
-    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = PAL.purple, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
+    const { t, sn, X, Y, bx, ln, px } = skDoorAt(d), c = DI, G = PAL.gray, K = PAL.black, dh = 2.0, dx = X(1.25), dw = sn(0.7 * t);
     const Wd = 2.6, ht = 3.0, bend = 0.5;   // its width, its height, its chimney's crook
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.4 + 0.12 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round its mouth
     for (const [u, v, ru, rv] of [[0.4, ht - 0.35, 0.55, 0.45], [Wd - 0.4, ht - 0.4, 0.55, 0.5], [Wd / 2, ht - 0.25, Wd * 0.4, 0.4], [-0.02, 0.6, 0.18, 0.6], [Wd + 0.02, 0.7, 0.16, 0.55]]) F(X(u), Y(v), ru * t, 0, 0, rv * t, G, 1, 0);   // its lumpy shoulders, its sides bulging
@@ -7273,6 +7278,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // colour only for lights (eyes, see skEyes; a candle). Roots half dark (behind the ledge's face), a cobweb that is only decor dim (the white one you hold is
   // this world's moss). False for what keeps the common look.
   const skazkaRect = (r) => {
+    if (lv.kind === 'treasure') return false;   // (a Forest cave's ledges plain, in the Forest's grey: its shafts' roots, hollows and mortars over its backdrop and props went past the owner's ~2500; its own look after З22)
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);

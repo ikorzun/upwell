@@ -244,6 +244,8 @@ function loadSave(s) {
   c.order = ids;   // the worlds' order this save is in (the next change follows it)
   delete c.open;   // what is open comes of the stars (campOpen)
   save.v = 7; save.stick = true; saveIn = true;   // only the stick for now (user): its choice against the keys is hidden
+  if (!('pal' in save)) save.pal = 'snes';   // the settings' SNES on unless set off, its off a null (owner, 2026-10-29: «палитру snes включи по умолчанию»)
+  if (window.fxPalette) fxPalette();   // (the page's colours with it at once)
   if (!Array.isArray(save.owned)) save.owned = [save.color];   // the colours bought (owner, 2026-10-28: sold now, not opened by coins): a save from before keeps the one it has on
   // (so `save` has no `owned` of its own: given one, a save from before would come in with it empty and its colour back to the first)
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not bought
@@ -3055,7 +3057,7 @@ function cardShade(d, i, tint, w, o) {   // SHADE_GLSL's shadeOf in 0–255: the
   o[i + 3] = 255;
 }
 function cardNormals(im, w, h, D = 1) {   // (D: its cells to a cell of the cut it was tuned on, STORY's `was`: its dome and slopes the same size on the card)
-  const t = document.createElement('canvas'); t.width = w; t.height = h; const g = t.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, w, h).data;
+  const t = document.createElement('canvas'); t.width = w; t.height = h; const g = t.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, w, h).data; t.width = t.height = 0;
   const n = w * h, ins = new Uint8Array(n), dist = new Float32Array(n), hgt = new Float32Array(n), out = new Float32Array(n * 3);
   const lum = (q) => { const f = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return Math.cbrt(0.2126 * f(d[q * 4]) + 0.7152 * f(d[q * 4 + 1]) + 0.0722 * f(d[q * 4 + 2])); };   // (about Oklab's L)
   for (let q = 0; q < n; q++) { ins[q] = d[q * 4 + 3] > 0 ? 1 : 0; dist[q] = ins[q] ? 1e4 : 0; }
@@ -3094,7 +3096,14 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
   let L = L0, thread = null, sheen = null, sg = null, img = null, masks = null;
   const show = (a, b) => { title.style.opacity = a; title.style.transform = `translateY(${8 * (1 - cardEase.out(a))}px)`; next.style.opacity = b; next.style.transform = `translateY(${8 * (1 - cardEase.out(b))}px)`; next.style.pointerEvents = b < 0.5 ? 'none' : ''; };
   show(0, 0);   // (under «reduce motion» at once once the art is in: before it, Next skipped a card unseen; QA)
-  const failSafe = setTimeout(() => { if (st.alive && !st.ready) { st.forced = true; show(1, 1); } }, 3000);   // the art late: Next all the same (review)
+  const failSafe = setTimeout(() => { if (st.alive && !st.ready && !st.flat) { st.forced = true; show(1, 1); track('card_fail', { id: c.id, why: 'late' }); } }, 3000);   // the art late: Next all the
+  // same (review); told, as each way its art can fail (card_fail), to find what left a phone's card black (owner, 2026-10-29: «после первого уровня карточка не прогрузилась»)
+  let pics = [];
+  const flat = (err) => {   // its planes not made or not drawn (a phone short of canvas memory gets no 2D context): its pictures as they are, still, and its Next
+    if (st.flat) return; st.flat = true; st.ready = false; st.forced = true; cancelAnimationFrame(st.raf);
+    clip.querySelectorAll('.spl').forEach((e) => e.remove()); for (const im of pics) if (im) { im.className = 'spl'; clip.append(im); }
+    show(1, 1); track('card_fail', { id: c.id, why: String(err).slice(0, 80) });
+  };
   const move = (e) => { const r = card.getBoundingClientRect(); st.gx = ((e.clientX - r.left) / r.width - 0.5) * 2; st.gy = ((e.clientY - r.top) / r.height - 0.5) * 2; st.lastIn = performance.now(); };
   const leave = () => { st.gx = 0; st.gy = 0; };
   card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
@@ -3103,8 +3112,8 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
     // a card's: a slow first answer kept as none left every later card without its motion)
     if (!st.alive) return;
     const ims = got.slice(0, -1), j = got[got.length - 1];
-    if (!ims[0]) { show(1, 1); return; }   // (no art: the card's ground only, and its Next: a card that did not load held the game for good; review)
-    L = (j && j[c.id]) || L0;
+    if (!ims[0]) { show(1, 1); track('card_fail', { id: c.id, why: 'noimg' }); return; }   // (no art: the card's ground only, and its Next: a card that did not load held the game for good; review)
+    pics = ims; L = (j && j[c.id]) || L0;
     const specs = [['plate', 0.25], ...(def ? def.planes : [])];
     ims.forEach((im, i) => {
       if (!im) return;
@@ -3113,6 +3122,7 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
       if (i > 0) {   // a figure's cells: what is not clear in its picture (its live cells' owner)
         const t = document.createElement('canvas'); t.width = w; t.height = h; const tg = t.getContext('2d'); tg.drawImage(im, 0, 0); const d = tg.getImageData(0, 0, w, h).data;
         pl.mask = new Uint8Array(w * h); for (let q = 0; q < w * h; q++) pl.mask[q] = d[q * 4 + 3] > 0 ? 1 : 0;
+        t.width = t.height = 0;   // (its memory back at once: WebKit counts a canvas's till it is collected)
       }
       if (CARD_VOL && i > 0) { pl.nrm = cardNormals(im, w, h, D); pl.vol = document.createElement('canvas'); pl.vol.width = w; pl.vol.height = h; pl.volKey = ''; pl.tint = cardTint(c.ink); pl.w = pl.id === 'hero' ? 1 : 0.35; }   // (its volume, CARD_VOL)
       planes.push(pl);
@@ -3129,8 +3139,9 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (CARD_BAYER[y & 3][x & 3] < n) d.data[(y * w + x) * 4 + 3] = 255;
       mg.putImageData(d, 0, 0); masks.push(m);
     }
+    if (planes.some((p) => !p.g) || (sheen && !sg)) throw new Error('no 2d context');
     st.ready = true; if (still) show(1, 1);
-  });
+  }).catch(flat);
   const rgb = RAINBOW_INK.map((v) => v.map((q) => Math.round(q * 255)));
   function drawPlane(p, level, f, blink) {   // its picture, its live cells this step, through the coming-in's dither (only when either changed)
     const lk = p.nrm ? cardLight(p, st.tx, st.ty) : '', key = level + ':' + (p.live.length ? f + (blink ? 'b' : '') : '') + lk;
@@ -3145,7 +3156,7 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
       if (e.kind === 'twinkle' && (f + i * 5) % 12 < 3) fill(e.cells, L.pal[2]);
       if (e.kind === 'light' && !LIVE.flick[(f + i * 4) % LIVE.flick.length]) fill(e.cells, L.pal[3]);
     });
-    if (level < 16) { g.globalCompositeOperation = 'destination-in'; g.drawImage(masks[level], 0, 0); }
+    if (level < 16 && masks) { g.globalCompositeOperation = 'destination-in'; g.drawImage(masks[level], 0, 0); }
   }
   function drawSheen(px, py) {   // the band of the six inks, its place by the tilt, dithered at its edges; as strong as the card is tipped
     const amt = Math.min(1, 1.6 * Math.hypot(px, py)), d = img.data; d.fill(0);
@@ -3172,9 +3183,10 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
       }
     }
   }
+  const tick = (now) => { try { step(now); } catch (err) { flat(err); } };
   function step(now) {
     if (!st.alive) return;
-    st.raf = requestAnimationFrame(step);
+    st.raf = requestAnimationFrame(tick);
     if (!st.ready) { st.last = now; return; }
     if (!st.t0) st.t0 = st.in0 = now - (settled ? 1e4 : 0);   // (the coming-in from the first frame its pictures are there)
     const dt = Math.min(0.05, (now - st.last) / 1000), t = (now - st.t0) / 1000, a = (now - st.in0) / 1000, K = kd(); st.last = now;
@@ -3193,9 +3205,10 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
     });
     if (thread) { drawThread(off, K * D); thread.style.opacity = still ? 1 : clamp01((a - CARD.step) / CARD.each); }
     if (sheen) drawSheen(st.tx, st.ty);
+    if (masks && (still || a >= CARD.step * planes.length + CARD.each)) { for (const m of masks) m.width = m.height = 0; masks = null; }   // (all in: the 17 dithers' memory back)
     show(still || st.forced ? 1 : clamp01((a - CARD.title) / CARD.fade), still || st.forced ? 1 : clamp01((a - CARD.next) / CARD.fade));
   }
-  st.raf = requestAnimationFrame(step);
+  st.raf = requestAnimationFrame(tick);
   return { stop() { st.alive = false; clearTimeout(failSafe); cancelAnimationFrame(st.raf); card.removeEventListener('pointermove', move); card.removeEventListener('pointerdown', move); card.removeEventListener('pointerleave', leave); } };
 }
 // A heading's or a button's words in the other script, small under it (the user: Japanese by the Latin, for the vibe;

@@ -2275,7 +2275,9 @@ class Game {
   }
   takeCoin(i) {   // coin i of the level's into the purse (counted for the stars and kept for a level under way: Game.saveCur)
     const cs = this.lv.coins, c = cs[i], cr = COIN.r * this.R;
-    cs.splice(i, 1); this.coins += c.v; if (!c.drop) { this.lv.coinsTaken++; if (this.lv.taken && c.id != null) this.lv.taken.push(c.id); } fx.ring(c.x, c.y, cr * 1.6, INK.coin); sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1);
+    cs.splice(i, 1); this.coins += c.v; if (!c.drop) { this.lv.coinsTaken++; if (this.lv.taken && c.id != null) this.lv.taken.push(c.id); } fx.ring(c.x, c.y, cr * 1.6, INK.coin);
+    if (PICK_FX) { coinPops.push({ x: c.x, y: c.y, r: cr, t: 0 }); const n0 = bits.length, tok = { done: false }; coinSparks(c.x, c.y, c.v > 1); if (PICK_FX === 'c') for (let k = n0; k < bits.length; k++) bits[k].bump = tok; else ui.coinBump(); }   // (the pickup tried: PICK_FX; 'c': the purse bumps as the coin's first spark gets there)
+    else { sparkFx(c.x, c.y, c.v > 1 ? 14 : 8, -Math.PI / 2, Math.PI, [110, c.v > 1 ? 420 : 300], [1.2, 2.4], [0.25, 0.5], [INK.coin, INK.white, INK.coinD], 0.1); ui.coinBump(); } sound.play('coin', 0.6, c.v > 1 ? 0.8 : 1);
   }
   payCombo() {
     const n = this.combo, s = this.mods.comboShift;

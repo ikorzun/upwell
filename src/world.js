@@ -6673,9 +6673,16 @@ Renderer.prototype.draw = function (g, alpha) {
       // margin round it, not a box: the scene runs round its top)
       const out = (i, j) => x0 + i * q < lv.l - 0.5 || x0 + (i + 1) * q > lv.r + 0.5   // (a scene wider than the room cut at its walls: wall to wall on any phone)
         || arch((x0 + (i + 0.5) * q - lv.l) / t, (lv.floor - y0 - (j + 0.5) * q) / t);
-      R.key = key; R.layers = T.map(([chs, ink, a]) => [R.map((r, j) => [...r].map((c, i) => (chs.includes(c) && !out(i, j) ? ink : '.')).join('')), a]);
+      const f = Math.max(1, Math.round(q / PIX.size));   // (a picture of the atlas has a game pixel a texel: its pixel f of them)
+      R.key = key; R.layers = T.map(([chs, ink, a]) => {   // each its own picture, cut to what it covers, one shape (TILES): a room's thousand runs of boxes were most of its detail count
+        const rows = R.map((r, j) => [...r].map((c, i) => (chs.includes(c) && !out(i, j) ? ink : '.')).join(''));
+        let i0 = 1e9, i1 = -1, j0 = 1e9, j1 = -1; rows.forEach((r, j) => { const u = r.search(/[^.]/); if (u < 0) return; i0 = Math.min(i0, u); i1 = Math.max(i1, r.length - 1 - [...r].reverse().join('').search(/[^.]/)); j0 = Math.min(j0, j); j1 = j; });
+        if (i1 < 0) return null;
+        const pic = []; for (let j = j0; j <= j1; j++) { const r = [...rows[j].slice(i0, i1 + 1)].map((c) => c.repeat(f)).join(''); for (let k = 0; k < f; k++) pic.push(r); }
+        return { pic, i0, j0, w: (i1 - i0 + 1) * q, h: (j1 - j0 + 1) * q, a };
+      }).filter(Boolean);
     }
-    for (const [rows, a] of R.layers) vsp(rows, x0, y0, false, a, q);
+    for (const L of R.layers) { const hw = L.w / 2, hh = L.h / 2; F(x0 + L.i0 * q + hw, y0 + L.j0 * q + hh, hw, 0, 0, hh, PAL.white, L.a, 11, hw, hh, tileId(L.pic) + 0.5); }
   };
   if (lv.kind === 'treasure' && lv.world && lv.world.theme) {   // a stash room's backdrop: its world's picked room redrawn by GPT wall to wall, as its own pixels (path
     // A), a GPT pixel two game pixels, wider than the room (312-362 game px): in its middle on its floor, cut at its walls (stashBack), so wall to wall on any phone

@@ -144,10 +144,11 @@ const SWARM = { time: 7, n: [5, 7], size: 0.9, orbit: 2.9, spin: 3.2, back: 0.3,
 // the campaign's levels from the third (one at most, a level's own), at `at` of its height; taken, the hero flies up `lift` of the level at `v` of a
 // jump through all, as through a boost ring (RING), in the astronaut's helmet, every coin and task on its way its own (Game.ringStep)
 const ASTRO = { p: 0.35, at: [0.25, 0.6], lift: 0.2, v: 2.6, time: 30 };   // time: a bound only (the flight ends it)
-// The bubble gum (owner, 2026-10-22: «жвачка-пузырь, конфета вместо пистолета»): for `time` s the hero is in a bubble floating up at `rise` R/s (its
-// pace eased to it at `ease`/s), steered by the sides, stuck to nothing; a hit (spikes, an enemy, a blob, the fire) or a jump pops it with no heart lost,
-// then `grace` s of a hit's safety; `size`: the bubble's R, the hero's
-const BUBBLE = { time: 6, rise: 2.4, ease: 6, size: 1.7, grace: 0.8 };
+// The bubble gum (owner, 2026-10-22: «жвачка-пузырь, конфета вместо пистолета»; quick and safe since 2026-10-29: «нужно переделать бонус пузыря, а то сейчас
+// он бестолковый: медленно, моти могут ранить»): for `time` s the hero is in a bubble floating up at `rise` R/s (its pace eased to it at `ease`/s; it was 2.4,
+// a phone's screen in 15 s), steered by the sides, stuck to nothing; nothing hurts in it (spikes, an enemy, a blob, the fire, a pestle) and an enemy it touches
+// pops (not a boss); a jump pops it, a hop out; as it ends, `grace` s of a hit's safety and the air jumps back; `size`: the bubble's R, the hero's
+const BUBBLE = { time: 5, rise: 10, ease: 6, size: 1.7, grace: 1 };
 // Wind (owner, 2026-10-22: «ветер: порывы сносят вбок, а заранее их показывают… летящие листья»): over a chunk a recipe's `wind` of them get, gusts across
 // it `push` R/s² (half on a floor), `on` s of each blowing after `off` s of calm; `warn` s before a gust sakura petals start drifting its way, and through
 // it they fly, with white streaks; a koinobori off the wall it blows from hangs limp in the calm, fills with the petals and flies with the gust (see the

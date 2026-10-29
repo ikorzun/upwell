@@ -7389,8 +7389,9 @@ Renderer.prototype.draw = function (g, alpha) {
       platTiles(r, PLAT.kblock);   // GPT's (PLAT): old stone, cracks, lichen, its underside jagged and dark
       if (CINE) this.route = 0;   // (the cinematic fork: its roots, its hollows and what is in them flat)
       [0.4, 1.9, 3.4].filter((u) => u < wt - 0.25).forEach((u, i) => root(W(u), 1.7 * (0.65 + 0.5 * hsh(i + 70)), 100 + i * 17, 3));
-      if (hsh(2030) < 1 / 3) { hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); }   // a skull in a hollow under one ledge in three (the rule book: under each, too many)
-      if (wt > 3) { let eyes = hsh(2020) < 0.34; if (eyes && CINE) { const hx = W(2.5), hy = Y(ht + 0.45), E2 = r.eyesP || (r.eyesP = {}); cinePoke(g, lv, E2, 'hollow', hx - 1.2 * t, hy - 1.2 * t, hx + 1.2 * t, hy + 1.2 * t); eyes = cinePerched(E2, lv.t); }   // (2.5D:
+      const pick = ((Math.imul(Math.round(r.x0 / t) + 7, 0x9E3779B1) ^ Math.imul(Math.round(r.y0 / t) + 13, 0x85EBCA77)) >>> 0) % 3;   // (one draw for both: a skull, eyes or neither, so never the two under one ledge; hsh(2030) and hsh(2020) were the same hash shifted, the two together under nine ledges in ten that had one)
+      if (pick === 0) { hollow(W(1.1), Y(ht + 0.45), 0.42, 0.34, 2000); skull(W(1.1), Y(ht + 0.42), 0.62); }   // a skull in a hollow under one ledge in three (the rule book: under each, too many)
+      if (wt > 3) { let eyes = pick === 1; if (eyes && CINE) { const hx = W(2.5), hy = Y(ht + 0.45), E2 = r.eyesP || (r.eyesP = {}); cinePoke(g, lv, E2, 'hollow', hx - 1.2 * t, hy - 1.2 * t, hx + 1.2 * t, hy + 1.2 * t); eyes = cinePerched(E2, lv.t); }   // (2.5D:
         hollow(W(2.5), Y(ht + 0.45), 0.42, 0.34, 2010, eyes); }   // eyes in one in three (the owner's rule on detail: a screen of eyes is noise); shut, their light out, while the hero is by
       if (CINE) this.route = 2; lip(); return true;
     }

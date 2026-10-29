@@ -3298,6 +3298,28 @@ const tutPic = (k) => {   // a step's picture: a finger on a phone (dragging, ta
   else if (k === 'run') e.append(tutCap('←'), tutCap('→')); else e.append(tutCap(null));
   return e;
 };
+// The lessons' look on trial (owner, 2026-10-29: «не нравится внешний вид обучения», then his research's directions): ?tut=a a hand doing it where it is
+// done (the stick, the jump key; the keys on a computer), ?tut=b Mochi's bubble with it in, ?tut=v a sign in the level; plain ?tut the old plate
+const TUT_LOOK = (location.search.match(/[?&]tut=([abv])\b/) || [])[1] || '';
+const TUT_GLOVE = ['.....XX..........', '....XWSX.........', '....XWSX.........', '....XWSX.........', '....XWSX.........', '....XWSXXX.......', '....XWSXWSXXX....',
+  '....XWSXWSXWSX...', '....XWSXWSXWSXX..', '.XXXXWSXWSXWSXSX.', 'XWWWWWWWWWWWWSSX.', 'XWWWWWWWWWWWWSX..', 'XWWWWWWWWWWWWSX..', '.XXWWWWWWWWWWSX..', '..XWWWWWWWWWWSX..',
+  '...XSSSSSSSSSX...', '....XXXXXXXXX....', '...XXXXXXXXXXX...', '...XSSSSSSSSSX...', '...XXXXXXXXXXX...'];   // a pointing glove: X its outline, W white, S its shade (the light from the left)
+const gloveEl = (down) => { const e = el('i', down ? 'glove down' : 'glove'); e.innerHTML = pxSvg(TUT_GLOVE[0].length, TUT_GLOVE.length, ['X', 'W', 'S'].map((c) => `<path class="g${c}" d="${inkPath(TUT_GLOVE.map((r) => r.replace(/./g, (q) => (q === c ? '#' : '.'))), 0, 0)}"/>`).join('')); return e; };
+const tutBubble = (k) => {   // ?tut=b: the step in Mochi's bubble, no words: the glove (and a mark of what it does) on a phone, the keys on a computer; its tail to him
+  const e = el('i', 'bub'), tail = el('i', 'tail');
+  tail.innerHTML = pxSvg(5, 3, '<path fill="currentColor" d="M0 0h5v1h-1v1h-1v1h-1v-1h-1v-1h-1z"/>');
+  if (!coarse) e.append(tutPic(k)); else { e.append(gloveEl()); e.append(k === 'run' ? tutArrows() : tutKeyMini()); }
+  if (k === 'double') e.append(px('×2'));
+  const w = el('i', 'bubw'); w.append(e, tail); return w;
+};
+const tutKeyMini = () => {   // the jump key, small: its round rim and its ▲ (FONT), in the bubble
+  const T = Array.isArray(FONT['▲']) ? FONT['▲'] : FONT['▲'].split('/'), n = 13, ox = (n - T[0].length) >> 1, oy = (n - T.length) >> 1, e = el('i', 'kmini');
+  e.innerHTML = pixRing(n, 5.6).replace('<path', `<path fill="currentColor" d="${inkPath(T, ox, oy)}"/><path`); return e;
+};
+const tutArrows = () => {   // ◀ ▶ (FONT): a run there and back, in the bubble
+  const g = (c) => (Array.isArray(FONT[c]) ? FONT[c] : FONT[c].split('/')), L = g('◀'), R = g('▶'), rows = L.map((r, i) => r + '..' + R[i]), e = el('i', 'arr');
+  e.innerHTML = pxSvg(rows[0].length, rows.length, `<path fill="currentColor" d="${inkPath(rows, 0, 0)}"/>`); return e;
+};
 function button(text, cls, fn) {
   const b = el('button', cls, text);
   b.addEventListener('click', (e) => { e.stopPropagation(); if (performance.now() - ui.openT < 300) return; sound.unlock(); sound.play('click', 0.6); fn(); });   // (a double tap's second: not into the next screen)
@@ -3765,6 +3787,24 @@ const ui = {
       e.classList.toggle('dim', p.sold || full || price > game.coins);
     });
   },
+  ghost(g, tq) {   // ?tut=a: the lesson's hand where it is done. A run on a phone: a stick like the player's (its base, its knob) with the glove on the knob,
+    // sliding there and back; a jump: the glove tapping the jump key, rings going out of it (twice for a jump in the air); on a computer the keys pressed, by Mochi
+    const gh = $('tutGhost'); if (!gh) return;
+    $('pad').classList.toggle('ghost', !!tq && coarse && tq !== 'run');   // (the key's own glow off while the hand taps it: one beat, not two)
+    if (tq !== this.ghostQ) {
+      this.ghostQ = tq; gh.className = tq ? 'on ' + tq + (coarse ? ' touch' : ' keys') : '';
+      if (tq) {
+        if (!coarse) gh.replaceChildren(tutPic(tq), ...(tq === 'double' ? [px('×2')] : []));
+        else if (tq === 'run') { const s = el('i', 'gstick'), k = el('i', 'gknob'); s.append(pixelDisc(56, 0.6)); k.append(pixelDisc(26, 0.9), gloveEl()); s.append(k); gh.replaceChildren(s); }
+        else { const r = el('i', 'grings'); r.innerHTML = [17, 20, 23].map((q) => pixRing(2 * q + 2, q)).join(''); gh.replaceChildren(r, gloveEl(true), ...(tq === 'double' ? [px('×2')] : [])); }   // (down onto the key from over it: the screen's corner under it)
+      }
+    }
+    if (!tq) return;
+    const lv = g.lv, U = $('ui').getBoundingClientRect(), at = (e) => { const r = e.getBoundingClientRect(); return [(r.left + r.width / 2 - U.left) / view.k, (r.top + r.height / 2 - U.top) / view.k]; };
+    const [x, y] = coarse ? (tq === 'run' ? [0.3 * view.w, view.h - view.keep - 76] : ((p) => [p[0], p[1] - 10])(at($('jumpBtn')))) : [g.hero.cx, g.hero.minY - lv.cam - 1.4 * g.R];   // (a thumb's start
+    // of the stick: the left of the screen over the keys)
+    gh.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
+  },
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot' && !(g.lv && g.lv.kind === 'menu');   // (the owed cards over the menu: no level's HUD)
     $('hud').classList.toggle('on', playing);
@@ -3772,7 +3812,7 @@ const ui = {
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner
     const teach = !!(g.tut && !g.tut.done.jump && g.state === 'play');   // (1-1's lessons: the jump key bright and pulsing till the first jump, TUT)
-    $('pad').classList.toggle('idle', performance.now() - padUsed > 2500 && !teach);   // unused, the keys go faint
+    $('pad').classList.toggle('idle', performance.now() - padUsed > 2500 && !teach && !(g.tut && g.tut.show));   // unused, the keys go faint (not under a lesson: TUT)
     $('pad').classList.toggle('teach', teach);
     const fh = $('floorHint'), lv = g.lv, fy = lv.floor - lv.cam;   // how to jump, written on the first level's floor, in the band over the keys
     const onFloor = g.state === 'play' && lv.kind === 'well' && g.world === 0 && g.stage === 0 && !g.bonus && g.daily == null && !g.tut && fy < view.h - view.keep;   // (1-1: its lessons say it, TUT)
@@ -3783,11 +3823,13 @@ const ui = {
     }
     const tb = $('tutHint'), tq = tb && g.state === 'play' && g.tut && lv.kind === 'well' ? g.tut.show : null;   // (tb: none in a cached old index.html)   // the first level's lesson by the hero (TUT): over him, under him
     // when the HUD is in the way; it fades where it was once the step is done
-    if (tb && tq !== this.tutQ) { this.tutQ = tq; if (tq) { tb.replaceChildren(tutPic(tq), px(t(tutWords(tq)).replace(': ', ':\n'), Math.floor((view.w - 48) / 3))); this.tutW = 0; } tb.classList.toggle('on', !!tq); }
-    if (tq) {
+    if (TUT_LOOK === 'a') this.ghost(g, tq);   // (the look on trial: the hand where it is done, not by Mochi; 'v': on signs in the level, world.js tutSigns)
+    else if (tb && TUT_LOOK !== 'v' && tq !== this.tutQ) { this.tutQ = tq; tb.classList.toggle('bubble', TUT_LOOK === 'b'); if (tq) { tb.replaceChildren(...(TUT_LOOK === 'b' ? [tutBubble(tq)] : [tutPic(tq), px(t(tutWords(tq)).replace(': ', ':\n'), Math.floor((view.w - 48) / 3))])); this.tutW = 0; } tb.classList.toggle('on', !!tq); }
+    if (tq && (TUT_LOOK === '' || TUT_LOOK === 'b')) {
       if (!this.tutW) { this.tutW = tb.offsetWidth; this.tutH = tb.offsetHeight; }
       const H = g.hero, x = clamp(Math.round(H.cx), Math.ceil(lv.l + this.tutW / 2) + 4, Math.floor(lv.r - this.tutW / 2) - 4);   // (inside the shaft's walls)
-      let y = Math.round(H.minY - lv.cam - 1.2 * g.R - this.tutH); if (y < (view.hudB || 0) + 8) y = Math.round(H.maxY - lv.cam + 1.2 * g.R);
+      let y = Math.round(H.minY - lv.cam - 1.2 * g.R - this.tutH), under = y < (view.hudB || 0) + 8; if (under) y = Math.round(H.maxY - lv.cam + 1.2 * g.R);
+      tb.classList.toggle('under', under);   // (the bubble's tail up to him)
       tb.style.transform = 'translate(' + x + 'px,' + y + 'px) translateX(-50%)';
     }
     if (g.hp !== this.hp || g.maxHp !== this.max) {

@@ -149,6 +149,10 @@ const ASTRO = { p: 0.35, at: [0.25, 0.6], lift: 0.2, v: 2.6, time: 30 };   // ti
 // a phone's screen in 15 s), steered by the sides, stuck to nothing; nothing hurts in it (spikes, an enemy, a blob, the fire, a pestle) and an enemy it touches
 // pops (not a boss); a jump pops it, a hop out; as it ends, `grace` s of a hit's safety and the air jumps back; `size`: the bubble's R, the hero's
 const BUBBLE = { time: 5, rise: 10, ease: 6, size: 1.7, grace: 1 };
+// Orbit (owner, 2026-10-29, Д370 «B» through Worlds: «на орбите прыжки легче (выше и медленнее) с 8-4»): from the Space world's `from`-th level (0-based:
+// 8-4, the Kibo module) the hero weighs `g` of himself and leaves the ground at `v` of his pace: a jump v²/g as high (1.28) and its rise v/g as long (1.6), a
+// fall as slow; enemies, coins and drops as ever. ?orbit: on any level, to try it
+const ORBIT = { world: 'space', from: 3, g: 0.5, v: 0.8 };
 // Wind (owner, 2026-10-22: «ветер: порывы сносят вбок, а заранее их показывают… летящие листья»): over a chunk a recipe's `wind` of them get, gusts across
 // it `push` R/s² (half on a floor), `on` s of each blowing after `off` s of calm; `warn` s before a gust sakura petals start drifting its way, and through
 // it they fly, with white streaks; a koinobori off the wall it blows from hangs limp in the calm, fills with the petals and flies with the gust (see the

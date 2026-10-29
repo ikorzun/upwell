@@ -1046,8 +1046,9 @@ class Game {
   }
   applyMods() {
     STICK.slide = BASE_STICK.slide * this.mods.slide; STICK.hold = BASE_STICK.hold + this.mods.hold; CEIL.any = !!this.mods.ceil;
-    this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump;
+    this.vjump = Math.sqrt(2 * WORLD.gravity * JUMP.height * this.R) * this.mods.jump * (this.orbit ? ORBIT.v : 1);
   }
+  heroG() { return this.orbit ? ORBIT.g : 1; }   // the hero's weight: on orbit lighter (ORBIT)
   get b() { return this.hero && Number.isFinite(this.hero.floorY) ? this.hero.floorY : this.lv.floor; }   // where Body.endStep puts landing dust
   get wd() { return this.preview || (this.state === 'menu' && this.menuWd) || (this.daily != null ? CAMPAIGN[DAY_W].world : this.mode === 'camp' ? CAMPAIGN[this.world].world : this.world === CRYPT.at[0] && this.stage === CRYPT.at[1] ? CRYPT : this.world < WORLDS.length ? WORLDS[this.world] : SUMMIT); }   // (the run's Crypt in the Mine)
   bodyList() {
@@ -1064,7 +1065,7 @@ class Game {
   makeHero() {
     const bs = this.lv.boss, x = bs && bs.def && (bs.def.glide || bs.def.quake || bs.def.street || bs.def.bone) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
     this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
-    this.hero.isHero = true; this.hero.dropT = 0; this.hero.dropRect = null;   // (dropT, dropRect: a plank it is let through, DROP)
+    this.hero.isHero = true; this.hero.dropT = 0; this.hero.dropRect = null; this.hero.gScale = this.heroG();   // (dropT, dropRect: a plank it is let through, DROP)
     this.startY = this.hero.cy;
   }
   placeHero(x, y) {
@@ -1125,12 +1126,13 @@ class Game {
     this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
       height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: (this.bonus && this.mode === 'camp' ? this.wd : wd).theme, keep: this.room() });   // (a campaign's bonus
     // in its world's look: the Sea's and Tokyo's coin rain were the Mine's grey, the kind's own theme from the days a bonus was its world's)
+    this.orbit = ORBIT_TRY || (wd.id === ORBIT.world && this.stage >= ORBIT.from);   // on orbit: the hero's light jumps (ORBIT)
     this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
     if (boss) { this.lv.boss = new Boss(this.lv, BOSSES[rc ? rc.boss : 'lid']); if ((save.camp.fails[this.failKey()] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
       const h = this.hero;
-      h.gScale = 1; h.sticky = true; h.growth = h.growthTarget = 1; h.growthV = 0;
+      h.gScale = this.heroG(); h.sticky = true; h.growth = h.growthTarget = 1; h.growthV = 0;
       this.placeHero(W / 2, this.lv.floor - 1.1 * this.R); this.startY = this.hero.cy;
     }
     this.applyMods();
@@ -1401,7 +1403,7 @@ class Game {
     for (const e of lv.enemies.slice()) { const q = e.body; if (q.maxX > H.minX && q.minX < H.maxX && q.maxY > H.minY && q.minY < H.maxY) this.zap(e, [INK.coin, INK.white]); }
     sparkFx(H.cx, H.maxY, 3, Math.PI / 2, 0.5, [80, 200], [1.5, 3], [0.2, 0.4], [INK.coin, INK.white], 0.1);   // its trail
     const clear = !lv.near(H.minY - 2, H.maxY + 2).some((r) => !r.gone && r.x1 > H.minX - 2 && r.x0 < H.maxX + 2 && !r.plank);
-    if (H.cy <= this.rocket.to && clear) { if (this.rocket.astro && this.pow === 'astro') this.powerEnd(); this.rocket = null; H.thread = false; H.gScale = 1; setVel(H, H.rigVx, -0.7 * this.vjump); this.invuln = Math.max(this.invuln, 1); this.sinceContact = JUMP.coyote + 1; }
+    if (H.cy <= this.rocket.to && clear) { if (this.rocket.astro && this.pow === 'astro') this.powerEnd(); this.rocket = null; H.thread = false; H.gScale = this.heroG(); setVel(H, H.rigVx, -0.7 * this.vjump); this.invuln = Math.max(this.invuln, 1); this.sinceContact = JUMP.coyote + 1; }
   }
   // The level crossing (TRAIN): on screen it rests, then rings and flashes, then its train goes through left to right; a hero in its
   // band as it passes is hit (and knocked on along with it).
@@ -2230,7 +2232,7 @@ class Game {
     if (this.pow === 'rainbow') { this.invuln = Math.max(this.invuln, RAINBOW.grace); fx.ring(this.hero.cx, this.hero.cy, 1.6 * this.R, INK.white); sound.play('bubble', 0.6, 0.8); }
     if (this.pow === 'swarm') { for (const b of this.swarm) sparkFx(b.cx, b.cy, 6, -Math.PI / 2, Math.PI, [80, 220], [1.2, 2.4], [0.2, 0.4], [b.color.base, INK.white], 0.4); this.swarm = []; this.invuln = Math.max(this.invuln, RAINBOW.grace); sound.play('bubble', 0.6, 1.1); }   // home, and a moment of safety
     if (this.pow === 'grow') { this.hero.growthTarget = 1; this.invuln = Math.max(this.invuln, GROW.grace); fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('bubble', 0.7, 0.7); }   // back to size, and a while blinking
-    if (this.pow === 'bubble') { const H = this.hero; H.gScale = 1; H.sticky = true; this.invuln = Math.max(this.invuln, BUBBLE.grace); this.air = Math.max(this.air, this.mods.airJumps); sparkFx(H.cx, H.cy, 14, -Math.PI / 2, Math.PI, [120, 380], [1.5, 3], [0.25, 0.5], [PAL.purple, INK.white], 0.4); fx.ring(H.cx, H.cy, BUBBLE.size * this.R, INK.white); sound.play('bubble', 0.9, 0.7); }   // popped
+    if (this.pow === 'bubble') { const H = this.hero; H.gScale = this.heroG(); H.sticky = true; this.invuln = Math.max(this.invuln, BUBBLE.grace); this.air = Math.max(this.air, this.mods.airJumps); sparkFx(H.cx, H.cy, 14, -Math.PI / 2, Math.PI, [120, 380], [1.5, 3], [0.25, 0.5], [PAL.purple, INK.white], 0.4); fx.ring(H.cx, H.cy, BUBBLE.size * this.R, INK.white); sound.play('bubble', 0.9, 0.7); }   // popped
     this.pow = null; this.ram = false;
   }
   candies(dt) {   // a candy touched is taken (`take`), and runs out
@@ -3317,6 +3319,7 @@ const TUT = { idle: 3, run: 1.5, wake: 3 }, TUT_STEPS = ['run', 'jump', 'double'
 // The lessons on again, in the owner's pick of three (2026-10-29, Об1 «А», after «не нравится внешний вид обучения» and his research): a glove doing each where
 // it is done (ui.ghost); ?tut=0 off, as the site was while their look was reworked (1-1's floor words and sign then, the fire on its own calm)
 const TUT_ON = !/[?&]tut=0\b/.test(location.search);
+const ORBIT_TRY = /[?&]orbit\b/.test(location.search);   // (?orbit: ORBIT's light jumps on any level, to try them)
 // The settings' 2.5D hidden for now and the game in 2D (owner, 2026-10-29: «убери переключатель 2.5d (временно скрой его)»); ?cine still shows 2.5D
 const D25_SHOWN = false;
 const tutCap = (g) => {   // a key's cap round a glyph (FONT; none: the space bar), its lower lip under it

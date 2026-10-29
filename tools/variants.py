@@ -1651,6 +1651,93 @@ ELEMENTS.update({
 })
 
 
+# Space, world 8 (owner 2026-10-29 Д365 «C»: 8-1…8-3 the launch tower at Tanegashima, from 8-4 the Kibo module in orbit; Д366 «B» blue; Д367 «A» the launch
+# flame below; Д368 «A» green EVA handrails to hold; Д369 «B» birds and turtles at the pad, lost things floating off in orbit)
+WORLDS['space'] = ('Space', 'Japan\'s way to space, cosy and cute, kawaii, true to the real places: first the Tanegashima Space Center on its island at night '
+                   '(the Yoshinobu launch complex, its steel service tower and the movable launcher with umbilical masts, the H3 rocket, the tall vehicle assembly '
+                   'building, the sea and palm trees of the cape), then in orbit the Japanese Kibo module of the International Space Station (the long pressurised '
+                   'module with its rings, hatches and handrails, the small logistics module on top, the open terrace of the exposed facility with experiment boxes, '
+                   'the Kibo robotic arm, truss beams, solar array wings, the curve of the Earth). In this game all its steel and hulls are the world\'s blue',
+                   'blue #5bb8ff', 'purple marks moving platforms, springs and rubber walls, grey blocks crumble, white is slippery, green is the handrails you can hold on to',
+                   'the black night sky full of small stars')
+SP_RULE = ('In this world purple marks moving platforms, springs and rubber walls, grey blocks crumble, white is slippery and green is the handrails you hold on to, '
+           'so use those only for tiny details; all the steel and the hulls are the world\'s blue; never red (danger) except a tiny warning lamp; never yellow (the coins\').')
+SP_AT = 'a blue steel deck ledge with a white top edge sticking out of the wall'
+SP_FAR = ('each thing in one or two faint dim tones on the black in big flat shapes (no dither noise, no fine speckle): steel, hulls and buildings a dim blue and grey, '
+          'trees a dim green, the sea a dim blue, small lights dim grey dots, stars small dim grey dots, the Earth a dim blue with dim grey clouds; no red, no yellow')
+SP_PROPS = ('two things side by side on the same ledge, a tile of air between them: {a} on the left, at the ledge\'s wall end, and {b} on the right, with the hero '
+            'for scale standing at the ledge\'s free end to the right of both (each cell a different take on both things)')
+ELEMENTS.update({
+    'sp-deck': dict(world='space', kind='ledge', what='the basic ledge of the launch levels, a deck of the steel service tower at the launch pad sticking out of the '
+                    'shaft wall: a steel girder with a grating floor on top, bracing, bolted plates', does='solid on every side: you stand on it, cling to its sides and '
+                    'jump off it', material='steel girders and grating, bolts, painted blue', size='4 tiles long and 1 tile thick', main='blue (the steel)', rule=SP_RULE,
+                    vary='the girder (an I-beam with a web of round holes, X bracing, a box girder with stiffeners, a Warren truss, a grating deck on a deep plate), the '
+                    'floor on top (grating, checker plate), how it meets the wall (a bolted flange, a knee brace, a hanger rod) and one small detail at its free end '
+                    '(a numbered level plate in plain glyph blocks, a cable clamp, a small warning lamp)'),
+    'sp-umbilical': dict(world='space', kind='ledge', what='an umbilical arm of the launch tower, a long boom reaching from the tower to the rocket, sticking out of the '
+                         'shaft wall: a steel truss boom with thick hoses and cables slung along it and a coupling plate at its free end',
+                         does='solid on every side: you stand on it', material='a steel truss, hoses, cables, a coupling plate', size='5 tiles long and 1 tile thick',
+                         main='blue (the steel)', rule=SP_RULE + ' The hoses are grey, never white; only the top edge is white.',
+                         vary='the boom (a truss, a box beam, two parallel beams), how the hoses hang (loops under it, bundled along its side, coiled at its end), its '
+                         'coupling end (a square plate, a round clamp, a swing hinge) and how it is fixed to the wall'),
+    'sp-module': dict(world='space', kind='ledge', what='the basic ledge of the orbit levels, a section of the Kibo pressurised module sticking out of the shaft wall: '
+                      'a long cylinder seen from the side, rings round it, panels of the hull, handrails along it', does='solid on every side: you stand on its top, '
+                      'cling to its sides and jump off it', material='a blue hull of panels with rings and bolts', size='5 tiles long and 1.5 tiles thick',
+                      main='blue (the hull)', rule=SP_RULE + ' Its handrails are green (you hold on to them); only the top edge is white.',
+                      vary='the hull panels and their seams (square panels, long strips, a quilt of blankets), the rings (one, two, many thin ones), its free end (a '
+                      'round hatch, a cone with a docking ring, a flat bulkhead) and one small detail (a window, an antenna stub, a grapple fixture)'),
+    'sp-terrace': dict(world='space', kind='ledge', what='the open terrace of Kibo\'s exposed facility sticking out of the shaft wall: a flat frame platform with '
+                       'experiment boxes fixed on it, open to space', does='solid on every side: you stand on its top (the tops of the boxes are the floor)',
+                       material='a blue frame, grey and blue experiment boxes, small dishes and sensors', size='5 tiles long and 1.5 tiles thick, the boxes 1 tile tall',
+                       main='blue (the frame)', rule=SP_RULE + ' Only the top edge is white.',
+                       vary='the frame (a lattice, a plate with round holes, a ribbed tray), the boxes on it (cubes, a row of drawers, a dish on a box, a little telescope), '
+                       'how the boxes sit (all one height, stepped) and its free end'),
+    'sp-rails': dict(world='space', kind='ledge', what='the underside of a ledge with a row of EVA handrails hanging under it, the bars astronauts hold on to outside '
+                     'the station: the ledge a blue hull plate with a white top edge, under it a row of short green bars on two little feet each',
+                     does='the ledge is solid; the green rails under it are what you hang from and climb along', material='a blue hull plate, green metal handrails',
+                     size='the ledge 4 tiles long and 1 tile thick, the rails a quarter of a tile thick and hanging a third of a tile below it', main='blue (the plate)',
+                     rule=SP_RULE + ' The handrails are green, the game\'s colour for what you hold on to; only the ledge\'s top edge is white.',
+                     vary='the rails (one long bar on many feet, short bars end to end, U-shaped loops, bars with tether rings), how they are fixed (little feet, '
+                     'brackets, a strip), and the plate above them'),
+    'sp-flame': dict(world='space', kind='hazard', what='the launch flame of a rocket rising up the shaft from below: a wall of fire and billowing smoke from wall to '
+                     'wall, the rocket\'s exhaust pushing up', why='a rocket lifts off under the hero, and its fire climbs after it',
+                     vary='its billows (round smoke heaps over the fire, tall flame tongues, a straight jet with smoke rolling out of it), how the red runs along its top '
+                     '(a ragged red edge, red tongues, sparks), what it throws up (a ball of flame, a puff of smoke with fire in it, a burning spark)',
+                     inks='the fire red and orange dithered, the smoke dark grey and grey dithered with black (never white), a red line along its top (danger)'),
+    'sp-wallhaz': dict(world='space', kind='wallhaz', what='a hazard on the steel wall: in cells A, B, C a vent of the launch tower blowing a jet of super-cold gas '
+                       'and sparks; in cells D, E, F a small thruster (an RCS jet) on the station hull firing a short jet of flame',
+                       why='a rocket on the pad vents its cold fuel; a station fires its small thrusters to keep its place',
+                       asleep='a vent grille or a small thruster nozzle set in the wall, quiet, a small warning stripe or lamp beside it',
+                       bursting='a hot jet of flame or a jet of gas with red in its core shooting out of it into the shaft, sparks',
+                       vary='the vent or nozzle (a round grille, a slot, a bell nozzle, a cluster of four small nozzles) and the jet\'s shape (a cone, a ragged burst, a '
+                       'straight beam with puffs)', inks='the nozzle grey and blue, the jet red at its core and orange round it, puffs grey, the wall\'s steel blue'),
+    'sp-far1': dict(world='space', kind='prop', plane='back', what="the far view behind the shaft as the climb goes up the launch tower at Tanegashima, a different "
+                    "scene in each cell, left to right, top to bottom: A the cape of Tanegashima at night: palm trees and low hills, the sea, the launch pad far off "
+                    "with the rocket standing lit; B the tall vehicle assembly building, its huge door half open, the movable launcher with the rocket on it rolling "
+                    "out on its rails; C the white H3 rocket close behind the tower, its two solid boosters, the JAXA lettering left out (no text); D the sea seen from "
+                    "high up the tower, the beach and the island's coast far below, a lighthouse; E the rocket's upper stage and nose fairing at the top of the tower, "
+                    "the umbilical masts beside it; F the night sky over the pad, stars and a big round moon",
+                    where='far behind everything, low and faint, so the play reads over it', material='a cape, palm trees, the sea, a building, a rocket, the sky',
+                    size='about 14 tiles wide and 7 tiles tall', inks=SP_FAR, scene=SP_AT + ' in front of it'),
+    'sp-far2': dict(world='space', kind='prop', plane='back', what="the far view behind the shaft in orbit at the Kibo module, a different scene in each cell, left to "
+                    "right, top to bottom: A the curve of the Earth low down, its blue sea and white cloud swirls, the thin glow of the air along its rim; B the big "
+                    "solar array wings of the station spreading out, long panels of cells; C the main truss of the station with its radiators; D the Kibo robotic arm "
+                    "reaching out, a box held in its hand; E Japan seen from orbit at night, its islands outlined by the lights of its cities; F the Moon rising over "
+                    "the rim of the Earth, stars", where='far behind everything, low and faint, so the play reads over it',
+                    material='the Earth, solar panels, a truss, a robotic arm, the Moon, stars', size='about 14 tiles wide and 7 tiles tall', inks=SP_FAR,
+                    scene='a blue hull ledge with a white top edge in front of it'),
+    'sp-padthings': dict(world='space', kind='prop', what=SP_PROPS.format(a='a launch-pad thing (a grey pole with a small warning '
+                         'lamp on top, a reel of thick cable, a gas cylinder in a cage, a wind sock on a mast, a small camera on a tripod, a fire hose cabinet; one kind in '
+                         'each cell)', b='a second launch-pad thing of another kind from the same list'),
+                         where='standing on a ledge of the launch tower', material='steel, cables, glass', size='each about 1 tile wide and 1 to 1.5 tiles tall',
+                         inks='blue and grey with small purple details, a warning lamp\'s glass orange (a light of the dark)', scene=SP_AT + ' under them'),
+    'sp-orbitthings': dict(world='space', kind='prop', what=SP_PROPS.format(a='a thing fixed on the station\'s hull (a small dish antenna, an experiment box with a '
+                           'handle, a camera on a pan-tilt head, a foot restraint, a grapple fixture pin, a folded small robot arm; one kind in each cell)',
+                           b='a second hull thing of another kind from the same list'),
+                           where='fixed on top of a hull ledge of the station', material='metal, foil blankets, glass', size='each about 1 tile wide and 1 tile tall',
+                           inks='blue and grey with small purple details, a camera\'s lens dark', scene='a blue hull ledge with a white top edge under them'),
+})
+
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.
 In play: {does}. Material: {material}. Size: {size}; {grid}

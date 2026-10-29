@@ -1399,7 +1399,7 @@ const THEMES = {
   // the Tokyo flag's, a dusk over the city), its gondolas blue; a plain black night, no dots (owner: they were noise)
   blocks: Object.assign(theme(PAL.gray, { mover: PAL.blue, spring: PAL.blue }), { danchi: true, hazard: 'watermain', wallHaz: 'steampipe' }),   // the Danchi (world 6; was the Tower Blocks): raw concrete (see BLOCKS)
   sea: Object.assign(theme(PAL.aqua, { ice: PAL.white, crumble: PAL.gray, mover: PAL.orange }), { sea: true, hazard: 'tide', wallHaz: 'coral', holder: 'sea' }),   // the Sea (see SEA): white wet rock you slip on, green seaweed you hold, orange boats, grey rafts
-  skazka: Object.assign(theme(PAL.gray, { crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true, shade: PAL.gray, hazard: 'bog', wallHaz: 'thorns' }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
+  skazka: Object.assign(theme(PAL.gray, { ice: PAL.gray, crumble: PAL.gray, mover: PAL.gray, spring: PAL.white, rubber: PAL.white }), { moss: PAL.white, skazka: true, shade: PAL.gray, hazard: 'bog', wallHaz: 'thorns' }),   // the Dark Forest (see SKAZKA): black and white (owner), white cobwebs you hold; what
   // crumbles or flies tells itself by its shape (a rotten log, Baba Yaga's mortar); colour only for the hero, lights, coins, danger and the doors' marks
   sky: Object.assign(theme(PAL.purple, { mover: PAL.blue, spring: PAL.blue, rubber: PAL.blue, crumble: PAL.white }), { dots: PAL.gray, glass: true, hazard: 'storm', wallHaz: 'lightning' }),   // the Skyscraper (see SKY), the TV
   // Tower since its round 2 (Tokyo Tower: Д161 «А» its far view by level in place of the cloud banks, Д164 «А» lightning down the rod, Д165 «А» a storm cloud from below)
@@ -6172,6 +6172,18 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   // The Mine's shared pieces: an oil dish lit (Iwami Ginzan's, Д117 «А»; the wall lamps the hero lights are IW's, see iwLamp), its ore glinting in the wall over
   // a ledge (the owner's pick of 2026-10-21, research/variants/mine-*-game.png C), its things on ledges, its bats, the mine far off
+  const skWeb = (r) => {   // Baba Yaga's cobweb canopy under a Forest cave's hold (caveWebs' '~'; the white strip you hold is this world's moss): grey threads sagging in two
+    // rings between its anchors, a thread down from each to the outer one; shallow (0.42 a tile), over the coins strung under it
+    const t = lv.tile, n = Math.max(2, Math.round((r.x1 - r.x0) / (1.25 * t))), y = snap(r.y1 + 2 * kitP), G = PAL.gray, X = (i) => snap(r.x0 + ((r.x1 - r.x0) * i) / n);
+    for (let i = 0; i < n; i++) for (const f of [0.22, 0.42]) { const xm = snap((X(i) + X(i + 1)) / 2), ym = snap(y + f * t); line(X(i), snap(y + f * t * 0.3), xm, ym, G, 1); line(xm, ym, X(i + 1), snap(y + f * t * 0.3), G, 1); }
+    for (let i = 1; i < n; i++) line(X(i), y, X(i), snap(y + 0.42 * t * 0.3), G, 1);
+  };
+  const skGate = (r) => {   // the Forest cave's gate (caveSkulls 'G'): Baba Yaga's paling, as her fence's: grey stakes sharpened at their tops, black between, two rails across
+    const P = PIX.size, w = r.x1 - r.x0, n = Math.max(2, Math.round(w / (0.66 * lv.tile))), G = PAL.gray, K = PAL.black, sw = snap(w / n);
+    box(r.x0, r.y0, r.x1, r.y1, K, 1, 0, 10, 0);
+    for (let i = 0; i < n; i++) { const x0 = snap(r.x0 + i * sw) + P, x1 = snap(r.x0 + (i + 1) * sw) - P, cx = snap((x0 + x1) / 2); box(x0, r.y0 + 3 * P, x1, r.y1, G, 1, 0, 10, 1); box(cx - P, r.y0, cx + P, r.y0 + 3 * P, G, 1, 0, 10, 0); }
+    for (const v of [0.3, 0.72]) box(r.x0, snap(r.y0 + v * (r.y1 - r.y0)), r.x1, snap(r.y0 + v * (r.y1 - r.y0)) + 2 * P, G, 1, 0, 10, 4);
+  };
   const fcGate = (r) => {   // Fuji's cave's gate (caveBells 'G'): the sheet's lumps of kept ice (FC_GATE), standing on its foot; it melts (UPwell's crumbleFx)
     const q = PIX.base, S = FC_GATE.rows, n = Math.max(1, Math.min(S.length, Math.floor((r.y1 - r.y0) / q))), key = 'h' + n;
     if (!FC_GATE[key]) { const m = Math.max(1, Math.round((S[0].length * n) / S.length)); FC_GATE[key] = Array.from({ length: n }, (_, j) => S[Math.floor((j * S.length) / n)]).map((row) => Array.from({ length: m }, (_, i) => row[Math.floor((i * row.length) / m)]).join('')); }
@@ -7278,7 +7290,8 @@ Renderer.prototype.draw = function (g, alpha) {
   // colour only for lights (eyes, see skEyes; a candle). Roots half dark (behind the ledge's face), a cobweb that is only decor dim (the white one you hold is
   // this world's moss). False for what keeps the common look.
   const skazkaRect = (r) => {
-    if (lv.kind === 'treasure') return false;   // (a Forest cave's ledges plain, in the Forest's grey: its shafts' roots, hollows and mortars over its backdrop and props went past the owner's ~2500; its own look after З22)
+    const cave = lv.kind === 'treasure';   // (a Forest cave, З22 «А»: its ledges the shaft's tiles and edges, no roots, hollows, twigs or smoke: they and its backdrop went past the
+    // owner's ~2500; its webs, mortars, skull lamps, gate and pestle their own, see skWeb, skGate, the bells and the pestle)
     const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
@@ -7302,6 +7315,13 @@ Renderer.prototype.draw = function (g, alpha) {
       disc(x, y, 0.42 * t * s, G, a); box(snap(x - 0.25 * t * s), snap(y + 0.18 * t * s), snap(x + 0.25 * t * s), snap(y + 0.46 * t * s), G, a, 0, 10, 0);
       for (const e of [-1, 1]) disc(snap(x + e * 0.17 * t * s), snap(y + 0.04 * t * s), 0.12 * t * s, K, a);
       box(snap(x) - P, snap(y + 0.18 * t * s), snap(x) + P, snap(y + 0.26 * t * s), K, a, 0, 10, 0); for (const e of [-0.13, 0, 0.13]) box(snap(x + e * t * s), snap(y + 0.34 * t * s), snap(x + e * t * s) + P, snap(y + 0.46 * t * s), K, a, 0, 10, 0);
+    };
+    const skMortar = (x0, x1, y0, y1) => {   // Baba Yaga's mortar standing (caveSquash's U): a tub of staves narrowing to its foot, its far third in shade, black hoops, a crack, its mouth dark
+      const n = Math.max(2, Math.round((y1 - y0) / (2 * P))), hw = (x1 - x0) / 2, cx = (x0 + x1) / 2;
+      for (let j = 0; j < n; j++) { const q = j / n, e = snap(hw * (1 - 0.18 * q)), ya = snap(y0 + q * (y1 - y0)), yb = snap(y0 + ((j + 1) / n) * (y1 - y0)); box(snap(cx - e), ya, snap(cx + e), yb, th.block, 1, 0, 10, 1); box(snap(cx + e * 0.35), ya, snap(cx + e), yb, th.block, 1, 0, 10, 4); }
+      for (const v of [0.4, 0.8]) box(snap(cx - hw * (1 - 0.18 * v)), snap(y0 + v * (y1 - y0)), snap(cx + hw * (1 - 0.18 * v)), snap(y0 + v * (y1 - y0)) + P, K, 1, 0, 10, 0);
+      box(snap(x0 + 0.3 * t), y0 + 2 * P, snap(x1 - 0.3 * t), y0 + 4 * P, K, 1, 0, 10, 0);   // its mouth
+      for (let i = 0; i < 3; i++) box(snap(cx - 0.4 * t) + (i % 2) * P, snap(y0 + 0.5 * (y1 - y0)) + i * P, snap(cx - 0.4 * t) + (i % 2) * P + P, snap(y0 + 0.5 * (y1 - y0)) + (i + 1) * P, K, 1, 0, 10, 0);   // a crack
     };
     const web = (x, y, dx, s = 1) => {   // a cobweb under it, dim: three threads out of a corner, two sagging rings across them, a strand hanging
       const L = 1.4 * t * s, at = (a, f) => [snap(x + dx * Math.cos(a) * L * f), snap(y + Math.sin(a) * L * f)];
@@ -7340,12 +7360,12 @@ Renderer.prototype.draw = function (g, alpha) {
       const cx = snap((r.x0 + r.x1) / 2), hw = w / 2 / t, c = th.mover, lean = ahead * 0.12;   // how much it leans, a row at a time
       const row = (v0, v1, i0, j, tn = 0) => box(snap(cx - (hw - i0 - lean * j) * t), Y(v0), snap(cx + (hw - i0 + lean * j) * t), Y(v1), c, 1, 0, 10, tn);   // a band of it, i0 in from each end, leaning
       if (CINE) this.route = 3;   // (the cinematic fork: its smoke behind, its pestle and candle small, the flame and the cat's eyes flat)
-      F(cx, Y(2.05), (hw + 0.6) * t, 0, 0, 0.6 * t, G, 0.6, 1); for (const [dx, dv, rr] of [[-hw - 0.5, 1.8, 0.32], [hw + 0.55, 1.9, 0.28], [-0.4, 2.5, 0.36], [0.6, 2.45, 0.3]]) { F(snap(cx + dx * t), Y(dv), rr * t, 0, 0, rr * t, G, 0.5, 1); F(snap(cx + dx * t), Y(dv), rr * 0.6 * t, 0, 0, rr * 0.6 * t, G, DIM, 4); }   // the smoke it rides, curling
+      if (!cave) F(cx, Y(2.05), (hw + 0.6) * t, 0, 0, 0.6 * t, G, 0.6, 1); if (!cave) for (const [dx, dv, rr] of [[-hw - 0.5, 1.8, 0.32], [hw + 0.55, 1.9, 0.28], [-0.4, 2.5, 0.36], [0.6, 2.45, 0.3]]) { F(snap(cx + dx * t), Y(dv), rr * t, 0, 0, rr * t, G, 0.5, 1); F(snap(cx + dx * t), Y(dv), rr * 0.6 * t, 0, 0, rr * 0.6 * t, G, DIM, 4); }   // the smoke it rides, curling
       if (CINE) this.route = 2;
       const bands = [[0, 0.3, 0], [0.3, 1.0, 0.12], [1.0, 1.5, 0.45], [1.5, 1.8, 0.8]];   // a wide bowl
       bands.forEach(([v0, v1, i0], j) => { row(v0, v1, i0, j, j ? 1 : 0); if (j) box(snap(cx + (hw - i0 + lean * j) * t * 0.35), Y(v0), snap(cx + (hw - i0 + lean * j) * t), Y(v1), c, 1, 0, 10, 4); });   // its staves, its far side in shade
       bands.slice(1).forEach(([v0, , i0], j) => box(snap(cx - (hw - i0 - lean * (j + 1)) * t), Y(v0), snap(cx + (hw - i0 + lean * (j + 1)) * t), Y(v0) + P, K, 1, 0, 10, 0));   // its iron hoops
-      for (const [u, v0, n] of [[0.25, 0.35, 4], [0.65, 0.5, 5], [0.45, 1.05, 3]]) for (let i = 0; i < n; i++) box(snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2), Y(v0 + i * 0.12), snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2) + P, Y(v0 + i * 0.12 + 0.12), K, 1, 0, 10, 0);   // its cracks
+      if (!cave) for (const [u, v0, n] of [[0.25, 0.35, 4], [0.65, 0.5, 5], [0.45, 1.05, 3]]) for (let i = 0; i < n; i++) box(snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2), Y(v0 + i * 0.12), snap(cx + (u - 0.5) * 2 * hw * t * 0.8 + (i % 2) * P * 2) + P, Y(v0 + i * 0.12 + 0.12), K, 1, 0, 10, 0);   // its cracks
       if (CINE) this.route = 4;
       { const tip = -1.45; line(B(0.75), Y(0.2), B(0.3), Y(tip), c, 1, 5); disc(B(0.3), Y(tip), 0.18 * t, c, 1); box(B(0.3) - P, Y(tip) - P, B(0.3) + P, Y(tip) + P, K, 1, 0, 10, 0); }   // the pestle stuck in it
       { const lx = B(1.1); box(lx - snap(0.08 * t), Y(-0.5), lx + snap(0.08 * t), r.y0, G, 1, 0, 10, 0); if (CINE) this.route = 0; box(lx - P, Y(-0.75), lx + P, Y(-0.5), PAL.orange, 1, 0, 10, 0); box(lx - P / 2, Y(-0.7), lx + P / 2, Y(-0.56), PAL.yellow, 1, 0, 10, 0); vlamps.push([lx, Y(-0.62), 0.5, 1.6]); }   // a candle lit on its rim (a light)
@@ -7354,6 +7374,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     if (r.plank) {   // a gnarled dead branch off a trunk that climbs the wall: thick at the wall, bark split, its free end in twigs like a clawing hand, thorns and a dim cobweb under it
       if (r.bouncy) return false;
+      if (cave) { platTiles(r, PLAT.kplank); lip(); return true; }
       const c = th.plank, sw = cinePoke(g, lv, r, 'branch', r.x0, r.y0, r.x1, r.y1), dip = sw ? snap(sw * r.poke.d * t) : 0, xe = E(0.7);   // (the cinematic
       // fork: under the hero its free end gives a little and springs back, bark falling, its cobweb swaying)
       const spans = dip ? (d > 0 ? [[r.x0, xe, 0], [xe, r.x1, dip]] : [[xe, r.x1, 0], [r.x0, xe, dip]]) : [[r.x0, r.x1, 0]];
@@ -7369,6 +7390,9 @@ Renderer.prototype.draw = function (g, alpha) {
       if (CINE) this.route = 2; for (const [x0, x1, o] of spans) box(x0, r.y0 + o, x1, r.y0 + o + 2.5, th.lip, 1, 1.25); return true;   // its edge (lip)
     }
     if (r.move || r.spring || r.magnet || r.bouncy || r.stair || r.slick) return false;
+    if (r.mortar) { skMortar(r.x0, r.x1, r.y0, r.y1); lip(); return true; }   // the pestle's mortar (caveSquash's U): Baba Yaga's, as her flying one, standing
+    if (r.beam) { platTiles(r, PLAT.kplank); box(r.x0, r.y1 - P, r.x1, r.y1, K, 1, 0, 10, 0); lip(); return true; }   // the low beam: a log, its underside dark
+    if (cave) { platTiles(r, PLAT.kblock); lip(); return true; }
     {   // earth clawed together by roots: dotted grey, its underside jagged and dark, roots like fingers, hollows in them, a skull in one, eyes glowing in the other
       const c = th.block;
       platTiles(r, PLAT.kblock);   // GPT's (PLAT): old stone, cracks, lichen, its underside jagged and dark
@@ -7703,6 +7727,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (!kit) {
       if (r.gate && lv.world && lv.world.theme && lv.world.theme.fuji) fcGate(r);   // (Fuji's cave's gate of ice, by take)
       else if (r.gate && lv.world && lv.world.theme && lv.world.theme.sea) enoGate(r);   // (the Sea cave's gate, the shrine's door)
+      else if (r.gate && th.skazka) skGate(r);   // (the Forest cave's, Baba Yaga's)
       else if (r.slick) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 7, 9);   // ice striped, a mover dotted, a crumbling block chequered, the rest lit from the top
       else if (r.move) box(r.x0, r.y0, r.x1, r.y1, c, a, 0, 10, 2);
       else if (r.crumble) box(r.x0 + ox, r.y0, r.x1 + ox, r.y1, c, a, 0, 10, 4);
@@ -7721,6 +7746,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (CINE && th.danchi) this.route = 0;   // (the Danchi's flat in 2.5D, the rule book: in depth its green and its slab's vault's dither made lone dots)
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 2 * kitP, th.moss, a, 0, 10, 0);
       if (CINE && th.danchi) this.route = 2;
+      if (th.skazka && lv.kind === 'treasure') skWeb(r);   // (a Forest cave's: Baba Yaga's cobweb canopy, what you hang from)
       if (th.rime) for (let x = r.x0 + 0.2 * R, k = 0; x < r.x1 - 0.1 * R; x += 0.36 * R, k++) if (k % 2) box(x + ox, r.y1 - 0.06 * R, x + ox + kitP, r.y1 - 0.06 * R + kitP, PAL.white, a, 0, 10, 0);   // rime: a glint here and there (no strands hanging: owner)
     } else if (r.moss) {   // moss under it, as on the walls: a strip and a fringe of tufts hanging off it
       box(r.x0 + ox, r.y1 - 0.12 * R, r.x1 + ox, r.y1 + 0.1 * R, th.moss, a, 0, 10, 0);
@@ -7880,6 +7906,18 @@ Renderer.prototype.draw = function (g, alpha) {
     const t = lv.tile, q = PIX.size, i = b.n - 1, w = BELLS.w[i] * t, h = BELLS.h[i] * t, u = T - b.t, top = sn2(b.y + BELLS.rope * t);
     const sw = u < 1.6 ? sn2(Math.sin(u * 11) * 0.14 * t * (1 - u / 1.6)) : 0, x = sn2(b.x) + sw, c = u < 0.12 ? PAL.white : b.rung ? PAL.orange : PAL.gray;
     box(sn2(b.x) - q / 2, sn2(b.y), sn2(b.x) + q / 2, top, PAL.gray, 1, 0, 10, 0);   // the rope (straight: the swing is the bell's)
+    if (th.skazka) {   // the Dark Forest's (caveSkulls): Baba Yaga's skull lamp on its cord, its size the bell's; dark till lit in order, then its sockets burn (a light), flashing white as
+      // it is struck; its number on its brow
+      const cg = u < 0.12 ? PAL.white : PAL.gray, cr = sn2(0.62 * h), K = PAL.black;
+      F(x, top + cr * 0.55, w, 0, 0, cr * 0.55, cg, 1, 0); box(sn2(x - 0.62 * w), sn2(top + cr * 0.5), sn2(x + 0.62 * w), sn2(top + h), cg, 1, 0, 10, 0);   // its crown, its jaw
+      for (const e of [-1, 1]) { const ex = sn2(x + e * 0.4 * w), ey = sn2(top + 0.62 * h), er = 0.24 * w;
+        if (b.rung) { disc(ex, ey, er, PAL.orange, 1); box(ex - q, ey - q, ex + q, ey + q, PAL.yellow, 1, 0, 10, 0); vlamps.push([ex, ey, 0.25, 0.7]); } else disc(ex, ey, er, K, 1); }
+      for (const e of [-0.18, 0.18]) box(sn2(x + e * w), sn2(top + 0.9 * h), sn2(x + e * w) + q, sn2(top + h), K, 1, 0, 10, 0);   // its teeth
+      const gl = POST_NUM[b.n].split('/'), gx = x - (gl[0].length * q) / 2, gy = top + sn2(0.3 * h) - (gl.length * q) / 2;
+      gl.forEach((row, j) => { for (let k = 0; k < row.length; k++) if (row[k] === '#') box(gx + k * q, gy + j * q, gx + (k + 1) * q, gy + (j + 1) * q, K, 1, 0, 10, 0); });
+      for (let k = 0; k < 2; k++) { const f = (u - k * 0.25) / 1.1; if (f > 0 && f < 1) F(x, top + 0.6 * h, (0.6 + 2.2 * f) * t, 0, 0, (0.6 + 2.2 * f) * t, PAL.orange, 1 - f, 4); }
+      continue;
+    }
     {   // its body (bellHw), row by row, three bands across it in its darker half
       const rows = Math.max(4, Math.round(h / q));
       for (let j = 0; j < rows;) { const f = bellHw((j + 0.5) / rows); let e = j + 1; while (e < rows && Math.abs(bellHw((e + 0.5) / rows) - f) * w < q / 2) e++; box(sn2(x - f * w), sn2(top + (j * h) / rows), sn2(x + f * w), sn2(top + (e * h) / rows), c, 1, 0, 10, 0); j = e; }
@@ -7928,6 +7966,13 @@ Renderer.prototype.draw = function (g, alpha) {
     box(snap(kn.px - 0.16 * t), snap(py), snap(kn.px + 0.16 * t), kn.foot, th.plank, 1, 0, 10, 0);
     line(sx, sy, ex, ey, th.plank, 1, (0.34 * t) / kitP);
     box(snap(sx - 0.32 * t), snap(sy - 0.3 * t), snap(sx + 0.32 * t), snap(sy + 0.3 * t), PAL.gray, 1, 0, 10, 0); disc(kn.px, py, 0.14 * t, PAL.gray, 1);
+    if (th.skazka) {   // the Dark Forest's: Baba Yaga's pestle, a club swelling to its round foot (its foot the head's: what flattens), cracked, a black band at its neck
+      for (const [v0, v1, f] of [[0, 0.3, 0.5], [0.3, 0.62, 0.78], [0.62, 1, 1]]) box(snap(ex - f * hw), snap(ey + v0 * 2 * hh), snap(ex + f * hw), snap(ey + v1 * 2 * hh), th.plank, 1, f < 1 ? 0 : 1.5 * kitP, 10, 1);
+      box(snap(ex - 0.5 * hw), snap(ey + 0.22 * hh), snap(ex + 0.5 * hw), snap(ey + 0.22 * hh) + 2 * kitP, PAL.black, 1, 0, 10, 0);
+      for (let i = 0; i < 4; i++) box(snap(ex + 0.3 * hw) + (i % 2) * kitP, snap(ey + 1.1 * hh) + i * kitP, snap(ex + 0.3 * hw) + (i % 2 + 1) * kitP, snap(ey + 1.1 * hh) + (i + 1) * kitP, PAL.black, 1, 0, 10, 0);
+      box(snap(ex - hw), snap(yb) - kitP, snap(ex + hw), snap(yb), th.plank, 1, 0, 10, 4);
+      continue;
+    }
     box(snap(ex - hw), snap(ey), snap(ex + hw), snap(yb), th.plank, 1, 0, 10, 1); box(snap(ex - hw), snap(ey + 0.35 * hh), snap(ex + hw), snap(ey + 0.35 * hh) + 2 * kitP, PAL.gray, 1, 0, 10, 0);
     box(snap(ex - hw), snap(yb) - kitP, snap(ex + hw), snap(yb), th.plank, 1, 0, 10, 4);
   }

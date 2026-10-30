@@ -1617,6 +1617,11 @@ const ENEMY = {
   tofu: { design: 'cube', color: 'red', size: 0.95, grav: 1, stomp: true, coins: 2, speed: 32, step: 0.9, move: 'crawl' },   // a soft cube: stomped, it falls into four (TOFU)
   tofuMini: { design: 'cube', color: 'red', size: 0.45, grav: 1, stomp: true, coins: 1, speed: 48, step: 0.45, move: 'crawl', safe: 0.8 },   // (slower, harmless its first 0.8 s: the same; was 70, 0.35 s)
   nurikabe: { design: 'cube', color: 'red', size: 0.75, grav: 0, stomp: true, coins: 6, speed: 0, step: 1, move: 'crush' },   // a wall yokai hanging over its ledge, it drops on the hero under it (CRUSH)
+  // Space's own (owner, 2026-10-30, Д394 «A», Д395 «B», Д396 «D»; Worlds' drawings SPACE_SPR, crisp, the body unseen): the tower's climber a Yaku gecko, the orbit's
+  // circler a bake-chochin, the orbit's drifter the utsuro-bune (DRIFT); each body the size of the drawing's middle (the gecko's torso, not its tail)
+  gecko: { design: 'mochi', color: 'red', size: 0.55, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall', cling: true },
+  chochin: { design: 'cat', color: 'red', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },
+  utsuro: { design: 'round', color: 'red', size: 0.7, grav: 0, stomp: true, coins: 5, speed: 0, step: 0.8, move: 'drift' },
 };
 // A tumbler: sits `rest` s on its ledge (crouching its last `crouch`), then somersaults `hop` R ahead, up and over in `air` s, turning at the ledge's end. Sitting it
 // is stomped; in the air its corners hurt. A nurikabe: hangs `up` tiles over its ledge (less if a ceiling is nearer); the hero under it (within `reach` R of its
@@ -1625,6 +1630,9 @@ const ENEMY = {
 const TUMBLE = { rest: 1.8, crouch: 0.45, air: 0.45, hop: 2.0 };   // (owner, 2026-10-23: «квадратных врагов тяжело одолеть, точно нужно проще»: it sits longer, crouches clearer, hops shorter; was 1.1, 0.3, 2.4)
 const CRUSH = { up: 3.6, reach: 1.55, warn: 0.85, fall: 2.2, down: 2.4, rise: 2.2 };   // (reach 1.55, was 1.2: with its body now 0.75 R the hero under it still within 2.3 R; before that it shook longer, fell slower, lay longer, was 0.55, 3, 1.4)
 const TOFU = { n: 4 };
+// A drifter (the utsuro-bune, Space's orbit): across the shaft wall to wall at `speed` R/s on a sine `bob` R high, `period` s long, easing through a stop
+// in `turn` s at a wall or a block `look` R ahead (head-on the while: its frame 3); no weight, no attack, stomped as any (Вр1 «А»: the patroller)
+const DRIFT = { speed: 1.6, bob: 0.35, period: 2.6, turn: 0.3, look: 0.4 };
 const SPRITE_EYES = {}, spriteEyes = (id) => SPRITE_EYES[id] || (SPRITE_EYES[id] = (() => {   // where a sprite's eyes are (its 'o' cells), in game pixels from its middle
   const rows = FOE_SPRITES[id]; let n = 0, x = 0, y = 0;
   rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] === 'o') { n++; x += i + 0.5; y += j + 0.5; } });
@@ -1674,6 +1682,9 @@ const FOE_DESC = {
   nurikabe: { en: 'Drops on you from above. Stomp it once it lands.', es: 'Cae sobre ti. Písalo cuando aterriza.', pt: 'Cai em você. Pise quando ele pousa.', ja: 'うえから おちてくる。おちたら ふもう。' },
   skull: { en: 'Creeps in its goo, lunges up close.', es: 'Se arrastra en su baba; se lanza de cerca.', pt: 'Rasteja na gosma; ataca de perto.', ja: 'どろどろ はう。ちかいと とびかかる。' },
   komori: { en: 'Dives when red. Lamps keep it asleep.', es: 'Rojo, se lanza en picado. Las lámparas lo duermen.', pt: 'Vermelho, ele mergulha. Lâmpadas o fazem dormir.', ja: 'あかく なると とっしん。ランプで ねむる。' },
+  gecko: { en: 'Crawls up and down the tower. Land on it!', es: 'Sube y baja por la torre. ¡Cae encima!', pt: 'Sobe e desce pela torre. Pule em cima!', ja: 'とうを のぼりおりする。うえから ふもう！' },
+  chochin: { en: 'Circles round its block.', es: 'Da vueltas a su bloque.', pt: 'Gira em volta do seu bloco.', ja: 'ブロックの まわりを まわる。' },
+  utsuro: { en: 'Drifts across the shaft. Bounce off it!', es: 'Flota de lado a lado. ¡Rebota en ella!', pt: 'Flutua de um lado a outro. Quique nela!', ja: 'よこに ただよう。ふんで はねよう！' },
 };
 const FOE_NAMES = {
   crawler: { en: 'Crawler', es: 'Reptador', pt: 'Rastejante', ja: 'ハイハイ' }, climber: { en: 'Climber', es: 'Trepador', pt: 'Escalador', ja: 'カベノボリ' },
@@ -1686,6 +1697,8 @@ const FOE_NAMES = {
   tumbler: { en: 'Tumbler', es: 'Volteretas', pt: 'Cambalhota', ja: 'ゴロゴロようかん' }, tofu: { en: 'Tofu', es: 'Tofu', pt: 'Tofu', ja: 'とうふ' },
   tofuMini: { en: 'Tofu bit', es: 'Trocito', pt: 'Pedacinho', ja: 'とうふの かけら' }, nurikabe: { en: 'Nurikabe', es: 'Nurikabe', pt: 'Nurikabe', ja: 'ぬりかべ' },
   komori: { en: 'Bat', es: 'Murciélago', pt: 'Morcego', ja: 'コウモリ' },
+  gecko: { en: 'Gecko', es: 'Geco', pt: 'Lagartixa', ja: 'ヤモリ' }, chochin: { en: 'Lantern ghost', es: 'Farol fantasma', pt: 'Lanterna fantasma', ja: 'ちょうちんおばけ' },
+  utsuro: { en: 'Hollow ship', es: 'Nave hueca', pt: 'Nave oca', ja: 'うつろぶね' },
 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
 const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
@@ -1769,7 +1782,7 @@ const SKAZKA = Object.assign({}, WORLDS[1], { id: 'skazka', name: { en: 'Forest'
 // (THEMES.space, THEMES.orbit; its kit in the renderer, SP). Not in the campaign's line yet (UPwell's CAMP_ORDER): ?space puts it after the Tower, ?play=space shows it.
 const SPACE = Object.assign({}, WORLDS[2], { id: 'space', name: { en: 'Space', es: 'Espacio', pt: 'Espaço', ja: 'うちゅう' }, theme: THEMES.space, dark: [], maxD: 2, magnet: 0,
   chunks: { planks: 3, shelves: 3, pillars: 2, comb: 2, chimney: 1, overhang: 1, spring: 1, lift: 2, movers: 1, twinshaft: 1, crumble: 1 },
-  enemies: { crawler: 3, climber: 2, circler: 1, shell: 1, spitter: 2 }, intro: [{}, {}, {}] });
+  enemies: { crawler: 3, gecko: 2, chochin: 1, shell: 1, spitter: 2, utsuro: 1 }, intro: [{}, {}, {}] });
 // A bonus level after each world's last: a shaft as long as that world's middle level, against the clock (`time` s, about
 // 1.1 s a metre) where no heart is lost; out by the hole on top, out of time or caught by the fire, what it paid is shown
 // with an offer to double it for an ad, then on to the next world (user). Made like a world, with
@@ -2149,20 +2162,20 @@ const CAMPAIGN = [
 // a level; first numbers about the Tower's, for the sweep (seeds too: the bot's pick to come). Its boss the Karasu-tengu's for now, till the bosses chat gives
 // Space its own. Its runes three more of Yarndings' (from the top of the tower the way went on to the Moon).
 { world: SPACE, runes: 'xjT', lore: { en: 'From the top of the tower\nthe way went on to the Moon.', es: 'Desde lo alto de la torre\nel camino siguió hacia la Luna.', pt: 'Do alto da torre\no caminho seguiu até a Lua.', ja: 'とうの うえから\nみちは つきへ つづいた。' }, levels: [
-  { role: 'teach', len: 36, fire: 0.5, calm: 8, maxD: 2, chunks: SPP, intro: ['planks'], enemies: ['crawler', 'climber'], foes: 0.45, candy: [], safe: true, seed: 8101,
+  { role: 'teach', len: 36, fire: 0.5, calm: 8, maxD: 2, chunks: SPP, intro: ['planks'], enemies: ['crawler', 'gecko'], foes: 0.45, candy: [], safe: true, seed: 8101,
     news: { en: 'the launch flame rises from below', es: 'la llama del despegue sube desde abajo', pt: 'a chama do lançamento sobe lá de baixo', ja: 'はっしゃの ほのおが したから くる' } },
-  { role: 'teach', len: 40, fire: 0.52, maxD: 2, chunks: { ...SPP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'climber', 'shell'], foes: 0.5, candy: ['bubble'], gate: 'gate', seed: 8102,
+  { role: 'teach', len: 40, fire: 0.52, maxD: 2, chunks: { ...SPP, lift: 3 }, intro: ['lift'], enemies: ['crawler', 'gecko', 'shell'], foes: 0.5, candy: ['bubble'], gate: 'gate', seed: 8102,
     news: { en: "the tower's vents blow fire", es: 'las rejillas de la torre escupen fuego', pt: 'as saídas da torre soltam fogo', ja: 'とうの あなから ひが でる' } },
-  { role: 'teach', len: 42, fire: 0.52, maxD: 2, chunks: { ...SPP, crumble: 3 }, intro: ['crumble'], enemies: ['crawler', 'climber', 'spitter'], foes: 0.5, candy: ['smash'], seed: 8103,
+  { role: 'teach', len: 42, fire: 0.52, maxD: 2, chunks: { ...SPP, crumble: 3 }, intro: ['crumble'], enemies: ['crawler', 'gecko', 'spitter'], foes: 0.5, candy: ['smash'], seed: 8103,
     news: { en: 'grey blocks give way', es: 'los bloques grises se caen', pt: 'os blocos cinzas desmoronam', ja: 'はいいろの ブロックは くずれる' } },
-  { role: 'apply', len: 44, fire: 0.5, maxD: 2, chunks: { ...SPP, sparse: 2 }, intro: [], enemies: ['crawler', 'circler', 'spitter'], foes: 0.55, pair: 0.15, candy: ['bubble'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 8104,
+  { role: 'apply', len: 44, fire: 0.5, maxD: 2, chunks: { ...SPP, sparse: 2 }, intro: [], enemies: ['crawler', 'chochin', 'spitter'], foes: 0.55, pair: 0.15, candy: ['bubble'], shop: 0.4, stash: 0.3, gate: 'gate2', seed: 8104,
     news: { en: 'in orbit you jump higher and float', es: 'en órbita saltas más alto y flotas', pt: 'em órbita você pula mais alto e flutua', ja: 'うちゅうでは たかく ふわっと とぶ' } },
-  { role: 'peak', len: 40, fire: 0.58, maxD: 3, chunks: { ...SPP, comb: 3, movers: 2, sparse: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'climber', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 8105 },
+  { role: 'peak', len: 40, fire: 0.58, maxD: 3, chunks: { ...SPP, comb: 3, movers: 2, sparse: 1 }, intro: [], set: 'arena', enemies: ['crawler', 'chochin', 'shell', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], seed: 8105 },
   { role: 'bonus', len: 48, bonus: 0, time: 52, seed: 8106 },
-  { role: 'twist', len: 42, fire: 0.54, maxD: 2, chunks: { ...SPP, sparse: 2 }, intro: [], dark: true, enemies: ['crawler', 'climber', 'shell'], foes: 0.55, candy: ['bubble'], stash: 0.3, seed: 8107,
+  { role: 'twist', len: 42, fire: 0.54, maxD: 2, chunks: { ...SPP, sparse: 2 }, intro: [], dark: true, enemies: ['crawler', 'shell', 'chochin'], foes: 0.55, candy: ['bubble'], stash: 0.3, seed: 8107,
     news: { en: 'the night side of the Earth', es: 'el lado nocturno de la Tierra', pt: 'o lado noturno da Terra', ja: 'ちきゅうの よるの がわ' } },
-  { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SPP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], enemies: ['crawler', 'climber', 'circler', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', seed: 8108 },
-  { role: 'rest', len: 32, fire: 0.44, maxD: 2, chunks: { planks: 3, shelves: 3, pillars: 2, sparse: 1 }, intro: [], enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 8109,
+  { role: 'peak', len: 44, fire: 0.58, maxD: 3, chunks: { ...SPP, comb: 3, movers: 2, rubberwall: 2 }, intro: [], enemies: ['crawler', 'utsuro', 'chochin', 'spitter'], foes: 0.75, pair: 0.3, candy: ['rainbow'], gate: 'gate3', seed: 8108 },
+  { role: 'rest', len: 32, fire: 0.44, maxD: 2, chunks: { planks: 3, shelves: 3, pillars: 2, sparse: 1 }, intro: [], enemies: ['crawler', 'utsuro'], foes: 0.3, candy: ['smash'], shop: 0.15, cage: true, runes: 2, seed: 8109,
     news: { en: "Aunt Moti's shop", es: 'la tienda de la tía Moti', pt: 'a loja da tia Moti', ja: 'モチおばさんの ショップ' } },
   { role: 'boss', boss: 'pigeon', par: 65 },   // the Karasu-tengu's for now (a placeholder: Space's own boss is the bosses chat's)
 ] },
@@ -4675,6 +4688,17 @@ class Level {
         const ok = rects.filter((r) => !r.plank && !r.crumble && !r.spring && r.x0 > this.l + t && r.x1 < this.r - t && !taken(r) &&
           !rects.some((s) => s.spring && Math.abs(s.y1 - r.y0) < 1 && s.x1 > r.x0 && s.x0 < r.x1));   // not one with a spring on top, in its way round
         if (ok.length) { const r = any(ok); this.spawns.push({ type, x: (r.x0 + r.x1) / 2, y: r.y0 - 1.1 * eR, rect: r, dir: rnd() < 0.5 ? 1 : -1 }); }
+      } else if (ENEMY[type].move === 'drift') {   // a drifter on a line across the shaft, in its widest stretch clear of blocks over its body and bob, five tiles at
+        // the least (DRIFT: it turns at a block as at a wall); of the widest, the one nearest the chunk's middle
+        const band = eR + DRIFT.bob * this.R + 0.5 * t, mid = (top + bottom) / 2; let best = null;
+        for (let y = top + band; y < bottom - band; y += 0.5 * t) {
+          const cut = this.rects.filter((r) => !r.cap && r.y0 < y + band && r.y1 > y - band).map((r) => [r.x0, r.x1]).sort((p, q) => p[0] - q[0]);
+          let x = this.l, gap = null;
+          for (const [a0, a1] of cut.concat([[this.r, this.r]])) { if (a0 - x > (gap ? gap[1] - gap[0] : 0)) gap = [x, a0]; x = Math.max(x, a1); }
+          const wide = gap ? gap[1] - gap[0] : 0;
+          if (wide >= 5 * t && (!best || wide > best.wide + 0.5 * t || (Math.abs(wide - best.wide) <= 0.5 * t && Math.abs(y - mid) < Math.abs(best.y - mid)))) best = { y, x: (gap[0] + gap[1]) / 2, wide };
+        }
+        if (best) this.spawns.push({ type, x: best.x, y: best.y, dir: rnd() < 0.5 ? 1 : -1 });
       } else {
         const side = rnd() < 0.5 ? 1 : 2, reach = 2.2 * eR;   // anything nearer the wall than it is wide is in its way, and a mover crosses it
         const cut = rects.filter((r) => r.move || (side === 1 ? r.x0 < this.l + reach : r.x1 > this.r - reach)).map((r) => [r.y0, r.y1])
@@ -8703,7 +8727,7 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const e of lv.enemies) {   // Space's own (SPACE_SPR, SPACE_V): the gecko on its wall in profile, its feet on the wall, its head the way it goes (its rows
     // turned over going down); the chochin round its block, facing you; the utsuro across the shaft, facing the way it goes. Crisp, a sheet pixel a game pixel.
     // Its frame b.frame (1, 2 on the move, 3 turning; UPwell's timing), else 1 and 2 by turns. Till the kinds land, the tower's climber is drawn a gecko, the orbit's circler a chochin
-    const b = e.body, k = SPACE_V[e.type] ? e.type : th.space && !th.orbit && e.type === 'climber' ? 'gecko' : th.space && th.orbit && e.type === 'circler' ? 'chochin' : null;
+    const b = e.body, k = SPACE_V[e.type] ? e.type : null;   // (its kind's: the recipes have them since UPwell's, 2026-10-30)
     if (!k || !seen(b.minY - 2 * R, b.maxY + 2 * R)) continue;
     const n = b.frame || 1 + (Math.floor(T * (k === 'chochin' ? 1.5 : 4)) % 2), id = k + '-' + SPACE_V[k] + '-' + n;
     let rows = FOE_SPRITES[id]; if (!rows) continue;

@@ -125,8 +125,10 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
-// come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu.
-const CAMP_STARS = { skazka: 180 };
+// come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu, its lock
+// and count shown though its place on the line is past the worlds out (owner, Г6 «Б»). 120 while the five worlds are out, their 150 stars
+// short of 180 (owner, Г10 «А», 2026-10-30: 2.4 a level, a third star played for); 180 again once more are out.
+const CAMP_STARS = { skazka: CAMP_OPEN > 5 ? 180 : 120 };
 const gated = (w) => w >= 0 && w < CAMPAIGN.length && !!CAMP_STARS[CAMPAIGN[w].world.id];
 const lineStars = () => save.camp.stars.reduce((n, s, i) => n + (s > 0 && !gated(Math.floor(i / 30)) ? s : 0), 0);   // the stars of the worlds on the line
 const lineBefore = (w) => { let p = w - 1; while (p >= 0 && gated(p)) p--; return p; };   // the world on the line before w (-1: none)
@@ -154,7 +156,7 @@ const dayAt = (i) => { const s = Math.floor((i % 30) / 3); return sideOf(i % 3, 
 // is a line. The calm and fierce sides (SIDE) are parts of it now, in a new order each time (campMerge); the daily well still plays them alone.
 const campOpen = (i) => {
   const st = save.camp.stars, w = Math.floor(i / 30), s = Math.floor((i % 30) / 3), c = i % 3;
-  if (i >= CAMP_LEN || c !== 1) return false;   // (a side's id, or a world past the open ones: shut, whatever a save says)
+  if ((i >= CAMP_LEN && !gated(w)) || c !== 1) return false;   // (a side's id, or a world past the open ones but a bonus world: shut, whatever a save says)
   if (gated(w) ? lineStars() < CAMP_STARS[CAMPAIGN[w].world.id] : lineBefore(w) >= 0 && !(st[lineBefore(w) * 30 + 28] > 0)) return false;   // its stars, or the boss before it on the line
   return s === 0 || st[i - 3] > 0;   // the first, or the one under it cleared
 };
@@ -3524,7 +3526,7 @@ const ui = {
     if (begun) row.append(cap(button(t('book'), 'chip k-book', () => this.book()), 'book'));
     if (begun) row.append(cap(button(t('daily'), 'chip k-daily', () => (r && r.daily === today && !r.world && r.bonus < 0 ? game.continueRun() : game.startRun(true))), 'daily'));   // the day's well (today's try kept: on with it)
     const bw = CAMPAIGN.findIndex((_, w) => gated(w));   // the bonus world (CAMP_STARS): its chip, the stars it wants while shut, its map once open
-    if (begun && bw >= 0 && bw < CAMP_OPEN) {
+    if (begun && bw >= 0) {
       const need = CAMP_STARS[CAMPAIGN[bw].world.id], shut = !campOpen(bw * 30 + 1), name = L2(CAMPAIGN[bw].world.name);
       const b = button('', 'chip' + (shut ? ' locked' : ''), () => (shut ? ui.toast(tf('starsFor', { n: need - lineStars(), w: name }), 2200, 'starOff') : this.map(bw))), w = px(L2(CAMPAIGN[bw].world.name));
       if (shut) { const k = el('span', 'need'); k.append(starEl(false, 20), px(lineStars() + '/' + need)); w.append(k); }   // after its name, dimmer: a star and the count (the Figma «Main-random»)

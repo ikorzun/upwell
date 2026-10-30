@@ -1737,6 +1737,146 @@ ELEMENTS.update({
                            where='fixed on top of a hull ledge of the station', material='metal, foil blankets, glass', size='each about 1 tile wide and 1 tile tall',
                            inks='blue and grey with small purple details, a camera\'s lens dark', scene='a blue hull ledge with a white top edge under them'),
 })
+# Space, round 3 (owner 2026-10-30 «да, делай третий круг»): the doors, the stash room, the arena's holder (only 8-5 has an arena: in orbit), the task's
+# light, and the animals and lost things that flee the hero, in stills first (their frames once picked: ANIM needs the picked still as its reference).
+# Pairs as Д377: A, B, C at the launch tower (8-1…8-3), D, E, F in orbit (8-4 on). References: research/variants/ref-sp-*.png (the game at 4 x 4)
+SP_PAIR = ('Cells A, B and C are at the launch tower on the pad at night (the blue steel deck ledges of the tower), cells D, E and F are in orbit on the Kibo '
+           'module (the blue hull ledges with green handrails under them), as in the attached image (the tower above, orbit below)')
+SP_ORB = 'a blue hull ledge of the Kibo module with a white top edge, green handrails under it, as in the attached image'
+ELEMENTS.update({
+    'sp-shop': dict(world='space', kind='prop', what="a way into the game's shop, a little stall where the hero buys things, built in the world's own way: "
+                    "A a canteen counter of the launch site under a short awning; B a tool crib, a cage of steel mesh with a hatch and goods on shelves behind it; C a "
+                    "small kiosk made of a shipping container with its side folded up as a counter; D a stowage locker in the module's wall, its door open, white "
+                    "cargo bags and food packs strapped inside; E a space food bar, a rack of drink pouches and food trays held by straps and Velcro; F a cargo "
+                    "transfer bag opened as a stall, goods floating tethered over it. Each has a red cloth or a red flag with a simple white coin on it (the shop's "
+                    "mark) over its opening. " + SP_PAIR,
+                    where='at the wall end of a ledge, standing on the ledge against the shaft wall, its opening facing the play',
+                    material='steel, mesh, a container, lockers, cargo bags, food packs', size='about 3 tiles wide and 3 tiles tall',
+                    inks='steel and hulls blue and grey, cargo bags and packs grey with black straps, small purple details, the red cloth with a white coin (the '
+                    'shop\'s mark); never yellow', scene='a ledge with a white top edge under it, as in the attached image'),
+    'sp-stash': dict(world='space', kind='prop', what="a hatch in the wall, the way into the game's secret stash, its gaps glowing a soft purple from inside: A "
+                     "a square service door of the launch tower with a lever handle and a small round window; B a cable-tray hatch with a hand wheel, bolted to "
+                     "the steel; C a hatch in the side of the umbilical mast with a striped frame of blue and black; D the round hatch of "
+                     "the station's berthing ring (a square-rounded hatch with a small round window, its latches round it); E the Kibo airlock's outer hatch, a "
+                     "square with rounded corners and a big handle; F a small round porthole hatch with a hand wheel. " + SP_PAIR,
+                     where='set in the shaft wall at the wall end of a ledge, standing on the ledge', material='riveted steel plate, a hull, hinges, latches, a hand wheel',
+                     size='about 2.5 tiles wide and 3 tiles tall', inks='blue and grey steel, black rivets and gaps, a purple glow with a dither halo from its gaps and '
+                     'window (purple is the stash\'s mark)', scene='a ledge with a white top edge under it, as in the attached image'),
+    'sp-stashroom': dict(world='space', kind='prop', plane='back', what="the inside of the secret stash, seen as one whole game screen, a different place in each "
+                         "cell: A inside the nose fairing of the rocket on the pad, a little satellite folded in it, the fairing's curved walls round it; B inside "
+                         "the tall vehicle assembly building at night, its huge girders and the rocket's stages standing in the dark; C the Tanegashima Space "
+                         "Museum's hall, a full-size rocket engine and a satellite model on stands; D inside the Kibo pressurised module, its walls of white racks "
+                         "and lockers, handrails, cables, a round window with the Earth in it; E inside Kibo's small logistics module, its racks of stowage and "
+                         "cargo bags, a hatch overhead; F inside the airlock, its slide table and an experiment box on it, the outer hatch open on the stars; coins "
+                         "to collect hanging in each room",
+                         where='the whole room behind the play: its back wall and its props; the ledges in it are shelves of the place',
+                         material='curved walls, girders, racks, lockers, handrails, cables, windows', size='the whole room, about 16 tiles wide and 26 tiles tall',
+                         inks='big flat shapes of one dim tone each on the black (no dither, no fine speckle): dim blue and dim grey walls and racks, dim green '
+                         'handrails, the Earth in a window dim blue with dim grey clouds, a purple glow (the stash), gold coins',
+                         scene='a blue steel or hull shelf with a white top edge in the room'),
+    'sp-holder': dict(world='space', kind='holder', what='a container of the station that holds the waiting wave in orbit, hanging over the arena on a tether '
+                      'from out of sight above, as things float in weightlessness: a different container in each cell: A a white cargo transfer bag (a soft '
+                      'box bag with handles and a zip) on a tether; B a mesh stowage net bag stuffed full; C a hard grey cargo case with latches, its lid that '
+                      'swings open; D a bag held in the hand of Kibo\'s robotic arm, its arm reaching in from above; E a round trash bag of the station, '
+                      'bulging; F a cargo pallet with straps across it, its straps that snap open',
+                      size='about 2 tiles wide and 2 tiles tall, its tether or arm running up out of the cell', scene=SP_ORB,
+                      vary='the container, how it hangs (a tether, two tethers, the robot arm\'s hand) and how it lets the wave go (it unzips, its lid swings open, '
+                      'its straps snap, it bursts)',
+                      inks='bags and cases grey with black straps and seams, the arm blue and grey, the tether grey, red eyes or a red glow in its gaps'),
+    'sp-light': dict(world='space', kind='prop', what="a lamp the hero lights by coming near it (a task of the level: light them all), drawn twice in each cell: "
+                     "off on the left (dark, its glass dim grey) and lit on the right (its glass lit and a soft glow of dither round it): A an aircraft "
+                     "warning beacon on a short mast of the tower; B a floodlight of the launch pad on a bracket, pointing up; C a rotating warning beacon "
+                     "in a cage; D the station's external floodlight on a pan-tilt head; E a camera-and-light unit with its lamp ring; F a small "
+                     "running light, a strobe in a guard. " + SP_PAIR,
+                     where='fixed at the wall end of a ledge, standing on the ledge', material='steel, glass, a lamp', size='about 1 tile wide and 1.5 tiles '
+                     'tall (each of the two)', inks='blue and grey steel; the glass dim grey when off; lit, the light orange or aqua with a dither glow (never '
+                     'red, never yellow)', scene='a ledge with a white top edge under them, as in the attached image'),
+    'sp-birds': dict(world='space', kind='prop', what="a bird of Tanegashima's coast resting on the launch tower's deck (it will fly off when the hero comes near), "
+                     "a different real bird in each cell: A a blue rock thrush (isohiyodori), the male blue with an orange-brown belly; B a Pacific reef "
+                     "heron (kurosagi), slate grey, long neck and legs; C a large-billed crow; D a black kite resting; E a Pacific swallow on a cable; "
+                     "F a Ryukyu robin (akahige), orange-red face and breast, dark back",
+                     where='standing on the top of a deck ledge of the launch tower', material='feathers', size='about 1 tile wide and 1 tile tall (the heron 1.5 '
+                     'tall)', inks='real colours in our inks: blue, grey, black, orange, a little purple; never red, never yellow, no white',
+                     scene='a blue steel deck ledge of the launch tower with a white top edge, as in the attached image'),
+    'sp-turtles': dict(world='space', kind='prop', what="a sea turtle come up from the beach of Tanegashima onto the launch tower's deck (it will crawl off when "
+                       "the hero comes near), a different take in each cell: A a loggerhead turtle (akaumigame), big head, a brown-orange shell; B a green "
+                       "turtle (aoumigame), a small head, a smooth olive shell; C a hawksbill turtle, a pointed beak, an overlapping patterned shell; D a "
+                       "loggerhead hatchling, tiny and round, three of them in a row; E a loggerhead resting with its flippers spread flat; F a kawaii round "
+                       "turtle with big eyes",
+                       where='on the top of a deck ledge of the launch tower', material='a shell, scaly flippers', size='about 1.5 tiles long and 0.7 tiles tall (the '
+                       'hatchlings a third of a tile each)', inks='real colours in our inks: orange, grey, green, black, a little blue; never red, never yellow, no white',
+                       scene='a blue steel deck ledge of the launch tower with a white top edge, as in the attached image'),
+    'sp-floaters': dict(world='space', kind='prop', what="three small lost things floating weightless just over a hull ledge in orbit (they will drift off, "
+                        "tumbling, when the hero comes near): a steel nut, an astronaut's glove and an onigiri in its plastic wrapper, all three in each cell, a "
+                        "different take on the three in each cell: A plain and simple; B tilted at angles as they turn; C the glove open, its fingers spread; "
+                        "D with a short tether trailing from each; E the onigiri half unwrapped, its nori showing; F kawaii, each with tiny round eyes",
+                        where='floating a third of a tile over the top of a hull ledge, a tile apart', material='steel, a fabric glove, rice, nori, a wrapper',
+                        size='each about half a tile to two thirds of a tile across', inks='the nut grey, the glove grey with blue cuffs, the onigiri grey rice '
+                        'with black nori in a blue-and-grey wrapper; never red, never yellow, no white (white is what you stand on)', scene=SP_ORB),
+})
+ELEMENTS.update({   # Space's hazards in frames, as the other worlds' (Д376 «A» the launch flame, Д377 «BD» the tower's vent and the station's nozzle); their
+    # references research/variants/ref-sp-vent-frames.png and ref-sp-nozzle-frames.png (the wall's rows as the game draws them: asleep, warning, bursting,
+    # 4 x 4 image px a game px) and ref-sp-flame-frames.png (a crop of the flame's front in the game at 4 x 4)
+    'sp-vent-frames': dict(world='space', kind='hazframes', what='a slit vent on the steel of the launch tower at Tanegashima that blows off the rocket\'s gas: '
+                           'asleep it is a tall narrow slit with a grey frame and blue louvres on the wall, quiet; it glows for half a second as a warning; then a '
+                           'hot jet of gas and flame blasts out of it straight across the shaft for about one second, hurting whoever is in it, and it sleeps again',
+                           refdesc='the shaft\'s left wall (blue dither, a white inner edge) with the same vent shown three times as it is drawn now: asleep (a '
+                           'tall slit with a grey and blue frame), warning (its outer edge red) and bursting (a long jet, red in its core, orange round it, with '
+                           'loose specks of red and orange)',
+                           frames='A asleep: the vent as in the attached image, one small grey puff of vapour (3 by 3 art pixels) just out of the slit near its '
+                           'top; B asleep: the same, the puff a little lower and fainter (A and B alternate slowly as it sleeps); C about to blow: the same vent, '
+                           'its frame\'s outer edge red along its whole height, two small grey puffs at the slit (held still for half a second as the warning); D '
+                           'blowing: a jet blasts straight out of the slit across the shaft, a red core and orange round it, widening a little to its ragged end, '
+                           'a few round puffs of grey gas rolling off its edges; E: the same jet, its ragged end and its puffs in other places; F: a third '
+                           'shape of the same jet (D, E and F loop fast as it blows: the jet never goes out between them)',
+                           scene='the shaft\'s left wall as a strip 10 art pixels wide down the left edge of the cell, as tall as the cell (blue dither on black, a '
+                           'one-pixel white inner edge, as in the attached image), plain black air to its right; the vent on the wall\'s inner edge, centred in '
+                           'the cell\'s height',
+                           size='the vent exactly 13 art pixels wide and 36 art pixels tall (as in the attached image); the jet at most 64 art pixels long from the '
+                           'wall\'s white inner edge and at most 24 art pixels tall; asleep and warning nothing reaches further out than 16 art pixels. The game '
+                           'stacks the stretch down the wall, so its top and bottom rows must join seamlessly',
+                           motion='A jet of gas under pressure: straight and fast out of the slit, its body steady, its end and edges ragged and flickering, puffs '
+                           'of gas rolling off it; the vent and its frame never move.',
+                           inks='the vent\'s frame grey and blue with black slits, the puffs grey (never white), the warning edge red, the jet red in its core and '
+                           'orange round it (red is the danger), the puffs off it grey'),
+    'sp-nozzle-frames': dict(world='space', kind='hazframes', what='a small bell-shaped thruster nozzle (an RCS jet) on the blue hull of the space station: asleep '
+                             'the nozzle sits quiet on its mount; it glows for half a second as a warning; then it fires a jet of flame out across the shaft for '
+                             'about one second, hurting whoever is in it, and it sleeps again',
+                             refdesc='the shaft\'s left wall (blue dither, a white inner edge) with the same nozzle shown three times as it is drawn now: asleep (a '
+                             'grey bell nozzle on a blue mount), warning (its outer edge red) and firing (a wide jet of flame, red inside, orange round it, '
+                             'with loose sparks)',
+                             frames='A asleep: the nozzle as in the attached image, quiet, a tiny grey wisp (2 by 2 art pixels) at its mouth; B asleep: the same, '
+                             'no wisp (A and B alternate slowly as it sleeps); C about to fire: the same nozzle, the rim of its bell red, a small orange glow '
+                             'inside its mouth (held still for half a second as the warning); D firing: a jet of flame shoots out of the bell across the shaft, '
+                             'a cone that widens from the bell\'s mouth, red inside and orange round it, its end breaking into round orange puffs; E: the same jet, '
+                             'its end and its puffs in other places; F: a third shape of the same jet (D, E and F loop fast as it fires: the jet never goes out '
+                             'between them)',
+                             scene='the shaft\'s left wall as a strip 10 art pixels wide down the left edge of the cell, as tall as the cell (blue dither on black, '
+                             'a one-pixel white inner edge, as in the attached image), plain black air to its right; the nozzle on the wall\'s inner edge, centred '
+                             'in the cell\'s height',
+                             size='the nozzle and its mount exactly 17 art pixels wide and 18 art pixels tall (as in the attached image) in a stretch 38 art '
+                             'pixels tall; the jet at most 50 art pixels long from the bell\'s mouth and at most 30 art pixels tall; asleep and warning nothing '
+                             'reaches further out than 18 art pixels. The game stacks the stretch down the wall, so its top and bottom rows must join seamlessly',
+                             motion='Rocket flame: it leaves the bell as a cone, steady at its root, flickering and breaking into round puffs at its end; the '
+                             'nozzle and its mount never move.',
+                             inks='the nozzle grey with black lines, its mount blue, the warning rim red and its glow orange, the jet red inside and orange round '
+                             'it (red is the danger), its puffs orange'),
+    'sp-flame-frames': dict(world='space', kind='hazframes', what='one tongue of flame on the front of the launch flame that rises up the shaft from below: a '
+                            'rocket lifts off under the hero, and its fire climbs after it: the front is a ragged band of red over orange over billowing pale '
+                            'grey-blue smoke, and along it tongues of flame are born, rise, tear off at the top and sink, each at its own beat',
+                            refdesc='the front of the rising launch flame as it is drawn now in the game: a ragged band, red on top and orange below, round pale '
+                            'billows of smoke under it, loose red and orange specks over it',
+                            frames='A a small low lick just rising out of the front; B growing taller, leaning a little; C tall, its tip flickering; D at its tallest, '
+                            'its tip tearing off as a separate small flame just above it; E sinking back, the torn-off flame higher up and smaller, turning into a '
+                            'small round puff of grey smoke; F low again, the puff gone (A to F loop as the tongue\'s life)',
+                            scene='a straight stretch of the flame\'s front 24 art pixels wide across the lower third of the cell, its top edge red and orange under '
+                            'it, flat and level at the same height in every cell, the tongue rising out of its middle; plain black air above',
+                            size='the tongue at most 10 art pixels wide at its base and at most 20 art pixels tall over the front\'s top edge (80 image pixels); at '
+                            'the stretch\'s left and right ends the front stays flat in every frame',
+                            motion='Fire rises: the tongue licks upward and narrows to its tip, a red outline round an orange core, never a solid block; nothing below '
+                            'the front\'s top edge changes.',
+                            inks='the flames red outside and orange inside, the smoke grey dither (never white), the band red and orange'),
+})
 
 LEDGE = """Pixel-art design sheet for "Upwell", a mobile vertical platformer: {hero_short} climbs up a narrow shaft at night.
 {refnote}One element of the world "{world}" ({mood}): {what}. It is in the foreground, the play itself: full colour.

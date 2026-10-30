@@ -299,6 +299,9 @@ const clearWay = (lv, f, pad, n = 20) => {
   return !pts.some(([x, y]) => near.some((r) => !r.cap && x > r.x0 - pad && x < r.x1 + pad && y > r.y0 - pad && y < r.y1 + pad));
 };
 // An enemy: a red squishy crawling its round (see ENEMY).
+// A shot laid, aimed, to go in `w` s with its way shown (SHOT): carried with its shooter `e`'s body till then (a wave along the floor only across), and
+// gone if it is; `snd`, a sound as it goes
+function laid(s, e, w, snd) { s.warn = w; if (e) { s.by = e; s.ox = s.x - e.body.cx; s.oy = s.y - e.body.cy; } if (snd) s.snd = snd; return s; }
 class Foe {
   constructor(s, lv) {
     const def = ENEMY[s.type];
@@ -570,18 +573,21 @@ class Foe {
     sound.play('crumble', 0.6, 1.9); b.kickSquash(this.dir, 0, -1.2); return true;
   }
   // A spitter, now and then while the hero is near and on screen, swells up for SPIT.wind s and
-  // lobs a blob that comes down where the hero was. True while it stands to do it.
+  // lobs a blob that comes down where the hero was as it began, its way shown meanwhile (SHOT). True while it stands to do it.
   spit(dt, g) {
     const b = this.body, H = g.hero, lv = g.lv;
     if (this.wind > 0) {
       if ((this.wind -= dt) > 0) { b.kickSquash(0, 1, 0.04); return true; }
-      const x = b.cx, y = b.minY - SPIT.r * lv.R, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1);
-      for (let k = 0, n = this.big ? 2 : 1; k < n; k++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (k ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * lv.R });   // a big one: two, apart
-      b.kickSquash(0, 1, -1.6); sound.play('spit', 0.5, 1.3);
+      b.kickSquash(0, 1, -1.6); sound.play('spit', 0.5, 1.3);   // (its blob away, laid as it swelled)
       this.spitT = rand(SPIT.every[0], SPIT.every[1]);
       return true;
     }
-    if ((this.spitT -= dt) <= 0 && Math.abs(H.cy - b.cy) < SPIT.range * view.h && b.cy > lv.cam && b.cy < lv.cam + view.h) { this.wind = SPIT.wind; return true; }
+    if ((this.spitT -= dt) <= 0 && Math.abs(H.cy - b.cy) < SPIT.range * view.h && b.cy > lv.cam && b.cy < lv.cam + view.h) {
+      this.wind = SPIT.wind;
+      const x = b.cx, y = b.minY - SPIT.r * lv.R, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1);
+      for (let k = 0, n = this.big ? 2 : 1; k < n; k++) lv.shots.push(laid({ x, y, vx: dx / T + (n > 1 ? (k ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * lv.R }, this, SPIT.wind));   // a big one: two, apart
+      return true;
+    }
     return false;
   }
   // A stomped shell rolls along at SHELL.speed, back off walls and over edges (Game.rolling has it hit the others).
@@ -614,6 +620,16 @@ class Boss {
   }
   open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)
   to(s) { this.was = this.state; this.state = s; this.st = 0; }
+  quakeAim(g, F, ph, w) {   // Onamazu's slam to come (the Lid's landing as it, F its own): its waves both ways along the floor off its sides, rocks over the
+    // hero, laid `w` s before (SHOT)
+    const lv = g.lv, R = lv.R, H = g.hero, b = this.body;
+    for (const d of [-1, 1]) lv.shots.push(laid({ x: b.cx + d * this.halfW, y: lv.floor - 0.45 * R, vx: d * F.wave * R, vy: 0, r: 0.75 * R, wave: true }, this, w));
+    for (let k = 0; k < F.rocks[ph]; k++) lv.shots.push(laid({ x: clamp(H.cx + (k - (F.rocks[ph] - 1) / 2) * 3.2 * R, lv.l + R, lv.r - R), y: lv.capY + R, vx: 0, vy: 0, r: CART.rock * R, rock: true }, null, w));
+  }
+  webAim(g, ph) {   // the Tsuchigumo's web(s) at the hero (the Lid's goo), lobbed as a spitter's, laid as its belly starts to pulse (SHOT)
+    const F = this.def.hang, lv = g.lv, R = lv.R, H = g.hero, b = this.body, x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = F.webs[ph];
+    for (let i = 0; i < n; i++) lv.shots.push(laid({ x, y, vx: dx / T + (n > 1 ? (i ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R }, this, F.spit));
+  }
   think(dt, g) {
     if (this.def && this.def.hang) { this.hang(dt, g); return; }
     if (this.def && this.def.glide) { this.glide(dt, g); return; }
@@ -684,16 +700,14 @@ class Boss {
       this.dir = Math.sign(H.cx - b.cx) || 1;
       const off = H.cx - this.dir * (this.halfW + F.keep * R) - b.cx;
       addVel(b, (clamp(off * 2, -F.creep * R, F.creep * R) - b.rigVx) * Math.min(1, 3 * dt), 0);
-      if (this.st > F.rest[ph]) { const rear = this.next !== 'leap'; this.to(rear ? 'warn' : 'crouch'); sound.play(...(rear ? ['crumble', 0.8, 0.35] : ['bubble', 0.8, 0.5])); }   // a rumble, or a splash
+      if (this.st > F.rest[ph]) { const rear = this.next !== 'leap'; this.to(rear ? 'warn' : 'crouch'); sound.play(...(rear ? ['crumble', 0.8, 0.35] : ['bubble', 0.8, 0.5])); if (rear) this.quakeAim(g, F, ph, F.rear); }   // a rumble, or a splash
     } else if (this.state === 'warn') {   // reared up on its tail, red, rumbling: a quake to come
       addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0);
       if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, -0.14);
       flash();
-      if (this.st > (this.drops ? F.again : F.rear)) {   // the slam: its waves both ways along the floor, rocks over the hero
+      if (this.st > (this.drops ? F.again : F.rear)) {   // the slam: its waves both ways along the floor, rocks over the hero (laid as it reared, quakeAim)
         b.color = this.ink; b.kickSquash(0, 1, 1.8); shake.add(10); haptics.buzz(40); sound.play('stomp', 1, 0.4); sound.play('crumble', 1, 0.5);
-        for (const d of [-1, 1]) lv.shots.push({ x: b.cx + d * this.halfW, y: lv.floor - 0.45 * R, vx: d * F.wave * R, vy: 0, r: 0.75 * R, wave: true });
-        for (let k = 0; k < F.rocks[ph]; k++) lv.shots.push({ x: clamp(H.cx + (k - (F.rocks[ph] - 1) / 2) * 3.2 * R, lv.l + R, lv.r - R), y: lv.capY + R, vx: 0, vy: 0, r: CART.rock * R, rock: true });
-        if (this.drops + 1 < F.waves[ph]) { this.drops++; this.st = 0; return; }   // another slam yet
+        if (this.drops + 1 < F.waves[ph]) { this.drops++; this.st = 0; this.quakeAim(g, F, ph, F.again); return; }   // another slam yet
         this.drops = 0; this.next = 'leap'; this.to(ph >= F.combo ? 'crouch' : 'hover');
         if (this.state === 'crouch') sound.play('bubble', 0.8, 0.5);
       }
@@ -744,7 +758,7 @@ class Boss {
       if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // its last heart: straight back once more
       this.drops = 0; this.to('dazed'); setVel(b, 0, 0); b.kickSquash(1, 0, 1.2); sound.play('chime', 0.7, 1.2);
       const x = b.cx, y = b.minY, n = F.sparks[ph];
-      for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 1.6 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R, fire: true }); }   // the pantograph's sparks at the hero
+      for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 1.6 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1); lv.shots.push(laid({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R, fire: true }, this, SHOT.warn, k ? null : ['spit', 0.6, 1.5])); }   // the pantograph's sparks at the hero, their ways shown first (SHOT)
       if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
     } else if (this.state === 'dazed') {   // at the stop, doors open: open to a stomp on its roof
       addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
@@ -770,6 +784,7 @@ class Boss {
         const m = this.next === 'feathers' ? 'feathers' : this.next === 'swoop' ? 'swoop' : 'fan';
         this.to(m === 'fan' ? 'fan' : m === 'feathers' ? 'flick' : 'warn'); this.tx = H.cx; this.wind = H.cx < b.cx ? -1 : 1;
         sound.play(...(m === 'fan' ? ['airjump', 0.7, 0.4] : m === 'feathers' ? ['spit', 0.6, 1.4] : ['airjump', 0.9, 1.8]));
+        if (m === 'feathers') { const x = b.cx, y = b.cy, n = F.fn[ph]; for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.4 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 520, 0.5, 0.8); lv.shots.push(laid({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R }, this, F.fwarn)); } }   // its feathers aimed as it flicks, their ways shown (SHOT)
       }
     } else if (this.state === 'fan') {   // its fan raised, red: a gust to come
       sway(); flash();
@@ -780,11 +795,9 @@ class Boss {
       addVel(H, this.wind * F.push * R * dt * (g.onFloor() ? 0.5 : 1), 0);
       if ((this.dustT -= dt) <= 0 && bits.length < 300) { this.dustT = 0.035; const x = fxRand(lv.l, lv.r), y = lv.capY + fxRand(0.05, 0.98) * (lv.floor - lv.capY), v = this.wind * fxRand(600, 800); for (let k = 0; k < 6; k++) bits.push({ x: x - this.wind * k * 3, y, vx: v, vy: 0, s: 1.2, c: k ? PAL.gray : PAL.white, t: 0, life: 0.45, g: 0, drag: 0.2 }); }   // a streak across the sky now and then (a look only)
       if (this.st > F.gust) { this.next = 'feathers'; this.to('hover'); }
-    } else if (this.state === 'flick') {   // a flick: feathers to come at the hero
+    } else if (this.state === 'flick') {   // a flick: feathers to come at the hero (laid as it began)
       sway(); flash();
       if (this.st > F.fwarn) {
-        const x = b.cx, y = b.cy, n = F.fn[ph];
-        for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.4 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 520, 0.5, 0.8); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R }); }
         b.color = this.ink; sound.play('spit', 0.8, 1.3); this.next = 'swoop'; this.to('hover');
       }
     } else if (this.state === 'warn') {   // a screech, red; over the hero's line, still its last `lock` s
@@ -824,12 +837,13 @@ class Boss {
       this.dir = Math.sign(H.cx - b.cx) || 1;
       const off = H.cx - this.dir * (this.halfW + F.keep * R) - b.cx;
       addVel(b, (clamp(off * 2, -F.walk * R, F.walk * R) - b.rigVx) * Math.min(1, 3 * dt), 0);
-      if (this.st > F.rest[ph]) { const sw = this.next === 'sweep'; this.to(sw ? 'warn' : 'throw'); sound.play(...(sw ? ['deny', 0.6, 0.6] : ['crumble', 0.5, 1.8])); }   // a scrape, or a rattle of bones
+      if (this.st > F.rest[ph]) {   // a scrape, or a rattle of bones (laid now, their ways shown as his arm is up: SHOT)
+        const sw = this.next === 'sweep'; this.to(sw ? 'warn' : 'throw'); sound.play(...(sw ? ['deny', 0.6, 0.6] : ['crumble', 0.5, 1.8]));
+        if (!sw) { const x = b.cx, y = b.minY + 0.3 * (b.maxY - b.minY), n = F.bones[ph]; for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.2 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 450, 0.55, 1.0); lv.shots.push(laid({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: 0.32 * R, bone: true }, this, F.twarn)); } }
+      }
     } else if (this.state === 'throw') {   // an arm raised, red: bones to come
       addVel(b, -b.rigVx * Math.min(1, 6 * dt), 0); flash();
-      if (this.st > F.twarn) {
-        const x = b.cx, y = b.minY + 0.3 * (b.maxY - b.minY), n = F.bones[ph];
-        for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.2 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 450, 0.55, 1.0); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: 0.32 * R, bone: true }); }
+      if (this.st > F.twarn) {   // (his bones away, laid as he raised it)
         b.color = this.ink; sound.play('spit', 0.6, 0.7); this.next = 'sweep'; this.to('hover');
       }
     } else if (this.state === 'warn') {   // his sword raised, red, a scrape: its sweep to come
@@ -881,14 +895,12 @@ class Boss {
       swing();
       if (this.st > F.rest[ph]) {   // its next move: a swing (if it has one), a spit (if this phase has any), a drop
         if (F.sweep && (this.next === 'sweep' || (this.next === 'spit' && !F.webs[ph]))) { this.to('windup'); this.tx = H.cx < cx ? x1 : x0; sound.play(...F.snd.sweep); }
-        else { const drop = this.next === 'drop' || !F.webs[ph]; this.to(drop ? 'warn' : 'spit'); this.tx = b.cx; sound.play(...(drop ? F.snd.warn : F.snd.spit)); }   // its drop's sound, or its spit's
+        else { const drop = this.next === 'drop' || !F.webs[ph]; this.to(drop ? 'warn' : 'spit'); this.tx = b.cx; sound.play(...(drop ? F.snd.warn : F.snd.spit)); if (!drop) this.webAim(g, ph); }   // its drop's sound, or its spit's
       }
-    } else if (this.state === 'spit') {   // its belly pulses, then the web(s) at the hero, lobbed as a spitter's
+    } else if (this.state === 'spit') {   // its belly pulses, then the web(s) at the hero, lobbed as a spitter's (laid as it began: webAim)
       swing();
       if (Math.floor(this.st * 10) % 2) b.kickSquash(0, 1, 0.08);
       if (this.st > F.spit) {
-        const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1), n = F.webs[ph];
-        for (let i = 0; i < n; i++) lv.shots.push({ x, y, vx: dx / T + (n > 1 ? (i ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R });
         b.kickSquash(0, 1, -1.6); sound.play('spit', 0.7, 1); this.next = 'drop'; this.to('hover'); this.lidAlso(g, ph);
       }
     } else if (this.state === 'windup') {   // wound back away from the hero, red, creaking: its swing to come
@@ -902,7 +914,7 @@ class Boss {
     } else if (this.state === 'cast') {   // the Lid: red, its card's sound; then the card (icicles, bones, crawlers; a gust blows on after)
       swing(); b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
       if (Math.floor(this.st * 10) % 2) b.kickSquash(0, 1, 0.08);
-      if (this.st > F.cast) { b.color = this.ink; const c = this.card; this.to(c === 'gust' ? 'gust' : 'hover'); this.lidFire(c, g, ph); this.lidAlso(g, ph); }
+      if (this.st > F.cast) { b.color = this.ink; const c = this.card; this.to(c === 'gust' ? 'gust' : 'hover'); if (c !== 'bones') this.lidFire(c, g, ph); this.lidAlso(g, ph); }   // (its bones laid as it began)
     } else if (this.state === 'gust') {   // the Lid's gust (the Karasu-tengu's): the hero blown toward a wall, streaks across the shaft
       swing(); addVel(H, this.wind * F.push * R * dt * (g.onFloor() ? 0.5 : 1), 0);
       if ((this.dustT -= dt) <= 0 && bits.length < 300) { this.dustT = 0.035; const x = fxRand(lv.l, lv.r), y = lv.capY + fxRand(0.05, 0.98) * (lv.floor - lv.capY), v = this.wind * fxRand(600, 800); for (let k = 0; k < 6; k++) bits.push({ x: x - this.wind * k * 3, y, vx: v, vy: 0, s: 1.2, c: k ? PAL.gray : PAL.white, t: 0, life: 0.35, g: 0, drag: 0 }); }
@@ -926,10 +938,8 @@ class Boss {
         shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); fx.dust(b.cx - this.halfW, lv.floor, IMPACT.puffSpeed + 700); fx.dust(b.cx + this.halfW, lv.floor, IMPACT.puffSpeed + 700);
         if (ph >= F.twice && !this.drops) { this.drops = 1; this.to('warn'); this.tx = b.cx; setVel(b, 0, -6 * R); return; }   // its last heart: straight back up a way, and a second drop
         this.drops = 0; this.next = F.sweep ? 'sweep' : 'spit'; this.to('dazed'); b.gScale = 1; setVel(b, 0, 0); b.kickSquash(0, 1, 2);
-        if (F.bag && this.land === 'quake') {   // the Lid landing as Onamazu slams: its waves both ways along the floor, rocks over the hero (their shadows show where)
-          for (const d of [-1, 1]) lv.shots.push({ x: b.cx + d * this.halfW, y: lv.floor - 0.45 * R, vx: d * F.wave * R, vy: 0, r: 0.75 * R, wave: true });
-          for (let k = 0; k < F.rocks[ph]; k++) lv.shots.push({ x: clamp(H.cx + (k - (F.rocks[ph] - 1) / 2) * 3.2 * R, lv.l + R, lv.r - R), y: lv.capY + R, vx: 0, vy: 0, r: CART.rock * R, rock: true });
-        } else if (F.bag && this.land === 'rush') { this.dir = H.cx < b.cx ? -1 : 1; this.to('rush'); sound.play('airjump', 0.9, 0.5); }   // off along the floor through where the hero is
+        if (F.bag && this.land === 'quake') this.quakeAim(g, F, ph, SHOT.warn);   // the Lid landing as Onamazu slams: its waves both ways along the floor, rocks over the hero (their ways shown first)
+        else if (F.bag && this.land === 'rush') { this.dir = H.cx < b.cx ? -1 : 1; this.to('rush'); sound.play('airjump', 0.9, 0.5); }   // off along the floor through where the hero is
         for (let k = 0; k < ((F.splat && F.splat[ph]) || 0) && lv.enemies.length < 4; k++) lv.enemies.push(new Foe({ type: F.ling, x: b.cx + (k % 2 ? 1 : -1) * (this.halfW + 0.6 * R), y: lv.floor - 1.2 * R }, lv));   // blobs out of its splat
         if (!this.dazes++) ui.toast(this.def.hint ? L2(this.def.hint) : t('bossHint'), 2400);   // the first time: what to do now
       }
@@ -959,16 +969,16 @@ class Boss {
     const c = this.lidDraw(lv, 'form' + f, F.bag[f]); this.cards++; this.card = c;
     if (F.both[ph]) { const two = F.bag[f].filter((k) => k !== c && k !== 'sweep' && k !== 'gust'); this.card2 = two.length ? two[Math.floor(lv.rng() * two.length)] : null; }   // two at once: one thrown with it
     if (c === 'sweep') { this.to('windup'); this.tx = H.cx < cx ? x1 : x0; sound.play(...F.snd.sweep); }
-    else if (c === 'goo') { this.to('spit'); this.tx = b.cx; sound.play(...F.snd.spit); }
-    else { this.to('cast'); this.wind = H.cx < b.cx ? -1 : 1; sound.play(...F.snd[c]); }
+    else if (c === 'goo') { this.to('spit'); this.tx = b.cx; sound.play(...F.snd.spit); this.webAim(g, ph); }
+    else { this.to('cast'); this.wind = H.cx < b.cx ? -1 : 1; sound.play(...F.snd[c]); if (c === 'bones') this.lidFire(c, g, ph, F.cast); }   // (bones laid as it casts, SHOT)
   }
   lidAlso(g, ph) { if (this.card2) { const c = this.card2; this.card2 = null; this.lidFire(c, g, ph); } }   // its second card, thrown with the first
-  lidFire(c, g, ph) {   // a card played: the campaign boss's own move it is
+  lidFire(c, g, ph, w = SHOT.warn) {   // a card played: the campaign boss's own move it is (its shots laid `w` s before they go, SHOT)
     const F = this.def.hang, lv = g.lv, R = lv.R, H = g.hero, b = this.body;
     if (c === 'icicles') { const n = F.icicles[ph]; for (let k = 0; k < n; k++) lv.icicles.push({ x: clamp(H.cx + (k - (n - 1) / 2) * F.gap * R, lv.l + R, lv.r - R), y: Math.max(lv.capY, lv.cam + CAM.top), state: 'shake', t: F.shake }); sound.play('crumble', 0.7, 1.4); }
-    else if (c === 'bones') { const x = b.cx, y = b.maxY, n = F.bones[ph]; for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.2 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 450, 0.55, 1.0); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: 0.32 * R, bone: true }); } sound.play('spit', 0.7, 0.8); }
+    else if (c === 'bones') { const x = b.cx, y = b.maxY, n = F.bones[ph]; for (let k = 0; k < n; k++) { const dx = H.cx - x + (k - (n - 1) / 2) * 2.2 * R, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 450, 0.55, 1.0); lv.shots.push(laid({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: 0.32 * R, bone: true }, this, w, k ? null : ['spit', 0.7, 0.8])); } }
     else if (c === 'web') { for (let k = 0; k < F.crawl[ph] && lv.enemies.length < 4; k++) lv.enemies.push(new Foe({ type: F.ling, x: lv.l + (k % 2 ? 0.78 : 0.22) * (lv.r - lv.l), y: lv.capY + 2 * R }, lv)); }
-    else if (c === 'goo') { const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1); lv.shots.push({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R }); sound.play('spit', 0.7, 1); }
+    else if (c === 'goo') { const x = b.cx, y = b.maxY, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1); lv.shots.push(laid({ x, y, vx: dx / T, vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * R }, this, w, ['spit', 0.7, 1])); }
     else if (c === 'gust') sound.play('airjump', 0.9, 0.3);
   }
   lidForm(f) {   // into form f (LIDF.forms): its look, its ink, its drawing's width; a burst of its goo over the change
@@ -2162,7 +2172,7 @@ class Game {
     this.placeHero(sp.x, sp.y); this.regroup();
     this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1; this.fallV = 0; this.landT = Infinity; this.landUsed = true; this.dizzyT = FACE.dizzy; this.flatT = 0; this.hero.squeezeIn = 0;   // (its face: dizzy, FACE; not flat, MOCHI)
     lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
-    if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; }
+    if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; this.pitOff(); }
     this.idleT = 0;
     ui.flash();
   }
@@ -2184,13 +2194,11 @@ class Game {
     const lv = this.lv, f = lv.fire, H = this.hero, R = this.R;
     if (!f) return;
     if (f.warn) {
-      if ((f.warn.t -= dt) <= 0) {   // up to about the hero's height, across to where it is
-        const x = f.warn.x, vy = -Math.sqrt(2 * SHOT_G * Math.max(2 * R, f.y - H.cy + rand(-0.5, 1) * R)), t = -vy / SHOT_G;
-        lv.shots.push({ x, y: f.y, vx: (H.cx + rand(-0.8, 0.8) * R - x) / t, vy, r: FIRE.blob * R, fire: true });
-        f.warn = null; sound.play('spit', 0.7);
-      }
-    } else if (f.y < lv.cam + view.h && (f.spitT -= dt * this.mods.fire) <= 0) {
-      f.warn = { x: clamp(H.cx + rand(-2.5, 2.5) * R, lv.l + R, lv.r - R), t: FIRE.warn };
+      if ((f.warn.t -= dt) <= 0) { f.warn = null; sound.play('spit', 0.7); }   // (its blob away, laid as the tongue flared)
+    } else if (f.y < lv.cam + view.h && (f.spitT -= dt * this.mods.fire) <= 0) {   // up to about the hero's height, across to where it is: aimed now, its way shown (SHOT)
+      const x = clamp(H.cx + rand(-2.5, 2.5) * R, lv.l + R, lv.r - R), vy = -Math.sqrt(2 * SHOT_G * Math.max(2 * R, f.y - H.cy + rand(-0.5, 1) * R)), t = -vy / SHOT_G;
+      f.warn = { x, t: FIRE.warn };
+      lv.shots.push(laid({ x, y: f.y, vx: (H.cx + rand(-0.8, 0.8) * R - x) / t, vy, r: FIRE.blob * R, fire: true, pit: true }, null, FIRE.warn));
       f.spitT = rand(FIRE.spit[0], FIRE.spit[1]);
     }
     if (f.y < lv.cam + view.h + R && fxRand(0, 1) < dt * 14) fx.add(fxRand(lv.l, lv.r), f.y + fxRand(0, 6), fxRand(-25, 25), fxRand(-150, -50), fxRand(2, 3.5), fxRand(0.5, 0.9), fxRand(0, 1) < 0.5 ? (WET[lv.theme.hazard] ? INK.white : INK.fire) : hazInk(lv.theme), 1, 0);
@@ -2210,7 +2218,7 @@ class Game {
     if (this.state !== 'play') return;
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;
     splatFx(H.cx, f.y, this.R * 0.7, hazInk(this.lv.theme), 6);
-    f.y = Math.max(f.y, H.maxY + FIRE.back * view.h); f.warn = null;   // and sinks back: a throw into a ceiling must not land in it again
+    f.y = Math.max(f.y, H.maxY + FIRE.back * view.h); f.warn = null; this.pitOff();   // and sinks back: a throw into a ceiling must not land in it again
   }
   power(k) { return this.gunT > 0 && this.pow === k; }   // a candy at work
   take(kind) {   // one candy at a time: a new one takes over, the same one starts again
@@ -2250,10 +2258,18 @@ class Game {
     if (this.gunT > 0 && (this.gunT -= dt) <= 0) this.powerEnd();
     for (const p of lv.fizz || []) if (p.again && p.taken && !this.power(p.kind) && H.cy > p.y - 6 * R) p.taken = false;   // the tutorial's helmet: back for a hero still under its blocks
   }
+  pitOff() { const sh = this.lv.shots; for (let i = sh.length - 1; i >= 0; i--) if (sh[i].pit && sh[i].warn > 0) sh.splice(i, 1); }   // the fire's blob laid (SHOT) gone with its warning
   shots(dt) {
     const lv = this.lv, H = this.hero, sh = lv.shots;
     for (let i = sh.length - 1; i >= 0; i--) {
       const s = sh[i];
+      if (s.warn > 0) {   // laid, its way shown (SHOT): harmless, carried with its shooter (the fire's at its top) till it goes; gone if its shooter is
+        const e = s.by;
+        if (e && (e.dead || (e !== lv.boss && !lv.enemies.includes(e)))) { sh.splice(i, 1); continue; }
+        if (e) { s.x = e.body.cx + s.ox; if (!s.wave) s.y = e.body.cy + s.oy; } else if (s.pit && lv.fire) s.y = lv.fire.y;
+        if ((s.warn -= dt) > 0) continue;
+        s.warn = 0; if (s.snd) sound.play(...s.snd);
+      }
       if (!s.wave) s.vy += SHOT_G * dt;   // (a quake's wave runs along the floor: no fall, gone at a wall)
       s.x += s.vx * dt; s.y += s.vy * dt;
       let gone = s.wave ? s.x < lv.l || s.x > lv.r : s.y > lv.floor || s.y > lv.cam + view.h + 100 || (s.vy > 0 && lv.fire && s.y > lv.fire.y);   // a blob falls into the fire

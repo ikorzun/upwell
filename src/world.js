@@ -1309,6 +1309,29 @@ const RUBBER = { x: 9, up: 0.55, min: 2 };
 // `calm`: in 1-1 the fire waits that many s before it rises, and an idle hero does not speed it up (the digest §6: no losing while learning).
 const FIRE = { calm: 15, lag: 0.5, idle: 3, boost: 3, ramp: 2, launch: 1.7, back: 0.3, spit: [3, 6], warn: 0.5, blob: 0.34 };
 const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
+// A shot's way shown before it goes (owner, 2026-10-30: «перед выстрелом должна быть показана тонкая пунктирная красная линия полета пули, иначе сложно и
+// игроки жалуются. Это касается всего, что стреляет»): a shot is laid aimed `warn` s before it goes (or its shooter's own wind-up: a spitter's SPIT.wind,
+// the fire's FIRE.warn, a boss's red flash), harmless and unseen till then, carried with its shooter (Game.shots); its way, as Game.shots will move it
+// (shotWay), a thin red line of dashes `dash` game pixels long and `gap` apart, running on along it at `run` a second, drawn over all (the dark too);
+// `max`: the s of its flight it shows at most
+const SHOT = { warn: 0.5, dash: 3, gap: 2, run: 10, max: 2.5 };
+const WAY = [], WAY_R = [];   // (shotWay's points and the ledges in their reach, used again each time)
+// Where a shot laid at (s.x, s.y) will be after each STEP, as Game.shots moves it, to the first where it is gone (in a ledge, the floor or the fire,
+// past the screen's foot; a quake's wave out at a wall): [x, y, x, y, …], WAY again each call
+function shotWay(lv, s) {
+  const out = WAY, foot = lv.cam + view.h + 100, fire = lv.fire ? lv.fire.y : Infinity;
+  let x = s.x, y = s.y, vx = s.vx, vy = s.vy, top = y, bot = y;
+  out.length = 0; out.push(x, y);
+  for (let i = Math.ceil(SHOT.max / STEP); i > 0; i--) {
+    if (!s.wave) vy += SHOT_G * STEP;
+    x += vx * STEP; y += vy * STEP; out.push(x, y); top = Math.min(top, y); bot = Math.max(bot, y);
+    if (s.wave ? x < lv.l || x > lv.r : y > lv.floor || y > foot || (vy > 0 && y > fire)) break;
+  }
+  if (s.wave) return out;
+  WAY_R.length = 0; for (const r of lv.rects) if (!r.gone && !r.plank && r.y1 >= top && r.y0 <= bot) WAY_R.push(r);
+  for (let i = 2; i < out.length; i += 2) for (const r of WAY_R) if (out[i] > r.x0 && out[i] < r.x1 && out[i + 1] >= r.y0 && out[i + 1] <= r.y1) { out.length = i + 2; return out; }
+  return out;
+}
 // A boss's defaults (BOSSES has its own): its body's `size` R, its hearts, `angry` s red after a hit (it only pushes then), its
 // `coins`, the win's `winDelay` s, a stomp's `bounce` of a jump's speed, where it starts, `high` R over the floor, and the
 // minions it calls (Koschei's skulls): one every `spawnEvery` s, `maxMinions` at most. Its fight is its own (BOSSES: hang, glide, quake, street, sky, bone).
@@ -8414,6 +8437,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
   }
   for (const s of lv.shots) {   // the boss's drops, red; the fire's blobs, orange round a yellow heart; a falling stalactite
+    if (s.warn > 0) continue;   // (laid, not gone yet: only its way, drawn last, SHOT)
     if (s.wave) { const y = lv.floor - 0.3 * R, f = Math.sin(T * 20 + s.x * 0.1) * 0.08 * R; F(s.x, y, 0.95 * R, 0, 0, 0.4 * R + f, INK.spike, 1, 0); F(s.x - 0.25 * Math.sign(s.vx) * R, y - 0.18 * R, 0.5 * R, 0, 0, 0.18 * R, PAL.white, 1, 0); continue; }   // Onamazu's quake: a red crest running along the floor
     if (s.rock) { F(s.x, lv.floor + 1, s.r * 1.3, 0, 0, s.r * 0.35, INK.dark, 1, 0); disc(s.x, s.y, s.r, PAL.gray, 1); disc(s.x - 0.3 * s.r, s.y - 0.3 * s.r, 0.3 * s.r, PAL.white, 1); continue; }   // the Minecart's rocks, a shadow under each on the floor
     if (s.icicle) { icicle(s.x, IC ? s.y + s.r - IC.fall.length * PIX.base : s.y - 0.3 * R, true); continue; }   // (the sheet's: its tip at the bottom of what hurts, its streaks over it)
@@ -8645,7 +8669,23 @@ Renderer.prototype.draw = function (g, alpha) {
   if (g.state === 'play' && g.air > 0 && g.sinceContact > JUMP.coyote) for (let k = 0; k < g.air; k++)   // in the air: the jumps it has left
     disc(hero.cx + (k - (g.air - 1) / 2) * 0.5 * R, hero.maxY + 0.42 * R, (g.power('smash') ? 0.22 : 0.15) * R, g.power('smash') ? INK.flame : INK.white, 1);   // orange: the next one rams
   if (CINE) cineMotes(this, g, lv, cam, H, box, disc, T);
-  const nFront = this.nf - front;
+  const nFront = this.nf - front, wayF = this.nf;   // the laid shots' ways (SHOT): their dashes drawn last, over the dark and the light
+  for (const s of lv.shots) if (s.warn > 0) {
+    const p = shotWay(lv, s), P = PIX.size, on = SHOT.dash * P, per = (SHOT.dash + SHOT.gap) * P, A = this.wayA || (this.wayA = [0, 0]), B = this.wayB || (this.wayB = [0, 0]);
+    let i = 0, base = 0, seg = p.length > 3 ? Math.hypot(p[2] - p[0], p[3] - p[1]) : 0;
+    const at = (u, o) => {   // the point u along the way into o (u never less than the last); false past its end
+      while (u > base + seg) { base += seg; i += 2; if (i + 3 >= p.length) return false; seg = Math.hypot(p[i + 2] - p[i], p[i + 3] - p[i + 1]); }
+      const f = seg ? (u - base) / seg : 0; o[0] = p[i] + (p[i + 2] - p[i]) * f; o[1] = p[i + 1] + (p[i + 3] - p[i + 1]) * f; return true;
+    };
+    for (let u = ((T * SHOT.run * P) % per) - per; ; u += per) {   // a dash each `per` along it, running on as the clock goes
+      if (u + on <= 0) continue;
+      if (!at(Math.max(0, u), A)) break;
+      const end = at(u + on, B), x1 = end ? B[0] : p[p.length - 2], y1 = end ? B[1] : p[p.length - 1];
+      if (seen(Math.min(A[1], y1), Math.max(A[1], y1))) line(A[0], A[1], x1, y1, INK.spike, 1, 1);
+      if (!end) break;
+    }
+  }
+  const nWay = this.nf - wayF;
   gl.bindVertexArray(null);
   this.upload(gl.ARRAY_BUFFER, this.vbo, this.vtx, this.nv * 10, 'vboCap');
   if (this.idxDirty) { this.upload(gl.ELEMENT_ARRAY_BUFFER, this.ebo, this.idx, this.ni, 'eboCap'); this.idxSig = sig; }
@@ -8727,7 +8767,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (lv.boss && !lv.boss.dead) { const b = lv.boss.body, s = ((lv.boss.state === 'warn' ? 1.3 : 1) * b.R) / R; light(b.cx, b.cy, 0.85 * s, 1.7 * s); }   // a boss in the dark (Koschei's arena) by its own glow, his whole drawing; more as it warns
     if (lv.crossing) { const xg = lv.crossing, on = xg.state !== 'rest'; for (const x of [lv.l + 0.5 * R, lv.r - 0.5 * R]) light(x, xg.y0 - 0.2 * R, on ? 1.6 : 0.7, on ? 4 : 1.8); if (xg.state === 'pass') light(Math.min(xg.x, lv.r), (xg.y0 + xg.y1) / 2, 2.2, 5); }   // a crossing's lamps (bright while they flash), the train's headlight
     if (lv.portal) light(lv.portal.x, lv.portal.y, 2, 4);
-    for (const s of lv.shots) light(s.x, s.y, 0.5, 1.4);   // blobs, the fire's and the spitters'
+    for (const s of lv.shots) if (!(s.warn > 0)) light(s.x, s.y, 0.5, 1.4);   // blobs, the fire's and the spitters' (one laid: its way over the dark)
     for (const b of lv.bubbles) light(b.x, b.y, 1.2, 2.6);
     for (const p of lv.fizz) if (!p.taken) light(p.x, p.y, 0.8, 2);
     if (lv.neonLit) for (const [k] of lv.neonLit) { const s = neonSign(lv, k); if (s) light((s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 1.2, 3.4); }   // Tokyo's lit neon
@@ -8794,6 +8834,7 @@ Renderer.prototype.draw = function (g, alpha) {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindTexture(gl.TEXTURE_2D, null); gl.enable(gl.BLEND);
   }
+  if (nWay) { gl.useProgram(pf.p); this.drawFeat(wayF, nWay); }   // the laid shots' ways over all (SHOT): seen in Koschei's dark arena too
   if (this.sides) this.sideShot(lv, cam, W, H, farR, th, menu, farY(cam, H) - cam);   // a computer's sides (game.js layout): its far view, once a level
   gl.bindVertexArray(null);
   if (CINE) { this.cinePost(g, lv, sx, sy, vlamps); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }   // (the cinematic fork: see cine.js)

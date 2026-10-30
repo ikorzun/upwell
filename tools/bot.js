@@ -200,7 +200,8 @@ function bossScore(base) {
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while it lies tangled
     else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - b.cx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // never under it as it drops
     else if (bs.state === 'windup' || bs.state === 'sweep') s -= Math.max(0, h - 0.5) * 600;   // low on the floor under its swing
-    else s -= Math.abs(dx - 3) * 60;   // near enough to be at it once it falls
+    else s -= Math.abs(dx - 3) * 60 + Math.max(0, 2.5 - Math.min(H.cx - lv.l, lv.r - H.cx) / T) * 400;   // near enough to be at it once it falls, never pinned to a wall (its drop
+    // wide: in a corner there is no way out from under it; the Bake-danuki's three drops at a wall, 2026-10-30)
   }
   return s;
 }

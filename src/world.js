@@ -97,7 +97,8 @@ const HEALTH = { start: 4, invuln: 1.0, knock: 416, hitstop: 0.08, blink: 0.09, 
 // knock a fifth less than 520: owner, 2026-10-29, «уменьши отскок моти при повреждении на 20%»)
 // A run that ends can go on for coins: `price`, half as much again a world (as in the shops)
 // and `grow` times more each time in a run; back with `hp` hearts and `invuln` s of safety.
-const REVIVE = { price: 50, grow: 2, invuln: 2.5 };   // a revive gives all the hearts back (user)
+const REVIVE = { price: 50, grow: 2, invuln: 2.5, free: 2 };   // a revive gives all the hearts back (user); in the campaign's worlds before `free` a level's first one costs
+// nothing, the next ones as the first and second paid (owner, Г2 «А», 2026-10-30, on the gameplay review: 50 coins when a new player has 20-30, 5 revives in three days)
 // A stomp bounces the hero at `bounce` of a jump's speed; `blast` (R) is the Blast upgrade's reach. `bounce` was 1.0, then 0.8: the user found the hop off
 // a kill too high.
 // A stomp: the hero's feet over the enemy's middle (overFoe: all its top half, the tester could not tell the old cone's edge), not going up into it faster
@@ -1350,6 +1351,10 @@ const RUBBER = { x: 9, up: 0.55, min: 2 };
 // flaring `warn` s where the blob will come out.
 // `calm`: in 1-1 the fire waits that many s before it rises, and an idle hero does not speed it up (the digest §6: no losing while learning).
 const FIRE = { calm: 15, lag: 0.5, idle: 3, boost: 3, ramp: 2, launch: 1.7, back: 0.3, spit: [3, 6], warn: 0.5, blob: 0.34 };
+// Worlds 1-3's fire, softer (owner, Г1 «А», 2026-10-30, on the gameplay review: the fire 53 of 113 deaths, most of them a run of three burns or more): a `calm`
+// start on every level (1-1's and 2-1's own longer), its speed-up only after `idle` s with no new height and `boost` times, not three; a burn sends it `back`
+// a screen under the hero and leaves `spare` s at least before it speeds up again. Not the daily (Tokyo's), nor a bonus's fire race (Game.softF)
+const FIRE_SOFT = { worlds: 3, calm: 8, idle: 6, boost: 2, ramp: 2, back: 0.6, spare: 3 };
 const SHOT_G = 1600;   // px/s², pulling a thrown or dropped blob down
 // A shot's way shown before it goes (owner, 2026-10-30: «перед выстрелом должна быть показана тонкая пунктирная красная линия полета пули, иначе сложно и
 // игроки жалуются. Это касается всего, что стреляет»): a shot is laid aimed `warn` s before it goes (or its shooter's own wind-up: a spitter's SPIT.wind,
@@ -2063,18 +2068,20 @@ const CAMPAIGN = [
     // jumps and coins only, as long (owner, З26 «А»: one new idea at a time), the shop's, the enemy's and the helmet's lessons on in 1-2 and 1-3
     news: { en: 'how to climb', es: 'cómo trepar', pt: 'como escalar', ja: 'のぼりかた' } },
   { role: 'apply', len: 31, safe: true, gate: 'gate', fire: 0.35, maxD: 2, chunks: { mosswall: 3, chimney: 2, planks: 1, shelves: 1, stairs: 1, crumble: 1, bridge: 1, lift: 1 },   // (1-1's surfaces first, it being the tutorial now)
-    motif: ['rope', 'rope2', 'ropewall'], steps: true, sparse: true, intro: ['crumble', 'tutEnemy'], enemies: ['crawler', 'shell'], foes: 0.7, pair: 0.3, candy: ['bubble', 'bubble'], cage: true, seed: 4105,   // the Village's second by the practice of 1-7 (owner, 2026-10-22,
+    motif: ['rope', 'rope2', 'ropewall'], steps: true, sparse: true, intro: ['crumble', 'tutEnemy'], enemies: ['crawler', 'shell'], foes: 0.5, pair: 0.15, fireWalls: 0, candy: ['bubble', 'bubble'], cage: true, seed: 4105,   // the Village's second by the practice of 1-7 (owner, 2026-10-22,
     // round 2: «Начинай все по списку»): its one idea bridges of boards falling behind the hero, met (a crumbling block), applied (a bridge across), varied (bridges by
-    // turns up the shaft), with the walls (the towers' channel); enemies more and in pairs, decor less; the walls in the pool (moss, chimneys)
+    // turns up the shaft), with the walls (the towers' channel); enemies more and in pairs, decor less; the walls in the pool (moss, chimneys). Since Г4 «А» (owner,
+    // 2026-10-30, the gameplay review: 17 of 35 who began 1-2 never cleared it) fewer enemies and half the pairs (were 0.7, 0.3), and no fire on its walls (from 1-5)
     news: { en: 'falling bridges', es: 'puentes que caen', pt: 'pontes que caem', ja: 'おちる はし' } },   // (short: one line at 320 px; «keep moving» is the crumble hint's)
   { role: 'teach', len: 28, safe: true, fire: 0.35, maxD: 2, chunks: { mosswall: 2, chimney: 1, stairs: 2, shelves: 1, planks: 1, rubberwall: 1, crumble: 1 }, intro: ['tutHelmet'],   // by the
-    motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler'], foes: 0.4, pair: 0.15, candy: ['bubble'], seed: 4106,   // practice
+    motif: ['spitstair', 'spitwall', 'spitbridge'], steps: true, sparse: true, set: 'ribbon', enemies: ['crawler'], foes: 0.4, pair: 0.15, fireWalls: 0, candy: ['bubble'], seed: 4106,   // practice
     // (round 2: «Начинай все по списку»): its one idea the spitters' blobs (its one new rule): steps under one, the moss up a chimney under one, 1-2's bridge to one; the crow with
     // the red ring midway (RIBBON, the story's card II); the walls in the pool; spitters only where its chunks put them (p), the others crawlers (the tumblers gone to Tokyo: Р1 «А»)
     news: { en: 'spitters lob blobs', es: 'los escupidores lanzan bolas', pt: 'cuspidores atiram bolas', ja: 'ペッペが たまを なげる' } },
   { role: 'apply', len: 34, gate: 'gate2', fire: 0.38, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1, spring: 1 }, intro: [],   // by the
-    motif: ['ambush', 'ambush2'], every: 3, steps: true, sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'crawler', 'shell'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
-    // (round 2): its one idea the pit's waves: a small ambush every other chunk, on a floor mid-shaft, then between two towers; the arena and its fat spitter midway
+    motif: ['ambush', 'ambush2'], every: 5, steps: true, sparse: true, fireWalls: 0, enemies: ['spitter', 'crawler', 'shell'], foes: 0.5, pair: 0.25, candy: ['bubble', 'smash'], shop: 0.4, seed: 4101,   // practice
+    // (round 2): its one idea the pit's waves: a small ambush every other chunk, on a floor mid-shaft, then between two towers. Since Г5 «А» (owner, 2026-10-30: the
+    // densest level of world 1 in an apply slot) an ambush every fifth chunk (was third), its arena and fat spitter gone to the peak 1-8, and no fire on its walls (Г4 «А»)
     news: { en: 'waves of enemies', es: 'oleadas enemigas', pt: 'ondas de inimigos', ja: 'てきの ウェーブ' } },   // (short: one line at 320 px; the arena says the rest)
   { role: 'peak', len: 25, sides: [0, 109814], fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 2, shelves: 1, crumble: 1, spikes: 1 }, intro: [], motif: ['iciclerun', 'icebridge'],
     steps: true, sparse: true, enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4108,   // by the practice (round 2): its one idea
@@ -2087,8 +2094,9 @@ const CAMPAIGN = [
     // a yaen every other chunk (A), more enemies and in pairs, on the ledges the planks carry to (D), less decor (E: Level `sparse`, see villageRect, kitThing)
     news: { en: 'the mill, the seesaw and the pestle', es: 'el molino, el balancín y el mazo', pt: 'o moinho, a gangorra e o pilão', ja: 'すいしゃ、シーソー、きね' } },
   { role: 'peak', len: 30, gate: 'gate3w', fire: 0.42, maxD: 2, chunks: { mosswall: 2, chimney: 2, stairs: 1, shelves: 1, crumble: 1, bridge: 1 }, intro: [], motif: ['iceride', 'icewall'], steps: true,
-    sparse: true, set: 'arena', enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4102,   // by the practice (round 2): its one idea the walls of
-    // ice, 1-7's walls that held turned slick: a yaen across between them, then the zigzag up between them; the arena midway; moss in the pool, the walls that hold
+    sparse: true, set: 'arena', mini: true, enemies: ['spitter', 'shell', 'crawler'], foes: 0.6, pair: 0.25, candy: ['bubble'], seed: 4102,   // by the practice (round 2): its one idea the walls of
+    // ice, 1-7's walls that held turned slick: a yaen across between them, then the zigzag up between them; the arena midway, its last wave 1-4's fat spitter (Г5 «А»);
+    // moss in the pool, the walls that hold
     news: { en: 'slippery walls', es: 'paredes resbaladizas', pt: 'paredes escorregadias', ja: 'すべる かべ' } },   // (short: one line at 320 px)
   { role: 'rest', len: 20, fire: 0.3, maxD: 1, chunks: { stairs: 3, planks: 2, shelves: 2, pillars: 2, mosswall: 1 }, intro: [], motif: ['coinarc', 'garden'], steps: true, sparse: true,   // by the
     enemies: ['crawler'], foes: 0.3, candy: ['smash'], shop: 0.15, runes: 2, seed: 4108,   // practice (round 2): the calm before the boss, its one idea the coins: rows along a jump's arc, the
@@ -4750,7 +4758,7 @@ class Level {
     }
     const f = this.fire;
     if (f && g.state === 'play' && !(f.calm > 0 && (f.calm -= dt) > 0)) {   // faster while the hero gains no height (not in a calm start)
-      f.rush = f.calm === 0 ? clamp((g.idleT - FIRE.idle) / FIRE.ramp, 0, 1) : 0; const k = 1 + (FIRE.boost - 1) * f.rush;   // (rush: how far into its speed-up, 0 to 1, for
+      const F = g.softF ? FIRE_SOFT : FIRE; f.rush = f.calm === 0 ? clamp((g.idleT - F.idle) / F.ramp, 0, 1) : 0; const k = 1 + (F.boost - 1) * f.rush;   // (rush: how far into its speed-up, 0 to 1, for
       // its sound and each world's look of it: owner, К2 «А»)
       f.y = Math.min(f.y - f.v * k * g.mods.fire * dt, this.cam + view.h * (1 + FIRE.lag));
     }

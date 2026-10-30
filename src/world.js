@@ -122,9 +122,9 @@ const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]], n: 3 };   // plus: s
 // A campaign level's candies (owner, 2026-10-24: «Мало бонусов: за весь мир фудзи я не встретил ни друзей в клетках, ни разноцветного множителя, ни большого
 // моти… играть стало скучно»): a tier's three parts each bring theirs (campMerge), filled to `n` from its world's own lot, so each level has a rainbow or a
 // big Mochi more often than not; laid evenly up its height once there are more than CANDIES.at's two
-const CANDY_POOL = { mine: ['bubble', 'rainbow', 'grow', 'smash'], cave: ['smash', 'grow', 'rainbow', 'bubble'], ice: ['rainbow', 'grow', 'smash', 'swarm'],
-  sea: ['rainbow', 'bubble', 'grow', 'swarm'], tokyo: ['smash', 'rainbow', 'grow', 'swarm'], blocks: ['grow', 'smash', 'rainbow', 'bubble'], sky: ['rainbow', 'swarm', 'grow', 'bubble'],
-  skazka: ['grow', 'rainbow', 'smash', 'swarm'], any: ['rainbow', 'grow', 'smash', 'bubble'] };
+const CANDY_POOL = { mine: ['bubble', 'rainbow', 'grow', 'smash', 'taiko'], cave: ['smash', 'grow', 'rainbow', 'bubble', 'taiko'], ice: ['rainbow', 'grow', 'smash', 'swarm', 'taiko'],
+  sea: ['rainbow', 'bubble', 'grow', 'swarm', 'taiko'], tokyo: ['smash', 'rainbow', 'grow', 'swarm', 'taiko'], blocks: ['grow', 'smash', 'rainbow', 'bubble', 'taiko'], sky: ['rainbow', 'swarm', 'grow', 'bubble', 'taiko'],
+  skazka: ['grow', 'rainbow', 'smash', 'swarm', 'taiko'], any: ['rainbow', 'grow', 'smash', 'bubble', 'taiko'] };   // (the taiko in every world's, Бн1 «А»)
 // The helmet (once rock candy; user): for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
 // `maxH` tiles found `reach` R over the hero (`look` R off a ceiling) breaks before it is met, its enemies with it, `coins` once ever,
 // the hero kicked on up at `kick` of a jump; it is back `back` s later, or under a hero coming down onto it once `soon` s are out.
@@ -201,11 +201,14 @@ function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): th
   if (u < c) { const e = (u - b) / MOCHI.slam; return { y: kn.yUp + (kn.yHit - kn.yUp) * e * e, down: true, shake: 0 }; }
   return { y: kn.yHit, down: true, shake: 0 };
 }
-const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE };
+// The taiko drum (owner, Бн1 «А», 2026-10-30): no time of its own; taken, a boom goes out from the hero over the screen and every enemy on it pops
+// (not a boss; a mini-boss a heart less, as a stomp takes), coins and all; `rings` of the wave, the last as wide as the screen
+const TAIKO = { time: 0, rings: [3, 7, 12, 18] };
+const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE, taiko: TAIKO };
 // The candies whose first taking holds the game under a card of their own (owner, 2026-10-30: «когда первый раз моти берет звездочку радуги, то нужно
 // показывать перекрывающий попап со звездочкой на котором показывать саму звезду и писать под ней как она работает и длительность и кнопку GO. Тоже самое с
 // расслоением моти»; all six since Бп1 «А», 2026-10-30): its picture big, what it does, for how long, GO (ui.candy; seen once a save, save.seen['candy_' + kind])
-const CANDY_INTRO = ['rainbow', 'swarm', 'grow', 'smash', 'bubble', 'astro'];
+const CANDY_INTRO = ['rainbow', 'swarm', 'grow', 'smash', 'bubble', 'astro', 'taiko'];
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless; in Tokyo a crow
@@ -2235,6 +2238,7 @@ ICONS.swarm = '.ooo....bbb./ooooo..bbbbb/ooooo..bbbbb/ooooo..bbbbb/.ooo....bbb./
 ICONS.plaster = '............/............/............/.wwwwwwwwww./wwswwoowwsww/wwwwwoowwwww/wwswwoowwsww/.wwwwwwwwww./............/............/............/............';   // the first hit a level is free
 ICONS.coin = '............/....oooo..../..ooyyyyoo../..oyywyyyo../.oyywyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./..oyyyyyyo../..ooyyyyoo../....oooo..../............';   // the campaign's map: a bonus level
 ICONS.warn = '.....ww...../....wrrw..../....wrrw..../...wrrrrw.../...wrwwrw.../..wrrwwrrw../..wrrwwrrw../.wrrrrrrrrw./.wrrrwwrrrw./wrrrrrrrrrrw/wwwwwwwwwwww/............';   // a warning sign, at the top edge: something coming down into view here
+ICONS.taiko = '.s........s./..s......s../...s....s.../.wwwwwwwwww./oooooooooooo/oyooyooyooyo/oooooooooooo/oooooooooooo/oyooyooyooyo/oooooooooooo/.wwwwwwwwww./............';   // the taiko: a drum, its two sticks (orange: red is for danger)
 ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
 // The runes, as Yarndings 12 knits them (SIL OFL 1.1; printed by tools/fonts.py from its 12-stitch grid)
 ICONS.runeS = '.....ww...../..w.wwww.w../.www.ww.www./..wwwwwwww../.w.ww..ww.w./wwww.ww.wwww/wwww.ww.wwww/.w.ww..ww.w./..wwwwwwww../.www.ww.www./..w.wwww.w../.....ww.....';

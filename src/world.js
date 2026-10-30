@@ -122,9 +122,9 @@ const CANDIES = { plus: 2, at: [[0.22, 0.4], [0.58, 0.78]], n: 3 };   // plus: s
 // A campaign level's candies (owner, 2026-10-24: «Мало бонусов: за весь мир фудзи я не встретил ни друзей в клетках, ни разноцветного множителя, ни большого
 // моти… играть стало скучно»): a tier's three parts each bring theirs (campMerge), filled to `n` from its world's own lot, so each level has a rainbow or a
 // big Mochi more often than not; laid evenly up its height once there are more than CANDIES.at's two
-const CANDY_POOL = { mine: ['bubble', 'rainbow', 'grow', 'smash', 'taiko', 'bell'], cave: ['smash', 'grow', 'rainbow', 'bubble', 'taiko', 'bell'], ice: ['rainbow', 'grow', 'smash', 'swarm', 'taiko', 'bell'],
-  sea: ['rainbow', 'bubble', 'grow', 'swarm', 'taiko', 'bell'], tokyo: ['smash', 'rainbow', 'grow', 'swarm', 'taiko', 'bell'], blocks: ['grow', 'smash', 'rainbow', 'bubble', 'taiko', 'bell'], sky: ['rainbow', 'swarm', 'grow', 'bubble', 'taiko', 'bell'],
-  skazka: ['grow', 'rainbow', 'smash', 'swarm', 'taiko', 'bell'], any: ['rainbow', 'grow', 'smash', 'bubble', 'taiko', 'bell'] };   // (the taiko in every world's, Бн1 «А»; the temple bell, Бн3 «А»)
+const CANDY_POOL = { mine: ['bubble', 'rainbow', 'grow', 'smash', 'taiko', 'bell', 'kage'], cave: ['smash', 'grow', 'rainbow', 'bubble', 'taiko', 'bell', 'kage'], ice: ['rainbow', 'grow', 'smash', 'swarm', 'taiko', 'bell', 'kage'],
+  sea: ['rainbow', 'bubble', 'grow', 'swarm', 'taiko', 'bell', 'kage'], tokyo: ['smash', 'rainbow', 'grow', 'swarm', 'taiko', 'bell', 'kage'], blocks: ['grow', 'smash', 'rainbow', 'bubble', 'taiko', 'bell', 'kage'], sky: ['rainbow', 'swarm', 'grow', 'bubble', 'taiko', 'bell', 'kage'],
+  skazka: ['grow', 'rainbow', 'smash', 'swarm', 'taiko', 'bell', 'kage'], any: ['rainbow', 'grow', 'smash', 'bubble', 'taiko', 'bell', 'kage'] };   // (the taiko in every world's, Бн1 «А»; the temple bell, Бн3 «А»; Kage, Бн6 «А»)
 // The helmet (once rock candy; user): for `time` s any jump (off a floor, a wall, a ledge's underside, or in the air) rams up: a solid ledge no taller than
 // `maxH` tiles found `reach` R over the hero (`look` R off a ceiling) breaks before it is met, its enemies with it, `coins` once ever,
 // the hero kicked on up at `kick` of a jump; it is back `back` s later, or under a hero coming down onto it once `soon` s are out.
@@ -208,11 +208,15 @@ const TAIKO = { time: 0, rings: [3, 7, 12, 18] };
 // its pace: the level (its clock, movers, crumbles, the fire's rise), enemies and a boss, their shots, the fire's spit, trains, set pieces, folk; coins, the
 // candy's own clock and a trial's or a bonus's at theirs. Its sound goes out from the hero in a ring each `ring` s
 const BELL = { time: 6, k: 0.5, ring: 0.9 };
-const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE, taiko: TAIKO, bell: BELL };
+// Kage, the shadow double (owner, Бн6 «А», 2026-10-30: «Кагэ: тень-двойник на другой стороне»): for `time` s a Mochi of another colour (purple; orange for
+// a purple hero) goes where the hero is as in a mirror down the shaft's middle, eased to it at `ease`/s, through blocks; the coins it touches are the
+// hero's, the enemies it touches pop (not a boss); a dashed line down the middle the mirror, `trail` dots behind it. It shields nothing
+const KAGE = { time: 8, ease: 10, trail: 6 };
+const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE, taiko: TAIKO, bell: BELL, kage: KAGE };
 // The candies whose first taking holds the game under a card of their own (owner, 2026-10-30: «когда первый раз моти берет звездочку радуги, то нужно
 // показывать перекрывающий попап со звездочкой на котором показывать саму звезду и писать под ней как она работает и длительность и кнопку GO. Тоже самое с
 // расслоением моти»; all six since Бп1 «А», 2026-10-30): its picture big, what it does, for how long, GO (ui.candy; seen once a save, save.seen['candy_' + kind])
-const CANDY_INTRO = ['rainbow', 'swarm', 'grow', 'smash', 'bubble', 'astro', 'taiko', 'bell'];
+const CANDY_INTRO = ['rainbow', 'swarm', 'grow', 'smash', 'bubble', 'astro', 'taiko', 'bell', 'kage'];
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless; in Tokyo a crow
@@ -2256,6 +2260,7 @@ ICONS.swarm = '.ooo....bbb./ooooo..bbbbb/ooooo..bbbbb/ooooo..bbbbb/.ooo....bbb./
 ICONS.plaster = '............/............/............/.wwwwwwwwww./wwswwoowwsww/wwwwwoowwwww/wwswwoowwsww/.wwwwwwwwww./............/............/............/............';   // the first hit a level is free
 ICONS.coin = '............/....oooo..../..ooyyyyoo../..oyywyyyo../.oyywyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./.oyyyyyyyyo./..oyyyyyyo../..ooyyyyoo../....oooo..../............';   // the campaign's map: a bonus level
 ICONS.warn = '.....ww...../....wrrw..../....wrrw..../...wrrrrw.../...wrwwrw.../..wrrwwrrw../..wrrwwrrw../.wrrrrrrrrw./.wrrrwwrrrw./wrrrrrrrrrrw/wwwwwwwwwwww/............';   // a warning sign, at the top edge: something coming down into view here
+ICONS.kage = '.....ss...../.....ss...../.www.ss.ppp./wwwwwssppppp/wkwkwsspkpkp/wwwwwssppppp/wwwwwssppppp/.www.ss.ppp./.....ss...../.....ss...../............/............';   // Kage: Mochi and his double either side of the mirror
 ICONS.bell = '.....ss...../.....ss...../....oooo..../...oyyyyo.../...oyyyyo.../..oyyyyyyo../..oyywyyyo../..oyyyyyyo../.oyyyyyyyyo./oooooooooooo/.....oo...../............';   // the temple bell: bronze, on its rope
 ICONS.taiko = '.s........s./..s......s../...s....s.../.wwwwwwwwww./oooooooooooo/oyooyooyooyo/oooooooooooo/oooooooooooo/oyooyooyooyo/oooooooooooo/.wwwwwwwwww./............';   // the taiko: a drum, its two sticks (orange: red is for danger)
 ICONS.rainbow = '.....rr...../.....rr...../....oooo..../yyyyyyyyyyyy/.gggggggggg./..gggggggg../...bbbbbb.../..bbbbbbbb../..ppp..ppp../.ppp....ppp./.pp......pp./............';   // a star in all the inks: nothing hurts
@@ -8516,6 +8521,11 @@ Renderer.prototype.draw = function (g, alpha) {
     if (s.fire && HB) { hazBlob(s.x, s.y, (s.vx || 0) < 0); continue; }   // (facing the way it flies: no flipping to and fro, the owner's «рваная»)
     disc(s.x, s.y, s.r, INK.spike, 1);
     if (s.fire) { if (th.hazard === 'avalanche') { disc(s.x, s.y, s.r * 0.8, PAL.white, 1); disc(s.x + s.r * 0.2, s.y + s.r * 0.2, s.r * 0.35, PAL.gray, 1); } else disc(s.x - s.r * 0.15, s.y - s.r * 0.15, s.r * 0.55, INK.flame, 1); }   // (an avalanche's: a snowball in its red rim)
+  }
+  if (g.kage && g.power('kage')) {   // Kage (KAGE): the mirror down the shaft's middle, thin dashes in the double's ink, and its trail
+    const P = PIX.size, xm = Math.round((lv.l + lv.r) / 2 / P) * P, ink = g.kage.color.base;
+    for (let y = Math.floor(top / (5 * P)) * 5 * P; y < bot; y += 5 * P) box(xm - P / 2, y, xm + P / 2, y + 3 * P, ink, 0.55, 0, 10, 0);
+    (g.kage.trail || []).forEach(([x, y], i, tr) => { const f = (i + 1) / tr.length; disc(x, y, g.kage.R * (0.3 + 0.55 * f), ink, 0.3 + 0.55 * f); });
   }
   if (g.swarm && g.power('swarm')) for (const b of g.swarm) (b.trail || []).forEach(([x, y], i, tr) => { const f = (i + 1) / tr.length; disc(x, y, b.R * (0.3 + 0.55 * f), b.color.base, 0.3 + 0.55 * f); });   // each clone's trail, in its colour (user)
   const tl = g.tail, hb = g.hero, bw = RAINBOW.band * R;   // a rainbow's tail: six bands along the hero's way, fading to its end

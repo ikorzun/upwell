@@ -554,6 +554,8 @@
   #result.dlg .rows { max-width: 300px; gap: 8px; margin: 0; padding: 8px 0; --p: 2.08; }
   #result.dlg .row { min-height: 24px; }   /* (the mockup's Inter 20 line) */
   #result.dlg .row span { color: var(--white); }
+  #result.dlg.tight .summary { gap: 12px; margin-bottom: 20px; } #result.dlg.tight .summary > .head { padding: 8px 8px 4px; } #result.dlg.tight .rows { gap: 2px; padding: 4px 0; }   /* too tall for its screen (ui.campDead, winFit): tighter, */
+  #result.dlg.tighter .summary { gap: 8px; margin-bottom: 12px; } #result.dlg.tighter .summary > .head { --p: 3; } #result.dlg.tighter .rows { --p: 1.8; }   /* then smaller still */
   /* «Pick an upgrade»: in the middle, Moti's slot 126 × 89, 22 over the title, 22 over the three: one box of 1-px yellow lines 340 across, each 16 in and
      12 high, its 60-px picture 16 from its name in yellow over what it does in white (Inter 18 → VT323 23.5) */
   #cards.dlg { justify-content: center; }

@@ -3358,8 +3358,9 @@ function pixelDisc(r, fill) {
 const taskIcon = (id) => 'task' + id[0].toUpperCase() + id.slice(1);   // ICONS.taskCage, taskCrow, taskNeon, taskLantern, taskBell, taskLamp, taskLighthouse
 function taskEl(q) { const e = el('span', q.n >= q.of ? 'done' : null); e.append(iconEl(taskIcon(q.id)), px(q.n + '/' + q.of)); return e; }   // a task (Game.setTasks): its picture and its count, yellow when done
 // The Win screen's stars' timing (ui.win, ui.starHit): one in every `gap` s (0.35: its flashes under the owner's 3 Hz), each landing `peak` s into its 0.4-s
-// way in (starIn's biggest), the won ones twinkling from `twinkle` s on, once all are in
-const STAR_IN = { gap: 0.35, peak: 0.24, twinkle: 1.45 };
+// way in (starIn's biggest), the won ones twinkling from `twinkle` s on, once all are in; `reach`: px over a 60-px star's top its landing's moment goes at
+// most (the last one's sparks, ui.starHit: (30 + 20)·1.6 out from its middle and their half of 4 more; its ring 42, the star itself 13.5), kept on the screen (ui.winFit)
+const STAR_IN = { gap: 0.35, peak: 0.24, twinkle: 1.45, reach: 52 };
 // A ring of pixels on an n-px grid at radius r (a star's going out, ui.starHit): an SVG of its cells, drawn crisp at any size
 function pixRing(n, r) {
   let d = ''; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const q = Math.hypot(x + 0.5 - n / 2, y + 0.5 - n / 2); if (Math.abs(q - r) < 0.62) d += 'M' + x + ' ' + y + 'h1v1h-1z'; }
@@ -3614,11 +3615,12 @@ const ui = {
     p.classList.add('dlg');
     const st = el('div', 'stars dstars'), won = save.camp.stars[g.ci] || 0; for (let k = 0; k < 3; k++) st.append(starEl(k < won, 48));
     box.append(st, def ? el('div', 'head', L2(def.quip[(save.camp.fails[g.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', t(deadKey(why, g.lv.theme))), deadKey(why, g.lv.theme)));   // a boss has a word of its own
-    box.append(this.runRows([[t('height'), Math.floor(g.levelM) + ' ' + t('m')], [t('reached'), g.where()], [t('coins'), g.lv.coinsTaken || 0], [t('kills'), g.kills], [t('combo'), g.bestCombo]]));
+    const rows = this.runRows([[t('height'), Math.floor(g.levelM) + ' ' + t('m')], [t('reached'), g.where()], [t('coins'), g.lv.coinsTaken || 0], [t('kills'), g.kills], [t('combo'), g.bestCombo]]); box.append(rows);
     const row = el('div', 'drow'), can = g.coins >= price;
     if (!boss) row.append(cap(button(tf('reviveShort', { n: price }), 'big' + (can ? '' : ' off'), () => (can ? g.revive() : this.toast(tf('reviveCost', { n: price, c: g.coins }), 1800))), 'reviveShort', { n: price }));
     if (g.canAdRevive()) row.append(adMark(cap(button(t('watchAd'), 'big', () => g.reviveAd()), 'watchAd')));
     p.append(box, ...(row.children.length ? [row] : []), cap(button(t('again'), 'big thumb', () => g.campAgain()), 'again'));
+    this.winFit(p, box, [4, 3, 2].map((i, n) => [n, rows.children[i]]));   // a short screen: tighter, as the Win, then the go's least lines out (its combo, enemies, coins)
   },
   runRows(rows) {   // a go's numbers in two columns, the words on the left, the numbers on the right (the Figma «too sour»)
     const tb = el('div', 'rows');
@@ -3814,11 +3816,11 @@ const ui = {
   // экранов: стиль, звезды, верстка»): the well and its level on top, the day's three heights as the Win's stars (lit by the day's best; one this run
   // reached lands with its moment, starHit, an earlier run's in quietly), why it ended in yellow, a line each in the game's pictures, the day's board
   // about the hero; Menu over Again. A short screen tightens as the Win's, then loses its least lines (winFit): the board's farthest from the hero, the
-  // fight's, the day's best, the well's, the board's near ones, the whole board
+  // fight's, the day's best, the well's (a run with no stars), the board's near ones, the whole board
   result(r) {
     const p = this.panel('cards'), box = el('div', 'wbox'), lines = el('div', 'wlines'), cuts = []; p.classList.add('win');
     const line = (cls, ...kids) => { const e = el('div', 'wl' + (cls ? ' ' + cls : '')); e.append(...kids); lines.append(e); return e; };
-    const where = el('div', 'wlines'), wl = el('div', 'wl'); wl.append(px((r.daily ? t('daily') + ' · ' : '') + r.where)); where.append(wl); box.append(where); cuts.push([2.8, where]);
+    const where = el('div', 'wlines'), wl = el('div', 'wl'); wl.append(px((r.daily ? t('daily') + ' · ' : '') + r.where)); where.append(wl); box.append(where); if (!r.daily) cuts.push([2.8, where]);   // (over the stars it is in their moments' room: out, it gains nothing, winFit)
     if (r.daily) {
       const row = el('div', 'stars wstars'), ms = dayMedals(r.daily.day), last = ms.filter((m) => r.total >= m).length - 1;
       ms.forEach((m, k) => {   // in one after another as the Win's (STAR_IN), each over its height
@@ -3862,11 +3864,15 @@ const ui = {
     p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu(), !POKI)), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun(!!r.daily, game.endless))), 'again'));   // Again (the same kind of run) at the bottom, Menu as big over it (Poki: no ad on the way to the menu)
     fit();
   },
-  // A Win-like screen (ui.win, ui.result) too tall for its screen, or many lines: laid out from the bottom it ran off the top, its stars at the screen's edge,
+  // A Win-like screen (ui.win, ui.result, a loss's ui.campDead) too tall for its screen, or many lines: laid out from the bottom it ran off the top, its stars at the screen's edge,
   // cut there as they grew to 1.45 (owner, 2026-10-30: «на финальном экране уровне при анимации звезды обрезаются сверху и частично по бокам»): its gaps
-  // tightened a step at a time till its top is on the screen, 8 px under the safe area; then `cuts` ([priority, its line], least first) taken out
+  // tightened a step at a time till its top is on the screen, 8 px under the safe area; then `cuts` ([priority, its line], least first) taken out. Its top:
+  // the box's, or its stars' landing's moments' if higher (STAR_IN.reach; owner, again: «на финальных экранах при анимации звезды ... срезаются из-за
+  // блока, которым они ограничены»: the run's stars, its well's line gone, had their rings and sparks cut by the screen's top)
   winFit(p, box, cuts = []) {
-    const room = () => box.getBoundingClientRect().top - (p.getBoundingClientRect().top + (parseFloat(getComputedStyle(p).paddingTop) - 24 + 8) * view.k);
+    const row = shakeOn() && box.querySelector('.stars'), reach = row && (row.classList.contains('wstars') ? STAR_IN.reach : ((1.45 - 1) / 2) * row.offsetHeight);   // (reduced motion: none; a loss's stars only grow, starIn)
+    const top = () => Math.min(box.getBoundingClientRect().top, row ? row.getBoundingClientRect().top - reach * view.k : Infinity);
+    const room = () => top() - (p.getBoundingClientRect().top + (parseFloat(getComputedStyle(p).paddingTop) - 24 + 8) * view.k);
     for (const c of ['tight', 'tighter']) { if (room() >= 0) return; p.classList.add(c); }
     while (room() < 0 && cuts.length) cuts.shift()[1].remove();
   },

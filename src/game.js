@@ -3332,12 +3332,14 @@ function iconEl(id) {
 const icon48Svgs = {};
 function bigIcon(id) {
   const f = ICON48[id]; if (!f) return iconEl(id);
-  if (!icon48Svgs[id]) {
-    const [ps, rs] = f, rows = rs.split('/'), pal = {}, runs = {}; for (const q of ps.split(',')) pal[q[0]] = '#' + q.slice(1);
+  const back = f[2] && !palNow() && typeof fxUnpal === 'function' ? fxUnpal(f[2]) : null, key = back ? id + '~' : id;   // (one drawn in SNES's colours, with SNES off: the world's own inks)
+  if (!icon48Svgs[key]) {
+    const [ps, rs] = f, rows = rs.split('/'), pal = {}, runs = {};
+    for (const q of ps.split(',')) pal[q[0]] = back ? '#' + back(...[1, 3, 5].map((i) => parseInt(q.slice(i, i + 2), 16))).map((v) => v.toString(16).padStart(2, '0')).join('') : '#' + q.slice(1);
     rows.forEach((r, y) => { for (let x = 0; x < r.length;) { const c = r[x]; if (c === '.') { x++; continue; } let e = x + 1; while (e < r.length && r[e] === c) e++; runs[c] = (runs[c] || '') + 'M' + x + ' ' + y + 'h' + (e - x) + 'v1h-' + (e - x) + 'z'; x = e; } });
-    icon48Svgs[id] = '<svg viewBox="0 0 ' + rows[0].length + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + Object.keys(runs).map((c) => '<path fill="' + pal[c] + '" d="' + runs[c] + '"/>').join('') + '</svg>';
+    icon48Svgs[key] = '<svg viewBox="0 0 ' + rows[0].length + ' ' + rows.length + '" shape-rendering="crispEdges" aria-hidden="true">' + Object.keys(runs).map((c) => '<path fill="' + pal[c] + '" d="' + runs[c] + '"/>').join('') + '</svg>';
   }
-  const e = document.createElement('i'); e.className = 'ico big48'; e.dataset.i = id; e.innerHTML = icon48Svgs[id]; return e;
+  const e = document.createElement('i'); e.className = 'ico big48'; e.dataset.i = id; e.innerHTML = icon48Svgs[key]; return e;
 }
 // A star in detail at `px` CSS px (ICON48.star<N>, research/stars): the grid of N pixels that makes each one whole there, 2 CSS px a pixel from 36 px up, 1 below
 // (owner, 2026-10-28: «везде улучши качество звезд»): the Win's 60, a loss's 48, a toast's 36, the map's 24, the menu's 20

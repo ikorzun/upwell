@@ -51,6 +51,19 @@
       const q = okl(n); let k = 0, bd = 1e9; allL.forEach((L, i) => { const e = L.reduce((s, x, j) => s + (x - q[j]) ** 2, 0); if (e < bd) { bd = e; k = i; } });
       v = all[k].map((x) => Math.round(x * 255)); done.set(key, v); return v; };
     maps.set(P, m); return m; };
+  // The other way (the Book's pictures drawn off the game in its default SNES, ICON48's third field): a colour in a palette's own colours as the game's own
+  // inks have it, back along the same lines the pass takes the inks out by, not snapped; with SNES off they are in the world's colours too (bigIcon)
+  const backs = new Map();
+  window.fxUnpal = (name) => { const P = PALS[name]; if (!P) return null; let m = backs.get(P); if (m) return m;
+    const ink0 = Object.values(PAL), inkN = P.inks.map(hex), W = Object.keys(PAL).indexOf('white'), done = new Map();
+    m = (r, g, b) => { const key = (r << 16) | (g << 8) | b; let v = done.get(key); if (v) return v;
+      const c = [r / 255, g / 255, b / 255]; let best = 1e9, n = c;
+      const line = (a, z, na, nz) => { const d = z.map((x, j) => x - a[j]), t = Math.min(1, Math.max(0, d.reduce((s, x, j) => s + (c[j] - a[j]) * x, 0) / d.reduce((s, x) => s + x * x, 0)));
+        const e = d.reduce((s, x, j) => s + (c[j] - a[j] - t * x) ** 2, 0); if (e < best) { best = e; n = na.map((x, j) => x + t * (nz[j] - x)); } };
+      for (let i = 1; i < inkN.length; i++) line(inkN[0], inkN[i], ink0[0], ink0[i]);
+      for (let i = 1; i < inkN.length; i++) if (i !== W) line(inkN[i], inkN[W], ink0[i], ink0[W]);
+      v = n.map((x) => Math.round(Math.max(0, Math.min(1, x)) * 255)); done.set(key, v); return v; };
+    backs.set(P, m); return m; };
   const f3 = (list) => new Float32Array(list.flat()), palBufs = new Map();   // (each palette's uniforms, made once)
   const bufsOf = (P) => { let b = palBufs.get(P); if (!b) { const inks = P.inks.map(hex), all = P.all.map(hex); b = { ink0: f3(Object.values(PAL)), inkN: f3(inks), all: f3(all), allL: f3(all.map(okl)), n: all.length }; palBufs.set(P, b); } return b; };
   const kicks = [{ p: null }, { p: null }, { p: null }], last = { flash: -9 };   // a hurt's moment, the others', and a jump's bend, all under way at once (a kill in a hurt's 1.95 s cuts it off no more)

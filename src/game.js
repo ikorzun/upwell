@@ -3392,7 +3392,7 @@ function fitBig(b, min = 2, slack = 24) {   // (min: the smallest --p it may go 
 }
 const ui = {
   open: null, openT: 0, hp: -1, max: -1, coins: -1, m: -1, stage: '', labelEls: [],
-  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); p.classList.remove('wmap', 'dlg', 'staged');   // (the book shares the map's panel: not its look; a dialog's look its own)
+  panel(id) { this.hideAll(); const p = $(id); p.replaceChildren(); p.classList.add('on'); p.classList.remove('wmap', 'dlg', 'staged', 'tight', 'tighter');   // (the book shares the map's panel: not its look; a dialog's look its own; a Win's tightening its own)
     this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer); return p; },   // (a toast of the screen before: gone)
   hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story', 'album']) $(id).classList.remove('on'); this.open = null; menuTop(false); if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
@@ -3553,6 +3553,11 @@ const ui = {
     if (lines.children.length) box.append(lines);
     this.stationLine(box);
     p.append(box, cap(button(t('next'), 'big thumb', next), 'next'));
+    // a short screen, or many lines (its tasks, the medals, the week's mark): the box laid out from the bottom ran off the top, the world's line gone and
+    // the stars at the screen's edge, cut there as they grew to 1.45 (owner, 2026-10-30: «на финальном экране уровне при анимации звезды обрезаются сверху и
+    // частично по бокам»): its gaps tightened a step at a time till its top is on the screen, 8 px under the safe area
+    const room = () => box.getBoundingClientRect().top - (p.getBoundingClientRect().top + (parseFloat(getComputedStyle(p).paddingTop) - 24 + 8) * view.k);
+    for (const c of ['tight', 'tighter']) { if (room() >= 0) break; p.classList.add(c); }
   },
   starHit(w, s, box, k, last) {   // a star landing on the Win screen (owner, 2026-10-28: «добавь при появлении звезды больше эффектов, можно использовать такой же crt
     // эффект как при уроне»): the CRT's moment over the game (fx.js KICK.star: a gold flash, the split, a tear), the star itself split red and blue and bright as a

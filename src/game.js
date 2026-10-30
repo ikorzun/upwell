@@ -3581,11 +3581,7 @@ const ui = {
     if (lines.children.length) box.append(lines);
     this.stationLine(box);
     p.append(box, cap(button(t('next'), 'big thumb', next), 'next'));
-    // a short screen, or many lines (its tasks, the medals, the week's mark): the box laid out from the bottom ran off the top, the world's line gone and
-    // the stars at the screen's edge, cut there as they grew to 1.45 (owner, 2026-10-30: «на финальном экране уровне при анимации звезды обрезаются сверху и
-    // частично по бокам»): its gaps tightened a step at a time till its top is on the screen, 8 px under the safe area
-    const room = () => box.getBoundingClientRect().top - (p.getBoundingClientRect().top + (parseFloat(getComputedStyle(p).paddingTop) - 24 + 8) * view.k);
-    for (const c of ['tight', 'tighter']) { if (room() >= 0) break; p.classList.add(c); }
+    this.winFit(p, box);   // (a short screen, or many lines: its tasks, the medals, the week's mark)
   },
   starHit(w, s, box, k, last) {   // a star landing on the Win screen (owner, 2026-10-28: «добавь при появлении звезды больше эффектов, можно использовать такой же crt
     // эффект как при уроне»): the CRT's moment over the game (fx.js KICK.star: a gold flash, the split, a tear), the star itself split red and blue and bright as a
@@ -3814,40 +3810,65 @@ const ui = {
     p.append(box, row, cap(button(tf('reviveFor', { n: price }), 'big thumb' + (can ? '' : ' off'), () => (can ? game.revive() : ui.toast(tf('reviveCost', { n: price, c: coins }), 1800))), 'reviveFor', { n: price }));
     game.stageIn(slot);
   },
+  // A run over (a daily well's or a random run's) as the Win is laid out (owner, 2026-10-30: «нужно переделать этот экран, по типу последней переделки
+  // экранов: стиль, звезды, верстка»): the well and its level on top, the day's three heights as the Win's stars (lit by the day's best; one this run
+  // reached lands with its moment, starHit, an earlier run's in quietly), why it ended in yellow, a line each in the game's pictures, the day's board
+  // about the hero; Menu over Again. A short screen tightens as the Win's, then loses its least lines (winFit): the board's farthest from the hero, the
+  // fight's, the day's best, the well's, the board's near ones, the whole board
   result(r) {
-    const p = this.panel('result'), box = el('div', 'summary');   // the results in the middle of the room over the buttons, as the Figma «too sour» (1268:2463)
-    p.classList.add('dlg');
-    const cuts = [], fit = () => { cuts.sort((a, b) => a[0] - b[0]); while (cuts.length && box.firstElementChild.getBoundingClientRect().top < p.getBoundingClientRect().top + 8 * view.k) cuts.shift()[1].remove(); };   // a short screen: the least of it goes, till the top shows (touch scrolls nothing here)
-    const def = !r.won && game.lv.boss && game.lv.boss.def;   // a loss: a word on what did it (a boss has its own, as in ui.campDead),
-    box.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[game.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', r.won ? t('won') : t(deadKey(r.why, game.lv.theme))), r.won ? 'won' : deadKey(r.why, game.lv.theme)));
-    const tb = this.runRows([[t('height'), r.total + ' ' + t('m')], [t('reached'), r.where], [t('coins'), r.coins], [t('kills'), r.kills], [t('combo'), r.combo]]);
-    [...tb.children].forEach((row, i) => { if (i > 1) cuts.push([3 - i / 10, row]); });   // the combo first, then the enemies, the coins
-    box.append(tb); this.markLine(box);
-    if (r.daily) {   // the day's three medals on top, where the Figma «too sour» has its stars (its «Tokyo 2/3» is the day's well), its best under the go
-      const row = el('div', 'medals');
-      dayMedals(r.daily.day).forEach((m, k) => { const c = el('div', 'medal'); c.append(iconEl(r.daily.best >= m ? ['medalB', 'medalS', 'medalG'][k] : 'medalOff'), px(m + ' ' + t('m'))); row.append(c); });
-      box.prepend(row); box.append(el('div', 'label', tf('dailyBest', { n: r.daily.best })));
-      if (r.daily.paid > 0) box.append(el('div', 'label mark pay', tf('purseIn', { n: r.daily.paid })));   // the day's first run's coins in the purse (Game.finish), as the week's pay is said
-      if (ads.ok && bridge.leaderboards && bridge.leaderboards.type === 'in_game') bridge.leaderboards.getEntries('daily_height').then((all) => {
-        const day = (e) => Math.floor(Number(e.score) / BOARD), es = all.filter((e) => day(e) === r.daily.day), ahead = all.filter((e) => day(e) > r.daily.day).length;   // today's only (see BOARD), ranked among themselves (a clock set ahead sends days to come)
-        const me = es.findIndex((e) => bridge.player && e.id === bridge.player.id), from = me < 0 ? 0 : Math.max(0, me - 2), b = el('div', 'rows');   // the neighbours, not the top hundred (the digest §6)
-        const n = Math.min(5, es.length - from), mid = Math.min(Math.max(me, from + 1), from + n - 2);   // the three that stay on a short screen: about the hero
-        for (const e of es.slice(from, from + 5)) {
-          const i = es.indexOf(e), q = el('div', 'row' + (i === me ? ' me' : '')); q.append(el('span', null, '#' + (e.rank - ahead) + ' ' + (e.name || '').slice(0, 14)), el('b', null, (Number(e.score) % BOARD) + ' ' + t('m'))); b.append(q);
-          if (Math.abs(i - mid) > 1) cuts.push([1 - Math.abs(i - mid) / 10, q]);   // the neighbours farthest away go first
+    const p = this.panel('cards'), box = el('div', 'wbox'), lines = el('div', 'wlines'), cuts = []; p.classList.add('win');
+    const line = (cls, ...kids) => { const e = el('div', 'wl' + (cls ? ' ' + cls : '')); e.append(...kids); lines.append(e); return e; };
+    const where = el('div', 'wlines'), wl = el('div', 'wl'); wl.append(px((r.daily ? t('daily') + ' · ' : '') + r.where)); where.append(wl); box.append(where); cuts.push([2.8, where]);
+    if (r.daily) {
+      const row = el('div', 'stars wstars'), ms = dayMedals(r.daily.day), last = ms.filter((m) => r.total >= m).length - 1;
+      ms.forEach((m, k) => {   // in one after another as the Win's (STAR_IN), each over its height
+        const won = r.daily.best >= m, s = starEl(won, 60), at = 0.15 + STAR_IN.gap * k, w = el('span', 'wstar'), c = el('div', 'wmed'); w.append(s); c.append(w, px(m + ' ' + t('m'))); row.append(c);
+        if (won) s.classList.add('won');
+        if (won && r.total >= m) {   // this run's: its moment at its way in's biggest (see ui.win)
+          const hit = () => this.starHit(w, s, box, k, k === last);
+          if (shakeOn()) s.addEventListener('animationstart', (e) => { if (e.animationName === 'starIn') setTimeout(hit, STAR_IN.peak * 1000); }, { once: true }); else setTimeout(hit, (at + STAR_IN.peak) * 1000);
         }
-        if (es.length) { box.append(el('div', 'label', t('board')), b); fit(); }
-      }).catch(() => {});
+        s.style.animationDelay = at + 's' + (won ? ', ' + (STAR_IN.twinkle + 0.2 * k) + 's' : '');
+      });
+      box.append(row);
     }
-    if (r.firstWin || r.tierUp > 1) {
-      const u = el('div', 'fresh');
-      u.append(el('div', 'label', t('unlocked')));
-      if (r.tierUp > 1) u.append(el('div', null, tf('tierOpen', { n: r.tierUp }))); else if (r.firstWin) u.append(el('div', null, t('hardOpen')));
-      box.append(u);
+    const def = !r.won && game.lv.boss && game.lv.boss.def;   // a loss: a word on what did it (a boss has its own, as in ui.campDead)
+    box.append(def ? el('div', 'head', L2(def.quip[(save.camp.fails[game.failKey()] || 0) % def.quip.length])) : cap(el('div', 'head', r.won ? t('won') : t(deadKey(r.why, game.lv.theme))), r.won ? 'won' : deadKey(r.why, game.lv.theme)));
+    line('', iconEl('air'), px(t('height') + ' ' + r.total + ' ' + t('m')));
+    line('', iconEl('coin'), px(t('coins') + ' ' + r.coins));
+    const fight = line('', iconEl('blast'), px(t('kills') + ' ' + r.kills)); fight.append(el('span', 'wdot', '•'), px(t('combo') + ' ' + r.combo)); cuts.push([2, fight]);
+    if (r.daily) {
+      cuts.push([2.5, line('', iconEl('star'), px(tf('dailyBest', { n: r.daily.best })))]);   // (said by its stars too: of the lines that go, after the fight's)
+      if (r.daily.paid > 0) line('pay', px(tf('purseIn', { n: r.daily.paid })));   // the day's first run's coins in the purse (Game.finish), as the week's pay is said (no picture: one line at 320)
     }
+    const m = game.markSay; if (m) { game.markSay = null; line(m.pay ? 'pay' : '', px(m.text)); }   // the week's mark (Game.markDay), once
+    if (r.firstWin || r.tierUp > 1) line('pay', iconEl('upgrade'), px(r.tierUp > 1 ? tf('tierOpen', { n: r.tierUp }) : t('hardOpen')));
+    box.append(lines);
+    const fit = () => { cuts.sort((a, b) => a[0] - b[0]); this.winFit(p, box, cuts); };
+    if (r.daily && ads.ok && bridge.leaderboards && bridge.leaderboards.type === 'in_game') bridge.leaderboards.getEntries('daily_height').then((all) => {
+      if (this.open !== 'cards' || !box.isConnected) return;   // (gone on by the time it came)
+      const day = (e) => Math.floor(Number(e.score) / BOARD), es = all.filter((e) => day(e) === r.daily.day), ahead = all.filter((e) => day(e) > r.daily.day).length;   // today's only (see BOARD), ranked among themselves (a clock set ahead sends days to come)
+      const me = es.findIndex((e) => bridge.player && e.id === bridge.player.id), from = me < 0 ? 0 : Math.max(0, me - 2), b = el('div', 'wlines wboard');   // the neighbours, not the top hundred (the digest §6)
+      const n = Math.min(5, es.length - from), mid = Math.min(Math.max(me, from + 1), from + n - 2);   // the three that stay on a short screen: about the hero
+      if (!es.length) return;
+      const head = el('div', 'wl not'); head.append(px(t('board'))); b.append(head);
+      for (const e of es.slice(from, from + 5)) {
+        const i = es.indexOf(e), q = el('div', 'wl' + (i === me ? ' me' : '')); q.append(px('#' + (e.rank - ahead) + ' ' + (e.name || '').slice(0, 14)), px((Number(e.score) % BOARD) + ' ' + t('m'))); b.append(q);
+        if (Math.abs(i - mid) > 1) cuts.push([1 - Math.abs(i - mid) / 10, q]); else if (i !== me) cuts.push([2.85, q]);   // the neighbours farthest away go first, the near ones late
+      }
+      box.append(b); cuts.push([2.9, b]); fit();   // (the whole board, the hero's line with it, the last to go)
+    }).catch(() => {});
     const then = (f, ad = true) => () => { if (game.state === 'wait') return; game.state = 'wait'; this.hideAll(); if (ad) ads.between(f); else f(); };   // the run over: an ad may come first
     p.append(box, cap(button(t('menu'), 'big thumb alt', then(() => game.toMenu(), !POKI)), 'menu'), cap(button(t('again'), 'big thumb', then(() => game.startRun(!!r.daily, game.endless))), 'again'));   // Again (the same kind of run) at the bottom, Menu as big over it (Poki: no ad on the way to the menu)
     fit();
+  },
+  // A Win-like screen (ui.win, ui.result) too tall for its screen, or many lines: laid out from the bottom it ran off the top, its stars at the screen's edge,
+  // cut there as they grew to 1.45 (owner, 2026-10-30: «на финальном экране уровне при анимации звезды обрезаются сверху и частично по бокам»): its gaps
+  // tightened a step at a time till its top is on the screen, 8 px under the safe area; then `cuts` ([priority, its line], least first) taken out
+  winFit(p, box, cuts = []) {
+    const room = () => box.getBoundingClientRect().top - (p.getBoundingClientRect().top + (parseFloat(getComputedStyle(p).paddingTop) - 24 + 8) * view.k);
+    for (const c of ['tight', 'tighter']) { if (room() >= 0) return; p.classList.add(c); }
+    while (room() < 0 && cuts.length) cuts.shift()[1].remove();
   },
   toastTimer: 0,
   toast(text, ms = 1500, icon) {   // `icon`: an ICONS picture before the words

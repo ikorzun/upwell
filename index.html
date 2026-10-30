@@ -514,8 +514,14 @@
   .wl.pay { color: var(--yellow); }
   .wl.new .ico { animation: starIn 0.4s steps(5) 1.5s both, starTwinkle 1.4s steps(2) 2s infinite; }   /* a medal won now: in after the stars */
   .wdot { color: var(--gray); opacity: 0.5; }   /* between two tasks */
+  .wmed { display: flex; flex-direction: column; align-items: center; gap: 2px; --p: 2; color: var(--gray); }   /* a daily star over its height (ui.result) */
+  .wboard .wl { align-self: stretch; justify-content: space-between; gap: 16px; }   /* the day's board: a name, its height (ui.result) */
+  .wboard .wl.not { justify-content: center; }
+  .wboard .wl.me { color: var(--yellow); }
   #cards.win > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* Next: the main screen's pill */
   #cards.win > .big.thumb > .cap { font-size: 12px; }
+  #cards.win > .big.alt { margin-bottom: 16px; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3); }   /* a run's Menu over Again (ui.result), as the dialogs' (.dlg) */
+  #cards.win > .big.alt > .cap { color: var(--white); opacity: 0.5; }
   /* The dialogs of the Figma round of 2026-10-28 (owner: «обнови экраны… внимательно посмотри на детали»), a px a CSS px, the game's fonts at the mockups'
      cap heights: «One more go?» («Death» 1268:2433), a loss («too sour» 1268:2463), «Pick an upgrade» (1268:2520). All dark (--veil; with Moti in it the
      stage's own dark under him, .staged: Game.stageIn), the title in yellow (Inter 33 → VT323 43, its caption 24 in purple), the yellow pill at the bottom

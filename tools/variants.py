@@ -1861,6 +1861,56 @@ ELEMENTS.update({   # the ghost crab's run (Д393 «C», its still sp-crabs A as
                        'all four, only its legs move)', ground='nothing under it (no deck drawn)',
                        inks='a sandy grey shell with darker grey, orange legs and claw, its eyes black on grey stalks; no white, no red, no yellow'),
 })
+ELEMENTS.update({   # Space's own enemies (owner 2026-10-30 «давай дальше, враги Космоса»; UPwell's roster: a climber on the tower, a circler and a new drifter in orbit;
+    # Вр3 «А» yokai and the place's real animals, Вр4 «А» a silhouette per behaviour, all three stompable so no spikes); red bodies read best on the blue
+    'sp-climber': dict(world='space', kind='foe', what='a creature that climbs the steel walls of the launch tower at Tanegashima at night. Draw it as one of six: A a Yaku '
+                       'gecko (Gekko yakuensis, a real gecko of Tanegashima and Yakushima that hunts insects on lit walls at night): wide toe pads, a banded back, a long '
+                       'tail; B a yamori (the house gecko, «the house guard») as a chubby gecko with a big round head and huge eyes, the kawaii one; C a tenjoname, '
+                       'the yokai that licks ceilings: a tall gangly little goblin with long thin limbs and a long tongue out; D an omukade, the giant centipede yokai: '
+                       'a long segmented body with many short legs; E a tsukumogami of an old tower tool: a maintenance crawler robot with suction-cup feet and a '
+                       'cable for a tail that came alive after a hundred years; F a mochi gecko: a soft round rice cake with little sticky feet and a stubby tail',
+                       does='a climber: it crawls up and down the shaft wall, clinging flat to it; at each end of its run it curls round with its head out into the '
+                       'shaft and goes back the other way; it never attacks, it only hurts on touch; the hero stomps it from above any time.',
+                       size='about 0.9 tiles wide and 1.6 tiles tall with its tail (about 14 by 25 art pixels), smaller than the hero',
+                       place='the same creature three times in the cell, one above the other, each clinging to the shaft wall on its LEFT, in profile, head UP, its feet '
+                       'on the wall: at the top crawling with its left legs forward and its tail swinging one way; in the middle crawling with its legs swapped and '
+                       'its tail swinging the other way; at the bottom curled round mid-turn with its head out into the shaft, facing you',
+                       main='red #f43e34 (an enemy: it hurts on touch), with black for its markings and shading', parts='its feet or toe pads, its tail, its markings, '
+                       'two eyes that glow orange #faa23e (never yellow: yellow is a coin)',
+                       vary='the creature, as the six letters above say: its head, its feet, its tail, its markings',
+                       foe_tone='Cute and a little cheeky, never gory: the game is for everyone.'),
+    'sp-circler': dict(world='space', kind='foe', what='a round thing that floats round and round a hull block of the Kibo module in orbit. Draw it as one of six: A a round '
+                       'camera drone like the little ball robot that floats inside Kibo (no logos, no text): one big round lens for an eye, small fan vents; '
+                       'B a bake-chochin, the paper lantern yokai: a round red lantern with one big eye and a tongue out; C a daruma doll floating, round and red, '
+                       'its two eyes staring; D a kedama, a round fluffy hair-ball yokai; E a little round satellite with a ring round its middle and two stubby '
+                       'antennas, the lens in its ring blinking; F a mochi ball, a round soft rice cake with a tiny antenna, the kawaii one',
+                       does='a circler: it floats slowly all the way round its block, over the top and underneath; it never turns or flips (it always faces you); it '
+                       'never attacks, it only hurts on touch; the hero stomps it from above any time.',
+                       size='about 1.4 tiles across (about 22 by 22 art pixels), round, smaller than the hero',
+                       place='the same thing twice in the cell, side by side, floating just over ' + SP_ORB.replace(', as in the attached image', '') + ', facing '
+                       'you, round and symmetric: on the left with its eye or light dim, on the right the same with its eye or light bright (two frames of one slow '
+                       'pulse; nothing else changes)',
+                       main='red #f43e34 (an enemy: it hurts on touch), with black and grey for its parts', parts='one slow light or lens that pulses (orange #faa23e, '
+                       'never yellow: yellow is a coin), two eyes or one big eye glowing orange, small fins, vents, antennas or tassels',
+                       vary='the thing, as the six letters above say: its shape inside the round, its eye or lens, what sticks out of it',
+                       foe_tone='Cute and a little eerie, never gory: the game is for everyone.'),
+    'sp-drifter': dict(world='space', kind='foe', what='a creature that drifts across the shaft in orbit, wall to wall, bobbing gently. Draw it as one of six: A a medaka '
+                       'fish in a floating ball of water (Japan kept medaka in the Kibo module\'s aquarium in 2012): a little fish inside a wobbly round water drop; '
+                       'B an ittan-momen, the flying yokai that is a long strip of cloth with eyes, rippling; C a koinobori, a carp streamer come alive, its tail '
+                       'fluttering; D an utsuro-bune, the «hollow ship» of the 1803 Japanese legend: a round bowl-shaped boat with a lid of glass windows, drifting; '
+                       'E a red stingray (ei) gliding, its wing fins waving; F a mochi fish, a soft flat rice cake with little fins, the kawaii one',
+                       does='a drifter: it crosses the shaft from wall to wall at an easy pace on a slow gentle wave, eases to a stop at each wall, turns to face you '
+                       'for a moment and drifts back the other way; it never attacks, it only hurts if touched from the side or below; the hero stomps it from above '
+                       'and bounces off its back.',
+                       size='about 1.6 tiles wide and 1.1 tiles tall (about 26 by 17 art pixels), wider than tall, smaller than the hero',
+                       place='the same creature three times in the cell in the open shaft between hull ledges, one above the other: at the top drifting to the '
+                       'right in side view, its tail or fins one way; in the middle drifting to the right with its tail or fins the other way; at the bottom turning '
+                       'at the wall, seen head-on or three-quarter, facing you',
+                       main='red #f43e34 (an enemy: it hurts on touch), with black and orange for its markings', parts='its fins, tail, cloth end or lid, two eyes '
+                       'that glow orange #faa23e (never yellow: yellow is a coin); for the water drop a thin blue outline with the red fish inside',
+                       vary='the creature, as the six letters above say: its shape, its fins or tail, its markings, its face',
+                       foe_tone='Cute and a little eerie, never gory: the game is for everyone.'),
+})
 ELEMENTS.update({   # Space's hazards in frames, as the other worlds' (Д376 «A» the launch flame, Д377 «BD» the tower's vent and the station's nozzle); their
     # references research/variants/ref-sp-vent-frames.png and ref-sp-nozzle-frames.png (the wall's rows as the game draws them: asleep, warning, bursting,
     # 4 x 4 image px a game px) and ref-sp-flame-frames.png (a crop of the flame's front in the game at 4 x 4)

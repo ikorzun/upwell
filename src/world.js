@@ -135,7 +135,8 @@ const SMASH = { time: 11, maxH: 1.5, reach: 0.5, look: 1, kick: 0.8, back: 3.5, 
 const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, fade: 1.5, grace: 0.8 };
 // The grow candy: the hero `size` times as big breaks any block it runs or jumps into (reach R ahead, more at speed; not the one
 // under it, whose top is within `feet` R of its bottom), spikes and all, at `jolt` of a smash's hitstop and shake; enemies it
-// touches go. Spikes, blobs and fire still hurt. After it, `grace` s of a hit's safety (user).
+// touches go. Nothing hurts it (owner, 2026-10-30: «если моти большой, то его ничего ни ранит: ни огонь, ни шипы, ничего»): the fire still throws it up,
+// a pestle lets it by; a fall off the screen's foot costs its heart, as in a rainbow. After it, `grace` s of a hit's safety (user).
 const GROW = { time: 9, size: 2, reach: 0.25, feet: 0.3, jolt: 0.5, grace: 2 };
 // The swarm (user): for its time the hero is 5-7 of its kind in the other colours round it, each wrecking what it touches
 // (enemies, and blocks over its feet); `size` theirs, R; `orbit` their ring's, R; `spin` its turn, rad/s; `back` the last s, home.

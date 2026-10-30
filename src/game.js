@@ -2158,7 +2158,7 @@ class Game {
     if (r) { this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.safes = [{ r, dx: (r.x1 - r.x0) / 2 }]; r.safe = true; lv.spawns = lv.spawns.filter((q) => q.ledge !== r); }   // (its enemy is laid on its middle too: not on the hero)
     this.invuln = HEALTH.invuln;   // a moment to look round
     lv.cam = Math.max(this.hero.cy - CAM.anchor * view.h, lv.capY - CAM.top);
-    if (lv.fire) lv.fire.y = this.hero.maxY + Math.max(cur.fire == null ? 0 : cur.fire * tl, 0.6 * view.h);   // as far under it as it was, a breath at least
+    if (lv.fire) lv.fire.y = this.hero.maxY + Math.max(cur.fire == null ? 0 : cur.fire * tl, 0.6 * view.fh);   // as far under it as it was, a breath at least
     this.hp = Math.min(this.maxHp, cur.hp); this.coins = cur.coins; this.kills = cur.kills; this.levelM = cur.m; lv.t = cur.t; this.harmed = !!cur.harmed;   // (this.kept: the purse at its start, so its coins count once)
     save.cur = cur; ui.toast(t('resumed'), 1800);
   }
@@ -2213,7 +2213,7 @@ class Game {
     if (!r) return;
     this.placeHero((r.x0 + r.x1) / 2, r.y0 - 1.1 * R); this.markSafe(r); this.levelM = Math.max(0, (this.startY - this.hero.cy) / (R_PER_M * R)); this.idleT = 0;
     lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top); lv.ensure(lv.cam - view.h * LEVEL.ahead);
-    if (lv.fire) { lv.fire.y = this.hero.maxY + FIRE_SOFT.back * view.h; lv.fire.warn = null; this.pitOff(); }
+    if (lv.fire) { lv.fire.y = this.hero.maxY + FIRE_SOFT.back * view.fh; lv.fire.warn = null; this.pitOff(); }
     this.invuln = REVIVE.invuln;
     setTimeout(() => { if (this.state === 'play') ui.toast(tf('fromPart', { n: k, of: this.rc.zones.length }), 1800); }, 2600);   // (after the level's banner)
   }
@@ -2223,7 +2223,7 @@ class Game {
     this.placeHero(sp.x, sp.y); this.regroup();
     this.invuln = HEALTH.invuln + this.mods.invuln; this.air = 0; this.queueT = 0; this.sinceContact = JUMP.coyote + 1; this.fallV = 0; this.landT = Infinity; this.landUsed = true; this.dizzyT = FACE.dizzy; this.flatT = 0; this.hero.squeezeIn = 0;   // (its face: dizzy, FACE; not flat, MOCHI)
     lv.cam = Math.max(Math.min(this.hero.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);
-    if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.h); lv.fire.warn = null; this.pitOff(); }
+    if (lv.fire) { lv.fire.y = Math.max(lv.fire.y, sp.y + 0.45 * view.fh); lv.fire.warn = null; this.pitOff(); }
     this.idleT = 0;
     ui.flash();
   }
@@ -2269,7 +2269,7 @@ class Game {
     if (this.state !== 'play') return;
     setVel(H, H.rigVx * 0.5, -FIRE.launch * this.vjump); unstick(H, 0.2); this.rising = false;
     splatFx(H.cx, f.y, this.R * 0.7, hazInk(this.lv.theme), 6);
-    f.y = Math.max(f.y, H.maxY + (this.softF ? FIRE_SOFT : FIRE).back * view.h); f.warn = null; this.pitOff();   // and sinks back: a throw into a ceiling must not land in it again
+    f.y = Math.max(f.y, H.maxY + (this.softF ? FIRE_SOFT : FIRE).back * view.fh); f.warn = null; this.pitOff();   // and sinks back: a throw into a ceiling must not land in it again
     if (this.softF) this.idleT = Math.min(this.idleT, FIRE_SOFT.idle - FIRE_SOFT.spare);   // (worlds 1-3: `spare` s at least before it speeds up again, FIRE_SOFT)
   }
   power(k) { return this.gunT > 0 && this.pow === k; }   // a candy at work
@@ -4406,7 +4406,7 @@ const ads = {
 // ── Setup ────────────────────────────────────────────────────
 const canvas = $('gl');
 const uiEl = $('ui');
-const view = { w: 1, h: 1, left: 0, keep: 0, k: 1 };   // keep: px at the bottom under the touch keys; k: the column's px on the screen (layout: under 1 in a short window)
+const view = { w: 1, h: 1, fh: 0, left: 0, keep: 0, k: 1 };   // keep: px at the bottom under the touch keys; k: the column's px on the screen (layout: under 1 in a short window)
 const perf = { ctxLoss: 0, lost0: 0, t0: 0, last: 0, active: 0, ft: [], err: 0, err0: 0, rej: 0, rej0: 0, lt: null };   // the renderer counts lost contexts here (Gum sends them as
 // telemetry); the page's errors and refused promises counted here, and its long tasks where the browser reports them (Chromium); the rest: see perfFrame
 addEventListener('error', () => perf.err++); addEventListener('unhandledrejection', () => perf.rej++);
@@ -4443,6 +4443,8 @@ function layout() {
   PIX.base = Math.max(1, Math.round(PIX.base / PIX.size - 1e-6)) * PIX.size;   // a picture's dot whole game pixels at this scale too (owner, 2026-10-28:
   // «важно, чтобы при уменьшении экрана пиксели не мылились»: at 0.96 its dot was 1.92 of them, one and two by turns)
   view.w = W / k; view.h = H / k; view.left = left; view.k = k; view.hudB = 0;   // (the HUD measured again: see ui.frame)
+  view.fh = view.h;   // the fire's measure of a screen (its start, its lag, how far a burn or a way back puts it under the hero): this screen; a computer's wide
+  // level's, its phone's rows (the wide plan's P0: in 20 rows the fire would chase twice as near)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }

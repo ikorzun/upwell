@@ -55,6 +55,7 @@ function snapBody(b) {
   return o;
 }
 function restoreBody(b, o) {
+  for (const k in b) if (!(k in o)) b[k] = undefined;   // what a try gave it goes too (an astro's flight left the hero `thread`, through every block: Sea 4-4)
   for (const k in o) {
     const v = o[k];
     if (v && ArrayBuffer.isView(v)) { if (b[k] && b[k].length === v.length) b[k].set(v); else b[k] = v.slice(); }
@@ -79,6 +80,7 @@ function snap() {
     boss: lv.boss && { f: Object.fromEntries(Object.entries(lv.boss).filter(([, v]) => typeof v !== 'object')), b: snapBody(lv.boss.body) }, crumble: [lv.crumbleTime, lv.crumbleBack],   // its hearts, turn and clocks; the Minecart's quicker bridges
     seesaws: (lv.seesaws || []).map((sw) => [sw.th, sw.om]),   // a seesaw's tip and its turning (SEESAW)
     rocket: g.rocket && Object.assign({}, g.rocket), rings: lv.rings.map((r) => [r, r.used]),   // a flight under way (an astro's, a boost ring's; its band moves up) and the rings flown through
+    followers: g.followers.slice(),   // (a try's freed one stayed on: each try at a cage added it again)
   };
 }
 function restore(S) {
@@ -107,6 +109,7 @@ function restore(S) {
   }
   [lv.crumbleTime, lv.crumbleBack] = S.crumble;
   g.rocket = S.rocket && Object.assign({}, S.rocket); lv.rings = S.rings.map(([r, used]) => Object.assign(r, { used }));   // a try's flight neither flies the real hero up nor cuts its own short
+  g.followers = S.followers.slice();
 }
 
 // ── playing ──

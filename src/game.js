@@ -3537,8 +3537,10 @@ const ui = {
     const p = this.panel('cards'), box = el('div', 'wbox'), lines = el('div', 'wlines'), part = (l) => STR[l]['got_' + kind].split(/[!！]/);
     const [name, rest] = part(lang), head = el('div', 'head', name.replace('¡', '')), c = document.createElement('small'), ol = lang !== 'ja' ? 'ja' : 'en';
     c.className = 'cap'; c.lang = ol; c.textContent = part(ol)[0].replace('¡', ''); head.classList.add('capped'); head.append(c);
-    const pic = iconEl(kind), time = el('div', 'wl');
-    pic.classList.add('x8'); p.classList.add('win'); lines.classList.add('candyw');
+    const pic = ICON48[kind] ? bigIcon(kind) : iconEl(kind), time = el('div', 'wl');
+    if (ICON48[kind]) { const d = (devicePixelRatio || 1) * view.k, s = (Math.max(1, Math.round((120 * d) / 48)) * 48) / d; pic.style.width = pic.style.height = s + 'px'; }   // its Book picture near 120 px, whole screen pixels a pixel of it: 128 on an iPhone, 120 at ×2 (owner, Пп2 «А»)
+    else pic.classList.add('x8');
+    p.classList.add('win'); lines.classList.add('candyw');
     for (const w of (rest || '').split('·')[0].trim().split(/,\s*|、/).filter(Boolean)) { const l = el('div', 'wl'); l.append(px(w.charAt(0).toUpperCase() + w.slice(1), 150)); lines.append(l); }   // (what it does a line a clause)
     if (STR[lang]['got_' + kind].includes('{s}')) { time.append(iconEl('clock'), px(Math.round(game.gunT) + ' ' + t('sec'))); lines.append(time); }   // (its seconds; the astro's flight has none, it ends where it gets to)
     box.append(pic, head, lines);

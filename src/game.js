@@ -278,8 +278,8 @@ function turnOver(b) {   // a body half round about its middle at once (the Puck
 }
 function addVel(b, dvx, dvy) { for (let i = 0; i < b.n; i++) { b.vx[i] += dvx; b.vy[i] += dvy; } }
 // Turn a body toward upright by spin (as Gum rights a body on a floor; a foe on a wall needs it too).
-function turnUp(b, k, dt) {
-  const dw = (-Math.atan2(Math.sin(b.theta), Math.cos(b.theta)) * k - b.omega) * Math.min(1, 8 * dt);
+function turnUp(b, k, dt, to = 0) {   // (`to`: turned that far instead, a clinging climber's belly to its wall, CLING)
+  const d = to - b.theta, dw = (Math.atan2(Math.sin(d), Math.cos(d)) * k - b.omega) * Math.min(1, 8 * dt);
   for (let i = 0; i < b.n; i++) { b.vx[i] -= dw * (b.y[i] - b.cy); b.vy[i] += dw * (b.x[i] - b.cx); }
 }
 function unstick(b, cd) { b.glue.fill(0); b.stuck = 0; b.stickCD = Math.max(b.stickCD || 0, cd); }
@@ -308,8 +308,9 @@ class Foe {
     this.type = s.type; this.def = def; this.ledge = s.ledge || null; this.rect = s.rect || null; this.wall = s.wall || null;
     this.big = !!s.big; this.hp = this.big ? MINI.hp : 1;   // a mini-boss (MINI)
     this.body = new Body(designById(def.design), foeColor(def.color), s.x, s.y, lv.R * def.size * (this.big ? MINI.size : 1), 0.5);
-    this.body.gScale = def.grav; this.body.sticky = false; this.body.face.frown = true; if (s.type === 'shell') this.body.helmet = 'kame';   // (a shell's hard look: writeFace)
+    this.body.gScale = def.grav; this.body.sticky = !!def.cling; this.body.face.frown = true; if (s.type === 'shell') this.body.helmet = 'kame';   // (a shell's hard look: writeFace)
     this.body.fric = 0;   // no drag from what it crawls on (a wall's friction all but holds it still): its steering sets the pace
+    this.body.slide = def.cling ? CLING.slide : 0; this.body.pressX = def.cling ? (this.wall.side === 1 ? -1 : 1) : 0;   // one that clings: glued to its wall as it presses on it (CLING)
     this.dir = s.dir || (Math.random() < 0.5 ? -1 : 1); this.t = 0; this.stall = 0; this.ph = Math.random(); this.lastPh = this.ph;
     this.state = 'walk'; this.shellT = 0; this.wind = 0; this.spitT = rand(SPIT.every[0], SPIT.every[1]);
     this.s = this.rect ? (this.rect.x1 - this.rect.x0) / 2 + 1.05 * this.body.R : 0;   // a circler starts on top, in the middle
@@ -323,7 +324,7 @@ class Foe {
     const b = this.body, def = this.def, lv = g.lv;
     const steer = (tvx, tvy, k, xOnly) => { const q = Math.min(1, k * dt); addVel(b, (tvx - b.rigVx) * q, xOnly ? 0 : (tvy - b.rigVy) * q); };
     this.t += dt; b.ghost = this.state === 'shell';   // kept in step with the state (a bot's restored branch included)
-    if (def.move !== 'tumble' || !(this.flip > 0)) turnUp(b, 6, dt);
+    if (def.move !== 'tumble' || !(this.flip > 0)) turnUp(b, 6, dt, def.cling ? (this.wall.side === 1 ? 1 : -1) * Math.PI / 2 : 0);   // (one that clings: belly to its wall, CLING)
     this.ph = (this.ph + dt / def.step) % 1;
     const pulse = 0.25 + 1.5 * Math.pow(Math.max(0, Math.sin(this.ph * TAU)), 2);   // averages about one
     const push = this.ph < this.lastPh;   // a new pulse begins
@@ -355,6 +356,7 @@ class Foe {
       else if (b.cy < w.y0) this.dir = 1; else if (b.cy > w.y1) this.dir = -1;
       if (push) b.kickSquash(0, 1, -0.9);
       steer((tx - b.cx) * 6, this.dir * def.speed * pulse, 6);
+      if (def.cling) addVel(b, (w.side === 1 ? -1 : 1) * CLING.pull * WORLD.gravity * dt, 0);   // its weight on its wall (CLING)
     } else {   // round its block: along the top, down a side, along the bottom, up the other side
       const r = this.rect, e = 1.05 * b.R, w = r.x1 - r.x0 + 2 * e, h = r.y1 - r.y0 + 2 * e, P = 2 * (w + h);
       const [v, jx] = def.lap ? this.whirl(dt, g, P, pulse) : [pulse, 0];   // a Leshy's pace: still and shaking to warn, then a fast lap (LESHY)

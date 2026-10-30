@@ -1582,9 +1582,14 @@ const KOLOBOK = { id: 'kolobok', base: PAL.orange, deep: PAL.black };   // the h
 // way hurts, and a hedgehog hurts from above too. Their own ways: a shell stomped rolls off along
 // its ledge into the others (SHELL); a spitter stops to lob a blob at the hero (SPIT); a splitter
 // stomped breaks into two minis; a chaser keeps to the hero's height on its wall.
+// A wall crawler that clings (ENEMY's `cling`) is stuck on its wall as the hero is on one: glued to it (Body's sticky, pressed toward it), turned belly to
+// it, its weight on it `pull` times the world's gravity, so it lies on it flat as the hero sits on a floor, not upright beside it touching at a point (owner, 2026-10-30:
+// «переделать скалолаза: оно должен не парить рядом со стеной, и липко ползать по ней как герой»); its glued patch keeps up with it to `slide` radii a
+// second, over its fastest pulse, so the glue never slows its crawl
+const CLING = { pull: 1, slide: 6 };
 const ENEMY = {
   crawler: { design: 'loaf', color: 'red', size: 0.8, grav: 1, stomp: true, coins: 3, speed: 60, step: 0.6, move: 'crawl' },
-  climber: { design: 'mochi', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall' },
+  climber: { design: 'mochi', color: 'red', size: 0.74, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall', cling: true },
   circler: { design: 'cat', color: 'red', size: 0.72, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round' },
   kikimora: { design: 'tengu', color: 'goo', size: 0.95, grav: 0, stomp: true, coins: 4, speed: 46, step: 0.7, move: 'wall', chase: true, leap: true },   // the Dark Forest's climber, a Kikimora (FOREST_V)
   leshy: { design: 'slug', color: 'goo', size: 0.95, grav: 0, stomp: true, coins: 5, speed: 54, step: 0.8, move: 'round', lap: true },   // the Dark Forest's circler, a Leshy (FOREST_V)
@@ -4784,7 +4789,8 @@ Body.prototype.finishSubstep = function (h) {
 // of a ledge or the ledge crumbles. A wall only takes a vertex that comes in fast enough
 // or a body pressed toward it (pressX), so a jump straight up beside a wall goes on up.
 // A vertex inside a block leaves it through the face it came in by; planks only catch a
-// body that was wholly above them when the step began. `fric` overrides the friction.
+// body that was wholly above them when the step began. `fric` overrides the friction, `slide` the pace a stuck patch keeps to (radii a second, on moss
+// too: a clinging climber's own, CLING).
 Body.prototype.collideLevel = function (lv, h) {
   const n = this.n, x = this.x, y = this.y, px = this.px, py = this.py, sk = WORLD.skin, fr = this.fric !== undefined ? this.fric : WORLD.wallFriction, glue = this.glue, convex = this.s.convex;
   if (!this.glueS) { this.glueS = new Float64Array(n); this.glueA = new Float64Array(n); this.glueB = new Float64Array(n); this.glueR = new Array(n).fill(null); }
@@ -4792,7 +4798,7 @@ Body.prototype.collideLevel = function (lv, h) {
   const L = lv.l + sk, R = lv.r - sk, F = lv.floor - sk;
   const canStick = this.sticky !== false && this.age > 0.5 && !(this.stickCD > 0) && !((this.wallMask | this.prevMask) & 8) && !this.wasTouching;
   const canTop = canStick && this.ceilT < STICK.hold && this.ceilCD <= 0;
-  const pull = STICK.tear * this.R, slide = STICK.slide * this.R * h, carry = 1 / PHYS.substeps;
+  const pull = STICK.tear * this.R, slide = (this.slide || STICK.slide) * this.R * h, carry = 1 / PHYS.substeps;
   const near = lv.near(this.minY - 2 * sk, this.maxY + 2 * sk);
   const stick = (i, code, s, a, b, r) => { glue[i] = code; gS[i] = s; gA[i] = a; gB[i] = b; gR[i] = r; };
   let mask = 0, sumL = 0, numL = 0, sumR = 0, numR = 0, sumT = 0, numT = 0, moss = 0;
@@ -4862,7 +4868,7 @@ Body.prototype.collideLevel = function (lv, h) {
   }
   if (numL + numR + numT) {   // each stuck patch slides no faster than `slide` (on moss, a lot slower); one under a ceiling creeps along it while pressed
     const cut = (sum, num, lim) => (num ? clamp(sum / num, -lim, lim) - sum / num : 0);
-    const cL = cut(sumL, numL, moss & 1 ? slide * MOSS.slide : slide), cR = cut(sumR, numR, moss & 2 ? slide * MOSS.slide : slide), cT = cut(sumT, numT, this.crawl ? MOVE.ceil * this.R * h : slide);
+    const cL = cut(sumL, numL, moss & 1 && !this.slide ? slide * MOSS.slide : slide), cR = cut(sumR, numR, moss & 2 && !this.slide ? slide * MOSS.slide : slide), cT = cut(sumT, numT, this.crawl ? MOVE.ceil * this.R * h : slide);
     for (let i = 0; i < n; i++) { const gl = glue[i]; if (gl === 1) y[i] += cL; else if (gl === 2) y[i] += cR; else if (gl === 4) x[i] += cT; }
   }
   let stuck = 0;

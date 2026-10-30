@@ -1293,7 +1293,7 @@ class Game {
     if (reb) { this.landUsed = true; this.missed = 0; H.face.surprise = Math.max(H.face.surprise, 0.7); if (!save.seen.reboundOk) { save.seen.reboundOk = 1; persist(); ui.toast(t('rebound_ok'), 1600); } }
     if (side === 1 || side === 2) { vx = (side === 1 ? 1 : -1) * JUMP.wallX * this.R; vy = -v * JUMP.wallUp; }
     else if (side === 4) {   // off a ceiling: down, or with a side pressed a dash that way, close under it
-      if (input.dir) { vx = input.dir * JUMP.dash * this.R; vy = JUMP.dashDown * v; this.dashT = 0.15; fx.dust(H.cx - input.dir * H.R, H.minY, IMPACT.puffSpeed + 600); }   // the ceiling's friction off for a moment, or it drags the dash
+      if (input.dir) { vx = input.dir * JUMP.dash * this.R; vy = JUMP.dashDown * v; this.dashT = 0.15; fx.dust(H.cx - input.dir * H.R, H.minY, IMPACT.puffSpeed + 600); dashFx(H, input.dir, false); }   // the ceiling's friction off for a moment, or it drags the dash (its ghosts, dashFx)
       else { vx = 0; vy = JUMP.ceil * v; }
       rise = false;
     }
@@ -1466,8 +1466,7 @@ class Game {
     if (held) unstick(H, 0.15);
     setVel(H, dir * JUMP.dash * this.R, floor ? -0.1 * this.vjump : Math.min(H.rigVy, 0.05 * this.vjump));
     this.dashT = 0.2; this.dashCD = JUMP.dashCD; this.rising = false;
-    H.kickSquash(dir, 0, -1.6); fx.dust(H.cx - dir * H.R, H.maxY, IMPACT.puffSpeed + 600);
-    sparkFx(H.cx - dir * H.R, H.cy, 10, dir > 0 ? Math.PI : 0, 0.5, [150, 380], [1.2, 2.6], [0.2, 0.4], [INK.white, H.color.base], 0.1);
+    H.kickSquash(dir, 0, -1.6); fx.dust(H.cx - dir * H.R, H.maxY, IMPACT.puffSpeed + 600); dashFx(H, dir, floor);   // its ghosts and speed lines (Sprite Fusion's dash, Эф1 «В»: in place of a spray of bits behind)
     sound.play('airjump', 0.6, 1.25); haptics.buzz(8);
   }
   // Pressed against the side of a ledge whose top is level with its body (bar its very top): a hop just high
@@ -1980,9 +1979,7 @@ class Game {
     this.air = Math.max(this.air, 1); this.sinceContact = JUMP.coyote + 1; this.rising = false;
     if (this.queueT > 0) { this.queueT = 0; this.air--; this.jump(true); }   // pressed just before landing on it
     this.hitstop = STOMP.hitstop; shake.add(3.5); haptics.buzz(14);
-    const bx = e.body.cx, by = e.body.minY;   // squashed flat: a spray of its colour and white, and a ring
-    sparkFx(bx, by, 18, -Math.PI / 2, 1.4, [200, 650], [1.6, 3.6], [0.35, 0.75], [e.body.color.base, INK.white, e.body.color.base], 0.85);
-    fx.ring(bx, by, 1.4 * this.R, INK.white); fx.ring(bx, by, 0.9 * this.R, e.body.color.base);
+    impactFx(e.body.cx, e.body.minY, e.body.color.base);   // squashed flat: Sprite Fusion's impact at its top (Эф1 «В»: its star, shards, ring, hot sparks and its chips, in place of a spray and two rings)
     if (!boss) sound.play('stomp', 1, 1 + 0.06 * Math.min(this.combo, 10));   // higher with each stomp of a combo, as in Downwell
   }
   // A shell stomped: it rolls off away from the hero, into the others, and pops in a while.
@@ -2248,7 +2245,7 @@ class Game {
   take(kind) {   // one candy at a time: a new one takes over, the same one starts again
     if (kind === 'taiko') { met('candy', kind); this.boom(); if (CANDY_INTRO.includes(kind) && !save.seen['candy_' + kind]) this.candyIntro(kind); else ui.toast(t('got_' + kind), 2200, kind); return; }   // (no time of its own: a candy at work goes on)
     if (this.gunT > 0 && this.pow !== kind) this.powerEnd();   // a rainbow or a giant cut short still ends safely
-    met('candy', kind);
+    met('candy', kind); powerFx(kind);   // (its power-up round the hero, Sprite Fusion's, Эф1 «В»)
     this.pow = kind; this.gunMax = this.gunT = CANDY[kind].time + this.mods.gun; this.ram = false;
     if (kind === 'grow') { this.hero.growthTarget = GROW.size; fx.ring(this.hero.cx, this.hero.cy, 2.4 * this.R, INK.white); sound.play('spring', 0.8, 0.6); shake.add(4); }
     if (kind === 'bell') { const H = this.hero; for (const r of [2.4, 5, 8]) fx.ring(H.cx, H.cy, r * this.R, INK.coin); sound.play('chime', 1, 0.45); sound.play('chime', 0.6, 0.3); this.bellT = BELL.ring; }   // its toll

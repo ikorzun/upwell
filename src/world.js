@@ -4971,6 +4971,161 @@ function updateBits(dt) {
   }
   for (let i = pops.length - 1; i >= 0; i--) if ((pops[i].t += dt) > POP.life) pops.splice(i, 1);
   for (let i = coinPops.length - 1; i >= 0; i--) if ((coinPops[i].t += dt) > 0.1) coinPops.splice(i, 1);
+  updateSF(dt);
+}
+// Sprite Fusion's feedback set after the pickup, its next three (MIT, Hugo Duprez; recipes through their MCP: movement.ts's Dash, power-up.ts, impact.ts;
+// owner, Эф1 «В»: the feedback set in turn, then the worlds' air): a dash's afterimages of the hero and its speed lines (dashFx), a candy's power-up round
+// the hero (powerFx), a stomp's impact (impactFx). Each in the game's inks, its fades the recipes' 4 × 4 dither (a feature's alpha is one), its sizes the
+// recipes' art pixels as their 43-px figure is to our hero as drawn (sfP), a line a game pixel thick at the least; no light buffer (the game has none:
+// their glows left out), no shake or flash of their own; a silhouette an ellipse round the hero's body (a feature, not a pixel each). Times are the recipes'
+const sfP = () => (2 * game.R * HERO.body) / 43;
+const sfOval = (H) => { const k = HERO.body, rx = ((H.maxX - H.minX) / 2) * k, ry = ((H.maxY - H.minY) / 2) * k; return { cx: (H.minX + H.maxX) / 2, cy: H.maxY - ry, rx, ry }; };   // (as drawBig grows him: from his feet)
+const sfClamp = (v) => (v < 0 ? 0 : v > 1 ? 1 : v), sfSmooth = (a, b, x) => { const u = sfClamp((x - a) / (b - a)); return u * u * (3 - 2 * u); };
+const sfOutExpo = (u) => (u >= 1 ? 1 : 1 - Math.pow(2, -10 * sfClamp(u))), sfOutCubic = (u) => 1 - Math.pow(1 - sfClamp(u), 3);
+const sfCount = (x) => Math.floor(x) + (fxRand(0, 1) < x - Math.floor(x) ? 1 : 0);   // a rate's whole number this frame
+// The dash (movement.ts, Dash; Game.dash): a ghost of the hero each 22 art px he goes (their 44 units), 0.4 s each, its light, body and rim a window
+// sliding down the recipe's cool ramp as it ages (white, aqua, blue, purple: their white-cyan going blue-violet, in our inks; in his own a ghost was
+// another Mochi), dithering out from 45% of its life; 120 speed lines a second from behind him, 0.2 s each, 16–64 art px long and shrinking to 40%:
+// white their first 3 px, aqua to 40%, the rest blue; off a floor a flat white flash and a blue ring at his feet (0.08 s); at its end along a floor, a skid of dust
+const DASHFX = { every: 22, ghost: 0.4, lines: 120, line: 0.2, len: [16, 64], flash: 0.08 }, DASH_INK = ['white', 'aqua', 'blue', 'purple'];
+const ghosts = [], speedLines = [];
+let dashGo = null;   // the dash going: its way, the last ghost's x, its clock, the floor it left (null in the air), its ramp, its end seen
+function dashFx(H, dir, floor) {
+  const o = sfOval(H), ink = DASH_INK.map((k) => PAL[k]);
+  dashGo = { dir, x: o.cx, t: 0, at: floor ? [o.cx, H.maxY] : null, ink, end: false };
+  ghosts.push({ ...o, t: 0, ink });
+}
+// A candy's power-up (power-up.ts; Game.take): 0.32 s of lines drawn in to his middle (180 a second, from 34–64 art px round, their heads white); then the
+// beat: he flashes white (a tint over him at 0.32, 0.87 and 1.32 s: under the owner's 3 Hz), a shock out both ways along a floor he stands on, dust, stars
+// off him; an aura in the candy's ink round him, thin at his feet and licking up over his head (three ellipses past his, white, the ink, the ink dithered,
+// and five tongues rising and falling on his top), full from 0.44 s, its rim swelling at each beat, out by 2.35 s; speed streaks rising beside him, wisps off
+// his top, a star now and then. The candy's ink its picture's (CANDY_AURA)
+const POWFX = { burst: 0.32, beats: [0.32, 0.87, 1.32], hold: 1.75, fade: 2.35, end: 2.95 };
+const CANDY_AURA = { smash: 'orange', rainbow: 'yellow', grow: 'green', swarm: 'purple', astro: 'blue', bubble: 'purple', bell: 'yellow', kage: 'purple' };   // (the smash's red is danger's: its orange)
+const powMotes = [];   // its lines in (k 0), streaks (2), stars (3), wisps (4)
+let powGo = null;   // the power-up going: its clock, the candy's ink, its beat seen, its shock (where on the floor)
+function powerFx(kind) { powGo = { t: 0, c: PAL[CANDY_AURA[kind]] || INK.white, burst: false, shock: null }; }
+const powAura = (t) => sfSmooth(POWFX.burst - 0.04, POWFX.burst + 0.12, t) * (1 - sfSmooth(POWFX.hold, POWFX.fade, t)) * (0.85 + 0.15 * Math.sin(t * 13));
+const powFlare = (t) => Math.max(Math.exp(-(((t - POWFX.beats[1]) / 0.07) ** 2)), Math.exp(-(((t - POWFX.beats[2]) / 0.07) ** 2))) + Math.exp(-(((t - POWFX.burst) / 0.08) ** 2));
+const powTint = (t) => Math.max(...POWFX.beats.map((b) => Math.exp(-(((t - b) / 0.07) ** 2))));
+const sfOn = (o, up) => { const a = up ? fxRand(-Math.PI * 0.95, -Math.PI * 0.05) : fxRand(0, TAU), r = Math.sqrt(fxRand(0, 1)); return [o.cx + Math.cos(a) * r * o.rx, o.cy + Math.sin(a) * r * o.ry]; };   // a point on him (his top half)
+// A stomp's impact (impact.ts, a hit on a surface whose normal is up; Game.stomp): an 8-spiked star at the foe's top stretched up along the bounce (its
+// spikes into the foe cut short), white-hot its first frame (a 60th of a second, held through the stomp's hitstop), a step cooler, longer and thinner its
+// second; then its four longest spikes broken off as crescents flying out (to 0.13 s), a ring opening on its open side (to 0.2 s), 14 hot sparks as
+// streaks, and the foe's own chips thrown up in its ink. Warm: white, yellow, orange (no red: red is danger's)
+const HITFX = { f1: 1 / 60, f2: 2 / 60, shards: 0.13, ring: 0.2, size: 0.8 };
+const impacts = [];
+function impactFx(x, y, ink) {
+  const P = sfP(), S = HITFX.size, B = -Math.PI / 2, spikes = [];
+  for (let i = 0; i < 8; i++) {
+    const a = B + (i / 8) * TAU + fxRand(-0.18, 0.18), cb = Math.cos(a - B);
+    spikes.push({ a, len: (7 + fxRand(0, 3)) * S * P * (1 + 1.8 * Math.max(0, cb) ** 3 + 0.6 * Math.max(0, -cb) ** 3) * (cb < -0.2 ? 0.3 : 1), w: (1.5 + fxRand(0, 0.6)) * S * P });
+  }
+  const shards = spikes.filter((s) => Math.cos(s.a - B) > -0.25).sort((p, q) => q.len - p.len).slice(0, 4).map((s) => ({ a: s.a + fxRand(-0.15, 0.15), r: s.len * 0.8, v: s.len * fxRand(5, 8), arc: fxRand(0.35, 0.6) }));
+  impacts.push({ x, y, t: 0, P, S, spikes, shards });
+  if (bits.length > 380) return;   // (a phone's budget for the rest)
+  for (let i = 0; i < 14; i++) { const a = B + fxRand(-0.85, 0.85), v = fxRand(130, 450) * (0.6 + 0.4 * S) * P; bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30 * P, s: 1, c: INK.white, t: 0, life: fxRand(0.1, 0.3), g: (427 * P) / SHOT_G, drag: 2.2, hot: v }); }   // (their 0.45 g)
+  for (let i = 0; i < 8; i++) { const a = B + fxRand(-0.8, 0.8), v = fxRand(75, 210) * S * P; bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: fxRand(0, 1) < 0.3 ? 2.4 : 1.4, c: i % 4 ? ink : INK.white, t: 0, life: fxRand(0.5, 0.9), g: (950 * P) / SHOT_G, drag: 0.6 }); }   // its chips (their full g)
+}
+function updateSF(dt) {
+  const H = typeof game !== 'undefined' && game.state !== 'dead' && game.lv && game.lv.kind !== 'menu' ? game.hero : null, P = H ? sfP() : 1;
+  if (dashGo) {
+    const d = dashGo; d.t += dt;
+    if (H && game.dashT > 0) {
+      const o = sfOval(H);
+      if (Math.abs(o.cx - d.x) > DASHFX.every * P) { d.x = o.cx; ghosts.push({ ...o, t: 0, ink: d.ink }); }
+      for (let k = sfCount(DASHFX.lines * dt); k > 0; k--) speedLines.push({ x: o.cx - d.dir * fxRand(4, 16) * P, y: H.maxY - fxRand(2, 44) * P, l: fxRand(DASHFX.len[0], DASHFX.len[1]) * P, dir: d.dir, t: 0, ink: d.ink });
+    } else if (!d.end) { d.end = true; if (H && game.onFloor()) fx.dust(H.cx + d.dir * H.R, H.maxY, IMPACT.puffSpeed + 500); }   // its skid
+    if (d.t > 1 || !H) dashGo = null;
+  }
+  for (let i = ghosts.length - 1; i >= 0; i--) if ((ghosts[i].t += dt) > DASHFX.ghost) ghosts.splice(i, 1);
+  for (let i = speedLines.length - 1; i >= 0; i--) if ((speedLines[i].t += dt) > DASHFX.line) speedLines.splice(i, 1);
+  if (powGo && !H) { powGo = null; powMotes.length = 0; }
+  if (powGo) {
+    const p = powGo, o = sfOval(H); p.t += dt;
+    if (p.t < POWFX.burst) for (let i = sfCount(180 * dt); i > 0; i--) {
+      const a = fxRand(0, TAU), r = fxRand(34, 64) * P, sp = fxRand(130, 210) * P;   // (their 260–420 units/s: two to an art px)
+      powMotes.push({ k: 0, x: o.cx + Math.cos(a) * r, y: o.cy + Math.sin(a) * r * 0.8, vx: (-Math.cos(a) * sp), vy: -Math.sin(a) * sp * 0.8, t: 0, life: r / sp, c: fxRand(0, 1) < 0.3 ? INK.white : p.c });
+    }
+    if (!p.burst && p.t >= POWFX.burst) {
+      p.burst = true;
+      if (game.onFloor()) p.shock = { x: o.cx, y: H.maxY };
+      fx.dust(o.cx, H.maxY, IMPACT.puffSpeed + 900);
+      for (let i = 0; i < 22; i++) { const [x, y] = sfOn(o); powMotes.push({ k: 3, x, y, vx: fxRand(-20, 20) * P, vy: -fxRand(15, 55) * P, t: 0, life: fxRand(0.6, 1.3), c: i % 3 ? p.c : INK.white, s: fxRand(0, 1) < 0.35 ? 2 : fxRand(0, 1) < 0.5 ? 1 : 0 }); }
+      if (p.shock && bits.length < 380) for (let i = 0; i < 10; i++) { const sd = i % 2 ? 1 : -1; bits.push({ x: o.cx + sd * fxRand(4, 30) * P, y: H.maxY - P, vx: sd * fxRand(15, 85) * P, vy: -fxRand(60, 150) * P, s: 1, c: i % 3 ? p.c : INK.white, t: -fxRand(0, 0.3), life: fxRand(0.3, 0.6), g: (220 * P) / SHOT_G, drag: 0 }); }   // the shock's sparks
+    }
+    const a = powAura(p.t), fl = powFlare(p.t);
+    if (p.burst && a > 0.05) {
+      for (let i = sfCount(60 * a * (1 + fl) * dt); i > 0; i--) { const sd = fxRand(0, 1) < 0.5 ? -1 : 1; powMotes.push({ k: 2, x: o.cx + sd * (o.rx * fxRand(0.2, 1) + fxRand(2, 10) * P), y: o.cy + fxRand(-0.75, 1.2) * o.ry, vx: 0, vy: -fxRand(110, 210) * P, t: 0, life: fxRand(0.14, 0.3), c: fxRand(0, 1) < 0.5 ? INK.white : p.c, s: fxRand(6, 16) * P }); }
+      for (let i = sfCount(30 * a * dt); i > 0; i--) { const [x, y] = sfOn(o, true); powMotes.push({ k: 4, x: x + fxRand(-4, 4) * P, y: y - fxRand(6, 12) * P, vx: fxRand(-8, 8) * P, vy: -fxRand(35, 65) * P, t: 0, life: fxRand(0.3, 0.55), c: p.c, s: fxRand(1.4, 2.4) * P }); }
+      for (let i = sfCount(12 * a * dt); i > 0; i--) { const [x, y] = sfOn(o); powMotes.push({ k: 3, x, y, vx: fxRand(-5, 5) * P, vy: -fxRand(12, 35) * P, t: 0, life: fxRand(0.6, 1.1), c: i % 2 ? p.c : INK.white, s: fxRand(0, 1) < 0.25 ? 1 : 0 }); }
+    }
+    for (let i = powMotes.length - 1; i >= 0; i--) {
+      const m = powMotes[i];
+      if ((m.t += dt) > m.life) { powMotes.splice(i, 1); continue; }
+      if (m.k === 3) { m.vx -= m.vx * 1.4 * dt; m.vy -= m.vy * 1.4 * dt + 9 * P * dt; }   // a star's drag and lift
+      m.x += m.vx * dt; m.y += m.vy * dt;
+    }
+    if (p.t > POWFX.end && !powMotes.length) powGo = null;
+  }
+  const hdt = typeof game !== 'undefined' && game.hitstop > 0 ? 0 : dt;   // (an impact's first frame held through the stomp's hitstop)
+  for (let i = impacts.length - 1; i >= 0; i--) if ((impacts[i].t += hdt) > HITFX.ring) impacts.splice(i, 1);
+  updateAir(dt);
+}
+// The worlds' air, Sprite Fusion's atmosphere set (MIT, Hugo Duprez; embers.ts, bubbles.ts, snow.ts through their MCP; owner, Эф1 «В»: after the feedback
+// set, the worlds' air), each world's by its hazard from below (th.hazard), sparse, in the game's inks, none with reduced motion. Over a fire (the Village's
+// field burning, Tokyo's alleys, the launch's flame) embers drift up from under the screen behind the play: sparks weaving up yellow to orange (an eighth of
+// the recipe's), a cinder now and then. In a water (the Mine's flood, the Danchi's main, the Sea's tide; the Dark Forest's bog in its green) bubbles rise
+// inside it from under the screen, faster the bigger, wobbling, growing, and pop in a little ring at its top. On Fuji snow falls across the screen at three
+// depths on a wandering breeze (far a pixel, mid a 2 × 2, near a crystal turning), each depth moving with the climb as far as it is near. Nothing thrown out
+// of a hazard (owner, 2026-10-29: «убери всплески со всех нижних опасностей»): the embers start under the screen, not off its band, and the bubbles stay under the water's top
+const AIR = { fire: ['noyaki', 'cityfire', 'launch'], water: ['flood', 'watermain', 'tide', 'bog'], snow: ['avalanche'] };
+const AIRFX = { sparks: 12, cinders: 1.6, bubbles: 7, flakes: [40, 20, 4], max: 140 };   // a second's sparks and cinders (the recipe's 96 and 13, an eighth), bubbles a second; flakes at each depth; at most at once
+const CRYSTAL = [['...b...', '.b.w.b.', '..bwb..', 'bwwWwwb', '..bwb..', '.b.w.b.', '...b...'], ['b..b..b', '.b.w.b.', '..wWw..', 'bwWWWwb', '..wWw..', '.b.w.b.', 'b..b..b'], ['..b..', '.bwb.', 'bwWwb', '.bwb.', '..b..']];   // a near flake's two turning frames and its still diamond
+const airPs = [];
+let airLv = null, airKind = null, airCam = 0;
+function flake(d, top) {   // a snowflake at depth d (0 far, 1 mid, 2 near) in the screen's frame: its fall 26/52/86 units/s and sway 8/16/30 (× 0.75–1.25, 0.6–1.2)
+  const P = sfP(), W = game.lv.r - game.lv.l;
+  return { k: 4, d, x: fxRand(-30 * P, W), y: top ? -fxRand(0, 20) * P : fxRand(0, view.h), vy: [13, 26, 43][d] * P * fxRand(0.75, 1.25), sway: [4, 8, 15][d] * P * fxRand(0.6, 1.2), f: fxRand(0.8, 1.8), ph: fxRand(0, TAU), kind: fxRand(0, 3) | 0, t: 0 };
+}
+function updateAir(dt) {
+  const lv = typeof game !== 'undefined' && game.lv;
+  if (!lv || lv.kind === 'menu' || !lv.theme || !shakeOn()) { airPs.length = 0; airLv = null; return; }
+  if (airLv !== lv) {   // a new level: its world's air (a snowfall full from its first frame)
+    airLv = lv; airPs.length = 0; airCam = lv.cam; airKind = Object.keys(AIR).find((k) => AIR[k].includes(lv.theme.hazard)) || null;
+    if (airKind === 'snow') AIRFX.flakes.forEach((n, d) => { for (let i = 0; i < n; i++) airPs.push(flake(d, false)); });
+  }
+  if (!airKind) return;
+  const P = sfP(), top = lv.cam, bot = lv.cam + view.h, l = lv.l, r = lv.r, t = lv.t, dcam = lv.cam - airCam, fy = lv.fire ? lv.fire.y : Infinity;
+  airCam = lv.cam;
+  if (airPs.length < AIRFX.max) {
+    if (airKind === 'fire' && lv.fire) {
+      for (let i = sfCount(AIRFX.sparks * dt); i > 0; i--) airPs.push({ k: 0, x: fxRand(l, r), y: bot + fxRand(0, 25) * P, vx: fxRand(-20, 20) * P, vy: -fxRand(45, 120) * P, t: 0, life: fxRand(2.2, 4.2), s: fxRand(0, 100) });
+      for (let i = sfCount(AIRFX.cinders * dt); i > 0; i--) airPs.push({ k: 1, x: fxRand(l, r), y: bot + 5 * P, vx: fxRand(-10, 10) * P, vy: -fxRand(25, 55) * P, t: 0, life: fxRand(3.5, 6), s: fxRand(0, 100), big: fxRand(0, 1) < 0.3 });
+    }
+    if (airKind === 'water' && fy < bot) for (let i = sfCount(AIRFX.bubbles * dt * Math.min(1, (bot - fy) / (0.3 * view.h))); i > 0; i--) {   // (as many as the water shows)
+      const rr = fxRand(0, 1) < 0.7 ? fxRand(0.5, 1.4) : fxRand(1.4, 2.6);
+      airPs.push({ k: 2, x0: fxRand(l + 6 * P, r - 6 * P), x: 0, y: bot + fxRand(0, 20) * P, r: rr, vy: -(20 + 13 * rr) * P, ph: fxRand(0, TAU), t: 0 });
+    }
+  }
+  for (let i = airPs.length - 1; i >= 0; i--) {
+    const p = airPs[i];
+    p.t += dt;
+    if (p.k === 0) {   // a spark: buoyed up and weaving, damped (it settles to rising a little and weaving a little)
+      p.vy += (-30 + 20 * Math.sin(t * 3 + p.s)) * P * dt; p.vx += 45 * Math.cos(t * 2.3 + p.s) * P * dt; p.vx -= p.vx * 1.6 * dt; p.vy -= p.vy * 1.6 * dt;
+      p.x += p.vx * dt; p.y += p.vy * dt; if (p.t > p.life) airPs.splice(i, 1);
+    } else if (p.k === 1) {   // a cinder: steadily up, wandering a little
+      p.vx += Math.sin(t * 0.9 + p.s) * 30 * P * dt; p.vx -= p.vx * 0.8 * dt; p.x += p.vx * dt + Math.sin(t * 2 + p.s) * 5 * P * dt; p.y += p.vy * dt; if (p.t > p.life) airPs.splice(i, 1);
+    } else if (p.k === 2) {   // a bubble: easing to its rise (40 + 26 r units/s), wobbling, growing; at the water's top it pops
+      p.vy += (-(20 + 13 * p.r) * P - p.vy) * Math.min(1, dt * 3); p.y += p.vy * dt; p.ph += dt * (4 + 2 / p.r); p.x = p.x0 + Math.sin(p.ph) * (0.5 + 0.8 * p.r) * P; p.r = Math.min(5, p.r + dt * 0.12);
+      if (p.y < fy + 2 * P) airPs[i] = { k: 3, x: p.x, y: fy, r: p.r, t: 0 }; else if (p.y < top - 20 * P || p.t > 12) airPs.splice(i, 1);
+    } else if (p.k === 3) { if (p.t > 0.2) airPs.splice(i, 1); }   // a pop's ring
+    else {   // a flake: its depth moving with the climb as far as it is near
+      const wind = (7 + 8 * Math.sin(t * 0.3)) * P;   // (their breeze, 14 ± 16 units/s)
+      p.y += p.vy * dt - dcam * [0.3, 0.6, 1][p.d]; p.x += (wind * (0.5 + p.d * 0.4) + Math.cos(t * p.f + p.ph) * p.sway) * dt;
+      if (p.y > view.h + 10 * P || p.y < -60 * P) Object.assign(p, flake(p.d, p.y > 0)); else if (p.x > r - l + 20 * P) p.x -= r - l + 50 * P;
+    }
+  }
 }
 // An enemy bursting like a ripe fruit (user: juicier, flying apart under the pressure): pieces of its skin and paler flesh
 // thrown in arcs, a few seeds, and a spray of juice drops falling after, over a white pop; `c` its ink.
@@ -8545,6 +8700,69 @@ Renderer.prototype.draw = function (g, alpha) {
     const [x0, y0] = tl[i], [x1, y1] = i + 1 < tl.length ? tl[i + 1] : [hb.cx, hb.cy], l = Math.hypot(x1 - x0, y1 - y0) || 1, ux = (x1 - x0) / l, uy = (y1 - y0) / l, hl = l / 2 + PIX.size;
     for (let k = 0; k < 6; k++) { const o = (k - 2.5) * bw; F((x0 + x1) / 2 - uy * o, (y0 + y1) / 2 + ux * o, ux * hl, uy * hl, -uy * bw / 2, ux * bw / 2, RAINBOW_INK[k], (i + 1) / tl.length, 10, hl, bw / 2, 0); }
   }
+  // Sprite Fusion's dash, power-up and impact (updateSF): a box, a line between two points and a spike (a triangle from its base at (x, y) out `L` along `a`,
+  // `hw` half as wide), a game pixel thick at the least (sfL), their alpha the dither's (at most 1: over it a feature goes toward the black)
+  const sfL = PIX.size, sfPx = sfP();
+  const sfBox = (x0, y0, x1, y1, c, a) => { if (a > 0.02) box(Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1), Math.max(y0, y1), c, Math.min(1, a), 0, 10, 0); };
+  const sfLine = (x0, y0, x1, y1, w, c, a) => { const h = Math.hypot(x1 - x0, y1 - y0) / 2; if (h < 0.01 || a <= 0.02) return; const ux = (x1 - x0) / (2 * h), uy = (y1 - y0) / (2 * h); F((x0 + x1) / 2, (y0 + y1) / 2, ux * h, uy * h, (-uy * w) / 2, (ux * w) / 2, c, Math.min(1, a), 10, h, w / 2, 0); };
+  const sfTri = (x, y, a, L, hw, c) => { const dx = Math.cos(a), dy = Math.sin(a); F(x + (dx * L) / 2, y + (dy * L) / 2, -dy * hw, dx * hw, (-dx * L) / 2, (-dy * L) / 2, c, 1, 6, hw, L / 2, 2 * hw); };
+  const sfMote = (m) => {   // a power-up's mote (powMotes)
+    const k = 1 - m.t / m.life;
+    if (m.k === 0) {   // a line drawn in: its tail 7 to 3 art px behind its head in its ink, its head 2.5 px white
+      const sp = Math.hypot(m.vx, m.vy) || 1, ux = m.vx / sp, uy = m.vy / sp;
+      sfLine(m.x - ux * 7 * sfPx, m.y - uy * 7 * sfPx, m.x - ux * 3 * sfPx, m.y - uy * 3 * sfPx, sfL, m.c, 1); sfLine(m.x - ux * 2.5 * sfPx, m.y - uy * 2.5 * sfPx, m.x, m.y, sfL, INK.white, 1);
+    } else if (m.k === 2) {   // a streak rising: white its top 2 px, its ink under, its lower half dithered out, shrinking to half
+      const l = m.s * (0.5 + 0.5 * k);
+      sfBox(m.x - sfL / 2, m.y, m.x + sfL / 2, m.y + 2 * sfPx, INK.white, 1); sfBox(m.x - sfL / 2, m.y + 2 * sfPx, m.x + sfL / 2, m.y + l * 0.5, m.c, 1); sfBox(m.x - sfL / 2, m.y + l * 0.5, m.x + sfL / 2, m.y + l, m.c, 0.45);
+    } else if (m.k === 4) {   // a wisp: a disc of the ink shrinking as it rises, a white glint up its left its first 65%
+      const r = m.s * (0.35 + 0.65 * k) + 0.7 * sfPx;
+      disc(m.x, m.y, r, m.c, 1); if (k > 0.35) disc(m.x - 0.3 * r, m.y - 0.4 * r, 0.55 * r, k > 0.7 ? INK.white : m.c, 1);
+    } else {   // a star: a plus twinkling, its arms up to 2 art px, its middle white at its brightest
+      const tw = 0.6 + 0.4 * Math.sin(m.t * 26 + m.x);
+      if (tw * k < 0.2) return;
+      const q = Math.max(sfL, Math.round(sfPx / sfL) * sfL), gx = Math.round(m.x / q) * q, gy = Math.round(m.y / q) * q, arm = Math.round(m.s * tw * Math.min(1, k * 2.5));
+      for (let d = 1; d <= arm; d++) for (const [ox, oy] of [[d, 0], [-d, 0], [0, d], [0, -d]]) sfBox(gx + ox * q, gy + oy * q, gx + ox * q + q, gy + oy * q + q, m.c, 1);
+      sfBox(gx, gy, gx + q, gy + q, tw > 0.75 ? INK.white : m.c, 1);
+    }
+  };
+  const sfPix = (x, y, c, a = 1) => { const q = Math.max(sfL, Math.round(sfPx / sfL) * sfL), gx = Math.floor(x / q) * q, gy = Math.floor(y / q) * q; sfBox(gx, gy, gx + q, gy + q, c, a); };   // one art pixel, on its grid
+  if (airKind === 'fire' || airKind === 'snow') for (const p of airPs) {   // the world's air behind the play (updateAir): embers, snow
+    if (p.k === 0) { const k = 1 - p.t / p.life; sfPix(p.x, p.y, k > 0.5 ? (Math.sin(lv.t * 15 + p.s * 3) > -0.2 ? PAL.yellow : PAL.orange) : PAL.orange, 1); }   // a spark (its flicker slowed under 3 Hz)
+    else if (p.k === 1) {   // a cinder: its core hot as it lives and flickers, a plus when big
+      const k = 1 - p.t / p.life, a = Math.min(1, k * 3) * Math.min(1, (1 - k) * 8), fl = 0.65 + 0.35 * Math.sin(lv.t * 3 + p.s), hot = k * fl, core = hot > 0.55 ? INK.white : hot > 0.35 ? PAL.yellow : PAL.orange, q = Math.max(sfL, Math.round(sfPx / sfL) * sfL);
+      if (p.big) for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) sfPix(p.x + ox * q, p.y + oy * q, PAL.orange, a); else sfPix(p.x, p.y + q, PAL.orange, 0.6 * a);
+      sfPix(p.x, p.y, core, a);
+    } else if (p.k === 4) {   // a flake: far a pixel, mid a 2 × 2, near a crystal (two thirds turning every third of a second)
+      const x = lv.l + p.x, y = lv.cam + p.y, q = Math.max(sfL, Math.round(sfPx / sfL) * sfL);
+      if (p.d === 0) sfPix(x, y, p.ph > Math.PI ? PAL.blue : PAL.gray);
+      else if (p.d === 1) { sfBox(x, y, x + 2 * q, y + 2 * q, INK.white, 1); sfPix(x + q, y + q, PAL.gray); }
+      else { const S = CRYSTAL[p.kind === 2 ? 2 : Math.floor(lv.t * 3 + p.ph) & 1], h = S.length; S.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') sfPix(x + (i - h / 2) * q, y + (j - h / 2) * q, row[i] === 'b' ? PAL.gray : INK.white); }); }
+    }
+  }
+  for (const gh of ghosts) {   // the dash's ghosts: its rim, body and light a window down the ramp as it ages, dithered out from 45% of its life
+    const k = gh.t / DASHFX.ghost, st = Math.min(3, Math.floor(k * 4)), a = k < 0.45 ? 1 : (1 - k) / 0.55, C = gh.ink, c = (i) => C[Math.min(3, st + i)];
+    F(gh.cx, gh.cy, gh.rx, 0, 0, gh.ry, c(2), a, 0);
+    F(gh.cx, gh.cy, Math.max(0, gh.rx - 1.5 * sfL), 0, 0, Math.max(0, gh.ry - 1.5 * sfL), c(1), a, 0);
+    F(gh.cx - 0.25 * gh.rx, gh.cy - 0.3 * gh.ry, 0.42 * gh.rx, 0, 0, 0.36 * gh.ry, c(0), a, 0);
+  }
+  for (const s of speedLines) {   // its speed lines back from where they started: white 3 art px, aqua to 40%, blue, fading as they shrink
+    const k = s.t / DASHFX.line, L = s.l * (1 - 0.6 * k), a = 1 - k, P3 = Math.min(3 * sfPx, L), d = -s.dir, [W, B, D] = s.ink;
+    sfBox(s.x, s.y - sfL / 2, s.x + d * P3, s.y + sfL / 2, W, a); sfBox(s.x + d * P3, s.y - sfL / 2, s.x + d * Math.max(P3, 0.4 * L), s.y + sfL / 2, B, 0.8 * a); sfBox(s.x + d * 0.4 * L, s.y - sfL / 2, s.x + d * L, s.y + sfL / 2, D, 0.4 * a);
+  }
+  if (powGo && hb) {   // the power-up's aura behind him: thin at his feet, thick over his head (their reach 3.4 + 14·n·(0.3 + 1.15·up) art px), a beat swelling it 30%
+    const p = powGo, o = sfOval(hb), a = powAura(p.t), fl = powFlare(p.t), sw = 1 + 0.3 * fl;
+    if (a > 0.02) {
+      const side = 5.5 * a * sw * sfPx, top = 13.5 * a * sw * sfPx, band = (f, c, al) => F(o.cx, o.cy - (f * (top - side)) / 2, o.rx + f * side, 0, 0, o.ry + (f * (top + side)) / 2, c, al, 0);
+      band(1, p.c, 0.5); band(0.7, p.c, 1);   // its edge dithered, its ink
+      for (let i = 0; i < 5; i++) {   // five tongues on his top, each rising and falling on its own
+        const th = -Math.PI * (0.18 + (0.64 * i) / 4), h = top * (0.9 + 0.5 * Math.sin(p.t * 9 + i * 2.3)) * (i === 2 ? 1.3 : 1), x = o.cx + Math.cos(th) * (o.rx + 0.4 * side), y = o.cy + Math.sin(th) * (o.ry + 0.4 * side);
+        F(x, y - h / 2, (1.4 + 0.6 * (i % 2)) * sfPx * (0.6 + 0.4 * a), 0, 0, h / 2, p.c, 1, 0);
+        if (fl > 0.35) F(x, y - h / 4, 0.8 * sfPx, 0, 0, h / 4, INK.white, 1, 0);
+      }
+      band(0.25, fl > 0.35 ? INK.white : p.c, 1); if (fl <= 0.35) band(0.12, INK.white, 1);   // its inside white against him
+    }
+    for (const m of powMotes) sfMote(m);   // (all behind him: over his white body their specks read as dirt)
+  }
   const back = this.nf;
   const list = g.bodyList(), hero = g.hero, heroOff = g.state === 'dead' ? !(g.dieT > 0) : g.invuln > 0 && Math.floor((g.invuln + (g.blinkHold || 0)) / HEALTH.blink) % 2 === 1;   // blinking (on through a
   // blink held inside an enemy, Game.blinkHold), or burst (after its death's beat)
@@ -8587,6 +8805,11 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   for (const b of bits) {   // a burst hero's bits, on the game-pixel grid, shrinking over their last 40%
     if (b.t < 0) continue;
+    if (b.hot) {   // an impact's hot spark (impactFx): a streak along its way in two parts, 1 + 0.011 its speed art px long (9 at most), white, yellow, orange as it cools
+      const k = (b.life - b.t) / b.life, sp = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / sp, uy = b.vy / sp, len = Math.min(9, 1 + ((2 * sp) / sfPx) * 0.011) * sfPx, hot = k > 0.6 ? INK.white : k > 0.3 ? PAL.yellow : PAL.orange;
+      sfLine(b.x - ux * len, b.y - uy * len, b.x - ux * len * 0.4, b.y - uy * len * 0.4, sfL, k > 0.5 ? hot : PAL.orange, 1); sfLine(b.x - ux * len * 0.45, b.y - uy * len * 0.45, b.x, b.y, sfL, hot, 1);
+      continue;
+    }
     if (b.star != null || b.mote) {   // a coin's spark or mote: a plus, its arms shrinking its last third, its trail's dots dithered out (0.8 to 0.2)
       const P = PICK_A(), gx = Math.round(b.x / P), gy = Math.round(b.y / P), k = (b.life - b.t) / b.life;   // (on the recipe's art-pixel grid in ours)
       if (b.mote && k * (0.6 + 0.4 * Math.sin(b.t * 18)) <= 0.25) continue;
@@ -8599,6 +8822,45 @@ Renderer.prototype.draw = function (g, alpha) {
     const P = PIX.size, s = Math.max(1, Math.round(b.s * PIX.keep * Math.min(1, (b.life - b.t) / (0.4 * b.life)))) * P, x0 = Math.round(b.x / P) * P, y0 = Math.round(b.y / P) * P;   // (its size in
     // the levels' grid's pixels: as big against the hero on a computer's finer grid as on a phone)
     box(x0, y0, x0 + s, y0 + s, b.c, 1, 0, 10, 0);
+  }
+  if (dashGo && dashGo.at && dashGo.t < DASHFX.flash) {   // the dash's take-off off a floor: a flat white flash at his feet and a ring opening on the floor
+    const k = dashGo.t / DASHFX.flash, [x, y] = dashGo.at, rx = (6 + 18 * k) * sfPx, ry = (2 + 3 * k) * sfPx;
+    F(x, y, 10 * (0.5 + k) * sfPx, 0, 0, 2.5 * sfPx, INK.white, 1 - k, 0);
+    for (let j = 0, n = Math.ceil((rx * TAU) / (2 * sfPx)); j < n; j++) { const q = (j / n) * TAU, px = x + Math.cos(q) * rx, py = y + Math.sin(q) * ry; sfBox(px - sfL / 2, py - sfL / 2, px + sfL / 2, py + sfL / 2, dashGo.ink[2], 1 - k); }
+  }
+  if (powGo && hb) {   // the power-up in front: its shock along the floor (its tint is his body's own colours at each beat: see the bodies' draw)
+    const p = powGo, q = (p.t - POWFX.burst) / 0.55;
+    if (p.shock && q >= 0 && q < 1.65) {   // its shock: two fronts out along the floor's top row (to 32 art px), white heads, the ink behind, a white crest on each, the row lit after
+      const z = 0.45, cx = p.shock.x, fy = p.shock.y, after = 1 - sfClamp((q - 0.25) / 1.4), reach = 4 * sfPx + 72 * z * sfPx * sfOutExpo(Math.min(1, q));
+      sfBox(cx - reach, fy - sfL, cx + reach, fy, p.c, 0.8 * after);
+      if (q < 0.5) sfBox(cx - 14 * z * sfPx, fy - sfL, cx + 14 * z * sfPx, fy, INK.white, 1.6 * (1 - q / 0.5));
+      if (q < 1) for (const sd of [-1, 1]) {
+        const hx = cx + sd * reach, len = (6 + 22 * (1 - q)) * z * sfPx, crest = 6 * z * (1 - q) ** 0.7 * sfPx;
+        sfBox(hx, fy - sfL, hx - sd * 2 * sfPx, fy, INK.white, 2.2 * (1 - q)); sfBox(hx - sd * 2 * sfPx, fy - sfL, hx - sd * len, fy, p.c, 1.4 * (1 - q));
+        sfBox(hx - sfL / 2, fy - crest - 3 * sfPx, hx + sfL / 2, fy - sfL, INK.white, 1.6 * (1 - q));
+      }
+    }
+  }
+  for (const h of impacts) {   // a stomp's impact: its star two frames, then its shards flying out and its ring opening on its open side
+    const t = h.t, P = h.P;
+    if (t <= HITFX.f2) {
+      const f1 = t <= HITFX.f1, sc = f1 ? 1 : 1.25, th = f1 ? 1 : 0.55, core = f1 ? INK.white : PAL.yellow, inner = f1 ? PAL.yellow : PAL.orange, body = f1 ? INK.white : PAL.yellow, rim = PAL.orange;
+      for (const s of h.spikes) sfTri(h.x, h.y, s.a, s.len * sc + 0.8 * P, s.w * th + 0.8 * P, rim);
+      for (const s of h.spikes) sfTri(h.x, h.y, s.a, s.len * sc, s.w * th, body);
+      for (const s of h.spikes) sfTri(h.x, h.y, s.a, 0.35 * s.len * sc, s.w * th, inner);
+      for (const s of h.spikes) sfTri(h.x, h.y, s.a, 0.55 * s.len * sc, Math.max(sfL / 2, 0.45 * s.w * th), core);
+      const r = 2.4 * h.S * sc * Math.sqrt(th) * P; disc(h.x, h.y, r + 0.8 * P, inner, 1); disc(h.x, h.y, r, core, 1);
+      continue;
+    }
+    if (t < HITFX.shards) {   // its four longest spikes broken off as crescents, flying out, narrowing, cooling, dithering out
+      const k = (t - HITFX.f2) / (HITFX.shards - HITFX.f2), c = k < 0.4 ? PAL.yellow : PAL.orange;
+      for (const s of h.shards) {
+        const r = s.r + s.v * (t - HITFX.f2), arc = s.arc * (1 - 0.4 * k), n = Math.max(3, Math.ceil((r * arc) / (1.5 * P)));
+        for (let j = 0; j <= n; j++) { const u = j / n - 0.5, a = s.a + u * arc, w = Math.max(sfL, 1.4 * P * (1 - Math.abs(u) * 2)), x = h.x + Math.cos(a) * r, y = h.y + Math.sin(a) * r; sfBox(x - w / 2, y - w / 2, x + w / 2, y + w / 2, c, 1 - k); }
+      }
+    }
+    const k = (t - HITFX.f2) / (HITFX.ring - HITFX.f2), r = (8 + 12 * sfOutCubic(k)) * h.S * P, w = Math.max(sfL, 2 * (1 - k) * h.S * P), c = k < 0.3 ? INK.white : k < 0.6 ? PAL.yellow : PAL.orange;
+    for (let j = 0, n = Math.ceil((r * TAU) / (1.5 * P)); j < n; j++) { const a = (j / n) * TAU; if (Math.cos(a + Math.PI / 2) <= -0.25) continue; const x = h.x + Math.cos(a) * r, y = h.y + Math.sin(a) * r; sfBox(x - w / 2, y - w / 2, x + w / 2, y + w / 2, c, 1.15 - k); }
   }
   if (lv.fire && lv.fire.y - 2.4 * R < bot) {   // the fire, between the walls: a red body under two layers of tongues, red behind and orange in front
     const fy = lv.fire.y, W = lv.r - lv.l;
@@ -8723,6 +8985,19 @@ Renderer.prototype.draw = function (g, alpha) {
     // slow in and slow out, and is thrown from there (no blinking)
     else if (w) { const u = 1 - w.t / FIRE.warn, hd = R * (0.5 + 1.1 * u); F(w.x, fy - hd + 0.3 * R, 0.45 * R, 0, 0, hd, th.hazard === 'avalanche' ? (u > 0.5 ? INK.spike : PAL.white) : u > 0.5 ? INK.white : INK.flame, 1, 6, 0.45 * R, hd, 0.9 * R); }   // a tongue rising where a blob is coming
   }
+  if (airKind === 'water') {   // the world's air in its water, over its band (updateAir): bubbles, white lit, its rim's ink, its inside half seen through; a pop's ring at the top
+    const rim = th.hazard === 'bog' ? PAL.green : PAL.aqua, deep = th.hazard === 'bog' ? PAL.green : PAL.blue;
+    for (const p of airPs) {
+      if (p.k === 2) {
+        const r = p.r * sfPx;
+        if (p.r < 1.5) { sfPix(p.x, p.y, INK.white); if (p.r >= 0.9) { sfPix(p.x + sfL, p.y + sfL, deep); sfPix(p.x, p.y + sfL, rim); } continue; }
+        disc(p.x, p.y, r, rim, 1); disc(p.x, p.y, Math.max(0, r - sfL), deep, 0.5); sfPix(p.x - 0.45 * r, p.y - 0.45 * r, INK.white);
+      } else if (p.k === 3) {   // its pop: the upper half of a ring opening flat, white then the rim's ink, dithered out
+        const k = p.t / 0.2, rr = (p.r + 1 + 3 * k) * sfPx;
+        for (let j = 0; j < 7; j++) { const a = Math.PI + (j / 6) * Math.PI; sfPix(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr * 0.5, k < 0.5 ? INK.white : rim, 1 - k); }
+      }
+    }
+  }
   if (lv.fire && lv.fire.rush > 0 && lv.fire.y > cam + H) {   // the fire speeding up out of sight (in sight its front stands higher: no red band over it) (К2 «А»: «красноватый край снизу»): the screen's bottom edge red, in four steps fading up
     // to over the keys, pulsing; not over the fire (in sight, its taller front says it)
     const P = PIX.size, yb = cam + H, hh = (view.keep || 0) + 1.6 * R, a = lv.fire.rush * (0.8 + 0.2 * Math.sin(T * 7)), y1 = Math.min(yb, lv.fire.y), at = (k) => Math.round((yb - (k / 4) * hh) / P) * P;
@@ -8825,7 +9100,8 @@ Renderer.prototype.draw = function (g, alpha) {
   for (const r of this.ranges) {
     gl.useProgram(pb.p);
     gl.bindVertexArray(this.bodyVao);
-    const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, col = kb ? KOLOBOK : r.b.color;   // (not while it dies or under a rainbow)
+    const kb = this.kolobok && r.b === g.hero && r.b.color.id === save.color, tn = r.b === g.hero && powGo && powGo.burst ? powTint(powGo.t) : 0;   // (not while it dies or under a rainbow)
+    const col = kb ? KOLOBOK : tn > 0.3 ? { base: tn > 0.75 ? INK.white : powGo.c, deep: powGo.c } : r.b.color;   // (a power-up's beat: the recipe's tint, him in the candy's ink, white at its peak, his face on him)
     gl.uniform3fv(pb.u.uBase, col.base); gl.uniform3fv(pb.u.uDeep, col.deep); gl.uniform3fv(pb.u.uLine, kb ? PAL.white : PAL.black); if (pb.u.uGlint) gl.uniform1f(pb.u.uGlint, r.b === g.hero && VOL_ON ? 1 : 0); gl.uniform2f(pb.u.uOrigin, Math.round(r.b.cx / P), Math.round(r.b.cy / P)); gl.uniform3fv(pb.u.uPaint, r.b.paint || PAINT_ALL);
     { const c = r.b.helmet === 'repair' ? repairCloth(r.b) : null; if (pb.u.uPants) gl.uniform4f(pb.u.uPants, c ? c[0] : 0, c ? c[1] : 0, c ? c[2] : 0, c ? REPAIR_LEGS : 99); }   // (his dungarees' legs)
     if (!BOSS_FIT[r.b.look]) {   // the target always has a stencil (a boss its sheet's drawing: only that on its body, the body unseen)

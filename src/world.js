@@ -136,7 +136,7 @@ const RAINBOW = { time: 9, cycle: 0.1, slow: 0.3, n: 14, gap: 0.4, band: 0.18, f
 // The grow candy: the hero `size` times as big breaks any block it runs or jumps into (reach R ahead, more at speed; not the one
 // under it, whose top is within `feet` R of its bottom), spikes and all, at `jolt` of a smash's hitstop and shake; enemies it
 // touches go. Nothing hurts it (owner, 2026-10-30: «если моти большой, то его ничего ни ранит: ни огонь, ни шипы, ничего»): the fire still throws it up,
-// a pestle lets it by; a fall off the screen's foot costs its heart, as in a rainbow. After it, `grace` s of a hit's safety (user).
+// a pestle lets it by; nor a fall off the screen's foot (owner, Бп2 «В»: nor in a rainbow, a swarm or a bubble). After it, `grace` s of a hit's safety (user).
 const GROW = { time: 9, size: 2, reach: 0.25, feet: 0.3, jolt: 0.5, grace: 2 };
 // The swarm (user): for its time the hero is 5-7 of its kind in the other colours round it, each wrecking what it touches
 // (enemies, and blocks over its feet); `size` theirs, R; `orbit` their ring's, R; `spin` its turn, rad/s; `back` the last s, home.
@@ -204,8 +204,8 @@ function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): th
 const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE };
 // The candies whose first taking holds the game under a card of their own (owner, 2026-10-30: «когда первый раз моти берет звездочку радуги, то нужно
 // показывать перекрывающий попап со звездочкой на котором показывать саму звезду и писать под ней как она работает и длительность и кнопку GO. Тоже самое с
-// расслоением моти»): its picture big, what it does, for how long, GO (ui.candy; seen once a save, save.seen['candy_' + kind]); the rest a toast as ever
-const CANDY_INTRO = ['rainbow', 'swarm'];
+// расслоением моти»; all six since Бп1 «А», 2026-10-30): its picture big, what it does, for how long, GO (ui.candy; seen once a save, save.seen['candy_' + kind])
+const CANDY_INTRO = ['rainbow', 'swarm', 'grow', 'smash', 'bubble', 'astro'];
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless; in Tokyo a crow

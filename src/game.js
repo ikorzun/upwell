@@ -2162,7 +2162,8 @@ class Game {
   // Off the bottom of the screen: a heart, and back onto that ledge with the camera and a
   // moment of safety; the combo under way is lost, and fire over the ledge sinks below it.
   fall() {
-    if (!this.learning() && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
+    const safe = this.power('rainbow') || this.power('swarm') || this.power('bubble') || this.power('grow');   // (a candy that says nothing hurts: no heart for a fall either; owner, Бп2 «В»)
+    if (!this.learning() && !safe && this.loseHeart()) { ui.hurt(); this.lastBy = 'fall'; track('hero_hit', { by: 'fall', fatal: this.hp <= 0, ...this.at() }); }
     haptics.buzz(40); shake.add(5);
     if (this.hp <= 0) { this.die(); return; }
     sound.play('fall', 0.8);
@@ -3508,7 +3509,8 @@ const ui = {
     const pic = iconEl(kind), time = el('div', 'wl');
     pic.classList.add('x8'); p.classList.add('win'); lines.classList.add('candyw');
     for (const w of (rest || '').split('·')[0].trim().split(/,\s*|、/).filter(Boolean)) { const l = el('div', 'wl'); l.append(px(w.charAt(0).toUpperCase() + w.slice(1), 150)); lines.append(l); }   // (what it does a line a clause)
-    time.append(iconEl('clock'), px(Math.round(game.gunT) + ' ' + t('sec'))); lines.append(time); box.append(pic, head, lines);
+    if (STR[lang]['got_' + kind].includes('{s}')) { time.append(iconEl('clock'), px(Math.round(game.gunT) + ' ' + t('sec'))); lines.append(time); }   // (its seconds; the astro's flight has none, it ends where it gets to)
+    box.append(pic, head, lines);
     p.append(box, cap(button(t('go'), 'big thumb', done), 'go'));
   },   // a campaign level played again: its Win, then on (an upgrade is for the first time only)
   // A level cleared as the Figma «Win» (1262:1542; owner, 2026-10-27: «вместо эмодзи игровые иконки, шрифт пиксельный из текущей реализации»): all dark, its

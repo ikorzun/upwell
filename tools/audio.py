@@ -112,6 +112,8 @@ SFX = {
     'bosshit': (0.8, 'A heavy wet squelch hitting a big jelly monster, with a low rubbery wobble.' + NO),
     'burn': (0.6, 'A short hot sizzle and crackling hiss with a soft squishy pop: a small jelly blob touching fire. Cartoon.' + NO),
     'spit': (0.6, 'A quick fiery whoosh and a soft pop: flames spitting a blob of burning lava up into the air. Cartoon, short.' + NO),
+    # owner 2026-10-30, А1 «А»: Mochi squeezed at home and in Feed Mochi, its pitch and loudness by how hard (game.js sound.play('squish', vol, rate))
+    'squish': (0.5, 'A soft squeezy squish of a cute round mochi rice cake pressed by a finger: a gentle wet squelch with a tiny rubbery squeak as it springs back. Cartoon, short.' + NO),
 }
 SR = 44100
 

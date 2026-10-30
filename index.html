@@ -73,7 +73,9 @@
   /* A heading's or a button's words in the other script, small under it: Japanese, or English in the Japanese game */
   .cap { display: block; margin-top: 4px; padding-left: 0.2em; font-family: 'DotGothic16', sans-serif; font-size: max(12px, calc(var(--p) * 4px)); line-height: 1; letter-spacing: 0.2em; }
   .cap:lang(en) { font-family: 'VT323', monospace; font-size: max(14px, calc(var(--p) * 5px)); letter-spacing: 0.1em; padding-left: 0.1em; }
+  .cap:lang(ja), :lang(ja) .px, .head:lang(ja) { word-break: keep-all; }   /* Japanese broken at its spaces only, never mid-word («いいえ、お / わる»: the UX tests, 2026-10-30) */
   .head .cap { color: var(--purple); }
+  .head > .cap { white-space: normal; }   /* (a head kept on one line by fitOne: its other script's line still wraps, as before) */
   .chip .cap { margin-top: 0; }
   .big.capped { padding-top: 0; padding-bottom: 0; }   /* (its words and their caption inside its one height) */
   .big, .chip, .head, #height, #stage, .cap:lang(en) { text-transform: uppercase; }
@@ -85,6 +87,9 @@
   .ahead { position: relative; align-self: stretch; min-height: var(--btnS); display: flex; align-items: center; justify-content: center; margin: 0 12px; }   /* the cross, the name, the count */
   .ahead .aclose { position: absolute; left: 0; top: 50%; transform: translateY(-50%); right: auto; }
   .ahead .acount { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); --p: 3; color: var(--white); }
+  .setBtn.anav { top: 50%; right: auto; transform: translateY(-50%); z-index: 2; }   /* the album's ‹ › on a computer (ui.album; .setBtn's own top came after) */
+  .setBtn.anav.l { left: 4px; } .setBtn.anav.r { left: auto; right: 4px; }
+  .anav .ico { width: 24px; height: 24px; }
   .astrip { touch-action: pan-x; overscroll-behavior: contain; flex: 1; min-height: 0; align-self: stretch; display: flex; align-items: center; gap: 16px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; padding: 0 calc(50% - var(--aw, 240px) / 2); scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .astrip::-webkit-scrollbar { display: none; }
   .acell { flex: none; scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -278,6 +283,8 @@
   #boot img { display: block; width: 196px; height: 31px; }   /* the menu's logo, a CSS px a cell */
   #boot .bar { width: 196px; height: 6px; box-sizing: border-box; border: 1px solid var(--gray); padding: 1px; }
   #boot .bar i { display: block; width: 0; height: 100%; background: var(--gray); }
+  #boot .fail { margin: 0; color: var(--white); font: 22px/1.2 'VT323', monospace; text-align: center; }   /* a file not come (bootFail) */
+  #boot button.fail { height: var(--btnS); padding: 0 28px; border: 0; border-radius: 24px; background: var(--yellow); color: var(--ink); font: 24px/1 'VT323', monospace; text-transform: uppercase; cursor: pointer; }
   #fade { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
   #fade.go { animation: fade 0.35s steps(4); }
 
@@ -334,7 +341,12 @@
   #story > .stitle { margin-bottom: auto; }
   @media (max-height: 620px) { #story { padding-top: calc(env(safe-area-inset-top, 0px) + 8px); } }   /* (a short screen's gap: 8 px, .panel) */
   #story > .big { align-self: stretch; margin: 0 12px; }
-  #story > .big.thumb { border-radius: 32px; clip-path: none; }   /* Next: the main screen's pill (owner, 2026-10-28: «кнопки в карточках сделай такие же круглые по краям, как в главном меню») */
+  #story > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* (its words as the Win's: the UX tests, 2026-10-30, they were --p 4) */
+  #story > .big.thumb > .cap { font-size: 12px; }
+  #map > .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; } #map > .big.thumb > .cap { font-size: 12px; }   /* the Book's Menu a pill too (it shares the map's panel, not its .wmap) */
+  .dlg .label { color: var(--white); }   /* (the old screens' grey-blue words white, as the Win's lines) */
+  #result.dlg.endlg { gap: 12px; } #result.dlg.endlg > .big.alt { margin-bottom: 0; }   /* (the runes, World cleared, a bonus's end: no Win box of their own, their lines a panel's gap apart) */
+  /* #story's Next: the main screen's pill (owner, 2026-10-28: «кнопки в карточках сделай такие же круглые по краям, как в главном меню») */
   .scard { position: relative; flex: none; margin-bottom: 14px; touch-action: none; }   /* its size by ui.story: whole pixels, from the view */
   .scard .stilt { position: absolute; inset: 0; }   /* what tilts and rises (cardLive) */
   .scard .sclip { position: absolute; inset: 0; overflow: hidden; border-radius: 20px; clip-path: inset(0 round 20px); background: var(--sbg); }   /* its planes, its corners round (owner, К16 «Б»: «углы скругли на 20 px») */
@@ -607,7 +619,7 @@
   @keyframes starIn { 0% { transform: scale(0) rotate(-120deg); opacity: 0; } 60% { transform: scale(1.45) rotate(12deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
   @keyframes starTwinkle { 50% { filter: brightness(1.45); } }
   @keyframes payIn { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .pay, .wl.new .ico, .stars .fm-star, .fin-in, .fin-in .head, .fin-in .fm-tom, .fin-in .fm-pay, .fin-in .ico { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } #hearts.hit, #purse.bump, #combo.pop .px, #fade.go, .stars .ico, .stars .ico.won, .stars .pay, .wl.new .ico, .stars .fm-star, .stars .fm-star.won, .fin-in, .fin-in .head, .fm-fin.fin-in > .fm-words > .head, #menu > .big.thumb.fin-in, .fin-in .fm-tom, .fin-in .fm-pay, .fin-in .ico { animation: none !important; } }   /* (!important: .won and .fin-in's own rules came after it and won, the UX tests 2026-10-30) */
 </style>
 </head>
 <body>
@@ -617,6 +629,18 @@
   function bootBar(w) { if (w > bootShow) { bootShow = w; var b = document.querySelector('#boot .bar i'); if (b) b.style.width = w + 'px'; } }
   var bootT = setInterval(function () { if (bootShow < Math.round(192 * Math.min(1, (bootGot + 0.9 * (bootW[bootK] || 0)) / bootAll))) bootBar(bootShow + 1); }, 60);
   function bootStep() { bootGot += bootW[bootK++] || 0; bootBar(Math.round(192 * Math.min(1, bootGot / bootAll))); if (bootK >= bootW.length) clearInterval(bootT); }
+  // A file of the game not come (a script's onerror), or one come that threw before the game started: the bar stops where it is, and says so with a way to try
+  // again, in the page's language (the UX tests, 2026-10-30: world.js cut off, the bar filled up and hung on the logo for good)
+  var bootDead = false;
+  function bootFail() {
+    if (bootDead || (window.__up && __up.started)) return; bootDead = true; clearInterval(bootT);
+    var w = { en: ['The game didn\u2019t load.', 'Try again'], es: ['El juego no carg\u00f3.', 'Reintentar'], pt: ['O jogo n\u00e3o carregou.', 'Tentar de novo'], ja: ['\u30b2\u30fc\u30e0\u3092 \u3088\u307f\u3053\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002', '\u3082\u3046\u3044\u3061\u3069'] }[(navigator.language || 'en').slice(0, 2)];
+    if (!w) w = ['The game didn\u2019t load.', 'Try again'];
+    var b = document.getElementById('boot'), p = document.createElement('p'), k = document.createElement('button');
+    p.className = 'fail'; p.textContent = w[0]; k.className = 'fail'; k.type = 'button'; k.textContent = w[1]; k.onclick = function () { location.reload(); };
+    b.removeAttribute('aria-hidden'); b.append(p, k); k.focus();
+  }
+  window.addEventListener('error', function (e) { if (e.filename && /\/src\//.test(e.filename)) bootFail(); });
 </script>
 <canvas id="sides" aria-hidden="true"></canvas>
 <canvas id="gl" class="wait" aria-label="Climbing squishy"></canvas>
@@ -651,11 +675,11 @@
   <div id="story" class="panel"></div>
   <div id="album" class="panel"></div>
 </div>
-<script src="src/gum.js" onload="bootStep()"></script>   <!-- (src/bossframes.js and src/sides.js: fetched by game.js after the menu, the sides' on a wide screen only; owner, З27 «А») -->
-<script src="src/world.js" onload="bootStep()"></script>
-<script src="src/cine.js" onload="bootStep()"></script>
-<script src="src/game.js" onload="bootStep()"></script>
-<script src="src/feed.js" onload="bootStep()"></script>   <!-- Feed Moti: a tap on Moti at home, a match-3 to feed him (see feed.js; ?feed while it is built) -->
-<script src="src/fx.js" onload="bootStep()"></script>   <!-- screen filters: the settings' CRT, and the ?fx= tries (see fx.js) -->
+<script src="src/gum.js" onload="bootStep()" onerror="bootFail()"></script>   <!-- (src/bossframes.js and src/sides.js: fetched by game.js after the menu, the sides' on a wide screen only; owner, З27 «А») -->
+<script src="src/world.js" onload="bootStep()" onerror="bootFail()"></script>
+<script src="src/cine.js" onload="bootStep()" onerror="bootFail()"></script>
+<script src="src/game.js" onload="bootStep()" onerror="bootFail()"></script>
+<script src="src/feed.js" onload="bootStep()" onerror="bootFail()"></script>   <!-- Feed Moti: a tap on Moti at home, a match-3 to feed him (see feed.js; ?feed while it is built) -->
+<script src="src/fx.js" onload="bootStep()" onerror="bootFail()"></script>   <!-- screen filters: the settings' CRT, and the ?fx= tries (see fx.js) -->
 </body>
 </html>

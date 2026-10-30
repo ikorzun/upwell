@@ -312,6 +312,7 @@ else {
   const joyHop = (h) => {   // a hop of joy: down a moment, then up, his eyes wide, hearts out
     const b = game.hero; if (!b || still) return;
     b.wake(); b.kickSquash(0, 1, -0.7); b.hop(Math.sqrt(2 * WORLD.gravity * h * b.R)); b.face.wide = 1; hearts(FEED.joy.hearts);
+    sound.play('squish', 0.4 + 0.5 * Math.min(1, h), 1.1 - 0.3 * Math.min(1, h));   // his squish, by how high he hops (owner, А1 «А»)
   };
   const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const anim = (e, frames, ms, ease = 'ease-out') => (e && e.animate ? e.animate(frames, { duration: still ? Math.min(ms, 90) : ms, easing: ease }).finished.catch(() => {}) : Promise.resolve());

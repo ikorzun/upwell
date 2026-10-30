@@ -2255,6 +2255,8 @@ ICONS.maxhp = ICONS.heart;
 ICONS.taskCrow = '............/............/.......sss../......sswsss/.....ssssss./..ssssssss../.ssssssssss./sssssssss.../..ssssss..../....s.s...../....s.s...../...ss.ss....';   // a level's tasks (Game.task): the crows,
 ICONS.taskNeon = '............/...rrrrrrrr./sssr......r./...r.rrrr.r./...r......r./...r.rrrr.r./...r....r.r./...r...r..r./sssr..r...r./...rrrrrrrr./............/............';   // the neon (ラ),
 ICONS.lock = '............/....ssss..../...s....s.../...s....s.../...s....s.../..yyyyyyyy../..yyyyyyyy../..yyykkyyy../..yyykkyyy../..yyyykyyy../..yyyyyyyy../............';   // a card not seen yet (ui.album)
+ICONS.next = '............/...kk......./...kwk....../...kwwk...../....kwwk..../.....kwwk.../.....kwwk.../....kwwk..../...kwwk...../...kwk....../...kk......./............';   // the album's way on a computer (ui.album: the UX tests, 2026-10-30), and back
+ICONS.prev = '............/.......kk.../......kwk.../.....kwwk.../....kwwk..../...kwwk...../...kwwk...../....kwwk..../.....kwwk.../......kwk.../.......kk.../............';
 ICONS.taskCage = '............/.....ss...../.ssssssssss./.s..s..s..s./.s..s..s..s./.s.gsggsg.s./.sgksggskgs./.sggsggsggs./.sggsggsggs./.ssssssssss./............/............';   // a friend in a cage,
 ICONS.taskLantern = '............/.....ss...../...ssssss.../..ssssssss../....soos..../....soos..../....ssss..../.....ss...../.....ss...../....ssss..../...ssssss.../............';   // a Village shrine's lantern lit,
 ICONS.taskLamp = '............/.....ss...../....s..s..../...ssssss.../...soooos.../...soyyos.../...soyyos.../...soooos.../...ssssss.../....ssss..../............/............';   // the Mine's lamps (its task)
@@ -5003,6 +5005,7 @@ const DASHFX = { every: 22, ghost: 0.4, lines: 120, line: 0.2, len: [16, 64], fl
 const ghosts = [], speedLines = [];
 let dashGo = null;   // the dash going: its way, the last ghost's x, its clock, the floor it left (null in the air), its ramp, its end seen
 function dashFx(H, dir, floor) {
+  if (!shakeOn()) return;   // (none of it with reduced motion: the UX tests, 2026-10-30)
   const o = sfOval(H), ink = DASH_INK.map((k) => PAL[k]);
   dashGo = { dir, x: o.cx, t: 0, at: floor ? [o.cx, H.maxY] : null, ink, end: false };
   ghosts.push({ ...o, t: 0, ink });
@@ -5016,7 +5019,7 @@ const POWFX = { burst: 0.32, beats: [0.32, 0.87, 1.32], hold: 1.75, fade: 2.35, 
 const CANDY_AURA = { smash: 'orange', rainbow: 'yellow', grow: 'green', swarm: 'purple', astro: 'blue', bubble: 'purple', bell: 'yellow', kage: 'purple' };   // (the smash's red is danger's: its orange)
 const powMotes = [];   // its lines in (k 0), streaks (2), stars (3), wisps (4)
 let powGo = null;   // the power-up going: its clock, the candy's ink, its beat seen, its shock (where on the floor)
-function powerFx(kind) { powGo = { t: 0, c: PAL[CANDY_AURA[kind]] || INK.white, burst: false, shock: null }; }
+function powerFx(kind) { if (shakeOn()) powGo = { t: 0, c: PAL[CANDY_AURA[kind]] || INK.white, burst: false, shock: null }; }   // (with reduced motion none: no flashes, no aura)
 const powAura = (t) => sfSmooth(POWFX.burst - 0.04, POWFX.burst + 0.12, t) * (1 - sfSmooth(POWFX.hold, POWFX.fade, t)) * (0.85 + 0.15 * Math.sin(t * 13));
 const powFlare = (t) => Math.max(Math.exp(-(((t - POWFX.beats[1]) / 0.07) ** 2)), Math.exp(-(((t - POWFX.beats[2]) / 0.07) ** 2))) + Math.exp(-(((t - POWFX.burst) / 0.08) ** 2));
 const powTint = (t) => Math.max(...POWFX.beats.map((b) => Math.exp(-(((t - b) / 0.07) ** 2))));
@@ -5034,9 +5037,9 @@ function impactFx(x, y, ink) {
     spikes.push({ a, len: (7 + fxRand(0, 3)) * S * P * (1 + 1.8 * Math.max(0, cb) ** 3 + 0.6 * Math.max(0, -cb) ** 3) * (cb < -0.2 ? 0.3 : 1), w: (1.5 + fxRand(0, 0.6)) * S * P });
   }
   const shards = spikes.filter((s) => Math.cos(s.a - B) > -0.25).sort((p, q) => q.len - p.len).slice(0, 4).map((s) => ({ a: s.a + fxRand(-0.15, 0.15), r: s.len * 0.8, v: s.len * fxRand(5, 8), arc: fxRand(0.35, 0.6) }));
-  impacts.push({ x, y, t: 0, P, S, spikes, shards });
+  const calm = !shakeOn(); if (!calm) impacts.push({ x, y, t: 0, P, S, spikes, shards });   // (reduced motion: no star's flash, no sparks; the foe's chips only)
   if (bits.length > 380) return;   // (a phone's budget for the rest)
-  for (let i = 0; i < 14; i++) { const a = B + fxRand(-0.85, 0.85), v = fxRand(130, 450) * (0.6 + 0.4 * S) * P; bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30 * P, s: 1, c: INK.white, t: 0, life: fxRand(0.1, 0.3), g: (427 * P) / SHOT_G, drag: 2.2, hot: v }); }   // (their 0.45 g)
+  if (!calm) for (let i = 0; i < 14; i++) { const a = B + fxRand(-0.85, 0.85), v = fxRand(130, 450) * (0.6 + 0.4 * S) * P; bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30 * P, s: 1, c: INK.white, t: 0, life: fxRand(0.1, 0.3), g: (427 * P) / SHOT_G, drag: 2.2, hot: v }); }   // (their 0.45 g)
   for (let i = 0; i < 8; i++) { const a = B + fxRand(-0.8, 0.8), v = fxRand(75, 210) * S * P; bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: fxRand(0, 1) < 0.3 ? 2.4 : 1.4, c: i % 4 ? ink : INK.white, t: 0, life: fxRand(0.5, 0.9), g: (950 * P) / SHOT_G, drag: 0.6 }); }   // its chips (their full g)
 }
 function updateSF(dt) {

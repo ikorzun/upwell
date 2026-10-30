@@ -1830,6 +1830,37 @@ ELEMENTS.update({   # Space's fleeing things in frames (the picks Д387 «A», �
                         ground='nothing under them; each thing in its own third of the cell, centred where it is in the attached image',
                         inks='the nut grey with a black hole, the glove grey with blue cuffs, the onigiri grey rice with black nori in a blue-and-grey wrapper'),
 })
+ELEMENTS.update({   # Space, round 4 (owner 2026-10-30: Д391 «A» the canteen counter in orbit too, Д393 «C» a ghost crab instead of the turtle). sp-shoporb's
+    # reference research/variants/ref-sp-shoporb.png (the picked counter, cell A of sp-shop, above; the orbit's hull ledges in the game below)
+    'sp-shoporb': dict(world='space', kind='prop', what="the game's shop in orbit: the same canteen counter under a short red awning as at the top of the attached "
+                       "image, rebuilt for the Kibo module in orbit (the hull ledges at the bottom of the attached image): its counter and stools the same shape, "
+                       "but made of the module's white-edged blue hull panels and grey racks, held by straps, a green handrail along it, food packs and drink "
+                       "pouches on it held by Velcro instead of cups; no lattice mast and no lamp on top; the red awning with a simple white coin on it (the "
+                       "shop's mark) over the counter as in the picked one. A as close to the picked one as it can be; B its awning a red cloth strapped flat to "
+                       "a frame; C its stools two foot loops on the ledge instead; D a drink pouch and a food tray floating tethered over it; E its back a "
+                       "rack of stowage lockers; F its counter a grey cargo case with its lid up",
+                       where='at the wall end of a hull ledge, standing on the ledge against the shaft wall, its opening facing the play',
+                       material='hull panels, racks, straps, Velcro, food packs, drink pouches', size='about 3 tiles wide and 3 tiles tall',
+                       inks='hull blue and grey, packs and pouches grey with black straps, small purple details, the red awning with a white coin; never yellow',
+                       scene=SP_ORB),
+    'sp-crabs': dict(world='space', kind='prop', what="a ghost crab (sunagani) come up from the beach of Tanegashima onto the launch tower's deck (it will run off "
+                     "sideways when the hero comes near), a different take in each cell: A a horned ghost crab, its square body low, its two black eyes high on "
+                     "stalks, one big claw; B the same crab up on the tips of its legs, alert; C a small one, a young crab, half the size; D two crabs side by "
+                     "side, one a little behind; E the crab with its claws raised; F a kawaii round crab with big eyes",
+                     where='on the top of a deck ledge of the launch tower', material='a hard shell, thin jointed legs',
+                     size='about 1 tile wide and 0.6 tiles tall (the young one half that)',
+                     inks='a sandy grey shell with a darker grey and a little orange on its legs and claws, black eyes; never red, never yellow, no white',
+                     scene='a blue steel deck ledge of the launch tower with a white top edge, as in the attached image'),
+})
+ELEMENTS.update({   # the ghost crab's run (Д393 «C», its still sp-crabs A as cut into the game: research/variants/ref-sp-crabrun.png, 4 x 4 image px a game px)
+    'sp-crabrun': dict(world='space', kind='frames', who='a horned ghost crab (sunagani), a sandy grey shell with orange legs and one big orange claw, its eyes on '
+                       'stalks, standing on the steel deck of a launch tower', motion='startled and running away sideways to the right, fast, as ghost crabs do',
+                       frames='A startled, up on the tips of its legs, its eye stalks raised, its claw up; B starting off sideways, its legs on the near side '
+                       'stretched out; C running, its near legs stretched and its far legs gathered; D running, all its legs under it; E running, its near legs '
+                       'gathered and its far legs stretched; F running, all its legs under it again (C, D, E, F loop as its run, its shell and claw the same in '
+                       'all four, only its legs move)', ground='nothing under it (no deck drawn)',
+                       inks='a sandy grey shell with darker grey, orange legs and claw, its eyes black on grey stalks; no white, no red, no yellow'),
+})
 ELEMENTS.update({   # Space's hazards in frames, as the other worlds' (Д376 «A» the launch flame, Д377 «BD» the tower's vent and the station's nozzle); their
     # references research/variants/ref-sp-vent-frames.png and ref-sp-nozzle-frames.png (the wall's rows as the game draws them: asleep, warning, bursting,
     # 4 x 4 image px a game px) and ref-sp-flame-frames.png (a crop of the flame's front in the game at 4 x 4)

@@ -1814,6 +1814,22 @@ ELEMENTS.update({
                         size='each about half a tile to two thirds of a tile across', inks='the nut grey, the glove grey with blue cuffs, the onigiri grey rice '
                         'with black nori in a blue-and-grey wrapper; never red, never yellow, no white (white is what you stand on)', scene=SP_ORB),
 })
+ELEMENTS.update({   # Space's fleeing things in frames (the picks Д387 «A», Д389 «A»); their references research/variants/ref-sp-birdfly.png and ref-sp-floatfly.png (the
+    # stills as cut into the game, 4 x 4 image px a game px)
+    'sp-birdfly': dict(world='space', kind='frames', who='a blue rock thrush (isohiyodori), a small songbird with a blue back and head and an orange-brown belly, '
+                       'standing on the steel deck of a launch tower', motion='taking off from the deck and flying away up and to the right',
+                       frames='A crouching ready to spring, wings closed; B springing off, wings half open, its legs still hanging; C flying, its wings fully up; D '
+                       'flying, its wings spread level; E flying, its wings fully down; F flying, its wings spread level again (C, D, E, F loop as its flap, its '
+                       'body the same in all four, its legs tucked)', ground='nothing under it (no deck drawn)',
+                       inks='a blue back, head and wings with darker blue feathers, an orange-brown belly, a grey beak and legs, a black eye'),
+    'sp-floatfly': dict(world='space', kind='frames', who='three small lost things floating weightless inside a space station, side by side in the same order: a steel '
+                        'nut, an astronaut\'s glove and an onigiri in its wrapper', motion='nudged and drifting away, tumbling slowly over and over as they go',
+                        frames='A all three floating still, upright as in the attached image; B just nudged, each tilted a little (an eighth of a turn); C each turned '
+                        'a quarter turn from A; D each turned half a turn (upside down); E each turned three quarters of a turn; F each turned almost a full turn, '
+                        'nearly upright again (C, D, E, F loop as the tumble, each thing the same size and the same shape in every frame, only turned)',
+                        ground='nothing under them; each thing in its own third of the cell, centred where it is in the attached image',
+                        inks='the nut grey with a black hole, the glove grey with blue cuffs, the onigiri grey rice with black nori in a blue-and-grey wrapper'),
+})
 ELEMENTS.update({   # Space's hazards in frames, as the other worlds' (Д376 «A» the launch flame, Д377 «BD» the tower's vent and the station's nozzle); their
     # references research/variants/ref-sp-vent-frames.png and ref-sp-nozzle-frames.png (the wall's rows as the game draws them: asleep, warning, bursting,
     # 4 x 4 image px a game px) and ref-sp-flame-frames.png (a crop of the flame's front in the game at 4 x 4)

@@ -251,6 +251,7 @@ function loadSave(s) {
   // (so `save` has no `owned` of its own: given one, a save from before would come in with it empty and its colour back to the first)
   if (!PALETTE.some((c) => c.id === save.color) || !UNLOCKS.some((u) => u.id === save.color && opened(u))) save.color = PALETTE[0].id;   // a colour that is gone, or not bought
 }
+let keysUsed = false;   // a key pressed this visit: the panels' focus from then on (ui.panel)
 let firstGo = false, dailyTold = false;   // this visit the player's first, no star yet at boot (boot), and its Win screen told of the daily (ui.win; owner, Г8 «А»)
 let saveIn = false, cloud = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
 // cloud: this visit writes the Bridge's storage too, decided once at boot: a Bridge up late, or a storage that did not answer,
@@ -3480,8 +3481,9 @@ const ui = {
     this.open = id; this.openT = performance.now(); $('toast').classList.remove('show'); clearTimeout(this.toastTimer);   // (a toast of the screen before: gone)
     $('hud').inert = $('pad').inert = true;   // the keys and the HUD under its veil out of Tab's way (a first Tab on the Win went to the pause key under it)
     requestAnimationFrame(() => { if (this.open !== id) return; for (const e of p.querySelectorAll('.head, .wl')) if (e.offsetParent) fitOne(e);   // its heads and lines on one line (fitOne)
-      if (coarse) return; const m = p.querySelector('.big.thumb:not(.alt)') || p.querySelector('.big') || p.querySelector('button'); if (m) m.focus({ preventScroll: true }); });   // a
-    // computer's focus on its main button, Enter and Space press it (the UX tests, 2026-10-30: it stayed on the page, Safari's Tab never reached a button)
+      if (coarse || !keysUsed) return; const m = p.querySelector('.big.thumb:not(.alt)') || p.querySelector('.big') || p.querySelector('button'); if (m) m.focus({ preventScroll: true }); });   // a
+    // computer's focus on its main button, Enter and Space press it (the UX tests, 2026-10-30: it stayed on the page, Safari's Tab never reached a button), once a
+    // key has been pressed: before that, a ring on Play over a page no one has touched yet
     return p; },
   hideAll() { for (const id of ['menu', 'settings', 'cards', 'pause', 'result', 'map', 'story', 'album']) $(id).classList.remove('on'); this.open = null; menuTop(false); $('hud').inert = $('pad').inert = false; if (this.live) { this.live.stop(); this.live = null; } },   // (a story card's motion stops with it)
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
@@ -4081,6 +4083,7 @@ const input = {
 };
 const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', Space: 'jump', ArrowUp: 'jump', KeyW: 'jump', KeyA: 'left', KeyD: 'right', KeyS: 'down' };   // (↑ and WASD too: the UX tests, 2026-10-30)
 document.addEventListener('keydown', (e) => {
+  keysUsed = true;
   if ((e.code === 'Escape' || e.code === 'KeyP') && !e.repeat && (game.state === 'play' || (game.state === 'pause' && ui.open === 'pause'))) { e.preventDefault(); game.togglePause(game.state === 'play'); return; }   // a computer's pause (QA: only its button)
   if (e.code === 'Escape' && !e.repeat && ui.open && ui.open !== 'pause') {   // Esc a screen's way back: its cross, Back or Menu (the UX tests: only the pause and Feed took it)
     const p = $(ui.open), b = p.querySelector('.aclose') || [...p.querySelectorAll('button')].find((x) => x.offsetParent && (x.textContent.startsWith(t('goBack')) || x.textContent.startsWith(t('menu'))));

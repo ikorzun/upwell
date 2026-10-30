@@ -73,7 +73,8 @@
   /* A heading's or a button's words in the other script, small under it: Japanese, or English in the Japanese game */
   .cap { display: block; margin-top: 4px; padding-left: 0.2em; font-family: 'DotGothic16', sans-serif; font-size: max(12px, calc(var(--p) * 4px)); line-height: 1; letter-spacing: 0.2em; }
   .cap:lang(en) { font-family: 'VT323', monospace; font-size: max(14px, calc(var(--p) * 5px)); letter-spacing: 0.1em; padding-left: 0.1em; }
-  .cap:lang(ja), :lang(ja) .px, .head:lang(ja) { word-break: keep-all; }   /* Japanese broken at its spaces only, never mid-word («いいえ、お / わる»: the UX tests, 2026-10-30) */
+  .cap:lang(ja), :lang(ja) .px, .head:lang(ja) { word-break: keep-all; }
+  .drow > .big > .cap { white-space: nowrap; letter-spacing: 0.04em; }   /* the loss screen's pair 137 px each at 320: its other script on one line («こうこくを / みる»), still 12 px */   /* Japanese broken at its spaces only, never mid-word («いいえ、お / わる»: the UX tests, 2026-10-30) */
   .head .cap { color: var(--purple); }
   .head > .cap { white-space: normal; }   /* (a head kept on one line by fitOne: its other script's line still wraps, as before) */
   .chip .cap { margin-top: 0; }

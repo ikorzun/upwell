@@ -3939,6 +3939,9 @@ const WAVES = {
 };
 const wavesOf = (th, small) => { const k = !th ? null : th.village ? 'village' : th.fuji ? 'fuji' : th.sea ? 'sea' : th.town ? 'town' : null; return k ? WAVES[k][small ? 'ambush' : 'arena'] : null; };
 const ICICLE = { reach: 1.1, below: 9, shake: 0.55, r: 0.28 };   // R either side and under it that set it off; s it shakes first; R round as it falls
+// (one over where the hero appears, a level's start, a fall's ledge, a door, Continue, lets him be till he has stepped out from under it: owner, 2026-10-30,
+// «на одном из уровней деревни герой появляется прямо под сосулькой и получает сразу урон»: 1-5 started him under one, and six of its ledges a fall
+// brings him back to had one over them; Game.appearT)
 // Fuji's bells in a cave (caveBells; '4' '5' '6' under a ledge: 一 二 三, big to small): each hangs on a `rope` (tiles) from the ledge's underside, `w` half wide
 // and `h` tall (tiles) by its number; the hero bumping into one rings it, its pitch `rate` (the chime's). Rung in their order (一 二 三) the room's ice gate ('G')
 // melts; a wrong one and all three fall quiet, to start again (owner З2 «А»: a mistake costs nothing). None rings the room's first `calm` s (the throw in)

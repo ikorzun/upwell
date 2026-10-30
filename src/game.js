@@ -1076,12 +1076,12 @@ class Game {
     const bs = this.lv.boss, x = bs && bs.def && (bs.def.glide || bs.def.quake || bs.def.street || bs.def.bone) ? this.lv.l + 2 * this.R : view.w / 2, y = this.lv.floor - 1.1 * this.R;   // the Puck's arena: by the far wall from it
     this.hero = loosenBody(new Body(designById('round'), colorById(save.color), x, y, this.R, 0.6));   // (its fields' kinds settled: see loosen)
     this.hero.isHero = true; this.hero.dropT = 0; this.hero.dropRect = null; this.hero.gScale = this.heroG();   // (dropT, dropRect: a plank it is let through, DROP)
-    this.startY = this.hero.cy;
+    this.startY = this.hero.cy; this.appearT = this.lv.t;
   }
   placeHero(x, y) {
     const b = this.hero;
     b.translate(x - b.cx, y - b.cy);
-    b.vx.fill(0); b.vy.fill(0); unstick(b, 0.2); b.ceilT = 0; b.peelT = 0;
+    b.vx.fill(0); b.vy.fill(0); unstick(b, 0.2); b.ceilT = 0; b.peelT = 0; this.appearT = this.lv.t;   // (appearT: an icicle over where he appears lets him be, ICICLE)
   }
   // The menu's scene (owner, 2026-10-23, the Figma «Main»): no level behind it, its backdrop (Renderer.drawMenu) and the hero alone, big, over
   // the colours, to drag and press as in Gum (menuTouch); ui.menu sizes and places it (menuFit). Play or Continue builds the level as ever.
@@ -1787,7 +1787,9 @@ class Game {
     }
     for (let i = lv.icicles.length - 1; i >= 0; i--) {
       const c = lv.icicles[i];
-      if (c.state === 'hang' && Math.abs(H.cx - c.x) < ICICLE.reach * R && H.minY > c.y && H.minY - c.y < ICICLE.below * R) { c.state = 'shake'; c.t = ICICLE.shake; sound.play('crumble', 0.4, 1.6); }
+      const under = c.state === 'hang' && Math.abs(H.cx - c.x) < ICICLE.reach * R && H.minY > c.y && H.minY - c.y < ICICLE.below * R;
+      if (c.state === 'hang' && !under) c.clear = lv.t;   // (the hero out from under it: from now on it falls when he comes under it; one appearing under it, it lets be till then)
+      if (under && c.clear >= (this.appearT || 0)) { c.state = 'shake'; c.t = ICICLE.shake; sound.play('crumble', 0.4, 1.6); }
       else if (c.state === 'shake' && (c.t -= dt) <= 0) { lv.icicles.splice(i, 1); const tip = icicleTip(lv.theme); lv.shots.push({ x: c.x, y: c.y + (tip ? tip - ICICLE.r * R : 0.3 * R), vx: 0, vy: 0, r: ICICLE.r * R, icicle: true }); }   // (from its drawn tip: Worlds' icicleTip)
     }
     for (const a of lv.arenas) {

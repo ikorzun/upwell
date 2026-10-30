@@ -202,6 +202,10 @@ function mochiAt(kn, t) {   // a pestle's head at the level's time t (MOCHI): th
   return { y: kn.yHit, down: true, shake: 0 };
 }
 const CANDY = { smash: SMASH, rainbow: RAINBOW, grow: GROW, swarm: SWARM, astro: ASTRO, bubble: BUBBLE };
+// The candies whose first taking holds the game under a card of their own (owner, 2026-10-30: «когда первый раз моти берет звездочку радуги, то нужно
+// показывать перекрывающий попап со звездочкой на котором показывать саму звезду и писать под ней как она работает и длительность и кнопку GO. Тоже самое с
+// расслоением моти»): its picture big, what it does, for how long, GO (ui.candy; seen once a save, save.seen['candy_' + kind]); the rest a toast as ever
+const CANDY_INTRO = ['rainbow', 'swarm'];
 // Folk along the way (user's picks): a blob in a cage on a ledge (`cageP` of levels, at `cage` of the height) that a touch
 // sets free — it pays `coins`, or a heart, by turns; a trader on a ledge (`traderP`, at `trader`) with one thing for sale;
 // now and then (`critterP` a chunk) a bat under a block or a bug on a ledge that keep `flee` R clear of the hero, harmless; in Tokyo a crow

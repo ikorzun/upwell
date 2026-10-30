@@ -506,6 +506,8 @@
   .wl, .wl > span { display: flex; align-items: center; gap: 8px; }
   .wl { min-height: 30px; }   /* (the mockup's Inter line, 30 tall) */
   .wl .ico { --p: 2; }
+  .wbox > .ico.x8 { --p: 8; }   /* a candy's first time (ui.candy): its level picture, 8 CSS px a pixel */
+  .wbox > .wlines.candyw { --p: 2.08; }   /* (its words a size down: a clause a line in 288 px) */
   .wl.not, .wl .not { color: var(--gray); }   /* not done: grey */
   .wl.pay { color: var(--yellow); }
   .wl.new .ico { animation: starIn 0.4s steps(5) 1.5s both, starTwinkle 1.4s steps(2) 2s infinite; }   /* a medal won now: in after the stars */

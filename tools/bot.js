@@ -313,6 +313,7 @@ function mute() {
   return () => { Object.assign(ui, saved.ui); haptics.buzz = saved.buzz; shake.add = saved.shake; fx.add = saved.fx; sound.play = saved.sound; Math.random = saved.random; };
 }
 if (typeof STORY === 'object') for (const k in STORY) save.seen['card_' + k] = 1;   // the story cards met already: none holds the bot's play (they are for all since К10)
+if (typeof CANDY_INTRO === 'object') for (const k of CANDY_INTRO) save.seen['candy_' + k] = 1;   // nor a candy's first card (ui.candy)
 window.__bot = { level, start, advance, PLANS };
 })();
 // Load:  const s = document.createElement('script'); s.src = 'tools/bot.js?' + Date.now(); document.body.append(s);

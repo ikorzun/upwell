@@ -3621,7 +3621,11 @@ const ui = {
   // pill at the bottom doing `next`
   win(next) {
     const p = this.panel('cards'), box = el('div', 'wbox'), lines = el('div', 'wlines'), st = game.stars, md = game.medals; p.classList.add('win');
+    clearTimeout(this.toastTimer); $('toast').classList.remove('show');   // (a toast still up from the climb, a task's or a hint's, on the stars' band: gone, the stars whole)
     const line = (cls, ...kids) => { const e = el('div', 'wl' + (cls ? ' ' + cls : '')); e.append(...kids); lines.append(e); return e; };
+    const cuts = [];   // what goes first where the screen is too short for all of it and the stars' landing (winFit; owner, again 2026-10-31: «звезды все так же срезаются в
+    // анимации»: a first session's first Win, its daily's two lines and the Book's over the rest, ran the stars 42 px off the top of an 836×470 window): the daily's
+    // «tomorrow», the Book's new, Fuji's station, the daily's line, the medals, the week's mark; the tasks and the coins stay
     const where = el('div', 'wlines'), wl = el('div', 'wl'); wl.append(px(L2(game.wd.name) + ' · ' + game.num)); where.append(wl); box.append(where);   // the world and the
     // level over the stars, as its lines are (owner, 2026-10-28: «добавь сверху звезд название мира и уровня, текстом такого же стиля, как рядом с монетами»)
     if (st) {
@@ -3641,18 +3645,20 @@ const ui = {
     if (st) line('', iconEl('coin'), px(tf('starLine', { c: st.coins.join('/') })));
     if (md) for (const [bit, on, off, text] of [[1, 'clock', 'clockOff', tf('medalTime', { p: md.par }) + (md.got & 1 ? '' : ' · ' + Math.ceil(md.t))], [2, 'heart', 'heartOff', t('medalClean')]]) {
       const won = (md.got | md.had) & bit, fresh = md.got & bit && !(md.had & bit);
-      line(won ? (fresh ? 'new' : '') : 'not', iconEl(won ? on : off), px(text));
+      cuts.push([3 + bit / 4, line(won ? (fresh ? 'new' : '') : 'not', iconEl(won ? on : off), px(text))]);
       if (fresh) setTimeout(() => sound.play('chime', 0.9, bit === 1 ? 1.5 : 1.7), 1500 + 200 * bit);
     }
-    const m = game.markSay; if (m) { game.markSay = null; line(m.pay ? 'pay' : '', px(m.text)); }   // the week's mark (Game.markDay), once
-    const nb = bookN() - (game.bookAt || 0); if (nb > 0) line('new', px(tf('bookNew', { n: nb })));   // what this level put in the Book (owner, А1 «А», after the market audit)
-    if (firstGo && !dailyTold) { dailyTold = true; line('', iconEl('medalG'), px(t('dailyWin'))); line('', px(t('dailyNext'))); }   // a first visit's first Win: the daily well and where it is (owner, Г8 «А»,
+    const m = game.markSay; if (m) { game.markSay = null; cuts.push([4, line(m.pay ? 'pay' : '', px(m.text))]); }   // the week's mark (Game.markDay), once
+    const nb = bookN() - (game.bookAt || 0); if (nb > 0) cuts.push([1, line('new', px(tf('bookNew', { n: nb })))]);   // what this level put in the Book (owner, А1 «А», after the market audit)
+    let daily = null;
+    if (firstGo && !dailyTold) { dailyTold = true; daily = line('', iconEl('medalG'), px(t('dailyWin'))); cuts.push([2, daily], [0, line('', px(t('dailyNext')))]); }   // a first visit's first Win: the daily well and where it is (owner, Г8 «А»,
     // 2026-10-30, on the gameplay review: 4 players in three days tried it; Tokyo's for all still, one table)
     if (lines.children.length) box.append(lines);
-    this.stationLine(box);
+    this.stationLine(box); const sl = box.querySelector('.station'); if (sl) cuts.push([1.5, sl]);
     p.append(box, cap(button(t('menu'), 'big thumb alt', () => game.toMenu()), 'menu'), cap(button(t('next'), 'big thumb', next), 'next'));   // Menu over Next (У8 «А»; a card owed:
     // offered before the next level, save.camp.owe)
-    this.winFit(p, box);   // (a short screen, or many lines: its tasks, the medals, the week's mark)
+    this.winFit(p, box, cuts.sort((a, b) => a[0] - b[0]));   // (a short screen, or many lines: its tasks, the medals, the week's mark)
+    if (daily && !daily.isConnected) dailyTold = false;   // (its daily's lines cut: told at a later Win)
   },
   starHit(w, s, box, k, last) {   // a star landing on the Win screen (owner, 2026-10-28: «добавь при появлении звезды больше эффектов, можно использовать такой же crt
     // эффект как при уроне»): the CRT's moment over the game (fx.js KICK.star: a gold flash, the split, a tear), the star itself split red and blue and bright as a

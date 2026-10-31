@@ -6842,11 +6842,11 @@ Renderer.prototype.draw = function (g, alpha) {
     }
   };
   function lastRow(rows) { let j = rows.length - 1; while (j >= 0 && !/[^.]/.test(rows[j])) j--; return j; }   // (a part's lowest drawn row: its foot over it)
-  function fleeDraw(r, Fr, cx, foot, bird, free) {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
+  function fleeDraw(r, Fr, cx, foot, bird, free, hw) {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
     // живность убегать»): sitting (false: its caller draws it) till the hero comes near, then its sheet's frames (Worlds': A crouched or startled, B off, C–F the
     // loop; each frame one width, its head on one column) along its way, facing it (the sheets face right); gone till its ledge has been out of view (FLEE_GO)
     if (!Fr) return false; const T = lv.t, H = g.hero, t = kitT, q = PIX.base, W = Fr[0].rows[0].length, drift = bird === 'drift';   // (bird: true, false, or 'drift',
-    // a thing lost in orbit drifting off)
+    // a thing lost in orbit drifting off: then `free` the way its still faces, `hw` the still's half width, its frames' box wider for their turns, Worlds b793837)
     let s = r.flee; if (s && s.gone && T - (r.fleeSeen ?? T) > FLEE_GO.back) s = r.flee = null; r.fleeSeen = T;
     if (!s) {
       const m = FLEE_GO.reach * t, x0 = cx - (W * q) / 2, x1 = cx + (W * q) / 2, y0 = foot - Fr[0].rows.length * q;
@@ -6868,11 +6868,13 @@ Renderer.prototype.draw = function (g, alpha) {
       dx = rm > 0 ? rm * (1 - Math.exp(-raw / rm)) : 0; up = (FLEE_GO.fly[2] * u + FLEE_GO.fly[3] * u * u) * t;
     }
     else { dx = FLEE_GO.run * u * t; const end = (s.dir > 0 ? r.x1 - cx : cx - r.x0) + (W * q) / 2; if (dx > end) { const fu = (dx - end) / (FLEE_GO.run * t); up = -0.5 * FLEE_GO.fall * t * fu * fu; } }
-    const half = (W * q) / 2, x = Math.max(lv.l + half, Math.min(lv.r - half, cx + s.dir * dx));
+    const half = (W * q) / 2, keep = drift && hw != null ? hw : half, x = Math.max(lv.l + keep, Math.min(lv.r - keep, cx + s.dir * dx));   // (a drifter kept off the walls by
+    // its still's width: by its frames' wider box it moved in a pixel or four as it set off)
     if (!bird && Math.abs(H.cy - (foot - H.R)) < 2 * H.R) up += Math.max(0, 1 - ((x - H.cx) / (half + 1.2 * H.R)) ** 2) * 1.6 * H.R;   // (its way past the hero on its ledge: a leap over him)
     const top = k < 2 || !bird || drift ? foot - up - Fk.rows.length * q : foot - up - (Fr[1].rows.length - hr(Fr[1])) * q - hr(Fk) * q;
     if (drift ? e > FLEE_GO.drift[5] : e > FLEE_GO.life || (bird ? foot - up < lv.cam - 2 * t : top > lv.cam + view.h + t)) { s.gone = true; return true; }
-    vsp(Fk.rows, snap(x - half), snap(top), s.dir < 0, drift ? Math.min(1, (FLEE_GO.drift[5] - e) / FLEE_GO.drift[6]) : 1, q, true);   // (a drifter fades as it goes)
+    vsp(Fk.rows, snap(x - half), snap(top), drift ? free < 0 : s.dir < 0, drift ? Math.min(1, (FLEE_GO.drift[5] - e) / FLEE_GO.drift[6]) : 1, q, true);   // (a drifter fades as it goes, facing
+    // as its still hangs whichever way it goes: the glove is no mirror of itself)
     return true;
   };
   function swayAt(r, kind, S, wx, b, d, ox = S.dx) {   // (declarations, not consts: hoisted, as kits drawn above them call them; a const here was a TDZ in Tokyo's frame)   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
@@ -7548,7 +7550,7 @@ Renderer.prototype.draw = function (g, alpha) {
       if (S.float) {   // (a lost thing: weightless, it bobs slowly; on a slot's half wherever there is room, not only a third); near, it drifts off tumbling (FLEE_GO.drift,
         // Worlds' frames <kind>Fly)
         const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + S.dx * q : snap(wx) - (S.dx + n) * q, y = r.y0 - Math.round(1.5 * Math.sin(T * 1.1 + r.y0 * 0.37)) * PIX.base;
-        if (!fleeDraw(r, SP[p.kind + 'Fly'], x0 + (n * q) / 2, snap(y), 'drift', 0)) iwAt(S, wx, y, d, 1, S.dx);
+        if (!fleeDraw(r, SP[p.kind + 'Fly'], x0 + (n * q) / 2, snap(y), 'drift', d, (n * q) / 2)) iwAt(S, wx, y, d, 1, S.dx);
         continue;
       }
       iwAt(S, wx, r.y0, d, 1, Math.min(S.dx, 4));

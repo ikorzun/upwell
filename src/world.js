@@ -122,10 +122,12 @@ const STOMP = { bounce: 0.7, keepVx: 0.45, hitstop: 0.045, blast: 3.4, rel: -350
 const overFoe = (H, b) => H.maxY < b.cy + (STOMP.zone - 1) * b.R;
 const stompable = (H, b, rel) => { const dx = Math.abs(b.cx - H.cx), S = H.R + b.R; return (overFoe(H, b) && rel > STOMP.rel) || (b.cy > H.cy && rel > 60 && dx < 0.95 * STOMP.zone * S); };
 // Candies, found once or twice a level (at `at` of its height, from..to), each kind for its own `time` s (+`plus` a Long charge).
-const FLEE_GO = { reach: 2.2, bird: [0.12, 0.1, 10], small: [0.2, 0.12, 11], fly: [2.5, 7, 1.5, 6], run: 7, fall: 30, life: 3.5, back: 0.6 };   // an animal that
+const FLEE_GO = { reach: 2.2, bird: [0.12, 0.1, 10], small: [0.2, 0.12, 11], drift: [0, 0.12, 8, 1.5, 0.5, 3.2, 0.6], fly: [2.5, 7, 1.5, 6], run: 7, fall: 30, life: 3.5, back: 0.6 };   // an animal that
 // flees the hero (fleeDraw): within `reach` tiles it goes; a bird crouches bird[0] s, springs bird[1] s, then flaps at bird[2] a second while it flies up and
 // away (fly: tiles out a + b·u², up c + d·u²); a small one is startled small[0] s, leaps small[1] s, then runs run tiles/s along its ledge to its free end and
-// off it, falling at `fall` tiles/s²; gone off screen or after `life` s, back once its ledge has been out of view `back` s
+// off it, falling at `fall` tiles/s²; gone off screen or after `life` s, back once its ledge has been out of view `back` s. A thing lost in orbit (Space's nut,
+// glove, onigiri: Worlds' frames, A as it hangs) drifts: nudged drift[1] s, then tumbles at drift[2] a second, away at drift[3] tiles/s and up drift[4], easing off
+// by a wall as a bird does, fading its last drift[6] s of drift[5]: weightless, no fall
 const SWAY = ['baskets', 'rods', 'bags'];   // the light things off sheets at a wall end that sway when the hero passes (swayAt, POKE.kinds)
 const CLOUD_FROM = 5;   // the TV Tower's clouds (free planks that give way) only from its sixth level up: no cloud round its foot (Worlds, handover 27)
 const DOOR_GAP = 30;   // tiles between a level's shop door and its stash door at least: a tall phone's screen (28.7 tiles) and the draw margin
@@ -6843,7 +6845,8 @@ Renderer.prototype.draw = function (g, alpha) {
   function fleeDraw(r, Fr, cx, foot, bird, free) {   // an animal that flees the hero (owner, 2026-10-25, via Worlds: «Такого размера птица должна улетать, а мелкая
     // живность убегать»): sitting (false: its caller draws it) till the hero comes near, then its sheet's frames (Worlds': A crouched or startled, B off, C–F the
     // loop; each frame one width, its head on one column) along its way, facing it (the sheets face right); gone till its ledge has been out of view (FLEE_GO)
-    if (!Fr) return false; const T = lv.t, H = g.hero, t = kitT, q = PIX.base, W = Fr[0].rows[0].length;
+    if (!Fr) return false; const T = lv.t, H = g.hero, t = kitT, q = PIX.base, W = Fr[0].rows[0].length, drift = bird === 'drift';   // (bird: true, false, or 'drift',
+    // a thing lost in orbit drifting off)
     let s = r.flee; if (s && s.gone && T - (r.fleeSeen ?? T) > FLEE_GO.back) s = r.flee = null; r.fleeSeen = T;
     if (!s) {
       const m = FLEE_GO.reach * t, x0 = cx - (W * q) / 2, x1 = cx + (W * q) / 2, y0 = foot - Fr[0].rows.length * q;
@@ -6851,22 +6854,25 @@ Renderer.prototype.draw = function (g, alpha) {
       let dir = bird || !free ? (H.cx < cx ? 1 : -1) : free;
       if (bird && (dir > 0 ? lv.r - cx : cx - lv.l) < 4 * t) dir = -dir;   // (a bird off to the open side of the shaft, not at a wall: Game.awayDir)
       s = r.flee = { t: T, dir, gone: false };
-      if (typeof sound !== 'undefined') sound.play('airjump', bird ? 0.25 : 0.15, bird ? 1.9 : 2.4);
+      if (typeof sound !== 'undefined') sound.play('airjump', drift ? 0.12 : bird ? 0.25 : 0.15, drift ? 2.6 : bird ? 1.9 : 2.4);
     }
     if (s.gone) return true;
-    const [ta, tb, fps] = bird ? FLEE_GO.bird : FLEE_GO.small, e = T - s.t, u = Math.max(0, e - ta), k = e < ta ? 0 : e < ta + tb ? 1 : 2 + (Math.floor((e - ta - tb) * fps) % 4), Fk = Fr[k];
+    const [ta, tb, fps] = drift ? FLEE_GO.drift : bird ? FLEE_GO.bird : FLEE_GO.small, e = T - s.t, u = Math.max(0, e - ta), k = e < ta ? 0 : e < ta + tb ? 1 : 2 + (Math.floor((e - ta - tb) * fps) % 4), Fk = Fr[k];
     const hr = (f) => f.hr ?? (f.hr = Math.max(0, f.rows.findIndex((row) => row[Math.min(row.length - 1, f.ax)] !== '.')));   // (its head's row: a bird's flight held by its head)
     let dx = 0, up = 0;
-    if (bird) {   // out toward the room it has, easing off as it nears the wall (it banks up, never into the wall: owner, «птицы улетают в стену…»)
+    if (drift) {   // weightless: off at its pace, easing off by the wall it heads for, rising a little (FLEE_GO.drift)
+      const D = FLEE_GO.drift, raw = D[3] * u * t, rm = Math.max(0, (s.dir > 0 ? lv.r - cx : cx - lv.l) - (W * q) / 2 - 0.6 * t);
+      dx = rm > 0 ? rm * (1 - Math.exp(-raw / rm)) : 0; up = D[4] * u * t;
+    } else if (bird) {   // out toward the room it has, easing off as it nears the wall (it banks up, never into the wall: owner, «птицы улетают в стену…»)
       const raw = (FLEE_GO.fly[0] * u + FLEE_GO.fly[1] * u * u) * t, rm = Math.max(0, (s.dir > 0 ? lv.r - cx : cx - lv.l) - (W * q) / 2 - 0.6 * t);
       dx = rm > 0 ? rm * (1 - Math.exp(-raw / rm)) : 0; up = (FLEE_GO.fly[2] * u + FLEE_GO.fly[3] * u * u) * t;
     }
     else { dx = FLEE_GO.run * u * t; const end = (s.dir > 0 ? r.x1 - cx : cx - r.x0) + (W * q) / 2; if (dx > end) { const fu = (dx - end) / (FLEE_GO.run * t); up = -0.5 * FLEE_GO.fall * t * fu * fu; } }
     const half = (W * q) / 2, x = Math.max(lv.l + half, Math.min(lv.r - half, cx + s.dir * dx));
     if (!bird && Math.abs(H.cy - (foot - H.R)) < 2 * H.R) up += Math.max(0, 1 - ((x - H.cx) / (half + 1.2 * H.R)) ** 2) * 1.6 * H.R;   // (its way past the hero on its ledge: a leap over him)
-    const top = k < 2 || !bird ? foot - up - Fk.rows.length * q : foot - up - (Fr[1].rows.length - hr(Fr[1])) * q - hr(Fk) * q;
-    if (e > FLEE_GO.life || (bird ? foot - up < lv.cam - 2 * t : top > lv.cam + view.h + t)) { s.gone = true; return true; }
-    vsp(Fk.rows, snap(x - half), snap(top), s.dir < 0, 1, q, true);
+    const top = k < 2 || !bird || drift ? foot - up - Fk.rows.length * q : foot - up - (Fr[1].rows.length - hr(Fr[1])) * q - hr(Fk) * q;
+    if (drift ? e > FLEE_GO.drift[5] : e > FLEE_GO.life || (bird ? foot - up < lv.cam - 2 * t : top > lv.cam + view.h + t)) { s.gone = true; return true; }
+    vsp(Fk.rows, snap(x - half), snap(top), s.dir < 0, drift ? Math.min(1, (FLEE_GO.drift[5] - e) / FLEE_GO.drift[6]) : 1, q, true);   // (a drifter fades as it goes)
     return true;
   };
   function swayAt(r, kind, S, wx, b, d, ox = S.dx) {   // (declarations, not consts: hoisted, as kits drawn above them call them; a const here was a TDZ in Tokyo's frame)   // a light thing off a sheet at a ledge's wall end (SWAY: baskets, rods, rubbish bags): poked, its sway (cinePoke), else null
@@ -7539,7 +7545,12 @@ Renderer.prototype.draw = function (g, alpha) {
         if (!fleeDraw(r, SP.crabRun, x0 + (n * q) / 2, snap(r.y0), false, d)) { const nb = notice(g, lv, r, x0, snap(r.y0) - S.base * q, x0 + n * q, r.y0); vsp(S.rows, x0, snap(r.y0 - S.base * q - nb.dy), nb.face === null ? d < 0 : nb.face, 1, PIX.base, true); }
         continue;
       }
-      if (S.float) { iwAt(S, wx, r.y0 - Math.round(1.5 * Math.sin(T * 1.1 + r.y0 * 0.37)) * PIX.base, d, 1, S.dx); continue; }   // (a lost thing: weightless, it bobs slowly; on a slot's half wherever there is room, not only a third)
+      if (S.float) {   // (a lost thing: weightless, it bobs slowly; on a slot's half wherever there is room, not only a third); near, it drifts off tumbling (FLEE_GO.drift,
+        // Worlds' frames <kind>Fly)
+        const q = PIX.base, n = S.rows[0].length, x0 = d > 0 ? snap(wx) + S.dx * q : snap(wx) - (S.dx + n) * q, y = r.y0 - Math.round(1.5 * Math.sin(T * 1.1 + r.y0 * 0.37)) * PIX.base;
+        if (!fleeDraw(r, SP[p.kind + 'Fly'], x0 + (n * q) / 2, snap(y), 'drift', 0)) iwAt(S, wx, y, d, 1, S.dx);
+        continue;
+      }
       iwAt(S, wx, r.y0, d, 1, Math.min(S.dx, 4));
     }
   }

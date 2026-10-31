@@ -125,6 +125,8 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
 // The wide plan's P0 (owner, Шаг1 «А»): ?wide plays the Village's tiers in a computer's window held wide as wide levels (WIDE: two lanes and a spine), its lesson,
 // its bonus race and its boss as before; every other screen a column as before (wideTo)
+const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera to try by hand (the plan's question К: ?anchor=0.7, Mochi
+// lower, more rows over him), its own CAM.anchor (layoutWide); every other screen the game's
 const WIDE_ON = /[?&]wide\b/.test(location.search), wideFor = (w, rc) => WIDE_ON && !coarse && CAMPAIGN[w].world.id === 'mine' && !rc.boss && rc.bonus == null && !rc.script;
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
@@ -4460,7 +4462,7 @@ function layout() {
   PIX.size = P / k;   // (the drawing's grid in the laid-out column's px)
   PIX.base = Math.max(1, Math.round(PIX.base / PIX.size - 1e-6)) * PIX.size;   // a picture's dot whole game pixels at this scale too (owner, 2026-10-28:
   // «важно, чтобы при уменьшении экрана пиксели не мылились»: at 0.96 its dot was 1.92 of them, one and two by turns)
-  view.w = W / k; view.h = H / k; view.left = left; view.k = view.s = k; view.wide = false; view.hudB = 0; uiEl.classList.remove('wide');   // (the HUD measured again: see ui.frame)
+  view.w = W / k; view.h = H / k; view.left = left; view.k = view.s = k; view.wide = false; view.hudB = 0; uiEl.classList.remove('wide'); CAM.anchor = CAM_ANCHOR;   // (the HUD measured again: see ui.frame)
   view.fh = view.h;   // the fire's measure of a screen (its start, its lag, how far a burn or a way back puts it under the hero): this screen; a computer's wide
   // level's, its phone's rows (the wide plan's P0: in 20 rows the fire would chase twice as near)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
@@ -4489,7 +4491,7 @@ function layout() {
 function layoutWide(vw, vh) {
   const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(W / (WIDE.cols + 1) / P + 1e-6)) * P, s = T / WIDE.tile;
   PIX.size = P / s; PIX.base = Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;
-  view.w = W / s; view.h = H / s; view.left = 0; view.k = 1; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile;
+  view.w = W / s; view.h = H / s; view.left = 0; view.k = 1; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile; CAM.anchor = WIDE_ANCHOR || CAM_ANCHOR;
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = '0px'; }
   uiEl.style.transform = ''; uiEl.classList.add('wide'); uiEl.style.setProperty('--colW', Math.round(Math.max(COL_MIN, H * 0.5625)) + 'px');
   document.documentElement.style.setProperty('--k', 1);

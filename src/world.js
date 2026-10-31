@@ -3475,6 +3475,99 @@ const CHUNKS = {
     '............',
     '............',
     '............'] },
+  // Space's bonus caves (after the Dark Forest's, one world at a time; owner, 2026-10-31: «делать и собирать»), in its stash room inside Kibo (SPACE_ROOM),
+  // of its own things: the handrails under its panels (Д368 «A»: '~', hung from and crept along), its robot arms (movers to and fro), an airlock's door
+  // and its button (SHUTTER) and a cracked hull panel (X). Route-tested on 393×852 and 375×667 on the launch tower and on orbit (from 8-4 a room too has
+  // ORBIT's light jumps: a jump 8.3 tiles, with the air jump 17.3, against 6.5 and 13.7), the way out the hole in the left wall, nothing to fall down
+  // within 3 tiles of it (research/caves-space)
+  caveRails: { d: 1, kind: 'cave', rows: [   // a gift: three panels in a zigzag, a handrail under each, coins hanging under it: up into the low one from the floor; up onto
+    '............',   // the catwalk on the right and up into the middle one's rail over it; up the shaft (5 wide, clear to the top: in 3 or 4 the soft body caught
+    '............',   // the rails' corners) onto the catwalk on the left and up into the high one's, its big coins hanging under it. Each rail 6 over the catwalk
+    '...###......',   // under it: from beside a panel a jump rose past its end onto its top
+    '...~~~......',
+    '...OOO......',
+    '............',
+    '............',
+    '.......o....',
+    '....O.....##',
+    '...===....~~',
+    '......o..ooo',
+    '............',
+    '.......o....',
+    '...###......',
+    '...~~~......',
+    '...ooo....==',
+    '.......o....',
+    '............',
+    '............',
+    '............',
+    '............'] },
+  caveArms: { d: 1, kind: 'cave', rows: [   // a gift: Kibo's robot arms (W), a ladder of four 4 tiles apart, by turns on the right and in the middle, coins over each; the big
+    '............',   // coins in a row over the top one's way, taken riding it (the magnet). Each arm's way 4 tiles and more from the left wall
+    '............',
+    '............',
+    '....OOOOO...',
+    '............',
+    '............',
+    '.....WW.....',
+    '............',
+    '.........o..',
+    '........o...',
+    '........WW..',
+    '............',
+    '......o.....',
+    '.....o......',
+    '.....WW.....',
+    '............',
+    '.........o..',
+    '........o...',
+    '........WW..',
+    '............',
+    '............'] },
+  caveAirlock: { d: 1, kind: 'cave', rows: [   // a puzzle: an airlock high on the right wall, its door (G) up for 5 s once its button (N) is pressed: the button on the floor under
+    '............',   // its sill; out from under it, a jump + air jump onto the sill (or up the catwalk and a jump) and in, about 3 s of the 5 on the tower and on
+    '............',   // orbit (with the button by the wall it took 4.5). The sill's top 11: a jump onto it comes down from over it, not onto its corner (a body
+    '............',   // landing over a block's end drapes on it, as at the Tower's lift). Floor and roof two thick: no coin in the magnet's reach from outside
+    '............',
+    '........####',
+    '........####',
+    '........GG..',
+    '........GGOO',
+    '........GGOO',
+    '........GGOO',
+    '......######',
+    '......######',
+    '............',
+    '............',
+    '............',
+    '...==.......',
+    '............',
+    '............',
+    '............',
+    '............',
+    '........N...'] },
+  caveHull: { d: 1, kind: 'cave', rows: [   // a puzzle: a hole in the outer hull. The big coins in the inner module high on the right, its floor's right side a cracked
+    '............',   // panel (X; to the wall: a tile short, Level.place's `pass` cut it back to a hole by the wall) over the gap between the hulls, shut all round but for the hole high in its outer wall, just under the handrail's panel: up the catwalk, up
+    '.......#####',   // into the rail, creep along it through the hole (or a jump into it), down into the gap, and a jump knocks the panel out and carries him in.
+    '.......#####',   // The gap 4 tall (from its floor a jump's feet rise 6.5, over the inner floor's top); the coins 3.5 tiles and more from the gap and the roof
+    '.......#....',
+    '.......#....',
+    '.......#..O.',
+    '.......#.OOO',
+    '.......#.OOO',
+    '.......#....',
+    '...######XXX',
+    '...~~~~.....',
+    '............',
+    '............',
+    '.......#....',
+    '.......#####',
+    '.......#####',
+    '....==......',
+    '............',
+    '............',
+    '............',
+    '............'] },
   umeVend: { d: 1, rows: [   // Ume (UME, u) by a vending machine on a ledge at a wall (the machine its kit's, forced there), a ledge over at the other
     '............',   // side the way on, coins under; no enemy in the chunk
     '............',
@@ -4012,9 +4105,11 @@ const AMBUSH = { waves: [2], coins: 2 };
 const CAVES = { mine: { gift: ['caveMill', 'caveBridges'], puzzle: ['cavePestle', 'caveIn'] }, cave: { gift: ['caveLift', 'caveMoss'], puzzle: ['caveSeal', 'caveRubble'] },
   ice: { gift: ['caveColumns', 'caveFall'], puzzle: ['caveShafts', 'caveBells'] }, sea: { gift: ['caveSpouts', 'caveRafts'], puzzle: ['caveShell', 'caveKeel'] },
   tokyo: { gift: ['caveAwnings', 'cavePins'], puzzle: ['caveShutter', 'caveRush'] }, blocks: { gift: ['caveRungs'], puzzle: ['caveRungs'] },
-  sky: { gift: ['caveClouds', 'caveCascade'], puzzle: ['caveElevator', 'caveLid'] }, skazka: { gift: ['caveWebs', 'caveMortars'], puzzle: ['caveSkulls', 'caveSquash'] } };
+  sky: { gift: ['caveClouds', 'caveCascade'], puzzle: ['caveElevator', 'caveLid'] }, skazka: { gift: ['caveWebs', 'caveMortars'], puzzle: ['caveSkulls', 'caveSquash'] },
+  space: { gift: ['caveRails', 'caveArms'], puzzle: ['caveAirlock', 'caveHull'] } };
 // (the Village's, 'mine'; the Mine's, 'cave'; Fuji's, 'ice'; the Sea's, 'sea'; Tokyo's, 'tokyo'; the Danchi's, 'blocks': its one room in both places, З15 «В»;
-// the TV Tower's, 'sky': its clouds, Д336 «A», kept З21 «А»; the Dark Forest's, 'skazka': its webs, mortars, skulls and pestle)
+// the TV Tower's, 'sky': its clouds, Д336 «A», kept З21 «А»; the Dark Forest's, 'skazka': its webs, mortars, skulls and pestle; Space's, 'space': its handrails,
+// robot arms, airlock and cracked hull)
 // Each world's waves by a table (owner, К4 «А»: not drawn at random from the level's kinds; in worlds 1-3 one spitter a wave at most): an arena's two,
 // an ambush's one, of the kinds that crawl and are stomped (a tofu's four would crowd it). A world without its own: the level's kinds at random, as before.
 const WAVES = {

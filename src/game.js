@@ -1029,8 +1029,8 @@ const CAUSE = { noyaki: 'causeNoyaki', flood: 'causeFlood', avalanche: 'causeAva
 const BREAK_T = 0.6;   // s a fallen icicle's, cone's or bolt's break stays in lv.breaks for its shatter (Worlds' frames)
 const DROP = { t: 0.3, v: 3 };   // down on a plank: let through it `t` s, pushed down at `v` R/s
 const STORY_ORDER = ['moon_fall', 'arrive_mine', 'village_crow', 'boss_probka', 'arrive_cave', 'boss_cart', 'mine_lamp', 'arrive_ice', 'boss_puck', 'fuji_bell', 'arrive_sea',
-  'boss_namazu', 'sea_lighthouse', 'arrive_tokyo', 'city_friendship', 'boss_tram', 'arrive_blocks', 'boss_crane', 'danchi_lantern', 'arrive_sky', 'boss_pigeon', 'sky_clouds',
-  'arrive_skazka', 'boss_koschei', 'forest_path', 'moon_home'];   // the cards as the story tells them (ui.album): each world arrived in, its episode, its boss, its card
+  'boss_namazu', 'sea_lighthouse', 'arrive_tokyo', 'city_friendship', 'boss_tram', 'arrive_blocks', 'boss_crane', 'danchi_lantern', 'arrive_sky', 'boss_pigeon', 'sky_clouds', ...(CAMP_ORDER.includes('space') ? ['arrive_space', 'space_moon'] : []),
+  'arrive_skazka', 'boss_koschei', 'forest_path', 'moon_home'];   // the cards as the story tells them (ui.album): each world arrived in, its episode, its boss, its card (Space's while it is on the line)
 const RISE_HINT = { flood: 'riseWater', tide: 'riseWater', avalanche: 'riseSnow', storm: 'riseStorm', watermain: 'riseWater', bog: 'riseBog' };   // (storm: the TV Tower's cloud, tower-real)   // what rises from below, by its world (the Sea's a typhoon surge at high tide, Д145; Tokyo's the wooden quarter burning, Д155: fire)
 const WALL_HINT = { crackwater: 'waterWall', coral: 'coralWall', wallice: 'iceWall', sparkpanel: 'sparkWall', lightning: 'boltWall', steampipe: 'steamWall', thorns: 'thornWall' };   // (sparkpanel: Golden Gai's, Д154 «Б», gai-real; lightning: the TV Tower's rod, Д164, tower-real)   // a wall hazard's hint by what bursts out (the Mine's groundwater, Д118: no gas; the Sea's blowholes; Fuji's ice)
 const WET = { flood: { why: 'water', ink: PAL.blue, body: { id: 'die', base: PAL.blue, deep: PAL.black } }, tide: { why: 'water', ink: PAL.white, body: { id: 'die', base: PAL.aqua, deep: PAL.black } },
@@ -2949,6 +2949,7 @@ const STORY = {
   city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [359, 538], was: [179, 268], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
   danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [342, 512], was: [171, 256], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
   sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [315, 474], was: [157, 235], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
+  space_moon: { n: 'IX', still: 'assets/cards/27_space_moon.png', cells: [372, 556], was: [186, 278], ink: 'space', boss: 'space', title: { en: 'The Moon Up Close', es: 'La Luna de cerca', pt: 'A Lua de perto', ja: 'ちかくの つき' } },   // (owner, 2026-10-31: Д398 «C», then «переделай карточку на вариант А с иллюминатором»: the round window)
   forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [408, 618], was: [205, 307], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
   moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [378, 570], was: [192, 288], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
   // A card for Mochi's coming to each world, before its first level (owner, 2026-10-23: «историю с карточками нужно дополнить, например, сначала показываем
@@ -2961,6 +2962,7 @@ const STORY = {
   arrive_tokyo: { n: '', still: 'assets/cards/23_arrive_tokyo.png', cells: [344, 542], was: [173, 260], ink: 'tokyo', title: { en: 'The Night Train', es: 'El tren nocturno', pt: 'O trem noturno', ja: 'よるの でんしゃ' } },
   arrive_blocks: { n: '', still: 'assets/cards/24_arrive_blocks.png', cells: [368, 564], was: [204, 305], ink: 'blocks', title: { en: 'Among the Blocks', es: 'Entre los bloques', pt: 'Entre os blocos', ja: 'だんちの なかで' } },
   arrive_sky: { n: '', still: 'assets/cards/25_arrive_sky.png', cells: [278, 442], was: [146, 219], ink: 'sky', title: { en: 'Up the Tower', es: 'Torre arriba', pt: 'Torre acima', ja: 'タワーの うえへ' } },
+  arrive_space: { n: '', still: 'assets/cards/28_arrive_space.png', cells: [276, 412], was: [138, 206], ink: 'space', title: { en: 'To the Launch Pad', es: 'A la plataforma', pt: 'Para a plataforma', ja: 'はっしゃだいへ' } },   // (Д397 «B», up the launch tower)
   arrive_skazka: { n: '', still: 'assets/cards/26_arrive_skazka.png', cells: [374, 549], was: [192, 288], ink: 'skazka', title: { en: 'The Forest Gate', es: 'La puerta del bosque', pt: 'O portão da floresta', ja: 'もりの もん' } },
   // The bosses' (owner, 2026-10-23: «Для каждого босса нужна сюжетная карточка»; К11 «А»: before its first fight, by playLevel), each named as the
   // boss is, in its world's ink and its own: for all since his К13 «А» (2026-10-23; the tram face-on, as he asked)
@@ -2982,7 +2984,7 @@ let storyLook = STORY_LIVE;   // the first level of the load, seen or not)
 const inkOn = (hex) => { const lum = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }, [r, g, b] = [1, 3, 5].map((i) => lum(parseInt(hex.slice(i, i + 2), 16))), L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   return (L + 0.05) / (0.0137 + 0.05) >= (1.05) / (L + 0.05) ? '#141414' : '#f3f3f3'; };   // (#141414's luminance 0.0137)
 const STORY_INK = { moon: { I: '#201638', W: '#f7f3ee', L: '#ab80e5', R: '#f34545', G: '#ffb642', bg: '#0b0716' } };
-for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8ff'], ['sea', '#6fe0ee'], ['tokyo', '#c996ff'], ['blocks', '#c8c8c8'], ['sky', '#c996ff'], ['skazka', '#c8c8c8']]) {
+for (const [k, ink] of [['mine', '#faa23e'], ['cave', '#c8c8c8'], ['ice', '#5bb8ff'], ['sea', '#6fe0ee'], ['tokyo', '#c996ff'], ['blocks', '#c8c8c8'], ['sky', '#c996ff'], ['space', '#5bb8ff'], ['skazka', '#c8c8c8']]) {
   const a = [1, 3, 5].map((i) => parseInt(ink.slice(i, i + 2), 16)), I = '#' + a.map((v) => Math.round(20 + (v - 20) * 0.25).toString(16).padStart(2, '0')).join('');
   STORY_INK[k] = { I, W: '#f3f3f3', L: ink, R: '#f43e34', G: '#ffed57', bg: '#141414' };
 }
@@ -3020,6 +3022,7 @@ const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png 
   // as it, the snow, the clouds, the lighthouse's foot; the two at home together)
   mine_lamp: { planes: [['boss', 0.7], ['hero', 1]], threads: [{ ink: '#808080', pts: [[75.5, 57, 0], [76.5, 76, 1]] }, { ink: '#e0e0e0', pts: [[78.5, 57, 0], [78.5, 76, 1]] }] },
   fuji_bell: { planes: [['boss', 1]] }, sea_lighthouse: { planes: [['boss', 1]] }, danchi_lantern: { planes: [['boss', 0.9], ['hero', 1]] },
+  arrive_space: { planes: [['hero', 1]] }, space_moon: { planes: [['hero', 1]] },   // (Space's: Mochi on the tower's deck; Mochi afloat before the station's round window)
   sky_clouds: { planes: [['boss', 1]] }, forest_path: { planes: [['hero', 1]] }, moon_home: { planes: [['boss', 1]] },
 };
 const cardEase = {
@@ -3105,6 +3108,10 @@ Object.assign(CARD_MOTION, {
     const lag = 0.35 * Math.sin(Math.PI * seg(u, 0, 0.5)) - 0.3 * Math.sin(Math.PI * seg(u, 1.9, 2.5)) - 0.35 * Math.sin(Math.PI * seg(u, 3, 3.5)) + 0.3 * Math.sin(Math.PI * seg(u, 4.9, 5.5));
     return { boss: [0, cy], hero: [0, cy + lag], blink: u > 2.4 && u < 2.55 };
   },
+  arrive_space(t) {   // Mochi on the launch tower's lowest deck, looking up the rocket: breathing, and now and then up on its toes to see higher
+    const u = t % 3.4, b = (1 - Math.cos((2 * Math.PI * t) / 1.7)) / 2;
+    return { hero: [0, -0.3 * cardEase.io(b) + cardHop(u - 2.2, 0.8, 0.22, 0.38)], blink: u > 1 && u < 1.15 };
+  },
   arrive_skazka(t) {   // Kolobok on the forest path, uneasy: rocking side to side, and now and then a start
     const u = t % 3.6;
     return { hero: [0.4 * Math.sin((2 * Math.PI * t) / 2.2), cardHop(u - 2.4, 1, 0.15, 0.3)], blink: u > 1 && u < 1.15 };
@@ -3147,6 +3154,11 @@ Object.assign(CARD_MOTION, {
   forest_path(t) {   // ★: Kolobok on the path, the eyes in the dark on him: rolling a little this way and that, and a start
     const u = t % 3.8;
     return { hero: [0.6 * Math.sin((2 * Math.PI * t) / 3.8), cardHop(u - 2.6, 1, 0.15, 0.3)], blink: u > 1.2 && u < 1.35 };
+  },
+  space_moon(t) {   // IX: Mochi afloat in the station before its round window and the Moon: weightless, it rises and sinks slow on a long breath, drifting a little
+    // toward the Moon and back, out of phase (secondary motion), its blink at the top of a rise
+    const w = (2 * Math.PI * t) / 5.2, u = t % 5.2;
+    return { hero: [0.5 * Math.sin(w - 1.1), -0.9 * (1 - Math.cos(w)) / 2], blink: u > 2.5 && u < 2.65 };
   },
   moon_home(t) {   // Home: Mochi and the rabbit in their hug, rocking gently together
     const w = (2 * Math.PI * t) / 3;

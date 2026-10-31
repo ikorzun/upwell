@@ -13,6 +13,7 @@ then silence is cut off its ends, it is levelled to −16 LUFS and given a 30 ms
     python3 tools/audio.py check              # the key works? tier and credits left
     python3 tools/audio.py sfx [name …]       # make missing effects (named ones anew), then build them
     python3 tools/audio.py music [name …]     # make missing music loops (named ones anew)
+    python3 tools/audio.py loop name …        # loop the named music's kept takes again, making nothing
 """
 import json, os, ssl, subprocess, sys, time, urllib.error, urllib.request
 
@@ -220,6 +221,12 @@ MUSIC = {
     'sea': (75, 'breezy, bright, flowing, steady, no ending',   # the Sea (rivers, the sea, islands), between Fuji and Tokyo
             ['lo-fi chiptune', 'a flowing pentatonic melody on a soft bamboo flute lead', 'rolling harp-like arpeggios like waves', 'a light steady beat with soft taiko and a shaker',
              'a Japanese seaside with islands, a torii in the sea and wooden piers', 'cute video game platformer, rafts on rivers and the open sea', 'steady 104 BPM']),
+    # owner 2026-10-31 «делать»: Space's own climb (the launch tower on Tanegashima, 8-1…8-3, then Kibo in orbit), in place of the Void's
+    'space': (75, 'wondrous, floating, hopeful, gently bouncy, steady, no ending',
+              ['lo-fi chiptune', 'a pentatonic Japanese melody on a soft glassy square lead', 'twinkling bell arpeggios like distant stars',
+               'warm floating synth pads with a little reverb', 'a soft steady beat with light claps and a round synth bass',
+               'a Japanese rocket launch tower by the sea, then the Kibo module of a space station high above the Earth',
+               'cute video game platformer, climbing into space', 'steady 100 BPM']),
     'bonus': (60, 'upbeat, exciting, fast, sparkling, steady, no ending',
               ['chiptune', 'bright catchy lead melody', 'fast arpeggios', 'punchy drums', 'joyful rush',
                'video game bonus stage, collecting coins', 'steady 140 BPM']),
@@ -252,6 +259,20 @@ def song_id(name: str) -> str:
             sys.exit(f'ElevenLabs music upload: HTTP {e.code} {e.read().decode("utf-8", "replace")[:300]}')
         json.dump(ids, open(path, 'w'), indent=1)
     return ids[name]
+
+
+def loud_run(x: np.ndarray) -> np.ndarray:
+    """The take's longest run of seconds within 10 dB of its median loudness: a take may open or close on a decay, a silence or a
+    fade, and a loop must not run through them (2026-10-31: Space's opened on a 10-s decay and 9 s of silence)."""
+    mono = x.mean(1)
+    db = np.array([20 * np.log10(np.sqrt(np.mean(mono[i:i + SR] ** 2)) + 1e-9) for i in range(0, len(mono) - SR + 1, SR)])
+    best, start = (0, 0), None
+    for i, on in enumerate(list(db > np.median(db) - 10) + [False]):
+        if on and start is None:
+            start = i
+        elif not on and start is not None:
+            best, start = max(best, (start, i), key=lambda r: r[1] - r[0]), None
+    return x[best[0] * SR:best[1] * SR]
 
 
 def loopify(x: np.ndarray, length_s: float) -> np.ndarray:
@@ -297,17 +318,23 @@ def music(names: list[str]) -> None:
             subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 's16le', '-ar', str(SR), '-ac', '2', '-i', '-', music_raw(name)],
                            input=raw, check=True)
             print(f'{name}: generated, {before - credits_left()} credits')
-        y = loopify(pcm(music_raw(name), 2), length)
-        peak = np.abs(y).max() + 1e-9
-        rms = np.sqrt(np.mean(y ** 2)) + 1e-9
-        y *= min(10 ** (-16 / 20) / rms, 10 ** (-1.5 / 20) / peak)   # about −16 dBFS RMS, peak under −1.5 dBFS, no limiter
-        pad = int(0.1 * SR)   # the loop's last 0.1 s before it and its first 0.1 s after it: the codec's edges outside the loop (game.js MUSIC_PAD)
-        y = np.concatenate([y[-pad:], y, y[:pad]])
-        out = os.path.join(ROOT, 'assets/music', f'{name}.mp3')
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', '-ac', '1', '-ar', '32000', '-c:a', 'libmp3lame',
-                        '-b:a', '64k', out], input=y.astype(np.float32).tobytes(), check=True)   # (mono at 32 kHz: owner 2026-10-24, «100 мб это очень много»)
-        print(f'{name}: {out}', flush=True)
+        finish_music(name)
+
+
+def finish_music(name: str) -> None:
+    """The kept take looped, levelled, padded and written as the game's mono 32 kHz MP3."""
+    x = loud_run(pcm(music_raw(name), 2))
+    y = loopify(x, len(x) / SR)
+    peak = np.abs(y).max() + 1e-9
+    rms = np.sqrt(np.mean(y ** 2)) + 1e-9
+    y *= min(10 ** (-16 / 20) / rms, 10 ** (-1.5 / 20) / peak)   # about −16 dBFS RMS, peak under −1.5 dBFS, no limiter
+    pad = int(0.1 * SR)   # the loop's last 0.1 s before it and its first 0.1 s after it: the codec's edges outside the loop (game.js MUSIC_PAD)
+    y = np.concatenate([y[-pad:], y, y[:pad]])
+    out = os.path.join(ROOT, 'assets/music', f'{name}.mp3')
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', '-ac', '1', '-ar', '32000', '-c:a', 'libmp3lame',
+                    '-b:a', '64k', out], input=y.astype(np.float32).tobytes(), check=True)   # (mono at 32 kHz: owner 2026-10-24, «100 мб это очень много»)
+    print(f'{name}: {out}', flush=True)
 
 
 if __name__ == '__main__':
@@ -318,5 +345,8 @@ if __name__ == '__main__':
         sfx(sys.argv[2:])
     elif cmd == 'music':
         music(sys.argv[2:])
+    elif cmd == 'loop':
+        for n in sys.argv[2:]:
+            finish_music(n)
     else:
         sys.exit(__doc__)

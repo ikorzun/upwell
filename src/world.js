@@ -1273,6 +1273,7 @@ const kitThing = (lv, r) => {
   if (opts && k >= 0) {
     r.kit = null;   // (deciding it: what is under it is decided first and never asks back)
     const avoid = kitAvoid(lv, r, new Set(opts.map((q) => q[1])).size >= 4 ? 2 : 1), fits = (q) => q[2]() && !avoid.has(q[1]);
+    if (lv.lanes && r.x0 >= lv.lanes[1].l - 1) opts = opts.filter((q) => !KIT_TEND[q[1]]);   // (a wide level's lane B: no task things, its tasks lane A's alone as a phone's, owner Ш9 «А»)
     let o = opts.filter((q) => q[0] === k).find(fits);
     if (!o && opts.some((q) => q[0] === k && q[2]())) for (let i = 1; i < 6 && !o; i++) o = opts.filter((q) => q[0] === (k + i) % 6).find(fits);   // a repeat: the next slot's
     out = o ? Object.assign({ kind: o[1] }, o[3] ? o[3]() : {}) : null;
@@ -4415,7 +4416,8 @@ class Level {
     }
     this.coinTotal += this.coins.length - lens[3]; this.foeTotal += this.spawns.length - lens[4];   // as laid at last
     if (c.kind === 'gate') for (const r of this.rects.slice(lens[0])) if (r.crack) r.key = true;   // a gate's keystone
-    if (c.kit) for (const r of this.rects.slice(lens[0])) r.kitWant = c.kit;   // the thing it asks for on its wall's ledge (kitThing)
+    if (c.kit && !(this.lanes && this.l !== this.full[0])) for (const r of this.rects.slice(lens[0])) r.kitWant = c.kit;   // the thing it asks for on its wall's ledge (kitThing; a wide
+    // level's lane B none: its task things lane A's alone, a phone's, owner Ш9 «А»)
     if (this.fizzAt.length && this.top - (lift + c.rows.length) * this.tile < this.fizzAt[0] && c !== CHUNKS.pocket) {   // a candy due: over a steady ledge of this chunk
       const ok = this.rects.slice(lens[0]).filter((r) => !r.crumble && !r.move && !r.spring && r.x1 - r.x0 >= 2 * this.tile), n = this.fizz.filter((f) => !f.again).length;   // (n: the planned ones
       // laid so far, a helmet's not among them: 1-3's helmet lesson, owner, З26 «А», read one past the planned kinds)

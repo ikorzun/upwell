@@ -327,6 +327,7 @@
     box-sizing: border-box; background: var(--dim); pointer-events: auto; text-align: center;
   }
   .panel.on { display: flex; }
+  #ui.wide .panel { padding-left: calc(50% - var(--colW) / 2 + 22px); padding-right: calc(50% - var(--colW) / 2 + 22px); }   /* a wide level's (?wide): its panels a column in the middle, the dim over all */
   @media (max-height: 620px) { .panel { gap: 8px; } }   /* a short screen: the 64-px buttons whole (QA: 61 px at 320×568 under a two-row build) */
   #result, #cards { background: var(--dim2); }   /* over the game after a level, at the end */
   #pause { background: var(--dim3); }   /* at a pause twice as dark (owner, 2026-10-28: «во время паузы затемнение фона нужно сделать в 2 раза темнее») */

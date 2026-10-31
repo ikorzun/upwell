@@ -123,6 +123,9 @@ const dayMedals = (day) => { let m = 0; return dayPlan(day).map((i) => (m += day
 // of its own. A world opens with the last one's boss.
 const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { foes: 1.3, fire: 1.06, pair: 0.12, seed: 104729, time: -2 }];
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
+// The wide plan's P0 (owner, Шаг1 «А»): ?wide plays the Village's tiers in a computer's window held wide as wide levels (WIDE: two lanes and a spine), its lesson,
+// its bonus race and its boss as before; every other screen a column as before (wideTo)
+const WIDE_ON = /[?&]wide\b/.test(location.search), wideFor = (w, rc) => WIDE_ON && !coarse && CAMPAIGN[w].world.id === 'mine' && !rc.boss && rc.bonus == null && !rc.script;
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
 // come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu, its lock
@@ -1104,6 +1107,7 @@ class Game {
   // The menu's scene (owner, 2026-10-23, the Figma «Main»): no level behind it, its backdrop (Renderer.drawMenu) and the hero alone, big, over
   // the colours, to drag and press as in Gum (menuTouch); ui.menu sizes and places it (menuFit). Play or Continue builds the level as ever.
   toMenu() {
+    wideTo(false);
     if (this.held) this.stageOut();   // (from a dialog with Moti in it: its level first, as it was)
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
@@ -1145,13 +1149,14 @@ class Game {
   }
   buildLevel(newHero) {
     this.held = null;   // (a dialog's kept level gone with a new one: Game.stageIn)
+    wideTo(this.mode === 'camp' && !this.bonus && wideFor(this.world, this.rc));   // (the view's layout first: the level is laid to it)
     const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
-    this.R = clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);
+    this.R = view.wide ? WIDE.tile : clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);   // (a wide level's: a 408-px phone's, WIDE)
     const seed = nextSeed != null ? nextSeed : this.daily != null ? daySeed(this.daily, this.world, this.stage, !!this.bonus) : (Math.random() * 4294967296) >>> 0;
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
-    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
+    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, lanes: view.wide && !boss, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
       height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: (this.bonus && this.mode === 'camp' ? this.wd : wd).theme, keep: this.room() });   // (a campaign's bonus
     // in its world's look: the Sea's and Tokyo's coin rain were the Mine's grey, the kind's own theme from the days a bonus was its world's)
     this.orbit = ORBIT_TRY || (wd.id === ORBIT.world && this.stage >= ORBIT.from);   // on orbit: the hero's light jumps (ORBIT)
@@ -2750,8 +2755,9 @@ class Game {
       this.lv.reset({ kind: 'menu', w: view.w, h: view.h, R: this.R, seed: 1, world: wd, theme: wd.theme, floorY: 0.5 * view.h }); this.menuBack = this.menuBackdrop();
       menuTouch.idleAt = performance.now(); menuTouch.hopAt = 0; menuTouch.hops = 0;
     }
-    const r = slot.getBoundingClientRect(), y0 = uiEl.getBoundingClientRect().top, R = Math.max(HERO.sizeMin, (MENU_HERO.k * r.width) / view.k / 2.05);
-    this.menuFloor = (r.bottom - y0) / view.k; this.menuSplit = 1; this.menuBare = true; this.lv.menuAt(this.menuFloor);
+    const r = slot.getBoundingClientRect(), y0 = uiEl.getBoundingClientRect().top, R = Math.max(HERO.sizeMin, (MENU_HERO.k * r.width) / view.s / 2.05);   // (the page's px in the
+    // canvas's: view.s, a wide level's own scale too)
+    this.menuFloor = (r.bottom - y0) / view.s; this.menuSplit = 1; this.menuBare = true; this.lv.menuAt(this.menuFloor);
     if (this.hero === this.held.hero || Math.abs(R - this.R) > 0.5) { this.R = this.lv.R = R; this.makeHero(); }   // (no levelReset: the run's level state is the kept level's)
   }
   stageOut() {
@@ -3992,11 +3998,12 @@ const ui = {
     const box = $('labels');
     if (!lv || !lv.pickups.length) { if (this.labelEls.length) { box.replaceChildren(); this.labelEls = []; } return; }
     if (this.labelEls.length !== lv.pickups.length) { box.replaceChildren(); this.labelEls = lv.pickups.map(() => box.appendChild(el('div', 'tag'))); }
+    const u = view.s / view.k;   // (a level's px on the words' layer: 1 in a column, a wide level's view.s)
     lv.pickups.forEach((p, i) => {
       const e = this.labelEls[i], price = game.priceOf(p), full = !p.sold && p.item.id === 'maxhp' && game.heartsFull(), text = L2(p.item.name) + '\n' + (p.sold ? t('sold') : full ? t('heartCap') : price ? price : t('free'));
       if (e.dataset.text !== text) { e.dataset.text = text; e.replaceChildren(px(text, 34)); e.h = 0; }
       if (!e.h) e.h = e.offsetHeight;
-      e.style.transform = 'translate(' + Math.round(p.x) + 'px,' + Math.round((p.top != null ? p.top - 6 : p.y - p.r - 8) - e.h - lv.cam) + 'px) translateX(-50%)';   // over its drawn picture (p.top, the renderer's), clear of it
+      e.style.transform = 'translate(' + Math.round(p.x * u) + 'px,' + Math.round(((p.top != null ? p.top : p.y - p.r) - lv.cam) * u - (p.top != null ? 6 : 8) - e.h) + 'px) translateX(-50%)';   // over its drawn picture (p.top, the renderer's), clear of it
       e.classList.toggle('dim', p.sold || full || price > game.coins);
     });
   },
@@ -4014,14 +4021,14 @@ const ui = {
     }
     if (!tq) return;
     const lv = g.lv, U = $('ui').getBoundingClientRect(), at = (e) => { const r = e.getBoundingClientRect(); return [(r.left + r.width / 2 - U.left) / view.k, (r.top + r.height / 2 - U.top) / view.k]; };
-    const [x, y] = coarse ? (tq === 'run' ? [0.3 * view.w, view.h - view.keep - 76] : ((p) => [p[0], p[1] - 10])(at($('jumpBtn')))) : [g.hero.cx, g.hero.minY - lv.cam - 1.4 * g.R];   // (a thumb's start
+    const [x, y] = coarse ? (tq === 'run' ? [0.3 * view.w, view.h - view.keep - 76] : ((p) => [p[0], p[1] - 10])(at($('jumpBtn')))) : [g.hero.cx * view.s / view.k, (g.hero.minY - lv.cam - 1.4 * g.R) * view.s / view.k];   // (a thumb's start
     // of the stick: the left of the screen over the keys)
     gh.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
   },
   frame(g) {
     const playing = g.state !== 'menu' && g.state !== 'boot' && !(g.lv && g.lv.kind === 'menu');   // (the owed cards over the menu: no level's HUD)
     $('hud').classList.toggle('on', playing);
-    if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children, $('tasks')].map((e) => e.getBoundingClientRect().bottom)) / view.k;   // the threat signs go under it, the level's name too (see Game.threats)
+    if (playing && !view.hudB) view.hudB = Math.max(...[...$('hud').children, $('tasks')].map((e) => e.getBoundingClientRect().bottom)) / view.s;   // the threat signs go under it, the level's name too (see Game.threats)
     $('pad').classList.toggle('on', coarse && g.state === 'play');
     $('pad').classList.toggle('stick', !!save.stick);   // with the stick, a round jump key alone, in the corner
     const teach = !!(g.tut && !g.tut.done.jump && g.state === 'play');   // (1-1's lessons: the jump key bright and pulsing till the first jump, TUT)
@@ -4032,7 +4039,7 @@ const ui = {
     fh.classList.toggle('on', onFloor);
     if (onFloor) {
       if (!fh.firstChild) fh.append(px(t(howTo()).replace(' · ', '\n'), Math.floor((view.w - 48) / 3)));   // how to run and jump, once, on the floor (owner: not in a toast as well), a line each
-      fh.style.transform = 'translate(' + Math.round(view.w / 2) + 'px,' + Math.round(fy + (view.h - view.keep - fy) / 2) + 'px) translate(-50%, -50%)';
+      fh.style.transform = 'translate(' + Math.round((view.w / 2) * (view.s / view.k)) + 'px,' + Math.round((fy + (view.h - view.keep - fy) / 2) * (view.s / view.k)) + 'px) translate(-50%, -50%)';
     }
     const tq = g.state === 'play' && g.tut && lv.kind === 'well' ? g.tut.show : null;   // the first level's lesson (TUT): the glove where it is done (ui.ghost)
     this.ghost(g, tq);
@@ -4052,7 +4059,7 @@ const ui = {
     const bh = $('bossHp'), bs = g.lv.boss, bon = !!bs && !bs.dead && playing;   // a boss's hearts, under the HUD (Lucky Tower's players asked for them)
     bh.classList.toggle('on', bon);
     if (bon && (bs.hp !== this.bhp || bs.max !== this.bmax || bs !== this.bboss)) { this.bhp = bs.hp; this.bmax = bs.max; this.bboss = bs; bh.replaceChildren(...Array.from({ length: bs.max }, (_, i) => el('i', i < bs.hp ? null : 'off'))); bh.style.setProperty('--pip', `var(--${(bs.def && bs.def.ink) || 'blue'})`); }   // in its colour
-    if (bon) bh.style.top = Math.round(view.hudB + 6) + 'px';
+    if (bon) bh.style.top = Math.round(view.hudB * (view.s / view.k) + 6) + 'px';
     const gun = $('gun'), left = g.gunT > 0 && g.state === 'play' ? Math.ceil((g.gunT / g.gunMax) * 10) : 0;   // the fizz left, in tenths, blinking near the end
     gun.classList.toggle('on', left > 0);
     if (left) { gun.dataset.k = g.pow; gun.firstChild.style.width = left * 10 + '%'; gun.classList.toggle('low', g.gunT < 1 && Math.floor(g.gunT * 6) % 2 === 0); }
@@ -4064,7 +4071,8 @@ const ui = {
     const tk = (playing && !g.well && g.lv.tasks) || [], tkey = tk.map((q) => q.id + q.n + '/' + q.of).join();   // the level's tasks, how far each
     if (tkey !== this.tkey) { this.tkey = tkey; $('tasks').replaceChildren(...tk.map(taskEl)); view.hudB = 0; }   // (the HUD measured again)
     const c = $('combo');
-    if (g.combo > 0 && g.hero) c.style.transform = 'translate(' + Math.round(g.hero.cx) + 'px,' + Math.round(g.hero.minY - g.lv.cam - 30) + 'px) translateX(-50%)';
+    if (g.combo > 0 && g.hero) c.style.transform = 'translate(' + Math.round(g.hero.cx * (view.s / view.k)) + 'px,' + Math.round((g.hero.minY - g.lv.cam) * (view.s / view.k) - 30) + 'px) translateX(-50%)';   // (a level's px times
+    // view.s on the words' layer: a wide level's)
     this.labels(g.lv.pickups.length ? g.lv : null);   // a room's things, or a trader's in the shaft
   },
 };
@@ -4414,7 +4422,7 @@ const ads = {
 // ── Setup ────────────────────────────────────────────────────
 const canvas = $('gl');
 const uiEl = $('ui');
-const view = { w: 1, h: 1, fh: 0, left: 0, keep: 0, k: 1 };   // keep: px at the bottom under the touch keys; k: the column's px on the screen (layout: under 1 in a short window)
+const view = { w: 1, h: 1, fh: 0, left: 0, keep: 0, k: 1, s: 1, wide: false };   // keep: px at the bottom under the touch keys; k: the column's px on the screen (layout: under 1 in a short window)
 const perf = { ctxLoss: 0, lost0: 0, t0: 0, last: 0, active: 0, ft: [], err: 0, err0: 0, rej: 0, rej0: 0, lt: null };   // the renderer counts lost contexts here (Gum sends them as
 // telemetry); the page's errors and refused promises counted here, and its long tasks where the browser reports them (Chromium); the rest: see perfFrame
 addEventListener('error', () => perf.err++); addEventListener('unhandledrejection', () => perf.rej++);
@@ -4424,6 +4432,7 @@ if (window.PerformanceObserver && (PerformanceObserver.supportedEntryTypes || []
 const fx = new FX();
 const game = new Game();
 const renderer = new Renderer(canvas);
+let wideWant = false, wideSwitch = false;   // a wide level's view wanted (wideTo); the layout switched to it or back, not a resize
 let paused = document.hidden, started = false, firstFrame = false, layoutQueued = false, inputTold = false, menuTold = false, sidesAsked = false;   // (told: the first input, the menu, once a page; asked: src/sides.js fetched)
 { const s = new URLSearchParams(location.search).get('seed'); if (s != null && s !== '' && Number.isFinite(+s)) nextSeed = +s; }
 
@@ -4438,6 +4447,7 @@ function layout() {
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
   PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
+  if (wideWant && !coarse && vw >= vh) { layoutWide(vw, vh); return; }
   const d = window.devicePixelRatio || 1, W0 = vw < vh ? vw : Math.min(vw, Math.max(Math.round(vh * 0.5625), vh >= COL_TALL ? COL_MIN : 0)), W = Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = Math.floor(vh / PIX.size + 1e-6) * PIX.size;   // a phone
   // held upright: all of its width; a whole number of game pixels across and down, on the screen's own pixels (left), so each is as many of them as the next
   // (owner: «пиксель в пиксель на всех устройствах»; a phone's was its full width and height, a game pixel 4.5 of an iPhone's, lines 4 and 5 by turns)
@@ -4450,7 +4460,7 @@ function layout() {
   PIX.size = P / k;   // (the drawing's grid in the laid-out column's px)
   PIX.base = Math.max(1, Math.round(PIX.base / PIX.size - 1e-6)) * PIX.size;   // a picture's dot whole game pixels at this scale too (owner, 2026-10-28:
   // «важно, чтобы при уменьшении экрана пиксели не мылились»: at 0.96 its dot was 1.92 of them, one and two by turns)
-  view.w = W / k; view.h = H / k; view.left = left; view.k = k; view.hudB = 0;   // (the HUD measured again: see ui.frame)
+  view.w = W / k; view.h = H / k; view.left = left; view.k = view.s = k; view.wide = false; view.hudB = 0; uiEl.classList.remove('wide');   // (the HUD measured again: see ui.frame)
   view.fh = view.h;   // the fire's measure of a screen (its start, its lag, how far a burn or a way back puts it under the hero): this screen; a computer's wide
   // level's, its phone's rows (the wide plan's P0: in 20 rows the fire would chase twice as near)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
@@ -4469,9 +4479,25 @@ function layout() {
   // pixelated (index.html): a phone gets no full-resolution copy of each frame to keep and compose (on a 3x iPhone 20 times the pixels for nothing);
   // a browser that cannot scale it pixelated gets the copy, a device pixel per pixel, as before
   game.applyMods();
+  if (wideSwitch) return;   // (a wide level's view left or taken: the level about to be laid or the menu built for it)
   if (started && Math.abs(view.w - game.builtW) > 2) game.resized();
   else if (started && ui.open === 'menu') ui.menu();   // only taller or shorter: the menu's rows, and the hero over them, placed again
 }
+// A wide level's layout (WIDE, ?wide): the canvas the whole window, a tile a whole number of game pixels (about 35 across: WIDE.tile px of the level's own,
+// view.s times bigger), the width left over the walls'; a picture's dot about the column's 2 px of the level's; the page's words and buttons in CSS px over all of
+// it, its panels a column in the middle (--colW); no sides. A resize keeps the level, only its scale changes (owner, Ш11 «А»)
+function layoutWide(vw, vh) {
+  const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(W / (WIDE.cols + 1) / P + 1e-6)) * P, s = T / WIDE.tile;
+  PIX.size = P / s; PIX.base = Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;
+  view.w = W / s; view.h = H / s; view.left = 0; view.k = 1; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile;
+  for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = '0px'; }
+  uiEl.style.transform = ''; uiEl.classList.add('wide'); uiEl.style.setProperty('--colW', Math.round(Math.max(COL_MIN, H * 0.5625)) + 'px');
+  document.documentElement.style.setProperty('--k', 1);
+  $('sides').classList.remove('on'); renderer.sides = null;
+  renderer.resize(view.w, view.h, PIXELATED ? 1 / PIX.size : (window.devicePixelRatio || 1) * s);
+  game.applyMods();
+}
+function wideTo(on) { if (wideWant === on) return; wideWant = on; wideSwitch = true; layout(); wideSwitch = false; }
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
 // start of the next frame, right before drawing.
 function queueLayout() { layoutQueued = true; }
@@ -4509,7 +4535,7 @@ const MENU_HOP = { first: 1.2, every: 3.6, ready: 0.12, squash: 0.5, stretch: 0.
 const menuTouch = {
   ptrs: new Map(), lastT: 0, lastPoke: null, idleAt: 0, hopAt: 0, hops: 0,
   on() { return game.state === 'menu' && ui.open === 'menu' && game.lv && game.lv.kind === 'menu' && !!game.hero; },
-  local(e) { return [(e.clientX - view.left) / view.k, e.clientY / view.k + game.lv.cam]; },   // in the world
+  local(e) { return [(e.clientX - view.left) / view.s, e.clientY / view.s + game.lv.cam]; },   // in the world
   look(x, y, now) { const l = game.heroLook; l.x = x; l.y = y; l.t = now; },
   down(e) {
     this.idleAt = performance.now(); this.hopAt = 0;   // (a touch: no hop on its way, the quiet counted from now)

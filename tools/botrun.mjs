@@ -45,7 +45,9 @@ const run = async (expression) => {
   if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
   return r.result.value;
 };
-await page('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 2, mobile: true });
+// W, H, MOBILE=0 (and DPR): a computer's window instead of the phone (the wide plan's P0: PAGE=…/?wide W=1280 H=720 MOBILE=0)
+const MOBILE = process.env.MOBILE !== '0';
+await page('Emulation.setDeviceMetricsOverride', { width: +(process.env.W || 375), height: +(process.env.H || 812), deviceScaleFactor: +(process.env.DPR || (MOBILE ? 2 : 1)), mobile: MOBILE });
 await page('Page.navigate', { url: PAGE });
 for (let i = 0; !(await run(`document.readyState === 'complete' && typeof __up === 'object' && __up.started && typeof BOSS_FRAMES !== 'undefined'`)); i++) {
   if (i > 300) throw new Error('the game did not load');

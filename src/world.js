@@ -5855,11 +5855,10 @@ Object.assign(FOE_SPRITES, UME_SPR); for (const id in UME_SPR) BOSS_FIT[id] = ['
 // Frames: the gecko -1, -2 crawling (head up, its feet on a wall to its left), -3 turning; the chochin -1 its eye dim, -2 lit; the utsuro -1, -2 drifting
 // (facing right), -3 turning (head-on)
 const SPACE_V = { gecko: 'A', chochin: 'B', utsuro: 'D' };
-// Space's stash rooms' own things (CAVES.space, UPwell 76431e7; the owner's З28 «А»: keep the four rooms, their look Worlds'), after research/variants/sp-arm,
-// sp-airlock, sp-button, sp-hullcrack -1.png: Kibo's robot arm's hand (the movers), the airlock's door and its button, the cracked hull panel; man-made, so in the
-// game's boxes at the rooms' own sizes (UPwell's: their routes are timed). While the owner picks, ?spv=ABCD shows arm, door, button, panel by their letters
-const SPCAVE_V = (() => { const v = { arm: 'A', door: 'A', button: 'A', crack: 'A' }, m = /[?&]spv=([A-F]{4})\b/.exec(location.search);
-  if (m) ['arm', 'door', 'button', 'crack'].forEach((k, i) => (v[k] = m[1][i])); return v; })();
+// Space's stash rooms' own things (CAVES.space, UPwell 76431e7; the owner's З28 «А»: keep the four rooms, their look Worlds'), the owner's picks off six drawn in the
+// game (Д399 «F», Д400–Д402 «A»; research/variants/sp-arm, sp-airlock, sp-button, sp-hullcrack -1.png, research/space/cave/sp-*-six.png): Kibo's robot arm's hand
+// under each mover, the airlock's hatch with its wheel and its mushroom button, the hull panel cracked in a zigzag; man-made, so in the game's boxes at the rooms'
+// own sizes (UPwell's: their routes are timed)
 const SPACE_SPR = {
   'gecko-A-1': ["........................................", ".............rrrrrr.....................", "............rrrrrrrr....................", ".b.b.......rrrrrroor....................", "..rrbb....rrr...oooo....................", "b..rbs...r.rr...orrr....................", "brrrr....rrrr...orrrr...................", "..rrr....rrrrrrrrrrr....................", ".bb.r.....rrrrrrrrr.....................", ".b...rr...rrrrrrrr......................", ".....rr....rrrrrr.......................", ".....rr....rrrrr.r......................", ".....rrrr.rrrrr.r.......................", "..r.b.....rrrrrr........................", "b.rrr.....rrrrrrr.......................", "bbrrrrrrrrrrrrrr........................", "b.rrrrrrrr.rrrrr........................", ".rrbb.....rrrr.rr..............r........", "..b.b.....rrrrrrr..............rr.......", "...b......rrrrrr.r.............rr.......", "..........rrrrr.r...rr..........o.......", "......rrrr.rrrrr.r.rrrr........oo.......", ".....rrrrr.rrrr.r..rrrr........rr.......", ".....rr....rrrrrr...rr........rr........", "..b..rr.....rrr..r....r......rrr........", "..rb.rr.....rrrrrrr..........rrr........", "...s.rr......rr.r.rr.........ro.........", "brrrrrr.......rr.rrrrrr..rrr.r..........", ".brrrrr.......rrrrr..rr...rr............", ".brrbb..........rr..rrr..rrr............", "..s.s...............rrrrr...............", "........................................"],
   'gecko-A-2': [".bbbb......rrr..........................", "..rrb.....rrrrrrr.......................", "bbrrr....rrrrrrrrr......................", "..rrr.b.rrrrrr.rrrr.....................", ".rrbrr..rrrrr...oorr....................", "b.b..r..rrrrr...ooor....................", ".....r..rrrrrr..orro....................", ".....r...rrrrrrrroor....................", ".....r...rrrrrrrrorr....................", ".....rr...rrrrrrrrr.....................", "...b..rrr..rrrrrrr......................", "...bb..rr.rrrrrrr.......................", ".brrb.....rrrr.r....rr..................", "b.rrrrr...rrrrrrr...rrr.................", ".brrrrrrrrrrrrrrr..rrrr...............r.", "..rr......rrr.r.....rr...............rrr", ".rbbb.....rrrr.rr....rr............rrr..", "....b.....rrrrr.r.................rr....", "..........rrrrrr.r...............rr.....", "..........rrrrr.r...rr..........rr......", "......rrrr.rrrrrr..rrrr..........o......", ".....rr.rr.rrrr.r..rrrr.................", ".....rr....rrrrr.r..rr........rr........", "..r..rr....rr........rr......roo........", ".brs.rr......r.r.r...........roo........", ".bbrr.b.....rrrrrr..........r.rr........", "bbrrrbb.....rrrrrr.r.....rrr.r..........", "..rrbb.......rrrrrrr..r..rrr............", ".rrbbb.......rrr.rrr.rrr.rrr............", "..bb............r.r.rrr...r.............", "................rr.rrrrr................", "....................rrr................."],
@@ -8382,94 +8381,45 @@ Renderer.prototype.draw = function (g, alpha) {
   const scv = lv.kind === 'treasure' && lv.world && lv.world.theme && lv.world.theme.glass;   // (a TV Tower cave's, the owner's З21 «А»: all its ledges the Tower's
   // own (skyRect, as in its shafts): its clouds that give way, its catwalks the outside stair's landings, its box, roof and floors the lattice's trusses; its door a
   // lift's, its button a call panel's: see the shutter's and the switches')
-  const spcv = lv.kind === 'treasure' && th.space;   // (a Space cave's: Kibo's robot arms, its airlock's door and button, its cracked hull panel: SPCAVE_V)
+  const spcv = lv.kind === 'treasure' && th.space;   // (a Space cave's: Kibo's robot arms, its airlock's door and button, its cracked hull panel: Д399–Д402)
   const spB = (a, b, c, d, col, al = 1) => { if (c - a > 0 && d - b > 0) box(snap(a), snap(b), snap(c), snap(d), col, al, 0, 10, 0); };
-  const spArm = (r) => {   // a robot arm's hand carrying the mover (SPCAVE_V.arm): the plank purple (it moves) with its white edge and a darker underside; the arm's
-    // wrist, joints and last boom grey and blue, behind (in 2.5D flat), reaching up to it from under it (over it are the room's coins), its boom ending in a joint's
-    // housing; it rides along, rigid
-    const V = SPCAVE_V.arm, q = PIX.size, t = lv.tile, x0 = snap(r.x0), x1 = snap(r.x1), y0 = snap(r.y0), y1 = snap(r.y1), cx = snap((x0 + x1) / 2), G = PAL.gray, K = PAL.black, Bl = th.block, Pp = th.mover, rt = this.route;
+  const spArm = (r) => {   // a robot arm's hand carrying the mover (Д399 «F»): the plank purple (it moves) with its white edge and a darker underside, a clamp at each
+    // end and a connector under its middle; from it the arm's wrist, an elbow and its last boom reach down and out (over it are the room's coins) to a joint's
+    // housing, a cable along them, all grey and blue and behind (in 2.5D flat). Its elbow out to the side of its way nearer the room's middle, the same all its
+    // ride (it never flips); it rides along, rigid
+    const q = PIX.size, t = lv.tile, x0 = snap(r.x0), x1 = snap(r.x1), y0 = snap(r.y0), y1 = snap(r.y1), cx = snap((x0 + x1) / 2), G = PAL.gray, K = PAL.black, Bl = th.block, Pp = th.mover, rt = this.route;
+    const d = r.move && r.move.a + (r.move.b + x1 - x0) > lv.l + lv.r ? -1 : 1, e = d > 0 ? x1 : x0, X = (u) => e + d * u;   // (u out past its end on its elbow's side)
     const jt = (x, y, n = 3) => { disc(snap(x), snap(y), n * q, G, 1); disc(snap(x), snap(y), (n - 1.5) * q, K, 1); };
     const bm = (xa, ya, xb, yb, wd = 3, col = G) => line(snap(xa), snap(ya), snap(xb), snap(yb), col, 1, wd);
-    const hs = (x, y) => { spB(x - 4 * q, y, x + 4 * q, y + 5 * q, Bl); spB(x - 4 * q, y + 4 * q, x + 4 * q, y + 5 * q, Bl, 1.5); spB(x - q, y + 2 * q, x + q, y + 3 * q, K); };   // a joint's housing, where the arm goes on out of sight
     if (CINE) this.route = 0;
-    if (V === 'A') {   // gripper jaws clamping both ends, the arm up to the right jaw by an elbow
-      for (const [e, d] of [[x0, -1], [x1, 1]]) { const o = e + 3 * d * q; spB(Math.min(e, o), y0 - q, Math.max(e, o), y1 + 4 * q, G); spB(Math.min(e - 3 * d * q, o), y1 + 2 * q, Math.max(e - 3 * d * q, o), y1 + 4 * q, G); }
-      jt(x1 + 2 * q, y1 + 4 * q); bm(x1 + 2 * q, y1 + 4 * q, x1 + 0.35 * t, y1 + 0.7 * t); jt(x1 + 0.35 * t, y1 + 0.7 * t); bm(x1 + 0.35 * t, y1 + 0.7 * t, x1 - 0.2 * t, y1 + 1.0 * t); hs(x1 - 0.2 * t, y1 + 1.0 * t);
-    } else if (V === 'B') {   // a turntable plate under it on a hub, the arm straight down from the hub
-      spB(x0 - q, y1, x1 + q, y1 + 3 * q, Pp, 1.5); spB(x0 + 4 * q, y1 + 3 * q, x1 - 4 * q, y1 + 5 * q, G); spB(cx - 2 * q, y1 + 5 * q, cx + 2 * q, y1 + 8 * q, G);
-      jt(cx, y1 + 9 * q); bm(cx, y1 + 9 * q, cx, y1 + 1.0 * t); hs(cx, y1 + 1.0 * t);
-    } else if (V === 'C') {   // a box effector under its middle, a cable looping off it, a clamp at each end, the arm down-left from the box
-      spB(x0 - q, y0 - q, x0 + 2 * q, y1 + 2 * q, Bl); spB(x1 - 2 * q, y0 - q, x1 + q, y1 + 2 * q, Bl);
-      spB(cx - 5 * q, y1 + q, cx + 5 * q, y1 + 7 * q, Bl); spB(cx - 5 * q, y1 + 6 * q, cx + 5 * q, y1 + 7 * q, Bl, 1.5); disc(cx, snap(y1 + 4 * q), 1.5 * q, K, 1);
-      jt(cx - 3 * q, y1 + 9 * q); bm(cx - 3 * q, y1 + 9 * q, cx - 0.45 * t, y1 + 0.95 * t); hs(cx - 0.45 * t, y1 + 0.95 * t);
-      bm(cx + 5 * q, y1 + 4 * q, cx + 0.5 * t, y1 + 0.55 * t, 1, PAL.aqua); bm(cx + 0.5 * t, y1 + 0.55 * t, x1 - 2 * q, y1 + 3 * q, 1, PAL.aqua);
-    } else if (V === 'D') {   // a two-finger claw holding the plank by its ends from under it, a camera box on its wrist
-      const wy = y1 + 0.55 * t; for (const e of [x0 + 2 * q, x1 - 2 * q]) { bm(e, y0 - q, e, y1 + 3 * q); bm(e, y1 + 3 * q, cx, wy); }
-      jt(cx, wy); spB(cx + 3 * q, wy - 2 * q, cx + 10 * q, wy + 3 * q, Bl); disc(snap(cx + 7 * q), snap(wy + 0.5 * q), 1.5 * q, K, 1); spB(cx + 7 * q, wy - q, cx + 8 * q, wy, PAL.aqua);
-      bm(cx, wy, cx, y1 + 1.05 * t); hs(cx, y1 + 1.05 * t);
-    } else if (V === 'E') {   // a yoke: two members from a joint under its middle up to its ends
-      const ty = y1 + 0.7 * t; for (const e of [x0 + 2 * q, x1 - 2 * q]) { bm(cx, ty, e, y1); jt(e, y1 + q, 2.5); }
-      jt(cx, ty, 3.5); bm(cx, ty, cx + 0.3 * t, y1 + 1.1 * t); hs(cx + 0.3 * t, y1 + 1.1 * t);
-    } else {   // F: a clamp at each end, a connector under its middle, an elbow off to the right, a cable along it
-      for (const e of [x0 - q, x1 - 3 * q]) spB(e, y0 - q, e + 4 * q, y1 + 2 * q, Bl); spB(cx - 3 * q, y1, cx + 3 * q, y1 + 3 * q, Bl);
-      jt(cx, y1 + 5 * q); bm(cx, y1 + 5 * q, x1 + 0.3 * t, y1 + 0.6 * t); jt(x1 + 0.3 * t, y1 + 0.6 * t); bm(x1 + 0.3 * t, y1 + 0.6 * t, x1 - 0.1 * t, y1 + 1.0 * t); hs(x1 - 0.1 * t, y1 + 1.0 * t);
-      bm(cx + 2 * q, y1 + 3 * q, x1 + 0.45 * t, y1 + 0.45 * t, 1, PAL.aqua); bm(x1 + 0.45 * t, y1 + 0.45 * t, x1 + 0.4 * t, y1 + 0.8 * t, 1, PAL.aqua);
-    }
+    for (const c of [x0 - q, x1 - 3 * q]) spB(c, y0 - q, c + 4 * q, y1 + 2 * q, Bl); spB(cx - 3 * q, y1, cx + 3 * q, y1 + 3 * q, Bl);   // its clamps, its connector
+    jt(cx, y1 + 5 * q); bm(cx, y1 + 5 * q, X(0.3 * t), y1 + 0.6 * t); jt(X(0.3 * t), y1 + 0.6 * t); bm(X(0.3 * t), y1 + 0.6 * t, X(-0.1 * t), y1 + 1.0 * t);   // its wrist, its elbow
+    { const hx = X(-0.1 * t), hy = y1 + 1.0 * t; spB(hx - 4 * q, hy, hx + 4 * q, hy + 5 * q, Bl); spB(hx - 4 * q, hy + 4 * q, hx + 4 * q, hy + 5 * q, Bl, 1.5); spB(hx - q, hy + 2 * q, hx + q, hy + 3 * q, K); }   // a joint's housing,
+    // where the arm goes on out of sight
+    bm(cx + 2 * d * q, y1 + 3 * q, X(0.45 * t), y1 + 0.45 * t, 1, PAL.aqua); bm(X(0.45 * t), y1 + 0.45 * t, X(0.4 * t), y1 + 0.8 * t, 1, PAL.aqua);   // its cable
     this.route = rt;
     spB(x0, y1 - q, x1, y1 + q, Pp, 1.5); box(x0, y0, x1, y1, Pp, 1, 0, 10, 2); box(x0, y0, x1, y0 + PIX.size, th.lip, 1, 0);   // the plank: purple, dotted as a mover, its edge
   };
-  const spDoor = (r, f) => {   // the airlock's door (SPCAVE_V.door; f how far shut): the vault dark behind, a steel frame, over it a lamp lit orange while it stands open;
-    // each its own way of opening, eased as a motor drives it. Grey and blue, no white (not an edge to stand on)
-    const V = SPCAVE_V.door, q = PIX.size, t = lv.tile, G = PAL.gray, K = PAL.black, Bl = th.block, x0 = snap(r.x0), x1 = snap(r.x1), yt = snap(r.y0), y1 = snap(r.y1), y0 = yt + snap(0.3 * t);
-    const a = x0 + q, b = x1 - q, W = b - a, H = y1 - y0, cx = snap((a + b) / 2), cy = snap((y0 + y1) / 2), riv = (x, y) => spB(x, y, x + q, y + q, K);
+  const spDoor = (r, f) => {   // the airlock's door (Д400 «A»; f how far shut): a square hatch with a wheel and hinges, sliding up into its header as a motor drives it,
+    // the wheel turning as it goes; the vault dark behind, a steel frame, over it a lamp lit orange while it stands open. Grey and blue, no white (not an edge to stand on)
+    const q = PIX.size, t = lv.tile, G = PAL.gray, K = PAL.black, Bl = th.block, x0 = snap(r.x0), x1 = snap(r.x1), yt = snap(r.y0), y1 = snap(r.y1), y0 = yt + snap(0.3 * t);
+    const a = x0 + q, b = x1 - q, W = b - a, H = y1 - y0, cx = snap((a + b) / 2);
     box(x0, y0, x1, y1, K, 1, 0, 10, 0);
-    if (V === 'A') {   // a square hatch with a wheel, sliding up into its header; the wheel turns as it goes
-      const lh = snap(f * H), bot = y0 + lh, ny = bot - H; if (lh > 0) { spB(a, y0, b, bot, Bl); spB(a, y0, a + q, bot, Bl, 1.5); spB(b - q, y0, b, bot, Bl, 1.5); spB(a, bot - q, b, bot, Bl, 1.5); }
-      for (const v of [0.2, 0.5, 0.8]) if (ny + v * H > y0) spB(a, ny + v * H, a + 2 * q, ny + v * H + 3 * q, G);   // its hinges
-      const wy = ny + 0.55 * H, wr = 0.62 * (W / 2); if (wy - wr > y0) { disc(cx, snap(wy), wr, G, 1); disc(cx, snap(wy), wr - q, K, 1); const an = (1 - f) * 4; for (const k of [0, 1]) { const c = Math.cos(an + k * Math.PI / 2) * (wr - q), s = Math.sin(an + k * Math.PI / 2) * (wr - q); line(snap(cx - c), snap(wy - s), snap(cx + c), snap(wy + s), G, 1, 1); } disc(cx, snap(wy), q, G, 1); }
-    } else if (V === 'B') {   // a slab with a porthole sliding aside into the wall on its left
-      const lw = snap(f * W), nx = a + lw - W; if (lw > 0) { spB(a, y0, a + lw, y1, Bl); spB(a, y0, a + lw, y0 + q, Bl, 1.5); spB(a + lw - q, y0, a + lw, y1, Bl, 1.5); }
-      const px = nx + 0.5 * W, py = y0 + 0.3 * H, pr = 0.32 * W; if (px - pr > a) { disc(snap(px), snap(py), pr, G, 1); disc(snap(px), snap(py), pr - q, K, 1); spB(px - 2 * q, py - 2 * q, px - q, py - q, Bl, 1.5); }
-      for (const v of [0.08, 0.92]) for (const u of [0.15, 0.85]) if (nx + u * W > a) riv(nx + u * W, y0 + v * H);
-    } else if (V === 'C') {   // two leaves parting from their middle seam, a handle by the seam on each
-      const lw = snap((f * W) / 2); if (lw > 0) for (const [l, rr, hx] of [[a, a + lw, a + lw - 3 * q], [b - lw, b, b - lw + 2 * q]]) {
-        spB(l, y0, rr, y1, Bl); spB(l, y0, rr, y0 + q, Bl, 1.5); if (rr - l > 4 * q) spB(hx, cy - 3 * q, hx + q, cy + 3 * q, G); }
-      if (f > 0.98) spB(cx - q / 2, y0, cx + q / 2, y1, K);
-    } else if (V === 'D') {   // a round hatch in a square plate, swinging in on its hinges at the left (it narrows to its hinge edge)
-      const lw = snap(f * W); if (lw > 0) { spB(a, y0, a + lw, y1, Bl); spB(a + lw - q, y0, a + lw, y1, Bl, 1.5);
-        if (lw > 4 * q) { const hx = a + lw / 2, rx = 0.42 * lw, ry = 0.42 * W; F(snap(hx), cy, rx, 0, 0, ry, G, 1, 0); F(snap(hx), cy, Math.max(q, rx - q), 0, 0, ry - q, K, 1, 0); F(snap(hx), cy, Math.max(q / 2, rx - 2 * q), 0, 0, ry - 2 * q, Bl, 2.2, 0); } }
-      for (const v of [0.2, 0.8]) spB(a - q, y0 + v * H, a + q, y0 + v * H + 3 * q, G);   // its hinges, on the frame
-    } else if (V === 'E') {   // a ribbed shutter in its frame, rolling up a whole rib at a time
-      const S = 3 * q, yb = Math.max(y0, y1 - Math.round(((1 - f) * H) / S) * S); if (yb > y0) { spB(a, y0, b, yb, Bl); for (let y = yb - S; y > y0; y -= S) spB(a, y, b, y + q, Bl, 1.6); spB(a, yb - 2 * q, b, yb, G); }
-    } else {   // F: an iris: shut, its blades meet in a ring; it opens from its middle out, the hole wider than the door at the end
-      const R0 = Math.hypot(W, H) / 2 + q, Rh = (1 - f) * R0;
-      if (f >= 1) { spB(a, y0, b, y1, Bl); disc(cx, cy, 0.48 * W, G, 1); disc(cx, cy, 0.48 * W - q, Bl, 1.3); for (let k = 0; k < 6; k++) { const an = (k * Math.PI) / 3 + 0.4; line(cx, cy, snap(cx + Math.cos(an) * (0.48 * W - q)), snap(cy + Math.sin(an) * (0.48 * W - q)), K, 1, 1); } }
-      else if (f > 0) for (let y = y0; y < y1; y += q) { const d = y + q / 2 - cy; if (Math.abs(d) >= Rh) spB(a, y, b, y + q, Bl); else { const hw = Math.sqrt(Rh * Rh - d * d); spB(a, y, cx - hw, y + q, Bl); spB(cx + hw, y, b, y + q, Bl); } }
-    }
+    const lh = snap(f * H), bot = y0 + lh, ny = bot - H; if (lh > 0) { spB(a, y0, b, bot, Bl); spB(a, y0, a + q, bot, Bl, 1.5); spB(b - q, y0, b, bot, Bl, 1.5); spB(a, bot - q, b, bot, Bl, 1.5); }
+    for (const v of [0.2, 0.5, 0.8]) if (ny + v * H > y0) spB(a, ny + v * H, a + 2 * q, ny + v * H + 3 * q, G);   // its hinges
+    const wy = ny + 0.55 * H, wr = 0.62 * (W / 2); if (wy - wr > y0) { disc(cx, snap(wy), wr, G, 1); disc(cx, snap(wy), wr - q, K, 1); const an = (1 - f) * 4; for (const k of [0, 1]) { const c = Math.cos(an + k * Math.PI / 2) * (wr - q), s = Math.sin(an + k * Math.PI / 2) * (wr - q); line(snap(cx - c), snap(wy - s), snap(cx + c), snap(wy + s), G, 1, 1); } disc(cx, snap(wy), q, G, 1); }
     for (const x of [x0, x1 - q]) box(x, y0, x + q, y1, G, 1.5, 0, 10, 0);   // its jambs
     box(x0 - q, yt, x1 + q, y0, Bl, 1, 0, 10, 0); box(x0 - q, y0 - q, x1 + q, y0, K, 1, 0, 10, 0);   // its header
     box(cx - q, yt + q, cx + q, yt + 3 * q, r.gone && f <= 0 ? PAL.orange : K, 1, 0, 10, 0);   // its lamp
   };
-  const spCrack = (r) => {   // the cracked hull panel (SPCAVE_V.crack): a blue panel, rivets, its white edge, its weak place each its own way; through it now and then a
+  const spCrack = (r) => {   // the cracked hull panel (Д402 «A»): a blue panel, rivets at its ends, its white edge, a zigzag crack across it; through it now and then a
     // glint of gold (the coins behind it); a gate's keystone's rim blinks
-    const V = SPCAVE_V.crack, q = PIX.size, t = lv.tile, x0 = snap(r.x0), x1 = snap(r.x1), y0 = snap(r.y0), y1 = snap(r.y1), W = x1 - x0, H = y1 - y0, Bl = th.block, K = PAL.black, G = PAL.gray;
+    const q = PIX.size, x0 = snap(r.x0), x1 = snap(r.x1), y0 = snap(r.y0), y1 = snap(r.y1), W = x1 - x0, H = y1 - y0, K = PAL.black;
     const X = (u) => snap(x0 + u * W), Y = (v) => snap(y0 + v * H), riv = (u, v) => spB(X(u), Y(v), X(u) + q, Y(v) + q, K);
-    let gx = 0.55, gy = 0.5, dent = null;
-    if (V === 'D') dent = [0.35, 0.75];
-    if (dent) { spB(x0, y0, X(dent[0]), y1, Bl); spB(X(dent[1]), y0, x1, y1, Bl); spB(X(dent[0]), y0 + 2 * q, X(dent[1]), y1, Bl); spB(X(dent[0]) + 2 * q, y0 + q, X(dent[1]) - 2 * q, y0 + 3 * q, Bl);
-      spB(X(dent[0]), y0, X(dent[0]) + 2 * q, y0 + q, th.lip); spB(X(dent[1]) - 2 * q, y0, X(dent[1]), y0 + q, th.lip); spB(X(dent[0]) + 2 * q, y0 + q, X(dent[1]) - 2 * q, y0 + 2 * q, th.lip); spB(X(dent[0]) + 3 * q, y0 + 4 * q, X(dent[1]) - 3 * q, y0 + 5 * q, K); gx = 0.55; gy = 0.6; }
-    else if (V === 'C') { spB(x0, y0, X(0.55), y1, Bl); for (let k = 0, n = 4, s = (x1 - X(0.55) - 2 * q) / n; k < n; k++) spB(X(0.55) + 2 * q + k * s, y0 + k * q, X(0.55) + 2 * q + (k + 1) * s, y1 + k * q, Bl);
-      spB(X(0.55), y0, X(0.55) + 2 * q, y1, K); gx = 0.56; }
-    else spB(x0, y0, x1, y1, Bl);
-    spB(x0, y1 - q, x1, y1, Bl, 1.5);
-    if (V !== 'D') { spB(x0, y0, V === 'C' ? X(0.55) : x1, y0 + q, th.lip); if (V === 'C') for (let k = 0, n = 4, s = (x1 - X(0.55) - 2 * q) / n; k < n; k++) spB(X(0.55) + 2 * q + k * s, y0 + k * q, X(0.55) + 2 * q + (k + 1) * s, y0 + (k + 1) * q, th.lip); }
+    spB(x0, y0, x1, y1, th.block); spB(x0, y1 - q, x1, y1, th.block, 1.5); spB(x0, y0, x1, y0 + q, th.lip);
     for (const u of [0.04, 0.93]) for (const v of [0.25, 0.7]) riv(u, v);
-    if (V === 'A') { const P = [[0.42, 0.05], [0.5, 0.35], [0.44, 0.5], [0.56, 0.75], [0.5, 0.95]]; for (let k = 0; k < P.length - 1; k++) line(X(P[k][0]), Y(P[k][1]), X(P[k + 1][0]), Y(P[k + 1][1]), K, 1, 2); gx = 0.47; gy = 0.45; }
-    else if (V === 'B') { for (let k = 0; k < 8; k++) { const an = (k * Math.PI) / 4 + 0.3, l = (k % 2 ? 0.32 : 0.45) * H * 1.3; line(X(0.6), Y(0.5), snap(X(0.6) + Math.cos(an) * l * 1.4), snap(Y(0.5) + Math.sin(an) * l * 0.7), K, 1, 1); } spB(X(0.6) - q, Y(0.5) - q, X(0.6) + q, Y(0.5) + q, K); gx = 0.6; }
-    else if (V === 'E') { const P = [[0.5, 0.05], [0.53, 0.3], [0.48, 0.55], [0.52, 0.8], [0.5, 0.95]]; for (let k = 0; k < P.length - 1; k++) line(X(P[k][0]), Y(P[k][1]), X(P[k + 1][0]), Y(P[k + 1][1]), K, 1, 1);
-      spB(X(0.43), Y(0.3), X(0.43) + q, Y(0.3) + q, G); spB(X(0.58), Y(0.65), X(0.58) + q, Y(0.65) + q, G); spB(X(0.56), y0 - q, X(0.56) + q, y0, G); gx = 0.5; }
-    else if (V === 'F') { for (let u = 0.62; u < 0.9; u += 0.1) for (let k = 0; k < 4; k++) spB(X(u) + k * q, Y(0.2) + k * q * 1.5, X(u) + (k + 2) * q, Y(0.2) + (k + 1) * q * 1.5, G); const P = [[0.47, 0.05], [0.5, 0.4], [0.45, 0.6], [0.49, 0.95]]; for (let k = 0; k < P.length - 1; k++) line(X(P[k][0]), Y(P[k][1]), X(P[k + 1][0]), Y(P[k + 1][1]), K, 1, 2); gx = 0.48; }
-    if ((T * 1.3 + r.x0 * 0.01) % 2 < 0.25) spB(X(gx) - q, Y(gy) - q, X(gx) + q, Y(gy) + q, INK.coin);
+    const P = [[0.42, 0.05], [0.5, 0.35], [0.44, 0.5], [0.56, 0.75], [0.5, 0.95]]; for (let k = 0; k < P.length - 1; k++) line(X(P[k][0]), Y(P[k][1]), X(P[k + 1][0]), Y(P[k + 1][1]), K, 1, 2);
+    if ((T * 1.3 + r.x0 * 0.01) % 2 < 0.25) spB(X(0.47) - q, Y(0.45) - q, X(0.47) + q, Y(0.45) + q, INK.coin);
     if (r.key && (T * 1.6) % 1 < 0.5) for (const [p0, p1, p2, p3] of [[r.x0, r.y0, r.x1, r.y0 + q], [r.x0, r.y1 - q, r.x1, r.y1], [r.x0, r.y0, r.x0 + q, r.y1], [r.x1 - q, r.y0, r.x1, r.y1]]) box(p0, p1, p2, p3, INK.coin, 1, 0, 10, 0);
   };
   for (const r of lv.rects) {
@@ -8746,16 +8696,10 @@ Renderer.prototype.draw = function (g, alpha) {
     const left = on ? s.t + SHUTTER.open - lv.t : 0, lamp = s.done ? K : !on ? PAL.aqua : Math.floor((lv.t - s.t) * (left < 1.5 ? 5 : 3)) % 2 ? K : PAL.orange;
     const X = (u) => sn2(x + u * w), Y = (v) => sn2(top + v * h), bx = (u0, v0, u1, v1, c) => box(X(u0), Y(v0), X(u1), Y(v1), c, 1, 0, 10, 0);
     const lit = (u, v) => box(X(u), Y(v), X(u) + 2 * q, Y(v) + 2 * q, lamp, 1, 0, 10, 0), post = (u, v) => box(X(u) - q, Y(v), X(u) + q, foot, G, 1, 0, 10, 0);
-    if (spcv) {   // Space's airlock button (SPCAVE_V.button): its key, cap or lamp lit as the lever box's lamp (ready aqua, pressed blinking orange, done dark: its
-      // steel then); pressed, it goes in or down. Grey and blue steel, no white, no red
-      const V = SPCAVE_V.button, lc = lamp === K ? G : lamp, pd = on ? 0.08 : 0;
-      if (V === 'A') { bx(-0.8, 0.86, 0.8, 1, G); bx(-0.4, 0.42 + pd, 0.4, 0.86, Bl); bx(-1, 0.22 + 2 * pd, 1, 0.44 + pd, lc); bx(-1, 0.38 + pd, 1, 0.44 + pd, G); }   // a mushroom button on a pedestal
-      else if (V === 'B') { post(0, 0.55); bx(-0.9, 0, 0.9, 0.58, G); bx(-0.6, 0.08, 0.6, 0.4, K); bx(-0.36, 0.13 + pd, 0.36, 0.35, lc); for (const u of [-0.5, 0, 0.5]) bx(u - 0.1, 0.46, u + 0.1, 0.52, K); }   // a panel on a post, a square key
-      else if (V === 'C') { bx(-1, 0.78, 1, 1, Bl); if (on) bx(-1, 0.68, 1, 0.78, G); else { bx(-1, 0.46, -0.3, 0.78, G); bx(-0.3, 0.56, 0.4, 0.78, G); bx(0.4, 0.66, 1, 0.78, G); } lit(0.45, 0.84); }   // a foot pedal
-      else if (V === 'D') { const ly = on ? 0.55 : 0.22; for (const u of [-1, 0.8]) bx(u, 0, u + 0.2, 1, G); bx(-1, 0, 1, 0.08, G); bx(-1, 0.92, 1, 1, G); bx(-0.8, 0.74, 0.8, 0.88, G);
-        for (const u of [-0.6, -0.1, 0.4]) bx(u, 0.74, u + 0.22, 0.88, K); bx(-0.1, ly, 0.1, 0.74, G); bx(-0.5, ly - 0.08, 0.5, ly, Bl); bx(-0.15, 0.08, 0.15, 0.16, lc); }   // a T lever in a guard cage
-      else if (V === 'E') { post(0, 0.6); bx(-1, 0.1, 1, 0.62, G); bx(-0.85, 0.17, 0.15, 0.45, K); bx(-0.7, 0.23, -0.1, 0.28, PAL.aqua); bx(-0.7, 0.34, -0.35, 0.39, PAL.aqua); disc(X(0.55), Y(0.3) + (on ? q : 0), 1.5 * q, lc, 1); }   // a console, its screen, one round button
-      else { const hy = on ? 0.55 : 0.34; bx(-0.7, 0, 0.7, 1, G); bx(-0.45, 0.3, 0.45, 0.92, K); bx(-0.2, 0.07, 0.2, 0.2, lc); bx(-0.08, hy, 0.08, hy + 0.3, Bl); bx(-0.36, hy, 0.36, hy + 0.08, Bl); }   // a release handle in its recess
+    if (spcv) {   // Space's airlock button (Д401 «A»): a mushroom button on a pedestal, its cap lit as the lever box's lamp (ready aqua, pressed blinking orange,
+      // done dark: its steel then); pressed, it goes down. Grey and blue steel, no white, no red
+      const lc = lamp === K ? G : lamp, pd = on ? 0.08 : 0;
+      bx(-0.8, 0.86, 0.8, 1, G); bx(-0.4, 0.42 + pd, 0.4, 0.86, Bl); bx(-1, 0.22 + 2 * pd, 1, 0.44 + pd, lc); bx(-1, 0.38 + pd, 1, 0.44 + pd, G);
       continue;
     }
     if (scv) {   // the TV Tower's: a lift's call panel on a post, an up arrow over its round button, the button lit as the lever box's lamp (ready aqua, pressed

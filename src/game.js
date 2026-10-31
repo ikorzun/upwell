@@ -4497,7 +4497,8 @@ function layoutWide(vw, vh) {
   renderer.resize(view.w, view.h, PIXELATED ? 1 / PIX.size : (window.devicePixelRatio || 1) * s);
   game.applyMods();
 }
-function wideTo(on) { if (wideWant === on) return; wideWant = on; wideSwitch = true; layout(); wideSwitch = false; }
+function wideTo(on) { if (wideWant === on) return; wideWant = on; wideSwitch = true; layout(); wideSwitch = false; if (window.fxRetro) fxRetro(); }   // (the CRT's lines
+// over the canvas as it is now: they kept the last screen's box for up to a second, a band of them)
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
 // start of the next frame, right before drawing.
 function queueLayout() { layoutQueued = true; }

@@ -4792,9 +4792,13 @@ class Level {
     for (const r of this.rects) if (!r.gone && r.y1 >= y0 && r.y0 <= y1) out.push(r);
     return out;
   }
+  coatOn(x, y) {   // a wide level's spine: the coat of the lane's wall that is this face of it (WIDE), or null
+    for (const s of this.coats) if (s.x === x && y >= s.y0 && y <= s.y1) return s.kind;
+    return null;
+  }
   coatAt(side, y) {   // 'ice', 'moss', 'rubber' or null
     for (const s of this.coats) if (s.side === side && y >= s.y0 && y <= s.y1 && (s.x === undefined || s.x === (side === 1 ? this.l : this.r))) return s.kind;   // (a wide level's on the spine:
-    // not the outer walls', and the spine's faces plain in P0)
+    // not the outer walls', coatOn)
     return null;
   }
   // Once per step: movers slide, touched crumbles count down, springs settle, the fire rises (in play only).
@@ -4909,7 +4913,7 @@ Body.prototype.collideLevel = function (lv, h) {
     let gl = glue[i];
     if (gl) {   // pulled off, slid past the end of its surface, or the surface is gone
       const off = gl === 1 ? x[i] - gS[i] : gl === 2 ? gS[i] - x[i] : y[i] - gS[i], along = gl === 4 ? x[i] : y[i];
-      const coat = gl !== 4 && !gR[i] ? lv.coatAt(gl, y[i]) : null;   // ice and rubber hold nothing, not even a patch sliding down onto them
+      const coat = gl === 4 ? null : !gR[i] ? lv.coatAt(gl, y[i]) : gR[i].spine ? lv.coatOn(gl === 2 ? gR[i].x0 : gR[i].x1, y[i]) : null;   // (a wide level's spine: its faces' coats, coatOn)   // ice and rubber hold nothing, not even a patch sliding down onto them
       if (off > pull || along < gA[i] || along > gB[i] || (gR[i] && gR[i].gone) || coat === 'ice' || coat === 'rubber') gl = glue[i] = 0;
     }
     if (gl) {   // bent sharper than 100° (a crumple frozen flat, or the top of the patch drawn
@@ -4920,7 +4924,7 @@ Body.prototype.collideLevel = function (lv, h) {
     if (gl === 4) { y[i] = gS[i]; mask |= 4; sumT += x[i] - px[i]; numT++; continue; }   // on a ceiling
     if (gl) {   // on a wall
       x[i] = gS[i]; mask |= gl;
-      if (!gR[i] && lv.coatAt(gl, y[i]) === 'moss') moss |= gl;
+      if ((!gR[i] ? lv.coatAt(gl, y[i]) : gR[i].spine ? lv.coatOn(gl === 2 ? gR[i].x0 : gR[i].x1, y[i]) : null) === 'moss') moss |= gl;
       if (gl === 1) { sumL += y[i] - py[i]; numL++; } else { sumR += y[i] - py[i]; numR++; }
     } else if (x[i] < L) {   // ice and rubber take nothing, moss takes any touch
       const coat = lv.coatAt(1, y[i]), v = (px[i] - x[i]) / h;
@@ -4957,7 +4961,8 @@ Body.prototype.collideLevel = function (lv, h) {
         if (px[i] >= x1 && dR < best) { best = dR; face = 1; }
         if (!face) { best = dT; face = 8; if (dB < best) { best = dB; face = 4; } if (dL < best) { best = dL; face = 2; } if (dR < best) face = 1; }
       }
-      const rf = r.slick ? SLICK.fr : fr, st = !r.slick && !glue[i] && convex[i];
+      const sc = r.spine && (face === 1 || face === 2) ? lv.coatOn(face === 2 ? r.x0 : r.x1, y[i]) : null;   // a wide level's spine: the coat of the lane's wall by it, as the outer walls'
+      const rf = r.slick || sc === 'ice' ? SLICK.fr : fr, st = !r.slick && !glue[i] && convex[i] && sc !== 'ice' && sc !== 'rubber';
       if (hero && (r.crumble || r.ac)) r.hit = true;
       if (face === 8) {
         const v = (y[i] - py[i]) / h;
@@ -4965,8 +4970,8 @@ Body.prototype.collideLevel = function (lv, h) {
         y[i] = y0; x[i] -= (x[i] - px[i] - (hero && r.move && (r.move.wheel || r.move.seesaw) ? 0 : r.dx) * carry) * rf; mask |= 8; this.floorX += x[i]; this.floorN++; this.floorY = r.y0; this.floorRect = r;   // friction against the ledge's own motion: a mover carries what rides it (the hero on a mill's board is moved with it, Game.step)
         if ((r.spring || r.bouncy) && hero) this.springHit = r;
       } else if (face === 4) { const v = (py[i] - y[i]) / h; if (v > hitW[2]) hitW[2] = v; y[i] = y1; x[i] -= (x[i] - px[i]) * rf; mask |= 4; if (canTop && st && (CEIL.any || r.moss)) stick(i, 4, y1, x0, x1, r); }
-      else if (face === 2) { const v = (x[i] - px[i]) / h; if (v > hitW[1]) hitW[1] = v; x[i] = x0; y[i] -= (y[i] - py[i]) * rf; mask |= 2; if (canStick && st && (v > MOVE.cling || this.pressX > 0)) stick(i, 2, x0, y0, y1, r); }
-      else { const v = (px[i] - x[i]) / h; if (v > hitW[0]) hitW[0] = v; x[i] = x1; y[i] -= (y[i] - py[i]) * rf; mask |= 1; if (canStick && st && (v > MOVE.cling || this.pressX < 0)) stick(i, 1, x1, y0, y1, r); }
+      else if (face === 2) { const v = (x[i] - px[i]) / h; if (v > hitW[1]) hitW[1] = v; x[i] = x0; y[i] -= (y[i] - py[i]) * rf; mask |= 2; if (sc === 'rubber') this.rubber = 2; if (canStick && st && (sc === 'moss' || v > MOVE.cling || this.pressX > 0)) stick(i, 2, x0, y0, y1, r); }
+      else { const v = (px[i] - x[i]) / h; if (v > hitW[0]) hitW[0] = v; x[i] = x1; y[i] -= (y[i] - py[i]) * rf; mask |= 1; if (sc === 'rubber') this.rubber = 1; if (canStick && st && (sc === 'moss' || v > MOVE.cling || this.pressX < 0)) stick(i, 1, x1, y0, y1, r); }
     }
   }
   if (numL + numR + numT) {   // each stuck patch slides no faster than `slide` (on moss, a lot slower); one under a ceiling creeps along it while pressed
@@ -6326,15 +6331,20 @@ Renderer.prototype.draw = function (g, alpha) {
     else F(x, y - r * 0.1 + bob, r * 0.45, 0, 0, r * 0.45, c, 1, 3, 1.1, 0.75, 0.2);   // ^: the way out
   };
   for (const s of lv.coats) {   // in their own colours: ice striped white, rubber ribbed black, moss solid with a fringe of tufts over its edge
-    if (!seen(s.y0, s.y1) || (s.x !== undefined && s.x !== (s.side === 1 ? lv.l : lv.r))) continue;   // (a wide level's on the spine: not drawn, its faces plain in P0)
-    const x0 = s.side === 1 ? 0 : lv.r, x1 = s.side === 1 ? lv.l : W;
-    if (s.kind === 'ice') box(x0, s.y0, x1, s.y1, th.slick, 0.9, 0, 7, 9);
-    else if (s.kind === 'rubber') box(x0, s.y0, x1, s.y1, th.rubber, 1, 0, 8, 8);
-    else {
-      box(x0, s.y0, x1, s.y1, th.moss, 1, 0, 10, 0);
-      if (th.rime) for (let y = s.y0 + 0.2 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.3 * R, k++) { const e = s.side === 1 ? 1 : -1, l = (k % 3 === 1 ? 0.34 : 0.22) * R, ex = s.side === 1 ? lv.l : lv.r;   // rime (Fuji's, owner d36 «А»: no green in the ice): crystals
-        F(ex + (e * l) / 2, y, 0, 0.1 * R, (-e * l) / 2, 0, th.moss, 1, 6, 0.1 * R, l / 2, 0.2 * R); if (k % 2) box(ex + e * 0.06 * R - PIX.size / 2, y - PIX.size / 2, ex + e * 0.06 * R + PIX.size / 2, y + PIX.size / 2, PAL.white, 1, 0, 10, 0); }   // out of its edge, a glint here and there
-      else for (let y = s.y0 + 0.25 * R, k = 0; y < s.y1 - 0.15 * R; y += 0.42 * R, k++) disc(s.side === 1 ? lv.l : lv.r, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
+    if (!seen(s.y0, s.y1)) continue;
+    const ex = s.x !== undefined ? s.x : s.side === 1 ? lv.l : lv.r, e = s.side === 1 ? 1 : -1, outer = ex === (s.side === 1 ? lv.l : lv.r);   // its edge, and which way the play is from it
+    const spans = outer ? [[s.y0, s.y1]] : lv.rects.filter((q) => q.spine && (q.x0 === ex || q.x1 === ex) && q.y1 > s.y0 && q.y0 < s.y1).map((q) => [Math.max(q.y0, s.y0), Math.min(q.y1, s.y1)]);   // (a wide
+    // level's on the spine: on its blocks, not over a passage; as wide as the outer walls)
+    for (const [ya, yb] of spans) {
+      const x0 = outer ? (s.side === 1 ? 0 : lv.r) : e > 0 ? ex - lv.l : ex, x1 = outer ? (s.side === 1 ? lv.l : W) : e > 0 ? ex : ex + lv.l;
+      if (s.kind === 'ice') box(x0, ya, x1, yb, th.slick, 0.9, 0, 7, 9);
+      else if (s.kind === 'rubber') box(x0, ya, x1, yb, th.rubber, 1, 0, 8, 8);
+      else {
+        box(x0, ya, x1, yb, th.moss, 1, 0, 10, 0);
+        if (th.rime) for (let y = ya + 0.2 * R, k = 0; y < yb - 0.15 * R; y += 0.3 * R, k++) { const l = (k % 3 === 1 ? 0.34 : 0.22) * R;   // rime (Fuji's, owner d36 «А»: no green in the ice): crystals
+          F(ex + (e * l) / 2, y, 0, 0.1 * R, (-e * l) / 2, 0, th.moss, 1, 6, 0.1 * R, l / 2, 0.2 * R); if (k % 2) box(ex + e * 0.06 * R - PIX.size / 2, y - PIX.size / 2, ex + e * 0.06 * R + PIX.size / 2, y + PIX.size / 2, PAL.white, 1, 0, 10, 0); }   // out of its edge, a glint here and there
+        else for (let y = ya + 0.25 * R, k = 0; y < yb - 0.15 * R; y += 0.42 * R, k++) disc(ex, y, (k & 1 ? 0.17 : 0.27) * R, th.moss, 1);
+      }
     }
   }
   for (const u of lv.runes) if (seen(u.y - R, u.y + R)) {   // a world's runes on the back wall (RUNE): a faint cloth, the rune knitted on it in the world's ink

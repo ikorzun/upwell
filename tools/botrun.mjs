@@ -14,7 +14,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const CHROME = process.env.CHROME || `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
+const CHROME = process.env.CHROME || `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
 const PAGE = process.env.PAGE || 'http://localhost:8793/';
 const [seed = '5', ...asked] = process.argv.slice(2);
 const levels = asked.length ? asked : [1, 2, 3, 4].flatMap((w) => [1, 2, 3].map((s) => `${w}-${s}`));

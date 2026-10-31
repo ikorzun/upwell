@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const CHROME = `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
+const CHROME = `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
 const [setupFile, out] = process.argv.slice(2);
 const chrome = spawn(CHROME, ['--remote-debugging-port=0', `--user-data-dir=${mkdtempSync(join(tmpdir(), 'upwell-look-'))}`,
   '--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--autoplay-policy=no-user-gesture-required', '--lang=ru-RU', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });

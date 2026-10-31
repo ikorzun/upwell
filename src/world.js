@@ -89,8 +89,8 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // 34 in all, a tile `tile` px of its own (R as a 408-px phone's: the jumps a phone's), the window showing it view.s times bigger. Lane A is the phone's level
 // as a phone lays it (its chunks, coins, enemies, rooms and tasks: owner, Ш9 «А», a third star's coins a phone's); lane B a second way up of the same recipe
 // on generators of its own, a step harder, with no rooms, folk, candies or tasks. The spine starts `open` rows over the floor and opens a passage `pass` rows
-// tall every `every` rows; the fire's measures a phone's `rows` (view.fh)
-const WIDE = { cols: 34, lane: 16, spine: 2, tile: 24, rows: 36.9, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
+// tall every `every` rows; the fire's measures a phone's `rows` (view.fh); `seen` rows at least on the screen (a window wider than 16:9: the width left the walls')
+const WIDE = { cols: 34, lane: 16, spine: 2, tile: 24, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
 // from `every` rows a passage may go to be open on both sides)
 // What a lane keeps of its own while the other is laid (Level.lane): its walls, its top and last chunk, its plan, its generators
 const LANE_KEYS = ['l', 'r', 'rc', 'top', 'last', 'lastFeet', 'placed', 'rested', 'intro', 'plan', 'fizzAt', 'fizzKind', 'folkAt', 'runeAt', 'ringAt', 'spotAt', 'gateAt', 'gateId',

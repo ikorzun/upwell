@@ -4501,7 +4501,7 @@ function layout() {
 // view.s times bigger), the width left over the walls'; a picture's dot about the column's 2 px of the level's; the page's words and buttons in CSS px over all of
 // it, its panels a column in the middle (--colW); no sides. A resize keeps the level, only its scale changes (owner, Ш11 «А»)
 function layoutWide(vw, vh) {
-  const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(W / (WIDE.cols + 1) / P + 1e-6)) * P, s = T / WIDE.tile;
+  const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(Math.min(W / (WIDE.cols + 1), H / WIDE.seen) / P + 1e-6)) * P, s = T / WIDE.tile;
   PIX.size = P / s; PIX.base = Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;
   view.w = W / s; view.h = H / s; view.left = 0; view.k = 1; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile; CAM.anchor = WIDE_ANCHOR || CAM_ANCHOR;
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = '0px'; }

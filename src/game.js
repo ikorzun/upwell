@@ -127,7 +127,10 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // its bonus race and its boss as before; every other screen a column as before (wideTo)
 const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera to try by hand (the plan's question К: ?anchor=0.7, Mochi
 // lower, more rows over him), its own CAM.anchor (layoutWide); every other screen the game's
-const WIDE_ON = /[?&]wide\b/.test(location.search), wideFor = (w, rc) => WIDE_ON && !coarse && CAMPAIGN[w].world.id === 'mine' && !rc.boss && rc.bonus == null && !rc.script;
+const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && !rc.boss && rc.bonus == null && !rc.script;   // a computer's
+// levels as wide as its window (owner, ПК5/ПК6 «Б»; ?nowide the 16-column well): every world's tiers, the daily well (Ш8 «Б») and a run's floors, in a window
+// at least as wide as it is tall when the level starts; a boss's, a bonus race's and the scripted lesson 1-1 stay a 16-column well till they are reworked
+// wide, the plan's P2
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
 // come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu, its lock
@@ -1101,6 +1104,8 @@ class Game {
     this.hero.isHero = true; this.hero.dropT = 0; this.hero.dropRect = null; this.hero.gScale = this.heroG();   // (dropT, dropRect: a plank it is let through, DROP)
     this.startY = this.hero.cy; this.appearT = this.lv.t;
   }
+  heroTo(k) { for (const b of [this.hero, ...this.followers.map((f) => f.body), ...this.swarm]) { const cx = b.cx, cy = b.cy; b.R *= k; b.area *= k * k; b.targetArea *= k * k; b.place(cx, cy); } }   // the hero (and
+  // those with him) k times as big, laid again where he is (a wide level's room in the column: enterRoom)
   placeHero(x, y) {
     const b = this.hero;
     b.translate(x - b.cx, y - b.cy);
@@ -1109,7 +1114,7 @@ class Game {
   // The menu's scene (owner, 2026-10-23, the Figma «Main»): no level behind it, its backdrop (Renderer.drawMenu) and the hero alone, big, over
   // the colours, to drag and press as in Gum (menuTouch); ui.menu sizes and places it (menuFit). Play or Continue builds the level as ever.
   toMenu() {
-    wideTo(false);
+    wideTo(false); this.wellR = 0;   // (left from a wide level's room too)
     if (this.held) this.stageOut();   // (from a dialog with Moti in it: its level first, as it was)
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
@@ -1150,9 +1155,10 @@ class Game {
     if (save.runs <= 2 && daily) ui.toast(t(howTo()), 3500);   // (a run's first floor says it: the daily well's has no words on it)
   }
   buildLevel(newHero) {
-    this.held = null;   // (a dialog's kept level gone with a new one: Game.stageIn)
-    wideTo(this.mode === 'camp' && !this.bonus && wideFor(this.world, this.rc));   // (the view's layout first: the level is laid to it)
-    const W = view.w, H = view.h, rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
+    this.held = null; this.wellR = 0;   // (a dialog's kept level gone with a new one: Game.stageIn; a wide level's room's left with it)
+    const rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null;
+    wideTo(!this.bonus && wideFor(rc || { boss: this.world >= WORLDS.length }));   // (the view's layout first: the level is laid to it)
+    const W = view.w, H = view.h, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = view.wide ? WIDE.tile : clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);   // (a wide level's: a 408-px phone's, WIDE)
     const seed = nextSeed != null ? nextSeed : this.daily != null ? daySeed(this.daily, this.world, this.stage, !!this.bonus) : (Math.random() * 4294967296) >>> 0;
@@ -1250,8 +1256,8 @@ class Game {
       lv.fizzAt = (lv.fizzAt || []).map(Y); for (const key of ['ringAt', 'spotAt', 'gateAt', 'setAt']) if (num(lv[key])) lv[key] = Y(lv[key]);
       for (const b of lv.bubbles) if (b.room) level(b.room);   // a room built (its frame the same: the wall, the floor)
     };
-    level(this.well || this.lv); level(this.lv);
-    this.R *= k; this.startY = Y(this.startY);
+    if (!this.wellR) level(this.well || this.lv); level(this.lv);   // (a wide level behind a column room keeps its own px: only the room and the hero change)
+    this.R *= k; if (!this.wellR) this.startY = Y(this.startY);
     for (const b of [this.hero, ...this.followers.map((f) => f.body), ...this.swarm]) body(b);
     this.trail = this.trail.map(([x, y]) => [X(x), Y(y)]); for (const s of this.safes) s.dx *= k;
     if (this.rocket) { this.rocket.to = Y(this.rocket.to); if (num(this.rocket.y)) this.rocket.y = Y(this.rocket.y); }
@@ -2196,7 +2202,8 @@ class Game {
   prog(kind, data, msg = true) {
     if (msg) pmsg('level_' + kind, this.lvl());
     const mode = this.bonus ? 'bonus' : this.daily != null ? 'daily' : this.mode === 'camp' ? 'campaign' : this.endless ? 'endless' : 'run';
-    track('progression_' + kind, { level_id: this.levelId(), ...(mode === 'campaign' ? { step_index: this.world * 10 + this.stage + 1 } : mode === 'daily' ? { step_index: this.stage + 1 } : {}), mode, world: this.lvl().world, ...data });
+    track('progression_' + kind, { level_id: this.levelId(), ...(mode === 'campaign' ? { step_index: this.world * 10 + this.stage + 1 } : mode === 'daily' ? { step_index: this.stage + 1 } : {}), mode, world: this.lvl().world, layout: view.wide ? 'wide' : 'column', ...data });   // (layout: a computer's
+    // wide level or the 16-column well, the plan's P1 telemetry)
   }
   lost(reason) { return { reason, ...(reason === 'died' ? { cause: (this.lastBy === 'fire' && this.lastCause) || this.lastBy || 'other' } : {}), seconds: Math.round(this.lv.t), height: Math.round(this.levelM), ...this.part() }; }   // a loss's
   // data: died (by its last hit) or quit
@@ -2442,6 +2449,11 @@ class Game {
   // ── Rooms behind bubbles (time stands still in the shaft meanwhile) ──
   enterRoom(bub) {
     track('room_enter', { kind: bub.kind, ...this.at() });   // a shop, a stash, a trial gone into (the gameplay review: none of it was seen)
+    if (view.wide) {   // a wide level's room in the column, as on a phone, with its R (its rooms are 21 rows; a wide screen showed 13 of them and cut their vaults off,
+      // the plan's P2): the hero as big as the column's, back to the level's on the way out (leaveRoom)
+      wideTo(false); this.wellR = this.R; this.wellW = this.builtW; this.builtW = view.w;
+      this.R = bub.room ? bub.room.R : clamp((view.w - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax); this.heroTo(this.R / this.wellR); this.applyMods();
+    }
     if (!bub.room) {
       const room = new Level();
       room.reset({ kind: bub.kind, goal: bub.goal, w: view.w, h: view.h, R: this.R, seed: (this.lv.rng() * 4294967296) >>> 0, world: this.lv.world, theme: this.lv.world.theme, hard: this.hard, keep: this.roomFloor(), cave: bub.kind === 'treasure' ? this.caveNext(this.lv.world) : undefined });   // in its world's colours, a shop's and a stash's alike (owner: «пещеры и магазины внутри … такого же цвета как и мир»)
@@ -2511,6 +2523,7 @@ class Game {
   leaveRoom() {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
+    if (this.wellR) { this.heroTo(this.wellR / this.R); this.R = this.wellR; this.builtW = this.wellW; this.wellR = 0; wideTo(true); this.applyMods(); }   // (out of a column room into its wide level)
     this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R); this.regroup();   // beside the door, on its ledge
     bub.cd = 1.2; this.hero.squeezeIn = 0; ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
     if ((bub.kind === 'treasure' && !room.coins.length) || bub.kind === 'trial') {   // a stash with all its coins taken, or a trial (TRIAL: one try, left halfway or not): its way in closes behind the hero
@@ -4462,7 +4475,7 @@ function layout() {
   if (vw < 120 || vh < 120) return;   // a collapsed frame or hidden host: keep the last layout
   if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
   PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
-  if (wideWant && !coarse && vw >= vh) { layoutWide(vw, vh); return; }
+  if (wideWant && !coarse) { layoutWide(vw, vh); return; }   // (a wide level wide whatever the window becomes: a resize keeps the level, only its scale changes, Ш11 «А»)
   const d = window.devicePixelRatio || 1, W0 = vw < vh ? vw : Math.min(vw, Math.max(Math.round(vh * 0.5625), vh >= COL_TALL ? COL_MIN : 0)), W = Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = Math.floor(vh / PIX.size + 1e-6) * PIX.size;   // a phone
   // held upright: all of its width; a whole number of game pixels across and down, on the screen's own pixels (left), so each is as many of them as the next
   // (owner: «пиксель в пиксель на всех устройствах»; a phone's was its full width and height, a game pixel 4.5 of an iPhone's, lines 4 and 5 by turns)
@@ -4504,11 +4517,20 @@ function layout() {
 function layoutWide(vw, vh) {
   const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(Math.min(W / (WIDE.cols + 1), H / WIDE.seen) / P + 1e-6)) * P, s = T / WIDE.tile;
   PIX.size = P / s; PIX.base = Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;
-  view.w = W / s; view.h = H / s; view.left = 0; view.k = 1; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile; CAM.anchor = WIDE_ANCHOR || CAM_ANCHOR;
-  for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = '0px'; }
-  uiEl.style.transform = ''; uiEl.classList.add('wide'); uiEl.style.setProperty('--colW', Math.round(Math.max(COL_MIN, H * 0.5625)) + 'px');
-  document.documentElement.style.setProperty('--k', 1);
-  $('sides').classList.remove('on'); renderer.sides = null;
+  const Wc = (WIDE.cols + 1) * T, d = window.devicePixelRatio || 1, left = Math.round(((vw - Wc) / 2) * d) / d;   // the level always WIDE.cols + 1 tiles across, in
+  // the middle: laid the same in any window, so a resize keeps it in the middle too (it kept a 16:9 one at the left of a 21:9 window); the rest the world's far
+  // view beside it, as the column's (Ш11 «А», П3 «А»)
+  const fit = H / (COL_MIN / 0.5625), k = fit >= 1 ? 1 : d * fit >= 1 ? Math.floor(d * fit + 1e-6) / d : fit;   // a short window's words and buttons laid out as the
+  // column's (its 320 × 569) and shown k times smaller, a whole step where there is one (Ш3 «Б»): at 360 tall the Win's stars landed 60 px over the frame
+  view.w = Wc / s; view.h = H / s; view.left = left; view.k = k; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile; CAM.anchor = WIDE_ANCHOR || CAM_ANCHOR;
+  Object.assign(canvas.style, { width: Wc + 'px', height: H + 'px', left: left + 'px' });
+  Object.assign(uiEl.style, { width: Wc / k + 'px', height: H / k + 'px', left: left + 'px', transform: k < 1 ? 'scale(' + k + ')' : '', transformOrigin: '0 0' });
+  uiEl.classList.add('wide'); uiEl.style.setProperty('--colW', Math.round(Math.max(COL_MIN, (H / k) * 0.5625)) + 'px');
+  document.documentElement.style.setProperty('--k', k);
+  const sides = $('sides'), Ws = Math.floor(Math.min(vw, 2 * H) / P + 1e-6) * P, on = Ws > Wc + 4 * P;   // (2:1 at most, as the column's)
+  sides.classList.toggle('on', on); renderer.sides = on ? sides : null;
+  if (on && !sidesAsked && typeof SIDE_ART === 'undefined') { sidesAsked = true; const b = document.createElement('script'); b.src = 'src/sides.js'; document.head.append(b); }
+  if (on) { sides.width = Math.round(Ws / P); sides.height = Math.round(H / P); Object.assign(sides.style, { width: Ws + 'px', height: H + 'px', left: Math.round(((vw - Ws) / 2) * d) / d + 'px' }); renderer.sideLv = null; }
   renderer.resize(view.w, view.h, PIXELATED ? 1 / PIX.size : (window.devicePixelRatio || 1) * s);
   game.applyMods();
 }

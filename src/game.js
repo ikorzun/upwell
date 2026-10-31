@@ -2941,7 +2941,7 @@ const STORY = {
   city_friendship: { n: 'VI', still: 'assets/cards/03_city_friendship.png', cells: [359, 538], was: [179, 268], ink: 'tokyo', title: { en: 'The Shared Treat', es: 'El dulce compartido', pt: 'O doce dividido', ja: 'はんぶんこの おやつ' } },
   danchi_lantern: { n: 'VII', still: 'assets/cards/07_danchi_lantern.png', cells: [342, 512], was: [171, 256], ink: 'blocks', boss: 'blocks', title: { en: "A Friend's Lantern", es: 'El farolillo de un amigo', pt: 'A lanterna de um amigo', ja: 'ともだちの ちょうちん' } },
   sky_clouds: { n: 'VIII', still: 'assets/cards/08_sky_clouds.png', cells: [315, 474], was: [157, 235], ink: 'sky', boss: 'sky', title: { en: 'The Clouds Part', es: 'Se abren las nubes', pt: 'As nuvens se abrem', ja: 'くもの きれま' } },
-  space_moon: { n: 'IX', still: 'assets/cards/27_space_moon.png', cells: [290, 434], was: [145, 217], ink: 'space', boss: 'space', title: { en: 'The Moon Up Close', es: 'La Luna de cerca', pt: 'A Lua de perto', ja: 'ちかくの つき' } },   // (owner, 2026-10-31: Д398 «C», the station's arm)
+  space_moon: { n: 'IX', still: 'assets/cards/27_space_moon.png', cells: [372, 556], was: [186, 278], ink: 'space', boss: 'space', title: { en: 'The Moon Up Close', es: 'La Luna de cerca', pt: 'A Lua de perto', ja: 'ちかくの つき' } },   // (owner, 2026-10-31: Д398 «C», then «переделай карточку на вариант А с иллюминатором»: the round window)
   forest_path: { n: '★', still: 'assets/cards/09_forest_path.png', cells: [408, 618], was: [205, 307], ink: 'skazka', boss: 'skazka', title: { en: 'The Forest Path', es: 'El camino del bosque', pt: 'O caminho da floresta', ja: 'もりの こみち' } },
   moon_home: { n: '', still: 'assets/cards/10_moon_home.png', cells: [378, 570], was: [192, 288], ink: 'moon', title: { en: 'Home', es: 'En casa', pt: 'Em casa', ja: 'おかえり' } },
   // A card for Mochi's coming to each world, before its first level (owner, 2026-10-23: «историю с карточками нужно дополнить, например, сначала показываем
@@ -3014,7 +3014,7 @@ const CARD_PLANES = {   // a card's figures (assets/cards/planes/<id>-plate.png 
   // as it, the snow, the clouds, the lighthouse's foot; the two at home together)
   mine_lamp: { planes: [['boss', 0.7], ['hero', 1]], threads: [{ ink: '#808080', pts: [[75.5, 57, 0], [76.5, 76, 1]] }, { ink: '#e0e0e0', pts: [[78.5, 57, 0], [78.5, 76, 1]] }] },
   fuji_bell: { planes: [['boss', 1]] }, sea_lighthouse: { planes: [['boss', 1]] }, danchi_lantern: { planes: [['boss', 0.9], ['hero', 1]] },
-  arrive_space: { planes: [['hero', 1]] }, space_moon: { planes: [['hero', 1]] },   // (Space's: Mochi on the tower's deck; Mochi on the station's arm)
+  arrive_space: { planes: [['hero', 1]] }, space_moon: { planes: [['hero', 1]] },   // (Space's: Mochi on the tower's deck; Mochi afloat before the station's round window)
   sky_clouds: { planes: [['boss', 1]] }, forest_path: { planes: [['hero', 1]] }, moon_home: { planes: [['boss', 1]] },
 };
 const cardEase = {
@@ -3147,9 +3147,10 @@ Object.assign(CARD_MOTION, {
     const u = t % 3.8;
     return { hero: [0.6 * Math.sin((2 * Math.PI * t) / 3.8), cardHop(u - 2.6, 1, 0.15, 0.3)], blink: u > 1.2 && u < 1.35 };
   },
-  space_moon(t) {   // IX: Mochi at the end of the station's arm, weightless before the Moon: it floats up off the arm, slow, hangs, and drifts back down to it
-    const u = t % 4.8, k = u < 1.6 ? cardEase.io(u / 1.6) : u < 2.4 ? 1 : u < 4.2 ? 1 - cardEase.io(seg(u, 2.4, 4.2)) : 0;
-    return { hero: [0.25 * Math.sin((2 * Math.PI * t) / 4.8), -1.1 * k], blink: u > 1.9 && u < 2.05 };
+  space_moon(t) {   // IX: Mochi afloat in the station before its round window and the Moon: weightless, it rises and sinks slow on a long breath, drifting a little
+    // toward the Moon and back, out of phase (secondary motion), its blink at the top of a rise
+    const w = (2 * Math.PI * t) / 5.2, u = t % 5.2;
+    return { hero: [0.5 * Math.sin(w - 1.1), -0.9 * (1 - Math.cos(w)) / 2], blink: u > 2.5 && u < 2.65 };
   },
   moon_home(t) {   // Home: Mochi and the rabbit in their hug, rocking gently together
     const w = (2 * Math.PI * t) / 3;

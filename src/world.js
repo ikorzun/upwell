@@ -4133,7 +4133,8 @@ class Level {
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
     this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.cols = o.lanes ? WIDE.cols : COLS; this.lanes = null;
-    if (view.wide) { const m = (o.w - this.cols * o.R) / 2; this.l = m; this.r = o.w - m; }   // a wide view's: its columns a tile R each, in its middle (a room's 16 too) this.R = o.R; this.t = 0; this.cave = o.cave || null;   // (cave: a bonus cave's room, CAVES)
+    if (view.wide) { const m = (o.w - this.cols * o.R) / 2; this.l = m; this.r = o.w - m; }   // a wide view's: its columns a tile R each, in its middle (a room's 16 too)
+    this.R = o.R; this.t = 0; this.cave = o.cave || null;   // (cave: a bonus cave's room, CAVES)
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
     if (this.theme.space && !this.theme.orbit && this.stage >= ORBIT.from) this.theme = THEMES.orbit;   // (Space: the launch tower to 8-3, Kibo in orbit from 8-4)
     this.k = this.hard ? 1.4 * (1 + 0.15 * Math.max(0, (o.tier || 1) - 1)) : 1;   // hard: the fire and the enemies 1.4×, and 15% more each tier past the first

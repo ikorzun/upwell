@@ -160,8 +160,10 @@ function score(base, st) {
   const keys = g.lv.near(H.cy - 8 * tileOf(), H.cy).filter((r) => r.key), mid = (r) => Math.abs((r.x0 + r.x1) / 2 - H.cx);   // a gate just over it (GATE): the way is under its keystone,
   const key = g.lv.lanes ? keys.sort((p, q) => mid(p) - mid(q))[0] : keys[0];   // as a player sees it glint (a wide level's: its own lane's, the nearer of the two gates' keys)
   if (key) s -= 6 * Math.abs(H.cx - (key.x0 + key.x1) / 2) / tileOf();
-  const way = g.lv.lanes && g.lv.portal;   // a wide level's way out over its spine (WIDE): in its band, across to it, not up a far wall (a phone's is within its pull)
-  if (way && H.cy < way.y + 6 * tileOf()) s -= 30 * Math.abs(H.cx - way.x) / tileOf();
+  const way = g.lv.lanes && g.lv.portal;   // a wide level's way out over its spine (WIDE): in its band, across to it, not up a far wall (a phone's is within its pull);
+  // the band from 3 rows under the highest lane's end too: three lanes' way out is over the middle lane, 7-9 rows over the lanes' tops (stood under it 14 s, 2026-11-01)
+  const band = way && Math.max(way.y + 6 * tileOf(), Math.min(...g.lv.lanes.map((ln) => ln.ended ?? Infinity)) + 3 * tileOf());
+  if (way && H.cy < band) s -= 30 * Math.abs(H.cx - way.x) / tileOf();
   const helmet = (g.lv.fizz || []).find((p) => p.again && !p.taken && Math.abs(p.y - H.cy) < 8 * tileOf());   // the tutorial's helmet (CHUNKS.tutHelmet): the way on is through its blocks, as a player is told
   if (helmet && !g.power(helmet.kind)) s -= 6 * Math.hypot(H.cx - helmet.x, H.cy - helmet.y) / tileOf();
   return s;
@@ -174,6 +176,19 @@ function score(base, st) {
 //   quake (Onamazu): up off the floor when it rears (its waves), off its leap's way; at it while it lies flopped.
 //   glide (Tsurara-onna): off the floor in her slide's way (a ledge, or over her); at her while she sticks to the wall.
 //   hang (the Tsuchigumo, the Bake-danuki): never under it as it shakes over the hero and drops; near it, to be at it while it lies on the floor.
+// Off a boss's shots' ways: each laid or flying one followed 1.4 s on (a laid one waits its warning, then flies as the game moves it, SHOT; a quake's
+// wave runs along the floor, no fall), a penalty if the hero is in one's way. The tengu's feathers (0.7 s laid, 0.5-0.8 s in the air) and Onamazu's
+// waves and rocks hit past the bot's 1-s look (2026-11-01).
+function shotsWay(bs, H, T) {
+  const lv = g.lv; let pen = 0;
+  for (const q of lv.shots) {
+    if (q.by !== bs && !q.wave && !q.rock) continue;
+    let x = q.x, y = q.y, v = q.vy, w = q.warn || 0, near = Infinity;
+    for (let k = 0; k < 28; k++) { if (w > 0) w -= 0.05; else { if (!q.wave) v += SHOT_G * 0.05; x += q.vx * 0.05; y += v * 0.05; } near = Math.min(near, Math.hypot(H.cx - x, H.cy - y)); if (y > lv.floor || x < lv.l || x > lv.r) break; }
+    if (near < H.R + q.r + 0.5 * T) pen += 2500;
+  }
+  return pen;
+}
 function bossScore(base) {
   const lv = g.lv, bs = lv.boss, d = bs.def || {}, H = g.hero, b = bs.body, T = tileOf();
   if (bs.dead) return 1e9;
@@ -184,14 +199,20 @@ function bossScore(base) {
     else if (bs.state === 'warn' || bs.state === 'sweep') s += Math.min(h, 4) * 300 - (Math.sign(H.cx - b.cx) === bs.dir && dx < 5 && h < 1.5 ? 3000 : 0);   // up off the floor in front of him
     else s -= Math.abs(dx - 3) * 60;
   } else if (d.sky) {
+    s -= shotsWay(bs, H, T);   // off its feathers' ways
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while its beak is stuck
-    else if ((bs.state === 'warn' || bs.state === 'dive') && Math.abs(H.cx - bs.tx) < bs.halfW + H.R + 0.5 * T) s -= 4000;   // off its swoop's line
+    else if (bs.state === 'warn' || bs.state === 'dive') {   // off its swoop's line: from where it is down to the floor under its mark (it dives slantwise
+      // from a side, 2026-11-01: under the mark only was not enough)
+      const vx = bs.tx - b.cx, vy = lv.floor - b.cy, u = Math.max(0, Math.min(1, ((H.cx - b.cx) * vx + (H.cy - b.cy) * vy) / (vx * vx + vy * vy || 1)));
+      if (Math.hypot(H.cx - b.cx - u * vx, H.cy - b.cy - u * vy) < bs.halfW + H.R + 0.5 * T) s -= 4000;
+    }
     else s -= Math.abs(Math.abs(H.cx - (g.lv.l + g.lv.r) / 2) / T - 2) * 60;   // near the middle, not against a wall
   } else if (d.street) {
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over its roof, while it stands at a stop
     else if (bs.state === 'warn' || bs.state === 'dive') s += Math.min(h, 6) * 150;   // up, out of its way
     else s -= Math.abs(dx - 3) * 60;
   } else if (d.quake) {
+    s -= shotsWay(bs, H, T);   // off its waves' and rocks' ways
     if (bs.state === 'dazed') s -= dx * 400 - (H.maxY < b.minY ? 600 : 0);   // at it, best over it, while it lies flopped
     else if (bs.state === 'crouch' || bs.state === 'dive') s -= Math.max(0, 4 - dx) * 500;   // off its leap's way
     else s -= Math.abs(dx - 4) * 60;   // near enough to be at it once it flops

@@ -90,7 +90,8 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // as a phone lays it (its chunks, coins, enemies, rooms and tasks: owner, Ш9 «А», a third star's coins a phone's); lane B a second way up of the same recipe
 // on generators of its own, a step harder, with no rooms, folk, candies or tasks. The spine starts `open` rows over the floor and opens a passage `pass` rows
 // tall every `every` rows; the fire's measures a phone's `rows` (view.fh); `seen` rows at least on the screen (a window wider than 16:9: the width left the walls')
-const WIDE = { cols: 34, cols3: 52, three: 2.1, lane: 16, spine: 2, tile: 24, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
+// A boss's wide arena (Ш7 «Б»): its floor shown `arena` px under it, not a phone's CAM.floorShow (room for touch keys a computer has not): 15.6 rows floor to cap in a 20-row view, not 13.3
+const WIDE = { cols: 34, cols3: 52, three: 2.1, lane: 16, spine: 2, tile: 24, arena: 36, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
 // from `every` rows a passage may go to be open on both sides; cols3, three: a window 2.1 times as wide as it is tall or more when the level starts gets a third
 // lane, 52 columns, owner Ш12 «Б»)
 // What a lane keeps of its own while the other is laid (Level.lane): its walls, its top and last chunk, its plan, its generators
@@ -1408,6 +1409,10 @@ const CART = { size: 2.2, rock: 0.35 };
 // shake over the hero `shake` s and fall. A slide: she backs off flashing with a scrape, `wind` s, then dashes at `dash` R/s to the far wall and sticks
 // there frozen `stun` s, the only time a stomp hurts her (else her top is hard ice). From her second phase the wall shakes `wallIce`
 // icicles down; on her last heart (`twice`) she dashes back the other way after `again` s before she sticks. Still her first `calm` s.
+// A boss's wide arena on a computer (Ш7 «Б», the arena 34 columns, Level.arena): the hero runs 4.7 R/s, so a window that opens far from him (Tsurara-onna frozen to
+// the far wall) is held as long again as the run to it past `near` R would take at `walk` R/s; with room to dodge, Tsurara-onna calls `ice` times the icicles;
+// the Tram rushes `tram` times as fast (its way twice as long); the Lid plays `lid` cards more a turn. A phone's arena as it was
+const BOSS_ARENA = { near: 8, walk: 4.5, ice: 1.5, tram: 1.5, lid: 1 };
 const ICE = { creep: 2.4, keep: 2.5, rest: [2.0, 1.8, 1.6, 1.5], cast: 1.0, n: [3, 3, 4, 5], gap: 3, shake: 1.0, wind: 1.0, again: 0.6, dash: [13, 15, 17, 19], stun: 2.0, wallIce: [0, 2, 2, 2], twice: 3, calm: 2.5 };
 // Onamazu (BOSSES.namazu, the Sea's, world 4: the curve climbs from here; owner 2026-10-24): the earthquake catfish keeps `keep` R off the
 // hero, creeping `creep` R/s, its moves taking turns. A quake: it rears up on its tail, red, rumbling, `rear` s, and slams: `waves` waves
@@ -4233,7 +4238,7 @@ class Level {
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
-    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.cols = o.lanes === 3 ? WIDE.cols3 : o.lanes || o.arena ? WIDE.cols : COLS; this.lanes = null;
+    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.cols = o.lanes === 3 ? WIDE.cols3 : o.lanes || o.arena ? WIDE.cols : COLS; this.lanes = null; this.arena = !!o.arena;
     if (view.wide) { const m = (o.w - this.cols * o.R) / 2; this.l = m; this.r = o.w - m; }   // a wide view's: its columns a tile R each, in its middle (a room's 16 too)
     this.R = o.R; this.t = 0; this.cave = o.cave || null;   // (cave: a bonus cave's room, CAVES)
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
@@ -4286,7 +4291,7 @@ class Level {
     this.top = this.floor - (o.kind === 'well' ? this.tile : 0); this.endY = o.height ? this.floor - o.height : -Infinity;   // a tile of room over the floor, where the hero starts
     this.portal = null; this.exit = null; this.capY = -Infinity; this.fire = null; this.plan = [];
     this.coinTotal = 0; this.coinsTaken = 0; this.foeTotal = 0; this.foeKilled = 0;   // for the level's stars
-    this.cam = this.floor + CAM.floorShow - o.h;
+    this.cam = this.floor + (o.arena ? WIDE.arena : CAM.floorShow) - o.h;   // (a boss's wide arena: a thin floor, WIDE.arena)
     if (o.kind === 'well') {
       const rnd = this.rng, H = o.height;
       if (rc ? rc.shop : !o.world.bonus && rnd() < (this.hard ? 0.7 : 0.85)) this.plan.push({ y: this.floor - H * (rc ? rc.shop : 0.3 + rnd() * 0.4), kind: 'shop', done: false });

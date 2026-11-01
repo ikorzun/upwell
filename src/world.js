@@ -4423,8 +4423,9 @@ class Level {
     const t = this.tile, A = {}, rc = this.rc, h = WIDE.hard, w = WIDE.lane * t, gap = WIDE.spine * t;
     for (const k of LANE_KEYS) A[k] = this[k];
     A.r = this.l + w; A.ended = null;
-    const other = (l, salt) => {   // another lane: its own state and generators (seed ^ WIDE.seed ^ salt), a step harder (WIDE.hard), no plan, shops, folk or story of its own
-      const B = Object.assign({}, A, { l, r: l + w, last: null, lastFeet: null, placed: [], rested: false, intro: [], plan: [], fizzAt: [], fizzKind: [], folkAt: [], runeAt: [], ringAt: null,
+    const other = (l, salt) => {   // another lane: its own state and generators (seed ^ WIDE.seed ^ salt), a step harder (WIDE.hard), the level's motif chunks
+      // (intro) as lane A shows them, so a lesson is not missed going the other way; no plan, shops, folk or story of its own
+      const B = Object.assign({}, A, { l, r: l + w, last: null, lastFeet: null, placed: [], rested: false, intro: A.intro.slice(), plan: [], fizzAt: [], fizzKind: [], folkAt: [], runeAt: [], ringAt: null,
         spotAt: null, setAt: null, setId: null, script: null, pocketKind: 'shop', pocketGoal: undefined, coinTotal: 0, foeTotal: 0, ended: null,
         rc: rc && Object.assign({}, rc, { maxD: Math.min(3, (rc.maxD || 2) + h.maxD), foes: (rc.foes || 0) * h.foes, pair: (rc.pair || 0) + h.pair, zones: rc.zones && rc.zones.map((z) => ({ foes: z.foes * h.foes, pair: z.pair + h.pair })) }) });
       const g = (k) => mulberry32((seed ^ WIDE.seed ^ salt ^ k) >>> 0);

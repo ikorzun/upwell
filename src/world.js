@@ -4232,7 +4232,7 @@ class Level {
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
-    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.cols = o.lanes ? WIDE.cols : COLS; this.lanes = null;
+    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.cols = o.lanes || o.arena ? WIDE.cols : COLS; this.lanes = null;
     if (view.wide) { const m = (o.w - this.cols * o.R) / 2; this.l = m; this.r = o.w - m; }   // a wide view's: its columns a tile R each, in its middle (a room's 16 too)
     this.R = o.R; this.t = 0; this.cave = o.cave || null;   // (cave: a bonus cave's room, CAVES)
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;

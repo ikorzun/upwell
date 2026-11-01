@@ -127,10 +127,13 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // its bonus race and its boss as before; every other screen a column as before (wideTo)
 const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera to try by hand (the plan's question К: ?anchor=0.7, Mochi
 // lower, more rows over him), its own CAM.anchor (layoutWide); every other screen the game's
-const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && !rc.boss && !rc.script;   // a computer's
+const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
 // levels as wide as its window (owner, ПК5/ПК6 «Б»; ?nowide the 16-column well): every world's tiers, its bonus race, the daily well (Ш8 «Б») and a run's
 // floors, in a window at least as wide as it is tall when the level starts; a boss's and the scripted lesson 1-1 (one way up, as the plan's P1 has it) stay
 // a 16-column well
+// A boss's arena wide (Ш7 «Б»: each fight reworked for 34 columns, the bosses chat's): the bosses in BOSS_WIDE, or every one with ?wideboss to try them; the others
+// in the 16-column well
+const BOSS_WIDE = new Set([]), WIDE_BOSS_TRY = /[?&]wideboss\b/.test(location.search);
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
 // come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu, its lock
@@ -1164,7 +1167,7 @@ class Game {
     const seed = nextSeed != null ? nextSeed : this.daily != null ? daySeed(this.daily, this.world, this.stage, !!this.bonus) : (Math.random() * 4294967296) >>> 0;
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
-    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, lanes: view.wide && !boss, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
+    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, lanes: view.wide && !boss, arena: view.wide && boss, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
       height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: (this.bonus && this.mode === 'camp' ? this.wd : wd).theme, keep: this.room() });   // (a campaign's bonus
     // in its world's look: the Sea's and Tokyo's coin rain were the Mine's grey, the kind's own theme from the days a bonus was its world's)
     this.orbit = ORBIT_TRY || (wd.id === ORBIT.world && this.stage >= ORBIT.from);   // on orbit: the hero's light jumps (ORBIT)

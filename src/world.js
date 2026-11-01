@@ -6229,8 +6229,9 @@ Renderer.prototype.makeTarget = function () {
 // view drawn once on nothing (no walls, no shake) into a target of its own, read back and laid k times bigger (the sides' width over the column's, 2 at least) behind the column on the #sides
 // canvas (game.js layout), over its world's top ink; its middle stays behind the game. A room keeps its level's.
 Renderer.prototype.sideShot = function (lv, cam, W, H, ranges, th, menu, foot) {   // (foot: the far view's foot on the screen, farY: it sinks a little as the climb goes on)
-  if (!menu && (lv.kind === 'shop' || lv.kind === 'treasure' || lv.kind === 'trial')) return;
-  const art = lv.world && typeof SIDE_ART !== 'undefined' && SIDE_ART[th && th.orbit ? 'orbit' : lv.world.id];   // (Space in orbit: its own, Kibo over the Earth, Д390 «AB»)   // a world with its own backdrop (SIDE_ART): that, laid once, no shot
+  const art = lv.world && typeof SIDE_ART !== 'undefined' && SIDE_ART[th && th.orbit ? 'orbit' : lv.world.id];
+  if (!menu && !art && (lv.kind === 'shop' || lv.kind === 'treasure' || lv.kind === 'trial')) return;   // (a room: its world's backdrop, laid once as the level's; a wide level's
+  // room opens in the column, whose sides start bare: they were black)   // (Space in orbit: its own, Kibo over the Earth, Д390 «AB»)   // a world with its own backdrop (SIDE_ART): that, laid once, no shot
   const m = typeof fxPal === 'function' ? fxPal() : null;   // (the settings' palette, fx.js: the sides in it too, laid again when it changes)
   if (art) { if (this.sideArt !== art || this.sideLow !== this.low || this.sideCv !== this.sides || this.sidePal !== m) { this.sideArt = art; this.sideLv = lv; this.sideLow = this.low; this.sideCv = this.sides; this.sidePal = m; sidesArt(this.sides, art, m); } return; }
   this.sideArt = null;

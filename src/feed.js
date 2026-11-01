@@ -521,7 +521,8 @@ else {
       const st = this.st; st.done = true;
       if (st.told) return; st.told = true;
       const stars = FL.stars(st.full), b = game.hero, rec = this.rec();
-      st.pay = FEED.pay;   // (each world's end's run fed to its end: his coins; was the day's first) st.best = st.score > (rec.best || 0);   // the day's first run fed to the end, whatever its stars: his coins (once a UTC day)
+      st.pay = FEED.pay;   // (each world's end's run fed to its end: his coins; was the day's first)
+      st.best = st.score > (rec.best || 0);   // (its best score kept in the save)
       if (st.pay) { rec.day = today; save.bank += st.pay; save.camp.wallet = (save.camp.wallet || 0) + st.pay; if (save.cur) save.cur.coins = (save.cur.coins || 0) + st.pay; }   // (a level under way
       // takes them up too: Game.resume starts it from its own count)
       if (st.best) rec.best = st.score;

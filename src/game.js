@@ -4767,7 +4767,7 @@ function fpsFrame(now) {
   fps.el.textContent = (fps.t.length - 1) + ' fps · ' + d[d.length >> 1].toFixed(1) + ' ms · max ' + d[d.length - 1].toFixed(1) + ' ms';
 }
 // performance_sample (Playgama's telemetry guide): the drawn frames of play only, menus, pauses and hidden time left out
-// (a gap there is no frame), sent as one sample about every 30 s.
+// (a gap there is no frame), sent as one sample about every 30 s; layout and the canvas's megapixels tell a big monitor's frames from a phone's.
 function perfFrame(now) {
   if (!ads.ok || game.state !== 'play' || document.hidden) { perf.last = 0; return; }
   if (!perf.t0) perf.t0 = now;
@@ -4780,7 +4780,7 @@ function perfSend(now) {
   if (n) track('performance_sample', { target_fps: 60, window_ms: Math.round(now - perf.t0), active_ms: Math.round(perf.active), frame_count: n,
     fps_avg: r1((n * 1000) / perf.active), fps_p10: r1(1000 / q(0.9)), frame_time_p50_ms: r1(q(0.5)), frame_time_p95_ms: r1(q(0.95)), frame_time_p99_ms: r1(q(0.99)), frame_time_max_ms: r1(ft[n - 1]),
     frames_over_50ms: over(50), frames_over_100ms: over(100), frames_over_250ms: over(250), frames_over_500ms: over(500), frames_over_1000ms: over(1000), webgl_context_loss_count: perf.ctxLoss - perf.lost0, game_version: VERSION,
-    js_error_count: perf.err - perf.err0, unhandled_rejection_count: perf.rej - perf.rej0, ...(perf.lt ? { long_task_count: perf.lt.n, long_task_total_ms: Math.round(perf.lt.ms), long_task_max_ms: Math.round(perf.lt.max) } : {}),
+    layout: view.wide ? 'wide' : 'column', canvas_mpx: Math.round(canvas.width * canvas.height / 1e5) / 10, js_error_count: perf.err - perf.err0, unhandled_rejection_count: perf.rej - perf.rej0, ...(perf.lt ? { long_task_count: perf.lt.n, long_task_total_ms: Math.round(perf.lt.ms), long_task_max_ms: Math.round(perf.lt.max) } : {}),
     ...(performance.memory ? { memory_used_mb: Math.round(performance.memory.usedJSHeapSize / 1048576), memory_measurement_supported: true, memory_measurement_type: 'js_heap' } : { memory_measurement_supported: false }) });   // (each count this
   // window's; the memory where the browser tells it: Chromium's heap)
   perf.t0 = now; perf.active = 0; perf.ft = []; perf.lost0 = perf.ctxLoss; perf.err0 = perf.err; perf.rej0 = perf.rej; if (perf.lt) perf.lt = { n: 0, ms: 0, max: 0 };

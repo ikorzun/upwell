@@ -127,7 +127,9 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // its bonus race and its boss as before; every other screen a column as before (wideTo)
 const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera: WIDE.anchor (owner Кам1 «Б», Mochi lower,
 // 14 rows over him), ?anchor= to try another by hand (layoutWide); every other screen the game's
-const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
+const WIDE_HOST = /(^|\.)github\.io$|^localhost$/.test(location.hostname);   // the wide view only on the GitHub site (and the local server) till it is ready (owner,
+// 2026-11-01: «широкий вид только для гита, верни в песок версию без десктопа… Десктоп еще не готов»): Playgama's sandbox and every portal the column; ?wide there to try it
+const WIDE_ON = /[?&]wide\b/.test(location.search) || (WIDE_HOST && !/[?&]nowide\b/.test(location.search)), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
 // levels as wide as its window (owner, ПК5/ПК6 «Б»; ?nowide the 16-column well): every world's tiers, its bonus race, the daily well (Ш8 «Б») and a run's
 // floors, in a window at least as wide as it is tall when the level starts; a boss's and the scripted lesson 1-1 (one way up, as the plan's P1 has it) stay
 // a 16-column well

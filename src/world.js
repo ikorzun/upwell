@@ -4814,7 +4814,8 @@ class Level {
     for (const [ch, k, side, kind] of [['[', 0, 1, 'ice'], [']', COLS - 1, 2, 'ice'], ['{', 0, 1, 'moss'], ['}', COLS - 1, 2, 'moss'], ['(', 0, 1, 'rubber'], [')', COLS - 1, 2, 'rubber']])
       wall(ch, k, (y0, y1) => this.coats.push(this.lanes ? { side, y0, y1, kind, x: side === 1 ? l : this.r } : { side, y0, y1, kind }));   // (a wide level's: on which wall, see coatAt)
     const wd = this.world;
-    if (wd.coat) for (const side of [1, 2]) this.coats.push({ side, y0: base - H * t, y1: base, kind: wd.coat });   // a bonus well's walls, lined
+    if (wd.coat) for (const side of [1, 2]) this.coats.push(this.lanes ? { side, y0: base - H * t, y1: base, kind: wd.coat, x: side === 1 ? l : this.r } : { side, y0: base - H * t, y1: base, kind: wd.coat });   // a bonus
+    // well's walls, lined (a wide level's: its lane's, the spine's faces too, coatOn)
     if (wd.rain) for (let r = 1; r < H; r += 2) {   // and a rain of coins in the open
       const k = 1 + ((this.rng() * (COLS - 2)) | 0);
       if (at(r, k) === '.' && at(r - 1, k) === '.') this.coin(X(k) + t / 2, Y(r) - t / 2, this.rng() < 0.12 ? 5 : 1);

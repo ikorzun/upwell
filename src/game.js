@@ -127,10 +127,10 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // its bonus race and its boss as before; every other screen a column as before (wideTo)
 const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera to try by hand (the plan's question К: ?anchor=0.7, Mochi
 // lower, more rows over him), its own CAM.anchor (layoutWide); every other screen the game's
-const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && !rc.boss && rc.bonus == null && !rc.script;   // a computer's
-// levels as wide as its window (owner, ПК5/ПК6 «Б»; ?nowide the 16-column well): every world's tiers, the daily well (Ш8 «Б») and a run's floors, in a window
-// at least as wide as it is tall when the level starts; a boss's, a bonus race's and the scripted lesson 1-1 stay a 16-column well till they are reworked
-// wide, the plan's P2
+const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && !rc.boss && !rc.script;   // a computer's
+// levels as wide as its window (owner, ПК5/ПК6 «Б»; ?nowide the 16-column well): every world's tiers, its bonus race, the daily well (Ш8 «Б») and a run's
+// floors, in a window at least as wide as it is tall when the level starts; a boss's and the scripted lesson 1-1 (one way up, as the plan's P1 has it) stay
+// a 16-column well
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
 // come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu, its lock
@@ -1157,7 +1157,7 @@ class Game {
   buildLevel(newHero) {
     this.held = null; this.wellR = 0;   // (a dialog's kept level gone with a new one: Game.stageIn; a wide level's room's left with it)
     const rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null;
-    wideTo(!this.bonus && wideFor(rc || { boss: this.world >= WORLDS.length }));   // (the view's layout first: the level is laid to it)
+    wideTo(wideFor(rc || { boss: this.world >= WORLDS.length && !this.bonus }));   // (the view's layout first: the level is laid to it)
     const W = view.w, H = view.h, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = view.wide ? WIDE.tile : clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);   // (a wide level's: a 408-px phone's, WIDE)

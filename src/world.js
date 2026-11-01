@@ -91,9 +91,9 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // on generators of its own, a step harder, with no rooms, folk, candies or tasks. The spine starts `open` rows over the floor and opens a passage `pass` rows
 // tall every `every` rows; the fire's measures a phone's `rows` (view.fh); `seen` rows at least on the screen (a window wider than 16:9: the width left the walls')
 // A boss's wide arena (Ш7 «Б»): its floor shown `arena` px under it, not a phone's CAM.floorShow (room for touch keys a computer has not): 15.6 rows floor to cap in a 20-row view, not 13.3
-const WIDE = { cols: 34, cols3: 52, three: 2.1, lane: 16, spine: 2, tile: 24, arena: 36, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
+const WIDE = { cols: 34, cols3: 52, three: 2.1, lane: 16, spine: 2, tile: 24, arena: 36, anchor: 0.7, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
 // from `every` rows a passage may go to be open on both sides; cols3, three: a window 2.1 times as wide as it is tall or more when the level starts gets a third
-// lane, 52 columns, owner Ш12 «Б»)
+// lane, 52 columns, owner Ш12 «Б»; anchor: the camera's, Mochi lower, 14 rows over him and 6 under, owner Кам1 «Б»)
 // What a lane keeps of its own while the other is laid (Level.lane): its walls, its top and last chunk, its plan, its generators
 const LANE_KEYS = ['l', 'r', 'rc', 'top', 'last', 'lastFeet', 'placed', 'rested', 'intro', 'plan', 'fizzAt', 'fizzKind', 'folkAt', 'runeAt', 'ringAt', 'spotAt', 'gateAt', 'gateId',
   'setAt', 'setId', 'script', 'pocketKind', 'pocketGoal', 'endY', 'coinTotal', 'foeTotal', 'fireShare', 'rng', 'foeRng', 'folkRng', 'crowRng', 'windRng', 'fireRng', 'flavRng', 'astroRng', 'ended'];

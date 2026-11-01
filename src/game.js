@@ -125,8 +125,8 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // The worlds the site plays (owner: Tokyo alone in prod for now; the runs, through the other worlds, hidden with them); ?all opens all, to work on.
 // The wide plan's P0 (owner, Шаг1 «А»): ?wide plays the Village's tiers in a computer's window held wide as wide levels (WIDE: two lanes and a spine), its lesson,
 // its bonus race and its boss as before; every other screen a column as before (wideTo)
-const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera to try by hand (the plan's question К: ?anchor=0.7, Mochi
-// lower, more rows over him), its own CAM.anchor (layoutWide); every other screen the game's
+const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera: WIDE.anchor (owner Кам1 «Б», Mochi lower,
+// 14 rows over him), ?anchor= to try another by hand (layoutWide); every other screen the game's
 const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
 // levels as wide as its window (owner, ПК5/ПК6 «Б»; ?nowide the 16-column well): every world's tiers, its bonus race, the daily well (Ш8 «Б») and a run's
 // floors, in a window at least as wide as it is tall when the level starts; a boss's and the scripted lesson 1-1 (one way up, as the plan's P1 has it) stay
@@ -4532,7 +4532,7 @@ function layoutWide(vw, vh) {
   // view beside it, as the column's (Ш11 «А», П3 «А»)
   const fit = H / (COL_MIN / 0.5625), k = fit >= 1 ? 1 : d * fit >= 1 ? Math.floor(d * fit + 1e-6) / d : fit;   // a short window's words and buttons laid out as the
   // column's (its 320 × 569) and shown k times smaller, a whole step where there is one (Ш3 «Б»): at 360 tall the Win's stars landed 60 px over the frame
-  view.w = Wc / s; view.h = H / s; view.left = left; view.k = k; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile; CAM.anchor = WIDE_ANCHOR || CAM_ANCHOR;
+  view.w = Wc / s; view.h = H / s; view.left = left; view.k = k; view.s = s; view.wide = true; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile; CAM.anchor = WIDE_ANCHOR || WIDE.anchor;
   Object.assign(canvas.style, { width: Wc + 'px', height: H + 'px', left: left + 'px' });
   Object.assign(uiEl.style, { width: Wc / k + 'px', height: H / k + 'px', left: left + 'px', transform: k < 1 ? 'scale(' + k + ')' : '', transformOrigin: '0 0' });
   uiEl.classList.add('wide'); uiEl.style.setProperty('--colW', Math.round(Math.max(COL_MIN, (H / k) * 0.5625)) + 'px');

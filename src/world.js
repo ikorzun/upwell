@@ -90,8 +90,9 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // as a phone lays it (its chunks, coins, enemies, rooms and tasks: owner, Ш9 «А», a third star's coins a phone's); lane B a second way up of the same recipe
 // on generators of its own, a step harder, with no rooms, folk, candies or tasks. The spine starts `open` rows over the floor and opens a passage `pass` rows
 // tall every `every` rows; the fire's measures a phone's `rows` (view.fh); `seen` rows at least on the screen (a window wider than 16:9: the width left the walls')
-const WIDE = { cols: 34, lane: 16, spine: 2, tile: 24, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
-// from `every` rows a passage may go to be open on both sides)
+const WIDE = { cols: 34, cols3: 52, three: 2.1, lane: 16, spine: 2, tile: 24, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
+// from `every` rows a passage may go to be open on both sides; cols3, three: a window 2.1 times as wide as it is tall or more when the level starts gets a third
+// lane, 52 columns, owner Ш12 «Б»)
 // What a lane keeps of its own while the other is laid (Level.lane): its walls, its top and last chunk, its plan, its generators
 const LANE_KEYS = ['l', 'r', 'rc', 'top', 'last', 'lastFeet', 'placed', 'rested', 'intro', 'plan', 'fizzAt', 'fizzKind', 'folkAt', 'runeAt', 'ringAt', 'spotAt', 'gateAt', 'gateId',
   'setAt', 'setId', 'script', 'pocketKind', 'pocketGoal', 'endY', 'coinTotal', 'foeTotal', 'fireShare', 'rng', 'foeRng', 'folkRng', 'crowRng', 'windRng', 'fireRng', 'flavRng', 'astroRng', 'ended'];
@@ -1275,7 +1276,7 @@ const kitThing = (lv, r) => {
   if (opts && k >= 0) {
     r.kit = null;   // (deciding it: what is under it is decided first and never asks back)
     const avoid = kitAvoid(lv, r, new Set(opts.map((q) => q[1])).size >= 4 ? 2 : 1), fits = (q) => q[2]() && !avoid.has(q[1]);
-    if (lv.lanes && r.x0 >= lv.lanes[1].l - 1) opts = opts.filter((q) => !KIT_TEND[q[1]]);   // (a wide level's lane B: no task things, its tasks lane A's alone as a phone's, owner Ш9 «А»)
+    if (lv.lanes && r.x0 >= lv.lanes[0].r - 1) opts = opts.filter((q) => !KIT_TEND[q[1]]);   // (a wide level's lane B: no task things, its tasks lane A's alone as a phone's, owner Ш9 «А»)
     let o = opts.filter((q) => q[0] === k).find(fits);
     if (!o && opts.some((q) => q[0] === k && q[2]())) for (let i = 1; i < 6 && !o; i++) o = opts.filter((q) => q[0] === (k + i) % 6).find(fits);   // a repeat: the next slot's
     out = o ? Object.assign({ kind: o[1] }, o[3] ? o[3]() : {}) : null;
@@ -4232,7 +4233,7 @@ class Level {
   }
   // o: { kind, w, h, R, seed, world, stage, hard, height (px, a shaft only), theme, recipe (a campaign level's: CAMPAIGN) }
   reset(o) {
-    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.cols = o.lanes || o.arena ? WIDE.cols : COLS; this.lanes = null;
+    this.kind = o.kind; this.l = LEVEL.wall; this.r = o.w - LEVEL.wall; this.floor = 0; this.cols = o.lanes === 3 ? WIDE.cols3 : o.lanes || o.arena ? WIDE.cols : COLS; this.lanes = null;
     if (view.wide) { const m = (o.w - this.cols * o.R) / 2; this.l = m; this.r = o.w - m; }   // a wide view's: its columns a tile R each, in its middle (a room's 16 too)
     this.R = o.R; this.t = 0; this.cave = o.cave || null;   // (cave: a bonus cave's room, CAVES)
     this.world = o.world; this.stage = o.stage || 0; this.hard = !!o.hard; this.theme = o.theme || o.world.theme;
@@ -4296,7 +4297,7 @@ class Level {
         if (sp && st && H && Math.abs(sp.y - st.y) < gap) { const up = st.y - gap, dn = st.y + gap; if (up >= this.floor - 0.88 * H) sp.y = up; else if (dn <= this.floor - 0.12 * H) sp.y = dn; } }
       const v = (rc ? rc.fire : o.world.fire || 0) * this.R * this.k;
       if (v > 0) loosen(this.fire = { y: this.floor + (view.fh || o.h) * 0.4, v, spitT: FIRE.spit[0], warn: null, calm: rc ? rc.calm || 0 : WORLDS.indexOf(o.world) === 0 && !this.stage ? FIRE.calm : 0, rush: 0 }, 'y', 'v', 'spitT', 'calm', 'rush');   // (see loosen)
-      if (o.lanes) this.lanesAt(o.seed);
+      if (o.lanes) this.lanesAt(o.seed, o.lanes === 3 ? 3 : 2);
     } else if (o.kind === 'menu') this.menuAt(o.floorY);   // the menu's (owner, 2026-10-23, the Figma «Main»): nothing in it but the hero
     else this.build(o);
   }
@@ -4404,27 +4405,34 @@ class Level {
   ensure(y) {
     if (!this.lanes) { while (this.top > y) this.addChunk(); return; }
     for (const ln of this.lanes) { this.lane(ln); while (this.top > y) this.addChunk(); this.unlane(ln); }   // each lane laid as a phone lays its level
-    const [A, B] = this.lanes, t = this.tile, low = Math.max(A.ended ?? A.top, B.ended ?? B.top);   // (low: the lower of the two tops)
-    while (this.spineY - (WIDE.every + WIDE.near) * t >= low) {   // the spine up to it: a block about `every` rows tall, then a passage `pass` rows tall over its top
-      // where both lanes are open by the spine (none near: a block as tall again, no passage, and a look over it)
-      const y1 = this.spineY, d = WIDE.tries.find((q) => this.passOpen(y1 - (WIDE.every + q) * t, A, B)), y0 = y1 - (WIDE.every + (d ?? WIDE.near)) * t;
-      this.rects.push(this.box(A.r, y0, B.l, y1, { spine: true }));
-      this.spineY = d == null ? y0 : y0 - WIDE.pass * t;
+    const t = this.tile;
+    for (const sp of this.spines) {   // each spine up to the lower of its two lanes' tops: a block about `every` rows tall, then a passage `pass` rows tall over its top
+      // where both lanes are open by it (none near: a block as tall again, no passage, and a look over it)
+      const [A, B] = sp.ln, low = Math.max(A.ended ?? A.top, B.ended ?? B.top);
+      while (sp.y - (WIDE.every + WIDE.near) * t >= low) {
+        const y1 = sp.y, d = WIDE.tries.find((q) => this.passOpen(y1 - (WIDE.every + q) * t, A, B)), y0 = y1 - (WIDE.every + (d ?? WIDE.near)) * t;
+        this.rects.push(this.box(A.r, y0, B.l, y1, { spine: true }));
+        sp.y = d == null ? y0 : y0 - WIDE.pass * t;
+      }
     }
     this.rest();
-    if (A.top === -Infinity && B.top === -Infinity && !this.portal) this.join();
+    if (this.lanes.every((ln) => ln.top === -Infinity) && !this.portal) this.join();
   }
   // A wide level's lanes (WIDE): A the phone's level as laid (this level's own state and generators, taken as they are), B its own state and generators
-  lanesAt(seed) {
-    const t = this.tile, A = {}, B = {}, rc = this.rc, h = WIDE.hard;
+  lanesAt(seed, n = 2) {   // (n 3: a third lane, the middle one, between A and the last, owner Ш12 «Б»)
+    const t = this.tile, A = {}, rc = this.rc, h = WIDE.hard, w = WIDE.lane * t, gap = WIDE.spine * t;
     for (const k of LANE_KEYS) A[k] = this[k];
-    A.r = this.l + WIDE.lane * t; A.ended = null;
-    Object.assign(B, A, { l: this.r - WIDE.lane * t, r: this.r, last: null, lastFeet: null, placed: [], rested: false, intro: [], plan: [], fizzAt: [], fizzKind: [], folkAt: [], runeAt: [], ringAt: null,
-      spotAt: null, setAt: null, setId: null, script: null, pocketKind: 'shop', pocketGoal: undefined, coinTotal: 0, foeTotal: 0, ended: null,
-      rc: rc && Object.assign({}, rc, { maxD: Math.min(3, (rc.maxD || 2) + h.maxD), foes: (rc.foes || 0) * h.foes, pair: (rc.pair || 0) + h.pair, zones: rc.zones && rc.zones.map((z) => ({ foes: z.foes * h.foes, pair: z.pair + h.pair })) }) });
-    const g = (k) => mulberry32((seed ^ WIDE.seed ^ k) >>> 0);
-    Object.assign(B, { rng: g(0), foeRng: g(0x85ebca6b), folkRng: g(0x2545f491), crowRng: g(0x68e31da4), windRng: g(0x51ed2700), fireRng: g(0x0f1e3a11), flavRng: g(0x2c1b3c6d), astroRng: g(0x3c6ef372) });
-    this.lanes = [A, B]; this.full = [this.l, this.r]; this.spineY = this.floor - WIDE.open * t;
+    A.r = this.l + w; A.ended = null;
+    const other = (l, salt) => {   // another lane: its own state and generators (seed ^ WIDE.seed ^ salt), a step harder (WIDE.hard), no plan, shops, folk or story of its own
+      const B = Object.assign({}, A, { l, r: l + w, last: null, lastFeet: null, placed: [], rested: false, intro: [], plan: [], fizzAt: [], fizzKind: [], folkAt: [], runeAt: [], ringAt: null,
+        spotAt: null, setAt: null, setId: null, script: null, pocketKind: 'shop', pocketGoal: undefined, coinTotal: 0, foeTotal: 0, ended: null,
+        rc: rc && Object.assign({}, rc, { maxD: Math.min(3, (rc.maxD || 2) + h.maxD), foes: (rc.foes || 0) * h.foes, pair: (rc.pair || 0) + h.pair, zones: rc.zones && rc.zones.map((z) => ({ foes: z.foes * h.foes, pair: z.pair + h.pair })) }) });
+      const g = (k) => mulberry32((seed ^ WIDE.seed ^ salt ^ k) >>> 0);
+      return Object.assign(B, { rng: g(0), foeRng: g(0x85ebca6b), folkRng: g(0x2545f491), crowRng: g(0x68e31da4), windRng: g(0x51ed2700), fireRng: g(0x0f1e3a11), flavRng: g(0x2c1b3c6d), astroRng: g(0x3c6ef372) });
+    };
+    this.lanes = n === 3 ? [A, other(A.r + gap, 0x6b43a9b5), other(this.r - w, 0)] : [A, other(this.r - w, 0)];   // (the last lane's salt 0: a two-lane level's B, as before)
+    this.spines = this.lanes.slice(1).map((B, i) => ({ ln: [this.lanes[i], B], y: this.floor - WIDE.open * t }));
+    this.full = [this.l, this.r];
   }
   passOpen(y0, A, B) {   // a passage's window over a spine block's top at y0: nothing solid in either lane's column by the spine, nor spikes (a plank lets one by)
     const t = this.tile, ya = y0 - WIDE.pass * t, by = (q) => q.y1 > ya && q.y0 < y0 && ((q.x1 > A.r - t && q.x0 < A.r) || (q.x0 < B.l + t && q.x1 > B.l));
@@ -4434,14 +4442,15 @@ class Level {
   unlane(ln) { for (const k of LANE_KEYS) ln[k] = this[k]; }
   rest() {   // between lays: lane A's state (its counts the level's: a third star's coins a phone level's, owner Ш9 «А»; B's coins count as taken all the same),
     // the whole level's walls
-    const [A, B] = this.lanes; this.lane(A); [this.l, this.r] = this.full; this.top = Math.max(A.top, B.top);
+    this.lane(this.lanes[0]); [this.l, this.r] = this.full; this.top = Math.max(...this.lanes.map((ln) => ln.top));
   }
-  // Both lanes ended: the lower one's top brought up to the higher's by a stair of planks, the spine closed under it, the way out over the spine
+  // Every lane ended: each lower one's top brought up to the highest's by a stair of planks, the spines closed under it, the way out over the middle (a spine's
+  // with two lanes, the middle lane's with three)
   join() {
-    const [A, B] = this.lanes, t = this.tile, hi = Math.min(A.ended, B.ended), lo = Math.max(A.ended, B.ended), ln = A.ended === lo ? A : B;
-    for (let y = lo - 3 * t, k = 0; y > hi - t; y -= 3 * t, k++) { const x = k % 2 ? ln.r - 7 * t : ln.l + 3 * t; this.rects.push(this.box(x, y, x + 4 * t, y + LEVEL.plank * this.R, { plank: true })); }
-    if (this.spineY > hi) this.rects.push(this.box(A.r, hi, B.l, this.spineY, { spine: true }));
-    this.top = hi; this.joining = true; this.finish(); this.joining = false; A.coinTotal = this.coinTotal; A.top = B.top = -Infinity;   // (the way out's trail counted)
+    const A = this.lanes[0], t = this.tile, hi = Math.min(...this.lanes.map((ln) => ln.ended));
+    for (const ln of this.lanes) if (ln.ended > hi) for (let y = ln.ended - 3 * t, k = 0; y > hi - t; y -= 3 * t, k++) { const x = k % 2 ? ln.r - 7 * t : ln.l + 3 * t; this.rects.push(this.box(x, y, x + 4 * t, y + LEVEL.plank * this.R, { plank: true })); }
+    for (const sp of this.spines) if (sp.y > hi) this.rects.push(this.box(sp.ln[0].r, hi, sp.ln[1].l, sp.y, { spine: true }));
+    this.top = hi; this.joining = true; this.finish(); this.joining = false; A.coinTotal = this.coinTotal; for (const ln of this.lanes) ln.top = -Infinity;   // (the way out's trail counted)
   }
   // Drop what has fallen far below the camera (a crumbled block stays: it comes back).
   prune(y) {
@@ -4624,6 +4633,8 @@ class Level {
   // on a steady bare ledge with room over it and no enemy on it; maybe a critter. All by folkRng.
   addFolk(from, top) {
     if (this.world.bonus) return;
+    if (this.lanes && this.lanes.length === 3 && this.l === this.lanes[1].l) return;   // (a three-lane level's middle lane: no critters or crows, its screen within the
+    // computer's detail line, Ш6 «Б»: Tokyo at 2560x1080 with the fire mid-screen 6160 of 6000; its folk and trader are lane A's alone anyway)
     const fr = this.folkRng, R = this.R, t = this.tile, rs = this.rects.slice(from);
     const steady = (r) => !r.plank && !r.crumble && !r.move && !r.spring && !r.cap && !r.slick;
     const over = (r, h) => !this.rects.some((q) => q !== r && q.x1 > r.x0 && q.x0 < r.x1 && q.y1 <= r.y0 + 1 && q.y1 > r.y0 - h);   // nothing within h over it

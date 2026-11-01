@@ -1160,14 +1160,17 @@ class Game {
   buildLevel(newHero) {
     this.held = null; this.wellR = 0;   // (a dialog's kept level gone with a new one: Game.stageIn; a wide level's room's left with it)
     const rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null;
-    wideTo(wideFor(rc || { boss: this.world >= WORLDS.length && !this.bonus }));   // (the view's layout first: the level is laid to it)
+    const cols = (rc && rc.boss) || this.daily != null || innerWidth / innerHeight < WIDE.three ? WIDE.cols : WIDE.cols3, re = cols !== wideCols && wideWant;   // a third lane
+    // in a window 2.1 times as wide as it is tall or more (owner, Ш12 «Б»); a boss's arena and the daily well two (its board: one layout for all computers)
+    wideCols = cols; wideTo(wideFor(rc || { boss: this.world >= WORLDS.length && !this.bonus }));   // (the view's layout first: the level is laid to it)
+    if (re && wideWant) { wideSwitch = true; layout(); wideSwitch = false; }   // (wide already, its width changed)
     const W = view.w, H = view.h, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = view.wide ? WIDE.tile : clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);   // (a wide level's: a 408-px phone's, WIDE)
     const seed = nextSeed != null ? nextSeed : this.daily != null ? daySeed(this.daily, this.world, this.stage, !!this.bonus) : (Math.random() * 4294967296) >>> 0;
     nextSeed = null;
     this.seed = seed; this.lv = new Level(); this.well = null; this.door = null;
-    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, lanes: view.wide && !boss, arena: view.wide && boss, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
+    this.lv.reset({ kind: boss ? 'boss' : 'well', w: W, h: H, R: this.R, seed, lanes: view.wide && !boss ? (wideCols === WIDE.cols3 ? 3 : 2) : 0, arena: view.wide && boss, world: wd, stage: this.stage, hard: this.hard, tier: this.tier + this.loop, recipe: this.bonus ? null : rc,
       height: boss ? 0 : (rc ? rc.len : wd.heights[this.stage]) * R_PER_M * this.R, theme: (this.bonus && this.mode === 'camp' ? this.wd : wd).theme, keep: this.room() });   // (a campaign's bonus
     // in its world's look: the Sea's and Tokyo's coin rain were the Mine's grey, the kind's own theme from the days a bonus was its world's)
     this.orbit = ORBIT_TRY || (wd.id === ORBIT.world && this.stage >= ORBIT.from);   // on orbit: the hero's light jumps (ORBIT)
@@ -4463,7 +4466,7 @@ if (window.PerformanceObserver && (PerformanceObserver.supportedEntryTypes || []
 const fx = new FX();
 const game = new Game();
 const renderer = new Renderer(canvas);
-let wideWant = false, wideSwitch = false;   // a wide level's view wanted (wideTo); the layout switched to it or back, not a resize
+let wideWant = false, wideSwitch = false, wideCols = WIDE.cols;   // (wideCols: the wide level's across, 34 or with a third lane 52)   // a wide level's view wanted (wideTo); the layout switched to it or back, not a resize
 let paused = document.hidden, started = false, firstFrame = false, layoutQueued = false, inputTold = false, menuTold = false, sidesAsked = false;   // (told: the first input, the menu, once a page; asked: src/sides.js fetched)
 { const s = new URLSearchParams(location.search).get('seed'); if (s != null && s !== '' && Number.isFinite(+s)) nextSeed = +s; }
 
@@ -4518,9 +4521,9 @@ function layout() {
 // view.s times bigger), the width left over the walls'; a picture's dot about the column's 2 px of the level's; the page's words and buttons in CSS px over all of
 // it, its panels a column in the middle (--colW); no sides. A resize keeps the level, only its scale changes (owner, Ш11 «А»)
 function layoutWide(vw, vh) {
-  const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(Math.min(W / (WIDE.cols + 1), H / WIDE.seen) / P + 1e-6)) * P, s = T / WIDE.tile;
+  const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(Math.min(W / (wideCols + 1), H / WIDE.seen) / P + 1e-6)) * P, s = T / WIDE.tile;
   PIX.size = P / s; PIX.base = Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;
-  const Wc = (WIDE.cols + 1) * T, d = window.devicePixelRatio || 1, left = Math.round(((vw - Wc) / 2) * d) / d;   // the level always WIDE.cols + 1 tiles across, in
+  const Wc = (wideCols + 1) * T, d = window.devicePixelRatio || 1, left = Math.round(((vw - Wc) / 2) * d) / d;   // the level always WIDE.cols + 1 tiles across, in
   // the middle: laid the same in any window, so a resize keeps it in the middle too (it kept a 16:9 one at the left of a 21:9 window); the rest the world's far
   // view beside it, as the column's (Ш11 «А», П3 «А»)
   const fit = H / (COL_MIN / 0.5625), k = fit >= 1 ? 1 : d * fit >= 1 ? Math.floor(d * fit + 1e-6) / d : fit;   // a short window's words and buttons laid out as the

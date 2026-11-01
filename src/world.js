@@ -5601,17 +5601,21 @@ const TILE_MAX = 128, TILES = { list: [], byKey: new Map(), tex: null, n: 0, u: 
 // need about 90 together, the five open ones 66, past the 64 there were: a sixth world's in one sitting drew the first picture, the Village's; 128 ivec4s keep the
 // shader well inside WebGL2's 224 uniform vectors)
 let TILES_VKEY = 0;   // (vtsp's pictures' own keys)
-const TILE_LIM = 2048;   // (the atlas's side: WebGL2 promises textures of 2048 at least; past a phone's limit texImage2D fails without a word, the pictures wrong)
+const TILE_LIM = 2048;   // (the atlas's columns' height, and its width till the GPU is asked (TILES.lim, tileUpload): WebGL2 promises textures of 2048 at least; past a
+// phone's limit texImage2D fails without a word, the pictures wrong)
 const tileId = (rows) => {
   const key = rows.key || rows.join('/'); let id = TILES.byKey.get(key); if (id !== undefined) return id;
-  const w = rows[0].length, h = rows.length, K = TILES.pk || (TILES.pk = { x: 0, y: 0, cw: 0 });   // (packed down columns TILE_LIM tall, the columns side by side)
+  const w = rows[0].length, h = rows.length, K = TILES.pk || (TILES.pk = { x: 0, y: 0, cw: 0 }), L = TILES.lim || TILE_LIM;   // (packed down columns TILE_LIM tall, the columns side by side)
   if (K.y + h > TILE_LIM) { K.x += K.cw; K.y = 0; K.cw = 0; }
-  if (TILES.list.length >= TILE_MAX || K.x + w > TILE_LIM) { TILES.list.length = 0; TILES.byKey.clear(); TILES.at = []; TILES.n = -1; K.x = K.y = K.cw = 0; TILES.resets = (TILES.resets || 0) + 1; }   // (full all the same: begun
+  if (TILES.list.length >= TILE_MAX || K.x + w > L) { TILES.list.length = 0; TILES.byKey.clear(); TILES.at = []; TILES.n = -1; K.x = K.y = K.cw = 0; TILES.resets = (TILES.resets || 0) + 1; }   // (full all the same: begun
   // again, its pictures registered anew as drawn, never another's)
   id = TILES.list.length; TILES.list.push(rows); TILES.byKey.set(key, id); (TILES.at || (TILES.at = []))[id] = [K.x, K.y]; K.y += h; K.cw = Math.max(K.cw, w); return id;
 };
 const tileUpload = (gl) => {   // (again whenever a picture was added since)
   if (TILES.n === TILES.list.length && TILES.tex) return TILES.tex;
+  if (!TILES.lim) TILES.lim = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE) || TILE_LIM, 8192);   // (the atlas as wide as the GPU allows, 8192 at most:
+  // a wide level's far view and its fire's band are 1664 texels each, 2544 with three lanes; at 2048 the two never fitted and the atlas began again
+  // mid-frame, 4 times a frame, what was drawn before it on others' places, every frame uploaded again: the owner's striped blocks and slow frames, 2026-11-01)
   const keys = Object.keys(PAL); let W = 1, H = 1;
   TILES.list.forEach((rows, id) => { const [x0, y0] = TILES.at[id]; W = Math.max(W, x0 + rows[0].length); H = Math.max(H, y0 + rows.length); });
   const px = new Uint8Array(W * H * 4);

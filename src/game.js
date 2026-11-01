@@ -132,8 +132,8 @@ const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON
 // floors, in a window at least as wide as it is tall when the level starts; a boss's and the scripted lesson 1-1 (one way up, as the plan's P1 has it) stay
 // a 16-column well
 // A boss's arena wide (Ш7 «Б»: each fight reworked for 34 columns, the bosses chat's): the bosses in BOSS_WIDE, or every one with ?wideboss to try them; the others
-// in the 16-column well
-const BOSS_WIDE = new Set([]), WIDE_BOSS_TRY = /[?&]wideboss\b/.test(location.search);
+// in the 16-column well. All nine since 2026-11-01: the arena's thin floor (WIDE.arena), each fight's wide numbers (BOSS_ARENA); the bot wins each on 5 seeds
+const BOSS_WIDE = new Set(['probka', 'cart', 'puck', 'namazu', 'tram', 'crane', 'pigeon', 'koschei', 'lid']), WIDE_BOSS_TRY = /[?&]wideboss\b/.test(location.search);
 const ALL = /[?&]all\b/.test(location.search), CAMP_OPEN = ALL ? CAMPAIGN.length : 5;   // the worlds out (owner 2026-10-21: the Village, the Mine, Fuji, the Sea and Tokyo; the rest under lock till their updates)
 // A bonus world off the worlds' line (owner, 2026-10-20: the Dark Forest «За звёзды», at 180 of the campaign's 210): open once the line's stars
 // come to so many, not by the boss before it; the line goes on past it, Continue keeps to the line; a chip of its own in the menu, its lock
@@ -639,14 +639,15 @@ class Boss {
     this.look = this.body.look = lk ? lk.id : null;   // drawn round it by the renderer (look), on it by writeFace (LOOK_FACE)
     this.def = def || null; this.help = 1;   // help: its dazed time stretched (Game.buildLevel: after three losses running)
     this.hp = (def ? def.hp : BOSS.hp) + (lv.hard ? 2 : 0); this.max = this.hp; this.t = 0; this.drop = 1.8; this.call = 3; this.angry = 0; this.dead = false;
-    this.state = 'hover'; this.was = 'hover'; this.st = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // was: its state before (its pose's follow-through, bossPose); rattled: Koschei's bones have shaken to say he rises
+    this.state = 'hover'; this.was = 'hover'; this.st = 0; this.trek = 0; this.dazes = 0; this.wind = 0; this.mark = false; this.rattled = false;   // was: its state before (its pose's follow-through, bossPose); rattled: Koschei's bones have shaken to say he rises
     this.next = 'spit'; this.drops = 0; this.phSeen = 0; this.dustT = 0; this.tx = this.body.cx;
     this.form = 0; this.cards = 0; this.card = null; this.card2 = null; this.land = 'plain'; this.last = {}; this.bags = null;   // the Lid's (LIDF): its form, its turn's cards, its bags   // the Tsuchigumo's: its next move, a drop's count, the phase shown, the dust's clock, where it drops
     this.halfW = bossSize(this)[0] / 2;   // its drawing's half width
     this.pose = this.body.pose = loosen({ n: 1, m: false, f: 1, fm: false, ft: 0, out: 0, outM: false, outT: 0, outTurn: false, turn: false, ink: null, go: false, fly: false, t0: 0, since: 0 }, 'ft', 'outT', 't0', 'since');   // its pose (its frame, bossPose): drawn only
-    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'was', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx', 'card', 'card2', 'land', 'cards', 'look', 'halfW');   // (see loosen)
+    loosen(this, 't', 'drop', 'call', 'angry', 'state', 'was', 'st', 'wind', 'next', 'drops', 'phSeen', 'dustT', 'tx', 'trek', 'card', 'card2', 'land', 'cards', 'look', 'halfW');   // (see loosen)
   }
-  open() { return this.state === 'dazed'; }   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)
+  open() { return this.state === 'dazed'; }
+  far(g) { const lv = g.lv; return lv.arena ? Math.max(0, Math.abs(g.hero.cx - this.body.cx) / lv.R - this.halfW / lv.R - BOSS_ARENA.near) / BOSS_ARENA.walk : 0; }   // a wide arena's run to it, s (BOSS_ARENA)   // a stomp hurts it only in its window, after its own move (the plan: every boss's hit earned)
   to(s) { this.was = this.state; this.state = s; this.st = 0; }
   quakeAim(g, F, ph, w) {   // Onamazu's slam to come (the Lid's landing as it, F its own): its waves both ways along the floor off its sides, rocks over the
     // hero, laid `w` s before (SHOT)
@@ -690,7 +691,7 @@ class Boss {
       if (Math.floor(this.st * 12) % 2) b.kickSquash(0, 1, -0.12);
       b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
       if (this.st > F.cast) {
-        const n = F.n[ph];
+        const n = lv.arena ? Math.round(F.n[ph] * BOSS_ARENA.ice) : F.n[ph];   // (a wide arena: more of them, BOSS_ARENA)
         for (let k = 0; k < n; k++) icicle(H.cx + (k - (n - 1) / 2) * F.gap * R);
         b.color = this.ink; sound.play('crumble', 0.7, 1.4); this.next = 'dash'; this.to('hover');
       }
@@ -703,14 +704,14 @@ class Boss {
       addVel(b, (this.dir * F.dash[ph] * R - b.rigVx) * Math.min(1, 10 * dt), 0);
       if (!(b.wallMask & (this.dir > 0 ? 2 : 1)) && this.st < 2.5) return;
       shake.add(8); haptics.buzz(30); sound.play('stomp', 1, 0.5); sound.play('crumble', 0.7, 0.8); fx.dust(this.dir > 0 ? lv.r : lv.l, lv.floor, IMPACT.puffSpeed + 900);   // the wall: it shakes
-      for (let k = 0; k < F.wallIce[ph]; k++) icicle(b.cx - this.dir * (this.halfW + (1.2 + 2.4 * k) * R));   // over the way to her: wait for them to fall, then go
+      for (let k = 0; k < (lv.arena ? Math.round(F.wallIce[ph] * BOSS_ARENA.ice) : F.wallIce[ph]); k++) icicle(b.cx - this.dir * (this.halfW + (1.2 + 2.4 * k) * R));   // over the way to her: wait for them to fall, then go
       if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // her last heart: back the other way first
-      this.drops = 0; this.next = 'cast'; this.to('dazed'); setVel(b, 0, 0); b.kickSquash(1, 0, 1.6);
+      this.drops = 0; this.next = 'cast'; this.to('dazed'); setVel(b, 0, 0); b.kickSquash(1, 0, 1.6); this.trek = this.far(g);
       if (!this.dazes++) ui.toast(L2(this.def.hint), 2600);   // the first time: what to do now
     } else if (this.state === 'dazed') {   // frozen to the wall: open to a stomp
       addVel(b, -b.rigVx * Math.min(1, 8 * dt), 0);
       if (Math.floor(this.st * 6) % 2) b.kickSquash(1, 0, 0.05);
-      if (this.st > F.stun * this.help) this.to('rise');
+      if (this.st > F.stun * this.help + this.trek) this.to('rise');
     } else if (this.state === 'rise' && this.st > 0.5) this.to('hover');   // off the wall again
   }
   // Onamazu (BOSSES.namazu, QUAKE): the earthquake catfish keeps off the hero, its moves taking turns. A quake: reared up on its tail, red,
@@ -780,7 +781,7 @@ class Boss {
       b.color = Math.floor(this.st * 5) % 2 ? FOE_COLOR.red : this.ink;   // 2.5 flashes a second: under WCAG's 3
       if (this.st > (this.drops ? F.again : F.warn)) { this.to('dive'); b.color = this.ink; sound.play('airjump', 0.9, 0.4); }
     } else if (this.state === 'dive') {   // along the floor to the other end
-      addVel(b, (this.dir * F.rush[ph] * R - b.rigVx) * Math.min(1, 8 * dt), 0);
+      addVel(b, (this.dir * F.rush[ph] * (lv.arena ? BOSS_ARENA.tram : 1) * R - b.rigVx) * Math.min(1, 8 * dt), 0);   // (a wide arena: faster, its way twice as long)
       if ((this.dir > 0 ? b.cx < x1 : b.cx > x0) && !(b.wallMask & (this.dir > 0 ? 2 : 1)) && this.st < 2.5) return;
       shake.add(6); sound.play('stomp', 0.8, 0.6); fx.dust(this.dir > 0 ? b.maxX : b.minX, lv.floor, IMPACT.puffSpeed + 700);
       if (ph >= F.twice && !this.drops) { this.drops = 1; this.dir = -this.dir; this.to('warn'); return; }   // its last heart: straight back once more
@@ -918,7 +919,7 @@ class Boss {
     if (F.forms && this.state === 'rise' && F.form(ph) !== this.form) this.lidForm(F.form(ph));   // the Lid: into its next form as it gets up after the hit
     if (this.state === 'hover' && F.bag) {   // the Lid: its next card from its bag after its rest (a short one between the cards of one turn)
       swing();
-      if (this.st > (this.cards > 0 && this.cards < F.cards[ph] ? F.chain : F.rest[ph])) this.lidPick(g, ph, x0, x1);
+      if (this.st > (this.cards > 0 && this.cards < F.cards[ph] + (lv.arena ? BOSS_ARENA.lid : 0) ? F.chain : F.rest[ph])) this.lidPick(g, ph, x0, x1);
     } else if (this.state === 'hover') {   // swinging, its next move after its rest
       swing();
       if (this.st > F.rest[ph]) {   // its next move: a swing (if it has one), a spit (if this phase has any), a drop
@@ -990,7 +991,7 @@ class Boss {
   }
   lidPick(g, ph, x0, x1) {
     const F = this.def.hang, lv = g.lv, H = g.hero, b = this.body, cx = (lv.l + lv.r) / 2, f = F.form(ph);
-    if (this.cards >= F.cards[ph]) {   // its turn played: the drop (and how it lands)
+    if (this.cards >= F.cards[ph] + (lv.arena ? BOSS_ARENA.lid : 0)) {   // its turn played: the drop (and how it lands; a wide arena's turn a card longer, BOSS_ARENA)
       this.cards = 0; this.land = this.lidDraw(lv, 'drop' + Math.min(ph, F.drops.length - 1), F.drops[Math.min(ph, F.drops.length - 1)]);
       this.to('warn'); this.tx = b.cx; sound.play(...F.snd.warn); return;
     }
@@ -1160,7 +1161,7 @@ class Game {
   buildLevel(newHero) {
     this.held = null; this.wellR = 0;   // (a dialog's kept level gone with a new one: Game.stageIn; a wide level's room's left with it)
     const rc = this.mode === 'camp' ? this.rc : this.daily != null ? (this.rc = dayAt(dayPlan(this.daily)[this.stage])) : null;
-    wideTo(wideFor(rc || { boss: this.world >= WORLDS.length && !this.bonus }));   // (the view's layout first: the level is laid to it)
+    wideTo(wideFor(rc || { boss: this.world >= WORLDS.length && !this.bonus && 'lid' }));   // (a run's summit: the Lid, its id for BOSS_WIDE)   // (the view's layout first: the level is laid to it)
     const W = view.w, H = view.h, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
     this.R = view.wide ? WIDE.tile : clamp((W - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);   // (a wide level's: a 408-px phone's, WIDE)
@@ -1172,7 +1173,7 @@ class Game {
     // in its world's look: the Sea's and Tokyo's coin rain were the Mine's grey, the kind's own theme from the days a bonus was its world's)
     this.orbit = ORBIT_TRY || (wd.id === ORBIT.world && this.stage >= ORBIT.from);   // on orbit: the hero's light jumps (ORBIT)
     this.softF = !this.bonus && this.daily == null && this.world < FIRE_SOFT.worlds; if (this.softF && this.lv.fire) this.lv.fire.calm = Math.max(this.lv.fire.calm, FIRE_SOFT.calm);   // worlds 1-3's softer fire (FIRE_SOFT)
-    this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys
+    if (!this.lv.arena) this.lv.cam = Math.max(this.lv.cam, this.lv.floor + this.room() - H);   // the floor shows over the touch keys (a computer's wide arena has none: WIDE.arena)
     if (boss) { this.lv.boss = new Boss(this.lv, BOSSES[rc ? rc.boss : 'lid']); if ((save.camp.fails[this.failKey()] || 0) >= 3) this.lv.boss.help = 1.15; }   // help in trouble, unseen (the digest §7)
     if (newHero || !this.hero || this.hero.R !== this.R) this.makeHero();
     else {   // back to size and weight after the hole
@@ -1268,6 +1269,7 @@ class Game {
     fx.n = 0;   // the sparks in the air: gone
     const lv = this.lv, H = this.hero;   // the camera as a level, a room or a respawn sets it: the hero in sight where it was meant (a width alone changing, the view's height did not)
     if (lv.exit) lv.cam = lv.floor + this.roomFloor() - view.h;   // a room's (enterRoom)
+    else if (lv.arena) lv.cam = lv.floor + WIDE.arena - view.h;   // a boss's wide arena (WIDE.arena)
     else if (lv.kind !== 'well') lv.cam = Math.max(lv.floor + CAM.floorShow - view.h, lv.floor + this.room() - view.h);
     else if (lv.under) lv.cam = clamp(H.cy - 0.35 * view.h, lv.capY - CAM.top, lv.floor + this.room() - view.h);
     else if (this.state !== 'menu') lv.cam = Math.max(Math.min(H.cy - CAM.anchor * view.h, lv.floor + this.room() - view.h), lv.capY - CAM.top);

@@ -1720,7 +1720,7 @@ const FOE_NAMES = {
   utsuro: { en: 'Hollow ship', es: 'Nave hueca', pt: 'Nave oca', ja: 'うつろぶね' },
 };
 const SHELL = { speed: 11, life: 4 };   // a rolling shell: R/s, and s before it pops
-const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in views, blob R
+const SPIT = { every: [2.6, 4], wind: 0.6, range: 0.9, r: 0.3 };   // s between lobs (from, to), s winding up, reach in a phone's screens (view.fh), blob R
 // A mini-boss (the plan: a big one of a known enemy, on a variation level, its scene's last): `size` times as big, `hp`
 // stomps to beat; a spitter's lobs two blobs at once. 3-4's arena ends with one (a recipe's `mini`).
 const MINI = { size: 1.6, hp: 3 };

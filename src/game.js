@@ -618,7 +618,7 @@ class Foe {
       this.spitT = rand(SPIT.every[0], SPIT.every[1]);
       return true;
     }
-    if ((this.spitT -= dt) <= 0 && Math.abs(H.cy - b.cy) < SPIT.range * view.h && b.cy > lv.cam && b.cy < lv.cam + view.h) {
+    if ((this.spitT -= dt) <= 0 && Math.abs(H.cy - b.cy) < SPIT.range * view.fh && b.cy > lv.cam && b.cy < lv.cam + view.h) {
       this.wind = SPIT.wind;
       const x = b.cx, y = b.minY - SPIT.r * lv.R, dx = H.cx - x, dy = H.cy - y, T = clamp(Math.hypot(dx, dy) / 420, 0.55, 1.1);
       for (let k = 0, n = this.big ? 2 : 1; k < n; k++) lv.shots.push(laid({ x, y, vx: dx / T + (n > 1 ? (k ? 80 : -80) : 0), vy: (dy - 0.5 * SHOT_G * T * T) / T, r: SPIT.r * lv.R }, this, SPIT.wind));   // a big one: two, apart
@@ -1452,7 +1452,7 @@ class Game {
     if (r.key) { crumbleFx(r, this.lv.theme.block, true); sound.play('bosshit', 0.8, 0.7); }   // a gate's keystone: heavier
     sound.play('crumble', 1, 0.9); sound.play('chime', 0.6, 1.3); shake.add(r.key ? 7 : 3); haptics.buzz(r.key ? 35 : 20);
   }
-  gated() { const H = this.hero; return this.lv.near(H.cy - view.h, H.cy).some((r) => r.key); }   // a whole gate over the hero, within a screen (see GATE)
+  gated() { const H = this.hero; return this.lv.near(H.cy - view.fh, H.cy).some((r) => r.key); }   // a whole gate over the hero, within a screen (see GATE; a phone's, view.fh)
   // The boost ring (RING): through it the hero rockets up a quarter of the level through all, smashing what breaks and popping
   // the enemies it meets, safe meanwhile; it ends once that high and clear of every ledge.
   ringStep(dt) {
@@ -1633,7 +1633,8 @@ class Game {
   }
   // Enemies come alive a little above the screen and are forgotten far below it.
   activate() {
-    const lv = this.lv, lim = lv.cam - 0.7 * view.h, far = lv.cam + 2 * view.h, low = lv.under ? lv.cam + 1.7 * view.h : Infinity;   // (the flip side is fallen: what is under the view is ahead)
+    const lv = this.lv, lim = lv.cam + CAM.anchor * view.h - (CAM_ANCHOR + 0.7) * view.fh, far = lv.cam + 2 * view.h, low = lv.under ? lv.cam + 1.7 * view.h : Infinity;   // (the flip side is fallen: what is under the view is ahead)
+    // (lim: they wake as on a phone, 0.7 of its screen over its top, so as many tiles over the hero on any screen: Эк2 «А»; a wide view's 20 rows woke them 22 tiles later)
     for (let i = lv.spawns.length - 1; i >= 0; i--) {
       const s = lv.spawns[i];
       if (s.y < lim || s.y > low) continue;
@@ -4515,8 +4516,9 @@ function layout() {
   PIX.base = Math.max(1, Math.round(PIX.base / PIX.size - 1e-6)) * PIX.size;   // a picture's dot whole game pixels at this scale too (owner, 2026-10-28:
   // «важно, чтобы при уменьшении экрана пиксели не мылились»: at 0.96 its dot was 1.92 of them, one and two by turns)
   view.w = W / k; view.h = H / k; view.left = left; view.k = view.s = k; view.wide = false; view.hudB = 0; uiEl.classList.remove('wide'); CAM.anchor = CAM_ANCHOR;   // (the HUD measured again: see ui.frame)
-  view.fh = view.h;   // the fire's measure of a screen (its start, its lag, how far a burn or a way back puts it under the hero): this screen; a computer's wide
-  // level's, its phone's rows (the wide plan's P0: in 20 rows the fire would chase twice as near)
+  view.fh = WIDE.rows * clamp((view.w - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax);   // the fire's measure of a screen (its start, its lag, how far a burn or a way back
+  // puts it under the hero, a spitter's reach, the enemies' wake): a phone's rows of this tile on any screen (Эк2 «А»: a computer's column had 31, the fire 12 tiles under at the start, not 15;
+  // the wide plan's P0: in 20 rows the fire would chase twice as near)
   const pad = $('pad');   // what the touch keys cover at the bottom (their height and the pad's padding, safe area and all)
   view.keep = coarse ? Math.max(...[...pad.querySelectorAll('.key')].map((k) => parseFloat(getComputedStyle(k).height))) + parseFloat(getComputedStyle(pad).paddingBottom) + 8 : 0;   // the tallest key
   for (const e of [canvas, uiEl]) { e.style.width = W + 'px'; e.style.height = H + 'px'; e.style.left = left + 'px'; }
@@ -4572,7 +4574,7 @@ function layoutCol(vw, vh) {
   const W = 17 * T, H = Math.floor(vh / P + 1e-6) * P, left = Math.round(((vw - W) / 2) * d) / d;
   PIX.size = P / s; PIX.base = GRID_ON && !PIX.slow ? PIX.size : Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;
   const fit = W / COL_MIN, k = fit >= 1 ? 1 : d * fit >= 1 ? Math.floor(d * fit + 1e-6) / d : fit;
-  view.w = W / s; view.h = H / s; view.left = left; view.k = k; view.s = s; view.wide = false; view.hudB = 0; view.keep = 0; view.fh = view.h; CAM.anchor = CAM_ANCHOR;
+  view.w = W / s; view.h = H / s; view.left = left; view.k = k; view.s = s; view.wide = false; view.hudB = 0; view.keep = 0; view.fh = WIDE.rows * WIDE.tile; CAM.anchor = CAM_ANCHOR;
   Object.assign(canvas.style, { width: W + 'px', height: H + 'px', left: left + 'px' });
   Object.assign(uiEl.style, { width: W / k + 'px', height: H / k + 'px', left: left + 'px', transform: k < 1 ? 'scale(' + k + ')' : '', transformOrigin: '0 0' });
   uiEl.classList.remove('wide'); document.documentElement.style.setProperty('--k', k);

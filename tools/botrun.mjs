@@ -48,6 +48,8 @@ const run = async (expression) => {
 // W, H, MOBILE=0 (and DPR): a computer's window instead of the phone (the wide plan's P0: PAGE=…/?wide W=1280 H=720 MOBILE=0)
 const MOBILE = process.env.MOBILE !== '0';
 await page('Emulation.setDeviceMetricsOverride', { width: +(process.env.W || 375), height: +(process.env.H || 812), deviceScaleFactor: +(process.env.DPR || (MOBILE ? 2 : 1)), mobile: MOBILE });
+if (MOBILE) await page('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });   // (a phone's touch: the game's coarse pointer, its phone layout; without it a
+// "phone" was a computer's 375-px column, and since the logical column, Эк1 «А», no phone at all)
 await page('Page.navigate', { url: PAGE });
 for (let i = 0; !(await run(`document.readyState === 'complete' && typeof __up === 'object' && __up.started && typeof BOSS_FRAMES !== 'undefined'`)); i++) {
   if (i > 300) throw new Error('the game did not load');

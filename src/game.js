@@ -127,9 +127,9 @@ const SIDE = [{ foes: 0.7, fire: 0.92, pair: 0, seed: 7919, time: 4 }, null, { f
 // its bonus race and its boss as before; every other screen a column as before (wideTo)
 const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CAM_ANCHOR = CAM.anchor;   // a wide level's camera: WIDE.anchor (owner Кам1 «Б», Mochi lower,
 // 14 rows over him), ?anchor= to try another by hand (layoutWide); every other screen the game's
-const GRID_ON = /[?&]grid\b/.test(location.search), GRID_DOTS = 17;   // ?grid (a try for the owner, 2026-11-01: «на десктопе … проблемы с масштабированием
-// объектов»): a computer's pictures and textures on one grid, a dot a whole number of the screen's pixels, about GRID_DOTS of it to a tile as on a phone
-// (23 px, 17.3 dots); without it a computer's pictures have a dot of 2 CSS px over a 1-px drawing grid, 12–15 dots to a tile, their pixels twice the ledges'
+const GRID_ON = !/[?&]nogrid\b/.test(location.search), GRID_DOTS = 17;   // a computer's pictures and textures on one grid (owner, Пк1 «Б», 2026-11-02, after
+// «на десктопе … проблемы с масштабированием объектов»): a dot a whole number of the screen's pixels, about GRID_DOTS of it to a tile as on a phone (23 px,
+// 17.3 dots); ?nogrid the grid before it, a picture's dot of 2 CSS px over a 1-px drawing grid, 12–15 dots to a tile, its pixels twice the ledges'
 const WIDE_HOST = /(^|\.)github\.io$|^localhost$/.test(location.hostname);   // the wide view only on the GitHub site (and the local server) till it is ready (owner,
 // 2026-11-01: «широкий вид только для гита, верни в песок версию без десктопа… Десктоп еще не готов»): Playgama's sandbox and every portal the column; ?wide there to try it
 const WIDE_ON = /[?&]wide\b/.test(location.search) || (WIDE_HOST && !/[?&]nowide\b/.test(location.search)), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
@@ -4497,7 +4497,7 @@ function layout() {
   PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
   if (wideWant && !coarse) { layoutWide(vw, vh); return; }
   if (GRID_ON && !coarse && !PIX.slow) { const dd = window.devicePixelRatio || 1, w0 = vw < vh ? vw : Math.min(vw, Math.max(Math.round(vh * 0.5625), vh >= COL_TALL ? COL_MIN : 0)), t = Math.min(HERO.sizeMax, (w0 - 2 * LEVEL.wall) / 16);
-    PIX.size = PIX.base = Math.max(1, Math.round((t * dd) / GRID_DOTS)) / dd; }   // (?grid: the column's dot from its tile)   // (a wide level wide whatever the window becomes: a resize keeps the level, only its scale changes, Ш11 «А»)
+    PIX.size = PIX.base = Math.max(1, Math.round((t * dd) / GRID_DOTS)) / dd; }   // (one grid: the column's dot from its tile)   // (a wide level wide whatever the window becomes: a resize keeps the level, only its scale changes, Ш11 «А»)
   const d = window.devicePixelRatio || 1, W0 = vw < vh ? vw : Math.min(vw, Math.max(Math.round(vh * 0.5625), vh >= COL_TALL ? COL_MIN : 0)), W = Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = Math.floor(vh / PIX.size + 1e-6) * PIX.size;   // a phone
   // held upright: all of its width; a whole number of game pixels across and down, on the screen's own pixels (left), so each is as many of them as the next
   // (owner: «пиксель в пиксель на всех устройствах»; a phone's was its full width and height, a game pixel 4.5 of an iPhone's, lines 4 and 5 by turns)
@@ -4537,7 +4537,7 @@ function layout() {
 // view.s times bigger), the width left over the walls'; a picture's dot about the column's 2 px of the level's; the page's words and buttons in CSS px over all of
 // it, its panels a column in the middle (--colW); no sides. A resize keeps the level, only its scale changes (owner, Ш11 «А»)
 function layoutWide(vw, vh) {
-  if (GRID_ON && !PIX.slow) { const dd = window.devicePixelRatio || 1; PIX.size = Math.max(1, Math.round((Math.min(vw / (wideCols + 1), vh / WIDE.seen) * dd) / GRID_DOTS)) / dd; }   // (?grid: the
+  if (GRID_ON && !PIX.slow) { const dd = window.devicePixelRatio || 1; PIX.size = Math.max(1, Math.round((Math.min(vw / (wideCols + 1), vh / WIDE.seen) * dd) / GRID_DOTS)) / dd; }   // (one grid: the
   // dot from the tile the window gives, so a tile is about GRID_DOTS of it)
   const P = PIX.size, W = Math.floor(vw / P + 1e-6) * P, H = Math.floor(vh / P + 1e-6) * P, T = Math.max(1, Math.floor(Math.min(W / (wideCols + 1), H / WIDE.seen) / P + 1e-6)) * P, s = T / WIDE.tile;
   PIX.size = P / s; PIX.base = GRID_ON && !PIX.slow ? PIX.size : Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;

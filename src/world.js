@@ -6306,6 +6306,7 @@ function sidesPaint(cv, S) {   // over the world's top ink, k times bigger, on i
 // across, its height as much again, its pixels taken nearest (a column or a row of it twice here and there: each pixel a whole game pixel, no blur), each colour its ink and its tone from the black (vtsp's
 // texels); its tones brought down together till the brightest is a quarter (the depth rule: the boss and its shots read over it), a light's (orange) a little
 // more, at most 0.3; its black clear (the arena's dark and stars behind show). Made once a palette (?pal)
+let arenaAsked = false;   // (src/sides-arena.js fetched once: SIDE_ARENA)
 function arenaArt(art, id, tw) {
   const C = art.arena || (art.arena = {}), key = tw + (PAL.blue + ''); if (C[key]) return C[key];
   const keys = Object.keys(PAL), B = PAL.black, inks = art.pal.map((h) => {   // (each colour to the ink whose line from the black it lies nearest, and how far along)
@@ -7674,7 +7675,11 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   if (lv.arena && typeof SIDE_ART !== 'undefined') {   // a boss's wide arena on a computer: its world's backdrop behind all (arenaArt), its foot on the floor
     const id = th.orbit ? 'orbit' : lv.world && lv.world.id, art = id && SIDE_ART[id];
-    if (art) { const tw = Math.ceil((lv.r - lv.l) / PIX.size), pic = arenaArt(art, id, tw), q = PIX.size, hw = (tw * q) / 2, hh = (pic.length * q) / 2, x0 = snap((lv.l + lv.r) / 2 - hw), y0 = snap(lv.floor) - pic.length * q, rt = this.route;   // (wall to wall: arenaArt)
+    // (a width cut on its own, SIDE_ARENA: 578 on the owner's MacBook, 612 at 1280x720, 1920x1080 and 2560x1440, laid 1:1, no column or row twice; Д404 «А»)
+    const tw = art && Math.ceil((lv.r - lv.l) / PIX.size), cut = art && typeof SIDE_ARENA !== 'undefined' && SIDE_ARENA[tw] && SIDE_ARENA[tw][id];
+    if (typeof SIDE_ARENA === 'undefined' && !arenaAsked) { arenaAsked = true; const b = document.createElement('script'); b.src = 'src/sides-arena.js'; document.head.append(b); }   // (its 860 KB
+    // fetched the first time an arena is drawn; till it comes, the stretch)
+    if (art) { const pic = cut ? arenaArt(cut, id + '-cut', tw) : arenaArt(art, id, tw), q = PIX.size, hw = (tw * q) / 2, hh = (pic.length * q) / 2, x0 = snap((lv.l + lv.r) / 2 - hw), y0 = snap(lv.floor) - pic.length * q, rt = this.route;   // (wall to wall: arenaArt)
       if (CINE) this.route = 3; farMark(); F(x0 + hw, y0 + hh, hw, 0, 0, hh, PAL.white, 1, 11, hw, hh, tileId(pic) + 0.5); farMark(); this.route = rt; }
   }
   if (th.space && lv.kind === 'well') {   // Space's far view by level behind (spFar), then its things at the ledges' wall ends (kitThing, SP), one sheet pixel a game pixel

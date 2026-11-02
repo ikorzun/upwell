@@ -130,6 +130,9 @@ const WIDE_ANCHOR = +new URLSearchParams(location.search).get('anchor') || 0, CA
 const GRID_ON = !/[?&]nogrid\b/.test(location.search), GRID_DOTS = 17;   // a computer's pictures and textures on one grid (owner, Пк1 «Б», 2026-11-02, after
 // «на десктопе … проблемы с масштабированием объектов»): a dot a whole number of the screen's pixels, about GRID_DOTS of it to a tile as on a phone (23 px,
 // 17.3 dots); ?nogrid the grid before it, a picture's dot of 2 CSS px over a 1-px drawing grid, 12–15 dots to a tile, its pixels twice the ledges'
+const COL_LOGIC = !/[?&]oldcol\b/.test(location.search);   // a computer's column level in the level's own px, a tile WIDE.tile, the window showing it view.s times
+// bigger (owner Эк1 «А», 2026-11-02): a phone's jumps, timing and level on any monitor, Mochi never under a tile (the column's tile grew with the window, gravity
+// in px: +9–28% air time, and over a 40-px tile R stopped at HERO.sizeMax, the level laid otherwise); ?oldcol the column as before
 const WIDE_HOST = /(^|\.)github\.io$|^localhost$/.test(location.hostname);   // the wide view only on the GitHub site (and the local server) till it is ready (owner,
 // 2026-11-01: «широкий вид только для гита, верни в песок версию без десктопа… Десктоп еще не готов»): Playgama's sandbox and every portal the column; ?wide there to try it
 const WIDE_ON = /[?&]wide\b/.test(location.search) || (WIDE_HOST && !/[?&]nowide\b/.test(location.search)), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
@@ -1123,7 +1126,7 @@ class Game {
   // The menu's scene (owner, 2026-10-23, the Figma «Main»): no level behind it, its backdrop (Renderer.drawMenu) and the hero alone, big, over
   // the colours, to drag and press as in Gum (menuTouch); ui.menu sizes and places it (menuFit). Play or Continue builds the level as ever.
   toMenu() {
-    wideTo(false); this.wellR = 0;   // (left from a wide level's room too)
+    wideTo(false); colTo(false); this.wellR = 0;   // (left from a wide level's room too; the menu in the page's px, the column as it was)
     ads.due = false;   // (a third level's interstitial not taken on the way on is not carried to a later loss)
     if (this.held) this.stageOut();   // (from a dialog with Moti in it: its level first, as it was)
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
@@ -1170,7 +1173,7 @@ class Game {
     const summit = !rc && this.world >= WORLDS.length && !this.bonus;   // a run's summit: the Lid (its id 'lid' for BOSS_WIDE)
     const cols = (rc && rc.boss) || summit || this.daily != null || innerWidth / innerHeight < WIDE.three ? WIDE.cols : WIDE.cols3, re = cols !== wideCols && wideWant;   // a third lane
     // in a window 2.1 times as wide as it is tall or more (owner, Ш12 «Б»); a boss's arena and the daily well two (its board: one layout for all computers)
-    wideCols = cols; wideTo(wideFor(rc || { boss: summit && 'lid' }));   // (the view's layout first: the level is laid to it)
+    wideCols = cols; wideTo(wideFor(rc || { boss: summit && 'lid' })); colTo(COL_LOGIC && !coarse && !wideWant);   // (the view's layout first: the level is laid to it)
     if (re && wideWant) { wideSwitch = true; layout(); wideSwitch = false; }   // (wide already, its width changed)
     const W = view.w, H = view.h, boss = rc ? !!rc.boss : this.world >= WORLDS.length && !this.bonus, wd = this.bonus || this.wd;
     this.builtW = W;
@@ -2468,7 +2471,7 @@ class Game {
     track('room_enter', { kind: bub.kind, ...this.at() });   // a shop, a stash, a trial gone into (the gameplay review: none of it was seen)
     if (view.wide) {   // a wide level's room in the column, as on a phone, with its R (its rooms are 21 rows; a wide screen showed 13 of them and cut their vaults off,
       // the plan's P2): the hero as big as the column's, back to the level's on the way out (leaveRoom)
-      wideTo(false); this.wellR = this.R; this.wellW = this.builtW; this.builtW = view.w;
+      wideTo(false); colTo(COL_LOGIC); this.wellR = this.R; this.wellW = this.builtW; this.builtW = view.w;   // (the room in the logical column: R its WIDE.tile)
       this.R = bub.room ? bub.room.R : clamp((view.w - 2 * LEVEL.wall) * HERO.sizeFrac, HERO.sizeMin, HERO.sizeMax); this.heroTo(this.R / this.wellR); this.applyMods();
     }
     if (!bub.room) {
@@ -2540,7 +2543,7 @@ class Game {
   leaveRoom() {
     const bub = this.door, room = this.lv;
     this.lv = this.well; this.well = null; this.door = null;
-    if (this.wellR) { this.heroTo(this.wellR / this.R); this.R = this.wellR; this.builtW = this.wellW; this.wellR = 0; wideTo(true); this.applyMods(); }   // (out of a column room into its wide level)
+    if (this.wellR) { this.heroTo(this.wellR / this.R); this.R = this.wellR; this.builtW = this.wellW; this.wellR = 0; colTo(false); wideTo(true); this.applyMods(); }   // (out of a column room into its wide level)
     this.placeHero(bub.side === 1 ? bub.x1 + 1.2 * this.R : bub.x0 - 1.2 * this.R, bub.y1 - 1.1 * this.R); this.regroup();   // beside the door, on its ledge
     bub.cd = 1.2; this.hero.squeezeIn = 0; ui.flash(); ui.labels(null); sound.play('bubble', 0.8, 0.85);
     if ((bub.kind === 'treasure' && !room.coins.length) || bub.kind === 'trial') {   // a stash with all its coins taken, or a trial (TRIAL: one try, left halfway or not): its way in closes behind the hero
@@ -4480,7 +4483,7 @@ if (window.PerformanceObserver && (PerformanceObserver.supportedEntryTypes || []
 const fx = new FX();
 const game = new Game();
 const renderer = new Renderer(canvas);
-let wideWant = false, wideSwitch = false, wideCols = WIDE.cols;   // (wideCols: the wide level's across, 34 or with a third lane 52)   // a wide level's view wanted (wideTo); the layout switched to it or back, not a resize
+let wideWant = false, colWant = false, wideSwitch = false, wideCols = WIDE.cols;   // (wideCols: the wide level's across, 34 or with a third lane 52)   // a wide level's view wanted (wideTo); the layout switched to it or back, not a resize
 let paused = document.hidden, started = false, firstFrame = false, layoutQueued = false, inputTold = false, menuTold = false, sidesAsked = false;   // (told: the first input, the menu, once a page; asked: src/sides.js fetched)
 { const s = new URLSearchParams(location.search).get('seed'); if (s != null && s !== '' && Number.isFinite(+s)) nextSeed = +s; }
 
@@ -4496,6 +4499,7 @@ function layout() {
   if (started && coarse && vw > vh) { game.togglePause(true); return; }   // held sideways: paused under the 'turn it upright' screen, the game as it was (no new size)
   PIX.size = PIX.fit();   // the drawing's grid for this screen (a computer's: a whole number of its pixels, see PIX.fit)
   if (wideWant && !coarse) { layoutWide(vw, vh); return; }
+  if (colWant && !coarse) { layoutCol(vw, vh); return; }
   if (GRID_ON && !coarse && !PIX.slow) { const dd = window.devicePixelRatio || 1, w0 = vw < vh ? vw : Math.min(vw, Math.max(Math.round(vh * 0.5625), vh >= COL_TALL ? COL_MIN : 0)), t = Math.min(HERO.sizeMax, (w0 - 2 * LEVEL.wall) / 16);
     PIX.size = PIX.base = Math.max(1, Math.round((t * dd) / GRID_DOTS)) / dd; }   // (one grid: the column's dot from its tile)   // (a wide level wide whatever the window becomes: a resize keeps the level, only its scale changes, Ш11 «А»)
   const d = window.devicePixelRatio || 1, W0 = vw < vh ? vw : Math.min(vw, Math.max(Math.round(vh * 0.5625), vh >= COL_TALL ? COL_MIN : 0)), W = Math.floor(W0 / PIX.size + 1e-6) * PIX.size, H = Math.floor(vh / PIX.size + 1e-6) * PIX.size;   // a phone
@@ -4558,7 +4562,29 @@ function layoutWide(vw, vh) {
   renderer.resize(view.w, view.h, PIXELATED ? 1 / PIX.size : (window.devicePixelRatio || 1) * s);
   game.applyMods();
 }
-function wideTo(on) { if (wideWant === on) return; wideWant = on; wideSwitch = true; layout(); wideSwitch = false; if (window.fxRetro) fxRetro(); }   // (the CRT's lines
+// A computer's column level in the level's own px (COL_LOGIC, owner Эк1 «А»): 16 columns of WIDE.tile px and the walls, 17 tiles across as the column's
+// window gives them (its 9:16, or COL_MIN across in a short window), a tile a whole number of the one grid's dots (GRID_DOTS to a tile), view.s times
+// bigger on the screen; the page's words and buttons in CSS px over it, shrunk by k in a short window as the column's. A resize keeps the level (its
+// view.w is the same in any window), only the scale changes
+function layoutCol(vw, vh) {
+  const d = window.devicePixelRatio || 1, W0 = Math.min(vw, Math.max(Math.round(vh * 0.5625), vh >= COL_TALL ? COL_MIN : 0)), T0 = W0 / 17;
+  const P = PIX.slow ? PIX.size : Math.max(1, Math.round((T0 * d) / GRID_DOTS)) / d, T = Math.max(P, Math.floor(T0 / P + 1e-6) * P), s = T / WIDE.tile;
+  const W = 17 * T, H = Math.floor(vh / P + 1e-6) * P, left = Math.round(((vw - W) / 2) * d) / d;
+  PIX.size = P / s; PIX.base = GRID_ON && !PIX.slow ? PIX.size : Math.max(1, Math.round((PIX.base * s) / P - 1e-6)) * PIX.size;
+  const fit = W / COL_MIN, k = fit >= 1 ? 1 : d * fit >= 1 ? Math.floor(d * fit + 1e-6) / d : fit;
+  view.w = W / s; view.h = H / s; view.left = left; view.k = k; view.s = s; view.wide = false; view.hudB = 0; view.keep = 0; view.fh = view.h; CAM.anchor = CAM_ANCHOR;
+  Object.assign(canvas.style, { width: W + 'px', height: H + 'px', left: left + 'px' });
+  Object.assign(uiEl.style, { width: W / k + 'px', height: H / k + 'px', left: left + 'px', transform: k < 1 ? 'scale(' + k + ')' : '', transformOrigin: '0 0' });
+  uiEl.classList.remove('wide'); document.documentElement.style.setProperty('--k', k);
+  const sides = $('sides'), Ws = Math.floor(Math.min(vw, 2 * H) / P + 1e-6) * P, on = Ws > W + 4 * P;   // (the world's far view beside it, 2:1 at most, as the column's)
+  sides.classList.toggle('on', on); renderer.sides = on ? sides : null;
+  if (on && !sidesAsked && typeof SIDE_ART === 'undefined') { sidesAsked = true; const b = document.createElement('script'); b.src = 'src/sides.js'; document.head.append(b); }
+  if (on) { sides.width = Math.round(Ws / P); sides.height = Math.round(H / P); Object.assign(sides.style, { width: Ws + 'px', height: H + 'px', left: Math.round(((vw - Ws) / 2) * d) / d + 'px' }); renderer.sideLv = null; }
+  renderer.resize(view.w, view.h, PIXELATED ? (CINE ? CINE.k : 1) / PIX.size : d * s);
+  game.applyMods();
+}
+function wideTo(on) { if (wideWant === on) return; wideWant = on; wideSwitch = true; layout(); wideSwitch = false; if (window.fxRetro) fxRetro(); }
+function colTo(on) { if (colWant === on) return; colWant = on; if (!wideWant) { wideSwitch = true; layout(); wideSwitch = false; if (window.fxRetro) fxRetro(); } }   // (the logical column, COL_LOGIC)   // (the CRT's lines
 // over the canvas as it is now: they kept the last screen's box for up to a second, a band of them)
 // Resizing the canvas clears it, so a resize is only flagged here and applied at the
 // start of the next frame, right before drawing.

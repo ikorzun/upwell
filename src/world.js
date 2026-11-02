@@ -6302,11 +6302,12 @@ function sidesPaint(cv, S) {   // over the world's top ink, k times bigger, on i
 
 // (SIDE_ART, each world's backdrop for a computer's sides: src/sides.js, loaded on a wide screen only; none yet: the far view's shot)
 // A boss's wide arena on a computer (owner Ар1 «А», 2026-11-01: the world's backdrop behind the fight, not the dark alone): its world's side backdrop
-// (SIDE_ART) as one picture of the atlas, a pixel of it f whole game pixels (as many as bring its 530 nearest the arena's width), each colour its ink and its tone from the black (vtsp's
+// (SIDE_ART) as one picture of the atlas, wall to wall (owner 2026-11-02: «задники тянутся от края до края… убрать растяжкой задника»): stretched to `tw` game pixels
+// across, its height as much again, its pixels taken nearest (a column or a row of it twice here and there: each pixel a whole game pixel, no blur), each colour its ink and its tone from the black (vtsp's
 // texels); its tones brought down together till the brightest is a quarter (the depth rule: the boss and its shots read over it), a light's (orange) a little
 // more, at most 0.3; its black clear (the arena's dark and stars behind show). Made once a palette (?pal)
-function arenaArt(art, id, f) {
-  const C = art.arena || (art.arena = {}), key = f + (PAL.blue + ''); if (C[key]) return C[key];
+function arenaArt(art, id, tw) {
+  const C = art.arena || (art.arena = {}), key = tw + (PAL.blue + ''); if (C[key]) return C[key];
   const keys = Object.keys(PAL), B = PAL.black, inks = art.pal.map((h) => {   // (each colour to the ink whose line from the black it lies nearest, and how far along)
     const c = hex(h); let best = [0, 0, 1e9];
     keys.forEach((k, i) => { if (!i) return; const d = PAL[k].map((v, j) => v - B[j]), dd = d.reduce((m, v) => m + v * v, 0), t = Math.max(0, Math.min(1, c.reduce((m, v, j) => m + (v - B[j]) * d[j], 0) / dd));
@@ -6314,11 +6315,12 @@ function arenaArt(art, id, f) {
     return best[1] < 0.03 ? null : best;   // (the black: clear)
   });
   const lightI = keys.indexOf('orange'), top = Math.max(...inks.filter((v) => v && v[0] !== lightI).map((v) => v[1]), 0.01), s = Math.min(1, 0.25 / top);
-  const W = art.w * f, H = art.h * f, px = new Uint8Array(W * H * 4), pic = new Array(H).fill('x'.repeat(W));
-  art.rows.forEach((r, y) => { let x = 0; for (const [, ch, n] of r.matchAll(/([a-z])(\d*)/g)) { const v = inks[ch.charCodeAt(0) - 97];
-    for (let k = +(n || 1); k > 0; k--, x++) if (v) { const tn = Math.max(1, Math.round((v[0] === lightI ? Math.min(0.3, v[1]) : v[1] * s) * 200));
-      for (let j = 0; j < f; j++) for (let i = 0; i < f; i++) { const o = ((y * f + j) * W + x * f + i) * 4; px[o] = v[0]; px[o + 1] = tn; px[o + 3] = 255; } } } });
-  pic.px = px; pic.key = 'arena-' + id + '-' + f; return (C[key] = pic);
+  const src = art.rows.map((r) => { const o = []; for (const [, ch, n] of r.matchAll(/([a-z])(\d*)/g)) for (let k = +(n || 1); k > 0; k--) o.push(ch.charCodeAt(0) - 97); return o; });
+  const W = tw, H = Math.round((art.h * tw) / art.w), px = new Uint8Array(W * H * 4), pic = new Array(H).fill('x'.repeat(W));
+  for (let y = 0; y < H; y++) { const r = src[Math.min(art.h - 1, Math.floor((y * art.h) / H))];
+    for (let x = 0; x < W; x++) { const v = inks[r[Math.min(art.w - 1, Math.floor((x * art.w) / W))]]; if (!v) continue;
+      const o = (y * W + x) * 4; px[o] = v[0]; px[o + 1] = Math.max(1, Math.round((v[0] === lightI ? Math.min(0.3, v[1]) : v[1] * s) * 200)); px[o + 3] = 255; } }
+  pic.px = px; pic.key = 'arena-' + id + '-' + tw; return (C[key] = pic);
 }
 function sidesArt(cv, art, m) {   // (m: the settings' palette, fx.js fxPal: each of its colours through it)
   if (!art.off || art.m !== m) {   // (once, and again in another palette: its rows into a picture of its own size)
@@ -7672,7 +7674,7 @@ Renderer.prototype.draw = function (g, alpha) {
   }
   if (lv.arena && typeof SIDE_ART !== 'undefined') {   // a boss's wide arena on a computer: its world's backdrop behind all (arenaArt), its foot on the floor
     const id = th.orbit ? 'orbit' : lv.world && lv.world.id, art = id && SIDE_ART[id];
-    if (art) { const f = Math.max(1, Math.round((lv.r - lv.l) / (art.w * PIX.size))), pic = arenaArt(art, id, f), q = f * PIX.size, hw = (art.w * q) / 2, hh = (art.h * q) / 2, x0 = snap((lv.l + lv.r) / 2 - hw), y0 = snap(lv.floor) - art.h * q, rt = this.route;
+    if (art) { const tw = Math.ceil((lv.r - lv.l) / PIX.size), pic = arenaArt(art, id, tw), q = PIX.size, hw = (tw * q) / 2, hh = (pic.length * q) / 2, x0 = snap((lv.l + lv.r) / 2 - hw), y0 = snap(lv.floor) - pic.length * q, rt = this.route;   // (wall to wall: arenaArt)
       if (CINE) this.route = 3; farMark(); F(x0 + hw, y0 + hh, hw, 0, 0, hh, PAL.white, 1, 11, hw, hh, tileId(pic) + 0.5); farMark(); this.route = rt; }
   }
   if (th.space && lv.kind === 'well') {   // Space's far view by level behind (spFar), then its things at the ledges' wall ends (kitThing, SP), one sheet pixel a game pixel

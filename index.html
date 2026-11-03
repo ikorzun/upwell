@@ -226,6 +226,8 @@
   #combo { position: absolute; left: 0; top: 0; display: none; --p: 4; color: var(--yellow); filter: drop-shadow(0 4px 0 var(--ink)); }
   #combo.show { display: block; }
   #combo.pop .px { animation: pop 0.24s steps(3); }
+  #aim { position: absolute; left: 0; top: 0; --p: 3; color: var(--white); filter: drop-shadow(0 3px 0 var(--ink)); opacity: 0; transition: opacity 0.2s; pointer-events: none; }   /* the mouse's point the hero runs to, while the cursor is locked (mouseInput) */
+  #aim.on { opacity: 0.85; }
   #toast {
     position: absolute; left: 50%; top: 22%; z-index: 5;   /* over a panel too: a toast once one is open (the week's mark at a clear, a shut world's stars) */
     transform: translate(-50%, -6px);
@@ -658,6 +660,7 @@
   </div>
   <div id="bossHp" aria-hidden="true"></div>   <!-- a boss's hearts (see ui.frame) -->
   <div id="combo" aria-hidden="true"></div>
+  <div id="aim" aria-hidden="true"></div>
   <div id="labels"></div>
   <div id="floorHint" aria-hidden="true"></div>
   <div id="tutGhost" aria-hidden="true"></div>   <!-- the first level's lessons: the glove where it is done (TUT, ui.ghost in game.js) -->

@@ -20,7 +20,7 @@ const STR = {
     reviveQ: 'One more go?', revive: 'Revive', reviveFor: 'Revive • {n} coins', watchAd: 'Watch ad', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', feedMoves: 'moves', motiYum: 'Yum!|Mmm!|So good!|More!', motiThanks: 'Best snack ever!|Thank you!|I\'m so happy!|Round and full!', feedDone: 'Mochi is full', feedTomorrow: 'See you in the next world', feedClose: 'Close', feedMochi: 'Feed Mochi', feedTreat: 'Gift +{n}', feedFav: "Today's favourite: points ×2", feedX2: '×2 score', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
-    noNeed: 'Not needed now', rotate: 'Turn your phone upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
+    noNeed: 'Not needed now', rotate: 'Turn the screen upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
     nogl: 'This game needs WebGL 2. Please try another browser.', sound: 'Sound', depth: '2.5D', crt: 'CRT', snes: 'SNES', album: 'Cards', on: 'on', off: 'off',
     hintStick: 'Drag to run · tap to jump', lang: 'Language',
     random: 'Random run', reviveShort: 'Revive • {n}', reviveFree: 'Revive • free', newBuild: 'New world — upgrades start over', dailyWin: 'Daily in the Menu', dailyNext: 'A new one tomorrow', fromPart: 'From part {n} of {of}', bookNew: 'New in the Book: {n}', cleared: 'Level cleared!', station: 'Station {n}', worldDone: 'World cleared!', soon: 'World {n} is on its way', bossFirst: 'Beat World {n}\'s boss first', worldNext: 'World {n} is open!', dead_fire: 'Toasted!', dead_water: 'Soaked!', dead_snow: 'Snowed under!', dead_storm: 'Thunderstruck!', dead_bog: 'Swamped!', dead_steam: 'Scalded!', dead_thorns: 'Pricked!', dead_spikes: 'Ouch, spikes!', dead_fall: 'Splat!', dead_enemy: 'Too sour!', dead_icicle: 'Bonk!', dead_train: 'Choo-choo!', map: 'Map', bossHow: 'Dodge its dive, then land on it', motiReads: 'Aunt Moti reads:', got_swarm: 'Swarm! Nothing hurts, your crowd smashes all · {s} s', seen_worm: 'Stomp the knot, not the tubes!', seen_skull: 'Skulls lunge up close. Stomp them first!', seen_spot: 'A liquid spot: dive in, fall down!', under: 'Flip side: fall down!', back: 'Back up, and higher!', daily: 'Daily', dailyBest: "Today's best: {n} m", board: 'Today, around you', mark: 'Day {n} of 7 this week', markPay: 'Day {n} of 7: +{c} coins!', heartCap: 'Up to 3 a world', purseIn: '+{n} coins to your purse', synergy: 'Synergy! {n}', book: 'Book', bookUp: 'Upgrades', bookCandy: 'Candies', bookFoe: 'Enemies', bookBoss: 'Bosses', unknown: 'Not met yet', endless: 'Endless', loop: 'Round {n}: harder!', tierOpen: 'Hard mode {n} is open!', miniSpit: 'A fat spitter!',
@@ -37,7 +37,7 @@ const STR = {
     reviveQ: '¿Otro intento?', revive: 'Revivir', reviveFor: 'Revivir • {n} monedas', watchAd: 'Ver anuncio', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', feedMoves: 'jugadas', motiYum: '¡Ñam!|¡Mmm!|¡Qué rico!|¡Más!', motiThanks: '¡La mejor merienda!|¡Gracias!|¡Qué feliz estoy!|¡Redondo y lleno!', feedDone: 'Mochi está lleno', feedTomorrow: 'Nos vemos en el próximo mundo', feedClose: 'Cerrar', feedMochi: 'Alimentar a Mochi', feedTreat: 'Regalo +{n}', feedFav: 'Su favorito de hoy: puntos ×2', feedX2: '×2 puntos', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
-    noNeed: 'Ahora no hace falta', rotate: 'Pon el móvil en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
+    noNeed: 'Ahora no hace falta', rotate: 'Pon la pantalla en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
     nogl: 'Este juego necesita WebGL 2. Prueba otro navegador.', sound: 'Sonido', depth: '2.5D', crt: 'CRT', snes: 'SNES', album: 'Cartas', on: 'sí', off: 'no',
     hintStick: 'Arrastra para correr · toca para saltar', lang: 'Idioma',
     random: 'Partida al azar', reviveShort: 'Revivir • {n}', reviveFree: 'Revivir • gratis', newBuild: 'Mundo nuevo — mejoras desde cero', dailyWin: 'Diario en el Menú', dailyNext: 'Uno nuevo mañana', fromPart: 'Desde la parte {n} de {of}', bookNew: 'Nuevo en el Libro: {n}', cleared: '¡Nivel superado!', station: 'Estación {n}', worldDone: '¡Mundo superado!', soon: 'El mundo {n} está en camino', bossFirst: 'Antes vence al jefe del mundo {n}', worldNext: '¡El mundo {n} está abierto!', dead_fire: '¡Tostado!', dead_water: '¡Empapado!', dead_snow: '¡Bajo la nieve!', dead_storm: '¡Fulminado!', dead_bog: '¡Empantanado!', dead_steam: '¡Escaldado!', dead_thorns: '¡Pinchado!', dead_spikes: '¡Ay, pinchos!', dead_fall: '¡Plaf!', dead_enemy: '¡Qué ácido!', dead_icicle: '¡Bonk!', dead_train: '¡Chu-chú!', map: 'Mapa', bossHow: 'Esquiva su caída y salta encima', motiReads: 'La tía Moti lee:', got_swarm: '¡Enjambre! Nada duele, tu pandilla lo rompe todo · {s} s', seen_worm: '¡Pisa el nudo, no los tubos!', seen_skull: 'Las calaveras se lanzan de cerca. ¡Písalas antes!', seen_spot: 'Una mancha líquida: ¡entra y cae!', under: '¡Al revés: cae!', back: '¡De vuelta, y más arriba!', daily: 'Diario', dailyBest: 'Lo mejor de hoy: {n} m', board: 'Hoy, a tu alrededor', mark: 'Día {n} de 7 esta semana', markPay: '¡Día {n} de 7: +{c} monedas!', heartCap: 'Hasta 3 por mundo', purseIn: '+{n} monedas a tu monedero', synergy: '¡Sinergia! {n}', book: 'Libro', bookUp: 'Mejoras', bookCandy: 'Caramelos', bookFoe: 'Enemigos', bookBoss: 'Jefes', unknown: 'Aún sin descubrir', endless: 'Sin fin', loop: '¡Vuelta {n}: más difícil!', tierOpen: '¡Modo difícil {n} desbloqueado!', miniSpit: '¡Un escupidor gordo!',
@@ -54,7 +54,7 @@ const STR = {
     reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveFor: 'Reviver • {n} moedas', watchAd: 'Ver anúncio', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', feedMoves: 'jogadas', motiYum: 'Nham!|Hmm!|Que delícia!|Mais!', motiThanks: 'Melhor lanche de todos!|Obrigado!|Estou tão feliz!|Redondo e cheio!', feedDone: 'Mochi está cheio', feedTomorrow: 'Até o próximo mundo', feedClose: 'Fechar', feedMochi: 'Alimentar o Mochi', feedTreat: 'Presente +{n}', feedFav: 'O favorito de hoje: pontos ×2', feedX2: '×2 pontos', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
-    noNeed: 'Não precisa agora', rotate: 'Vire o celular na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
+    noNeed: 'Não precisa agora', rotate: 'Vire a tela na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
     nogl: 'Este jogo precisa de WebGL 2. Tente outro navegador.', sound: 'Som', depth: '2.5D', crt: 'CRT', snes: 'SNES', album: 'Cartas', on: 'sim', off: 'não',
     hintStick: 'Arraste para correr · toque para pular', lang: 'Idioma',
     random: 'Partida aleatória', reviveShort: 'Reviver • {n}', reviveFree: 'Reviver • grátis', newBuild: 'Mundo novo — melhorias do zero', dailyWin: 'Diário no Menu', dailyNext: 'Um novo amanhã', fromPart: 'Da parte {n} de {of}', bookNew: 'Novo no Livro: {n}', cleared: 'Fase concluída!', station: 'Estação {n}', worldDone: 'Mundo concluído!', soon: 'O mundo {n} está a caminho', bossFirst: 'Antes vença o chefe do mundo {n}', worldNext: 'O mundo {n} está aberto!', dead_fire: 'Tostado!', dead_water: 'Encharcado!', dead_snow: 'Soterrado na neve!', dead_storm: 'Fulminado!', dead_bog: 'Atolado!', dead_steam: 'Escaldado!', dead_thorns: 'Espetado!', dead_spikes: 'Ai, espinhos!', dead_fall: 'Ploft!', dead_enemy: 'Azedou!', dead_icicle: 'Bonk!', dead_train: 'Piuí!', map: 'Mapa', bossHow: 'Desvie do mergulho e pule em cima', motiReads: 'A tia Moti lê:', got_swarm: 'Enxame! Nada machuca, sua turma quebra tudo · {s} s', seen_worm: 'Pise no nó, não nos tubos!', seen_skull: 'Caveiras atacam de perto. Pise primeiro!', seen_spot: 'Uma mancha líquida: entre e caia!', under: 'Avesso: caia!', back: 'De volta, e mais alto!', daily: 'Diário', dailyBest: 'Melhor de hoje: {n} m', board: 'Hoje, ao seu redor', mark: 'Dia {n} de 7 nesta semana', markPay: 'Dia {n} de 7: +{c} moedas!', heartCap: 'Até 3 por mundo', purseIn: '+{n} moedas na sua bolsa', synergy: 'Sinergia! {n}', book: 'Livro', bookUp: 'Melhorias', bookCandy: 'Doces', bookFoe: 'Inimigos', bookBoss: 'Chefes', unknown: 'Ainda não encontrado', endless: 'Sem fim', loop: 'Volta {n}: mais difícil!', tierOpen: 'Modo difícil {n} liberado!', miniSpit: 'Um cuspidor gordo!',
@@ -71,7 +71,7 @@ const STR = {
     reviveQ: 'もういちど？', revive: 'ふっかつ', reviveFor: 'ふっかつ • {n}コイン', watchAd: 'こうこくを みる', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', feedMoves: 'のこり', motiYum: 'おいしい！|もぐもぐ！|うまうま！|もっと！', motiThanks: 'さいこうの おやつ！|ありがとう！|しあわせ〜！|まんまる まんぷく！', feedDone: 'モチ まんぷく', feedTomorrow: 'つぎの ワールドで またね', feedClose: 'とじる', feedMochi: 'モチに ごはん', feedTreat: 'おれい +{n}', feedFav: 'きょうの だいすき: ポイント ×2', feedX2: 'スコア ×2', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
-    noNeed: 'いまは いらない', rotate: 'スマホを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
+    noNeed: 'いまは いらない', rotate: 'がめんを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
     nogl: 'この ゲームには WebGL 2 が ひつようです。 べつの ブラウザで ためしてね。', sound: 'サウンド', depth: 'りったい', crt: 'ブラウンかん', snes: 'スーファミ', album: 'カード', on: 'オン', off: 'オフ',
     hintStick: 'ドラッグで はしる · タップで ジャンプ', lang: 'ことば',
     random: 'ランダム プレイ', reviveShort: 'ふっかつ • {n}', reviveFree: 'ふっかつ • むりょう', newBuild: 'あたらしい ワールド — つよさは さいしょから', dailyWin: 'メニューに デイリー', dailyNext: 'あしたは あたらしい デイリー', fromPart: '{of}つの うち {n}ばんめから', bookNew: 'ずかんに あたらしく {n}', cleared: 'ステージ クリア！', station: '{n} ごうめ', worldDone: 'ワールド クリア！', soon: 'ワールド {n}は じゅんびちゅう', bossFirst: 'さきに ワールド {n}の ボスを たおそう', worldNext: 'ワールド {n}が ひらいた！', dead_fire: 'こげた！', dead_water: 'びしょぬれ！', dead_snow: 'ゆきに うもれた！', dead_storm: 'かみなりに うたれた！', dead_bog: 'ぬまに しずんだ！', dead_steam: 'じょうきで やけど！', dead_thorns: 'トゲに ささった！', dead_spikes: 'トゲ いたい！', dead_fall: 'ベチャ！', dead_enemy: 'すっぱい！', dead_icicle: 'ゴツン！', dead_train: 'ガタンゴトン！', map: 'マップ', bossHow: 'おちてくるのを よけて、うえから ふもう', motiReads: 'モチおばさんが よむ:', got_swarm: 'むれ！ むてき、なかまが ぜんぶ こわす · {s} びょう', seen_worm: 'むすびめを ふめ、くだは さけろ！', seen_skull: 'ドクロは ちかくで とびかかる。さきに ふめ！', seen_spot: 'えきたいの しみ: はいって おちろ！', under: 'うらがわ: おちろ！', back: 'もどった、もっと うえへ！', daily: 'デイリー', dailyBest: 'きょうの ベスト: {n} m', board: 'きょうの まわり', mark: 'こんしゅう {n}/7 にち', markPay: '{n}/7 にち: +{c} コイン！', heartCap: 'ワールドに 3つまで', purseIn: 'さいふに +{n} コイン', synergy: 'シナジー！ {n}', book: 'ずかん', bookUp: 'パワーアップ', bookCandy: 'キャンディ', bookFoe: 'てき', bookBoss: 'ボス', unknown: 'まだ みつけてない', endless: 'エンドレス', loop: 'しゅう {n}: もっと むずかしい！', tierOpen: 'むずかしい モード {n} が あそべる！', miniSpit: 'でっかい ペッペ！',
@@ -1546,6 +1546,7 @@ class Game {
   move(dt) {
     if (this.mods.dive && input.down && !this.downWas && this.sinceContact > JUMP.coyote && !this.contact()) { const H = this.hero; setVel(H, H.rigVx * 0.6, Math.max(H.rigVy, 1.4 * this.vjump)); this.diving = true; fx.ring(H.cx, H.minY, 1.2 * this.R, INK.white); sound.play('airjump', 0.6, 0.7); }   // the Dive: down at a press, a flick on touch too
     this.downWas = input.down;
+    if (MOUSE === 'c') mouseSteer(this.hero, this.R);
     const H = this.hero, d = input.dir, floor = this.onFloor(), top = H.stuck > 0 && glueSide(H) === 4;
     H.pressX = d; H.crawl = top && d !== 0;   // only a body hanging from a ceiling alone creeps along it
     const plank = floor && H.floorRect && H.floorRect.plank && !H.floorRect.gone ? H.floorRect : null;
@@ -4141,7 +4142,7 @@ const input = {
   clear() {
     if (game.hero) game.hero.squeezeIn = 0;   // (a crouch held into a pause or a card: not left squeezed)
     for (const k of ['left', 'right', 'down', 'jump']) this.set(k, false);
-    this.swipe = false; joyEnd();
+    this.swipe = false; joyEnd(); mouseAim = null;
     for (const e of document.querySelectorAll('#pad .on')) e.classList.remove('on');
   },
 };
@@ -4158,6 +4159,7 @@ document.addEventListener('keydown', (e) => {
   if (!k) return;
   if (game.state !== 'play') { const f = document.activeElement; if (!f || f.tagName !== 'BUTTON') e.preventDefault(); return; }   // (off play: not the portal page's scroll; Space still presses a button in focus)
   e.preventDefault();
+  if (MOUSE === 'c' && (k === 'left' || k === 'right') && !mouseKeys) { mouseKeys = true; mouseAim = null; input.set('left', false); input.set('right', false); }   // (the cursor's steering off: keys from now on)
   if (e.repeat && k !== 'jump' && !input[k]) input.set(k, true);   // a side key held from a panel on: taken by its repeats
   if (!e.repeat) {
     input.set(k, true);
@@ -4206,7 +4208,7 @@ padPart(act, (e) => {
 const GEST = { dead: 12, flick: 30, quick: 320, tap: 230, still: 12, swipe: 28, fast: 500 };
 let gest = null, tap2 = null;
 document.addEventListener('pointerdown', (e) => {
-  if (e.pointerType !== 'touch' || e.target.closest('#pad, button, .panel') || game.state === 'menu') return;
+  if (!(e.pointerType === 'touch' || (MOUSE === 'b' && e.pointerType === 'mouse' && e.button === 0)) || e.target.closest('#pad, button, .panel') || game.state === 'menu') return;
   if (gest || joy) { tap2 = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp }; return; }
   if (save.stick) { joyStart(e); return; }
   gest = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ax: e.clientX, t0: e.timeStamp, dir: 0, flick: '', moved: false, dashed: false };
@@ -4244,6 +4246,36 @@ const gestEnd = (e) => {
   else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)
 };
 for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, gestEnd);
+// A mouse's (or a pen's) left button over the game is the jump key, as Space (owner, 2026-11-03: «добавь прыжок на клик мышки»): a jump as it goes
+// down, higher the longer it is held; not on a button or a panel. Read off e.buttons, so a second button held, or one let go off the window, is heard.
+// Trials of a mouse on its own (the owner's question Мш1), by the address: ?mouse=b the mouse as a finger (the gestures above: a drag runs, a click
+// jumps as it comes up), ?mouse=c the cursor leads (the hero runs to its x, the right button is down, two of it quick a dash; a side key sends it to sleep).
+const MOUSE = (/[?&]mouse=([bc])/.exec(location.search) || [])[1] || '';
+let mouseBtns = 0, mouseJump = false, mouseAim = null, mouseKeys = false, mouseDownT = -1e9;   // mouseAim: the cursor's x in the level while it steers
+function mouseInput(e) {
+  if (e.pointerType === 'touch' || MOUSE === 'b') return;
+  const was = mouseBtns, over = game.state === 'play' && !e.target.closest('#pad, button, .panel');
+  mouseBtns = e.buttons;
+  const press = (b) => (mouseBtns & b) && !(was & b), lift = (b) => !(mouseBtns & b) && (was & b);
+  if (press(1) && over) { input.set('jump', false); input.set('jump', true); mouseJump = true; }
+  else if (lift(1) && mouseJump) { mouseJump = false; input.set('jump', false); }
+  if (MOUSE !== 'c') return;
+  if (e.type === 'pointermove' && game.state === 'play' && !mouseKeys) mouseAim = (e.clientX - view.left) / view.s;
+  if (press(2) && over) {
+    input.set('down', true);
+    if (e.timeStamp - mouseDownT < 280 && game.hero) game.dash(Math.sign((mouseAim ?? game.hero.cx) - game.hero.cx) || 1);
+    mouseDownT = e.timeStamp;
+  } else if (lift(2)) input.set('down', false);
+}
+for (const type of ['pointerdown', 'pointermove', 'pointerup']) document.addEventListener(type, mouseInput);
+document.addEventListener('contextmenu', (e) => { if (MOUSE === 'c' && game.state === 'play') e.preventDefault(); });
+// ?mouse=c: toward the cursor past a dead zone round the hero, stopping short by as far as the run slides on (so it settles, not swings).
+function mouseSteer(H, R) {
+  if (mouseAim === null || mouseKeys) return;
+  const dx = mouseAim - H.cx, run = input.left || input.right, dir = Math.abs(dx) > (run ? 0.2 * R + MOUSE_SLIDE * Math.abs(H.rigVx) : 0.6 * R) ? Math.sign(dx) : 0;
+  input.set('left', dir < 0); input.set('right', dir > 0);
+}
+const MOUSE_SLIDE = 0.035;   // s: how far ahead of the cursor a run lets go
 // The stick (the round ▲ key beside it): it comes up where a finger comes down, anywhere, and runs left or right as
 // the finger leans that way: past `on` of its `reach` (px), and on till it is back under `off` (so it
 // doesn't flicker at the edge); all or nothing, as on a d-pad, easing in `accel` times as fast as the keys.

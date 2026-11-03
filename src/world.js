@@ -5620,30 +5620,45 @@ let TILES_VKEY = 0;   // (vtsp's pictures' own keys)
 const TILE_LIM = 2048;   // (the atlas's columns' height, and its width till the GPU is asked (TILES.lim, tileUpload): WebGL2 promises textures of 2048 at least; past a
 // phone's limit texImage2D fails without a word, the pictures wrong)
 const tileId = (rows) => {
-  const key = rows.key || rows.join('/'); let id = TILES.byKey.get(key); if (id !== undefined) return id;
+  const key = rows.key || (rows.key = rows.join('/')); let id = TILES.byKey.get(key); if (id !== undefined) return id;   // (its key joined once: a picture's rows are not changed once drawn)
   const w = rows[0].length, h = rows.length, K = TILES.pk || (TILES.pk = { x: 0, y: 0, cw: 0 }), L = TILES.lim || TILE_LIM;   // (packed down columns TILE_LIM tall, the columns side by side)
   if (K.y + h > TILE_LIM) { K.x += K.cw; K.y = 0; K.cw = 0; }
   if (TILES.list.length >= TILE_MAX || K.x + w > L) { TILES.list.length = 0; TILES.byKey.clear(); TILES.at = []; TILES.n = -1; K.x = K.y = K.cw = 0; TILES.resets = (TILES.resets || 0) + 1; }   // (full all the same: begun
   // again, its pictures registered anew as drawn, never another's)
   id = TILES.list.length; TILES.list.push(rows); TILES.byKey.set(key, id); (TILES.at || (TILES.at = []))[id] = [K.x, K.y]; K.y += h; K.cw = Math.max(K.cw, w); return id;
 };
-const tileUpload = (gl) => {   // (again whenever a picture was added since)
+const tilePx = (rows, keys) => {   // a picture's texels, made once and kept on it (vtsp's are made already): its letters read once, not at every picture added
+  if (rows.px) return rows.px;
+  const w = rows[0].length, px = new Uint8Array(w * rows.length * 4), ink = {};
+  rows.forEach((row, j) => { for (let i = 0; i < w; i++) { const ch = row[i]; if (ch === '.') continue;
+    const v = ink[ch] || (ink[ch] = ((lc) => [keys.indexOf(ICON_INK[lc]), lc !== ch ? 255 : 0])(ch === 'd' || ch === 'D' ? 's' : ch.toLowerCase())), o = (j * w + i) * 4; px[o] = v[0]; px[o + 1] = v[1]; px[o + 3] = 255; } });
+  return (rows.px = px);
+};
+const tileUpload = (gl) => {   // (again whenever a picture was added since: the new ones alone into the room the atlas has, its texture added to where they are;
+  // all again into a bigger one when they no longer fit or it began again. It was all of it each time, every picture's letters read and the whole atlas
+  // sent, many times in a level's first second: a phone's slow start, owner: «на телефоне стала подтупливать»)
   if (TILES.n === TILES.list.length && TILES.tex) return TILES.tex;
   if (!TILES.lim) TILES.lim = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE) || TILE_LIM, 8192);   // (the atlas as wide as the GPU allows, 8192 at most:
   // a wide level's far view and its fire's band are 1664 texels each, 2544 with three lanes; at 2048 the two never fitted and the atlas began again
   // mid-frame, 4 times a frame, what was drawn before it on others' places, every frame uploaded again: the owner's striped blocks and slow frames, 2026-11-01)
   const keys = Object.keys(PAL); let W = 1, H = 1;
   TILES.list.forEach((rows, id) => { const [x0, y0] = TILES.at[id]; W = Math.max(W, x0 + rows[0].length); H = Math.max(H, y0 + rows.length); });
-  const px = new Uint8Array(W * H * 4);
-  TILES.list.forEach((rows, id) => {
-    const [x0, y0] = TILES.at[id], w = rows[0].length;
-    if (rows.px) for (let j = 0; j < rows.length; j++) px.set(rows.px.subarray(j * w * 4, (j + 1) * w * 4), ((y0 + j) * W + x0) * 4);   // (vtsp's: its texels made already)
-    else rows.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '.') return; const lc = ch === 'd' || ch === 'D' ? 's' : ch.toLowerCase(), o = ((y0 + j) * W + x0 + i) * 4; px[o] = keys.indexOf(ICON_INK[lc]); px[o + 1] = lc !== ch ? 255 : 0; px[o + 3] = 255; }));
-    TILES.u.set([x0, y0, rows[0].length, rows.length], 4 * id);
-  });
+  const from = TILES.tex && TILES.px && TILES.n > 0 && W <= TILES.w && H <= TILES.h ? TILES.n : 0;
+  if (!from) { TILES.w = Math.min(TILES.lim, Math.ceil(W / 512) * 512); TILES.h = Math.min(TILE_LIM, Math.ceil(H / 512) * 512); TILES.px = new Uint8Array(TILES.w * TILES.h * 4); }   // (room to add to)
+  for (let id = from; id < TILES.list.length; id++) {
+    const rows = TILES.list[id], [x0, y0] = TILES.at[id], w = rows[0].length, src = tilePx(rows, keys);
+    for (let j = 0; j < rows.length; j++) TILES.px.set(src.subarray(j * w * 4, (j + 1) * w * 4), ((y0 + j) * TILES.w + x0) * 4);
+    TILES.u.set([x0, y0, w, rows.length], 4 * id);
+  }
   if (!TILES.tex) TILES.tex = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, TILES.tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, W, H, 0, gl.RGBA, gl.UNSIGNED_BYTE, px);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); gl.activeTexture(gl.TEXTURE0);
+  gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, TILES.tex);
+  if (!from) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, TILES.w, TILES.h, 0, gl.RGBA, gl.UNSIGNED_BYTE, TILES.px);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); }
+  else { gl.pixelStorei(gl.UNPACK_ROW_LENGTH, TILES.w);   // (each new one's own rectangle, read out of the kept texels)
+    for (let id = from; id < TILES.list.length; id++) { const [x0, y0] = TILES.at[id], rows = TILES.list[id]; gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, x0); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, y0);
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, x0, y0, rows[0].length, rows.length, gl.RGBA, gl.UNSIGNED_BYTE, TILES.px); }
+    gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0); gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0); }
+  gl.activeTexture(gl.TEXTURE0);
   TILES.n = TILES.list.length; return TILES.tex;
 };
 const FEAT_FS = GLSL + PIX_GLSL + SHADE_GLSL + `in vec2 vL; in vec4 vCol; flat in vec4 vP; out vec4 o;
@@ -6322,6 +6337,8 @@ function sidesPaint(cv, S) {   // over the world's top ink, k times bigger, on i
 // across, its height as much again, its pixels taken nearest (a column or a row of it twice here and there: each pixel a whole game pixel, no blur), each colour its ink and its tone from the black (vtsp's
 // texels); its tones brought down together till the brightest is a quarter (the depth rule: the boss and its shots read over it), a light's (orange) a little
 // more, at most 0.3; its black clear (the arena's dark and stars behind show). Made once a palette (?pal)
+const FAR_CUT = new WeakMap();   // (farPic's cuts at the walls, kept across frames: made in the frame, each frame cut, cleaned (vspClean), scaled (tsp) and joined for its key
+// anew, a quarter of a phone's busy frame, owner: «на телефоне стала подтупливать»)
 let arenaAsked = false;   // (src/sides-arena.js fetched once: SIDE_ARENA)
 function arenaArt(art, id, tw) {
   const C = art.arena || (art.arena = {}), key = tw + (PAL.blue + ''); if (C[key]) return C[key];
@@ -6375,7 +6392,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // features, and in the 2.5D's far ones)
   const farQ = (n, fill, w = menu ? view.w : lv.lanes ? WIDE.lane * lv.tile : lv.r - lv.l) => { const q = 2 * PIX.base; return (menu || fill) && n * q < w ? Math.ceil(w / (n * PIX.size)) * PIX.size : q; };   // (a wide
   // level's: a lane's, as a phone's, its picture repeated across, owner Фн1 «Б»: stretched over the whole width it had filled the sky)
-  const farCut = new WeakMap(), farPic = (FV, cx, foot, a = DIM) => {   // a far picture for the low band (Д331 «Г»): centred, its foot at `foot`, the shaft filled, cut at the walls in
+  const farCut = FAR_CUT, farPic = (FV, cx, foot, a = DIM) => {   // a far picture for the low band (Д331 «Г»): centred, its foot at `foot`, the shaft filled, cut at the walls in
     // play (owner, Д332: «фон не должен заходить за боковые линии»; the main screen has none: edge to edge)
     const n = FV[0].length, q = farQ(n, true), x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q), xs = [];
     for (const k of !menu && lv.lanes ? [0, -1, 1, -2, 2] : [0]) { const xk = x0 + k * n * q;   // (a wide level's: as many as the width takes, each cut at the walls)

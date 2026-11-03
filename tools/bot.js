@@ -161,10 +161,10 @@ function score(base, st) {
   const key = g.lv.lanes ? keys.sort((p, q) => mid(p) - mid(q))[0] : keys[0];   // as a player sees it glint (a wide level's: its own lane's, the nearer of the two gates' keys)
   if (key) s -= 6 * Math.abs(H.cx - (key.x0 + key.x1) / 2) / tileOf();
   const way = g.lv.lanes && g.lv.portal;   // a wide level's way out over its spine (WIDE): in its band, across to it, not up a far wall (a phone's is within its pull);
-  // the band from 2 rows under the lowest lane's end too (three lanes' way out is over the middle lane, 7-9 rows over the lanes' tops: it stood under it,
-  // 2026-11-01), the pull light (10 a tile, under a row's height) till it is up at the highest lane's end: up its lane first, then across
+  // the band from 4 rows under the lowest lane's end too (three lanes' way out is over the middle lane, 7-9 rows over the lanes' tops: it stood under it,
+  // 2026-11-01; a lane's rest ledges 2-3 rows under its end, under the bridge over the spine: it walked off to their outer ends, 2026-11-03), the pull light (10 a tile, under a row's height) till it is up at the highest lane's end: up its lane first, then across
   const ends = way ? g.lv.lanes.map((ln) => ln.ended).filter((y) => y != null) : [], T = tileOf();
-  if (way && H.cy < Math.max(way.y + 6 * T, Math.max(...ends) + 2 * T)) s -= (H.cy < Math.min(...ends) + T || H.cy < way.y + 6 * T ? 30 : 10) * Math.abs(H.cx - way.x) / T;
+  if (way && H.cy < Math.max(way.y + 6 * T, Math.max(...ends) + 4 * T)) s -= (H.cy < Math.min(...ends) + T || H.cy < way.y + 6 * T ? 30 : 10) * Math.abs(H.cx - way.x) / T;
   const helmet = (g.lv.fizz || []).find((p) => p.again && !p.taken && Math.abs(p.y - H.cy) < 8 * tileOf());   // the tutorial's helmet (CHUNKS.tutHelmet): the way on is through its blocks, as a player is told
   if (helmet && !g.power(helmet.kind)) s -= 6 * Math.hypot(H.cx - helmet.x, H.cy - helmet.y) / tileOf();
   return s;

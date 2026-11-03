@@ -186,7 +186,7 @@
   #hearts { display: flex; flex-wrap: wrap; gap: 2px 3px; flex: 1; min-width: 0; max-width: calc(50% - 52px); --p: 3; }   /* many hearts (a world's shop buys them for good): rows of them, in their corner, clear of the middle */
   #hearts.many { --p: 2; }
   #rotate { display: none; position: fixed; inset: 0; z-index: 50; background: var(--ink); align-items: center; justify-content: center; --p: 3; color: var(--white); }
-  @media (pointer: coarse) and (orientation: landscape) { #rotate { display: flex; } }   /* Playgama's checklist: the layout holds in the orientation it supports */
+  @media (orientation: landscape) { html.touch #rotate { display: flex; } }   /* Playgama's checklist: the layout holds in the orientation it supports */
   #hearts i { display: block; filter: drop-shadow(0 3px 0 var(--ink)); }
   #hearts .full { color: var(--red); }
   #hearts .empty { color: var(--gray); }
@@ -392,7 +392,7 @@
   #menu .big.thumb { --p: 2.6; border-radius: 32px; clip-path: none; }   /* a pill, 64 tall */
   #menu .big.thumb > .cap { font-size: 12px; }   /* (the Figma's 10; DotGothic16 no smaller than 12 px: under that its 16-px grid blurs) */
   #topTint { display: none; position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #696d85; pointer-events: none; z-index: 70; }   /* (owner, 2026-10-23: «На сафари и ios градиент должен уходить под остров») iOS 26 Safari tints the bar over the page by a fixed element at its top (theme-color it no longer reads): the menu's backdrop's top ink there, and the bottom left as it is */
-  @media (pointer: coarse) { html.menuTop #topTint { display: block; } }
+  html.touch.menuTop #topTint { display: block; }
   /* The menu's settings as the Figma «Settings» (owner, 2026-10-27: «передай экран настроек»), a px a CSS px: no backdrop of its own (the canvas draws the dark, Moti in
      it in his work clothes: ui.settings); from the bottom the yellow pill, 16 over it the bar of rows (8 in from the sides, 64 tall, white lines round and between their
      cells), 16 over that «Settings»; its words in the game's fonts as tall as the mockup's Inter (19 → VT323 24.8, 33 → 43) */

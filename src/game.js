@@ -4789,7 +4789,7 @@ window.addEventListener('orientationchange', queueLayout);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', queueLayout);
 
 // ── Loop ─────────────────────────────────────────────────────
-const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+const coarse = TOUCH;   // a phone's or a tablet's (see TOUCH in world.js)
 const loop = { last: 0, acc: 0, n: 0, ema: 16.7, prevRaw: 0, frozen: false, dpr: window.devicePixelRatio };
 function frame(now) {
   requestAnimationFrame(frame);

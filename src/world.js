@@ -1495,7 +1495,11 @@ const LIDF = { size: 2.8, high: [12, 12, 11, 9.5], swing: 0.24, follow: 0.4, spi
 // A phone's game pixel a whole number of its screen's (owner, 2026-10-24: «Масштабирование всегда должно попадать пиксель в пиксель на всех устройствах»):
 // 1.5 CSS px was 4.5 of an iPhone's, its lines 4 and 5 by turns; the nearest whole number to 1.5 CSS px (at 3 a tie: PIX_TIE, `?pb=` to try another)
 const PIX_TIE = 4, phonePx = () => { const d = window.devicePixelRatio || 1, q = +new URLSearchParams(location.search).get('pb'), n = q > 0 ? q : Math.abs(1.5 * d - 4.5) < 1e-6 ? PIX_TIE : Math.max(1, Math.round(1.5 * d)); return n / d; };
-const PIX = { size: matchMedia('(pointer: coarse)').matches ? phonePx() : 2, get keep() { return this.base / this.size; } };   // a phone's screen is small and sharp: finer there (1 was too fine)
+// A phone or a tablet: the mobile version (owner, 2026-11-03: «На планшетах открывай мобильную»). A touch screen's pointer, and by name an iPad or an Android one
+// too: an iPad with a trackpad or a mouse reads as a fine pointer (and as a Mac, but with touch points), and would get a computer's wide view.
+const TOUCH = matchMedia('(pointer: coarse)').matches || /iP(hone|ad|od)|Android/.test(navigator.userAgent || '') || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent || ''));
+document.documentElement.classList.toggle('touch', TOUCH);
+const PIX = { size: TOUCH ? phonePx() : 2, get keep() { return this.base / this.size; } };   // a phone's screen is small and sharp: finer there (1 was too fine)
 PIX.base = PIX.size;   // the grid the levels are laid by and the sprites sized to (a phone's 1.5, a computer's 2) whatever the drawing's: a sprite's dot PIX.keep times its pixels
 // A computer's drawing grid (owner, 2026-10-23: «на мониторах ретина на десктопе графика тоже должны быть как на телефоне», his Д1 «А»): a game pixel a whole
 // number of the screen's, the nearest to one CSS px (a Retina screen's two, a plain one's one), its grain about a phone's; fitted at each layout (the screen

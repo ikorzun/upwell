@@ -4465,8 +4465,11 @@ class Level {
     for (const sp of this.spines) if (sp.y > hi) this.rects.push(this.box(sp.ln[0].r, hi, sp.ln[1].l, sp.y, { spine: true }));
     const mid = (this.l + this.r) / 2, y1 = hi + LEVEL.plank * this.R;   // the spine under the way out: a plank over it, `bridge` tiles out over both lanes (the way out
     // stood over a 2-tile pillar top, 4 tiles off the lanes' rest ledges and 2 over them: the bot stalled there in 6 of its 12 stalls, and a player lands on a pillar)
-    for (const sp of this.spines) if (sp.ln[0].r <= mid && sp.ln[1].l >= mid) { const x0 = sp.ln[0].r - WIDE.bridge * t, x1 = sp.ln[1].l + WIDE.bridge * t;
-      if (!this.rects.some((r) => !r.spine && !r.wall && !r.cap && r.x1 > x0 && r.x0 < x1 && r.y1 > hi - 2 * t && r.y0 < y1 + t)) this.rects.push(this.box(x0, hi, x1, y1, { plank: true })); }
+    const free = (x0, x1) => !this.rects.some((r) => !r.spine && !r.wall && !r.cap && r.x1 > x0 && r.x0 < x1 && r.y1 > hi - 2 * t && r.y0 < y1 + t);   // (head room over it, nothing just under)
+    for (const sp of this.spines) if (sp.ln[0].r <= mid && sp.ln[1].l >= mid) { let a = WIDE.bridge, b = WIDE.bridge;   // as far out on each side as there is room (5-4: a lane's
+      // plank a tile under it by the spine)
+      while (a > 0 && !free(sp.ln[0].r - a * t, sp.ln[0].r)) a--; while (b > 0 && !free(sp.ln[1].l, sp.ln[1].l + b * t)) b--;
+      if (a + b > 0) this.rects.push(this.box(sp.ln[0].r - a * t, hi, sp.ln[1].l + b * t, y1, { plank: true })); }
     this.top = hi; this.joining = true; this.finish(); this.joining = false; A.coinTotal = this.coinTotal; for (const ln of this.lanes) ln.top = -Infinity;   // (the way out's trail counted)
   }
   // Drop what has fallen far below the camera (a crumbled block stays: it comes back).

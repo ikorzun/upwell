@@ -1163,6 +1163,8 @@ const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
   const th = lv.theme, t = lv.tile, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, d = wl ? 1 : -1, wx = wl ? wallL(lv, r) : wallR(lv, r), b = r.y0, w = r.x1 - r.x0, X = (u) => wx + d * u * t;
+  if (lv.lanes && laneOf(lv, r) !== lv.lanes[0] && (wl ? r.x0 > lv.l + 1 : wr && r.x1 < lv.r - 1)) return (r.kit = null);   // (lanes B and C: none by a spine, lane A's
+  // there a phone's: Fuji's 21:9 screen at 6686 boxes with them, the detail count's line 6000)
   const clear = (x0, y0, x1, y1) => !lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1) && !lv.rects.some((q) => !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
   // A picture's room in tiles as fitted on the 393 phone, times how much bigger its dot (whole pixels, whatever the tile) is against this screen's tile, never

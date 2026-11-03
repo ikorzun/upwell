@@ -133,9 +133,9 @@ const GRID_ON = !/[?&]nogrid\b/.test(location.search), GRID_DOTS = 17;   // a co
 const COL_LOGIC = !/[?&]oldcol\b/.test(location.search);   // a computer's column level in the level's own px, a tile WIDE.tile, the window showing it view.s times
 // bigger (owner Эк1 «А», 2026-11-02): a phone's jumps, timing and level on any monitor, Mochi never under a tile (the column's tile grew with the window, gravity
 // in px: +9–28% air time, and over a 40-px tile R stopped at HERO.sizeMax, the level laid otherwise); ?oldcol the column as before
-const WIDE_HOST = /(^|\.)github\.io$|^localhost$/.test(location.hostname);   // the wide view only on the GitHub site (and the local server) till it is ready (owner,
-// 2026-11-01: «широкий вид только для гита, верни в песок версию без десктопа… Десктоп еще не готов»): Playgama's sandbox and every portal the column; ?wide there to try it
-const WIDE_ON = /[?&]wide\b/.test(location.search) || (WIDE_HOST && !/[?&]nowide\b/.test(location.search)), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
+// The wide view on every computer again (owner, 2026-11-03: «сначала сделать то, что не готово», then Фн1 «Б»; it was the GitHub site's alone from 2026-11-01,
+// «Десктоп еще не готов»); ?nowide the column
+const WIDE_ON = !/[?&]nowide\b/.test(location.search), wideFor = (rc) => WIDE_ON && !coarse && innerWidth >= innerHeight && (!rc.boss || WIDE_BOSS_TRY || BOSS_WIDE.has(rc.boss)) && !rc.script;   // a computer's
 // levels as wide as its window (owner, ПК5/ПК6 «Б»; ?nowide the 16-column well): every world's tiers, its bonus race, the daily well (Ш8 «Б») and a run's
 // floors, in a window at least as wide as it is tall when the level starts; a boss's and the scripted lesson 1-1 (one way up, as the plan's P1 has it) stay
 // a 16-column well

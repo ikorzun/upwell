@@ -6320,7 +6320,6 @@ function sidesPaint(cv, S) {   // over the world's top ink, k times bigger, on i
 // across, its height as much again, its pixels taken nearest (a column or a row of it twice here and there: each pixel a whole game pixel, no blur), each colour its ink and its tone from the black (vtsp's
 // texels); its tones brought down together till the brightest is a quarter (the depth rule: the boss and its shots read over it), a light's (orange) a little
 // more, at most 0.3; its black clear (the arena's dark and stars behind show). Made once a palette (?pal)
-const FAR_WIDE = (location.search.match(/[?&]far=([abc])\b/) || [])[1] || '';   // a wide level's far view, trials (farPic): a a lane's scale, b repeated, c sunk
 let arenaAsked = false;   // (src/sides-arena.js fetched once: SIDE_ARENA)
 function arenaArt(art, id, tw) {
   const C = art.arena || (art.arena = {}), key = tw + (PAL.blue + ''); if (C[key]) return C[key];
@@ -6372,16 +6371,16 @@ Renderer.prototype.draw = function (g, alpha) {
   // анимацию, а вместо градиента за моти используй фон локации»)
   const menu = g.state === 'menu', farR = [], farF = [], farMark = () => { farR.push(this.nf); farF.push(this.nFar || 0); };   // (a far view's start and end: in the
   // features, and in the 2.5D's far ones)
-  const farQ = (n, fill, w = menu ? view.w : lv.r - lv.l) => { const q = 2 * PIX.base; return (menu || fill) && n * q < w ? Math.ceil(w / (n * PIX.size)) * PIX.size : q; };
+  const farQ = (n, fill, w = menu ? view.w : lv.lanes ? WIDE.lane * lv.tile : lv.r - lv.l) => { const q = 2 * PIX.base; return (menu || fill) && n * q < w ? Math.ceil(w / (n * PIX.size)) * PIX.size : q; };   // (a wide
+  // level's: a lane's, as a phone's, its picture repeated across, owner Фн1 «Б»: stretched over the whole width it had filled the sky)
   const farCut = new WeakMap(), farPic = (FV, cx, foot, a = DIM) => {   // a far picture for the low band (Д331 «Г»): centred, its foot at `foot`, the shaft filled, cut at the walls in
     // play (owner, Д332: «фон не должен заходить за боковые линии»; the main screen has none: edge to edge)
-    const n = FV[0].length, fw = !menu && lv.lanes && FAR_WIDE, qA = fw ? farQ(n, true, WIDE.lane * lv.tile) : 0, q = fw === 'a' || fw === 'b' ? qA : farQ(n, true);
-    const x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * (fw === 'c' ? qA : q));   // (?far, a wide level's trials: a, b a lane's scale, b repeated; c sunk to a lane's height)
-    for (const k of fw === 'b' ? [0, -1, 1, -2, 2] : [0]) { const xk = x0 + k * n * q;
+    const n = FV[0].length, q = farQ(n, true), x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q), xs = [];
+    for (const k of !menu && lv.lanes ? [0, -1, 1, -2, 2] : [0]) { const xk = x0 + k * n * q;   // (a wide level's: as many as the width takes, each cut at the walls)
       const i0 = menu ? 0 : Math.max(0, Math.ceil((lv.l - xk) / q - 1e-6)), i1 = menu ? n : Math.min(n, Math.floor((lv.r - xk) / q + 1e-6)); if (i1 <= i0) continue;
       const cs = farCut.get(FV) || farCut.set(FV, {}).get(FV); let c = cs[k]; if (!c || c.i0 !== i0 || c.i1 !== i1) cs[k] = c = { i0, i1, rows: i0 === 0 && i1 === n ? FV : FV.map((r) => r.slice(i0, i1)) };   // (its own arrays: vsp keeps its boxes by them)
-      if (window.__noAtlas) vsp(c.rows, xk + i0 * q, y0, false, a, q); else tsp(a > 1 && a <= DIM && VSP_SPECK ? vspClean(c.rows) : c.rows, xk + i0 * q, y0, q, a); }   // (one picture of the atlas, as vsp's boxes drew it, specks cleaned: its boxes were 450–1150 of a screen)
-    return [x0, y0, q];   // (where the whole picture lies: its lights by it)
+      xs.push(xk); if (window.__noAtlas) vsp(c.rows, xk + i0 * q, y0, false, a, q); else tsp(a > 1 && a <= DIM && VSP_SPECK ? vspClean(c.rows) : c.rows, xk + i0 * q, y0, q, a); }   // (one picture of the atlas, as vsp's boxes drew it, specks cleaned: its boxes were 450–1150 of a screen)
+    return [x0, y0, q, xs];   // (where the whole picture lies, and each one drawn: its lights by them)
   };   // a far picture's pixel: two game pixels, on the main screen as many whole ones
   // as fill it edge to edge (no walls there: a phone's game pixel is small, its 111-116 across were narrower than it; owner, 2026-10-28: «задник в мобильном на главном экране
   // сейчас срезается по бокам, п должен быть от края до края»)
@@ -6873,12 +6872,12 @@ Renderer.prototype.draw = function (g, alpha) {
     // Mine's MFAR)
     const FV = TFAR.cell[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5];   // (no recipe: 5-6's, the bonus level's, the fair)
     if (!FV) return;
-    const n = FV[0].length, [x0, y0, q] = farPic(FV, (lv.l + lv.r) / 2, snap(farY(cam, H)));
+    const n = FV[0].length, [x0, y0, q, xs] = farPic(FV, (lv.l + lv.r) / 2, snap(farY(cam, H)));
     if (!FV.lit) { FV.lit = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (!'oO'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);   // its lights (its
       // orange clusters, once a cell) light the dark round them, as the Mine's
       while (st.length) { const [a, b] = st.pop(); cl.push([a, b]); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy; if (v >= 0 && v < FV.length && u >= 0 && u < n && !seen2.has(v * n + u) && 'oO'.includes(FV[v][u])) { seen2.add(v * n + u); st.push([u, v]); } } }
       if (cl.length >= 4) FV.lit.push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
-    for (const [a, b] of FV.lit) vlamps.push([x0 + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
+    for (const xk of xs) for (const [a, b] of FV.lit) vlamps.push([xk + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
   };
   if (th.town && lv.kind === 'well') {   // Tokyo's kit (THEMES.tokyo; see the parts catalog): whatever hangs, hangs on something. A utility pole up
     // each wall carries the wires on a crossarm every `arm`; air conditioners sit on brackets on the walls; signs hang on two arms off
@@ -7106,12 +7105,12 @@ Renderer.prototype.draw = function (g, alpha) {
     // most: the tower's steel is no lamp) light the dark round them
     const key = TWFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5], FV = TWFAR.cell[key];   // (no recipe: the bonus level, 7-6's painters)
     if (!FV) return;
-    const n = FV[0].length, [x0, y0, q] = farPic(FV, (lv.l + lv.r) / 2, snap(farY(cam, H)));
+    const n = FV[0].length, [x0, y0, q, xs] = farPic(FV, (lv.l + lv.r) / 2, snap(farY(cam, H)));
     const L = TWFAR.lit || (TWFAR.lit = {});
     if (!L[key]) { L[key] = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== 'o' || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
       while (st.length) { const [a, b] = st.pop(); cl.push([a, b]); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy; if (v >= 0 && v < FV.length && u >= 0 && u < n && !seen2.has(v * n + u) && FV[v][u] === 'o') { seen2.add(v * n + u); st.push([u, v]); } } }
       if (cl.length >= 2 && cl.length <= 16 && L[key].length < 6) L[key].push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
-    for (const [a, b] of L[key]) vlamps.push([x0 + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
+    for (const xk of xs) for (const [a, b] of L[key]) vlamps.push([xk + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
   };
   const mnThing = (kind, wx, b, d, r) => {   // a cart, the miners' tools or a winch on a ledge at its wall end (X tiles out, Y up from its top)
     if (IW[kind]) { iwAt(IW[kind], wx, b, d, 1, IW[kind].dx, IW[kind].base, swayAt(r, kind, IW[kind], wx, b, d)); return; }   // (Iwami's, IW; its baskets sway, SWAY)
@@ -7138,12 +7137,12 @@ Renderer.prototype.draw = function (g, alpha) {
     const glow = (u, v) => { fb(u - 0.08, v - 0.1, u + 0.08, v + 0.1, PAL.orange, LIT); vlamps.push([U(u), Vv(v), 0.4, 1.4]); };
     const key = MFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5], FV = window.__far === 99 ? null : MFAR.cell[key];   // (window.__far 99: the old view, to count against)
     if (FV) {   // Iwami Ginzan by level (MFAR); its lights (its orange and yellow clusters) light the dark round them
-      const n = FV[0].length, [x0, y0, q] = farPic(FV, cx, foot);
+      const n = FV[0].length, [x0, y0, q, xs] = farPic(FV, cx, foot);
       const L = MFAR.lit || (MFAR.lit = {});
       if (!L[key]) { L[key] = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (!'oOyY'.includes(ch) || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
         while (st.length) { const [a, b] = st.pop(); cl.push([a, b]); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy; if (v >= 0 && v < FV.length && u >= 0 && u < n && !seen2.has(v * n + u) && 'oOyY'.includes(FV[v][u])) { seen2.add(v * n + u); st.push([u, v]); } } }
         L[key].push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
-      for (const [a, b] of L[key]) vlamps.push([x0 + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
+      for (const xk of xs) for (const [a, b] of L[key]) vlamps.push([xk + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.25, 0.9]);
       return;
     }
     { const u = 2.6, w = 5, h = 4.6; for (let i = 0; i < 4; i++) { const f = 1 - i * 0.2, hw = (w / 2) * f, hh = h * f, b = i * 0.15; fb(u - hw, b, u - hw + 0.22 * f, b + hh); fb(u + hw - 0.22 * f, b, u + hw, b + hh); fb(u - hw - 0.1 * f, b + hh, u + hw + 0.1 * f, b + hh + 0.2 * f); }   // the tunnel's frames
@@ -7385,11 +7384,11 @@ Renderer.prototype.draw = function (g, alpha) {
     if (CINE) this.route = 3;
     farMark();
     if (lv.kind === 'well') {   // the forest far off by level (KFAR), screen-fixed in the low band; its eyes and lit windows (its orange clusters) and its moon light the dark round them
-      const key = KFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5], FV = KFAR.cell[key], n = FV[0].length, [x0, y0, q] = farPic(FV, (lv.l + lv.r) / 2, snap(farY(cam, H)));
+      const key = KFAR.stage[lv.rc ? Math.max(0, Math.min(8, lv.stage || 0)) : 5], FV = KFAR.cell[key], n = FV[0].length, [x0, y0, q, xs] = farPic(FV, (lv.l + lv.r) / 2, snap(farY(cam, H)));
       if (!FV.lit) { FV.lit = []; const seen2 = new Set(); FV.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== 'o' || seen2.has(y * n + x)) return; const st = [[x, y]], cl = []; seen2.add(y * n + x);
         while (st.length) { const [a, b] = st.pop(); cl.push([a, b]); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const u = a + dx, v = b + dy; if (v >= 0 && v < FV.length && u >= 0 && u < n && !seen2.has(v * n + u) && FV[v][u] === 'o') { seen2.add(v * n + u); st.push([u, v]); } } }
         FV.lit.push([cl.reduce((m, c) => m + c[0], 0) / cl.length, cl.reduce((m, c) => m + c[1], 0) / cl.length]); })); }
-      for (const [a, b] of FV.lit) vlamps.push([x0 + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.2, 0.7]);
+      for (const xk of xs) for (const [a, b] of FV.lit) vlamps.push([xk + (a + 0.5) * q, y0 + (b + 0.5) * q, 0.2, 0.7]);
       const m = KFAR.moon[key]; if (m) { const r = (m[2] * q) / t; vlamps.push([x0 + m[0] * q, y0 + m[1] * q, r * 1.05, r * 1.6]); }
     } else {   // Koschei's arena far off (F), on its floor: spruces, a dead tree with eyes in it, the moon, mist, his oak; at a quarter (DIM), the moon brighter (a light:
       // it shows through the dark, the crooked treetops black against it), the eyes LIT

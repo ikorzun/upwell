@@ -91,7 +91,7 @@ const PORTAL = { pull: 9, spin: 4, shrink: 0.7, rise: 7 };
 // on generators of its own, a step harder, with no rooms, folk, candies or tasks. The spine starts `open` rows over the floor and opens a passage `pass` rows
 // tall every `every` rows; the fire's measures a phone's `rows` (view.fh); `seen` rows at least on the screen (a window wider than 16:9: the width left the walls')
 // A boss's wide arena (Ш7 «Б»): its floor shown `arena` px under it, not a phone's CAM.floorShow (room for touch keys a computer has not): 15.6 rows floor to cap in a 20-row view, not 13.3
-const WIDE = { cols: 34, cols3: 52, three: 2.1, lane: 16, spine: 2, tile: 24, arena: 36, anchor: 0.7, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
+const WIDE = { cols: 34, cols3: 52, three: 2.1, lane: 16, spine: 2, tile: 24, arena: 36, anchor: 0.7, bridge: 4, rows: 36.9, seen: 19.5, open: 6, every: 10, pass: 4, near: 4, tries: [0, 1, -1, 2, -2, 3, -3, 4], seed: 0x7a3c19e5, hard: { maxD: 1, foes: 1.3, pair: 0.12 } };   // (near, tries: how far
 // from `every` rows a passage may go to be open on both sides; cols3, three: a window 2.1 times as wide as it is tall or more when the level starts gets a third
 // lane, 52 columns, owner Ш12 «Б»; anchor: the camera's, Mochi lower, 14 rows over him and 6 under, owner Кам1 «Б»)
 // What a lane keeps of its own while the other is laid (Level.lane): its walls, its top and last chunk, its plan, its generators
@@ -1120,9 +1120,10 @@ HAZ_SPR.watermain.tongue = { fps: 6, n: 2, base: 12, pad: [13, 14], gap: 27, fra
 const kitAvoid = (lv, r, rows = 1) => {   // what r's thing may not be: the kinds in the nearest row of things under it (two rows where a world has four kinds or
   // more), within a screen: what is seen one after another; and those already decided across at its height (the one to its left at its very height first).
   // Decided in that order, bottom up, so the same whatever asks first
-  const t = lv.tile, out = new Set(), below = [];
+  const t = lv.tile, out = new Set(), below = [], A = lv.lanes && laneOf(lv, r) === lv.lanes[0];   // (a wide level's lane A by its own things alone: a phone's level's,
+  // its tasks too, owner Ш9 «А»; the other lanes by lane A's as well, two alike not side by side)
   for (const q of lv.rects) {
-    if (q === r || q.gone || q.cap) continue;
+    if (q === r || q.gone || q.cap || (A && laneOf(lv, q) !== lv.lanes[0])) continue;
     const dy = q.y0 - r.y0;
     if (dy > 28 * t || dy < -0.5 * t || (Math.abs(dy) <= 0.5 * t && !(q.x0 < r.x0))) continue;
     const kq = kitThing(lv, q);
@@ -1152,10 +1153,16 @@ const SKT = {   // the Dark Forest's things on its ledges (owner 2026-10-28, Д3
   ravenFly: [{"ax": 44, "rows": ["......................ssss........................", "....................kdkkkkd.......................", "...................sdkkkkkkd......................", "................dsdkkkkkkkkd.......ssss...........", ".............ssdkkkkkkkkkkkkd...ssskkkks..........", "..........sssdkkkkkkkkkkkkkkddsskkkkkkkkd.........", ".........sdkkkkkkkkkkkkkkkkkddkkkkkkkkkkkd........", ".......ddkkkkdkkkkkkkkkkkkkkdkkkkkkkkkokkkd.......", ".....ssdkkkddkkddkkkkkkddkkkdkkkkkkkkkkkkss.......", "......sddddkkkdkkkddkkdkkkkkkkkkkkkkkkkkddks......", "........ksddddkkkdkkkdkkkkkkkkkkkkkkkkdddkkds.....", "............sddkddkddkkkkkkkkkkkkkkkk...kdd.s.....", "........ssdksdkksddkkkkkkkkkkkkkkdd.........d.....", "......ssdkkkkkkksdkkkkkkkkkkkkdkdd................", ".....dkkkkkdkkkkkkkkkkkkkkkkkdkdd.................", "..ksskkkkddkkkkkkkkkkkkkkkkkdkkd..................", ".......dkkkdkkkkdddkkskdkkdkd.....................", "......dkdkdkkkdd...dkdkdkdd.......................", ".....sddkdkkkdd......dddkkd.......................", "....ss..dkkdd.......dkd.kkk.......................", ".......dd.s.........dk..kkd.......................", ".......s............dkd...kkd.....................", ".....................kks..kkk.....................", "......................kk....kkkk..................", ".......................kkk..k.k.k.................", "......................kkk.k......................."]}, {"ax": 44, "rows": ["....................s.............................", "....................ss............................", "................ss..dkd...........................", "................ksskkkkd..........................", ".................dkdkkkkk.........................", "...........sssd..dkkskkks.........................", "............sdkddkdkkdkkksk.......................", ".............dkkkdkkkkdkkkd.......................", "..............skkkdkkkkdkkkd......................", "...............dkkkdkkkdkkkdd.....................", "...........sssdkdkkkdkkkdkkkd.....................", "............sdkkkddkkkkkkdkkkdk...................", ".............ddkkkkkkkkkkkkkkkd...................", "...............ddkkkkkkkkkkkkkd...................", "...........sssdkkdddkkkkkkkkkkkd..................", "............sdkkkkkkddkkkkkkkkkkd.................", "..............dddkkkkkdkkkkkkkkks.................", "................kdkkkkkkkkkkkkkkd.................", "..............ssdkkddkkkkkkkkkkkd......sss........", "...............skkkkkkkkkkkkkkkkd...ssskkks.......", "................ddkkkkkkkkkkkkkkd.sskkkkkkkd......", "..................dddkkkkkkkkkkkkdkkkkkkkkkkd.....", "...................dkdddkkkkkkkkkdkkkkkkkkkk......", "................ssdkkkkkkkkkkkkkkkkkkkkkkkkkss....", ".................sddkkkkkkkkkkkkkkkkkkkkkkkddds...", "....................dkkddkkkkkkkkkkkkkkkkkdkkkds..", "...................sdddkkkkkkkkkkkkkkkkkkk.ddd.s..", "..................sskkkkddkkkkkkkkkkkkkdk......d..", "....................ddddkkddkkkkkkkkkkd...........", ".................sddkdkkkdkkkkkkkkkkkdd...........", "................sdkkksdddkkkkkkkkkkkdd............", ".............ssdkddkkkkkkkkkkkkkkkdkd.............", "...............ddkkkkkkkkkkkkkkkkdkd..............", "..............sdkkkkkkkkkkkkkkkkd.d...............", "...........ssdkkkdkkkddkkksdkkkdd.................", "..........ssdddkdkkkd..dkkdkdkdd..................", "..........kkk..dkkkdk...ddkdkddd..................", "..............dkdkd....kdkkdkkd...................", ".............dkkds.....dkkdkkd....................", "............dd.ss......dkd.kd.....................", "............s...........dd.kd.....................", "........................ks.kk.....................", "........................kk.kk.....................", "........................kk..kk....................", "........................kkk.k.k...................", ".......................kkkk.k.k...................", ".........................k........................"]}, {"ax": 44, "rows": ["...................s..............................", "...................ss.............................", "...................sds...s........................", "................s..dkds..ss.......................", "................ss.dkkks.dd.......................", ".............d..dkdkdkkdkkks......................", ".............ss.dkkddkkkdkkd......................", "..............ssdkkkddkkddkkd.....................", "..............dkddkkkdkkkdkkd.....................", "...............dkkdkkkkkkdkkkd....................", "..........ssss.dkkkdkkdkkkdkkd....................", "...........ssdddkkkkkkkdkkkkkks...................", "............sdkkddkkdkkkkkkkkkd...................", ".............ddkkddkkdkkkkkkkkd...................", "...............dkkkskddkkkkkkkkd..................", "...........ssddddkkkkkdkkkkkkkkd..................", "............sdkkkddkkkkkkkkkkkkkd.................", ".............dddkkkdkkkkkkkkkkkkd.................", "...............ddkkkkkkkkkkkkkkks.................", ".............ssskddkkkkkkkkkkkkkd.......ssss......", ".............ssdkkkdddkkkkkkkkkkd....ssskkkks.....", "..............ssdkkkkkkkkkkkkkkkd..sskkkkkkkkd....", "................ddddkkkkkkkkkkkkdddkkkkkkkkkkkd...", "..................kkddddkkkkkkkkdkkkkkkkkkkokkkk..", "..................ddkkkkkkkkkkkkdkkkkkkkkkkkkkss..", "................sskkkkkkkkkkkkkkdkkkkkkkkkkkkddds.", ".................sdddkkdkkkkkkkkkdkkkkkkkkkddkkkds", ".....................ddkkkkkkkkkkkkkkkkkkkd..ddd.s", "...................sskkkddkkkkkkkkkkkkkkd........k", "....................ddddkkddkkkkkkkkkkkd..........", ".....................kdkkddkkkkkkkkkkkdd..........", "...................ssdkkkkkkkkkkkkkkdkd...........", ".................sdkkkkkkkkkkkkkkkkdkd............", "...............ssddkkkkkkkkkkkkkkkdkd.............", "..............sddkkkkkkkkkkkkkkkkdkd..............", "...........ddddkkkkkkkkdkkkkkkkkdd................", "..........ssddddkdkkkd..ddkkdkdkk.................", "..............kkdkkdd....kkdk.....................", ".............ddkdkd....kkkkk......................", "............dd.dkd....k.kkk.......................", "...........ddk.dd.......kkk.......................", "...........s...s.......k.kk.......................", ".........................k........................"]}, {"ax": 44, "rows": ["....................................sss...........", ".....sssdddddds..................ssskkks..........", "sssddkkkkkkkkkkddddd..........dsskkkkkkkd.........", ".sdkkkkkkkkkkkkkkkkkddd.....sddkkkkkkkkkkd........", "...dddddddkkkkkkkkkkkkkdd..skkkkkkkkkkok..........", "....ddkkkkkkkkkkkkkkkkkkkddkkkkkkkkkkkkkkss.......", ".ssdkkkkkkdddkkkkkkkkkkkkkkddkkkkkkkkkkkddds......", "..sdddddddkkkkkkkkkkkkkkkkkkkkkkkkkkkkkdkkkds.....", ".....ddkkkkkkddkkkkkkkkkkkkkkkkkkkkkkk..dddks.....", "...ssddddkdddkkkkdkkkkkkkkkkkkkkkkkkd.......d.....", "...dddkkksdkkkkddkkkkkkkkkkkkkkkkkkd..............", "........ssdddddkkkkdkdkkkkkkkkkkkkdd..............", "............sddddddkkkkkkkkkkkkkdkd...............", "..............skkkkkkkkkkkkkkkkdkd................", ".............sdddkkkkkkkkkkkkkdkd.................", "............sdkkkkkkkkkkkkkkkd.k..................", ".........dddkkkkkkkddkkkkkkkkd....................", "........ssdddkdkkkd..dkdkdkkk.....................", ".............dkkkd....kkdkk.......................", "...........dkkkd....kkkkk.........................", "..........ddkdd....k.kkk..........................", ".........dd.dd.......kkk..........................", ".........s..s.......kkkk..........................", ".........s..k.......kkkk..........................", ".....................kk..........................."]}, {"ax": 44, "rows": ["...................................sss............", "................................ssskkkd...........", "..............................sskkkkkkkdd.........", "............................dskkkkkkkkkkkd........", ".......................sdddskkkkkkkkkkkkk.........", ".....................ddkkkkkkkkkkkkkkkokkssk......", "...................sdkkkkkkkkkkkkkkkkkkkddks......", ".................sdkkkkkddkkkkkkkkkkkkddkkkds.....", "................sdkkkkddkkkkkkkkkkkkk...dddks.....", ".............ssddkkkkkkkkkkkkkkkkkd.........d.....", "............sddkkdkkkkkkkkkkkkdkkdk...............", "...........dkkkddkkkkkkkkkkkkkdkkdd...............", ".........sdkkdddkkkkkkkkkkkkkkdkd.................", "...........dkkkkkkkkskkkkkkkkkkd..................", ".........ddkkkkkkkkddkkkkkkkkkkd..................", ".......sdkkkdkkkdkkskkkkkkkkkkkd..................", "......ssddkdkkkdkdkdkkkkkkkkkkkkk.................", "..........dkkkd...kdkkdkkkkkkkkkd.................", ".........dkdkd....dkddkkkkkkkkkkd.................", "........ddkdd.....sdddkkdkkkkkkkkd................", ".......dd.ds......s..dkdkkkkkkkkkd................", ".......s..s.........dkkdkkkkkkkkkd................", ".......k..k.........dkdkkkdkkkdkkd................", "....................sskkkdkkdkdkkkd...............", "....................s.dkddkkdkkdkkd...............", "......................dkddkkdkkdkks...............", "......................ss.dkddkkdkks...............", "......................s..sd.dkkdkdk...............", ".........................sd.skddkd................", ".........................s..sddsds................", "............................ks..ss................", ".............................s...k................"]}, {"ax": 44, "rows": ["....................................sss...........", "......sssdddddds.................ssskkks..........", ".sssddkkkkkkkkkkdddd...........sskkkkkkkd.........", "..sskkkkkkkkkkkkkkkkddd.....dddkkkkkkkkkkd........", "....ddskdddkkkkkkkkkkkkdd..skkkkkkkkkkdkk.........", ".....ddkkkkkkkkkkkkkkkkkkddkkkkkkkkkkkkkkss.......", "..ssdkkkkkkdddkkkkkkkkkkkkkddkkkkkkkkkkkddds......", "...sdddddddkkkkkkkkkkkkkkkkkkkkkkkkkkkkdkkkds.....", "......ddkkkkkkddkkkkkkkkkkkkkkkkkkkkkkk.dddks.....", "....dsddddddddkkkkdkkkkkkkkkkkkkkkkkd.......k.....", "....ssdddksdkkkkddkkkkkkkkkkkkkkkkkd..............", ".........ssdddddkkkdddkkkkkkkkkkkkdd..............", "............dsddddddkkkkkkkkkkkkdkd...............", "...............skdkkkkkkkkkkkkkkkd................", "..............sddkkkkkkkkkkkkkkdd.................", ".............sdkkkkkkkkkkkkkkkdk..................", "..........sddkkkkkkkdkkkkkkkkdd...................", ".........ssdddkdkkkd.dkdkdkk......................", "..............dkkdd...kkdk........................", "............dkdkd...kkkkk.........................", "...........ddkdd.....kkk..........................", "..........dd.dd......kkk..........................", "..........s..s......kkk...........................", ".....................k............................"]}],   // startled, off, a flapping loop of four (GPT off the sitting one at the game's pixel, cut 1:1,
   // its beak on one column: scratchpad snap/raven)
 };
+// A wide level's lane walls (WIDE): by a spine a lane's side is a wall as the level's own are (a ledge's things and its end into it, a door's house, a
+// cable or a stream across), from the first spine block up (passOpen keeps ledges off a passage); a phone's level, and what is across a spine, the level's
+function laneOf(lv, q) { const x = (q.x0 + q.x1) / 2; for (const ln of lv.lanes || []) if (x >= ln.l && x <= ln.r) return ln; return null; }
+function laneAt(lv, q) { return lv.lanes && q.y0 < lv.floor - WIDE.open * lv.tile ? laneOf(lv, q) : null; }
+function wallL(lv, q) { const ln = laneAt(lv, q); return ln ? ln.l : lv.l; }
+function wallR(lv, q) { const ln = laneAt(lv, q); return ln ? ln.r : lv.r; }
 const kitThing = (lv, r) => {
   if (r.kit !== undefined) return r.kit;
   if (lv.kind !== 'well') return (r.kit = null);   // (a shaft's: none in a boss's arena or a room)
-  const th = lv.theme, t = lv.tile, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, w = r.x1 - r.x0, X = (u) => wx + d * u * t;
+  const th = lv.theme, t = lv.tile, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, d = wl ? 1 : -1, wx = wl ? wallL(lv, r) : wallR(lv, r), b = r.y0, w = r.x1 - r.x0, X = (u) => wx + d * u * t;
   const clear = (x0, y0, x1, y1) => !lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1) && !lv.rects.some((q) => !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
   const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);   // clear over the ledge from u0 to u1 tiles out, h up
   // A picture's room in tiles as fitted on the 393 phone, times how much bigger its dot (whole pixels, whatever the tile) is against this screen's tile, never
@@ -1179,7 +1186,7 @@ const kitThing = (lv, r) => {
     if (lv.stage === 1 && !lv.statueAt && H > 0 && H < 1e9 && b < lv.floor - 0.35 * H && b > lv.floor - 0.7 * H && ssteady(2.6) && room(w / t - 1.6 * f, w / t, 2.8 * f)) { lv.statueAt = r; return (r.kit = { kind: 'statue' }); }
     k = hk(0); opts = [[0, 'sakura', () => ssteady(2.6) && sroom(0, 4.6, 4.9)], [1, 'scarecrow', () => ssteady(3) && sroom(0, 3.5, 3.8)],
       [3, 'beast', () => ssteady(2.6) && sroom(0, 2.6, 2.6)], [5, 'kaya', () => ssteady(2.6) && sroom(0, 2.8, 3.0)],   // (Iya's: Д90 «В», Д87 «В»)
-      [2, 'lantern', () => steady(4) && room(0, 4, 4.4), shrineAt], [4, 'koinobori', () => steady(2.2) && clear(lv.l, b - 5.6 * t, lv.r, b - 3.6 * t)]];
+      [2, 'lantern', () => steady(4) && room(0, 4, 4.4), shrineAt], [4, 'koinobori', () => steady(2.2) && clear(wallL(lv, r), b - 5.6 * t, wallR(lv, r), b - 3.6 * t)]];
   } else if (th.mines) {   // the Mine's: a lamp on the wall over the ledge (the hero lights it: a task, and then a light), a vein of ore in the wall behind it, a cart on
     // its rails, the miners' tools, a winch; the props but the lamps on half their ledges: about four in six with a thing on them, as the Village (the rule book's
     // detail: «Сократить до 4 из 6»)
@@ -1250,8 +1257,8 @@ const kitThing = (lv, r) => {
     // height over six slots, on about two ledges in five (the detail rule); each Golden Gai thing its sprite's room, one sheet pixel a game pixel, in tiles, a
     // thing up the wall not over a bar's lightbox (neonSign), and no two of them within 16 tiles
     const base = !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key) && (wl || wr);
-    const door = (x0, y0, x1, y1) => lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1), vx = wl ? lv.l + 0.2 * t : lv.r - 1.6 * t, cx = wx + d * 0.85 * t;
-    const acNear = lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < lv.l + lv.r) === wl && q.y0 < b && q.y0 + (AC.h + AC.brace) * t > b - 1.7 * t);
+    const door = (x0, y0, x1, y1) => lv.bubbles.some((q) => q.x1 + t > x0 && q.x0 - t < x1 && q.y1 > y0 && q.y0 - t < y1), vx = wl ? wallL(lv, r) + 0.2 * t : wallR(lv, r) - 1.6 * t, cx = wx + d * 0.85 * t;
+    const acNear = lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < wallL(lv, q) + wallR(lv, q)) === wl && q.y0 < b && q.y0 + (AC.h + AC.brace) * t > b - 1.7 * t);
     const folk = lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     const some = ((Math.imul(Math.round(b / t) + 3, 0x85ebca6b) >>> 0) / 4294967296) < 0.4, alt = hk(19) < 3;
     const sign = (y0, y1) => { for (let k = Math.floor(y0 / (11 * t)) - 1; k <= Math.floor(y1 / (11 * t)) + 1; k++) { const s = neonSign(lv, k); if (s && s.left === wl && s.y1 > y0 && s.y0 < y1) return true; } return false; };
@@ -4456,6 +4463,10 @@ class Level {
     const A = this.lanes[0], t = this.tile, hi = Math.min(...this.lanes.map((ln) => ln.ended));
     for (const ln of this.lanes) if (ln.ended > hi) for (let y = ln.ended - 3 * t, k = 0; y > hi - t; y -= 3 * t, k++) { const x = k % 2 ? ln.r - 7 * t : ln.l + 3 * t; this.rects.push(this.box(x, y, x + 4 * t, y + LEVEL.plank * this.R, { plank: true })); }
     for (const sp of this.spines) if (sp.y > hi) this.rects.push(this.box(sp.ln[0].r, hi, sp.ln[1].l, sp.y, { spine: true }));
+    const mid = (this.l + this.r) / 2, y1 = hi + LEVEL.plank * this.R;   // the spine under the way out: a plank over it, `bridge` tiles out over both lanes (the way out
+    // stood over a 2-tile pillar top, 4 tiles off the lanes' rest ledges and 2 over them: the bot stalled there in 6 of its 12 stalls, and a player lands on a pillar)
+    for (const sp of this.spines) if (sp.ln[0].r <= mid && sp.ln[1].l >= mid) { const x0 = sp.ln[0].r - WIDE.bridge * t, x1 = sp.ln[1].l + WIDE.bridge * t;
+      if (!this.rects.some((r) => !r.spine && !r.wall && !r.cap && r.x1 > x0 && r.x0 < x1 && r.y1 > hi - 2 * t && r.y0 < y1 + t)) this.rects.push(this.box(x0, hi, x1, y1, { plank: true })); }
     this.top = hi; this.joining = true; this.finish(); this.joining = false; A.coinTotal = this.coinTotal; for (const ln of this.lanes) ln.top = -Infinity;   // (the way out's trail counted)
   }
   // Drop what has fallen far below the camera (a crumbled block stays: it comes back).
@@ -6306,6 +6317,7 @@ function sidesPaint(cv, S) {   // over the world's top ink, k times bigger, on i
 // across, its height as much again, its pixels taken nearest (a column or a row of it twice here and there: each pixel a whole game pixel, no blur), each colour its ink and its tone from the black (vtsp's
 // texels); its tones brought down together till the brightest is a quarter (the depth rule: the boss and its shots read over it), a light's (orange) a little
 // more, at most 0.3; its black clear (the arena's dark and stars behind show). Made once a palette (?pal)
+const FAR_WIDE = (location.search.match(/[?&]far=([abc])\b/) || [])[1] || '';   // a wide level's far view, trials (farPic): a a lane's scale, b repeated, c sunk
 let arenaAsked = false;   // (src/sides-arena.js fetched once: SIDE_ARENA)
 function arenaArt(art, id, tw) {
   const C = art.arena || (art.arena = {}), key = tw + (PAL.blue + ''); if (C[key]) return C[key];
@@ -6357,13 +6369,15 @@ Renderer.prototype.draw = function (g, alpha) {
   // анимацию, а вместо градиента за моти используй фон локации»)
   const menu = g.state === 'menu', farR = [], farF = [], farMark = () => { farR.push(this.nf); farF.push(this.nFar || 0); };   // (a far view's start and end: in the
   // features, and in the 2.5D's far ones)
-  const farQ = (n, fill) => { const q = 2 * PIX.base, w = menu ? view.w : lv.r - lv.l; return (menu || fill) && n * q < w ? Math.ceil(w / (n * PIX.size)) * PIX.size : q; };
+  const farQ = (n, fill, w = menu ? view.w : lv.r - lv.l) => { const q = 2 * PIX.base; return (menu || fill) && n * q < w ? Math.ceil(w / (n * PIX.size)) * PIX.size : q; };
   const farCut = new WeakMap(), farPic = (FV, cx, foot, a = DIM) => {   // a far picture for the low band (Д331 «Г»): centred, its foot at `foot`, the shaft filled, cut at the walls in
     // play (owner, Д332: «фон не должен заходить за боковые линии»; the main screen has none: edge to edge)
-    const n = FV[0].length, q = farQ(n, true), x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * q);
-    const i0 = menu ? 0 : Math.max(0, Math.ceil((lv.l - x0) / q - 1e-6)), i1 = menu ? n : Math.min(n, Math.floor((lv.r - x0) / q + 1e-6));
-    let c = farCut.get(FV); if (!c || c.i0 !== i0 || c.i1 !== i1) farCut.set(FV, (c = { i0, i1, rows: i0 === 0 && i1 === n ? FV : FV.map((r) => r.slice(i0, i1)) }));   // (its own arrays: vsp keeps its boxes by them)
-    if (window.__noAtlas) vsp(c.rows, x0 + i0 * q, y0, false, a, q); else tsp(a > 1 && a <= DIM && VSP_SPECK ? vspClean(c.rows) : c.rows, x0 + i0 * q, y0, q, a);   // (one picture of the atlas, as vsp's boxes drew it, specks cleaned: its boxes were 450–1150 of a screen)
+    const n = FV[0].length, fw = !menu && lv.lanes && FAR_WIDE, qA = fw ? farQ(n, true, WIDE.lane * lv.tile) : 0, q = fw === 'a' || fw === 'b' ? qA : farQ(n, true);
+    const x0 = snap(cx - (n * q) / 2), y0 = snap(foot - FV.length * (fw === 'c' ? qA : q));   // (?far, a wide level's trials: a, b a lane's scale, b repeated; c sunk to a lane's height)
+    for (const k of fw === 'b' ? [0, -1, 1, -2, 2] : [0]) { const xk = x0 + k * n * q;
+      const i0 = menu ? 0 : Math.max(0, Math.ceil((lv.l - xk) / q - 1e-6)), i1 = menu ? n : Math.min(n, Math.floor((lv.r - xk) / q + 1e-6)); if (i1 <= i0) continue;
+      const cs = farCut.get(FV) || farCut.set(FV, {}).get(FV); let c = cs[k]; if (!c || c.i0 !== i0 || c.i1 !== i1) cs[k] = c = { i0, i1, rows: i0 === 0 && i1 === n ? FV : FV.map((r) => r.slice(i0, i1)) };   // (its own arrays: vsp keeps its boxes by them)
+      if (window.__noAtlas) vsp(c.rows, xk + i0 * q, y0, false, a, q); else tsp(a > 1 && a <= DIM && VSP_SPECK ? vspClean(c.rows) : c.rows, xk + i0 * q, y0, q, a); }   // (one picture of the atlas, as vsp's boxes drew it, specks cleaned: its boxes were 450–1150 of a screen)
     return [x0, y0, q];   // (where the whole picture lies: its lights by it)
   };   // a far picture's pixel: two game pixels, on the main screen as many whole ones
   // as fill it edge to edge (no walls there: a phone's game pixel is small, its 111-116 across were narrower than it; owner, 2026-10-28: «задник в мобильном на главном экране
@@ -6543,8 +6557,8 @@ Renderer.prototype.draw = function (g, alpha) {
   // doorway, 3.4 tiles out from the wall, its roof deep in snow. The stash's (E): its door framed purple and lit warm inside, a little stone lantern by it; the
   // shop's (F): a red noren hanging in its doorway, a face on it, and a lit window beside it. What is inside bobs in the doorway; sparks rise past it.
   const hut = (d, kind) => {   // (a real Fuji hut, stones on its roof, cut off its sheet: the shop's open, d58 A; the stash's shut for the winter, d59 D)
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = DI;
-    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), id = shop ? 'shop' : 'stash', rows = sprRows(id), [c0, c1, r0, r1] = FUJI_DOOR[id], Pk = PIX.base, hh = rows.length;
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (wallL(lv, d) + wallR(lv, d)) / 2, dir = wl ? 1 : -1, c = DI;
+    const X = (u) => sn((wl ? wallL(lv, d) : wallR(lv, d)) + dir * u * t), id = shop ? 'shop' : 'stash', rows = sprRows(id), [c0, c1, r0, r1] = FUJI_DOOR[id], Pk = PIX.base, hh = rows.length;
     const W = rows[0].length, dcN = (c0 + c1 + 1) / 2, mir = dcN > W - dcN, dc = mir ? W - dcN : dcN;   // (its door kept near the wall, in the door's place: a hut
     // whose door is past its middle drawn mirrored; one whose door is far out set into the wall, as Fuji's huts are built into the slope)
     const dx = X(Math.min(1.6, 0.1 + (dc * Pk) / t)), flip = wl ? mir : !mir, x0 = sn(flip ? dx + dcN * Pk : dx - dcN * Pk), y1 = d.y1, top = y1 - (hh - (shop ? r1 + 1 : r0)) * Pk, wy = y1 - hh * Pk;
@@ -6571,8 +6585,8 @@ Renderer.prototype.draw = function (g, alpha) {
   // a thatch in two tiers under a dark ridge, grey posts on a stone footing, a lit window, a purple noren, a lantern off a bracket. What is inside bobs in the
   // doorway; sparks rise past it.
   const farmhouse = (d, kind) => {
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = DI, y1 = d.y1, px = P / t;
-    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (wallL(lv, d) + wallR(lv, d)) / 2, dir = wl ? 1 : -1, c = DI, y1 = d.y1, px = P / t;
+    const X = (u) => sn((wl ? wallL(lv, d) : wallR(lv, d)) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);   // by tiles out from the wall and up from the ledge
     const on = (u) => lv.rects.some((q) => !q.gone && Math.abs(q.y0 - y1) < 2 && Math.min(X(u - 0.3), X(u + 0.3)) >= q.x0 && Math.max(X(u - 0.3), X(u + 0.3)) <= q.x1);   // its ledge goes on out under u
     const roof = (u0, u1, w0, w1, v0, v1) => {   // a thatch: rows from (u0, u1) at its eave v0 in to (w0, w1) at v1, sparse dots in the straw, its eave ragged
@@ -6627,9 +6641,9 @@ Renderer.prototype.draw = function (g, alpha) {
   // The Village's door from the Iya valley (Д91 «А», VDOOR): the shop a soba shop, the stash the cellar under a farmhouse, off their sheets; its doorway's mark
   // where the old farmhouse had its door (1.25 tiles out from the wall); a glow breathing round it, what is inside bobbing in it, sparks rising past it
   const iyaDoor = (d, kind, S0 = null) => {   // (S0: another world's house off its sheet, the Mine's, the Sea's)
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, c = DI, y1 = d.y1, q = PIX.base;
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (wallL(lv, d) + wallR(lv, d)) / 2, c = DI, y1 = d.y1, q = PIX.base;
     const S = S0 || VDOOR[shop ? 'shop' : 'stash'], n = S.rows[0].length, [c0, c1, r0, r1] = S.mark || [n >> 2, n >> 2, 0, 0];
-    const dx = sn((wl ? lv.l : lv.r) + (wl ? 1 : -1) * 1.25 * t), cm0 = (c0 + c1 + 1) / 2, mir = cm0 > n / 2, flip = wl ? mir : !mir;   // (a house whose door is past its
+    const dx = sn((wl ? wallL(lv, d) : wallR(lv, d)) + (wl ? 1 : -1) * 1.25 * t), cm0 = (c0 + c1 + 1) / 2, mir = cm0 > n / 2, flip = wl ? mir : !mir;   // (a house whose door is past its
     // middle drawn mirrored, so that its door is the nearer the wall and less of it in the wall, as Fuji's huts)
     const cm = flip ? n - cm0 : cm0, x0 = sn(dx - cm * q), y0 = y1 - S.base * q;
     const my = y0 + ((r0 + r1 + 1) / 2) * q, dw = sn(0.7 * t);
@@ -6648,8 +6662,8 @@ Renderer.prototype.draw = function (g, alpha) {
   // water as in Ine, built round the doorway on the ledge, its boat bay under the ledge behind (DIM); the noren red for the shop, purple for the stash (the
   // owner's), a lit window, a lattice panel by the door, a lantern off its eave. What is inside bobs in the doorway; sparks rise past it.
   const funaya = (d, kind) => {
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, c = DI, y1 = d.y1, px = P / t;
-    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, shop = kind === 'shop', wl = d.x0 < (wallL(lv, d) + wallR(lv, d)) / 2, dir = wl ? 1 : -1, c = DI, y1 = d.y1, px = P / t;
+    const X = (u) => sn((wl ? wallL(lv, d) : wallR(lv, d)) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
     const W = 3.2, eave = 2.4, dh = 2.0, noren = 0.8, dx = X(1.25), dw = sn(0.7 * t);
     F(dx, Y(dh / 2), 1.6 * t, 0, 0, 1.5 * t, c, 0.25 + 0.08 * Math.sin(T * 2.6 + dx), 1);   // a glow breathing round (a step quieter than the way out, К7) its door
@@ -6693,8 +6707,8 @@ Renderer.prototype.draw = function (g, alpha) {
   // in its door; the stash a crooked Russian stove, its mouth the door, glowing purple inside, embers. What is inside bobs in the doorway; sparks rise past
   // it; a glow breathes round it. Grey and black but the doors' marks and lights.
   const skDoorAt = (d) => {   // the frame both draw in: tiles out from the wall, up from the ledge
-    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, wl = d.x0 < (lv.l + lv.r) / 2, dir = wl ? 1 : -1, y1 = d.y1;
-    const X = (u) => sn((wl ? lv.l : lv.r) + dir * u * t), Y = (v) => sn(y1 - v * t);
+    const P = PIX.size, t = lv.tile, sn = (v) => Math.round(v / P) * P, wl = d.x0 < (wallL(lv, d) + wallR(lv, d)) / 2, dir = wl ? 1 : -1, y1 = d.y1;
+    const X = (u) => sn((wl ? wallL(lv, d) : wallR(lv, d)) + dir * u * t), Y = (v) => sn(y1 - v * t);
     const bx = (u0, v0, u1, v1, ink, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), ink, a, 0, 10, tn);
     const ln = (u0, v0, u1, v1, ink, wp = 1, a = 1) => line(X(u0), Y(v0), X(u1), Y(v1), ink, a, wp);
     return { P, t, sn, X, Y, bx, ln, px: P / t, dir, y1 };
@@ -6820,7 +6834,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const aircon = (r, ox, oy) => {   // a Tokyo air conditioner (AC; the owner's pick, research/variants/tokyo-aircon2-2-px.png E) on its rect, moved by (ox, oy): a grey
     // box off the wall on two pipes clamped grey (E's were purple), a black fan behind eight grey spokes, a black seam, the side panel's green light and black louvers,
     // on a grey knee brace bolted white
-    const t = kitT, P = kitP, wl = r.x0 + r.x1 < lv.l + lv.r, w = r.x1 - r.x0, h = AC.h * t, x0 = r.x0 + ox, y = r.y0 + oy, f = (u) => (wl ? x0 + u * w : x0 + w - u * w), wx = (wl ? lv.l : lv.r) + ox, d = wl ? 1 : -1;
+    const t = kitT, P = kitP, wl = r.x0 + r.x1 < wallL(lv, r) + wallR(lv, r), w = r.x1 - r.x0, h = AC.h * t, x0 = r.x0 + ox, y = r.y0 + oy, f = (u) => (wl ? x0 + u * w : x0 + w - u * w), wx = (wl ? wallL(lv, r) : wallR(lv, r)) + ox, d = wl ? 1 : -1;
     const rt = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork: its grey box in depth, clean, so its top face reads as the top it is; all
     // on it flat; its pipes and its brace, thin, flat)
     L(0); for (const v of [0.42, 0.62]) { const py = snap(y + v * h), cx = snap((wx + f(0)) / 2); box(Math.min(wx, f(0)), py, Math.max(wx, f(0)), py + 2 * P, PAL.gray, 1, 0, 10, 0); box(cx - P, py - P, cx + 2 * P, py + 3 * P, PAL.gray, 1, 0, 10, 0); }
@@ -6874,7 +6888,7 @@ Renderer.prototype.draw = function (g, alpha) {
       for (let x = x0; x < x1; x += st) { const u = (x + st / 2 - x0) / (x1 - x0), y = snap(y0 + sag * 4 * u * (1 - u)); box(x, y, Math.min(x + st, x1), y + P, PAL.gray, DIM, 0, 10, 0); }
     }
     const atDoor = (x0, y0, x1, y1) => lv.bubbles.some((b) => b.x1 + t > x0 && b.x0 - t < x1 && b.y1 > y0 && b.y0 - t < y1);   // in the way of a door, or its glow (owner: nothing covers one)
-    const acNear = (wl, ya, yb) => lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < lv.l + lv.r) === wl && q.y0 < yb && q.y0 + (AC.h + AC.brace) * t > ya);   // an air conditioner hangs over [ya, yb] on that wall
+    const acNear = (wl, ya, yb) => lv.rects.some((q) => q.ac && !q.gone && (q.x0 + q.x1 < wallL(lv, q) + wallR(lv, q)) === wl && q.y0 < yb && q.y0 + (AC.h + AC.brace) * t > ya);   // an air conditioner hangs over [ya, yb] on that wall
     for (const side of [-1, 1]) {
       const at = (d) => (side < 0 ? lv.l + d : lv.r - d), span = (d0, d1) => [Math.min(at(d0), at(d1)), Math.max(at(d0), at(d1))];
       const [p0, p1] = span(0.28 * t, 0.46 * t);
@@ -6909,25 +6923,25 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const r of lv.rects) {   // a vending machine in a niche at the wall end of some wide steady ledges (the owner's pick, research/variants/tokyo-vending-1.png
       // D): a navy cabinet, its lit front by the wall with rows of cans and a glint, a grey coin panel and buttons at its free side (D's was yellow: yellow is
       // for what you take), the slot under the front
-      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      const wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1;
       if (!seen(r.y0 - 4 * t, r.y0) || (kitThing(lv, r) || {}).kind !== 'vending') continue;   // (where: kitThing's, never twice in a row, the owner's rule)
-      const S = KIT9.vending, q = PIX.base, x0 = wl ? lv.l + S.dx * q : lv.r - (S.dx + S.rows[0].length) * q;
+      const S = KIT9.vending, q = PIX.base, x0 = wl ? wallL(lv, r) + S.dx * q : wallR(lv, r) - (S.dx + S.rows[0].length) * q;
       if (atDoor(x0 - 0.15 * t, r.y0 - S.base * q, x0 + S.rows[0].length * q + 0.15 * t, r.y0)) continue;
-      kit9At('vending', wl ? lv.l : lv.r, r.y0, wl ? 1 : -1);   // off its sheet (Д353 E)
+      kit9At('vending', wl ? wallL(lv, r) : wallR(lv, r), r.y0, wl ? 1 : -1);   // off its sheet (Д353 E)
     }
     for (const r of lv.rects) {   // a bonsai at the wall end of some other steady ledges, as on a balcony (the owner's pick, research/variants/tokyo-bonsai-1.png F):
       // a shallow grey pot, an orange trunk in an S and its branches, pads of green needles shaded down to the right; not under an air conditioner, nor by a cage or Moti
-      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      const wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1;
       if (!seen(r.y0 - 3 * t, r.y0) || (kitThing(lv, r) || {}).kind !== 'bonsai') continue;   // (where: kitThing's, never twice in a row, the owner's rule)
-      const S = KIT9.bonsai, q = PIX.base, x0 = wl ? lv.l + S.dx * q : lv.r - (S.dx + S.rows[0].length) * q;
+      const S = KIT9.bonsai, q = PIX.base, x0 = wl ? wallL(lv, r) + S.dx * q : wallR(lv, r) - (S.dx + S.rows[0].length) * q;
       if (atDoor(x0, r.y0 - S.base * q, x0 + S.rows[0].length * q, r.y0)) continue;
-      kit9At('bonsai', wl ? lv.l : lv.r, r.y0, wl ? 1 : -1);   // off its sheet (Д354 A)
+      kit9At('bonsai', wl ? wallL(lv, r) : wallR(lv, r), r.y0, wl ? 1 : -1);   // off its sheet (Д354 A)
     }
     for (const r of lv.rects) {   // Golden Gai's things at some ledges' wall ends (kitThing; Д156 «Б», Д209 C, Д210–Д213 A, GAI): purple plastic crates or an old
       // bicycle, rubbish bags under a crow net, the meters and an extinguisher, a lucky cat in a bar's window
       if (r.gone || !seen(r.y0 - 5 * t, r.y0 + t)) continue;
       const p = kitThing(lv, r);
-      if (p && GAI[p.kind]) { const wl = r.x0 <= lv.l + 1, S = GAI[p.kind]; gaiAt(S, wl ? lv.l : lv.r, r.y0, wl ? 1 : -1, 1, swayAt(r, p.kind, S, wl ? lv.l : lv.r, r.y0, wl ? 1 : -1)); }   // (its bags sway, SWAY)
+      if (p && GAI[p.kind]) { const wl = r.x0 <= wallL(lv, r) + 1, S = GAI[p.kind]; gaiAt(S, wl ? wallL(lv, r) : wallR(lv, r), r.y0, wl ? 1 : -1, 1, swayAt(r, p.kind, S, wl ? wallL(lv, r) : wallR(lv, r), r.y0, wl ? 1 : -1)); }   // (its bags sway, SWAY)
     }
     if (CINE) this.route = 1;
   }
@@ -6969,7 +6983,7 @@ Renderer.prototype.draw = function (g, alpha) {
     return h === 2 && !lv.rects.some((q) => q !== r && !q.cap && q.x1 > r.x0 && q.x0 < r.x1 && q.y0 < r.y1 + 1.5 * kitT && q.y1 > r.y1);
   };
   const mnBats = (r) => {   // four bats hanging asleep under a ledge, folded in their wings, one with an eye open (a tiny light), clear of a brace under it
-    const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, n = 4, wl = r.x0 <= lv.l + 1, x0 = wl ? r.x0 + 1.95 * t : r.x1 - 1.95 * t - (n - 1) * 0.55 * t;
+    const t = kitT, P = kitP, G = PAL.gray, K = PAL.black, n = 4, wl = r.x0 <= wallL(lv, r) + 1, x0 = wl ? r.x0 + 1.95 * t : r.x1 - 1.95 * t - (n - 1) * 0.55 * t;
     if (CINE) {   // (the cinematic fork: come near, they wake and fly off one after another; back later; the rule book's «летучие мыши просыпаются и разлетаются»)
       const B = r.batsP || (r.batsP = {}), at = [];
       for (let i = 0; i < n; i++) at.push([snap(x0 + i * 0.55 * t), snap(r.y1 + 0.75 * t)]);
@@ -7141,10 +7155,10 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 3.6 * kitT, r.y0 + kitT) && kitThing(lv, r);
       if (!p) continue;
-      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1;
-      if (p.kind === 'lamp') { if (CINE) this.route = 4; iwLamp(wl ? lv.l : lv.r, p.y, d, lv.tended.has(r)); }
-      else if (p.kind === 'ore') { if (CINE) this.route = 3; kit9At('ore', wl ? lv.l : lv.r, r.y0, d, DIM); }   // (behind: DIM)
-      else { if (CINE) this.route = 4; mnThing(p.kind, wl ? lv.l : lv.r, r.y0, d, r); }
+      const wl = r.x0 <= wallL(lv, r) + 1, d = wl ? 1 : -1;
+      if (p.kind === 'lamp') { if (CINE) this.route = 4; iwLamp(wl ? wallL(lv, r) : wallR(lv, r), p.y, d, lv.tended.has(r)); }
+      else if (p.kind === 'ore') { if (CINE) this.route = 3; kit9At('ore', wl ? wallL(lv, r) : wallR(lv, r), r.y0, d, DIM); }   // (behind: DIM)
+      else { if (CINE) this.route = 4; mnThing(p.kind, wl ? wallL(lv, r) : wallR(lv, r), r.y0, d, r); }
     }
     if (CINE) this.route = 0;
     for (const r of lv.rects) if (!r.gone && seen(r.y1 - kitT, r.y1 + 2 * kitT) && mnBatsAt(r)) mnBats(r);   // bats asleep under some ledges
@@ -7163,7 +7177,7 @@ Renderer.prototype.draw = function (g, alpha) {
     const clear = (x0, y0, x1, y1) => !atDoor(x0, y0, x1, y1) && !lv.rects.some((q) => !q.gone && !q.cap && q.x1 > x0 && q.x0 < x1 && q.y1 > y0 && q.y0 < y1);
     const rt0 = this.route, L = (n) => { if (CINE) this.route = n; };   // (the cinematic fork, the rule book: far off behind, the kamakura flat, the props small with
     // their thin parts and steam flat)
-    const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= lv.l + 1 || r.x1 >= lv.r - 1)
+    const steady = (r, w) => !(r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.cage || r.slick) && (r.x0 <= wallL(lv, r) + 1 || r.x1 >= wallR(lv, r) - 1)
       && r.x1 - r.x0 >= w * t && !lv.folk.some((f) => f.rect === r && (f.kind === 'cage' || f.kind === 'trader' || f.kind === 'ribbon'));
     L(3);
     farMark();
@@ -7172,7 +7186,7 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const r of lv.rects) {
       if (!seen(r.y0 - 6 * t, r.y0) || !steady(r, 2.4)) continue;
       const kk = kitThing(lv, r); if (!kk) continue;   // (which thing: kitThing's, never the one next under it, the owner's rule)
-      const k = kk.kind, wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
+      const k = kk.kind, wl = r.x0 <= wallL(lv, r) + 1, d = wl ? 1 : -1, wx = wl ? wallL(lv, r) : wallR(lv, r), b = r.y0, X = (u) => snap(wx + d * u * t), w = r.x1 - r.x0;
       const room = (u0, u1, h) => clear(Math.min(X(u0), X(u1)), b - h * t, Math.max(X(u0), X(u1)), b - 1);
       if (k === 'tent') {   // a mountaineer's tent (d53 B; the owner's d38: the kamakura goes, a tent, lit warm with no flame),
         // its snow rabbit by it (B, its ears of snow now: d37 «А»)
@@ -7221,8 +7235,8 @@ Renderer.prototype.draw = function (g, alpha) {
         const wd = sprW(id) * t, free = (x) => !lv.coins.some((c) => c.x > x - 0.6 * t && c.x < x + wd + 0.6 * t && c.y < q.y0 && c.y > q.y0 - 4.6 * t), xl = snap(q.x0 + 0.4 * t), xr = snap(q.x1 - 0.4 * t - wd);
         if (lv.fujiPostU === undefined) {   // its place, once (a Level field, as fujiPost; a share of its ledge, so a rescale keeps it): from an end away from a wall
         // inward till no coin is by it
-          const xs = []; for (let k = 0; xr - k * 0.5 * t >= xl; k++) { if (q.x1 < lv.r - 1) xs.push(xr - k * 0.5 * t); if (q.x0 > lv.l + 1) xs.push(xl + k * 0.5 * t); }
-          lv.fujiPostU = ((xs.find(free) ?? (q.x1 >= lv.r - 1 ? xl : xr)) - q.x0) / (q.x1 - q.x0);
+          const xs = []; for (let k = 0; xr - k * 0.5 * t >= xl; k++) { if (q.x1 < wallR(lv, q) - 1) xs.push(xr - k * 0.5 * t); if (q.x0 > wallL(lv, q) + 1) xs.push(xl + k * 0.5 * t); }
+          lv.fujiPostU = ((xs.find(free) ?? (q.x1 >= wallR(lv, q) - 1 ? xl : xr)) - q.x0) / (q.x1 - q.x0);
         }
         L(4); fspr(id, snap(q.x0 + lv.fujiPostU * (q.x1 - q.x0)), q.y0, false);
       }
@@ -7230,7 +7244,7 @@ Renderer.prototype.draw = function (g, alpha) {
     this.route = rt0;
   }
   if (th.village) for (const r of lv.rects) if (r.plank && r.move && !r.move.wheel && seen(r.y0 - 4 * kitT, r.y0)) {   // a yaen's cable across the shaft at its pulley, behind (DEPTH)
-    const cy = snap(r.y0 - snap(YAEN.frame * kitT) - YAEN.wheel * kitT); box(lv.l, cy, lv.r, cy + kitP, PAL.gray, DIM, 0, 10, 0);
+    const cy = snap(r.y0 - snap(YAEN.frame * kitT) - YAEN.wheel * kitT); box(wallL(lv, r), cy, wallR(lv, r), cy + kitP, PAL.gray, DIM, 0, 10, 0);
   }
   for (const wh of lv.wheels) if (seen(wh.y0, wh.y1)) {   // a mill's wheel, behind (DEPTH): its rim, a paddle between each two boards, its spokes, its hub; water off a flume
     // from the wall onto its going-down side (it turns the wheel), falling in dashes
@@ -7247,7 +7261,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const seaRoom = !th.sea && lv.kind !== 'well' && lv.world && lv.world.theme && lv.world.theme.sea;   // (a Sea cave: its rooms are in the stash's purple)
   if (th.sea || seaRoom) for (const r of lv.rects) if (r.plank && r.move && !r.move.wheel && seen(r.y1, r.y1 + 2 * kitT)) {   // a Sea raft's stream across the shaft under it, its ripples going by, behind (DEPTH), in steps six a second (the guide's water);
     // under the Benten-maru (Д142 «А», ENO.boat), at its waterline
-    const BT = th.sea && ENO.boat, sy = BT ? snap(r.y0) + (BT.rows.length - BT.up - 3) * PIX.base : snap(r.y1); box(lv.l, sy, lv.r, sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = lv.l + (((Math.floor(T * 6) / 6) * 30) % (12 * kitP)); x < lv.r; x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0);
+    const BT = th.sea && ENO.boat, sy = BT ? snap(r.y0) + (BT.rows.length - BT.up - 3) * PIX.base : snap(r.y1); box(wallL(lv, r), sy, wallR(lv, r), sy + 6 * kitP, PAL.blue, DIM, 0, 10, 0); for (let x = wallL(lv, r) + (((Math.floor(T * 6) / 6) * 30) % (12 * kitP)); x < wallR(lv, r); x += 12 * kitP) box(snap(x), sy + kitP, snap(x) + 4 * kitP, sy + 2 * kitP, PAL.gray, DIM, 0, 10, 0);
   }
   if (th.sea && lv.kind === 'well') {   // the Sea's props, Enoshima's (Д146 «А», ENO, one sheet pixel a game pixel): on ledges, by kitThing, the harbour light (the
     // task, off till the hero comes, then lit; on 4-9 the Sea Candle), a black kite on its post, a grill of sazae on its coals, the island's cats asleep, the
@@ -7283,7 +7297,7 @@ Renderer.prototype.draw = function (g, alpha) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);
       if (!p || !PROPS.includes(p.kind)) continue;
       L(4); let sx = 0;   // (sx: a flag shifted, fluttering)
-      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, fx = d > 0 ? r.x1 : r.x0, b = r.y0;
+      const wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, fx = d > 0 ? r.x1 : r.x0, b = r.y0;
       const X = (u) => snap(wx + d * u * t) + sx, Q = (u) => snap(fx - d * u * t), Y = (v) => snap(b - v * t);   // tiles out from its wall end, in from its free end, up from its top
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(X(u0), X(u1)), Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
       const bq = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(Q(u0), Q(u1)), Y(Math.max(v0, v1)), Math.max(Q(u0), Q(u1)), Y(Math.min(v0, v1)), c, a, 0, 10, tn);
@@ -7400,15 +7414,15 @@ Renderer.prototype.draw = function (g, alpha) {
       // sockets glow the nearer the hero comes, their cores looking at him
       const p = !r.gone && seen(r.y0 - 5 * t, r.y0) && kitThing(lv, r);
       if (p && p.kind === 'raven') {   // the raven on its snag: it flies off when the hero comes (FLEE_GO), the snag stays
-        const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, B = SKT.ravenBird, q = PIX.base, n = B.rows[0].length; if (CINE) this.route = 0;
-        const [x0, y0] = iwAt(SKT.ravenSnag, wl ? lv.l : lv.r, r.y0, d), cx = x0 + (d > 0 ? B.mid : n - B.mid) * q;
-        if (!fleeDraw(r, SKT.ravenFly, cx, y0 + B.foot * q, true, 0)) iwAt(B, wl ? lv.l : lv.r, r.y0, d);
+        const wl = r.x0 <= wallL(lv, r) + 1, d = wl ? 1 : -1, B = SKT.ravenBird, q = PIX.base, n = B.rows[0].length; if (CINE) this.route = 0;
+        const [x0, y0] = iwAt(SKT.ravenSnag, wl ? wallL(lv, r) : wallR(lv, r), r.y0, d), cx = x0 + (d > 0 ? B.mid : n - B.mid) * q;
+        if (!fleeDraw(r, SKT.ravenFly, cx, y0 + B.foot * q, true, 0)) iwAt(B, wl ? wallL(lv, r) : wallR(lv, r), r.y0, d);
         continue;
       }
-      if (p && SKT[p.kind]) { const wl = r.x0 <= lv.l + 1; if (CINE) this.route = 0; iwAt(SKT[p.kind], wl ? lv.l : lv.r, r.y0, wl ? 1 : -1); continue; }   // its things (SKT), flat in the
+      if (p && SKT[p.kind]) { const wl = r.x0 <= wallL(lv, r) + 1; if (CINE) this.route = 0; iwAt(SKT[p.kind], wl ? wallL(lv, r) : wallR(lv, r), r.y0, wl ? 1 : -1); continue; }   // its things (SKT), flat in the
       // 2.5D (the rule book's thin parts: a broom's twigs, roots, a snag, fur in depth ghosted, as the kaya's)
       if (!p || p.kind !== 'fence') continue;
-      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, b = r.y0;
+      const wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, d = wr && !wl ? -1 : 1, wx = d > 0 ? r.x0 : r.x1, b = r.y0;
       if (CINE) this.route = 4;
       const [x0, y0] = kit9At('fence', wx, b, d, 1, false), FS = KIT9.fence, q = PIX.base, n = FS.rows[0].length;   // off its sheet (Д359 A); its skulls' sockets light the dark, more as the hero comes
       for (const [u, v] of FS.lit) { const ex = d > 0 ? x0 + (u + 0.5) * q : x0 + (n - u - 0.5) * q, ey = y0 + (v + 0.5) * q, near = Math.max(0, Math.min(1, 1 - (Math.hypot(hero.cx - ex, hero.cy - ey) - 2.5 * R) / (5 * R)));
@@ -7501,7 +7515,7 @@ Renderer.prototype.draw = function (g, alpha) {
       const p = !r.gone && seen(r.y0 - 5.5 * t, r.y0) && kitThing(lv, r);   // which, and where (kitThing)
       if (!p) continue;
       if (CINE) this.route = 4;   // (the cinematic fork: a sakura, a scarecrow, a lantern, a koinobori: small things in depth, whole)
-      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
+      const wl = r.x0 <= wallL(lv, r) + 1, d = wl ? 1 : -1, wx = wl ? wallL(lv, r) : wallR(lv, r), b = r.y0, X = (u) => snap(wx + d * u * t), Y = (v) => snap(b - v * t);
       const pk = { sakura: [0.4, 4.2, 4.6], scarecrow: [0.2, 2.9, 3.8], koinobori: [0.7, 4.4, 5.3], kaya: [0, 2.8, 3.0] }[p.kind], sw = pk ? cinePoke(g, lv, r, p.kind, Math.min(X(pk[0]), X(pk[1])), Y(pk[2]), Math.max(X(pk[0]), X(pk[1])), b, p.kind === 'scarecrow' ? [X(2.75), Y(2.55)] : null) : 0;
       const SW = (v) => (sw ? snap(sw * v * t) : 0);   // (the cinematic fork: poked, it sways, its top the most; see cinePoke)
       const bx = (u0, v0, u1, v1, c, tn = 0, a = 1) => { const q = SW((v0 + v1) / 2); box(Math.min(X(u0), X(u1)) + q, Y(Math.max(v0, v1)), Math.max(X(u0), X(u1)) + q, Y(Math.min(v0, v1)), c, a, 0, 10, tn); };   // by tiles out from the wall and up from the ledge
@@ -7520,9 +7534,9 @@ Renderer.prototype.draw = function (g, alpha) {
         // thin parts: its strands in depth smeared, owner 1-3: «не понятная платформа по краям»)
         else if (p.kind === 'statue') { const S = vil2('statue'), n = S.rows[0].length, ex = wl ? r.x1 : r.x0; vsp(S.rows, wl ? snap(ex - S.end * q) : snap(ex - (n - S.end) * q), snap(b - S.base * q), !wl, 1, q, true); }   // at the ledge's end (Д93 «А»)
         else {   // koinobori on a rope across the shaft over the ledge (Д89 «А»), sagging, faint; its carps along it, swaying
-          const S = vil2('rope'), Wd = lv.r - lv.l, yr = b - 4.8 * t, sag = 0.5 * t, ry = (x) => snap(yr + sag * (1 - Math.pow((2 * (x - lv.l)) / Wd - 1, 2)));
-          for (let x = lv.l; x < lv.r; x += P) box(snap(x), ry(x), snap(x) + P, ry(x) + P, PAL.gray, DIM, 0, 10, 0);
-          S.carps.forEach((c, i) => { const n = c.rows[0].length, cx = lv.l + (0.06 + 0.88 * c.u) * Wd, sw = Math.round(Math.sin(T * 2.2 + i * 1.3)) * q; vsp(c.rows, snap(cx - (n * q) / 2) + sw, ry(cx) + snap(c.hang * q)); });
+          const S = vil2('rope'), WL = wallL(lv, r), Wd = wallR(lv, r) - WL, yr = b - 4.8 * t, sag = 0.5 * t, ry = (x) => snap(yr + sag * (1 - Math.pow((2 * (x - WL)) / Wd - 1, 2)));
+          for (let x = WL; x < WL + Wd; x += P) box(snap(x), ry(x), snap(x) + P, ry(x) + P, PAL.gray, DIM, 0, 10, 0);
+          S.carps.forEach((c, i) => { const n = c.rows[0].length, cx = WL + (0.06 + 0.88 * c.u) * Wd, sw = Math.round(Math.sin(T * 2.2 + i * 1.3)) * q; vsp(c.rows, snap(cx - (n * q) / 2) + sw, ry(cx) + snap(c.hang * q)); });
         }
         continue;
       }
@@ -7583,7 +7597,7 @@ Renderer.prototype.draw = function (g, alpha) {
       const p = !r.gone && seen(r.y0 - 3 * t, r.y0 + t) && kitThing(lv, r);
       if (!p) continue;
       const S = p.kind === 'plants' ? DC_GARDEN : 1;   // (the garden drawn bigger: owner, «too small»)
-      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r, b = r.y0, X = (u) => snap(wx + d * u * S * t), Y = (v) => snap(b - v * S * t);
+      const wl = r.x0 <= wallL(lv, r) + 1, d = wl ? 1 : -1, wx = wl ? wallL(lv, r) : wallR(lv, r), b = r.y0, X = (u) => snap(wx + d * u * S * t), Y = (v) => snap(b - v * S * t);
       const bx = (u0, v0, u1, v1, c, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), Math.min(Y(v0), Y(v1)), Math.max(X(u0), X(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
       if (p.kind === 'bikes') { L(4); kit9At('bikes', wx, b, d); L(0);   // a bicycle shelter off its sheet (Д355 B)
       } else if (p.kind === 'plants') { L(4); kit9At('plants', wx, b, d); L(0);   // a balcony garden off its sheet (Д356 A)
@@ -7620,9 +7634,9 @@ Renderer.prototype.draw = function (g, alpha) {
       }
     }
     for (const r of lv.rects) {
-      const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+      const wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1;
       if (r.gone || r.cap || r.plank || r.move || r.crumble || r.spring || r.key || r.stair || !(wl || wr) || r.x1 - r.x0 < 4 * t || !seen(r.y0 - 3 * t, r.y0) || mod(Math.round(r.y0 / t), 3) !== 2) continue;
-      const dw = 1.2 * t, dh = 1.9 * t, x0 = wl ? lv.l + 0.6 * t : lv.r - 0.6 * t - dw, bw = 1.3 * t, bx = wl ? x0 + dw + 0.5 * t : x0 - 0.5 * t - bw;
+      const dw = 1.2 * t, dh = 1.9 * t, x0 = wl ? wallL(lv, r) + 0.6 * t : wallR(lv, r) - 0.6 * t - dw, bw = 1.3 * t, bx = wl ? x0 + dw + 0.5 * t : x0 - 0.5 * t - bw;
       box(x0, r.y0 - dh, x0 + dw, r.y0, PAL.black, 1, 0, 10, 0); box(x0 + P, r.y0 - dh + P, x0 + dw - P, r.y0, PAL.blue, 1, 0, 10, 0); box(x0 + dw * 0.7, r.y0 - dh * 0.5, x0 + dw * 0.7 + 2 * P, r.y0 - dh * 0.5 + P, PAL.black, 1, 0, 10, 0);   // the door, its handle
       box(x0 - 0.3 * t, r.y0 - dh - 0.25 * t, x0 + dw + 0.3 * t, r.y0 - dh, PAL.gray, 1, 0, 10, 0); disc(x0 + dw / 2, r.y0 - dh - 0.45 * t, 0.12 * t, PAL.white, 1);   // its canopy, its lamp
       box(bx, r.y0 - 0.55 * t, bx + bw, r.y0 - 0.42 * t, PAL.gray, 1, 0, 10, 0); for (const lx of [bx + 0.1 * t, bx + bw - 0.2 * t]) box(lx, r.y0 - 0.42 * t, lx + 0.1 * t, r.y0, PAL.gray, 1, 0, 10, 0);   // the bench
@@ -7631,7 +7645,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // The Junkyard's ledges: a block is green brick (mortar courses, joints in bond), a plank off a wall a fire escape's black grating behind
   // its rail, a free plank a wooden pallet (orange, its slats).
   const junkRect = (r) => {
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, hgt = r.y1 - r.y0;
     if (r.plank && r.move) return false;
     if (r.plank && (wl || wr)) {
       box(r.x0, r.y0, r.x1, r.y1, PAL.black, 1, 0, 10, 0); for (let x = r.x0 + 0.2 * t; x < r.x1; x += 0.4 * t) box(snap(x), r.y0 + 2 * P, snap(x) + P, r.y1 - P, PAL.gray, 1, 0, 10, 0);
@@ -7661,15 +7675,15 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5 * kitT, r.y0 + kitT) && kitThing(lv, r);
       if (!p) continue;
-      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1;
-      if (p.kind === 'flood') twFlood(wl ? lv.l : lv.r, p.y, d, lv.tended.has(r));
+      const wl = r.x0 <= wallL(lv, r) + 1, d = wl ? 1 : -1;
+      if (p.kind === 'flood') twFlood(wl ? wallL(lv, r) : wallR(lv, r), p.y, d, lv.tended.has(r));
       else if (p.kind === 'crow') {   // the crow on the beam (Д245 A) notices the hero (NOTICE): a hop, it turns to him
-        const S = TW.crow, q = PIX.base, n = S.rows[0].length, ox = twDx(S), wx = snap(wl ? lv.l : lv.r), x0 = d > 0 ? wx + ox * q : wx - (ox + n) * q;
+        const S = TW.crow, q = PIX.base, n = S.rows[0].length, ox = twDx(S), wx = snap(wl ? wallL(lv, r) : wallR(lv, r)), x0 = d > 0 ? wx + ox * q : wx - (ox + n) * q;
         if (!fleeDraw(r, TW.crowFly, x0 + (n * q) / 2, snap(r.y0 - S.base * q) + S.rows.length * q, true, 0)) {   // (it flies off: FLEE_GO)
           const nb = notice(g, lv, r, x0, snap(r.y0) - S.base * q, x0 + n * q, r.y0); vsp(S.rows, x0, snap(r.y0 - S.base * q - nb.dy), nb.face === null ? d < 0 : nb.face, 1, q, true);
         }
       }
-      else if (TW[p.kind]) { const S = TW[p.kind]; iwAt(S, wl ? lv.l : lv.r, r.y0, d, 1, twDx(S)); }
+      else if (TW[p.kind]) { const S = TW[p.kind]; iwAt(S, wl ? wallL(lv, r) : wallR(lv, r), r.y0, d, 1, twDx(S)); }
     }
     this.route = rt0;
   }
@@ -7687,7 +7701,7 @@ Renderer.prototype.draw = function (g, alpha) {
     for (const r of lv.rects) {
       const p = !r.gone && seen(r.y0 - 5 * kitT, r.y0 + kitT) && kitThing(lv, r);
       if (!p) continue;
-      const wl = r.x0 <= lv.l + 1, d = wl ? 1 : -1, wx = wl ? lv.l : lv.r;
+      const wl = r.x0 <= wallL(lv, r) + 1, d = wl ? 1 : -1, wx = wl ? wallL(lv, r) : wallR(lv, r);
       if (p.kind === 'beacon') { spBeacon(wx, p.y, d, lv.tended.has(r)); continue; }
       const S = SP[p.kind]; if (!S) continue;
       if (p.kind === 'bird') {   // the blue rock thrush on the deck (Д387 «A») notices the hero (NOTICE): a hop, it turns to him; near, it flies off (FLEE_GO)
@@ -7729,7 +7743,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const SP_PARTS = Renderer.spParts || (Renderer.spParts = new WeakMap());   // (a ledge's picture in its three parts for the 2.5D, kept by its rows)
   const spaceRect = (r) => {
     if (r.move || r.spring || r.magnet || r.bouncy || r.crumble || r.slick || r.stair || r.cloud || r.gate) return false;
-    const q = PIX.base, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, one = ((Math.imul(Math.round(r.y0 / kitT) + 29, 0x85ebca6b) >>> 0) / 4294967296) < 1 / 3;
+    const q = PIX.base, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, one = ((Math.imul(Math.round(r.y0 / kitT) + 29, 0x85ebca6b) >>> 0) / 4294967296) < 1 / 3;
     const S = SP[r.plank ? (th.orbit ? (one ? 'terrace' : 'terracePlain') : 'umb') : th.orbit ? 'module' : 'deck'];   // (the facility's boxes, dish and antenna on one in three:
     // the owner's rule for small things on ledges)
     const nx = Math.max(4, Math.round((r.x1 - r.x0) / q)), ny = r.plank ? 0 : Math.max(4, Math.round((r.y1 - r.y0) / q));
@@ -7751,7 +7765,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // steel the world's purple (Д168 «Б»); white only its top edge (th.lip, skyRect)
   const twTruss = (r) => {   // its chords, X bracing in square panels, a plate where they cross, an end plate at its free end, a gusset under it at the wall; tiers of
     // panels in a thick block (a leg of the lattice)
-    const t = kitT, P = kitP, C = th.block, K = PAL.black, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl !== wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, hgt = r.y1 - r.y0, ch = 3 * P;
+    const t = kitT, P = kitP, C = th.block, K = PAL.black, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, on = wl !== wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, hgt = r.y1 - r.y0, ch = 3 * P;
     const X = (u) => snap(d > 0 ? r.x0 + u : r.x1 - u);   // px out from its wall end (a free one: from its left)
     const bxp = (u0, y0, u1, y1, c = C, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), snap(Math.min(y0, y1)), Math.max(X(u0), X(u1)), snap(Math.max(y0, y1)), c, a, 0, 10, tn);
     const ln = (u0, y0, u1, y1, wd = 2, c = C) => line(X(u0), snap(y0), X(u1), snap(y1), c, 1, wd);
@@ -7776,7 +7790,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (CINE) this.route = 2;
   };
   const twLanding = (r) => {   // a bar grating, one rail on posts (behind the hero, a tone darker, never white), a knee brace under it at the wall
-    const t = kitT, P = kitP, C = th.plank, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl !== wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0;
+    const t = kitT, P = kitP, C = th.plank, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, on = wl !== wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0;
     const X = (u) => snap(d > 0 ? r.x0 + u : r.x1 - u), RL = 1.5;
     const bxp = (u0, y0, u1, y1, c = C, a = 1, tn = 0) => box(Math.min(X(u0), X(u1)), snap(Math.min(y0, y1)), Math.max(X(u0), X(u1)), snap(Math.max(y0, y1)), c, a, 0, 10, tn);
     box(r.x0, r.y0, r.x1, r.y1, C, 1, 0, 10, 3); box(r.x0, snap(r.y1 - P), r.x1, r.y1, C, 1.5, 0, 10, 0);   // its floor, its edge under
@@ -7803,7 +7817,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (CINE) this.route = 2;
   };
   const skyRect = (r) => {
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, hgt = r.y1 - r.y0;
     if (r.cloud) {
       const a = r.crumbling ? 1 - 0.7 * (r.t / CRUMBLE.time) : 1, n = Math.max(2, Math.round((r.x1 - r.x0) / (0.7 * t)));
       if (CINE) this.route = 0;   // (2.5D: a cloud flat, the rule book)
@@ -7824,7 +7838,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // Laundry muted (its inks mean things here) and on one balcony in three. The row 7 game pixels under a white edge stays plain (the 2.5D top face takes its
   // colour from it). False for what keeps the common look.
   const danchiRect = (r) => {
-    const t = kitT, P = kitP, px = P / t, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const t = kitT, P = kitP, px = P / t, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);
     const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
@@ -7890,7 +7904,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // The Tower Blocks' ledges: a step is a concrete step with a handrail post, a plank off a wall a balcony behind its bars, a free plank a
   // heating pipe in white lagging bands, a block a concrete panel cut square with seams every 2 tiles and window slits in a thick one.
   const panelsRect = (r) => {
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, hgt = r.y1 - r.y0;
     if (r.stair) { box(r.x0, r.y0, r.x1, r.y1, th.block, 1, 0); const px = snap((r.x0 + r.x1) / 2); box(px - P / 2, r.y0 - 0.9 * t, px + P / 2, r.y0, PAL.gray, 1, 0, 10, 0); box(px - 0.25 * t, r.y0 - 0.9 * t, px + 0.25 * t, r.y0 - 0.9 * t + P, PAL.gray, 1, 0, 10, 0); }
     else if (r.plank && r.move) return false;
     else if (r.plank && (wl || wr)) {
@@ -7919,12 +7933,12 @@ Renderer.prototype.draw = function (g, alpha) {
   const tbox = (x0, y0, x1, y1, rows, flip, oy, a) => { const hw = (x1 - x0) / 2, hh = (y1 - y0) / 2; F(x0 + hw, y0 + hh, hw, 0, 0, hh, PAL.white, a, 11, hw, hh, (flip ? -1 : 1) * (tileId(rows) + TILE_MAX * oy + 0.5)); };
   const platTiles = (r, S, ox = 0, a = 1) => {   // a ledge in its tile set (PLAT): its top band from its edge down, its middle repeated, its bottom; at each free end its L
     const q = PIX.size, x0 = snap(r.x0) + ox, x1 = snap(r.x1) + ox, y0 = snap(r.y0), y1 = snap(r.y1), H = Math.max(1, Math.round((y1 - y0) / q)), E = S.top.L[0].length * q;
-    const wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, ht = Math.min(S.top.M.length, H), hb = Math.min(S.bot.M.length, H - ht), hm = H - ht - hb, l = wl ? x0 : x0 + E, rr = wr ? x1 : x1 - E;
+    const wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, ht = Math.min(S.top.M.length, H), hb = Math.min(S.bot.M.length, H - ht), hm = H - ht - hb, l = wl ? x0 : x0 + E, rr = wr ? x1 : x1 - E;
     const band = (B, ya, yb, oy) => { if (yb <= ya) return; if (!wl) tbox(x0, ya, x0 + E, yb, B.L, false, oy, a); if (!wr) tbox(x1 - E, ya, x1, yb, B.L, true, oy, a); if (rr > l) tbox(l, ya, rr, yb, B.M, false, oy, a); };
     band(S.top, y0, y0 + ht * q, 0); band(S.mid, y0 + ht * q, y0 + (ht + hm) * q, 0); band(S.bot, y1 - hb * q, y1, S.bot.M.length - hb); if (S.hang) band(S.hang, y1, y1 + S.hang.M.length * q, 0); if (S.hang) band(S.hang, y1, y1 + S.hang.M.length * q, 0);
   };
   const villageRect = (r) => {
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hgt = r.y1 - r.y0;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, hgt = r.y1 - r.y0;
     const thin = (f) => { const rt = this.route; if (CINE) this.route = 0; f(); this.route = rt; };   // (2.5D: a rail, a rope, a post or a charm flat, no depth of its own: owner, 2026-10-23: «дублирование перил и мелких деталей ради объема не нужно, сильно утяжеляет»)
     const hang = (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663)) >>> 0) % 3 === 0;
     if (r.slick) {   // a slick wall without ice (owner, Д77: no cold in the Village): its sheet's surface (VSLICK_SPR), a sheet pixel a game pixel, tiled down and across
@@ -7954,7 +7968,7 @@ Renderer.prototype.draw = function (g, alpha) {
         box(x0, r.y0, x1, r.y0 + 2.5, th.lip, a, 1.25);
       }
       thin(() => { for (const v of [0.3, 0.75]) { const y = snap(r.y0 + v * hgt); box(r.x0, y, r.x1, y + P, PAL.gray, a, 0, 10, 0); } });
-      thin(() => { for (const [on, wx, d, ex] of [[wl, lv.l, 1, r.x0], [wr, lv.r, -1, r.x1]]) {
+      thin(() => { for (const [on, wx, d, ex] of [[wl, wallL(lv, r), 1, r.x0], [wr, wallR(lv, r), -1, r.x1]]) {
         if (on) {   // a peg in the wall over it, the rope down off it to its first plank
           const ky = snap(r.y0 - 1.0 * t), kx = snap(wx + d * 0.17 * t);
           box(snap(Math.min(wx, wx + d * 0.32 * t)), ky, snap(Math.max(wx, wx + d * 0.32 * t)), ky + snap(0.28 * t), PAL.gray, a, 0, 10, 0); box(kx, ky + P, kx + P, ky + 2 * P, PAL.black, a, 0, 10, 0);
@@ -8002,7 +8016,7 @@ Renderer.prototype.draw = function (g, alpha) {
     }
     if (r.plank) {
       if (r.bouncy) return false;
-      for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {   // a bracket under it at the wall, chequered (C's), its nail
+      for (const [on, wx, d] of [[wl, wallL(lv, r), 1], [wr, wallR(lv, r), -1]]) if (on) {   // a bracket under it at the wall, chequered (C's), its nail
         box(snap(Math.min(wx, wx + d * 0.45 * t)), r.y0, snap(Math.max(wx, wx + d * 0.45 * t)), snap(r.y1 + 0.7 * t), th.plank, 1, 0, 10, 4);
         box(snap(wx + d * 0.22 * t), snap(r.y1 + 0.25 * t), snap(wx + d * 0.22 * t) + P, snap(r.y1 + 0.25 * t) + P, PAL.gray, 1, 0, 10, 0);
       }
@@ -8040,7 +8054,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // under it (raft C). The sheets' red and yellow are orange here (red is danger, yellow what you take), their white grey but for the edges you stand on.
   // False for what keeps the common look.
   const seaRect = (r) => {
-    const t = kitT, P = kitP, px = P / t, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, hgt = r.y1 - r.y0, ht = hgt / t;
+    const t = kitT, P = kitP, px = P / t, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, hgt = r.y1 - r.y0, ht = hgt / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
@@ -8095,7 +8109,7 @@ Renderer.prototype.draw = function (g, alpha) {
   const skazkaRect = (r) => {
     const cave = lv.kind === 'treasure';   // (a Forest cave, З22 «А»: its ledges the shaft's tiles and edges, no roots, hollows, twigs or smoke: they and its backdrop went past the
     // owner's ~2500; its webs, mortars, skull lamps, gate and pestle their own, see skWeb, skGate, the bells and the pestle)
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const be = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(E(u0), E(u1)), Math.min(Y(v0), Y(v1)), Math.max(E(u0), E(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
@@ -8213,7 +8227,7 @@ Renderer.prototype.draw = function (g, alpha) {
   // braced across, a lamp and a basket in it, its two pulleys and their ropes up (F, blue); a crumbling block rubble in two rows of stones, a post at the wall and a
   // short one at its end, grit trickling (A, orange). Timber under a ledge half dark (behind its face, DEPTH). False for what keeps the common look.
   const mineRect = (r) => {
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, on = wl || wr, d = wr && !wl ? -1 : 1, w = r.x1 - r.x0, ht = (r.y1 - r.y0) / t, wt = w / t;
     const w0 = d > 0 ? r.x0 : r.x1, w1 = d > 0 ? r.x1 : r.x0, W = (u) => snap(w0 + d * u * t), E = (u) => snap(w1 - d * u * t), Y = (v) => snap(r.y0 + v * t);   // tiles from its wall end, from its free end, down from its top
     const bw = (u0, v0, u1, v1, c, tn = 0, a = 1) => box(Math.min(W(u0), W(u1)), Math.min(Y(v0), Y(v1)), Math.max(W(u0), W(u1)), Math.max(Y(v0), Y(v1)), c, a, 0, 10, tn);
     const hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
@@ -8285,12 +8299,12 @@ Renderer.prototype.draw = function (g, alpha) {
   // and notches in its underside, a cap of snow on top (its white is the edge stood on); a plank is a trail's boardwalk (C), on a knee brace at the wall, a
   // garland of rope under it and a bell off its free end (C's was yellow: the midground has none). False for what keeps the common look.
   const fujiRect = (r) => {
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1, hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1, hsh = (n) => (((Math.round(r.x0 / t) * 73856093) ^ (Math.round(r.y0 / t) * 19349663) ^ (n * 83492791)) >>> 0) / 4294967296;
     if (r.plank) {
       if (r.move || r.bouncy) return false;
       platTiles(r, PLAT.fplank);   // its boards, GPT's (PLAT): grain, a dusting of snow, frost along its edge
       if (CINE) this.route = 0;   // (the cinematic fork: its brace and its garland flat, thin things)
-      for (const [on, wx, d] of [[wl, lv.l, 1], [wr, lv.r, -1]]) if (on) {
+      for (const [on, wx, d] of [[wl, wallL(lv, r), 1], [wr, wallR(lv, r), -1]]) if (on) {
         brace(wx, d, snap(r.y1) + P, snap(0.9 * t), 2 * P, th.plank);
         if (r.x1 - r.x0 >= 3 * t && hsh(5) < 1 / 3) {   // (a garland on one in three)
           const g0 = wx + d * 1.0 * t, g1 = wl ? r.x1 - 0.35 * t : r.x0 + 0.35 * t, gy = snap(r.y1) + P;
@@ -8347,7 +8361,7 @@ Renderer.prototype.draw = function (g, alpha) {
     return true;
   };
   const townRect = (r) => {
-    const t = kitT, P = kitP, wl = r.x0 <= lv.l + 1, wr = r.x1 >= lv.r - 1;
+    const t = kitT, P = kitP, wl = r.x0 <= wallL(lv, r) + 1, wr = r.x1 >= wallR(lv, r) - 1;
     if (r.ac) {   // an air conditioner (aircon; owner: you may stand on it, for 3 s): its top edge white, and once stood on it rattles, harder as it gives way
       const u = r.crumbling ? r.t / AC.time : 0, ox = u ? snap(Math.sin(T * 31) * (1 + 2 * u) * P) : 0;
       aircon(r, ox, 0); box(r.x0 + ox, r.y0, r.x1 + ox, r.y0 + 2.5, th.lip, 1, 1.25); return true;
@@ -8357,7 +8371,7 @@ Renderer.prototype.draw = function (g, alpha) {
     if (r.plank && r.move) {   // a crate on a rope pulley across the alley, as drinks go up to a bar's second floor (Д152 «А», Д206 A; research/variants/gai-pulley-1.png):
       // a beer crate hung under its top, blue (what moves), three handholds, two ropes in a V up to its wheel on a rope across the shaft 2 tiles over it (behind)
       const M = th.mover, w = r.x1 - r.x0, cx = snap((r.x0 + r.x1) / 2), yr = snap(r.y0 - 2 * t), yb = snap(r.y0 + 0.62 * t);
-      if (CINE) this.route = 3; box(lv.l, yr, lv.r, yr + P, G, DIM, 0, 10, 0);   // the rope across, behind
+      if (CINE) this.route = 3; box(wallL(lv, r), yr, wallR(lv, r), yr + P, G, DIM, 0, 10, 0);   // the rope across, behind
       flat(() => { disc(cx, yr, 0.22 * t, G, 1); disc(cx, yr, 0.08 * t, K, 1); for (const x of [r.x0 + 0.2 * t, r.x1 - 0.2 * t]) { line(cx, yr, x, r.y0, G, 1, 1); disc(x, r.y0 - P, 0.07 * t, G, 1); } });
       if (CINE) this.route = 2;
       bx(r.x0, r.y0, r.x1, yb, M);   // the crate
@@ -8366,7 +8380,7 @@ Renderer.prototype.draw = function (g, alpha) {
     } else if (r.plank && r.bouncy) {   // a shop's awning off a wall, which always bounces (the owner's pick, research/variants/tokyo-awning-1.png D): blue and white
       // checks in two rows, its belly and scalloped hem hanging lower in the middle, two rods to bolts in the wall, a paper lantern off its free end, orange (D's was red:
       // red is danger); landed on, it sags in a curve, its top edge with it (at rest straight, where it is stood on)
-      const wx = wl ? lv.l : lv.r, d = wl ? 1 : -1, w = r.x1 - r.x0, n = Math.max(4, Math.round(w / (0.4 * t))), cw = w / n, amp = r.t > 0 ? 0.3 * t * (r.t / SPRING.anim) : 0, rh = snap(0.17 * t);
+      const wx = wl ? wallL(lv, r) : wallR(lv, r), d = wl ? 1 : -1, w = r.x1 - r.x0, n = Math.max(4, Math.round(w / (0.4 * t))), cw = w / n, amp = r.t > 0 ? 0.3 * t * (r.t / SPRING.anim) : 0, rh = snap(0.17 * t);
       for (let i = 0; i < n; i++) {
         const u = (i + 0.5) / n, k = 4 * u * (1 - u), y = r.y0 + snap(amp * k), x0 = snap(r.x0 + i * cw), x1 = snap(r.x0 + (i + 1) * cw), yh = y + 2 * rh + snap(0.12 * t * k), lo = i % 2 ? th.block : PAL.white;
         box(x0, y, x1, y + rh, i % 2 ? PAL.white : th.block, 1, 0, 10, 0); box(x0, y + rh, x1, yh, lo, 1, 0, 10, 0); disc((x0 + x1) / 2, yh, (x1 - x0) / 2, lo, 1);

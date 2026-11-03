@@ -21,6 +21,7 @@
     warp: { warp: 5, dur: 0.5 },   // a jump in the air (Game.requestJump): space bent round Mochi, a ring going out of him pushing what it passes outward, `warp`
     // game px at most, half a second (owner, 2026-10-29: «При повторном прыжке сделай на 0,5 секунды фильтр искривления пространства»), whole game pixels
   };
+  const CRT_BRIGHT = 1.12;   // the picture brighter under the CRT's lines (the pass's uBright; the canvas's CSS filter where there is no pass)
   const FLASH_GAP = 0.34;   // s: a flash at most three times a second (the owner's rule)
   // The screen in a console's colours, the settings' «SNES» (save.pal; owner, 2026-10-29: «вместо него добавь переключение цвета на SNES», after the palettes
   // compared): the last pass finds each pixel's ink and how far along from the black (or on to the white) it is, as the dark levels' ramp does, takes that
@@ -68,7 +69,7 @@
   const bufsOf = (P) => { let b = palBufs.get(P); if (!b) { const inks = P.inks.map(hex), all = P.all.map(hex); b = { ink0: f3(Object.values(PAL)), inkN: f3(inks), all: f3(all), allL: f3(all.map(okl)), n: all.length }; palBufs.set(P, b); } return b; };
   const kicks = [{ p: null }, { p: null }, { p: null }], last = { flash: -9 };   // a hurt's moment, the others', and a jump's bend, all under way at once (a kill in a hurt's 1.95 s cuts it off no more)
   const FS = GLSL + `in vec2 vUv; out vec4 o;
-uniform sampler2D uScene; uniform vec2 uLow; uniform float uScale, uChroma, uTear, uSeed, uJolt, uSweep, uSweepK, uLines, uWarp, uWarpR, uPalOn; uniform vec2 uWarpC; uniform vec4 uFlash;
+uniform sampler2D uScene; uniform vec2 uLow; uniform float uScale, uChroma, uTear, uSeed, uJolt, uSweep, uSweepK, uLines, uWarp, uWarpR, uPalOn, uBright; uniform vec2 uWarpC; uniform vec4 uFlash;
 uniform vec3 uInk0[${Object.keys(PAL).length}], uInkN[${Object.keys(PAL).length}], uPalC[32], uPalL[32]; uniform int uPalN;
 vec3 at(ivec2 p) { return texelFetch(uScene, clamp(p, ivec2(0), ivec2(uLow) - 1), 0).rgb; }
 vec3 okl(vec3 c) { c = mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
@@ -98,7 +99,7 @@ void main() {
   if (uLines > 0.0 && fract(gl_FragCoord.y / uScale) < 0.3) c *= 1.0 - uLines;   // the lines darker (each game row's bottom)
   c = mix(c, uFlash.rgb, uFlash.a);
   if (uPalOn > 0.5) c = repal(c);   // (the settings' SNES)
-  o = vec4(c, 1.0);
+  o = vec4(min(c * uBright, vec3(1.0)), 1.0);   // (the CRT's: the picture a little brighter for its lines, as the canvas's CSS brightness was)
 }`;
   const pass = (r) => {
     const gl = r.gl, t = r.target; if (!t || !t.scene || CINE) return;
@@ -106,7 +107,8 @@ void main() {
     const pal = palOn(), pf = r.pFx; if (!pf || (!retro() && !pal)) return;
     const now = performance.now() / 1000, on = [];
     if (retro()) for (const m of kicks) if (m.p) { const u = (now - m.t0) / m.p.dur; if (u >= 1) m.p = null; else on.push({ m, p: m.p, u, k: (1 - u) * (1 - u) }); }   // (each fades fast, then slowly)
-    if (!on.length && !pal) return;   // (nothing to do: no pass at all)
+    // (the CRT on: the pass every frame, for its brightness; a CSS filter on the canvas had the browser filter the whole screen at the screen's own pixels each
+    // frame, a phone's three million, owner: «на телефоне стала подтупливать»)
     const [lw, lh] = r.low, most = (f) => (on.length ? Math.max(...on.map(f)) : 0), tr = on.find((o) => o.p.tear), sw = on.find((o) => o.p.sweep);   // (two at once: each part the stronger's, the bands a hurt's)
     let fl = null, fa = 0; for (const o of on) if (o.m.flash && o.p.flash && o.p.flash[3] * o.k > fa) { fl = o.p.flash; fa = fl[3] * o.k; }   // (the brighter flash now)
     gl.bindFramebuffer(gl.READ_FRAMEBUFFER, t.fb); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, t.sceneFb);
@@ -121,7 +123,7 @@ void main() {
     gl.uniform1f(pf.u.uWarp, L ? wa.p.warp * (1 - wa.u) : 0); gl.uniform1f(pf.u.uWarpR, L ? 6 + wa.u * 0.45 * lh : 0);
     gl.uniform2f(pf.u.uWarpC, L ? (H.cx / view.w) * lw : 0, L ? lh - ((H.cy - L.cam) / view.h) * lh : 0);
     gl.uniform4f(pf.u.uFlash, fl ? fl[0] : 0, fl ? fl[1] : 0, fl ? fl[2] : 0, fa);
-    gl.uniform1f(pf.u.uPalOn, pal ? 1 : 0);
+    gl.uniform1f(pf.u.uPalOn, pal ? 1 : 0); gl.uniform1f(pf.u.uBright, retro() ? CRT_BRIGHT : 1);
     if (pal) { const b = bufsOf(pal); gl.uniform3fv(pf.u['uInk0[0]'], b.ink0); gl.uniform3fv(pf.u['uInkN[0]'], b.inkN); gl.uniform3fv(pf.u['uPalC[0]'], b.all); gl.uniform3fv(pf.u['uPalL[0]'], b.allL); gl.uniform1i(pf.u.uPalN, b.n); }
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, t.scene); gl.uniform1i(pf.u.uScene, 0);
     gl.bindVertexArray(r.emptyVao); gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -130,10 +132,11 @@ void main() {
   {   // the scanlines: a still overlay over the canvas, one dark line under each row of game pixels, the picture under it a little brighter for them. Drawn on
     // the screen's own pixels: a CSS tile a game pixel tall went wrong where a CSS px is not whole screen pixels (a browser's zoom: Safari at 85 % drew no
     // lines and the column's bottom third half dark, owner: «а затемнение это что внизу экрана?»)
-    const ov = document.createElement('canvas'); ov.style.cssText = 'position:fixed;pointer-events:none;mix-blend-mode:multiply;image-rendering:pixelated';   // (after the canvas, before the HUD: under its words)
+    const ov = document.createElement('canvas'); ov.style.cssText = 'position:fixed;pointer-events:none;image-rendering:pixelated';   // (after the canvas, before the HUD: under its words;
+    // black lines over it the same as multiplied, without the blend's own pass over the screen)
     let drawn = '';
     const fit = () => { const r = typeof renderer !== 'undefined' ? renderer : null, c = r && r.canvas; if (!c || !r.low) return; const b = c.getBoundingClientRect(), onn = retro();
-      Object.assign(ov.style, { display: onn ? '' : 'none', left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px' }); c.style.filter = onn ? 'brightness(1.12)' : '';
+      Object.assign(ov.style, { display: onn ? '' : 'none', left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px' }); c.style.filter = onn && (CINE || r.pFx === null) ? 'brightness(' + CRT_BRIGHT + ')' : '';   // (the pass's own brightness, but in the 2.5D or with no pass)
       const rows = r.low[1], h = Math.round(b.height * (window.devicePixelRatio || 1)), key = rows + ' ' + h; if (!onn || key === drawn) return; drawn = key;
       ov.width = 1; ov.height = h; const x = ov.getContext('2d'), g = h / rows, line = Math.max(1, Math.round(0.3 * g));   // a row's screen pixels; its line, the bottom 30 % of them (one at least)
       x.fillStyle = `rgba(0,0,0,${(0.125 * g) / line})`;   // as dark on the whole as a 3x phone's lines were: a pixel of a row's four, half black

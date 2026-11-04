@@ -4101,10 +4101,8 @@ const ui = {
       if (!fh.firstChild) fh.append(px(t(howTo()).replace(' · ', '\n'), Math.floor((view.w - 48) / 3)));   // how to run and jump, once, on the floor (owner: not in a toast as well), a line each
       fh.style.transform = 'translate(' + Math.round((view.w / 2) * (view.s / view.k)) + 'px,' + Math.round((fy + (view.h - view.keep - fy) / 2) * (view.s / view.k)) + 'px) translate(-50%, -50%)';
     }
-    if (mouseIsLocked() && (g.state !== 'play' || this.open)) mouseUnlock();   // a screen over the game: the cursor back for its buttons
-    const am = $('aim'), aimOn = mouseIsLocked() && g.state === 'play' && !!g.hero && mouseAim !== null && (Math.abs(mouseAim - g.hero.cx) > MOUSE.dead * g.R || performance.now() - mouseMoveT < MOUSE.show * 1000);
-    am.classList.toggle('on', aimOn);   // the mouse's point, over the hero's head height (whole px), while he runs to it and a moment after a move
-    if (aimOn) am.style.transform = 'translate(' + Math.round(mouseAim * (view.s / view.k)) + 'px,' + Math.round((g.hero.cy - 1.7 * g.R - lv.cam) * (view.s / view.k)) + 'px) translate(-50%, -100%)';
+    const curOn = MOUSE_ON && g.state === 'play' && !this.open;   // in play no system cursor over the game (a button keeps its hand), the Mochi while the mouse is in use
+    document.body.classList.toggle('mcur', curOn); mcur.classList.toggle('on', curOn && ctlMouse && mcurIn && !mcurOff);   // (keys pressed: neither, till the mouse moves; mouseInput)
     const tq = g.state === 'play' && g.tut && lv.kind === 'well' ? g.tut.show : null;   // the first level's lesson (TUT): the glove where it is done (ui.ghost)
     this.ghost(g, tq);
     if (g.hp !== this.hp || g.maxHp !== this.max) {
@@ -4157,7 +4155,7 @@ const input = {
   clear() {
     if (game.hero) game.hero.squeezeIn = 0;   // (a crouch held into a pause or a card: not left squeezed)
     for (const k of ['left', 'right', 'down', 'jump']) this.set(k, false);
-    this.swipe = false; joyEnd(); mouseAim = null; mouseRun = 0; sideKeys = 0; mouseUnlock();
+    this.swipe = false; joyEnd(); mouseAim = null; sideKeys = 0;
     for (const e of document.querySelectorAll('#pad .on')) e.classList.remove('on');
   },
 };
@@ -4175,7 +4173,7 @@ document.addEventListener('keydown', (e) => {
   if (game.state !== 'play') { const f = document.activeElement; if (!f || f.tagName !== 'BUTTON') e.preventDefault(); return; }   // (off play: not the portal page's scroll; Space still presses a button in focus)
   e.preventDefault();
   ctlMouse = false;   // (the hints in the keys' words: ctlHow)
-  if (k === 'left' || k === 'right') { if (!sideKeys) { input.set('left', false); input.set('right', false); } mouseRun = 0; sideKeys |= k === 'left' ? 1 : 2; }   // a side key over the mouse's run (mouseSteer)
+  if (k === 'left' || k === 'right') { if (!sideKeys) { input.set('left', false); input.set('right', false); } sideKeys |= k === 'left' ? 1 : 2; }   // a side key over the mouse's run (mouseSteer)
   if (e.repeat && k !== 'jump' && !input[k]) input.set(k, true);   // a side key held from a panel on: taken by its repeats
   if (!e.repeat) {
     input.set(k, true);
@@ -4206,7 +4204,7 @@ function padPart(part, onTouch) {
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) part.addEventListener(type, (e) => { if (e.pointerId === id) { id = -1; onTouch(null); } });
 }
 const dpad = $('dpad');
-dpad.children[0].append(px('◀')); dpad.children[1].append(px('▶')); $('jumpBtn').append(px('▲')); $('aim').append(px('▼'));
+dpad.children[0].append(px('◀')); dpad.children[1].append(px('▶')); $('jumpBtn').append(px('▲'));
 let lastTap = { d: 0, t: -1e9 }, padDir = 0;   // the last press of a side, for a double tap (keys and pad alike)
 padPart(dpad, (e) => {
   const r = dpad.getBoundingClientRect(), right = !!e && e.clientX > r.left + r.width / 2, d = e ? (right ? 1 : -1) : 0;
@@ -4266,45 +4264,46 @@ const gestEnd = (e) => {
   else if (!g.moved && e.type === 'pointerup' && e.timeStamp - g.t0 < GEST.tap) game.requestJump();   // a tap: a whole jump (no button to let go of)
 };
 for (const type of ['pointerup', 'pointercancel']) document.addEventListener(type, gestEnd);
-// The mouse on a computer (owner, 2026-11-03: «добавь прыжок на клик мышки», then Мш1: «как вариант с, но добавить движение влево и вправо и блокировку курсора»):
+// The mouse on a computer (owner, 2026-11-03: «добавь прыжок на клик мышки», then Мш1 the point, then Мш2 (2026-11-04): «видимый курсор лучше всего»):
 // - the left button over the game is the jump key, as Space: a jump as it goes down, higher the longer it is held (any computer, a pen too);
-// - the hero runs to a point the mouse moves left and right (mouseAim, in the level) and stands under it; the right button is down (lets go of a wall,
+// - the hero runs to the cursor's x (mouseAim, in the level, held between the walls) and stands under it; the right button is down (lets go of a wall,
 //   on a floor a crouch for a high jump), two of it quick a dash toward the point;
-// - in play the cursor is locked to the game (a click asks for it, a button back into play asks again; Esc gives it back and pauses): hidden, its
-//   moves only left and right, the point drawn (▼, #aim) and held between the walls; where the lock is refused (a frame without it, Chrome's second
-//   after an Esc) the cursor's own x is the point;
+// - the cursor stays free, and over the game in play it is a little Mochi in the hero's colour (MOUSE_CUR, #mcur; owner: «давай кастомный только в тематику
+//   игры и крупнее. Может быть это в 5 раз уменьшенный моти»); a button keeps the system's hand, and off play the system's cursor is back;
 // - the arrows run as before: a side key held, the mouse waits, and let go the point is where the hero is (nothing pulls him back).
 // Read off e.buttons, so a second button held, or one let go off the window, is heard. ?mouse=0: the click's jump only.
 const MOUSE_ON = !TOUCH && !/[?&]mouse=0\b/.test(location.search);
-// Trials for the owner's next question, Мш2 (after «с мышкой стало лучше, но нужны еще варианты»), by the address only, the buttons as above:
-// ?mouse=s the mouse a stick (he runs while it moves, that way, and stops as it stops); ?mouse=f a flick (one sets him running that way till he sticks to a wall,
-// one back stops him); ?mouse=v the point with the cursor shown, never locked.
-const MOUSE_TRY = (/[?&]mouse=([sfv])\b/.exec(location.search) || [])[1] || '';
-const MOUSE = { dead: 0.6, stop: 0.2, slide: 0.035, show: 0.5, fails: 3, hold: 0.12, flick: 30, window: 0.12, flickCD: 0.25 };   // dead/stop: R round the hero a run starts past and stops within (+ slide s of its speed:
-// it lets go that far ahead, so it settles, not swings); show: s the ▼ stays after a move; fails: refused locks before the visit gives up asking;
-// hold: s a stick's run lasts after the mouse's last move (?mouse=s); flick: CSS px the mouse goes within about `window` s for a flick, flickCD s before the next (?mouse=f)
-let mouseBtns = 0, mouseJump = false, mouseAim = null, mouseDownT = -1e9, mouseMoveT = -1e9, mouseFresh = false, mouseLetGo = false, mouseLocked = false, mouseNoLock = 0, mouseNoLockT = 0, sideKeys = 0, ctlMouse = false;
-let mouseRun = 0, mouseRunT = 0, mouseAcc = 0, mouseAccT = 0, mouseFlickT = 0;   // (?mouse=s|f: the run the mouse's motion set)
-const mouseIsLocked = () => document.pointerLockElement === canvas;
-function mouseLock() {
-  if (!MOUSE_ON || MOUSE_TRY === 'v' || mouseIsLocked() || !canvas.requestPointerLock || mouseNoLock >= MOUSE.fails || performance.now() < mouseNoLockT) return;
-  try { const q = canvas.requestPointerLock(); if (q && q.catch) q.catch(() => {}); } catch (err) { /* refused: the cursor's own x */ }
+const MOUSE = { dead: 0.6, stop: 0.2, slide: 0.035 };   // R round the hero a run starts past and stops within (+ slide s of its speed: it lets go that far ahead, so it settles, not swings)
+let mouseBtns = 0, mouseJump = false, mouseAim = null, mouseDownT = -1e9, sideKeys = 0, ctlMouse = MOUSE_ON;   // (a computer's lessons and hints in the mouse's words till a key is pressed: ctlHow; owner: «сразу показывай мышку на компьютере»)
+// The cursor: the menu's Mochi (DESIGNS' mochi, its face) on 16 × 13 cells, `cell` CSS px each made whole screen pixels, its middle on the pointer. X ink, W his colour,
+// S its shade (the renderer's shadeOf, a white's toward the orange as at home), T his tongue, B the blush, G the glint
+const MOUSE_CUR = { cell: 2, art: ['.....XXXXXX.....', '...XXWWWWWWXX...', '..XWWWWWWWWWWX..', '.XWGGWWWWWWWWWX.', 'XWWWWWWWWWWWWWWX', 'XWWWWWWWWWWWWWSX', 'XWWWWXWWWWXWWWSX',
+  'XWWWWXWWWWXWWWSX', 'XWWWBWXWWXWBWWSX', 'XWWWWWWTTWWWWSSX', 'XSWWWWWWWWWWWSSX', '.XSSWWWWWWWSSSX.', '..XXXXXXXXXXXX..'] };
+const mcur = $('mcur');
+let mcurKey = '', mcurIn = false, mcurOff = false;   // (drawn for this colour and screen; the pointer over the page; over a button or a panel)
+function mcurAt(e) {
+  const d = devicePixelRatio || 1, q = Math.max(1, Math.round(MOUSE_CUR.cell * d)), A = MOUSE_CUR.art, key = save.color + '|' + d;
+  if (key !== mcurKey) {   // his colour as the hero's (a swatch at home), whole screen pixels a cell (a zoom)
+    mcurKey = key;
+    const c = colorById(save.color).base, mx = Math.max(...c), sat = mx ? (mx - Math.min(...c)) / mx : 0, s = c.map((v) => v * 0.6), l = 0.299 * s[0] + 0.587 * s[1] + 0.114 * s[2];
+    const ink = { X: PAL.black, W: c, S: s.map((v, i) => { const f = clamp(l + (v - l) * 1.35, 0, 1); return f + ((c[i] * 0.72 + PAL.orange[i]) / 2 - f) * (1 - sat); }), T: PAL.red, B: PAL.red.map((v, i) => (v + PAL.white[i]) / 2), G: PAL.white };
+    mcur.innerHTML = pxSvg(A[0].length, A.length, Object.keys(ink).map((k) => `<path fill="${rgb(ink[k])}" d="${inkPath(A.map((r) => r.replace(/./g, (h) => (h === k ? '#' : '.'))), 0, 0)}"/>`).join(''));
+    mcur.style.setProperty('--p', q / d);
+  }
+  mcur.style.transform = 'translate(' + Math.round(e.clientX * d - (A[0].length * q) / 2) / d + 'px,' + Math.round(e.clientY * d - (A.length * q) / 2) / d + 'px)';
 }
-function mouseUnlock() { if (mouseIsLocked()) { mouseLetGo = true; document.exitPointerLock(); } }
 function mouseInput(e) {
-  if (e.pointerType === 'touch') return;
+  if (e.pointerType === 'touch') { mcurIn = false; return; }
   const was = mouseBtns, play = game.state === 'play', over = play && !(e.target.closest && e.target.closest('#pad, button, .panel')), H = game.hero;
   mouseBtns = e.buttons;
   const press = (b) => (mouseBtns & b) && !(was & b), lift = (b) => !(mouseBtns & b) && (was & b);
-  if (press(1) && over) { input.set('jump', false); input.set('jump', true); mouseJump = true; ctlMouse = true; mouseLock(); }
+  if (press(1) && over) { input.set('jump', false); input.set('jump', true); mouseJump = true; ctlMouse = true; }
   else if (lift(1) && mouseJump) { mouseJump = false; input.set('jump', false); }
   if (!MOUSE_ON) return;
-  if (e.type === 'pointermove' && play && H && !sideKeys && (MOUSE_TRY === 's' || MOUSE_TRY === 'f')) mouseFlick(e);
-  else if (e.type === 'pointermove' && play && H && !sideKeys) {
-    const lv = game.lv, locked = mouseIsLocked(), dx = locked ? (mouseFresh ? 0 : e.movementX / view.s) : 0;   // (a lock's first move can jump: not taken)
-    mouseFresh = false;
-    const x = clamp(locked ? (mouseAim ?? H.cx) + dx : (e.clientX - view.left) / view.s, lv.l + game.R, lv.r - game.R);
-    if (x !== mouseAim) { mouseAim = x; mouseMoveT = performance.now(); if (!locked || Math.abs(dx) > 0.5) ctlMouse = true; }
+  if (e.type === 'pointermove') { mcurIn = true; mcurOff = !!(e.target.closest && e.target.closest('#pad, button, .panel')); mcurAt(e); }
+  if (e.type === 'pointermove' && play && H && !sideKeys) {
+    const lv = game.lv, x = clamp((e.clientX - view.left) / view.s, lv.l + game.R, lv.r - game.R);
+    if (x !== mouseAim || e.movementX || e.movementY) { mouseAim = x; ctlMouse = true; }   // (a move up or down brings the Mochi back too; a browser's own still move does not)
   }
   if (press(2) && over) {
     input.set('down', true); ctlMouse = true;
@@ -4314,32 +4313,11 @@ function mouseInput(e) {
 }
 for (const type of ['pointerdown', 'pointermove', 'pointerup']) document.addEventListener(type, mouseInput);
 document.addEventListener('contextmenu', (e) => { if (MOUSE_ON && game.state === 'play') e.preventDefault(); });
-document.addEventListener('pointerlockchange', () => {
-  const on = mouseIsLocked();
-  mouseFresh = on; if (on) mouseLocked = true;
-  if (!on && !mouseLetGo && game.state === 'play') game.togglePause(true);   // Esc gave the cursor back: a pause, its buttons under the cursor
-  mouseLetGo = false;
-});
-document.addEventListener('pointerlockerror', () => { mouseNoLock++; mouseNoLockT = performance.now() + 1500; });
-document.addEventListener('click', () => { if (mouseLocked) setTimeout(() => { if (game.state === 'play' && !ui.open) mouseLock(); }, 0); }, true);   // a button back into play (Resume, Next, a level):
-// the lock again, if this visit had it (after the button's own handler, still in the click's activation)
-function mouseFlick(e) {   // ?mouse=s|f: the mouse's own motion sets the run, not a point
-  const dx = mouseFresh ? 0 : e.movementX; mouseFresh = false;
-  if (!dx) return;
-  ctlMouse = true;
-  if (MOUSE_TRY === 's') { mouseRun = Math.sign(dx); mouseRunT = performance.now() + MOUSE.hold * 1000; return; }
-  mouseAcc = mouseAcc * Math.exp(-(e.timeStamp - mouseAccT) / (MOUSE.window * 1000)) + dx; mouseAccT = e.timeStamp;
-  if (Math.abs(mouseAcc) < MOUSE.flick || e.timeStamp < mouseFlickT) return;
-  const d = Math.sign(mouseAcc); mouseRun = mouseRun === -d ? 0 : d; mouseAcc = 0; mouseFlickT = e.timeStamp + MOUSE.flickCD * 1000;   // a flick back stops him
-}
-// Toward the point past a dead zone round the hero, stopping short by as far as the run slides on (?mouse=s|f: the run the mouse's motion set, a flick's till a wall).
+document.addEventListener('mouseout', (e) => { if (!e.relatedTarget) mcurIn = false; });   // off the page (or its frame): no Mochi left where it went out
+window.addEventListener('blur', () => { mcurIn = false; });
+// Toward the point past a dead zone round the hero, stopping short by as far as the run slides on.
 function mouseSteer(H, R) {
-  if (sideKeys) return;
-  if (MOUSE_TRY === 's' || MOUSE_TRY === 'f') {
-    if ((MOUSE_TRY === 's' && performance.now() > mouseRunT) || (mouseRun && H.stuck && glueSide(H) === (mouseRun < 0 ? 1 : 2))) mouseRun = 0;   // (stuck on the wall it ran into; a low ledge is mantled first)
-    input.set('left', mouseRun < 0); input.set('right', mouseRun > 0); return;
-  }
-  if (mouseAim === null) return;
+  if (sideKeys || mouseAim === null) return;
   const dx = mouseAim - H.cx, run = input.left || input.right, dir = Math.abs(dx) > (run ? MOUSE.stop * R + MOUSE.slide * Math.abs(H.rigVx) : MOUSE.dead * R) ? Math.sign(dx) : 0;
   input.set('left', dir < 0); input.set('right', dir > 0);
 }

@@ -57,7 +57,7 @@
   #ui { position: absolute; top: 0; left: 0; pointer-events: none; overflow: hidden; }
   button { font: inherit; color: inherit; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
   .px { display: inline-block; vertical-align: middle; line-height: 0; }
-  .px svg, #hearts svg { display: block; width: calc(var(--w) * var(--p) * 1px); height: calc(var(--h) * var(--p) * 1px); }
+  .px svg, #hearts svg, #mcur svg { display: block; width: calc(var(--w) * var(--p) * 1px); height: calc(var(--h) * var(--p) * 1px); }
   /* Text: its capitals as tall as the old pixel font's 7 pixels (VT323's are 0.56 em) and its box cut to them, as that
      font's was, so nothing round it moved; a line every 10 pixels, as before. Japanese: DotGothic16, its kana about as
      tall (0.94 em at 8 pixels an em: its own 16-px grid at --p 2), the box cut the same way. */
@@ -226,8 +226,9 @@
   #combo { position: absolute; left: 0; top: 0; display: none; --p: 4; color: var(--yellow); filter: drop-shadow(0 4px 0 var(--ink)); }
   #combo.show { display: block; }
   #combo.pop .px { animation: pop 0.24s steps(3); }
-  #aim { position: absolute; left: 0; top: 0; --p: 3; color: var(--white); filter: drop-shadow(0 3px 0 var(--ink)); opacity: 0; transition: opacity 0.2s; pointer-events: none; }   /* the mouse's point the hero runs to, while the cursor is locked (mouseInput) */
-  #aim.on { opacity: 0.85; }
+  body.mcur { cursor: none; }   /* in play on a computer: no system cursor over the game, the Mochi (#mcur) in its place; a button keeps its own hand */
+  #mcur { display: none; position: fixed; left: 0; top: 0; z-index: 46; pointer-events: none; }   /* the mouse's cursor in play: a little Mochi, its middle on the pointer (MOUSE_CUR, mouseInput) */
+  #mcur.on { display: block; }
   #toast {
     position: absolute; left: 50%; top: 22%; z-index: 5;   /* over a panel too: a toast once one is open (the week's mark at a clear, a shut world's stars) */
     transform: translate(-50%, -6px);
@@ -671,7 +672,6 @@
   </div>
   <div id="bossHp" aria-hidden="true"></div>   <!-- a boss's hearts (see ui.frame) -->
   <div id="combo" aria-hidden="true"></div>
-  <div id="aim" aria-hidden="true"></div>
   <div id="labels"></div>
   <div id="floorHint" aria-hidden="true"></div>
   <div id="tutGhost" aria-hidden="true"></div>   <!-- the first level's lessons: the glove where it is done (TUT, ui.ghost in game.js) -->
@@ -691,6 +691,7 @@
   <div id="story" class="panel"></div>
   <div id="album" class="panel"></div>
 </div>
+<div id="mcur" aria-hidden="true"></div>   <!-- the mouse's cursor in play, over everything (out of #ui: whole screen pixels in a short window too) -->
 <script src="src/gum.js" onload="bootStep()" onerror="bootFail()"></script>   <!-- (src/bossframes.js and src/sides.js: fetched by game.js after the menu, the sides' on a wide screen only; owner, З27 «А») -->
 <script src="src/world.js" onload="bootStep()" onerror="bootFail()"></script>
 <script src="src/cine.js" onload="bootStep()" onerror="bootFail()"></script>

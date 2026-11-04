@@ -4157,7 +4157,7 @@ const input = {
   clear() {
     if (game.hero) game.hero.squeezeIn = 0;   // (a crouch held into a pause or a card: not left squeezed)
     for (const k of ['left', 'right', 'down', 'jump']) this.set(k, false);
-    this.swipe = false; joyEnd(); mouseAim = null; sideKeys = 0; mouseUnlock();
+    this.swipe = false; joyEnd(); mouseAim = null; mouseRun = 0; sideKeys = 0; mouseUnlock();
     for (const e of document.querySelectorAll('#pad .on')) e.classList.remove('on');
   },
 };
@@ -4175,7 +4175,7 @@ document.addEventListener('keydown', (e) => {
   if (game.state !== 'play') { const f = document.activeElement; if (!f || f.tagName !== 'BUTTON') e.preventDefault(); return; }   // (off play: not the portal page's scroll; Space still presses a button in focus)
   e.preventDefault();
   ctlMouse = false;   // (the hints in the keys' words: ctlHow)
-  if (k === 'left' || k === 'right') { if (!sideKeys) { input.set('left', false); input.set('right', false); } sideKeys |= k === 'left' ? 1 : 2; }   // a side key over the mouse's run (mouseSteer)
+  if (k === 'left' || k === 'right') { if (!sideKeys) { input.set('left', false); input.set('right', false); } mouseRun = 0; sideKeys |= k === 'left' ? 1 : 2; }   // a side key over the mouse's run (mouseSteer)
   if (e.repeat && k !== 'jump' && !input[k]) input.set(k, true);   // a side key held from a panel on: taken by its repeats
   if (!e.repeat) {
     input.set(k, true);
@@ -4276,12 +4276,18 @@ for (const type of ['pointerup', 'pointercancel']) document.addEventListener(typ
 // - the arrows run as before: a side key held, the mouse waits, and let go the point is where the hero is (nothing pulls him back).
 // Read off e.buttons, so a second button held, or one let go off the window, is heard. ?mouse=0: the click's jump only.
 const MOUSE_ON = !TOUCH && !/[?&]mouse=0\b/.test(location.search);
-const MOUSE = { dead: 0.6, stop: 0.2, slide: 0.035, show: 0.5, fails: 3 };   // dead/stop: R round the hero a run starts past and stops within (+ slide s of its speed:
-// it lets go that far ahead, so it settles, not swings); show: s the ▼ stays after a move; fails: refused locks before the visit gives up asking
+// Trials for the owner's next question, Мш2 (after «с мышкой стало лучше, но нужны еще варианты»), by the address only, the buttons as above:
+// ?mouse=s the mouse a stick (he runs while it moves, that way, and stops as it stops); ?mouse=f a flick (one sets him running that way till he sticks to a wall,
+// one back stops him); ?mouse=v the point with the cursor shown, never locked.
+const MOUSE_TRY = (/[?&]mouse=([sfv])\b/.exec(location.search) || [])[1] || '';
+const MOUSE = { dead: 0.6, stop: 0.2, slide: 0.035, show: 0.5, fails: 3, hold: 0.12, flick: 30, window: 0.12, flickCD: 0.25 };   // dead/stop: R round the hero a run starts past and stops within (+ slide s of its speed:
+// it lets go that far ahead, so it settles, not swings); show: s the ▼ stays after a move; fails: refused locks before the visit gives up asking;
+// hold: s a stick's run lasts after the mouse's last move (?mouse=s); flick: CSS px the mouse goes within about `window` s for a flick, flickCD s before the next (?mouse=f)
 let mouseBtns = 0, mouseJump = false, mouseAim = null, mouseDownT = -1e9, mouseMoveT = -1e9, mouseFresh = false, mouseLetGo = false, mouseLocked = false, mouseNoLock = 0, mouseNoLockT = 0, sideKeys = 0, ctlMouse = false;
+let mouseRun = 0, mouseRunT = 0, mouseAcc = 0, mouseAccT = 0, mouseFlickT = 0;   // (?mouse=s|f: the run the mouse's motion set)
 const mouseIsLocked = () => document.pointerLockElement === canvas;
 function mouseLock() {
-  if (!MOUSE_ON || mouseIsLocked() || !canvas.requestPointerLock || mouseNoLock >= MOUSE.fails || performance.now() < mouseNoLockT) return;
+  if (!MOUSE_ON || MOUSE_TRY === 'v' || mouseIsLocked() || !canvas.requestPointerLock || mouseNoLock >= MOUSE.fails || performance.now() < mouseNoLockT) return;
   try { const q = canvas.requestPointerLock(); if (q && q.catch) q.catch(() => {}); } catch (err) { /* refused: the cursor's own x */ }
 }
 function mouseUnlock() { if (mouseIsLocked()) { mouseLetGo = true; document.exitPointerLock(); } }
@@ -4293,7 +4299,8 @@ function mouseInput(e) {
   if (press(1) && over) { input.set('jump', false); input.set('jump', true); mouseJump = true; ctlMouse = true; mouseLock(); }
   else if (lift(1) && mouseJump) { mouseJump = false; input.set('jump', false); }
   if (!MOUSE_ON) return;
-  if (e.type === 'pointermove' && play && H && !sideKeys) {
+  if (e.type === 'pointermove' && play && H && !sideKeys && (MOUSE_TRY === 's' || MOUSE_TRY === 'f')) mouseFlick(e);
+  else if (e.type === 'pointermove' && play && H && !sideKeys) {
     const lv = game.lv, locked = mouseIsLocked(), dx = locked ? (mouseFresh ? 0 : e.movementX / view.s) : 0;   // (a lock's first move can jump: not taken)
     mouseFresh = false;
     const x = clamp(locked ? (mouseAim ?? H.cx) + dx : (e.clientX - view.left) / view.s, lv.l + game.R, lv.r - game.R);
@@ -4316,9 +4323,23 @@ document.addEventListener('pointerlockchange', () => {
 document.addEventListener('pointerlockerror', () => { mouseNoLock++; mouseNoLockT = performance.now() + 1500; });
 document.addEventListener('click', () => { if (mouseLocked) setTimeout(() => { if (game.state === 'play' && !ui.open) mouseLock(); }, 0); }, true);   // a button back into play (Resume, Next, a level):
 // the lock again, if this visit had it (after the button's own handler, still in the click's activation)
-// Toward the point past a dead zone round the hero, stopping short by as far as the run slides on.
+function mouseFlick(e) {   // ?mouse=s|f: the mouse's own motion sets the run, not a point
+  const dx = mouseFresh ? 0 : e.movementX; mouseFresh = false;
+  if (!dx) return;
+  ctlMouse = true;
+  if (MOUSE_TRY === 's') { mouseRun = Math.sign(dx); mouseRunT = performance.now() + MOUSE.hold * 1000; return; }
+  mouseAcc = mouseAcc * Math.exp(-(e.timeStamp - mouseAccT) / (MOUSE.window * 1000)) + dx; mouseAccT = e.timeStamp;
+  if (Math.abs(mouseAcc) < MOUSE.flick || e.timeStamp < mouseFlickT) return;
+  const d = Math.sign(mouseAcc); mouseRun = mouseRun === -d ? 0 : d; mouseAcc = 0; mouseFlickT = e.timeStamp + MOUSE.flickCD * 1000;   // a flick back stops him
+}
+// Toward the point past a dead zone round the hero, stopping short by as far as the run slides on (?mouse=s|f: the run the mouse's motion set, a flick's till a wall).
 function mouseSteer(H, R) {
-  if (mouseAim === null || sideKeys) return;
+  if (sideKeys) return;
+  if (MOUSE_TRY === 's' || MOUSE_TRY === 'f') {
+    if ((MOUSE_TRY === 's' && performance.now() > mouseRunT) || (mouseRun && H.stuck && glueSide(H) === (mouseRun < 0 ? 1 : 2))) mouseRun = 0;   // (stuck on the wall it ran into; a low ledge is mantled first)
+    input.set('left', mouseRun < 0); input.set('right', mouseRun > 0); return;
+  }
+  if (mouseAim === null) return;
   const dx = mouseAim - H.cx, run = input.left || input.right, dir = Math.abs(dx) > (run ? MOUSE.stop * R + MOUSE.slide * Math.abs(H.rigVx) : MOUSE.dead * R) ? Math.sign(dx) : 0;
   input.set('left', dir < 0); input.set('right', dir > 0);
 }

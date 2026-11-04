@@ -278,6 +278,17 @@
   #tutGhost.keys.run .cap:first-child { animation: tutKeyL 1.2s step-end infinite; } #tutGhost.keys.run .cap:last-child { animation: tutKeyR 1.2s step-end infinite; }
   #tutGhost.keys.jump .cap { animation: tutTap 1.2s step-end infinite; } #tutGhost.keys.double .cap { animation: tutTap2 1.4s step-end infinite; }
   #tutGhost.keys > .tx { left: calc(12px * var(--p)); top: calc(-12px * var(--p)); }
+  #tutGhost.mouse > .tutpic { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); align-items: center; gap: calc(5px * var(--p)); }   /* the mouse over Mochi (tutMouse): its own outline */
+  .gB { fill: var(--white); } .tutpic .tarr { filter: drop-shadow(calc(1px * var(--p)) 0 0 var(--ink)) drop-shadow(calc(-1px * var(--p)) 0 0 var(--ink)) drop-shadow(0 calc(1px * var(--p)) 0 var(--ink)) drop-shadow(0 calc(-1px * var(--p)) 0 var(--ink)); }
+  #tutGhost.mouse.run .tmouse { animation: mRun 2.4s step-end infinite; }   /* to ← a cell at a time, back, to →, back */
+  @keyframes mRun { 0% { transform: none; } 8% { transform: translateX(calc(-1px * var(--p))); } 14% { transform: translateX(calc(-2px * var(--p))); } 20%, 34% { transform: translateX(calc(-3px * var(--p))); } 40% { transform: translateX(calc(-2px * var(--p))); }
+    46% { transform: translateX(calc(-1px * var(--p))); } 52% { transform: none; } 58% { transform: translateX(calc(1px * var(--p))); } 64% { transform: translateX(calc(2px * var(--p))); } 70%, 84% { transform: translateX(calc(3px * var(--p))); }
+    90% { transform: translateX(calc(2px * var(--p))); } 96% { transform: translateX(calc(1px * var(--p))); } 100% { transform: none; } }
+  #tutGhost.mouse.jump .gB { animation: mClick 1.2s step-end infinite; } #tutGhost.mouse.double .gB { animation: mClick2 1.4s step-end infinite; }   /* the left button lit: a click (tutTap's beat), two quick */
+  @keyframes mClick { 0%, 100% { fill: var(--white); } 60% { fill: var(--yellow); } 80% { fill: var(--white); } }
+  @keyframes mClick2 { 0%, 100% { fill: var(--white); } 40% { fill: var(--yellow); } 52% { fill: var(--white); } 64% { fill: var(--yellow); } 76% { fill: var(--white); } }
+  #tutGhost.mouse > .tx { left: calc(9px * var(--p)); top: calc(-14px * var(--p)); }
+  @media (prefers-reduced-motion: reduce) { #tutGhost.mouse.jump .gB, #tutGhost.mouse.double .gB { fill: var(--yellow); } }   /* (still: the button to press lit) */
   @media (prefers-reduced-motion: reduce) { #tutGhost * { animation: none !important; } }
   @keyframes tutKey { 0%, 100% { box-shadow: 0 0 0 0 rgba(243, 243, 243, 0); } 50% { box-shadow: 0 0 0 6px rgba(243, 243, 243, 0.45); } }
   @media (prefers-reduced-motion: reduce) { .tutpic svg, .tutpic .cap, #pad.teach #jumpBtn { animation: none !important; } }

@@ -3491,6 +3491,15 @@ const tutPic = (k) => {   // a step's keys on a computer, pressed in turn (their
   if (k === 'run') e.append(tutCap('←'), tutCap('→')); else e.append(tutCap(null));
   return e;
 };
+const TUT_MOUSE = ['....XXXXX....', '..XXBBXWSXX..', '.XBBBXSXWWSX.', '.XBBBXSXWWSX.', 'XBBBBXSXWWWSX', 'XBBBBBXWWWWSX', 'XBBBBBXWWWWSX', 'XXXXXXXXXXXXX', 'XWWWWWWWWWWSX',
+  'XWWWWWWWWWWSX', 'XWWWWWWWWWWSX', 'XWWWWWWWWWWSX', 'XWWWWWWWWWSSX', '.XWWWWWWWWSX.', '.XSSSSSSSSSX.', '..XXSSSSSXX..', '....XXXXX....'];   // a mouse in the glove's inks, B its left button (lit by a click)
+const tutMouse = (k) => {   // a step on a computer played with the mouse (ctlMouse): it slides between ← and →, or its left button clicks (index.html)
+  const m = el('i', 'tmouse'); m.innerHTML = pxSvg(13, TUT_MOUSE.length, ['X', 'W', 'S', 'B'].map((c) => `<path class="g${c}" d="${inkPath(TUT_MOUSE.map((r) => r.replace(/./g, (q) => (q === c ? '#' : '.'))), 0, 0)}"/>`).join(''));
+  const arrow = (g) => { const a = el('i', 'tarr'); a.innerHTML = pxSvg(5, 7, `<path fill="currentColor" d="${inkPath(FONT[g], 0, 0)}"/>`); return a; };
+  const e = el('i', 'tutpic ' + k + ' mouse');
+  if (k === 'run') e.append(arrow('←'), m, arrow('→')); else e.append(m);
+  return e;
+};
 const TUT_GLOVE = ['.....XX..........', '....XWSX.........', '....XWSX.........', '....XWSX.........', '....XWSX.........', '....XWSXXX.......', '....XWSXWSXXX....',
   '....XWSXWSXWSX...', '....XWSXWSXWSXX..', '.XXXXWSXWSXWSXSX.', 'XWWWWWWWWWWWWSSX.', 'XWWWWWWWWWWWWSX..', 'XWWWWWWWWWWWWSX..', '.XXWWWWWWWWWWSX..', '..XWWWWWWWWWWSX..',
   '...XSSSSSSSSSX...', '....XXXXXXXXX....', '...XXXXXXXXXXX...', '...XSSSSSSSSSX...', '...XXXXXXXXXXX...'];   // a pointing glove: X its outline, W white, S its shade (the light from the left)
@@ -4061,10 +4070,11 @@ const ui = {
     // sliding there and back; a jump: the glove tapping the jump key, rings going out of it (twice for a jump in the air); on a computer the keys pressed, by Mochi
     const gh = $('tutGhost'); if (!gh) return;
     $('pad').classList.toggle('ghost', !!tq && coarse && tq !== 'run');   // (the key's own glow off while the hand taps it: one beat, not two)
-    if (tq !== this.ghostQ) {
-      this.ghostQ = tq; gh.className = tq ? 'on ' + tq + (coarse ? ' touch' : ' keys') : '';
+    const q = tq && tq + ctlHow();   // (the picture swapped the moment the player changes from the keys to the mouse, or back)
+    if (q !== this.ghostQ) {
+      this.ghostQ = q; gh.className = tq ? 'on ' + tq + (coarse ? ' touch' : ctlMouse ? ' mouse' : ' keys') : '';
       if (tq) {
-        if (!coarse) gh.replaceChildren(tutPic(tq), ...(tq === 'double' ? [px('×2')] : []));
+        if (!coarse) gh.replaceChildren(ctlMouse ? tutMouse(tq) : tutPic(tq), ...(tq === 'double' ? [px('×2')] : []));
         else if (tq === 'run') { const s = el('i', 'gstick'), k = el('i', 'gknob'); s.append(pixelDisc(56, 0.6)); k.append(pixelDisc(26, 0.9), gloveEl()); s.append(k); gh.replaceChildren(s); }
         else { const r = el('i', 'grings'); r.innerHTML = [17, 20, 23].map((q) => pixRing(2 * q + 2, q)).join(''); gh.replaceChildren(r, gloveEl(true), ...(tq === 'double' ? [px('×2')] : [])); }   // (down onto the key from over it: the screen's corner under it)
       }

@@ -17,7 +17,7 @@ const STR = {
     seen_hedgehog: "Don't stomp a hedgehog: it pricks!", seen_crawler: 'Land on enemies from above!', seen_rebound: 'Jump as you land: bounce higher!', rebound_ok: 'Boing! Right on the beat', seen_wallK: '↓ lets go of a wall', seen_wallM: 'Right click lets go of a wall', seen_wallT: 'Flick down to let go', seen_wallS: 'Pull down to let go', seen_crouchK: '↓ then Space: a high jump', seen_crouchM: 'Hold right, then click: a high jump', seen_crouchS: 'Pull down, then tap: high jump', seen_cage: 'Someone is locked in! Touch the cage', seen_crack: 'A cracked block: hit it from below!', arena: 'Arena! Beat them all', arenaWave: 'Wave {n}!', arenaWon: 'Arena cleared! +{n}', seen_trader: 'A trader: touch the thing to buy it', freedCoins: '+{n} coins', freedHeart: '+1 heart', moti: 'Aunt Moti:\n{s}', seen_shell: 'Stomp a shell and it rolls into the others', seen_spitter: 'Spitters lob blobs at you: dodge', seen_wind: 'When the carp flag fills, a gust blows you aside', seen_mochi: 'The pestle flattens you: then you fit under low beams', seen_lanes: 'More than one way up: switch through the gaps in the walls', seen_fork: 'Two ways up: the risky one pays more', seen_fireWall: 'Fire bursts out of some walls: wait for it to die down', seen_waterWall: 'Water bursts out of some walls: wait for it to stop', seen_coralWall: 'Sharp corals shoot out of some walls: wait for them to draw back', seen_iceWall: 'Ice bursts out of some walls: wait for it to stop', seen_sparkWall: 'Sparks fly out of some walls: wait for them to stop', seen_boltWall: 'Lightning strikes some walls: wait for it to pass', seen_steamWall: 'Hot steam bursts out of some pipes: wait for it to stop', ventWall: 'Hot gas bursts from the tower\'s vents: wait for it to stop', nozzleWall: 'Thrusters fire from some walls: wait for them to stop', seen_thornWall: 'Thorns shoot out of some walls: wait for them to draw back',
     seen_splitter: 'A splitter breaks in two', seen_tumbler: 'A tumbler: stomp it between its somersaults', seen_tofu: 'Stomp a tofu and it falls into four', seen_nurikabe: 'A nurikabe drops on you: stomp it once it lands', seen_komori: 'Bats dive when they flash red: dodge, then stomp', seen_gecko: 'Geckos crawl the tower: stomp from above', seen_chochin: 'Lantern ghosts circle their block: stomp from above', seen_utsuro: 'Hollow ships drift across: bounce off them', seen_chaser: 'A chaser follows you on its wall',
     got_smash: 'Helmet! Jumps smash blocks · {s} s', got_bubble: 'Bubble gum! Fly up fast, nothing hurts · {s} s', got_rainbow: 'Rainbow! Nothing hurts, enemies pop · {s} s', got_grow: 'Giant! Nothing hurts, you break blocks · {s} s',
-    reviveQ: 'One more go?', revive: 'Revive', reviveFor: 'Revive • {n} coins', watchAd: 'Watch ad', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
+    reviveQ: 'One more go?', revive: 'Revive', reviveFor: 'Revive • {n} coins', watchAd: 'Revive • ad', reviveCost: 'Costs {n} · you have {c}', giveUp: 'No, finish',
     height: 'Climbed', coins: 'Coins', kills: 'Enemies', combo: 'Best combo', reached: 'Reached', unlocked: 'Unlocked', hardOpen: 'Hard mode is open!',
     again: 'Again', menu: 'Menu', resume: 'Resume', paused: 'Paused', settings: 'Settings', goBack: 'Back', feedMoves: 'moves', motiYum: 'Yum!|Mmm!|So good!|More!', motiThanks: 'Best snack ever!|Thank you!|I\'m so happy!|Round and full!', feedDone: 'Mochi is full', feedTomorrow: 'See you in the next world', feedClose: 'Close', feedMochi: 'Feed Mochi', feedTreat: 'Gift +{n}', feedFav: "Today's favourite: points ×2", feedX2: '×2 score', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 heart', poor: 'Need {n} more coins',
     noNeed: 'Not needed now', rotate: 'Turn the screen upright', sold: 'sold', free: 'free', shop: 'Shop', treasure: 'Stash', trial: 'Trial', trialGo: 'Trial! {n} coins in {s} s', trialWon: 'Trial passed! +{n}', medalTime: 'Under {p} s', medalClean: 'No heart lost', bossLeft: '{n} more!', bossHint: 'Dazed! Land on its head!', m: 'm',
@@ -34,7 +34,7 @@ const STR = {
     seen_hedgehog: 'No pises al erizo: ¡pincha!', seen_crawler: '¡Cae sobre los enemigos desde arriba!', seen_rebound: '¡Salta al aterrizar: rebotas más alto!', rebound_ok: '¡Boing! Justo a tiempo', seen_wallK: '↓ te suelta de la pared', seen_wallM: 'Clic derecho te suelta de la pared', seen_wallT: 'Desliza abajo para soltarte', seen_wallS: 'Tira abajo para soltarte', seen_crouchK: '↓ y Espacio: salto alto', seen_crouchM: 'Mantén el derecho y haz clic: salto alto', seen_crouchS: 'Abajo y toca: salto alto', seen_cage: '¡Alguien está encerrado! Toca la jaula', seen_crack: 'Bloque agrietado: ¡golpéalo desde abajo!', arena: '¡Arena! Derrótalos a todos', arenaWave: '¡Oleada {n}!', arenaWon: '¡Arena superada! +{n}', seen_trader: 'Un vendedor: toca el objeto para comprarlo', freedCoins: '+{n} monedas', freedHeart: '+1 corazón', moti: 'Tía Moti:\n{s}', seen_shell: 'Pisa un caparazón y rodará contra los demás', seen_spitter: 'Los escupidores te lanzan bolas: esquiva', seen_wind: 'Cuando se infla la carpa, una ráfaga te empuja de lado', seen_mochi: 'El mazo te aplasta: así cabes bajo las vigas bajas', seen_lanes: 'Hay más de un camino: cambia por los huecos de los muros', seen_fork: 'Dos caminos: el arriesgado paga más', seen_fireWall: 'De algunas paredes sale fuego: espera a que se apague', seen_waterWall: 'De algunas paredes sale agua: espera a que pare', seen_coralWall: 'De algunas paredes salen corales afilados: espera a que se retiren', seen_iceWall: 'De algunas paredes sale hielo: espera a que pare', seen_sparkWall: 'De algunas paredes saltan chispas: espera a que paren', seen_boltWall: 'Caen rayos en algunas paredes: espera a que pasen', seen_steamWall: 'De algunas tuberías sale vapor: espera a que pare', ventWall: 'De las rejillas de la torre sale gas caliente: espera a que pare', nozzleWall: 'Algunas toberas disparan: espera a que paren', seen_thornWall: 'De algunas paredes salen espinas: espera a que se retiren',
     seen_splitter: 'El divisor se parte en dos', seen_tumbler: 'Volteretas: písalo entre salto y salto', seen_tofu: 'Pisa un tofu y se parte en cuatro', seen_nurikabe: 'La nurikabe cae sobre ti: písala al aterrizar', seen_komori: 'Los murciélagos bajan al ponerse rojos: esquiva y pisa', seen_gecko: 'Los gecos trepan la torre: písalos desde arriba', seen_chochin: 'Los faroles fantasma giran en su bloque: písalos desde arriba', seen_utsuro: 'Las naves huecas flotan de lado: rebota en ellas', seen_chaser: 'El perseguidor te sigue por su pared',
     got_smash: '¡Casco! Tus saltos rompen bloques · {s} s', got_bubble: '¡Chicle! Subes rápido, nada duele · {s} s', got_rainbow: '¡Arcoíris! Nada duele, los enemigos revientan · {s} s', got_grow: '¡Gigante! Nada duele, rompes bloques · {s} s',
-    reviveQ: '¿Otro intento?', revive: 'Revivir', reviveFor: 'Revivir • {n} monedas', watchAd: 'Ver anuncio', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
+    reviveQ: '¿Otro intento?', revive: 'Revivir', reviveFor: 'Revivir • {n} monedas', watchAd: 'Revivir • anuncio', reviveCost: 'Cuesta {n} · tienes {c}', giveUp: 'No, terminar',
     height: 'Altura', coins: 'Monedas', kills: 'Enemigos', combo: 'Mejor combo', reached: 'Llegaste a', unlocked: 'Desbloqueado', hardOpen: '¡Modo difícil desbloqueado!',
     again: 'Otra vez', menu: 'Menú', resume: 'Seguir', paused: 'Pausa', settings: 'Ajustes', goBack: 'Volver', feedMoves: 'jugadas', motiYum: '¡Ñam!|¡Mmm!|¡Qué rico!|¡Más!', motiThanks: '¡La mejor merienda!|¡Gracias!|¡Qué feliz estoy!|¡Redondo y lleno!', feedDone: 'Mochi está lleno', feedTomorrow: 'Nos vemos en el próximo mundo', feedClose: 'Cerrar', feedMochi: 'Alimentar a Mochi', feedTreat: 'Regalo +{n}', feedFav: 'Su favorito de hoy: puntos ×2', feedX2: '×2 puntos', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 corazón', poor: 'Faltan {n} monedas',
     noNeed: 'Ahora no hace falta', rotate: 'Pon la pantalla en vertical', sold: 'vendido', free: 'gratis', shop: 'Tienda', treasure: 'Escondite', trial: 'Prueba', trialGo: '¡Prueba! {n} monedas en {s} s', trialWon: '¡Prueba superada! +{n}', medalTime: 'En menos de {p} s', medalClean: 'Sin perder corazones', bossLeft: '¡{n} más!', bossHint: '¡Aturdido! ¡Salta en su cabeza!', m: 'm',
@@ -51,7 +51,7 @@ const STR = {
     seen_hedgehog: 'Não pise no ouriço: ele espeta!', seen_crawler: 'Pule nos inimigos por cima!', seen_rebound: 'Pule ao pousar: quica mais alto!', rebound_ok: 'Boing! Bem na hora', seen_wallK: '↓ solta da parede', seen_wallM: 'Clique direito solta da parede', seen_wallT: 'Deslize para baixo para soltar', seen_wallS: 'Puxe para baixo para soltar', seen_crouchK: '↓ e Espaço: pulo alto', seen_crouchM: 'Segure o direito e clique: pulo alto', seen_crouchS: 'Puxe para baixo e toque: pulo alto', seen_cage: 'Alguém está preso! Toque na gaiola', seen_crack: 'Bloco rachado: bata nele por baixo!', arena: 'Arena! Derrote todos', arenaWave: 'Onda {n}!', arenaWon: 'Arena vencida! +{n}', seen_trader: 'Um vendedor: toque no item para comprar', freedCoins: '+{n} moedas', freedHeart: '+1 coração', moti: 'Tia Moti:\n{s}', seen_shell: 'Pise num casco e ele rola nos outros', seen_spitter: 'Os cuspidores atiram bolas: desvie', seen_wind: 'Quando a carpa enche, uma rajada te empurra de lado', seen_mochi: 'O pilão te achata: aí você passa sob as vigas baixas', seen_lanes: 'Há mais de um caminho: troque pelas aberturas nas paredes', seen_fork: 'Dois caminhos: o arriscado paga mais', seen_fireWall: 'Algumas paredes soltam fogo: espere ele baixar', seen_waterWall: 'Algumas paredes soltam água: espere ela parar', seen_coralWall: 'Corais afiados saem de algumas paredes: espere eles recuarem', seen_iceWall: 'Algumas paredes soltam gelo: espere ele parar', seen_sparkWall: 'Algumas paredes soltam faíscas: espere elas pararem', seen_boltWall: 'Raios caem em algumas paredes: espere passarem', seen_steamWall: 'Alguns canos soltam vapor: espere ele parar', ventWall: 'Das grades da torre sai gás quente: espere parar', nozzleWall: 'Alguns propulsores disparam: espere pararem', seen_thornWall: 'Espinhos saem de algumas paredes: espere eles recuarem',
     seen_splitter: 'O divisor se parte em dois', seen_tumbler: 'Cambalhota: pise entre um salto e outro', seen_tofu: 'Pise num tofu e ele vira quatro', seen_nurikabe: 'A nurikabe cai em você: pise quando ela pousa', seen_komori: 'Os morcegos mergulham ao ficar vermelhos: desvie e pise', seen_gecko: 'As lagartixas sobem a torre: pise de cima', seen_chochin: 'As lanternas fantasma giram no bloco: pise de cima', seen_utsuro: 'As naves ocas flutuam de lado: quique nelas', seen_chaser: 'O perseguidor segue você pela parede',
     got_smash: 'Capacete! Pulos quebram blocos · {s} s', got_bubble: 'Chiclete! Suba rápido, nada machuca · {s} s', got_rainbow: 'Arco-íris! Nada machuca, inimigos estouram · {s} s', got_grow: 'Gigante! Nada machuca, você quebra blocos · {s} s',
-    reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveFor: 'Reviver • {n} moedas', watchAd: 'Ver anúncio', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
+    reviveQ: 'Mais uma chance?', revive: 'Reviver', reviveFor: 'Reviver • {n} moedas', watchAd: 'Reviver • anúncio', reviveCost: 'Custa {n} · você tem {c}', giveUp: 'Não, encerrar',
     height: 'Altura', coins: 'Moedas', kills: 'Inimigos', combo: 'Melhor combo', reached: 'Chegou a', unlocked: 'Desbloqueado', hardOpen: 'Modo difícil liberado!',
     again: 'De novo', menu: 'Menu', resume: 'Continuar', paused: 'Pausado', settings: 'Ajustes', goBack: 'Voltar', feedMoves: 'jogadas', motiYum: 'Nham!|Hmm!|Que delícia!|Mais!', motiThanks: 'Melhor lanche de todos!|Obrigado!|Estou tão feliz!|Redondo e cheio!', feedDone: 'Mochi está cheio', feedTomorrow: 'Até o próximo mundo', feedClose: 'Fechar', feedMochi: 'Alimentar o Mochi', feedTreat: 'Presente +{n}', feedFav: 'O favorito de hoje: pontos ×2', feedX2: '×2 pontos', comboPay: 'Combo ×{n}  +{c}', comboHp: '+1 coração', poor: 'Faltam {n} moedas',
     noNeed: 'Não precisa agora', rotate: 'Vire a tela na vertical', sold: 'vendido', free: 'grátis', shop: 'Loja', treasure: 'Esconderijo', trial: 'Desafio', trialGo: 'Desafio! {n} moedas em {s} s', trialWon: 'Desafio vencido! +{n}', medalTime: 'Em menos de {p} s', medalClean: 'Sem perder corações', bossLeft: 'Mais {n}!', bossHint: 'Atordoado! Pule na cabeça!', m: 'm',
@@ -68,7 +68,7 @@ const STR = {
     seen_hedgehog: 'ハリネズミは ふむな: チクッ！', seen_crawler: 'てきは うえから ふもう！', seen_rebound: 'ちゃくちの しゅんかんに ジャンプ: たかく はねる！', rebound_ok: 'ボヨン！ ぴったり', seen_wallK: '↓で かべから はなれる', seen_wallM: 'みぎクリックで かべから はなれる', seen_wallT: 'したへ フリックで はなれる', seen_wallS: 'したへ たおして はなれる', seen_crouchK: '↓から スペース: ハイジャンプ', seen_crouchM: 'みぎを おしたまま クリック: ハイジャンプ', seen_crouchS: 'したへ たおして タップ: ハイジャンプ', seen_cage: 'だれか つかまってる！ おりに さわろう', seen_crack: 'ひびわれ ブロック: したから たたこう！', arena: 'アリーナ！ ぜんいん たおせ', arenaWave: 'ウェーブ {n}！', arenaWon: 'アリーナ クリア！ +{n}', seen_trader: 'しょうにん: しなものに さわって かおう', freedCoins: '+{n} コイン', freedHeart: 'ハート +1', moti: 'モチおばさん:\n{s}', seen_shell: 'こうらを ふむと ころがって ぶつかる', seen_spitter: 'ペッペは たまを とばす: よけろ', seen_wind: 'こいのぼりが ふくらむと とっぷう: よこへ ながされる', seen_mochi: 'きねに つぶされると ひくい はりの したを とおれる', seen_lanes: 'みちは ひとつじゃない: かべの すきまから のりかえよう', seen_fork: 'みちは ふたつ: あぶない ほうが たくさん もらえる', seen_fireWall: 'かべから ひが ふきだす: おさまるまで まとう', seen_waterWall: 'かべから みずが ふきだす: とまるまで まとう', seen_coralWall: 'かべから とがった サンゴが でる: ひっこむまで まとう', seen_iceWall: 'かべから こおりが ふきだす: とまるまで まとう', seen_sparkWall: 'かべから ひばなが とぶ: とまるまで まとう', seen_boltWall: 'かべに かみなりが おちる: やむまで まとう', seen_steamWall: 'かべの パイプから じょうきが ふきだす: とまるまで まとう', ventWall: 'タワーの あなから あつい ガスが でる: とまるまで まとう', nozzleWall: 'かべの ノズルが ふんしゃする: とまるまで まとう', seen_thornWall: 'かべから トゲが でる: ひっこむまで まとう',
     seen_splitter: 'ブンレツは ふたつに わかれる', seen_tumbler: 'ゴロゴロようかん: とまった すきに ふもう', seen_tofu: 'とうふを ふむと よっつに わかれる', seen_nurikabe: 'ぬりかべが おちてくる: おちたら ふもう', seen_komori: 'コウモリは あかく なると とっしん: よけて ふもう', seen_gecko: 'ヤモリは とうを のぼる: うえから ふもう', seen_chochin: 'ちょうちんおばけは ブロックを まわる: うえから ふもう', seen_utsuro: 'うつろぶねは よこに ただよう: ふんで はねよう', seen_chaser: 'オイカケは かべを つたって おってくる',
     got_smash: 'ヘルメット！ ジャンプで ブロックを こわす · {s} びょう', got_bubble: 'ガム！ ぐんぐん うく、むてき · {s} びょう', got_rainbow: 'にじ！ むてき、てきは はじける · {s} びょう', got_grow: 'きょだいか！ むてき、ブロックを こわす · {s} びょう',
-    reviveQ: 'もういちど？', revive: 'ふっかつ', reviveFor: 'ふっかつ • {n}コイン', watchAd: 'こうこくを みる', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
+    reviveQ: 'もういちど？', revive: 'ふっかつ', reviveFor: 'ふっかつ • {n}コイン', watchAd: 'ふっかつ • こうこく', reviveCost: 'ひつよう {n} · もってる {c}', giveUp: 'いいえ、おわる',
     height: 'のぼった たかさ', coins: 'コイン', kills: 'たおした てき', combo: 'さいこう コンボ', reached: 'とうたつ', unlocked: 'かいほう', hardOpen: 'むずかしい モードが あそべる！',
     again: 'もういちど', menu: 'メニュー', resume: 'つづける', paused: 'ポーズ', settings: 'せってい', goBack: 'もどる', feedMoves: 'のこり', motiYum: 'おいしい！|もぐもぐ！|うまうま！|もっと！', motiThanks: 'さいこうの おやつ！|ありがとう！|しあわせ〜！|まんまる まんぷく！', feedDone: 'モチ まんぷく', feedTomorrow: 'つぎの ワールドで またね', feedClose: 'とじる', feedMochi: 'モチに ごはん', feedTreat: 'おれい +{n}', feedFav: 'きょうの だいすき: ポイント ×2', feedX2: 'スコア ×2', comboPay: 'コンボ ×{n}  +{c}', comboHp: 'ハート +1', poor: 'コインが あと {n} たりない',
     noNeed: 'いまは いらない', rotate: 'がめんを たてに してね', sold: 'うりきれ', free: 'ただ', shop: 'ショップ', treasure: 'かくしべや', trial: 'しれん', trialGo: 'しれん！ {s}びょうで コイン {n}まい', trialWon: 'しれん クリア！ +{n}', medalTime: '{p}びょう いない', medalClean: 'ノーダメージ', bossLeft: 'あと {n}！', bossHint: 'ふらふら！ あたまに のれ！', m: 'm',
@@ -84,7 +84,7 @@ function t(k) { return (STR[lang] && STR[lang][k]) || STR.en[k]; }   // (a funct
 const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (_, n) => o[n]);
 const L2 = (o) => o[lang] || o.en;
 const LANGS = [['en', 'EN'], ['es', 'ES'], ['pt', 'PT'], ['ja', '日本語']];   // short, in one row (owner); Japanese as it is written
-const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || navigator.language || 'en').slice(0, 2).toLowerCase(); return STR[l] ? l : 'en'; };   // the platform's (Playgama checklist), else the browser's; English by default
+const detectLang = () => { const l = ((ads.ok && bridge.platform.language) || 'en').slice(0, 2).toLowerCase(); return STR[l] ? l : 'en'; };   // the platform's (Playgama checklist), else the browser's; English by default
 
 // ── Save ─────────────────────────────────────────────────────
 // What outlives a run: best climb, coins of all runs (they unlock colours),
@@ -274,7 +274,7 @@ function loadSave(s) {
 }
 let keysUsed = false;   // a key pressed this visit: the panels' focus from then on (ui.panel)
 let firstGo = false, dailyTold = false;   // this visit the player's first, no star yet at boot (boot), and its Win screen told of the daily (ui.win; owner, Г8 «А»)
-let saveIn = false, cloud = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
+let saveIn = false, cloud = false, noBridge = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
 // cloud: this visit writes the Bridge's storage too, decided once at boot: a Bridge up late, or a storage that did not answer,
 // never writes over the Bridge's copy with what this visit began from (the browser's copy, or nothing).
 function persist() {
@@ -282,7 +282,7 @@ function persist() {
   save.at = Date.now();   // (which copy is the newer, of two as far on)
   const s = JSON.stringify(save);
   if (cloud) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});   // through the Bridge's Storage alone (Playgama's checklist: never localStorage)
-  else try { localStorage.setItem(LOCAL_KEY, s); } catch (e) { /* private mode: this visit only */ }   // no Bridge this visit (none, late, or its storage not answering): the browser keeps it
+  else if (noBridge) try { localStorage.setItem(LOCAL_KEY, s); } catch (e) { /* private mode: this visit only */ }   // no Bridge this visit (none, or late): the browser keeps it. A Bridge whose storage did not answer: this visit only (Playgama 3.2.1: nothing past the Bridge)
 }
 const progress = (x) => (x && x.camp && Array.isArray(x.camp.stars) ? x.camp.stars.reduce((n, v) => n + (v > 0 ? v : 0), 0) : 0) * 1e7 + (x && x.bank > 0 ? x.bank : 0);   // a save's stars, then its coins of all runs
 
@@ -1848,7 +1848,7 @@ class Game {
     for (const w of lv.winds || []) {   // a gust (WIND); its petals setting off on the screen: its sound, from the side it blows from, and once the hint
       const u = (lv.t + w.ph) % (WIND.on + WIND.off), s = WIND.off - WIND.warn;
       if (H.cy > w.y0 && H.cy < w.y1 && u >= WIND.off) addVel(H, w.dir * WIND.push * R * dt * (this.onFloor() ? 0.5 : 1), 0);
-      if (u >= s && u - dt < s && w.y1 > lv.cam && w.y0 < lv.cam + view.h) { sound.gust(w.dir, WIND.warn + WIND.on); this.hint('wind'); }
+      if (u >= s && u - dt < s && w.y1 > lv.cam && w.y0 < lv.cam + view.h) { sound.gust(w.dir); this.hint('wind'); }
     }
     for (let i = lv.icicles.length - 1; i >= 0; i--) {
       const c = lv.icicles[i];
@@ -4374,7 +4374,7 @@ for (const type of ['touchend', 'touchcancel']) document.addEventListener(type, 
 // summit, quieter while paused or over (each fetched when first wanted, the last four kept: mono at 32 kHz and decoded at that rate, ~7 MB each). It sleeps
 // while the page is hidden; "sound" in the menu and the pause turns it off and on (saved).
 const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 'fall', 'die', 'spring', 'crumble', 'combo',
-  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'chime', 'squish'];   // (squish: Mochi squeezed, owner А1 «А»)   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
+  'buy', 'deny', 'bubble', 'portal', 'click', 'bosshit', 'burn', 'spit', 'chime', 'squish', 'ping', 'gust'];   // (squish: Mochi squeezed, owner А1 «А»)   // chime: the old coin's bright ding (bells, the stars), the coin's own a gloop now
 const MUSIC_VOL = 0.4, MUSIC_RATE = 32000, MUSIC_PAD = 0.1, FX_VOL = 0.7, PENTA = [0, 2, 4, 7, 9];
 const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', skazka: 'skazka', sea: 'sea', void: 'void', space: 'space' };   // (Space: its own, the
 // launch tower's and Kibo's, owner 2026-10-31 «делать»)   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
@@ -4409,28 +4409,20 @@ const sound = {
       if (old) { delete this.bufs['m:' + old]; this.asked[old] = false; }
     });
   },
-  note(k, vol = 0.35) {   // a soft bell, the k-th step of a major pentatonic up from C5
-    if (!this.ctx || save.sound === false || this.ctx.state !== 'running') return;
-    const c = this.ctx, t = c.currentTime, f = 523.25 * Math.pow(2, PENTA[k % 5] / 12 + Math.floor(k / 5)), g = c.createGain();
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
-    for (const [m, type, a] of [[1, 'triangle', 1], [2, 'sine', 0.35], [3.01, 'sine', 0.12]]) {   // a triangle and two overtones: a marimba-ish ping
-      const o = c.createOscillator(), og = c.createGain();
-      o.type = type; o.frequency.value = f * m; og.gain.value = a;
-      o.connect(og); og.connect(g); o.start(t); o.stop(t + 0.75);
-    }
-    g.connect(this.fx);
+  note(k, vol = 0.35) {   // a soft marimba note, the k-th step of a major pentatonic up from C5 (ping.mp3, a B3, played up to it: Playgama's 3.3.2 takes no sound made in code)
+    const b = this.bufs.ping;
+    if (!b || save.sound === false || this.ctx.state !== 'running') return;
+    const c = this.ctx, s = c.createBufferSource(), g = c.createGain();
+    s.buffer = b; s.playbackRate.value = (523.25 / 247) * Math.pow(2, PENTA[k % 5] / 12 + Math.floor(k / 5)); g.gain.value = vol;
+    s.connect(g); g.connect(this.fx); s.start();
   },
-  gust(dir, len, vol = 1) {   // a gust of wind (WIND): noise through a band that rises and falls, swelling over `len` s, going from the side it blows from to the other
-    if (!this.ctx || save.sound === false || this.ctx.state !== 'running') return;
-    const c = this.ctx, t = c.currentTime;
-    if (!this.noise) { const d = (this.noise = c.createBuffer(1, 2 * c.sampleRate, c.sampleRate)).getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
-    const s = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain(), pan = c.createStereoPanner ? c.createStereoPanner() : null;
-    s.buffer = this.noise; s.loop = true; bp.type = 'bandpass'; bp.Q.value = 1.2;
-    bp.frequency.setValueAtTime(300, t); bp.frequency.linearRampToValueAtTime(900, t + 0.5 * len); bp.frequency.linearRampToValueAtTime(400, t + len);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.45 * len); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-    s.connect(bp); bp.connect(g);
-    if (pan) { pan.pan.setValueAtTime(-0.6 * dir, t); pan.pan.linearRampToValueAtTime(0.6 * dir, t + len); g.connect(pan); pan.connect(this.fx); } else g.connect(this.fx);   // (no panner: Safari before 14.1)
-    s.start(t); s.stop(t + len + 0.05);
+  gust(dir) {   // a gust of wind (WIND, gust.mp3), going from the side it blows from to the other
+    const b = this.bufs.gust;
+    if (!b || save.sound === false || this.ctx.state !== 'running') return;
+    const c = this.ctx, t = c.currentTime, s = c.createBufferSource(), pan = c.createStereoPanner ? c.createStereoPanner() : null;
+    s.buffer = b;
+    if (pan) { pan.pan.setValueAtTime(-0.6 * dir, t); pan.pan.linearRampToValueAtTime(0.6 * dir, t + b.duration); s.connect(pan); pan.connect(this.fx); } else s.connect(this.fx);   // (no panner: Safari before 14.1)
+    s.start(t);
   },
   play(name, vol = 1, rate = 1) {
     const b = this.bufs[name];
@@ -4946,7 +4938,8 @@ async function boot() {
   const parse = (v) => (v ? (typeof v === 'string' ? JSON.parse(v) : v) : null);
   let b = null, got = false, l = null;   // the Bridge's copy (got: its storage answered), the browser's
   if (br) try { const r = await Promise.race([bridge.storage.get([SAVE_KEY]), new Promise((ok) => setTimeout(() => ok(null), 2500))]); if (r) { b = parse(r[0]); got = true; } } catch (e) { b = null; }   // (no answer in 2.5 s: as a failed one)
-  try { l = parse(localStorage.getItem(LOCAL_KEY)) || parse(localStorage.getItem(SAVE_KEY)); } catch (e) { l = null; }   // (SAVE_KEY: a save from before the Bridge, or the mock's)
+  noBridge = !br;
+  if (noBridge) try { l = parse(localStorage.getItem(LOCAL_KEY)) || parse(localStorage.getItem(SAVE_KEY)); } catch (e) { l = null; }   // (SAVE_KEY: a save from before the Bridge, or the mock's)
   const s = !b ? l : !l ? b : progress(l) !== progress(b) ? (progress(l) > progress(b) ? l : b) : (l.at || 0) > (b.at || 0) ? l : b;   // the one further on (a visit without the Bridge may have begun from nothing), then the newer, then the Bridge's
   cloud = br && got;
   loadSave(s);

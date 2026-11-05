@@ -114,6 +114,9 @@ SFX = {
     'burn': (0.6, 'A short hot sizzle and crackling hiss with a soft squishy pop: a small jelly blob touching fire. Cartoon.' + NO),
     'spit': (0.6, 'A quick fiery whoosh and a soft pop: flames spitting a blob of burning lava up into the air. Cartoon, short.' + NO),
     # owner 2026-10-30, А1 «А»: Mochi squeezed at home and in Feed Mochi, its pitch and loudness by how hard (game.js sound.play('squish', vol, rate))
+    # 2026-11-05, Playgama's 3.3.2 (no sound made in code): what the game's Web Audio used to make itself. A note for its pentatonic (sound.note, pitched by rate), and WIND's gust
+    'ping': (0.7, 'A single soft wooden marimba note, one clean mallet hit on a warm bar, ringing out gently. One note only, cute and light.' + NO),
+    'gust': (3.1, 'A bright airy gust of wind whooshing past: a breathy hiss and a thin whistle, swelling up out of silence and fading away. High and light, no low rumble, no rain, no birds.' + NO),
     'squish': (0.5, 'A soft squeezy squish of a cute round mochi rice cake pressed by a finger: a gentle wet squelch with a tiny rubbery squeak as it springs back. Cartoon, short.' + NO),
 }
 SR = 44100

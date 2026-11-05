@@ -1127,7 +1127,7 @@ class Game {
   // the colours, to drag and press as in Gum (menuTouch); ui.menu sizes and places it (menuFit). Play or Continue builds the level as ever.
   toMenu() {
     wideTo(false); colTo(false); this.wellR = 0;   // (left from a wide level's room too; the menu in the page's px, the column as it was)
-    ads.due = false;   // (a third level's interstitial not taken on the way on is not carried to a later loss)
+    ads.due = false;   // (a cleared level's interstitial not taken on the way on is not carried to a later loss)
     if (this.held) this.stageOut();   // (from a dialog with Moti in it: its level first, as it was)
     if (this.mode === 'camp' && (this.state === 'play' || this.state === 'pause' || this.state === 'dead')) { this.campKeep(); persist(); }   // the coins picked up are kept
     this.newRun(); this.state = 'menu'; this.menuWd = CAMPAIGN[campAt(campNextId()).w].world;   // (the world Play or Continue goes to: its theme, its music)
@@ -2222,7 +2222,7 @@ class Game {
   // own message as before (`msg` false: a quit, which it never had)
   prog(kind, data, msg = true) {
     if (msg) pmsg('level_' + kind, this.lvl());
-    if (kind === 'completed' && ++ads.levels % AD_EVERY === 0) ads.due = true;   // every third level cleared: an interstitial on the way on (ads.between)
+    ads.due = kind === 'completed';   // a level cleared: an interstitial asked for on the way on (ads.between); a loss or the next start drops it
     const mode = this.bonus ? 'bonus' : this.daily != null ? 'daily' : this.mode === 'camp' ? 'campaign' : this.endless ? 'endless' : 'run';
     track('progression_' + kind, { level_id: this.levelId(), ...(mode === 'campaign' ? { step_index: this.world * 10 + this.stage + 1 } : mode === 'daily' ? { step_index: this.stage + 1 } : {}), mode, world: this.lvl().world, layout: view.wide ? 'wide' : 'column', ...data });   // (layout: a computer's
     // wide level or the 16-column well, the plan's P1 telemetry)
@@ -4479,8 +4479,8 @@ for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.add
 
 // ── Ads (Playgama Bridge) ─────────────────────────────────────
 // Waited for at boot (see boot; given up on after BRIDGE_WAIT ms, and the game goes on without it). Ads: a rewarded one
-// doubles a bonus level's coins; an interstitial only on the way on after every third level cleared (AD_EVERY), three
-// minutes apart at least. The platform's pause and sound requests are kept (an ad open, a tab switched). Off a platform (GitHub
+// doubles a bonus level's coins; an interstitial asked for on the way on after every level cleared, the Bridge alone deciding
+// if one comes (its step 7, «Do not add your own timers or counters»; playgama-bridge-config.json holds the owner's 180 s between them: Рк1 «Б», 2026-11-05; none after a loss: Г3 «А»). The platform's pause and sound requests are kept (an ad open, a tab switched). Off a platform (GitHub
 // Pages, here) the Bridge is a mock with no ads: there the rewarded button doubles at once, so the way it goes can be
 // tried. No Bridge at all: no rewarded button, no interstitials.
 // Analytics (the digest §9: telemetry says what, playtests why): the level's start, end and failure go as the platform's own
@@ -4493,11 +4493,9 @@ if (POKI) ICONS.ad = '............/.kwkwkwkwkw./.wkwkwkwkwk./............/.wwwww
 const adMark = (b) => { if (POKI) { const i = iconEl('ad'); i.style.setProperty('--p', 2); b.querySelector('.tx').prepend(i, ' '); } return b; };   // a rewarded ad's button: 🎬 before its words (24 px: the words' height)
 const pmsg = (m, data) => { if (ads.ok) try { bridge.platform.sendMessage(m, data); } catch (e) { /* not on this platform */ } };
 const track = (name, data) => { if (ads.ok && bridge.analytics) try { bridge.analytics.send(name, data); } catch (e) { /* not on this platform */ } };
-const BRIDGE_WAIT = 4000, AD_GAP = 180000, AD_EVERY = 3;   // an interstitial only after every third level cleared (owner, 2026-11-01: «добавь вызов рекламы только
-// после каждого 3 уровня»), three minutes apart at least (CrazyGames; the digest §6)
+const BRIDGE_WAIT = 4000;
 const ads = {
-  ok: false, quiet: false, off: false, held: false, lastAd: 0, levels: 0, due: false,   // quiet: the platform's sound off, or its pause on; lastAd: when one was last up;
-  // levels: those cleared this visit, due: a third one just cleared, its ad on the way on (none after a loss)
+  ok: false, quiet: false, off: false, held: false, due: false,   // quiet: the platform's sound off, or its pause on; due: a level just cleared, its ad on the way on (none after a loss)
   init() {   // resolves true once the Bridge is up, false if it never came (no script in time, or its initialize failed)
     return new Promise((done) => {
       const t0 = performance.now();
@@ -4517,16 +4515,14 @@ const ads = {
       go();
     });
   },
-  between(done) {   // an interstitial, if one is due and to be had; `done` once it is closed, or at once if none comes
-    const now = performance.now();
-    const due = this.due; this.due = false;   // (a third level's one asked for once: the three-minute floor may skip it, not move it to the fourth)
-    if (!this.ok || !bridge.advertisement.isInterstitialSupported || (!POKI && (!due || now - this.lastAd < AD_GAP))) { done(); return; }
+  between(done) {   // an interstitial, if one is due and to be had; `done` once it is closed, or at once if none comes (the Bridge's own too early: 'failed' at once)
+    const due = this.due; this.due = false;
+    if (!this.ok || !bridge.advertisement.isInterstitialSupported || (!POKI && !due)) { done(); return; }
     const EV = bridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
     let over = false, timer = 0;
     const end = () => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(); };
-    const on = (s) => { if (s === 'loading') { clearTimeout(timer); timer = setTimeout(end, 10000); } else if (s === 'opened') { clearTimeout(timer); this.lastAd = performance.now(); } else if (s === 'closed' || s === 'failed') end(); };
+    const on = (s) => { if (s === 'loading') { clearTimeout(timer); timer = setTimeout(end, 10000); } else if (s === 'opened') clearTimeout(timer); else if (s === 'closed' || s === 'failed') end(); };
     bridge.advertisement.on(EV, on); timer = setTimeout(end, 3000);   // none heard of in time: on without it (one loading: up to 10 s)
-    this.lastAd = performance.now();   // (the gap from asking: one opening late is no reason for the next one sooner)
     bridge.advertisement.showInterstitial();
   },
   hush() { this.quiet = this.off || this.held; sound.sleep(this.quiet || document.hidden); },
@@ -4962,7 +4958,6 @@ async function boot() {
   if (!/[?&]cine\b/.test(location.search)) cineUse(D25_SHOWN && cinePref && save.flat === false);   // (the cinematic fork: 2D unless the player set 2.5D in the settings; owner, 2026-10-24:
   // «По умолчанию игра в 2d». ?cine shows it anyway, ?plain never)
   if (br) bridge.platform.getServerTime().then((ms) => { today = Math.floor(ms / 86400000); }).catch(() => {});
-  ads.lastAd = performance.now();   // the first interstitial a minute in at the earliest
   try { await Promise.race([Promise.all([document.fonts.load('25px VT323'), document.fonts.load('16px DotGothic16', 'アップウェル')]), new Promise((ok) => setTimeout(ok, 1500))]); } catch (e) { /* the system's type then */ }   // the type in before the first screen
   start();
   if (cloud && s && s !== b) persist();   // the browser's copy further on (a visit without the Bridge, or a save from before it): the Bridge's storage takes it

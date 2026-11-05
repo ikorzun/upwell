@@ -433,9 +433,8 @@ else {
       box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
     },
     mark() { this.els.forEach((e, i) => e && e.classList.toggle('sel', i === this.sel)); this.els.forEach((e, i) => e && e.classList.toggle('cur', this.keys && i === this.cur)); },
-    key(e) {   // the keys: arrows move a frame, Space or Enter takes the food under it, an arrow then swaps it that way; Escape closes
+    key(e) {   // the keys: arrows move a frame, Space or Enter takes the food under it, an arrow then swaps it that way
       if (!this.active || ui.open !== 'menu') return false;
-      if (e.code === 'Escape') { this.close(); return true; }
       if (this.busy || !this.st || this.st.done) return ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter'].includes(e.code);
       const n = FEED.n, dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.code];
       this.idle = performance.now();

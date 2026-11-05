@@ -4162,11 +4162,7 @@ const input = {
 const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', Space: 'jump', ArrowUp: 'jump', KeyW: 'jump', KeyA: 'left', KeyD: 'right', KeyS: 'down' };   // (↑ and WASD too: the UX tests, 2026-10-30)
 document.addEventListener('keydown', (e) => {
   keysUsed = true;
-  if ((e.code === 'Escape' || e.code === 'KeyP') && !e.repeat && (game.state === 'play' || (game.state === 'pause' && ui.open === 'pause'))) { e.preventDefault(); game.togglePause(game.state === 'play'); return; }   // a computer's pause (QA: only its button)
-  if (e.code === 'Escape' && !e.repeat && ui.open && ui.open !== 'pause') {   // Esc a screen's way back: its cross, Back or Menu (the UX tests: only the pause and Feed took it)
-    const p = $(ui.open), b = p.querySelector('.aclose') || [...p.querySelectorAll('button')].find((x) => x.offsetParent && (x.textContent.startsWith(t('goBack')) || x.textContent.startsWith(t('menu'))));
-    if (b) { e.preventDefault(); b.click(); return; }
-  }
+  if (e.code === 'KeyP' && !e.repeat && (game.state === 'play' || (game.state === 'pause' && ui.open === 'pause'))) { e.preventDefault(); game.togglePause(game.state === 'play'); return; }   // a computer's pause (QA: only its button). Never Esc, anywhere: the browser's, for leaving full screen (Playgama 1.5.2)
   if (ui.open === 'album' && ui.albumStep && /^(ArrowLeft|ArrowRight|KeyA|KeyD)$/.test(e.code)) { e.preventDefault(); ui.albumStep(/Left|KeyA/.test(e.code) ? -1 : 1); return; }   // (a card a key)
   const k = KEYS[e.code];
   if (!k) return;

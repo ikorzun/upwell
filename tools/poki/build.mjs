@@ -26,7 +26,7 @@ function once(text, from, to, what) {
 }
 const indexFile = path.join(GAME, 'index.html');
 let html = fs.readFileSync(indexFile, 'utf8');
-const bridgeTag = html.match(/<script async src="https:\/\/bridge\.playgama\.com\/[^"]+"[^>]*><\/script>/g) || [];
+const bridgeTag = html.match(/<script src="https:\/\/bridge\.playgama\.com\/[^"]+"[^>]*><\/script>/g) || [];
 if (bridgeTag.length !== 1) throw new Error('the Bridge tag: expected one, found ' + bridgeTag.length);
 // Poki's tag as its docs show it (in the head, not deferred: its loader is small, and the game asks for it at boot), then the adapter.
 html = once(html, bridgeTag[0], '<script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>\n<script src="poki.js"></script>', 'the Bridge tag');

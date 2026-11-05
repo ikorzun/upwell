@@ -4409,11 +4409,11 @@ const sound = {
       if (old) { delete this.bufs['m:' + old]; this.asked[old] = false; }
     });
   },
-  note(k, vol = 0.35) {   // a soft marimba note, the k-th step of a major pentatonic up from C5 (ping.mp3, a B3, played up to it: Playgama's 3.3.2 takes no sound made in code)
+  note(k, vol = 0.35) {   // a soft marimba note, the k-th step of a major pentatonic up from C5 (ping.mp3, a bell near A6, played down to it, so the low notes ring longest: Playgama's 3.3.2 takes no sound made in code)
     const b = this.bufs.ping;
     if (!b || save.sound === false || this.ctx.state !== 'running') return;
     const c = this.ctx, s = c.createBufferSource(), g = c.createGain();
-    s.buffer = b; s.playbackRate.value = (523.25 / 247) * Math.pow(2, PENTA[k % 5] / 12 + Math.floor(k / 5)); g.gain.value = vol;
+    s.buffer = b; s.playbackRate.value = (523.25 / 1736) * Math.pow(2, PENTA[k % 5] / 12 + Math.floor(k / 5)); g.gain.value = vol;
     s.connect(g); g.connect(this.fx); s.start();
   },
   gust(dir) {   // a gust of wind (WIND, gust.mp3), going from the side it blows from to the other

@@ -1893,7 +1893,7 @@ const BOSSES = {
   // «сом изогнутый», boss-sea D): its quake and its leap (QUAKE, Boss.quake; owner 2026-10-24: all bosses redone), its stone the hard top.
   namazu: { name: { en: 'Onamazu', es: 'Onamazu', pt: 'Onamazu', ja: 'おおなまず' }, ink: 'orange', design: 'dome', size: 2.4, quake: QUAKE, hp: 5, phase: (hp) => (hp >= 5 ? 0 : hp >= 3 ? 1 : hp >= 2 ? 2 : 3),
     intro: [{ en: 'Who wakes me under the islands?', es: '¿Quién me despierta bajo las islas?', pt: 'Quem me acorda sob as ilhas?', ja: 'しまの したで ねてたのに。だれだ？' },
-      { en: "The gods' stone holds me. Barely.", es: 'La piedra de los dioses me sujeta. Apenas.', pt: 'A pedra dos deuses me prende. Mal.', ja: 'かみの いしが おさえてる。ぎりぎりね。' },
+      { en: 'The old stone holds me. Barely.', es: 'La vieja piedra me sujeta. Apenas.', pt: 'A velha pedra me prende. Mal.', ja: 'ふるい いしが おさえてる。ぎりぎりね。' },
       { en: 'Feel the ground shake!', es: '¡Siente temblar la tierra!', pt: 'Sinta o chão tremer!', ja: 'じめんが ゆれるぞ！' }],
     quip: [{ en: 'Shaken? That was a small one.', es: '¿Temblando? Ese fue pequeño.', pt: 'Tremendo? Esse foi pequeno.', ja: 'ゆれた？ いまのは ちいさいほう。' },
       { en: 'Splash. Back to the shallows.', es: 'Chof. De vuelta a la orilla.', pt: 'Tchibum. De volta pro raso.', ja: 'ザブン。あさせへ おかえり。' }],

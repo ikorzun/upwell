@@ -4468,7 +4468,7 @@ for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.add
 // ── Ads (Playgama Bridge) ─────────────────────────────────────
 // Waited for at boot (see boot; given up on after BRIDGE_WAIT ms, and the game goes on without it). Ads: a rewarded one
 // doubles a bonus level's coins; an interstitial asked for on the way on after every level cleared, the Bridge alone deciding
-// if one comes (its step 7, «Do not add your own timers or counters»; playgama-bridge-config.json holds the owner's 180 s between them: Рк1 «Б», 2026-11-05; none after a loss: Г3 «А»). The platform's pause and sound requests are kept (an ad open, a tab switched). Off a platform (GitHub
+// if one comes (its step 7, «Do not add your own timers or counters»; no delay of ours in playgama-bridge-config.json, the platform decides: Рк5 «А», 2026-11-06; none after a loss: Г3 «А»). The platform's pause and sound requests are kept (an ad open, a tab switched). Off a platform (GitHub
 // Pages, here) the Bridge is a mock with no ads: there the rewarded button doubles at once, so the way it goes can be
 // tried. No Bridge at all: no rewarded button, no interstitials.
 // Analytics (the digest §9: telemetry says what, playtests why): the level's start, end and failure go as the platform's own

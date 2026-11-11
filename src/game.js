@@ -277,8 +277,19 @@ let firstGo = false, dailyTold = false;   // this visit the player's first, no s
 let saveIn = false, cloud = false, noBridge = false;   // the save loaded (boot): nothing is written before, or the defaults would go over it (the book's first entries are met building the game)
 // cloud: this visit writes the Bridge's storage too, decided once at boot: a Bridge up late, or a storage that did not answer,
 // never writes over the Bridge's copy with what this visit began from (the browser's copy, or nothing).
-function persist() {
+// One write for all an action changed (Playgama moderation, 2026-11-11: «an abnormal number of [storage] Set data to storage calls. Do not call set
+// data to storage more than once after an action»): a change asks for a write 1.5 s on, and what else changes by then rides along in it; while a level
+// is played nothing is written (a ledge stood on, a first enemy met, a hint), it waits for the level's end, a pause or the menu; persist(true) writes at
+// once (a pause, the page hidden or shut); and a save just as it was written last is not written again.
+let persistT = 0, persisted = '';
+function persistDue() { persistT = 0; if (game.state === 'play') { persistT = setTimeout(persistDue, 1500); return; } persist(true); }
+function persist(now) {
   if (!saveIn) return;
+  if (!now) { if (!persistT) persistT = setTimeout(persistDue, 1500); return; }
+  clearTimeout(persistT); persistT = 0;
+  const at = save.at; save.at = 0; const same = JSON.stringify(save);
+  if (same === persisted) { save.at = at; return; }
+  persisted = same;
   save.at = Date.now();   // (which copy is the newer, of two as far on)
   const s = JSON.stringify(save);
   if (cloud) bridge.storage.set([SAVE_KEY], [s]).catch(() => {});   // through the Bridge's Storage alone (Playgama's checklist: never localStorage)
@@ -2175,7 +2186,7 @@ class Game {
     save.cur = { ci: this.ci, seed: this.seed, order: this.rc.order || null, sig: lv.sig, y: (lv.floor - H.maxY) / tl, fire: lv.fire ? (lv.fire.y - H.maxY) / tl : null, hp: this.hp,
       coins: this.coins, got: lv.coinsTaken, kills: this.kills, m: this.levelM, t: lv.t, taken: lv.taken.slice(), gone: lv.gone.slice(), neon: [...lv.neonLit.keys()],
       tended: [...lv.tended.keys()].map((r) => r.id), tasks: lv.tasks.map((q) => q.n), harmed: this.harmed };
-    persist();
+    persist(now);   // (a ledge's: kept, written at the level's end or a pause; a pause's or the page shut's: now)
   }
   // Continue into the level under way (saveCur): the level laid again, what was taken and done off it, the hero on the highest steady ledge
   // at or under where it stood, the fire as far under it; a level that is not the same any more (a new build, another width): from its start
@@ -4506,6 +4517,7 @@ const ads = {
   between(done) {   // an interstitial, if one is due and to be had; `done` once it is closed, or at once if none comes (the Bridge's own too early: 'failed' at once)
     const due = this.due; this.due = false;
     if (!this.ok || !bridge.advertisement.isInterstitialSupported || (!POKI && !due)) { done(); return; }
+    if (persistT) persist(true);   // (a write waiting goes before the ad: Playgama's saving guide, an ad may end the visit)
     const EV = bridge.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
     let over = false, timer = 0;
     const end = () => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); done(); };
@@ -4519,6 +4531,7 @@ const ads = {
   reward(done) {   // done(true) once it was watched to its end; done(false, why) if it was closed early ('closed') or none came ('failed', 'none': a
     // platform with no ad to give, as Playgama's sandbox for a rewarded one: owner, 2026-10-28, «не работает в песочнице»)
     if (this.mock) { done(true); return; }
+    if (persistT) persist(true);   // (as before an interstitial)
     const EV = bridge.EVENT_NAME.REWARDED_STATE_CHANGED;
     let got = false, over = false, timer = 0, open = 0;
     const end = (ok, why) => { if (over) return; over = true; clearTimeout(timer); bridge.advertisement.off(EV, on); track('ad_reward_end', { ok, why, ms: open ? Math.round(performance.now() - open) : 0 }); done(ok, why); };   // (how long it stayed open: an ad closed in a second from one that ran, in the sandbox's numbers)
@@ -4839,12 +4852,12 @@ document.addEventListener('dblclick', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
   paused = document.hidden; loop.last = performance.now(); sound.sleep(document.hidden || ads.quiet);
   if (paused) { if (perf.active >= 5000) perfSend(loop.last); perf.last = 0; }
-  if (paused) { input.clear(); game.togglePause(true); }
+  if (paused) { input.clear(); game.togglePause(true); if (persistT) persist(true); }   // (a write waiting: now, the page may not come back)
   renderer.still = null;   // (a paused frame drawn again on the way back: a browser may have let its buffer go while hidden)
 });
 window.addEventListener('pageshow', () => { renderer.still = null; });   // (the same, back from the back-forward cache)
 window.addEventListener('blur', () => input.clear());
-window.addEventListener('pagehide', () => game.saveCur(true));   // (a phone's browser may drop the page after this without a word)
+window.addEventListener('pagehide', () => { game.saveCur(true); if (persistT) persist(true); });   // (a phone's browser may drop the page after this without a word)
 window.addEventListener('resize', queueLayout);
 window.addEventListener('orientationchange', queueLayout);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', queueLayout);

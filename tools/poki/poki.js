@@ -9,7 +9,9 @@
  * - advertisement         interstitial → commercialBreak, rewarded → rewardedBreak; one ad at a time; while one plays the game is
  *                         held and silent (pause and audio events) and its keys are kept from the game (Poki draws the ad in this page).
  * - platform.language     PokiSDK.getLanguage().
- * - storage, server time  none: the game keeps its save in localStorage, which Poki syncs to the cloud for a logged-in player.
+ * - storage               localStorage, key for key (Poki syncs it to the cloud for a logged-in player). The game writes a Bridge's
+ *                         storage alone since 0.3.52, so a storage that refused would keep nothing past the visit.
+ * - server time           none.
  * - leaderboards          none.
  * - Poki's pill on a phone is moved under the hearts (PILL).
  */
@@ -123,8 +125,12 @@
       getServerTime: function () { return Promise.reject(new Error('not on Poki')); },
     },
     storage: {
-      get: function () { return Promise.reject(new Error('not on Poki')); },   // the game's own localStorage instead
-      set: function () { return Promise.reject(new Error('not on Poki')); },
+      get: function (keys) {   // (no localStorage, as in some private windows: refused, and the game keeps this visit only)
+        try { return Promise.resolve(keys.map(function (k) { return localStorage.getItem(k); })); } catch (e) { return Promise.reject(e); }
+      },
+      set: function (keys, values) {
+        try { keys.forEach(function (k, i) { localStorage.setItem(k, values[i]); }); return Promise.resolve(); } catch (e) { return Promise.reject(e); }
+      },
     },
     advertisement: {
       isInterstitialSupported: true,

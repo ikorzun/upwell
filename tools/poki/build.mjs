@@ -31,7 +31,8 @@ if (bridgeTag.length !== 1) throw new Error('the Bridge tag: expected one, found
 // Poki's tag as its docs show it (in the head, not deferred: its loader is small, and the game asks for it at boot), then the adapter.
 html = once(html, bridgeTag[0], '<script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>\n<script src="poki.js"></script>', 'the Bridge tag');
 html = once(html, '<html lang="en" data-theme="dark">', '<html lang="en" data-theme="dark" data-host="poki">', 'the <html> tag');
-// The markup's and the styles' notes out; scripts byte for byte.
+// The markup's and the styles' notes out; scripts byte for byte, but for the one note in them that names the other portal.
+html = once(html, ', Playgama 3.4.2)', ')', 'the boot language note');
 html = html.split(/(<script\b[^>]*>[\s\S]*?<\/script>)/).map((part, i) => (i % 2 ? part : part
   .replace(/<!--[\s\S]*?-->/g, '')
   .replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/g, (all, open, css, close) => open + css.replace(/\/\*[\s\S]*?\*\//g, '') + close))).join('');

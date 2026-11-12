@@ -92,7 +92,9 @@
   // Keys under an ad stay out of the game (a Space would press the button under it).
   window.addEventListener('keydown', function (e) { if (adShowing) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 
-  function data() { return sdk && call(function () { return sdk.data; }); }   // (the Data module, or nothing when it is off for the game)
+  // The save's store, picked once at init: the Data module if it answers (off for the game, every call of it throws), else localStorage.
+  var store = null;
+  function pickStore() { try { var d = sdk.data; d.getItem('upwell-probe'); return d; } catch (e) { return localStorage; } }
 
   window.bridge = {
     EVENT_NAME: EVENT_NAME,
@@ -108,6 +110,7 @@
         // launch in its ad module's init info; read where it is, and a first 'adsDisabled' turns ads off anyway.
         var flow = call(function () { return sdk.ad.initInfo.launchFlow; });
         adsOn = flow !== 'basic';
+        store = pickStore();
         muted = !!call(function () { return sdk.game.settings.muteAudio; });
         call(function () { sdk.game.addSettingsChangeListener(function (s) { muted = !!(s && s.muteAudio); sound(); }); });
         tracker.sync();
@@ -130,13 +133,11 @@
     },
     storage: {
       get: function (keys) {
-        var d = data();
-        try { return Promise.resolve(keys.map(function (k) { var v = d ? d.getItem(k) : localStorage.getItem(k); return v == null ? null : v; })); }
+        try { var d = store || localStorage; return Promise.resolve(keys.map(function (k) { var v = d.getItem(k); return v == null ? null : v; })); }
         catch (e) { return Promise.reject(e); }   // (no localStorage, as in some private windows: the game keeps this visit only)
       },
       set: function (keys, values) {
-        var d = data();
-        try { keys.forEach(function (k, i) { if (d) d.setItem(k, values[i]); else localStorage.setItem(k, values[i]); }); return Promise.resolve(); }
+        try { var d = store || localStorage; keys.forEach(function (k, i) { d.setItem(k, values[i]); }); return Promise.resolve(); }
         catch (e) { return Promise.reject(e); }
       },
     },

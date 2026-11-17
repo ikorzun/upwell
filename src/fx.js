@@ -168,4 +168,6 @@ void main() {
     };
   }
   for (const k of ['draw', 'drawMenu']) { const f = Renderer.prototype[k]; Renderer.prototype[k] = function (g, ...a) { const res = f.call(this, g, ...a); pass(this); return res; }; }
+  { const init = Renderer.prototype.init; Renderer.prototype.init = function () { this.pFx = undefined; return init.call(this); }; }   // (a context lost and back: the
+  // pass built again in the new one; the lost one's program drew nothing, the CRT and the palette gone till a reload)
 })();

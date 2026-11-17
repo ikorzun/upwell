@@ -3213,7 +3213,20 @@ Object.assign(CARD_MOTION, {
 });
 function cardHop(h, up, rise, fall) { return h > 0 && h < rise + fall ? (h < rise ? -up * cardEase.out(h / rise) : -up * (1 - cardEase.in((h - rise) / fall))) : 0; }   // a hop at h s: up quick, down slower (cells)
 let liveData = null;
-const cardImg = (src, ms = 6000) => new Promise((ok) => { const i = new Image(), t = setTimeout(() => ok(null), ms); i.onload = () => { clearTimeout(t); ok(i); }; i.onerror = () => { clearTimeout(t); ok(null); }; i.src = src; });   // (given up after `ms`: a stalled request held the card for good; review)
+const liveGet = () => liveData || (liveData = fetch('assets/cards/live.json', { priority: 'high' }).then((r) => r.json()).catch(() => { liveData = null; return {}; }));   // (a failed one
+// asked again by the next card, not kept as none)
+const cardPics = new Map();   // a picture's load by its src, one for all who ask: the first card's, begun on the menu (cardWarm), is the one the card waits on
+const cardImg = (src, ms = 6000) => {
+  let p = cardPics.get(src);
+  if (!p) cardPics.set(src, (p = new Promise((ok) => { const i = new Image(); i.fetchPriority = 'high'; i.onload = () => ok(i); i.onerror = () => { cardPics.delete(src); ok(null); }; i.src = src; })));
+  return Promise.race([p, new Promise((ok) => setTimeout(() => ok(null), ms))]);   // (given up after `ms`: a stalled request held the card for good; review)
+};
+const cardWarm = (id) => {   // a card's art and the cards' motion fetched ahead, before what wants them: the first card's on the menu, not with the level's music and sounds that
+  // Play asks for at once (card_fail «late», its art over 3 s: 107 of 118 the first card's, 12% of new players, 2026-11-13..17; on Fast 3G its art came at 5.4–6 s behind 1.1 MB of them)
+  const def = CARD_PLANES[id];
+  if (def) for (const k of ['plate', ...def.planes.map(([p]) => p)]) cardImg(`assets/cards/planes/${id}-${k}.png`); else if (STORY[id]) cardImg(STORY[id].still);
+  liveGet();
+};
 // The settings' palette (fx.js fxPal) on the cards too (owner, 2026-10-29, Пл2 «А»: the story cards in SNES as the game): a canvas's pixels through it in
 // place, a picture as a canvas in it, a '#rrggbb' through it, a card's inks (STORY_INK); with none on, each as it is
 const palNow = () => (typeof fxPal === 'function' ? fxPal() : null);
@@ -3292,7 +3305,7 @@ function cardLive(c, card, tilt, clip, title, next, settled = false) {   // (set
   const leave = () => { st.gx = 0; st.gy = 0; };
   card.addEventListener('pointermove', move); card.addEventListener('pointerdown', move); card.addEventListener('pointerleave', leave);
   Promise.all([cardImg(def ? `assets/cards/planes/${c.id}-plate.png` : c.still), ...(def ? def.planes.map(([id]) => cardImg(`assets/cards/planes/${c.id}-${id}.png`)) : []),
-    Promise.race([liveData || (liveData = fetch('assets/cards/live.json').then((r) => r.json()).catch(() => ({}))), new Promise((ok) => setTimeout(() => ok({}), 6000))])]).then((got) => {   // (the wait
+    Promise.race([liveGet(), new Promise((ok) => setTimeout(() => ok({}), 6000))])]).then((got) => {   // (the wait
     // a card's: a slow first answer kept as none left every later card without its motion)
     if (!st.alive) return;
     const m = palNow(), ims = got.slice(0, -1).map((im) => palPic(im, m)), j = got[got.length - 1];   // (its pictures in the settings' palette)
@@ -3567,6 +3580,7 @@ const ui = {
   menu() {   // (owner, 2026-10-23, the Figma «Main»: the logo in vector, the settings icon on the right, the hero big over round colours, its perk on one line)
     const p = this.panel('menu'); menuTop(true);
     if (!menuTold) { menuTold = true; track('menu_shown', { runs: save.runs | 0 }); }   // (once a page)
+    if (!save.seen.card_moon_fall) cardWarm('moon_fall');   // (the first card's art, ahead of Play: cardWarm)
     const logo = el('img', 'logo'); logo.src = 'assets/ui/upwell-logo.svg'; logo.alt = 'UPWELL'; logo.lang = 'en'; logo.draggable = false; p.append(logo);
     if (typeof feed !== 'undefined' && feed.active) { feed.mount(p, logo); return; }   // Feed Moti open (feed.js): its board under him, the rest of home put by
     const set = button('', 'setBtn', () => this.settings()), gear = el('img'); gear.src = 'assets/ui/settings.svg'; gear.alt = ''; gear.draggable = false;
@@ -4558,6 +4572,9 @@ if (window.PerformanceObserver && (PerformanceObserver.supportedEntryTypes || []
 const fx = new FX();
 const game = new Game();
 const renderer = new Renderer(canvas);
+const glTell = (what) => { const n = perf.ctxLoss; if (n <= 1 || n === 20) track('gl_context', { what, n, ok: !!renderer.ok, s: Math.round(performance.now() / 1000), state: game.state, hidden: document.hidden }); };
+canvas.addEventListener('webglcontextlost', () => glTell('lost')); canvas.addEventListener('webglcontextrestored', () => glTell('back'));   // a lost context told with its device (a
+// session's facts carry it, a performance_sample's don't): its first time and back, and a storm's 20th (one player's 1338 on 2026-11-13, 3 in all the other days)
 let wideWant = false, colWant = false, wideSwitch = false, wideCols = WIDE.cols;   // (wideCols: the wide level's across, 34 or with a third lane 52)   // a wide level's view wanted (wideTo); the layout switched to it or back, not a resize
 let paused = document.hidden, started = false, firstFrame = false, layoutQueued = false, inputTold = false, menuTold = false, sidesAsked = false;   // (told: the first input, the menu, once a page; asked: src/sides.js fetched)
 { const s = new URLSearchParams(location.search).get('seed'); if (s != null && s !== '' && Number.isFinite(+s)) nextSeed = +s; }

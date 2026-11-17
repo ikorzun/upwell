@@ -6250,6 +6250,7 @@ Renderer.prototype.init = function () {
   try { this.pFeat = program(this.gl, FEAT_VS_PAL, FEAT_FS_PAL); } catch (err) { console.error(err); }   // (the sprites' palette snap a corner, not a fragment: FEAT_VS_PAL)
   this.darkBuf = new Float32Array(128);   // 32 lights (the Dark Forest's eyes and fences as well as the coins)
   this.target = null; this.sideT = null; this.sideLv = null;   // (a context lost and back: the sides' target made again, and shot again)
+  TILES.tex = null;   // (and the atlas uploaded again whole into the new context: the lost one's texture drew nothing, the far views and ledges gone)
   if (this.low) this.makeTarget();
   return true;
 };

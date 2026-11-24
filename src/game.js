@@ -4403,17 +4403,20 @@ const SOUNDS = ['jump', 'airjump', 'walljump', 'land', 'stomp', 'coin', 'hurt', 
 const MUSIC_VOL = 0.4, MUSIC_RATE = 32000, MUSIC_PAD = 0.1, FX_VOL = 0.7, PENTA = [0, 2, 4, 7, 9];
 const WORLD_MUSIC = { cave: 'mine', ice: 'fuji', mine: 'village', tokyo: 'tokyo', blocks: 'concrete', sky: 'sora', skazka: 'skazka', sea: 'sea', void: 'void', space: 'space' };   // (Space: its own, the
 // launch tower's and Kibo's, owner 2026-10-31 «делать»)   // owner 2026-10-20: every world its own, in Japan (tools/audio.py); world 2 the dark mines (cave: the old Mine's 'mine', since the owner's dark rework)   // by the world (a campaign's world's place is not the run's)   // the campaign's worlds 4-7, each its own climb (tools/audio.py)
+// A context's resume and suspend refused (iOS Safari: «InvalidStateError: Failed to start the audio device» when the device is not to be had, as after a
+// video ad, a call or another app's sound): no unhandled rejection for the portal's error log; the sound comes back at the next tap (unlock)
+const audioTry = (p) => { if (p && p.catch) p.catch(() => {}); };
 const sound = {
   ctx: null, out: null, fx: null, mus: null, bufs: {}, track: null, src: null, gain: null, duck: 1, asked: {}, used: [],
   unlock() {
-    if (this.ctx) { if (this.ctx.state !== 'running' && this.ctx.state !== 'closed' && !document.hidden && !ads.quiet) this.ctx.resume(); return; }   // suspended, or 'interrupted' (iOS: a call, a notification, another app's sound)
+    if (this.ctx) { if (this.ctx.state !== 'running' && this.ctx.state !== 'closed' && !document.hidden && !ads.quiet) audioTry(this.ctx.resume()); return; }   // suspended, or 'interrupted' (iOS: a call, a notification, another app's sound)
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     const c = (this.ctx = new AC());
     this.out = c.createGain(); this.out.gain.value = save.sound === false ? 0 : 1; this.out.connect(c.destination);
     this.fx = c.createGain(); this.fx.gain.value = FX_VOL; this.fx.connect(this.out);
     this.mus = c.createGain(); this.mus.gain.value = MUSIC_VOL; this.mus.connect(this.out);
-    if (ads.quiet || document.hidden) c.suspend();   // the platform's sound off from the start: asleep till it says on (ads.hush)
+    if (ads.quiet || document.hidden) audioTry(c.suspend());   // the platform's sound off from the start: asleep till it says on (ads.hush)
     for (const n of SOUNDS) this.load(n, 'assets/sfx/' + n + '.mp3');
     for (const n of ['calm', WORLD_MUSIC[game.wd.id] || 'climb']) this.fetchMusic(n);   // the menu's, and its world's climb
   },
@@ -4486,7 +4489,7 @@ const sound = {
     save.sound = save.sound === false; persist();
     if (this.out) this.out.gain.setTargetAtTime(save.sound ? 1 : 0, this.ctx.currentTime, 0.05);
   },
-  sleep(hidden) { if (this.ctx) { if (hidden) this.ctx.suspend(); else this.ctx.resume(); } },
+  sleep(hidden) { if (this.ctx) audioTry(hidden ? this.ctx.suspend() : this.ctx.resume()); },
 };
 for (const type of ['keydown', 'pointerdown', 'touchend', 'click']) document.addEventListener(type, () => sound.unlock(), { capture: true, passive: true });
 
